@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="DataSetStatus" targetNamespace="http://tempuri.org/DataSetStatus.xsd" xmlns:mstns="http://tempuri.org/DataSetStatus.xsd" xmlns="http://tempuri.org/DataSetStatus.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections />
+        <Tables />
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="DataSetStatus" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="true" msprop:Generator_DataSetName="DataSetStatus" msprop:Generator_UserDSName="DataSetStatus">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="DataTableStatus" msprop:Generator_TableClassName="DataTableStatusDataTable" msprop:Generator_TableVarName="tableDataTableStatus" msprop:Generator_RowChangedName="DataTableStatusRowChanged" msprop:Generator_TablePropName="DataTableStatus" msprop:Generator_RowDeletingName="DataTableStatusRowDeleting" msprop:Generator_RowChangingName="DataTableStatusRowChanging" msprop:Generator_RowEvHandlerName="DataTableStatusRowChangeEventHandler" msprop:Generator_RowDeletedName="DataTableStatusRowDeleted" msprop:Generator_RowClassName="DataTableStatusRow" msprop:Generator_UserTableName="DataTableStatus" msprop:Generator_RowEvArgName="DataTableStatusRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="地址" msprop:Generator_ColumnVarNameInTable="column地址" msprop:Generator_ColumnPropNameInRow="地址" msprop:Generator_ColumnPropNameInTable="地址Column" msprop:Generator_UserColumnName="地址" type="xs:string" minOccurs="0" />
+              <xs:element name="端口" msprop:Generator_ColumnVarNameInTable="column端口" msprop:Generator_ColumnPropNameInRow="端口" msprop:Generator_ColumnPropNameInTable="端口Column" msprop:Generator_UserColumnName="端口" type="xs:string" minOccurs="0" />
+              <xs:element name="负载" msprop:Generator_ColumnVarNameInTable="column负载" msprop:Generator_ColumnPropNameInRow="负载" msprop:Generator_ColumnPropNameInTable="负载Column" msprop:Generator_UserColumnName="负载" type="xs:string" minOccurs="0" />
+              <xs:element name="内存" msprop:Generator_ColumnVarNameInTable="column内存" msprop:Generator_ColumnPropNameInRow="内存" msprop:Generator_ColumnPropNameInTable="内存Column" msprop:Generator_UserColumnName="内存" type="xs:string" minOccurs="0" />
+              <xs:element name="当前IO" msprop:Generator_ColumnVarNameInTable="column当前IO" msprop:Generator_ColumnPropNameInRow="当前IO" msprop:Generator_ColumnPropNameInTable="当前IOColumn" msprop:Generator_UserColumnName="当前IO" type="xs:string" minOccurs="0" />
+              <xs:element name="当前流量" msprop:Generator_ColumnVarNameInTable="column当前流量" msprop:Generator_ColumnPropNameInRow="当前流量" msprop:Generator_ColumnPropNameInTable="当前流量Column" msprop:Generator_UserColumnName="当前流量" type="xs:string" minOccurs="0" />
+              <xs:element name="数据库地址" msprop:Generator_ColumnVarNameInTable="column数据库地址" msprop:Generator_ColumnPropNameInRow="数据库地址" msprop:Generator_ColumnPropNameInTable="数据库地址Column" msprop:Generator_UserColumnName="数据库地址" type="xs:string" minOccurs="0" />
+              <xs:element name="数据库端口" msprop:Generator_ColumnVarNameInTable="column数据库端口" msprop:Generator_ColumnPropNameInRow="数据库端口" msprop:Generator_ColumnPropNameInTable="数据库端口Column" msprop:Generator_UserColumnName="数据库端口" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
