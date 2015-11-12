@@ -88,7 +88,7 @@ HDREXTS = .h .H .hh .hpp .HPP .h++ .hxx .hp
 # The pre-processor and compiler options.
 # Users can override those variables from the command line.
 CFLAGS  = -g -pthread
-CXXFLAGS= -std=c++11 -g -pthread -I./library/ -L./library/lua/src -L./library/univ -Wl,-rpath=./library/univ -DLUA_USE_READLINE
+CXXFLAGS= -std=c++11 -g -pthread -DLUA_USE_READLINE
 
 # The C program compiler.
 #CC	 = gcc

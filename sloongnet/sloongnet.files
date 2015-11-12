@@ -6,3 +6,4 @@ msgproc.cpp
 msgproc.h
 userv.cpp
 userv.h
+makefile
