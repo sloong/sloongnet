@@ -1,3 +1,0 @@
-[submodule "sloongnet/library"]
-	path = sloongnet/library
-	url = git@git.sloong.com:app/library.git
