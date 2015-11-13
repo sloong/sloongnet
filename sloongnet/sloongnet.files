@@ -7,3 +7,6 @@ msgproc.h
 userv.cpp
 userv.h
 makefile
+script/epollproc.lua
+script/init.lua
+script/comm.lua

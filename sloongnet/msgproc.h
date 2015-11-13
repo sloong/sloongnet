@@ -11,7 +11,7 @@ class CMsgProc
 public:
     CMsgProc();
     ~CMsgProc();
-    bool MsgProcess(vector<string>& msg);
+    bool MsgProcess(string& msg);
 
     CLua*	m_pLua;
 };

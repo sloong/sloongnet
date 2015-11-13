@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "univ/univ.h"
-#include "univ/log.h"
+#include <univ/univ.h>
+#include <univ/log.h>
+using namespace Sloong;
+using namespace Sloong::Universal;
+
 #endif //MAIN_H

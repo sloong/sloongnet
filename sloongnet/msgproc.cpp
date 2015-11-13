@@ -1,27 +1,33 @@
 // MessgeProcess source file
 #include "msgproc.h"
 #include "main.h"
-#include "boost/format.hpp"
+#include <boost/format.hpp>
+
 CMsgProc::CMsgProc()
 {
     m_pLua = new CLua();
+    m_pLua->RunScript("init.lua");
+    // get current path
+    char szDir[MAX_PATH] = {0};
 
-//	luaL_openlibs(m_pLua);
+    getcwd(szDir,MAX_PATH);
+    string strDir(szDir);
+    strDir += "/";
+    m_pLua->RunFunction("Init","'"+strDir+"'");
 }
 
 CMsgProc::~CMsgProc()
 {
     delete m_pLua;
-//	lua_close(m_pLua);
 }
 
-bool CMsgProc::MsgProcess(vector<string>& msg)
+bool CMsgProc::MsgProcess(string& msg)
 {
     // In process, need add the lua script runtime and call lua to process.
     // In here, just show log to test.
-    CLog::showLog(INF,(boost::format("Message is processed. function id is %s.")%msg[0]).str());
-    //luaL_loadfile(m_pLua,"main.lua");
-    //lua_pcall(m_pLua,0,LUA_MULTRET,0);
-    m_pLua->RunScript("main");
+    CLog::showLog(INF,"Message is processed. call lua func.");
+    m_pLua->RunFunction("OnRecvMessage","'"+msg+"'");
+    string msgs = m_pLua->GetStringArgument(-1);
+    CLog::showLog(INF,boost::format("Message is processed. function id is %s.")%msgs);
     return true;
 }

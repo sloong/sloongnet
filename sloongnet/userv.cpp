@@ -41,9 +41,7 @@ void SloongWallUS::Run()
             // process read list.
             string msg = m_pEpoll->m_ReadList.front();
             m_pEpoll->m_ReadList.pop();
-            vector<string> res;
-            CUniversal::splitString(msg,res,"|");
-            if (true == m_pMsgProc->MsgProcess(res))
+            if (true == m_pMsgProc->MsgProcess(msg))
                 m_pEpoll->m_WriteList.push("succedss");
             else
                 m_pEpoll->m_WriteList.push("field");

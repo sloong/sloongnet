@@ -59,7 +59,7 @@
 MY_CFLAGS =
 
 # The linker options.
-MY_LIBS   = -lm -ldl -llua -luniv
+MY_LIBS   = -lm -ldl -llua.5.3.1 -luniv
 
 # The pre-processor options used by the cpp (man cpp for more).
 CPPFLAGS  = -Wall
@@ -88,7 +88,7 @@ HDREXTS = .h .H .hh .hpp .HPP .h++ .hxx .hp
 # The pre-processor and compiler options.
 # Users can override those variables from the command line.
 CFLAGS  = -g -pthread
-CXXFLAGS= -std=c++11 -g -pthread -DLUA_USE_READLINE
+CXXFLAGS= -std=c++11 -g -pthread -DLUA_USE_READLINE -L/usr/local/lib/sloong -Wl,-rpath=/usr/local/lib/sloong
 
 # The C program compiler.
 #CC	 = gcc
