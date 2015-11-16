@@ -2,7 +2,7 @@
 #include "msgproc.h"
 #include "main.h"
 #include <boost/format.hpp>
-
+#include "univ/luapacket.h"
 CMsgProc::CMsgProc()
 {
     m_pLua = new CLua();
@@ -14,6 +14,10 @@ CMsgProc::CMsgProc()
     string strDir(szDir);
     strDir += "/";
     m_pLua->RunFunction("Init","'"+strDir+"'");
+
+    CLuaPacket pack;
+
+    m_pLua->RunFunctionWithParam(string("test"),(void*)&pack);
 }
 
 CMsgProc::~CMsgProc()

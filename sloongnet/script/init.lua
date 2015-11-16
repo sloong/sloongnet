@@ -7,3 +7,8 @@ Init = function( path )
 
 end
 
+test = function( pack )
+    pack:setdata("test","testone");
+    print(pack:getdata("test"));
+    --print(pack)
+end
