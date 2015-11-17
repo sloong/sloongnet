@@ -1,10 +1,9 @@
-print('epollproc.lua is lodad')
-OnRecvMessage = function( msg )
+-- When mesaage is recved, the fm will call this function.
+OnRecvMessage = function( uinfo, request, result )
+	local msg = request:getdata("mesaage");
     local res = string.split(msg,"|");
-    local tmp = io.open('tmp.log','w');
     for k,v in pairs(res) do
         print(v);
     end
-    tmp.close();
-    return 'success';
+	result:setdata("result","success");
 end
