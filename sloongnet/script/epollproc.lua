@@ -1,6 +1,21 @@
 -- When message is recved, the fm will call this function.
+print('epollproc is load')
+
+local paserMessage = function( msg )
+    --if msg == nil then
+        print(msg)
+        local res = string.split(msg,"|");
+    for k,v in pairs(res) do
+        print(v);
+    end
+    return res[1];
+end
+
+
 OnRecvMessage = function( uinfo, request, response )
-	local msg = request:getdata("mesaage");
+    print('Recv message process is called.')
+    local msg = request:getdata("message");
+    print(msg);
     local funcid = paserMessage(msg);
     response:setdata("funcid",funcid);
     response:setdata("result","success");
@@ -14,11 +29,3 @@ SendMessage = function( uinfo,request,result )
 	result:setdata("message","hello");
 end
 
-
-local paserMessage = function( msg )
-	local res = string.split(msg,"|");
-    for k,v in pairs(res) do
-        print(v);
-    end
-    return res[1];
-end

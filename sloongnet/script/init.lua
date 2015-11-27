@@ -5,3 +5,7 @@ Init = function( path )
     require('epollproc')
 
 end
+
+OnError = function()
+    print('error proc');
+end

@@ -6,11 +6,15 @@
 using namespace std;
 int main( int argc, char** args )
 {
-    if (argc > 1) CLog::g_bDebug = true;
+    int nPort = 9009;
+    if ( argc >= 2 )
+         nPort = atoi(args[1]);
+    if( argc ==3 )
+         CLog::g_bDebug = true;
     CLog::showLog(INF,"Start.");
     CLog::showLog(INF,"程序开始运行,准备初始化.");
     SloongWallUS us;
-    us.Initialize();
+    us.Initialize(nPort);
     CLog::showLog(INF,"程序开始运行.");
     us.Run();
     CLog::showLog(INF,"程序即将退出.");

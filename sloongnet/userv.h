@@ -9,7 +9,7 @@ public:
     SloongWallUS();
     ~SloongWallUS();
 
-    void Initialize();
+    void Initialize(int nPort);
     void Run();
 
 protected:

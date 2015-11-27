@@ -24,10 +24,10 @@ SloongWallUS::~SloongWallUS()
 }
 
 
-void SloongWallUS::Initialize()
+void SloongWallUS::Initialize( int nPort )
 {
     m_pEpoll = new CEpollEx();
-    m_pEpoll->Initialize(1,8000);
+    m_pEpoll->Initialize(1,nPort);
 
     m_pMsgProc = new CMsgProc();
 }
@@ -41,10 +41,8 @@ void SloongWallUS::Run()
             // process read list.
             string msg = m_pEpoll->m_ReadList.front();
             m_pEpoll->m_ReadList.pop();
-            if (true == m_pMsgProc->MsgProcess(msg))
-                m_pEpoll->m_WriteList.push("succedss");
-            else
-                m_pEpoll->m_WriteList.push("field");
+            string res = m_pMsgProc->MsgProcess(msg);
+            m_pEpoll->m_WriteList.push(res);
         }
     }
 }

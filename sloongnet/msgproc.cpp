@@ -22,7 +22,7 @@ CMsgProc::~CMsgProc()
     delete m_pLua;
 }
 
-bool CMsgProc::MsgProcess(string& msg)
+string CMsgProc::MsgProcess(string& msg)
 {
     // In process, need add the lua script runtime and call lua to process.
     // In here, just show log to test.
@@ -31,8 +31,14 @@ bool CMsgProc::MsgProcess(string& msg)
     CLuaPacket userinfo;
     CLuaPacket request, response;
     request.SetData("message",msg);
-    m_pLua->RunFunction("OnRecvMessage",&userinfo,&request,&response);
+    if( !m_pLua->RunFunction("OnRecvMessage",&userinfo,&request,&response))
+
+    // check the return ;
+    string type = response.GetData("type");
+
     string funcid = response.GetData("funcid");
-    CLog::showLog(INF,boost::format("Message is processed. function id is %s.")%funcid);
-    return true;
+    string res = response.GetData("result");
+    string resmsg = CUniversal::Format("Message is processed. function id is %s.result is :%s",funcid,res);
+    CLog::showLog(INF,resmsg);
+    return resmsg;
 }
