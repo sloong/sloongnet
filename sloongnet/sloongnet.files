@@ -10,3 +10,5 @@ makefile
 script/epollproc.lua
 script/init.lua
 script/comm.lua
+sockinfo.h
+sockinfo.cpp
