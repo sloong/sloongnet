@@ -36,13 +36,22 @@ void SloongWallUS::Run()
 {
     while(true)
     {
-        if ( m_pEpoll->m_ReadList.size() > 0 )
+        if ( m_pEpoll->m_EventSockList.size() > 0 )
         {
             // process read list.
-            string msg = m_pEpoll->m_ReadList.front();
-            m_pEpoll->m_ReadList.pop();
-            string res = m_pMsgProc->MsgProcess(msg);
-            m_pEpoll->m_WriteList.push(res);
+            int sock = m_pEpoll->m_EventSockList.front();
+            m_pEpoll->m_EventSockList.pop();
+            CSockInfo* info = m_pEpoll->m_SockList[sock];
+            if( !info ) continue;
+            while ( info->m_ReadList.size() > 0)
+            {
+                string msg = info->m_ReadList.front();
+                info->m_ReadList.pop();
+                string res = m_pMsgProc->MsgProcess(msg);
+                m_pEpoll->SendMessage(sock,res);
+            }
+
         }
     }
 }
+
