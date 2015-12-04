@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Sloong;
+using Sloong.Interfaqce;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,34 +16,206 @@ namespace servctrl
 {
     public partial class FormMain : Form
     {
-        Socket m_Socket;
+        private GlobalShare share { get; set; }
+
+        IPageHost pageHost
+        {
+            get
+            {
+                return share as IPageHost;
+            }
+
+            set { }
+        }
+        private Dictionary<string, ConnectInfo> sockMap { get; set; }
+
+        private ApplicationStatus appStatus {get; set;}
+        // UI defines
+        private FormStatus formStatus = null;
+        private FormTest formTest = null;
+        private Log log = null;
+
+
+        public Dictionary<string, ConnectInfo> SocketMap
+        {
+            get
+            {
+                return pageHost[ShareItem.SocketMap] as Dictionary<string, ConnectInfo>;
+            }
+            set { }
+        }
+
+
+        Socket sockCurrent
+        {
+            get
+            {
+                var cbox = pageHost[ShareItem.ConfigSelecter] as ComboBox;
+                if (cbox != null)
+                {
+                    return SocketMap[cbox.SelectedText].m_Socket;
+                }
+                return null;
+            }
+
+            set { }
+        }
+
+        ComboBox ServList
+        {
+            get
+            {
+                var cbox = pageHost[ShareItem.ConfigSelecter] as ComboBox;
+                return cbox;
+            }
+
+            set { }
+        }
+
+        const string sockMapPath = "SockMap.bin";
+
         public FormMain()
         {
             InitializeComponent();
-            var fstatus = new FormStatus(ref m_Socket);
-            var ftest = new FormTest(ref m_Socket);
-            fstatus.TopLevel = ftest.TopLevel = false;
-            tabPageStatus.Controls.Add(fstatus);
-            tabPageTest.Controls.Add(ftest);
-            fstatus.Show();
-            ftest.Show();
+
+            // Init log
+            log = new Log();
+
+            InitMemberVariable();
+            InitPageHost();
+            InitFormStatus();
+        }
+
+        private void InitMemberVariable()
+        {
+            this.share = new GlobalShare();
+            appStatus = new ApplicationStatus();
+
+            try
+            {
+                sockMap = (Dictionary<string, ConnectInfo>)Utility.Deserialize(sockMapPath);
+                foreach( var item in sockMap )
+                {
+                    try
+                    {
+                        var info = ConnectToServer(item.Value.m_URL, item.Value.m_IPInfo.Port);
+                        item.Value.m_IPInfo = info.m_IPInfo;
+                        item.Value.m_Socket = info.m_Socket;
+                        if (!comboBoxServList.Items.Contains(item.Value.m_URL))
+                            comboBoxServList.Items.Add(item.Value.m_URL);
+                    }
+                    catch(Exception e)
+                    {
+                        log.Write(e.ToString());
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                log.Write(e.ToString());
+                sockMap = new Dictionary<string, ConnectInfo>();
+            }
+            
+            formStatus = new FormStatus(share);
+            formTest = new FormTest(share);
+
+            tabPageStatus.Controls.Add(formStatus);
+            formStatus.Show();
+            tabPageTest.Controls.Add(formTest);
+            formTest.Show();
+        }
+
+        private void InitFormStatus()
+        {
+            if(ServList.Items.Count>0)
+                ServList.SelectedIndex = 0;
+        }
+
+        private void InitPageHost()
+        {
+            this.share.PageMessage += PageMessageHandler;
+
+            this.share.Add(ShareItem.AppStatus, appStatus);
+            this.share.Add(ShareItem.SocketMap, sockMap);
+            this.share.Add(ShareItem.ConfigSelecter, comboBoxServList);
+        }
+
+        private ConnectInfo ConnectToServer( string url , int port )
+        {
+            if (string.IsNullOrEmpty(url))
+                throw new Exception("url is empty.");
+
+            // before connect, ping test.
+            var ip = Dns.GetHostAddresses(url)[0].ToString();
+            if (false == Utility.TestNetwork(ip))
+                throw new Exception(string.Format("ping to {0} fialed.", ip));
+
+            Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+
+            try
+            {
+                sock.Connect(ipEndPoint);
+
+                ConnectInfo info = new ConnectInfo();
+                info.m_Socket = sock;
+                info.m_IPInfo = ipEndPoint;
+                info.m_URL = url;
+
+                return info;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(string.Format("connect to {1} fialed. error message:", textBoxAddr.Text, ex.Message));
+            }
         }
 
         private void buttonConnect_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(textBoxAddr.Text))
-                MessageBox.Show("No input address");
-
-            m_Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Parse(textBoxAddr.Text), Convert.ToInt32(textBoxPort.Text));
+                return;
+           
             try
             {
-                m_Socket.Connect(ipEndPoint);
+                var info = ConnectToServer(textBoxAddr.Text, Convert.ToInt32(textBoxPort.Text));
+
+                // connect succeed
+                SocketMap[textBoxAddr.Text] = info;
+                if (!ServList.Items.Contains(textBoxAddr.Text))
+                    ServList.SelectedIndex = ServList.Items.Add(textBoxAddr.Text);
             }
             catch (Exception ex)
             {
-
+                MessageBox.Show(string.Format("connect to {1} fialed. error message:", textBoxAddr.Text,ex.Message));
             }
         }
+
+        void PageMessageHandler(object sender, PageMessage e)
+        {
+            var type = e.Type;
+            switch (type)
+            {
+                case MessageType.ExitApp:
+                    break;
+            }
+        }
+
+        private void comboBoxServList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var ip = sockMap[ServList.Text];
+            textBoxAddr.Text = ServList.Text;// ip.Address.ToString();
+            textBoxPort.Text = ip.m_IPInfo.Port.ToString();
+        }
+
+        private void FormMain_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            foreach( var item in SocketMap )
+            {
+                item.Value.m_Socket.Dispose();
+                item.Value.m_Socket = null;
+            }
+            Utility.Serialize(SocketMap, sockMapPath);
+        }
     }
+
 }
