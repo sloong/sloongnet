@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{b4d522c9-cd7e-4a81-ad5f-8004ca3b1c15}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{16351f91-863a-40a8-820c-8aff8ab0f86c}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource files">
+      <UniqueIdentifier>{7137043d-a57c-4146-86b2-47510e5e4d28}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Make files">
+      <UniqueIdentifier>{04dbcfc6-32c5-4c14-bccc-de143428ec5c}</UniqueIdentifier>
+      <Extensions>*.mak</Extensions>
+    </Filter>
+    <Filter Include="script">
+      <UniqueIdentifier>{d910d274-a871-4d10-bee2-edd0bd9aef9a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="debug.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="release.mak">
+      <Filter>Make files</Filter>
+    </None>
+    <None Include="script\comm.lua">
+      <Filter>script</Filter>
+    </None>
+    <None Include="script\epollproc.lua">
+      <Filter>script</Filter>
+    </None>
+    <None Include="script\init.lua">
+      <Filter>script</Filter>
+    </None>
+    <None Include="Makefile_VGDB" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="epollex.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="msgproc.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="sockinfo.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="userv.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="epollex.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="msgproc.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="sockinfo.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="userv.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

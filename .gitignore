@@ -28,3 +28,7 @@
 *.app
 Debug
 *.log
+*.sdf
+/CodeDB/
+/sloongnet/VisualGDBCache/
+*.suo
