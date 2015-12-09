@@ -50,7 +50,6 @@ void SloongWallUS::Run()
                 string res = m_pMsgProc->MsgProcess(msg);
                 m_pEpoll->SendMessage(sock,res);
             }
-
         }
     }
 }

@@ -34,42 +34,42 @@ void on_sigint(int signal)
 int CEpollEx::Initialize(int nThreadNums, int licensePort)
 {
     CLog::showLog(INF,boost::format("epollex is initialize.license port is %d")%licensePort);
-    //SIGPIPE:ÔÚreaderÖÕÖ¹Ö®ºóĞ´pipeµÄÊ±ºò·¢Éú
-    //SIG_IGN:ºöÂÔĞÅºÅµÄ´¦Àí³ÌĞò
-    //SIGCHLD: ½ø³ÌTerminate»òStopµÄÊ±ºò,SIGPIPE»á·¢ËÍ¸ø½ø³ÌµÄ¸¸½ø³Ì,È±Ê¡Çé¿öÏÂ¸ÃSignal»á±»ºöÂÔ
-    //SIGINT:ÓÉInterrupt Key²úÉú,Í¨³£ÊÇCtrl+c»òÕßDelete,·¢ËÍ¸øËùÓĞµÄForeGroundGroup½ø³Ì.
+    //SIGPIPE:åœ¨readerç»ˆæ­¢ä¹‹åå†™pipeçš„æ—¶å€™å‘ç”Ÿ
+    //SIG_IGN:å¿½ç•¥ä¿¡å·çš„å¤„ç†ç¨‹åº
+    //SIGCHLD: è¿›ç¨‹Terminateæˆ–Stopçš„æ—¶å€™,SIGPIPEä¼šå‘é€ç»™è¿›ç¨‹çš„çˆ¶è¿›ç¨‹,ç¼ºçœæƒ…å†µä¸‹è¯¥Signalä¼šè¢«å¿½ç•¥
+    //SIGINT:ç”±Interrupt Keyäº§ç”Ÿ,é€šå¸¸æ˜¯Ctrl+cæˆ–è€…Delete,å‘é€ç»™æ‰€æœ‰çš„ForeGroundGroupè¿›ç¨‹.
     signal(SIGPIPE,SIG_IGN);
     signal(SIGCHLD,SIG_IGN);
     signal(SIGINT,&on_sigint);
 
-    // ³õÊ¼»¯socket
+    // åˆå§‹åŒ–socket
     m_ListenSock=socket(AF_INET,SOCK_STREAM,0);
     int sock_op = 1;
-    // SOL_SOCKET:ÔÚsocket²ãÃæÉèÖÃ
-    // SO_REUSEADDR:ÔÊĞíÌ×½Ó×ÖºÍÒ»¸öÒÑÔÚÊ¹ÓÃÖĞµÄµØÖ·À¦°ó
+    // SOL_SOCKET:åœ¨socketå±‚é¢è®¾ç½®
+    // SO_REUSEADDR:å…è®¸å¥—æ¥å­—å’Œä¸€ä¸ªå·²åœ¨ä½¿ç”¨ä¸­çš„åœ°å€æ†ç»‘
     setsockopt(m_ListenSock,SOL_SOCKET,SO_REUSEADDR,&sock_op,sizeof(sock_op));
 
-    // ³õÊ¼»¯µØÖ·½á¹¹
+    // åˆå§‹åŒ–åœ°å€ç»“æ„
     struct sockaddr_in address;
     memset(&address,0,sizeof(address));
     address.sin_addr.s_addr=htonl(INADDR_ANY);
     address.sin_port=htons(licensePort);
 
-    // °ó¶¨¶Ë¿Ú
+    // ç»‘å®šç«¯å£
     errno = bind(m_ListenSock,(struct sockaddr*)&address,sizeof(address));
     if( errno == -1 )
         cout<<"bind to "<<licensePort<<" field. errno = "<<errno<<endl;
 
-    // ¼àÌı¶Ë¿Ú,¼àÌı¶ÓÁĞ´óĞ¡Îª1024.¿ÉĞŞ¸ÄÎªSOMAXCONN
+    // ç›‘å¬ç«¯å£,ç›‘å¬é˜Ÿåˆ—å¤§å°ä¸º1024.å¯ä¿®æ”¹ä¸ºSOMAXCONN
     errno = listen(m_ListenSock,1024);
-    // ÉèÖÃsocketÎª·Ç×èÈûÄ£Ê½
+    // è®¾ç½®socketä¸ºéé˜»å¡æ¨¡å¼
     SetSocketNonblocking(m_ListenSock);
-    // ´´½¨epoll
+    // åˆ›å»ºepoll
     m_EpollHandle=epoll_create(65535);
-    // ´´½¨epollÊÂ¼ş¶ÔÏó
+    // åˆ›å»ºepolläº‹ä»¶å¯¹è±¡
     CtlEpollEvent(EPOLL_CTL_ADD,m_ListenSock,EPOLLIN|EPOLLET|EPOLLOUT);
 
-    // ´´½¨Ïß³Ì³Ø
+    // åˆ›å»ºçº¿ç¨‹æ± 
     return InitThreadPool(nThreadNums);
 }
 
@@ -80,23 +80,23 @@ void CEpollEx::CtlEpollEvent(int opt, int sock, int events)
     ent.data.fd=sock;
     ent.events=events;
 
-    // ÉèÖÃÊÂ¼şµ½epoll¶ÔÏó
+    // è®¾ç½®äº‹ä»¶åˆ°epollå¯¹è±¡
     epoll_ctl(m_EpollHandle,opt,sock,&ent);
 }
 
 
 /*************************************************
 * Function: * init_thread_pool
-* Description: * ³õÊ¼»¯Ïß³Ì
-* Input: * threadNum:ÓÃÓÚ´¦ÀíepollµÄÏß³ÌÊı
+* Description: * åˆå§‹åŒ–çº¿ç¨‹
+* Input: * threadNum:ç”¨äºå¤„ç†epollçš„çº¿ç¨‹æ•°
 * Output: *
-* Others: * ´Ëº¯ÊıÎª¾²Ì¬staticº¯Êı,
+* Others: * æ­¤å‡½æ•°ä¸ºé™æ€staticå‡½æ•°,
 *************************************************/
 int CEpollEx::InitThreadPool(int threadNum)
 {
     pthread_t threadId;
 
-    //³õÊ¼»¯epollÏß³Ì³Ø,
+    //åˆå§‹åŒ–epollçº¿ç¨‹æ± ,
     for ( int i = 0; i < threadNum; i++)
     {
         errno = pthread_create(&threadId, 0, WorkLoop, (void *)0);
@@ -112,7 +112,7 @@ int CEpollEx::InitThreadPool(int threadNum)
     return 0;
 }
 
-// ÉèÖÃÌ×½Ó×ÖÎª·Ç×èÈûÄ£Ê½
+// è®¾ç½®å¥—æ¥å­—ä¸ºéé˜»å¡æ¨¡å¼
 int CEpollEx::SetSocketNonblocking(int socket)
 {
     int op;
@@ -125,7 +125,7 @@ int CEpollEx::SetSocketNonblocking(int socket)
 
 /*************************************************
 * Function: * epoll_loop
-* Description: * epoll¼ì²âÑ­»·
+* Description: * epollæ£€æµ‹å¾ªç¯
 * Input: *
 * Output: *
 * Others: *
@@ -136,7 +136,7 @@ void* CEpollEx::WorkLoop(void* para)
     int n,i;
     while(true)
     {
-        // ·µ»ØĞèÒª´¦ÀíµÄÊÂ¼şÊı
+        // è¿”å›éœ€è¦å¤„ç†çš„äº‹ä»¶æ•°
         n=epoll_wait(g_pThis->m_EpollHandle,g_pThis->m_Events,1024,-1);
         if( n<=0 ) continue;
 
@@ -145,7 +145,7 @@ void* CEpollEx::WorkLoop(void* para)
             int ProcessSock =g_pThis->m_Events[i].data.fd;
             if(ProcessSock==g_pThis->m_ListenSock)
             {
-                // ĞÂÁ¬½Ó½ÓÈë
+                // æ–°è¿æ¥æ¥å…¥
                 while(true)
                 {
                     // accept the connect and add it to the list
@@ -166,7 +166,7 @@ void* CEpollEx::WorkLoop(void* para)
                         info->m_sock = conn_sock;
                         g_pThis->m_SockList[conn_sock] = info;
                         CLog::showLog(INF,CUniversal::Format("accept client:%s.",info->m_Address));
-                        //½«½ÓÊÜµÄÁ¬½ÓÌí¼Óµ½EpollµÄÊÂ¼şÖĞ.
+                        //å°†æ¥å—çš„è¿æ¥æ·»åŠ åˆ°Epollçš„äº‹ä»¶ä¸­.
                         // Add the recv event to epoll;
                         g_pThis->SetSocketNonblocking(conn_sock);
                         g_pThis->CtlEpollEvent(EPOLL_CTL_ADD,conn_sock,EPOLLIN|EPOLLET);
@@ -183,11 +183,11 @@ void* CEpollEx::WorkLoop(void* para)
             else if(g_pThis->m_Events[i].events&EPOLLIN)
             {
                 CLog::showLog(INF,"Socket can read.");
-                // ÒÑ¾­Á¬½ÓµÄÓÃ»§,ÊÕµ½Êı¾İ,¿ÉÒÔ¿ªÊ¼¶ÁÈë
+                // å·²ç»è¿æ¥çš„ç”¨æˆ·,æ”¶åˆ°æ•°æ®,å¯ä»¥å¼€å§‹è¯»å…¥
                 bool bLoop = true;
                 while(bLoop)
                 {
-                    // ÏÈ¶ÁÈ¡ÏûÏ¢³¤¶È
+                    // å…ˆè¯»å–æ¶ˆæ¯é•¿åº¦
                     int len = 8;//sizeof(long long);
                     int readLen;
                     char dataLeng[9] = {0};
@@ -195,7 +195,7 @@ void* CEpollEx::WorkLoop(void* para)
                     CLog::showLog(INF,boost::format("recv %d bytes.")%readLen);
                     if(readLen < 0)
                     {
-                        //ÓÉÓÚÊÇ·Ç×èÈûµÄÄ£Ê½,ËùÒÔµ±errnoÎªEAGAINÊ±,±íÊ¾µ±Ç°»º³åÇøÒÑÎŞÊı¾İ¿É//¶ÁÔÚÕâÀï¾Íµ±×÷ÊÇ¸Ã´ÎÊÂ¼şÒÑ´¦Àí¹ı¡£
+                        //ç”±äºæ˜¯éé˜»å¡çš„æ¨¡å¼,æ‰€ä»¥å½“errnoä¸ºEAGAINæ—¶,è¡¨ç¤ºå½“å‰ç¼“å†²åŒºå·²æ— æ•°æ®å¯//è¯»åœ¨è¿™é‡Œå°±å½“ä½œæ˜¯è¯¥æ¬¡äº‹ä»¶å·²å¤„ç†è¿‡ã€‚
                         if(errno == EAGAIN)
                         {
                             printf("EAGAIN\n");
@@ -203,7 +203,7 @@ void* CEpollEx::WorkLoop(void* para)
                         }
                         else
                         {
-                            // ¶ÁÈ¡´íÎó,½«Õâ¸öÁ¬½Ó´Ó¼àÌıÖĞÒÆ³ı²¢¹Ø±ÕÁ¬½Ó
+                            // è¯»å–é”™è¯¯,å°†è¿™ä¸ªè¿æ¥ä»ç›‘å¬ä¸­ç§»é™¤å¹¶å…³é—­è¿æ¥
                             printf("recv error!\n");
                             //epoll_ctl(g_pThis->m_EpollHandle, EPOLL_CTL_DEL, ProcessSock, &g_pThis->m_Event);
                             close(ProcessSock);
@@ -227,11 +227,11 @@ void* CEpollEx::WorkLoop(void* para)
                         char* data = new char[dtlen];
                         memset(data,0,dtlen);
 
-                        readLen = recv(ProcessSock,data,dtlen,0);//Ò»´ÎĞÔ½ÓÊÜËùÓĞÏûÏ¢
+                        readLen = recv(ProcessSock,data,dtlen,0);//ä¸€æ¬¡æ€§æ¥å—æ‰€æœ‰æ¶ˆæ¯
                         CLog::showLog(INF,boost::format("recv msg:%d|%s")%dtlen%data);
 
                         if(readLen >= dtlen)
-                            bLoop = true; // ĞèÒªÔÙ´Î¶ÁÈ¡
+                            bLoop = true; // éœ€è¦å†æ¬¡è¯»å–
                         else
                             bLoop = false;
 
@@ -249,7 +249,7 @@ void* CEpollEx::WorkLoop(void* para)
             }
             else if(g_pThis->m_Events[i].events&EPOLLOUT)
             {
-                // ¿ÉÒÔĞ´ÈëÊÂ¼ş
+                // å¯ä»¥å†™å…¥äº‹ä»¶
                 CLog::showLog(INF,"Socket can write.");
                 CSockInfo* info = g_pThis->m_SockList[ProcessSock];
                 while (info->m_WriteList.size())
@@ -273,7 +273,7 @@ void* CEpollEx::WorkLoop(void* para)
 }
 /*************************************************
 * Function: * check_connect_timeout
-* Description: * ¼ì²â³¤Ê±¼äÃ»·´Ó¦µÄÍøÂçÁ¬½Ó£¬²¢¹Ø±ÕÉ¾³ı
+* Description: * æ£€æµ‹é•¿æ—¶é—´æ²¡ååº”çš„ç½‘ç»œè¿æ¥ï¼Œå¹¶å…³é—­åˆ é™¤
 * Input: *
 * Output: *
 * Others: *

@@ -6,6 +6,16 @@
 CMsgProc::CMsgProc()
 {
     m_pLua = new CLua();
+    InitLua();
+}
+
+CMsgProc::~CMsgProc()
+{
+    delete m_pLua;
+}
+
+void CMsgProc::InitLua()
+{
     m_pLua->RunScript("init.lua");
     // get current path
     char szDir[MAX_PATH] = {0};
@@ -13,13 +23,7 @@ CMsgProc::CMsgProc()
     getcwd(szDir,MAX_PATH);
     string strDir(szDir);
     strDir += "/";
-    m_pLua->RunFunction("Init","'"+strDir+"'");
-
-}
-
-CMsgProc::~CMsgProc()
-{
-    delete m_pLua;
+    m_pLua->RunFunction("Init",CUniversal::Format("'%s'",strDir));
 }
 
 string CMsgProc::MsgProcess(string& msg)
@@ -32,10 +36,19 @@ string CMsgProc::MsgProcess(string& msg)
     CLuaPacket request, response;
     request.SetData("message",msg);
     if( !m_pLua->RunFunction("OnRecvMessage",&userinfo,&request,&response))
+        CLog::showLog(INF,m_pLua->GetErrorString());
 
     // check the return ;
-    string type = response.GetData("type");
-
+    string opt = response.GetData("operation");
+    if( opt == "reload")
+    {
+        InitLua();
+        return "Reload succeed";
+    }
+    else if( opt == "sendmessage")
+    {
+        string msg = response.GetData("message");
+    }
     string funcid = response.GetData("funcid");
     string res = response.GetData("result");
     string resmsg = CUniversal::Format("Message is processed. function id is %s.result is :%s",funcid,res);

@@ -12,7 +12,7 @@ public:
     CMsgProc();
     ~CMsgProc();
     string MsgProcess(string& msg);
-
+    void InitLua();
     CLua*	m_pLua;
 };
 

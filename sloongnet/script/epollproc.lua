@@ -17,6 +17,11 @@ OnRecvMessage = function( uinfo, request, response )
     local msg = request:getdata("message");
     print(msg);
     local funcid = paserMessage(msg);
+    if funcid == '500010' then
+        response:setdata("operation","reload");
+        return true;
+        --response:setdata("")
+    end
     response:setdata("funcid",funcid);
     response:setdata("result","success");
 end
