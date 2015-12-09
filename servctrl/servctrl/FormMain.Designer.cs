@@ -32,7 +32,7 @@
             this.tabPageStatus = new System.Windows.Forms.TabPage();
             this.tabPageTest = new System.Windows.Forms.TabPage();
             this.buttonConnect = new System.Windows.Forms.Button();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.comboBoxServList = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.textBoxPort = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -80,14 +80,15 @@
             this.buttonConnect.UseVisualStyleBackColor = true;
             this.buttonConnect.Click += new System.EventHandler(this.buttonConnect_Click);
             // 
-            // comboBox1
+            // comboBoxServList
             // 
-            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(344, 4);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(201, 20);
-            this.comboBox1.TabIndex = 22;
+            this.comboBoxServList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxServList.FormattingEnabled = true;
+            this.comboBoxServList.Location = new System.Drawing.Point(344, 4);
+            this.comboBoxServList.Name = "comboBoxServList";
+            this.comboBoxServList.Size = new System.Drawing.Size(201, 20);
+            this.comboBoxServList.TabIndex = 22;
+            this.comboBoxServList.SelectedIndexChanged += new System.EventHandler(this.comboBoxServList_SelectedIndexChanged);
             // 
             // label3
             // 
@@ -131,12 +132,13 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.buttonConnect);
             this.Controls.Add(this.textBoxPort);
-            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.comboBoxServList);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBoxAddr);
             this.Controls.Add(this.tabControl1);
             this.Name = "FormMain";
             this.Text = "Main";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FormMain_FormClosed);
             this.tabControl1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -149,7 +151,7 @@
         private System.Windows.Forms.TabPage tabPageStatus;
         private System.Windows.Forms.TabPage tabPageTest;
         private System.Windows.Forms.Button buttonConnect;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox comboBoxServList;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBoxPort;
         private System.Windows.Forms.Label label1;
