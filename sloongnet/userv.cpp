@@ -38,7 +38,7 @@ SloongWallUS::~SloongWallUS()
 
 void SloongWallUS::Initialize(CServerConfig* config)
 {
-	//m_pLog->Initialize(config->m_strLogPath);
+    m_pLog->Initialize(config->m_strLogPath);
 	m_pLog->g_bDebug = config->m_bDebug;
     m_pEpoll->Initialize(config->m_nThreadNum,config->m_nPort);
 	m_pThreadPool->Initialize(config->m_nThreadNum);
@@ -66,15 +66,14 @@ void SloongWallUS::Run()
 void* SloongWallUS::HandleEventWorkLoop( void* pParam )
 {
 	SloongWallUS* pThis = (SloongWallUS*)pParam;
-	while (true)
-	{
+
 		if (pThis->m_pEpoll->m_EventSockList.size() > 0)
 		{
 			// process read list.
 			int sock = pThis->m_pEpoll->m_EventSockList.front();
 			pThis->m_pEpoll->m_EventSockList.pop();
 			CSockInfo* info = pThis->m_pEpoll->m_SockList[sock];
-			if (!info) continue;
+            if (!info) return NULL;
 			while (info->m_ReadList.size() > 0)
 			{
 				string msg = info->m_ReadList.front();
@@ -83,11 +82,7 @@ void* SloongWallUS::HandleEventWorkLoop( void* pParam )
 				pThis->m_pEpoll->SendMessage(sock, res);
 			}
 		}
-		else
-		{
-			sleep(10);
-		}
-	}
+
 }
 
 

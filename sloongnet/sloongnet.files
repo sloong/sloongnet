@@ -16,3 +16,5 @@ utility.h
 utility.cpp
 dbporcesser.h
 dbporcesser.cpp
+serverconfig.cpp
+serverconfig.h
