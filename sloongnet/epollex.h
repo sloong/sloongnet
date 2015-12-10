@@ -9,11 +9,12 @@
 #include <queue>
 #include "sockinfo.h"
 using namespace std; //std 命名空间
-
+#include <univ/log.h>
+using namespace Sloong::Universal;
 class CEpollEx
 {
 public:
-    CEpollEx();
+    CEpollEx( CLog* pLog );
     virtual ~CEpollEx();
     int Initialize( int nThreadNums, int listenPort);
     void SendMessage( int sock, string msg );
@@ -33,6 +34,7 @@ protected:
 public:
     map<int,CSockInfo*> m_SockList;
     queue<int> m_EventSockList;
+	static CLog*		g_pLog;
 };
 
 #endif // CEPOLLEX_H

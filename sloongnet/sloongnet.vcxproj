@@ -35,7 +35,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.150.129\0001\4.8.3;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.150.129\0001\4.8.3\x86_64-redhat-linux;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.150.129\0001\4.8.3\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.150.129\0002\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.150.129\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.150.129\0000\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.150.129\0003\include\;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0000\include\glib-2.0\;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0001\4.8.3;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0001\4.8.3\x86_64-redhat-linux;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0001\4.8.3\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0002\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0000\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
@@ -44,10 +44,12 @@
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
+    <LibraryWPath />
+    <SourcePath />
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.150.129\0001\4.8.3;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.150.129\0001\4.8.3\x86_64-redhat-linux;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.150.129\0001\4.8.3\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.150.129\0002\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.150.129\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.150.129\0000\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0001\4.8.3;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0001\4.8.3\x86_64-redhat-linux;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0001\4.8.3\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0002\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0000\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Release.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
@@ -69,18 +71,24 @@
     <None Include="script\init.lua" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="dbporcesser.h" />
     <ClInclude Include="epollex.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="msgproc.h" />
+    <ClInclude Include="serverconfig.h" />
     <ClInclude Include="sockinfo.h" />
     <ClInclude Include="userv.h" />
+    <ClInclude Include="utility.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="dbporcesser.cpp" />
     <ClCompile Include="epollex.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="msgproc.cpp" />
+    <ClCompile Include="serverconfig.cpp" />
     <ClCompile Include="sockinfo.cpp" />
     <ClCompile Include="userv.cpp" />
+    <ClCompile Include="utility.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

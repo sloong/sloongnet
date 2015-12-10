@@ -13,9 +13,9 @@ OBJCOPY := objcopy
 
 #Additional flags
 PREPROCESSOR_MACROS := DEBUG
-INCLUDE_DIRS := 
+INCLUDE_DIRS := /usr/include/glib-2.0/
 LIBRARY_DIRS := /usr/local/lib/sloong
-LIBRARY_NAMES := m dl lua.5.3.1 univ pthread
+LIBRARY_NAMES := m dl lua.5.3.1 univ pthread glib-2.0
 ADDITIONAL_LINKER_INPUTS := 
 MACOS_FRAMEWORKS := 
 LINUX_PACKAGES := 

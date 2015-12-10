@@ -726,6 +726,7 @@
 #endif
 
 // --- Include directories begin --- //
+///usr/include/glib-2.0/
 ///usr/lib/gcc/x86_64-redhat-linux/4.8.3/../../../../include/c++/4.8.3
 ///usr/lib/gcc/x86_64-redhat-linux/4.8.3/../../../../include/c++/4.8.3/x86_64-redhat-linux
 ///usr/lib/gcc/x86_64-redhat-linux/4.8.3/../../../../include/c++/4.8.3/backward

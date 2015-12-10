@@ -14,11 +14,13 @@
 #define MAXBUF MAXRECVBUF+10
 
 CEpollEx* CEpollEx::g_pThis = NULL;
+CLog* CEpollEx::g_pLog = NULL;
 
-CEpollEx::CEpollEx()
+CEpollEx::CEpollEx( CLog* pLog )
 {
+	g_pLog = pLog;
     g_pThis = this;
-    CLog::showLog(INF,"epollex is build.");
+    g_pLog->Log("epollex is build.");
 }
 
 CEpollEx::~CEpollEx()
@@ -33,7 +35,7 @@ void on_sigint(int signal)
 // Initialize the epoll and the thread pool.
 int CEpollEx::Initialize(int nThreadNums, int licensePort)
 {
-    CLog::showLog(INF,boost::format("epollex is initialize.license port is %d")%licensePort);
+    g_pLog->Log(CUniversal::Format("epollex is initialize.license port is %d",licensePort));
     //SIGPIPE:在reader终止之后写pipe的时候发生
     //SIG_IGN:忽略信号的处理程序
     //SIGCHLD: 进程Terminate或Stop的时候,SIGPIPE会发送给进程的父进程,缺省情况下该Signal会被忽略
@@ -132,7 +134,7 @@ int CEpollEx::SetSocketNonblocking(int socket)
 *************************************************/
 void* CEpollEx::WorkLoop(void* para)
 {
-    CLog::showLog(INF,"epoll is start work loop.");
+    g_pLog->Log("epoll is start work loop.");
     int n,i;
     while(true)
     {
@@ -165,7 +167,7 @@ void* CEpollEx::WorkLoop(void* para)
                         info->m_ConnectTime = tm;
                         info->m_sock = conn_sock;
                         g_pThis->m_SockList[conn_sock] = info;
-                        CLog::showLog(INF,CUniversal::Format("accept client:%s.",info->m_Address));
+                        g_pLog->Log(CUniversal::Format("accept client:%s.",info->m_Address));
                         //将接受的连接添加到Epoll的事件中.
                         // Add the recv event to epoll;
                         g_pThis->SetSocketNonblocking(conn_sock);
@@ -175,14 +177,14 @@ void* CEpollEx::WorkLoop(void* para)
                         if (errno == EAGAIN )
                             break;
                         else
-                            CLog::showLog(INF,"accept error.");
+                            g_pLog->Log("accept error.");
 
                     }
                 }
             }
             else if(g_pThis->m_Events[i].events&EPOLLIN)
             {
-                CLog::showLog(INF,"Socket can read.");
+                g_pLog->Log("Socket can read.");
                 // 已经连接的用户,收到数据,可以开始读入
                 bool bLoop = true;
                 while(bLoop)
@@ -192,7 +194,7 @@ void* CEpollEx::WorkLoop(void* para)
                     int readLen;
                     char dataLeng[9] = {0};
                     readLen = recv(ProcessSock,dataLeng,len,0);
-                    CLog::showLog(INF,boost::format("recv %d bytes.")%readLen);
+                    g_pLog->Log(CUniversal::Format("recv %d bytes.",readLen));
                     if(readLen < 0)
                     {
                         //由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可//读在这里就当作是该次事件已处理过。
@@ -222,13 +224,13 @@ void* CEpollEx::WorkLoop(void* para)
                     else
                     {
                         long dtlen = atol(dataLeng);
-                        CLog::showLog(INF,boost::format("dataLen=%s|%d")%dataLeng%dtlen);
+                        g_pLog->Log(CUniversal::Format("dataLen=%s|%d",dataLeng,dtlen));
                         dtlen++;
                         char* data = new char[dtlen];
                         memset(data,0,dtlen);
 
                         readLen = recv(ProcessSock,data,dtlen,0);//一次性接受所有消息
-                        CLog::showLog(INF,boost::format("recv msg:%d|%s")%dtlen%data);
+						g_pLog->Log(CUniversal::Format("recv msg:%d|%s", dtlen,data));
 
                         if(readLen >= dtlen)
                             bLoop = true; // 需要再次读取
@@ -237,7 +239,7 @@ void* CEpollEx::WorkLoop(void* para)
 
                         // Add the msg to the sock info list
                         string msg(data);
-                        CLog::showLog(INF,boost::format("data to string is %s")%msg);
+						g_pLog->Log(CUniversal::Format("data to string is %s", msg));
                         CSockInfo* info = g_pThis->m_SockList[ProcessSock];
                         info->m_ReadList.push(msg);
                         delete[] data;
@@ -250,16 +252,16 @@ void* CEpollEx::WorkLoop(void* para)
             else if(g_pThis->m_Events[i].events&EPOLLOUT)
             {
                 // 可以写入事件
-                CLog::showLog(INF,"Socket can write.");
+				g_pLog->Log("Socket can write.");
                 CSockInfo* info = g_pThis->m_SockList[ProcessSock];
                 while (info->m_WriteList.size())
                 {
                     string msg = info->m_WriteList.front();
                     info->m_WriteList.pop();
-                    CLog::showLog(INF,boost::format("send message %1%")%msg);
+					g_pLog->Log(CUniversal::Format("send message %1%", msg));
                     if(!SendEx(ProcessSock,msg))
                     {
-                        CLog::showLog(ERR,"write error.");
+						g_pLog->Log("write error.",ERR);
                     }
                 }
             }

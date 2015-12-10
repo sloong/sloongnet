@@ -2,55 +2,93 @@
 #include<sys/types.h>
 #include<sys/socket.h>
 #include<netinet/in.h>
-#define DEFAULT_PORT 8000
-#define MAXLINE 4096
 using namespace std;
 
-#include "userv.h"
-#include "epollex.h"
-#include "msgproc.h"
 #include <univ/log.h>
 #include <univ/univ.h>
+#include <univ/threadpool.h>
+using namespace Sloong;
+using namespace Sloong::Universal;
+
+#include "epollex.h"
+#include "msgproc.h"
+#include "serverconfig.h"
+#include "utility.h"
+
+#define MAXLINE 4096
+#include "userv.h"
 
 SloongWallUS::SloongWallUS()
 {
-    CLog::showLog(INF,"SloongWalls Linux Server object is build.");
-
+	m_pLog = new CLog();
+	m_pEpoll = new CEpollEx(m_pLog);
+	m_pMsgProc = new CMsgProc(m_pLog);
+	m_pThreadPool = new CThreadPool();
 }
 
 SloongWallUS::~SloongWallUS()
 {
-
+	SAFE_DELETE(m_pEpoll);
+	SAFE_DELETE(m_pMsgProc);
+	m_pThreadPool->End();
+	SAFE_DELETE(m_pThreadPool);
+	SAFE_DELETE(m_pLog);
 }
 
 
-void SloongWallUS::Initialize( int nPort )
+void SloongWallUS::Initialize(CServerConfig* config)
 {
-    m_pEpoll = new CEpollEx();
-    m_pEpoll->Initialize(1,nPort);
+	//m_pLog->Initialize(config->m_strLogPath);
+	m_pLog->g_bDebug = config->m_bDebug;
+    m_pEpoll->Initialize(config->m_nThreadNum,config->m_nPort);
+	m_pThreadPool->Initialize(config->m_nThreadNum);
 
-    m_pMsgProc = new CMsgProc();
+	CUtility uti;
+	int n1, n2;
+	uti.GetMemory(n1, n2);
+	uti.GetCpuUsed();
 }
 
 void SloongWallUS::Run()
 {
-    while(true)
-    {
-        if ( m_pEpoll->m_EventSockList.size() > 0 )
-        {
-            // process read list.
-            int sock = m_pEpoll->m_EventSockList.front();
-            m_pEpoll->m_EventSockList.pop();
-            CSockInfo* info = m_pEpoll->m_SockList[sock];
-            if( !info ) continue;
-            while ( info->m_ReadList.size() > 0)
-            {
-                string msg = info->m_ReadList.front();
-                info->m_ReadList.pop();
-                string res = m_pMsgProc->MsgProcess(msg);
-                m_pEpoll->SendMessage(sock,res);
-            }
-        }
-    }
+	m_pThreadPool->AddTask(SloongWallUS::HandleEventWorkLoop, this, true);
+	m_pThreadPool->Start();
+	char buff[256];
+	while (true)
+	{
+		
+		cin >> buff;
+		cout << buff;
+		sleep(10);
+	}
 }
+
+void* SloongWallUS::HandleEventWorkLoop( void* pParam )
+{
+	SloongWallUS* pThis = (SloongWallUS*)pParam;
+	while (true)
+	{
+		if (pThis->m_pEpoll->m_EventSockList.size() > 0)
+		{
+			// process read list.
+			int sock = pThis->m_pEpoll->m_EventSockList.front();
+			pThis->m_pEpoll->m_EventSockList.pop();
+			CSockInfo* info = pThis->m_pEpoll->m_SockList[sock];
+			if (!info) continue;
+			while (info->m_ReadList.size() > 0)
+			{
+				string msg = info->m_ReadList.front();
+				info->m_ReadList.pop();
+				string res = pThis->m_pMsgProc->MsgProcess(msg);
+				pThis->m_pEpoll->SendMessage(sock, res);
+			}
+		}
+		else
+		{
+			sleep(10);
+		}
+	}
+}
+
+
 

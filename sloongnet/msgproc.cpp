@@ -3,9 +3,14 @@
 #include "main.h"
 #include <boost/format.hpp>
 #include "univ/luapacket.h"
-CMsgProc::CMsgProc()
+
+CLog* CMsgProc::g_pLog = NULL;
+
+CMsgProc::CMsgProc( CLog* pLog )
 {
+	g_pLog = pLog;
     m_pLua = new CLua();
+	m_pLua->SetErrorHandle(CMsgProc::HandleError);
     InitLua();
 }
 
@@ -30,13 +35,13 @@ string CMsgProc::MsgProcess(string& msg)
 {
     // In process, need add the lua script runtime and call lua to process.
     // In here, just show log to test.
-    CLog::showLog(INF,"Message is processed. call lua func.");
+	g_pLog->Log("Message is processed. call lua func.");
 
     CLuaPacket userinfo;
     CLuaPacket request, response;
     request.SetData("message",msg);
     if( !m_pLua->RunFunction("OnRecvMessage",&userinfo,&request,&response))
-        CLog::showLog(INF,m_pLua->GetErrorString());
+		g_pLog->Log(m_pLua->GetErrorString());
 
     // check the return ;
     string opt = response.GetData("operation");
@@ -52,6 +57,11 @@ string CMsgProc::MsgProcess(string& msg)
     string funcid = response.GetData("funcid");
     string res = response.GetData("result");
     string resmsg = CUniversal::Format("Message is processed. function id is %s.result is :%s",funcid,res);
-    CLog::showLog(INF,resmsg);
+	g_pLog->Log(resmsg);
     return resmsg;
+}
+
+void CMsgProc::HandleError(string err)
+{
+	g_pLog->Log( err, ERR, -2);
 }

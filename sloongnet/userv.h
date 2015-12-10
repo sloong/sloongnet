@@ -3,21 +3,37 @@
 
 class CEpollEx;
 class CMsgProc;
-class SloongWallUS
+class CServerConfig;
+namespace Sloong
 {
-public:
-    SloongWallUS();
-    ~SloongWallUS();
+	namespace Universal
+	{
+		class CThreadPool;
+	}
+	using namespace Universal;
 
-    void Initialize(int nPort);
-    void Run();
+	class SloongWallUS
+	{
+	public:
+		SloongWallUS();
+		~SloongWallUS();
 
-protected:
-    int m_sockServ;
-    int* m_sockClient;
-    CEpollEx* m_pEpoll;
-    CMsgProc* m_pMsgProc;
-};
+		void Initialize(CServerConfig* config);
+		void Run();
+
+	public:// static function
+		static void* HandleEventWorkLoop(void* pParam);
+
+	protected:
+		int m_sockServ;
+		int* m_sockClient;
+		CEpollEx* m_pEpoll;
+		CMsgProc* m_pMsgProc;
+		CThreadPool* m_pThreadPool;
+		CLog* m_pLog;
+	};
+
+}
 
 
 

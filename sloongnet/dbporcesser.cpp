@@ -1,4 +1,5 @@
 #include <univ/univ.h>
+#include <univ/log.h>
 #include "dbporcesser.h"
 #include <mysql/mysql.h>
 using namespace Sloong;
@@ -15,7 +16,7 @@ CDBPorcesser::CDBPorcesser()
     res = mysql_store_result(&mysql);
     while((row = mysql_fetch_row(res)))
     {
-        CLog::showLog(INF,CUniversal::Format("%s - %s",row[0],row[1]));
+        CLog::showLog(CUniversal::Format("%s - %s",row[0],row[1]));
     }
 
     mysql_free_result(res);

@@ -55,6 +55,15 @@
     <ClInclude Include="userv.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="serverconfig.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="dbporcesser.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="utility.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="epollex.cpp">
@@ -70,6 +79,15 @@
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="userv.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="serverconfig.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="dbporcesser.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="utility.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
