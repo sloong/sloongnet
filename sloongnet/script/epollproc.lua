@@ -13,6 +13,9 @@ end
 
 
 OnRecvMessage = function( uinfo, request, response )
+	print('sql test')
+	local res = querySql('select * from users')
+	print(res);
     print('Recv message process is called.')
     local msg = request:getdata("message");
     print(msg);

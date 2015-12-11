@@ -1,13 +1,27 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-class CUtility
-{
-public:
-    CUtility();
+#include <univ/lua.h>
 
-    static int GetCpuUsed(int nWaitTime = 10);
-    static int GetMemory(int& total, int& free);
-};
+namespace Sloong
+{
+	namespace Universal
+	{
+		class CLog;
+	}
+	using namespace Universal;
+	class CUtility
+	{
+	public:
+		CUtility();
+
+		// Initialize the global variable. and register the function to lua.
+
+		int GetCpuUsed(int nWaitTime = 10);
+		int GetMemory(int& total, int& free);
+
+	};
+
+}
 
 #endif // UTILITY_H

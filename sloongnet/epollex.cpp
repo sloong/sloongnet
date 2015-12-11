@@ -8,19 +8,19 @@
 #include <unistd.h>
 #include <queue>
 #include "epollex.h"
-#include "univ/log.h"
-#include "univ/univ.h"
+#include <univ/log.h>
+#include <univ/univ.h>
+#include <univ/threadpool.h>
 #define MAXRECVBUF 4096
 #define MAXBUF MAXRECVBUF+10
 
-CEpollEx* CEpollEx::g_pThis = NULL;
-CLog* CEpollEx::g_pLog = NULL;
+using namespace Sloong;
+using namespace Sloong::Universal;
 
 CEpollEx::CEpollEx( CLog* pLog )
 {
-	g_pLog = pLog;
-    g_pThis = this;
-    g_pLog->Log("epollex is build.");
+	m_pLog = pLog;
+	m_pLog->Log("epollex is build.");
 }
 
 CEpollEx::~CEpollEx()
@@ -33,9 +33,9 @@ void on_sigint(int signal)
 }
 
 // Initialize the epoll and the thread pool.
-int CEpollEx::Initialize(int nThreadNums, int licensePort)
+int CEpollEx::Initialize(int licensePort, int nThreadNum )
 {
-    g_pLog->Log(CUniversal::Format("epollex is initialize.license port is %d",licensePort));
+	m_pLog->Log(CUniversal::Format("epollex is initialize.license port is %d", licensePort));
     //SIGPIPE:在reader终止之后写pipe的时候发生
     //SIG_IGN:忽略信号的处理程序
     //SIGCHLD: 进程Terminate或Stop的时候,SIGPIPE会发送给进程的父进程,缺省情况下该Signal会被忽略
@@ -71,8 +71,10 @@ int CEpollEx::Initialize(int nThreadNums, int licensePort)
     // 创建epoll事件对象
     CtlEpollEvent(EPOLL_CTL_ADD,m_ListenSock,EPOLLIN|EPOLLET|EPOLLOUT);
 
-    // 创建线程池
-    return InitThreadPool(nThreadNums);
+    // Init the thread pool
+	CThreadPool::AddWorkThread(WorkLoop, this, nThreadNum);
+	
+	return true;
 }
 
 void CEpollEx::CtlEpollEvent(int opt, int sock, int events)
@@ -86,33 +88,6 @@ void CEpollEx::CtlEpollEvent(int opt, int sock, int events)
     epoll_ctl(m_EpollHandle,opt,sock,&ent);
 }
 
-
-/*************************************************
-* Function: * init_thread_pool
-* Description: * 初始化线程
-* Input: * threadNum:用于处理epoll的线程数
-* Output: *
-* Others: * 此函数为静态static函数,
-*************************************************/
-int CEpollEx::InitThreadPool(int threadNum)
-{
-    pthread_t threadId;
-
-    //初始化epoll线程池,
-    for ( int i = 0; i < threadNum; i++)
-    {
-        errno = pthread_create(&threadId, 0, WorkLoop, (void *)0);
-        if (errno != 0)
-        {
-            printf("pthread create failed!\n");
-            return(errno);
-        }
-    }
-
-    // errno = pthread_create(&threadId, 0, check_connect_timeout, (void *)0);
-
-    return 0;
-}
 
 // 设置套接字为非阻塞模式
 int CEpollEx::SetSocketNonblocking(int socket)
@@ -132,27 +107,31 @@ int CEpollEx::SetSocketNonblocking(int socket)
 * Output: *
 * Others: *
 *************************************************/
-void* CEpollEx::WorkLoop(void* para)
+void* CEpollEx::WorkLoop(void* pParam)
 {
-    g_pLog->Log("epoll is start work loop.");
+	CEpollEx* pThis = (CEpollEx*)pParam;
+	auto log = pThis->m_pLog;
+	log->Log("epoll is start work loop.");
+	int sockListen = pThis->m_ListenSock;
+	auto& rSockList = pThis->m_SockList;
     int n,i;
     while(true)
     {
         // 返回需要处理的事件数
-        n=epoll_wait(g_pThis->m_EpollHandle,g_pThis->m_Events,1024,-1);
+		n = epoll_wait(pThis->m_EpollHandle, pThis->m_Events, 1024, -1);
         if( n<=0 ) continue;
 
         for(i=0; i<n; ++i)
         {
-            int ProcessSock =g_pThis->m_Events[i].data.fd;
-            if(ProcessSock==g_pThis->m_ListenSock)
+            int fd =pThis->m_Events[i].data.fd;
+			if (fd == sockListen)
             {
                 // 新连接接入
                 while(true)
                 {
                     // accept the connect and add it to the list
                     int conn_sock = -1;
-                    while ((conn_sock = accept(g_pThis->m_ListenSock,NULL,NULL)) > 0)
+					while ((conn_sock = accept(sockListen, NULL, NULL)) > 0)
                     {
                         CSockInfo* info = new CSockInfo();
                         struct sockaddr_in add;
@@ -166,71 +145,69 @@ void* CEpollEx::WorkLoop(void* para)
                         time(&tm);
                         info->m_ConnectTime = tm;
                         info->m_sock = conn_sock;
-                        g_pThis->m_SockList[conn_sock] = info;
-                        g_pLog->Log(CUniversal::Format("accept client:%s.",info->m_Address));
+                        rSockList[conn_sock] = info;
+						log->Log(CUniversal::Format("accept client:%s.", info->m_Address));
                         //将接受的连接添加到Epoll的事件中.
                         // Add the recv event to epoll;
-                        g_pThis->SetSocketNonblocking(conn_sock);
-                        g_pThis->CtlEpollEvent(EPOLL_CTL_ADD,conn_sock,EPOLLIN|EPOLLET);
+                        pThis->SetSocketNonblocking(conn_sock);
+                        pThis->CtlEpollEvent(EPOLL_CTL_ADD,conn_sock,EPOLLIN|EPOLLET);
                     }
                     if (conn_sock == -1) {
                         if (errno == EAGAIN )
                             break;
                         else
-                            g_pLog->Log("accept error.");
+							log->Log("accept error.");
 
                     }
                 }
             }
-            else if(g_pThis->m_Events[i].events&EPOLLIN)
+            else if(pThis->m_Events[i].events&EPOLLIN)
             {
-                g_pLog->Log("Socket can read.");
+				log->Log("Socket can read.");
                 // 已经连接的用户,收到数据,可以开始读入
                 bool bLoop = true;
                 while(bLoop)
                 {
                     // 先读取消息长度
-                    int len = 8;//sizeof(long long);
+                    int len = sizeof(long long);
                     int readLen;
-                    char dataLeng[9] = {0};
-                    readLen = recv(ProcessSock,dataLeng,len,0);
-                    g_pLog->Log(CUniversal::Format("recv %d bytes.",readLen));
+					char dataLeng[sizeof(long long)+1] = { 0 };
+                    readLen = recv(fd,dataLeng,len,0);
+					log->Log(CUniversal::Format("recv %d bytes.", readLen));
                     if(readLen < 0)
                     {
                         //由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可//读在这里就当作是该次事件已处理过。
                         if(errno == EAGAIN)
                         {
-                            printf("EAGAIN\n");
+							log->Log("EAGAIN.");
                             break;
                         }
                         else
                         {
                             // 读取错误,将这个连接从监听中移除并关闭连接
-                            printf("recv error!\n");
-                            //epoll_ctl(g_pThis->m_EpollHandle, EPOLL_CTL_DEL, ProcessSock, &g_pThis->m_Event);
-                            close(ProcessSock);
-                            g_pThis->CtlEpollEvent(EPOLL_CTL_DEL,ProcessSock,EPOLLIN|EPOLLOUT|EPOLLET);
+							log->Log("recv error!");
+                            close(fd);
+                            pThis->CtlEpollEvent(EPOLL_CTL_DEL,fd,EPOLLIN|EPOLLOUT|EPOLLET);
                             break;
                         }
                     }
                     else if(readLen == 0)
                     {
                         // The connect is disconnected.
-                        close(ProcessSock);
-                        g_pThis->CtlEpollEvent(EPOLL_CTL_DEL,ProcessSock,EPOLLIN|EPOLLOUT|EPOLLET);
-                        //epoll_ctl(g_pThis->m_EpollHandle,EPOLL_CTL_DEL, ProcessSock, &g_pThis->m_Event);
+                        close(fd);
+                        pThis->CtlEpollEvent(EPOLL_CTL_DEL,fd,EPOLLIN|EPOLLOUT|EPOLLET);
                         break;
                     }
                     else
                     {
                         long dtlen = atol(dataLeng);
-                        g_pLog->Log(CUniversal::Format("dataLen=%s|%d",dataLeng,dtlen));
+						log->Log(CUniversal::Format("dataLen=%s|%d", dataLeng, dtlen));
                         dtlen++;
                         char* data = new char[dtlen];
                         memset(data,0,dtlen);
 
-                        readLen = recv(ProcessSock,data,dtlen,0);//一次性接受所有消息
-						g_pLog->Log(CUniversal::Format("recv msg:%d|%s", dtlen,data));
+                        readLen = recv(fd,data,dtlen,0);//一次性接受所有消息
+						log->Log(CUniversal::Format("recv msg:%d|%s", dtlen, data));
 
                         if(readLen >= dtlen)
                             bLoop = true; // 需要再次读取
@@ -239,29 +216,29 @@ void* CEpollEx::WorkLoop(void* para)
 
                         // Add the msg to the sock info list
                         string msg(data);
-						g_pLog->Log(CUniversal::Format("data to string is %s", msg));
-                        CSockInfo* info = g_pThis->m_SockList[ProcessSock];
+						log->Log(CUniversal::Format("data to string is %s", msg));
+                        CSockInfo* info = rSockList[fd];
                         info->m_ReadList.push(msg);
                         delete[] data;
 
                         // Add the sock event to list
-                        g_pThis->m_EventSockList.push(ProcessSock);
+                        pThis->m_EventSockList.push(fd);
                     }
                 }
             }
-            else if(g_pThis->m_Events[i].events&EPOLLOUT)
+            else if(pThis->m_Events[i].events&EPOLLOUT)
             {
                 // 可以写入事件
-				g_pLog->Log("Socket can write.");
-                CSockInfo* info = g_pThis->m_SockList[ProcessSock];
+				log->Log("Socket can write.");
+                CSockInfo* info = rSockList[fd];
                 while (info->m_WriteList.size())
                 {
                     string msg = info->m_WriteList.front();
                     info->m_WriteList.pop();
-					g_pLog->Log(CUniversal::Format("send message %1%", msg));
-                    if(!SendEx(ProcessSock,msg))
+					log->Log(CUniversal::Format("send message %1%", msg));
+                    if(!SendEx(fd,msg))
                     {
-						g_pLog->Log("write error.",ERR);
+						log->Log("write error.", ERR);
                     }
                 }
             }
@@ -292,8 +269,8 @@ void CEpollEx::SendMessage(int sock, string msg)
         CSockInfo* info = m_SockList[sock];
         info->m_WriteList.push(msg);
         // Add to epoll list
-        g_pThis->SetSocketNonblocking(sock);
-        g_pThis->CtlEpollEvent(EPOLL_CTL_ADD,sock,EPOLLOUT|EPOLLET);
+        SetSocketNonblocking(sock);
+        CtlEpollEvent(EPOLL_CTL_ADD,sock,EPOLLOUT|EPOLLET);
     }
 }
 

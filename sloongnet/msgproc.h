@@ -6,19 +6,24 @@
 
 #include <univ/lua.h>
 #include <univ/log.h>
-using namespace Sloong::Universal;
-class CMsgProc
-{
-public:
-    CMsgProc( CLog* pLog );
-    ~CMsgProc();
-    string MsgProcess(string& msg);
-    void InitLua();
-    CLua*	m_pLua;
 
-	static void HandleError(string err);
-protected:
-	static CLog*	g_pLog;
-};
+namespace Sloong
+{
+	using namespace Universal;
+	class CGlobalFunction;
+	class CMsgProc
+	{
+	public:
+		CMsgProc(CLog* pLog);
+		~CMsgProc();
+		string MsgProcess(string& msg);
+		void InitLua();
+
+	protected:
+		CLua*	m_pLua;
+		CLog*	m_pLog;
+		CGlobalFunction*	m_pGFunc;
+	};
+}
 
 #endif // MSGPROC_H

@@ -71,8 +71,9 @@
     <None Include="script\init.lua" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="dbporcesser.h" />
+    <ClInclude Include="dbproc.h" />
     <ClInclude Include="epollex.h" />
+    <ClInclude Include="globalfunction.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="msgproc.h" />
     <ClInclude Include="serverconfig.h" />
@@ -81,8 +82,9 @@
     <ClInclude Include="utility.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dbporcesser.cpp" />
+    <ClCompile Include="dbproc.cpp" />
     <ClCompile Include="epollex.cpp" />
+    <ClCompile Include="globalfunction.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="msgproc.cpp" />
     <ClCompile Include="serverconfig.cpp" />

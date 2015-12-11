@@ -58,10 +58,13 @@
     <ClInclude Include="serverconfig.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="dbporcesser.h">
+    <ClInclude Include="utility.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="utility.h">
+    <ClInclude Include="globalfunction.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="dbproc.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -84,10 +87,13 @@
     <ClCompile Include="serverconfig.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="dbporcesser.cpp">
+    <ClCompile Include="utility.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="utility.cpp">
+    <ClCompile Include="globalfunction.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="dbproc.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>

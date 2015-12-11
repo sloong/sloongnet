@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string.h> // for stricmp
 using namespace std;
+using namespace Sloong;
 CUtility::CUtility()
 {
 }
@@ -91,7 +92,7 @@ int CUtility::GetCpuUsed(int nWaitTime)
 	int cpu;
 
 	get_cpuoccupy((CPU_OCCUPY *)&cpu_stat1);
-	sleep(nWaitTime/1000);
+	SLEEP(nWaitTime);
 
 	get_cpuoccupy((CPU_OCCUPY *)&cpu_stat2);
 

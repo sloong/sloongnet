@@ -38,15 +38,9 @@ SloongWallUS::~SloongWallUS()
 
 void SloongWallUS::Initialize(CServerConfig* config)
 {
-    m_pLog->Initialize(config->m_strLogPath);
-	m_pLog->g_bDebug = config->m_bDebug;
-    m_pEpoll->Initialize(config->m_nThreadNum,config->m_nPort);
+	m_pLog->Initialize(config->m_strLogPath, config->m_bDebug);
+	m_pEpoll->Initialize(config->m_nPort,config->m_nThreadNum);
 	m_pThreadPool->Initialize(config->m_nThreadNum);
-
-	CUtility uti;
-	int n1, n2;
-	uti.GetMemory(n1, n2);
-	uti.GetCpuUsed();
 }
 
 void SloongWallUS::Run()
@@ -56,10 +50,9 @@ void SloongWallUS::Run()
 	char buff[256];
 	while (true)
 	{
-		
-		cin >> buff;
-		cout << buff;
-		sleep(10);
+// 		cin >> buff;
+// 		cout << buff;
+		SLEEP(100);
 	}
 }
 
