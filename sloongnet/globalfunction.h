@@ -17,9 +17,9 @@ namespace Sloong
 		CGlobalFunction();
 		~CGlobalFunction();
 
-		void Initialize();
+        void Initialize(CLua* pLua);
 	protected:
-		CUniversal* m_pUtility;
+        CUtility * m_pUtility;
 		CDBProc* m_pDBProc;
 		CLua*	m_pLua;
 		CLog*	m_pLog;

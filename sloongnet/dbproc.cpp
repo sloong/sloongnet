@@ -35,7 +35,6 @@ int Sloong::CDBProc::Query(string sqlCmd, vector<string>& vRes)
 			line = line + "|" + row[i];
 		}
 
-		cout << line;
 		vRes.push_back(line);
 	}
 

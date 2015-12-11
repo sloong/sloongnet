@@ -18,3 +18,7 @@ dbporcesser.h
 dbporcesser.cpp
 serverconfig.cpp
 serverconfig.h
+dbproc.cpp
+dbproc.h
+globalfunction.cpp
+globalfunction.h
