@@ -9,7 +9,7 @@ CMsgProc::CMsgProc( CLog* pLog )
 	m_pLog = pLog;
     m_pLua = new CLua();
 	m_pGFunc = new CGlobalFunction();
-	m_pGFunc->Initialize();
+    m_pGFunc->Initialize(m_pLua);
     InitLua();
 }
 

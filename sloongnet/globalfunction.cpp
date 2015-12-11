@@ -6,6 +6,8 @@ using namespace Sloong;
 using namespace Sloong::Universal;
 #include <boost/foreach.hpp>
 #include "dbproc.h"
+#include "utility.h"
+#define ARRAYSIZE(a) (sizeof(a)/sizeof(a[0]))
 
 CGlobalFunction* CGlobalFunction::g_pThis = NULL;
 
@@ -18,6 +20,8 @@ LuaFunctionRegistr g_LuaFunc[] =
 
 CGlobalFunction::CGlobalFunction()
 {
+    m_pUtility = new CUtility();
+    m_pDBProc = new CDBProc();
 	g_pThis = this;
 }
 
@@ -26,12 +30,16 @@ CGlobalFunction::~CGlobalFunction()
 {
 }
 
-void Sloong::CGlobalFunction::Initialize()
+void Sloong::CGlobalFunction::Initialize(CLua* pLua)
 {
+    m_pLua = pLua;
 	m_pLua->SetErrorHandle(CGlobalFunction::HandleError);
 
-	vector<LuaFunctionRegistr> funcList(g_LuaFunc, g_LuaFunc + sizeof(g_LuaFunc));
+    vector<LuaFunctionRegistr> funcList(g_LuaFunc, g_LuaFunc + ARRAYSIZE(g_LuaFunc));
 	m_pLua->AddFunctions(&funcList);
+
+    // connect to db
+    m_pDBProc->Connect("localhost","root","sloong","sloong",0);
 }
 
 int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
