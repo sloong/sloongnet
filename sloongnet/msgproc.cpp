@@ -4,13 +4,10 @@
 #include <boost/format.hpp>
 #include <univ/luapacket.h>
 #include "globalfunction.h"
-CMsgProc::CMsgProc( CLog* pLog )
+CMsgProc::CMsgProc()
 {
-	m_pLog = pLog;
     m_pLua = new CLua();
-	m_pGFunc = new CGlobalFunction();
-    m_pGFunc->Initialize(m_pLua);
-    InitLua();
+    m_pGFunc = new CGlobalFunction();
 }
 
 CMsgProc::~CMsgProc()
@@ -18,6 +15,12 @@ CMsgProc::~CMsgProc()
     delete m_pLua;
 }
 
+void CMsgProc::Initialize(CLog *pLog)
+{
+    m_pLog = pLog;
+    m_pGFunc->Initialize(m_pLog,m_pLua);
+    InitLua();
+}
 
 void CMsgProc::InitLua()
 {

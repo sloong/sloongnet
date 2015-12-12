@@ -17,10 +17,8 @@
 using namespace Sloong;
 using namespace Sloong::Universal;
 
-CEpollEx::CEpollEx( CLog* pLog )
+CEpollEx::CEpollEx()
 {
-	m_pLog = pLog;
-	m_pLog->Log("epollex is build.");
 }
 
 CEpollEx::~CEpollEx()
@@ -33,8 +31,9 @@ void on_sigint(int signal)
 }
 
 // Initialize the epoll and the thread pool.
-int CEpollEx::Initialize(int licensePort, int nThreadNum )
+int CEpollEx::Initialize( CLog* plog, int licensePort, int nThreadNum )
 {
+    m_pLog = plog;
 	m_pLog->Log(CUniversal::Format("epollex is initialize.license port is %d", licensePort));
     //SIGPIPE:在reader终止之后写pipe的时候发生
     //SIG_IGN:忽略信号的处理程序

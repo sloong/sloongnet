@@ -16,6 +16,7 @@ LuaFunctionRegistr g_LuaFunc[] =
 	{ "showLog", CGlobalFunction::Lua_showLog },
 	{ "querySql", CGlobalFunction::Lua_querySql },
 	{ "modifySql", CGlobalFunction::Lua_modifySql },
+    { "getSqlError", CGlobalFunction::Lua_getSqlError },
 };
 
 CGlobalFunction::CGlobalFunction()
@@ -30,8 +31,9 @@ CGlobalFunction::~CGlobalFunction()
 {
 }
 
-void Sloong::CGlobalFunction::Initialize(CLua* pLua)
+void Sloong::CGlobalFunction::Initialize( CLog* plog,CLua* pLua)
 {
+    m_pLog = plog;
     m_pLua = pLua;
 	m_pLua->SetErrorHandle(CGlobalFunction::HandleError);
 
@@ -66,9 +68,15 @@ int Sloong::CGlobalFunction::Lua_modifySql(lua_State* l)
 {
 	auto lua = g_pThis->m_pLua;
 	int nRes = g_pThis->m_pDBProc->Modify(lua->GetStringArgument(1));
-	
+
 	lua->PushString(CUniversal::ntos(nRes));
 	return 1;
+}
+
+int Sloong::CGlobalFunction::Lua_getSqlError(lua_State *l)
+{
+    g_pThis->m_pLua->PushString(g_pThis->m_pDBProc->GetError());
+    return 1;
 }
 
 void CGlobalFunction::HandleError(string err)
@@ -79,7 +87,7 @@ void CGlobalFunction::HandleError(string err)
 
 int CGlobalFunction::Lua_showLog(lua_State* l)
 {
-	g_pThis->m_pLog->Log(g_pThis->m_pLua->GetStringArgument(1));
+    g_pThis->m_pLog->Log(g_pThis->m_pLua->GetStringArgument(1));
 }
 
 

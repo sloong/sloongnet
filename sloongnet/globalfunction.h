@@ -14,10 +14,10 @@ namespace Sloong
 	class CGlobalFunction
 	{
 	public:
-		CGlobalFunction();
+        CGlobalFunction( );
 		~CGlobalFunction();
 
-        void Initialize(CLua* pLua);
+        void Initialize(CLog* plog ,CLua* pLua);
 	protected:
         CUtility * m_pUtility;
 		CDBProc* m_pDBProc;
@@ -29,6 +29,7 @@ namespace Sloong
 		static int Lua_showLog(lua_State* l);
 		static int Lua_querySql(lua_State* l);
 		static int Lua_modifySql(lua_State* l);
+        static int Lua_getSqlError(lua_State* l);
 		
 	public:
 		static CGlobalFunction* g_pThis;
