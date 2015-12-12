@@ -211,10 +211,10 @@ namespace servctrl
         {
             foreach( var item in SocketMap )
             {
-                item.Value.m_Socket.Dispose();
                 item.Value.m_Socket = null;
             }
             Utility.Serialize(SocketMap, sockMapPath);
+            log.Dispose();
         }
     }
 

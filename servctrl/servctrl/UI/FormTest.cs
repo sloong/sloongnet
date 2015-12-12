@@ -17,6 +17,8 @@ namespace servctrl
     public partial class FormTest : Form
     {
         private IPageHost pageHost;
+        private Dictionary<string, string> testCaseMap = new Dictionary<string,string>();
+
 
 
         public Dictionary<string, ConnectInfo> SocketMap
@@ -107,12 +109,18 @@ namespace servctrl
         {
             AskForm askform = new AskForm();
             askform.ShowDialog();
-            MessageBox.Show(askform.InputText);
+            testCaseMap[askform.InputText] = textBoxMsg.Text;
+            comboBoxTestCase.SelectedIndex = comboBoxTestCase.Items.Add(askform.InputText);
         }
 
         private void FormTest_Shown(object sender, EventArgs e)
         {
 
+        }
+
+        private void comboBoxTestCase_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            textBoxMsg.Text = testCaseMap[comboBoxTestCase.Text];
         }
     }
 }
