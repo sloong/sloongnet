@@ -38,6 +38,7 @@
       <Filter>script</Filter>
     </None>
     <None Include="Makefile_VGDB" />
+    <None Include="default.conf" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="epollex.h">

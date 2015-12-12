@@ -63,6 +63,7 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="default.conf" />
     <None Include="debug.mak" />
     <None Include="Makefile_VGDB" />
     <None Include="release.mak" />
