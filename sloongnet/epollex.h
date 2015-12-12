@@ -21,9 +21,9 @@ namespace Sloong
 	class CEpollEx
 	{
 	public:
-		CEpollEx(CLog* pLog);
+        CEpollEx();
 		virtual ~CEpollEx();
-		int Initialize(int listenPort, int nThreadNum);
+        int Initialize(CLog* pLog,int listenPort, int nThreadNum);
 		void SendMessage(int sock, string msg);
 	protected:
 		int SetSocketNonblocking(int socket);

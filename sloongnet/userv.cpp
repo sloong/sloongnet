@@ -21,8 +21,8 @@ using namespace Sloong::Universal;
 SloongWallUS::SloongWallUS()
 {
 	m_pLog = new CLog();
-	m_pEpoll = new CEpollEx(m_pLog);
-	m_pMsgProc = new CMsgProc(m_pLog);
+    m_pEpoll = new CEpollEx();
+    m_pMsgProc = new CMsgProc();
 	m_pThreadPool = new CThreadPool();
 }
 
@@ -39,7 +39,8 @@ SloongWallUS::~SloongWallUS()
 void SloongWallUS::Initialize(CServerConfig* config)
 {
 	m_pLog->Initialize(config->m_strLogPath, config->m_bDebug);
-	m_pEpoll->Initialize(config->m_nPort,config->m_nThreadNum);
+    m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nThreadNum);
+    m_pMsgProc->Initialize(m_pLog);
 	m_pThreadPool->Initialize(config->m_nThreadNum);
 }
 

@@ -14,8 +14,9 @@ namespace Sloong
 	class CMsgProc
 	{
 	public:
-		CMsgProc(CLog* pLog);
+        CMsgProc();
 		~CMsgProc();
+        void Initialize(CLog* pLog);
 		string MsgProcess(string& msg);
 		void InitLua();
 
