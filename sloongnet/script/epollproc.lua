@@ -16,11 +16,16 @@ OnRecvMessage = function( uinfo, request, response )
 	print('sql test')
 	local res = querySql('select * from users')
 	print(res);
+showLog('insert test')
+if '-1' == modifySql("INSERT INTO `sloong`.`users` (`id`, `name`, `regdate`, `solelyid`) VALUES ('2', 'gaoerer', '2015-12-11', '48971786')") then
+    showLog(getSqlError())
+   end
+
     print('Recv message process is called.')
     local msg = request:getdata("message");
     print(msg);
     local funcid = paserMessage(msg);
-    if funcid == '500010' then
+    if funcid == 'L-0-reload' then
         response:setdata("operation","reload");
         return true;
         --response:setdata("")

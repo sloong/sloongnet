@@ -8,12 +8,8 @@ function require_ex( _mname )
 end
 
 Init = function( path )
-
-    package.path = package.path .. ';' .. path .. 'script/?.lua';
-print(package.path)
-print("test")
+    package.path = path .. 'script/?.lua';
     print('load comm lua file.:' .. tostring(require('comm')))
-        print('test3')
     print('load proc lua file:' .. tostring(require('epollproc')))
 
 end
