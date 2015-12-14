@@ -24,7 +24,7 @@ namespace Sloong
         CEpollEx();
 		virtual ~CEpollEx();
         int Initialize(CLog* pLog,int listenPort, int nThreadNum);
-		void SendMessage(int sock, string msg);
+		void SendMessage(int sock, const string& nSwift, string msg);
 	protected:
 		int SetSocketNonblocking(int socket);
 		void CtlEpollEvent(int opt, int sock, int events);

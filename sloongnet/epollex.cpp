@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <queue>
 #include "epollex.h"
+#include "utility.h"
 #include <univ/log.h>
 #include <univ/univ.h>
 #include <univ/threadpool.h>
@@ -261,8 +262,11 @@ void *check_connect_timeout(void* para)
     return 0;
 }
 
-void CEpollEx::SendMessage(int sock, string msg)
+void CEpollEx::SendMessage(int sock, const string& nSwift, string msg)
 {
+	// process msg
+	string md5 = CUtility::MD5_Encoding(msg);
+	msg = md5 + "|" + nSwift + "|" + msg;
     if( false == SendEx(sock,msg,true) )
     {
         CSockInfo* info = m_SockList[sock];
@@ -279,11 +283,8 @@ bool CEpollEx::SendEx( int sock, string msg, bool eagain /* = false */ )
     char* buf = new char[msg.size()+8+1];
     memcpy(buf,(void*)&len,8);
     memcpy(buf+8,msg.c_str(),msg.size()+1);
-    //send(ProcessSock,temp,msg.size()+8+1,0);
-
-
+  
     int nwrite, data_size = msg.length() +8 +1;
-    //const char* buf = msg.c_str();
     int n = data_size;
     while (n > 0) {
         nwrite = write(sock, buf + data_size - n, n);

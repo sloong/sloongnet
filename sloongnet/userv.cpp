@@ -3,7 +3,8 @@
 #include<sys/socket.h>
 #include<netinet/in.h>
 using namespace std;
-
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 #include <univ/log.h>
 #include <univ/univ.h>
 #include <univ/threadpool.h>
@@ -15,7 +16,6 @@ using namespace Sloong::Universal;
 #include "serverconfig.h"
 #include "utility.h"
 
-#define MAXLINE 4096
 #include "userv.h"
 
 SloongWallUS::SloongWallUS()
@@ -72,8 +72,25 @@ void* SloongWallUS::HandleEventWorkLoop( void* pParam )
 			{
 				string msg = info->m_ReadList.front();
 				info->m_ReadList.pop();
-				string res = pThis->m_pMsgProc->MsgProcess(msg);
-				pThis->m_pEpoll->SendMessage(sock, res);
+
+				auto md5index = msg.find("|");
+				auto swiftindex = msg.find("|", md5index+1);
+				string md5 = msg.substr(0, md5index);
+				//int swift = boost::lexical_cast<int>(msg.substr(md5index, swiftindex - md5index));
+				string swift = (msg.substr(md5index+1, swiftindex - (md5index+1)));
+				string tmsg = msg.substr(swiftindex+1);
+				string rmd5 = CUtility::MD5_Encoding(tmsg);
+				CUtility::tolower(md5);
+				CUtility::tolower(rmd5);
+				if (md5 != rmd5)
+				{
+					// handle error.
+					pThis->m_pEpoll->SendMessage(sock, swift, "-1|package check error");
+					continue;
+				}
+
+				string res = pThis->m_pMsgProc->MsgProcess(tmsg);
+				pThis->m_pEpoll->SendMessage(sock, swift, res);
 			}
 		}
 

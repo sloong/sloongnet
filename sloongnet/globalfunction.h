@@ -14,7 +14,7 @@ namespace Sloong
 	class CGlobalFunction
 	{
 	public:
-        CGlobalFunction( );
+        CGlobalFunction();
 		~CGlobalFunction();
 
         void Initialize(CLog* plog ,CLua* pLua);
@@ -34,9 +34,6 @@ namespace Sloong
 	public:
 		static CGlobalFunction* g_pThis;
 	};
-
-
-
 }
 #endif // !CGLOBALFUNCTION_H
 

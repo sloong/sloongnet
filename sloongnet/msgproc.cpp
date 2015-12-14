@@ -4,6 +4,7 @@
 #include <boost/format.hpp>
 #include <univ/luapacket.h>
 #include "globalfunction.h"
+
 CMsgProc::CMsgProc()
 {
     m_pLua = new CLua();
@@ -40,28 +41,28 @@ string CMsgProc::MsgProcess(string& msg)
     // In here, just show log to test.
 	m_pLog->Log("Message is processed. call lua func.");
 
-    CLuaPacket userinfo;
+	// process msg, get the md5 code and the swift number.
+	CLuaPacket userinfo;
     CLuaPacket request, response;
-    request.SetData("message",msg);
+	request.SetData("message", msg);
     if( !m_pLua->RunFunction("OnRecvMessage",&userinfo,&request,&response))
 		m_pLog->Log(m_pLua->GetErrorString());
 
     // check the return ;
     string opt = response.GetData("operation");
+	string res;
     if( opt == "reload")
     {
         InitLua();
-        return "Reload succeed";
+        res = "0|succeed|Reload succeed";
     }
-    else if( opt == "sendmessage")
-    {
-        string msg = response.GetData("message");
-    }
-    string funcid = response.GetData("funcid");
-    string res = response.GetData("result");
-    string resmsg = CUniversal::Format("Message is processed. function id is %s.result is :%s",funcid,res);
-	m_pLog->Log(resmsg);
-    return resmsg;
+	else
+	{
+		 res = response.GetData("errno") + "|" + response.GetData("errmsg") + "|" + response.GetData("message");
+	}
+	
+	m_pLog->Log(res);
+	return res;
 }
 
 
