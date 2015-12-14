@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -43,10 +44,12 @@ namespace servctrl
 
         public static void Serialize( object obj, string path )
         {
+            string temp = path + ".tmp";
             BinaryFormatter formatter = new BinaryFormatter();
-            Stream stream = new FileStream(path, FileMode.Create, FileAccess.Write);
+            Stream stream = new FileStream(temp, FileMode.Create, FileAccess.Write);
             formatter.Serialize(stream, obj);
             stream.Close();
+            File.Move(temp, path);
         }
 
         public static object Deserialize(string path)
@@ -60,6 +63,14 @@ namespace servctrl
             var obj = formatter.Deserialize(stream);
             stream.Close();
             return obj;
+        }
+
+        public static string MD5_Encoding( string str, Encoding enc = null )
+        {
+            MD5 md = MD5.Create();
+            if (enc == null)
+                enc = Encoding.ASCII;
+            return BitConverter.ToString(md.ComputeHash(enc.GetBytes(str))).Replace("-", ""); 
         }
     }
 }

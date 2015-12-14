@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,7 +19,7 @@ namespace servctrl
     {
         private IPageHost pageHost;
         private Dictionary<string, string> testCaseMap = new Dictionary<string,string>();
-
+        static int nSwift = 0;
 
 
         public Dictionary<string, ConnectInfo> SocketMap
@@ -69,12 +70,17 @@ namespace servctrl
         {
             try
             {
+                nSwift++;
                 Socket sock = sockCurrent;
+                // real message
                 var msg = textBoxMsg.Text;
-                byte[] bmsg = Encoding.ASCII.GetBytes(msg);
-                var len = string.Format("{0:D8}", bmsg.Length);
-                msg = len + msg;
+                string md5 = Utility.MD5_Encoding(msg,Encoding.UTF8);
+
+                msg = string.Format("{0}|{1}|{2}", md5, nSwift, msg);
                 listBoxLog.Items.Add(msg);
+                var len = string.Format("{0:D8}", msg.Length);
+                msg = len + msg;
+                
                 byte[] sendByte = Encoding.ASCII.GetBytes(msg);
                 lock (sockCurrent)
                 {
@@ -87,7 +93,16 @@ namespace servctrl
                 var nlen = BitConverter.ToInt64(leng, 0);
                 byte[] data = new byte[nlen];
                 sockCurrent.Receive(data, data.Length, 0);
-                listBoxLog.Items.Add(Encoding.ASCII.GetString(data));
+                // check the return.
+                string strres = Encoding.ASCII.GetString(data);
+                var ress=strres.Split('|');
+                string log = strres;
+                if (ress[2] != "0")
+                {
+                    log = ress[3];
+                }
+
+                listBoxLog.Items.Add(log);
             }
             catch (Exception ex)
             {
