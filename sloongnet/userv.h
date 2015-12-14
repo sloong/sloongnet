@@ -1,9 +1,6 @@
 #ifndef SLOONGWALLUS_H
 #define SLOONGWALLUS_H
 
-class CEpollEx;
-class CMsgProc;
-class CServerConfig;
 namespace Sloong
 {
 	namespace Universal
@@ -12,6 +9,9 @@ namespace Sloong
 	}
 	using namespace Universal;
 
+	class CServerConfig;
+	class CEpollEx;
+	class CMsgProc;
 	class SloongWallUS
 	{
 	public:

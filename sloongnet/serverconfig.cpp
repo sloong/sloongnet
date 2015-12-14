@@ -3,6 +3,7 @@
 #include "serverconfig.h"
 
 using namespace std;
+using namespace Sloong;
 
 CServerConfig::CServerConfig()
 {

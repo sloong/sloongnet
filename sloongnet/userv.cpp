@@ -89,7 +89,7 @@ void* SloongWallUS::HandleEventWorkLoop( void* pParam )
 					continue;
 				}
 
-				string res = pThis->m_pMsgProc->MsgProcess(tmsg);
+				string res = pThis->m_pMsgProc->MsgProcess( info->m_pUserInfo ,tmsg);
 				pThis->m_pEpoll->SendMessage(sock, swift, res);
 			}
 		}

@@ -5,6 +5,7 @@
 #include "univ/log.h"
 #include "serverconfig.h"
 using namespace std;
+using namespace Sloong;
 int main( int argc, char** args )
 {
 	CServerConfig config;

@@ -35,17 +35,16 @@ void CMsgProc::InitLua()
     m_pLua->RunFunction("Init",CUniversal::Format("'%s'",strDir));
 }
 
-string CMsgProc::MsgProcess(string& msg)
+string CMsgProc::MsgProcess( CLuaPacket* pUInfo, string& msg)
 {
     // In process, need add the lua script runtime and call lua to process.
     // In here, just show log to test.
 	m_pLog->Log("Message is processed. call lua func.");
 
 	// process msg, get the md5 code and the swift number.
-	CLuaPacket userinfo;
     CLuaPacket request, response;
 	request.SetData("message", msg);
-    if( !m_pLua->RunFunction("OnRecvMessage",&userinfo,&request,&response))
+	if (!m_pLua->RunFunction("OnRecvMessage", pUInfo, &request, &response))
 		m_pLog->Log(m_pLua->GetErrorString());
 
     // check the return ;
