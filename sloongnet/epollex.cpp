@@ -163,7 +163,6 @@ void* CEpollEx::WorkLoop(void* pParam)
             }
             else if(pThis->m_Events[i].events&EPOLLIN)
             {
-				log->Log("Socket can read.");
                 // 已经连接的用户,收到数据,可以开始读入
                 bool bLoop = true;
                 while(bLoop)
@@ -173,42 +172,34 @@ void* CEpollEx::WorkLoop(void* pParam)
                     int readLen;
 					char dataLeng[sizeof(long long)+1] = { 0 };
                     readLen = recv(fd,dataLeng,len,0);
-					log->Log(CUniversal::Format("recv %d bytes.", readLen));
                     if(readLen < 0)
                     {
-                        //由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可//读在这里就当作是该次事件已处理过。
+                        //由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
                         if(errno == EAGAIN)
                         {
-							log->Log("EAGAIN.");
                             break;
                         }
                         else
                         {
                             // 读取错误,将这个连接从监听中移除并关闭连接
-							log->Log("recv error!");
-                            close(fd);
-                            pThis->CtlEpollEvent(EPOLL_CTL_DEL,fd,EPOLLIN|EPOLLOUT|EPOLLET);
+							pThis->CloseConnect(fd);
                             break;
                         }
                     }
                     else if(readLen == 0)
                     {
                         // The connect is disconnected.
-                        close(fd);
-                        pThis->CtlEpollEvent(EPOLL_CTL_DEL,fd,EPOLLIN|EPOLLOUT|EPOLLET);
+						pThis->CloseConnect(fd);
                         break;
                     }
                     else
                     {
                         long dtlen = atol(dataLeng);
-						log->Log(CUniversal::Format("dataLen=%s|%d", dataLeng, dtlen));
                         dtlen++;
                         char* data = new char[dtlen];
                         memset(data,0,dtlen);
 
                         readLen = recv(fd,data,dtlen,0);//一次性接受所有消息
-						log->Log(CUniversal::Format("recv msg:%d|%s", dtlen, data));
-
                         if(readLen >= dtlen)
                             bLoop = true; // 需要再次读取
                         else
@@ -216,7 +207,6 @@ void* CEpollEx::WorkLoop(void* pParam)
 
                         // Add the msg to the sock info list
                         string msg(data);
-						log->Log(CUniversal::Format("data to string is %s", msg));
                         CSockInfo* info = rSockList[fd];
                         info->m_ReadList.push(msg);
                         delete[] data;
@@ -229,7 +219,6 @@ void* CEpollEx::WorkLoop(void* pParam)
             else if(pThis->m_Events[i].events&EPOLLOUT)
             {
                 // 可以写入事件
-				log->Log("Socket can write.");
                 CSockInfo* info = rSockList[fd];
                 while (info->m_WriteList.size())
                 {
@@ -244,7 +233,7 @@ void* CEpollEx::WorkLoop(void* pParam)
             }
             else
             {
-                //close(g_pThis->m_Events[i].data.fd);
+				pThis->CloseConnect(fd);
             }
         }
     }
@@ -265,7 +254,7 @@ void *check_connect_timeout(void* para)
 void CEpollEx::SendMessage(int sock, const string& nSwift, string msg)
 {
 	// process msg
-	string md5 = CUtility::MD5_Encoding(msg);
+	string md5 = CUniversal::MD5_Encoding(msg);
 	msg = md5 + "|" + nSwift + "|" + msg;
     if( false == SendEx(sock,msg,true) )
     {
@@ -279,26 +268,53 @@ void CEpollEx::SendMessage(int sock, const string& nSwift, string msg)
 
 bool CEpollEx::SendEx( int sock, string msg, bool eagain /* = false */ )
 {
-    long long len = msg.size() + 1;
-    char* buf = new char[msg.size()+8+1];
-    memcpy(buf,(void*)&len,8);
-    memcpy(buf+8,msg.c_str(),msg.size()+1);
-  
-    int nwrite, data_size = msg.length() +8 +1;
-    int n = data_size;
-    while (n > 0) {
-        nwrite = write(sock, buf + data_size - n, n);
-        if (nwrite < n)
-        {
-            // if errno != EAGAIN or again for error and return is -1, return false
-            if (nwrite == -1 && (errno != EAGAIN  || eagain == true )) {
-                delete[] buf;
-                return false;
-            }
-            break;
-        }
-        n -= nwrite;
-    }
-    delete[] buf;
-    return true;
+	long long len = msg.size() + 1;
+	char* buf = new char[msg.size() + 8 + 1];
+	memcpy(buf, (void*)&len, 8);
+	memcpy(buf + 8, msg.c_str(), msg.size() + 1);
+	SendEx(sock, buf, msg.size() + 8 + 1, eagain);
+}
+
+void Sloong::CEpollEx::CloseConnect(int socket)
+{
+	CSockInfo* info = m_SockList[socket];
+	m_pLog->Log(CUniversal::Format("close connect:%s.",info->m_Address));
+	CtlEpollEvent(EPOLL_CTL_DEL, socket, EPOLLIN | EPOLLOUT | EPOLLET);
+	SAFE_DELETE(info);
+	for (map<int, CSockInfo*>::iterator i = m_SockList.begin(); i != m_SockList.end();)
+	{
+		if (i->first == socket)
+		{
+			m_SockList.erase(i);
+			break;
+		}
+		else
+		{
+			i++;
+		}
+	}
+}
+
+bool Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, bool eagain /*= false*/)
+{	
+	int nSentSize = 0;
+	int nNosendSize = nSize;
+	while (nNosendSize > 0)
+	{
+		nSentSize = write(sock, buf + nSize - nNosendSize, nNosendSize);
+		// if errno != EAGAIN or again for error and return is -1, return false
+		if (nSentSize == -1 && (errno != EAGAIN || eagain == true)) 
+		{
+			return false;
+		}
+
+		nNosendSize -= nSentSize;
+	}
+
+	return true;
+}
+
+void Sloong::CEpollEx::SendMessage(int sock, const string& nSwift, char* msg, int nSize)
+{
+	SendEx(sock, msg, nSize);
 }

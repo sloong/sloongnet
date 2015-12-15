@@ -14,7 +14,6 @@ using namespace Sloong::Universal;
 #include "epollex.h"
 #include "msgproc.h"
 #include "serverconfig.h"
-#include "utility.h"
 
 #include "userv.h"
 
@@ -79,9 +78,9 @@ void* SloongWallUS::HandleEventWorkLoop( void* pParam )
 				//int swift = boost::lexical_cast<int>(msg.substr(md5index, swiftindex - md5index));
 				string swift = (msg.substr(md5index+1, swiftindex - (md5index+1)));
 				string tmsg = msg.substr(swiftindex+1);
-				string rmd5 = CUtility::MD5_Encoding(tmsg);
-				CUtility::tolower(md5);
-				CUtility::tolower(rmd5);
+				string rmd5 = CUniversal::MD5_Encoding(tmsg);
+				CUniversal::touper(md5);
+				CUniversal::touper(rmd5);
 				if (md5 != rmd5)
 				{
 					// handle error.
@@ -89,11 +88,21 @@ void* SloongWallUS::HandleEventWorkLoop( void* pParam )
 					continue;
 				}
 
-				string res = pThis->m_pMsgProc->MsgProcess( info->m_pUserInfo ,tmsg);
-				pThis->m_pEpoll->SendMessage(sock, swift, res);
+				string strRes;
+				char* pBuf = NULL;
+				int nSize = pThis->m_pMsgProc->MsgProcess(info->m_pUserInfo, tmsg, strRes, pBuf);
+				pThis->m_pEpoll->SendMessage(sock, swift, strRes);
+				if ( 0 < nSize )
+				{
+					pThis->m_pEpoll->SendMessage(sock, swift, pBuf, nSize);
+					SAFE_DELETE_ARR(pBuf)
+				}
 			}
 		}
-
+		else
+		{
+			SLEEP(500);
+		}
 }
 
 

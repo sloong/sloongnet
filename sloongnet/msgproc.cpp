@@ -4,7 +4,7 @@
 #include <boost/format.hpp>
 #include <univ/luapacket.h>
 #include "globalfunction.h"
-
+#include "utility.h"
 CMsgProc::CMsgProc()
 {
     m_pLua = new CLua();
@@ -35,7 +35,7 @@ void CMsgProc::InitLua()
     m_pLua->RunFunction("Init",CUniversal::Format("'%s'",strDir));
 }
 
-string CMsgProc::MsgProcess( CLuaPacket* pUInfo, string& msg)
+int CMsgProc::MsgProcess( CLuaPacket* pUInfo, string& msg, string&res, char*& pBuf)
 {
     // In process, need add the lua script runtime and call lua to process.
     // In here, just show log to test.
@@ -49,19 +49,25 @@ string CMsgProc::MsgProcess( CLuaPacket* pUInfo, string& msg)
 
     // check the return ;
     string opt = response.GetData("operation");
-	string res;
+	int nSize = 0;
     if( opt == "reload")
     {
         InitLua();
         res = "0|succeed|Reload succeed";
     }
+	else if (opt == "loadfile")
+	{
+		auto filename = response.GetData("message");
+		nSize = CUtility::ReadFile(filename, pBuf);
+		res = response.GetData("errno") + "|" + response.GetData("errmsg") + "|" + CUniversal::ntos(nSize);
+	}
 	else
 	{
-		 res = response.GetData("errno") + "|" + response.GetData("errmsg") + "|" + response.GetData("message");
+		res = response.GetData("errno") + "|" + response.GetData("errmsg") + "|" + response.GetData("message");
 	}
 	
 	m_pLog->Log(res);
-	return res;
+	return nSize;
 }
 
 

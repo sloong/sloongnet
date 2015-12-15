@@ -3,27 +3,8 @@
 #include <stdio.h>	// for FILE open and close
 #include <fstream>
 #include <string.h> // for stricmp
-#include <openssl/md5.h>
 using namespace std;
 using namespace Sloong;
-
-
-// Encoding lookup table
-char base64encode_lut[] = {
-	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q',
-	'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
-	'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
-	'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/', '=' };
-// Decode lookup table
-char base64decode_lut[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 62, 0, 0, 0, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 0, 0,
-	0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-	15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0, 0, 0, 0, 0, 0, 26, 27, 28,
-	29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
-	49, 50, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
-
 
 
 
@@ -122,68 +103,16 @@ int CUtility::GetCpuUsed(int nWaitTime)
 	return cpu;
 }
 
-string Sloong::CUtility::MD5_Encoding(string str, bool bFile /*= false*/)
+int Sloong::CUtility::ReadFile(string filepath, char*& pBuffer)
 {
-	unsigned char md[16];
-	char tmp[3] = { '\0' }, md5buf[33] = { '\0' };
-	if ( bFile )
-	{
-		FILE *fd = fopen(str.c_str(), "r");
-		MD5_CTX c;
-		int len;
-		unsigned char buffer[1024] = { '\0' };
-		MD5_Init(&c);
-		while (0 != (len = fread(buffer, 1, 1024, fd)))
-		{
-			MD5_Update(&c, buffer, len);
-		}
-		MD5_Final(md, &c);
-		fclose(fd);
-	}
-	else
-	{
-		MD5((unsigned char *)str.c_str(), str.length(), md);
-	}
-
-	for (int i = 0; i < 16; i++)
-	{
-		sprintf(tmp, "%02X", md[i]);
-		strcat(md5buf, tmp);
-	}
-	return md5buf;
-}
-
-
-
-string Sloong::CUtility::Base64_Encoding(string str)
-{
-	int i = 0, slen = str.size();
-	char* dest = new char[slen + 1];
-	const char* src = str.c_str();
-	for (i = 0; i < slen; i += 3, src += 3)
-	{ // Enc next 4 characters
-		*(dest++) = base64encode_lut[(*src & 0xFC) >> 0x2];
-		*(dest++) = base64encode_lut[(*src & 0x3) << 0x4 | (*(src + 1) & 0xF0) >> 0x4];
-		*(dest++) = ((i + 1) < slen) ? base64encode_lut[(*(src + 1) & 0xF) << 0x2 | (*(src + 2) & 0xC0) >> 0x6] : '=';
-		*(dest++) = ((i + 2) < slen) ? base64encode_lut[*(src + 2) & 0x3F] : '=';
-	}
-	*dest = '\0'; // Append terminator
-	return dest;
-}
-
-string Sloong::CUtility::Base64_Decoding(string str)
-{
-	int i = 0, slen = str.size();
-	char* dest = new char[slen + 1];
-	const char* src = str.c_str();
-	for (i = 0; i < slen; i += 4, src += 4)
-	{ // Store next 4 chars in vars for faster access
-		char c1 = base64decode_lut[*src], c2 = base64decode_lut[*(src + 1)], c3 = base64decode_lut[*(src + 2)], c4 = base64decode_lut[*(src + 3)];
-		// Decode to 3 chars
-		*(dest++) = (c1 & 0x3F) << 0x2 | (c2 & 0x30) >> 0x4;
-		*(dest++) = (c3 != 64) ? ((c2 & 0xF) << 0x4 | (c3 & 0x3C) >> 0x2) : '\0';
-		*(dest++) = (c4 != 64) ? ((c3 & 0x3) << 0x6 | c4 & 0x3F) : '\0';
-	}
-	*dest = '\0'; // Append terminator
-	return dest;
+	ifstream in(filepath.c_str(), ios::in | ios::binary);
+	streampos  pos = in.tellg();
+	in.seekg(0, ios::end);
+	int nSize = in.tellg();
+	in.seekg(pos);
+	pBuffer = new char[nSize];
+	//in.get(pBuffer, sizeof(char) * nSize);
+	in.read(pBuffer, nSize);
+	in.close();
+	return nSize;
 }

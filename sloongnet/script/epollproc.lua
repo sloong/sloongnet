@@ -9,7 +9,7 @@ OnRecvMessage = function( uinfo, request, response )
 	if type(func) == 'function' then
 		local res,msg = func(uinfo, request, response, msg);
 		response:setdata('errno', tostring(res));
-		response:setdata('errmsg',msg or "");
+		response:setdata('errmsg',msg or "success");
 	else
 		response:setdata("errno","2");
 		response:setdata('errmsg','not find the processer. the name is %s.' .. msg[1]);
@@ -54,6 +54,12 @@ local Func_AddUser = function( uinfo, request, response, msg )
 	return 0, res
 end
 
+local Func_ReadFile = function( uinfo, request, response, msg )
+	response:setdata('operation','loadfile');
+	response:setdata('message',msg[2]);
+	return 0
+end
+
 g_all_function = 
 {
 	['50001'] = Func_ReloadScript,
@@ -61,6 +67,7 @@ g_all_function =
 	['60002'] = Func_AddUser,
 	-- ['60003'] = Func_UpdateUserInfo,
 	-- ['60004'] = Func_DeleteUser,
+	['70001'] = Func_ReadFile,
 }
 
 -- send message to client
