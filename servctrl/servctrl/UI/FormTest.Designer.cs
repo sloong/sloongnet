@@ -206,6 +206,7 @@
             this.Name = "FormTest";
             this.ShowInTaskbar = false;
             this.Text = "FormTest";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FormTest_FormClosed);
             this.Shown += new System.EventHandler(this.FormTest_Shown);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
