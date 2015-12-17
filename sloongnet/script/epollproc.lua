@@ -60,6 +60,61 @@ local Func_ReadFile = function( uinfo, request, response, msg )
 	return 0
 end
 
+local Func_GetStyleList = function( uinfo, request, response, msg )
+	local row = msg[2];
+	if not row or row == '' then
+		row = '*';
+	end
+	local where = msg[3] or '';
+	if where and where ~= '' then
+		where = 'WHERE ' .. where;
+	end
+	
+	local cmd = 'SELECT ' .. row .. ' FROM styleList ' .. where
+	showLog("run sql cmd:" .. cmd);
+	local res = querySql(cmd);
+	showLog(res);
+	response:setdata('message',res);
+	return 0;
+end
+
+
+local Func_GetFileList = function( uinfo, request, response, msg )
+	local row = msg[2];
+	if not row or row == '' then
+		row = '*';
+	end
+	local where = msg[3] or '';
+	if where and where ~= '' then
+		where = 'WHERE ' .. where;
+	end
+	
+	local cmd = 'SELECT ' .. row .. ' FROM fileList ' .. where
+	showLog("run sql cmd:" .. cmd);
+	local res = querySql(cmd);
+	showLog(res);
+	response:setdata('message',res);
+	return 0;
+end
+
+local Func_GetFileData = function( uinfo, request, response, msg )
+-- 	local row = msg[2];
+-- 	if not row or row == '' then
+-- 		row = '*';
+-- 	end
+-- 	local where = msg[3] or '';
+-- 	if where and where ~= '' then
+-- 		where = 'WHERE ' .. where;
+-- 	end
+	
+	local cmd = "SELECT * FROM `fileList` WHERE `fileMD5`='" .. msg[2] .. "'"
+	showLog("run sql cmd:" .. cmd);
+	local res = querySql(cmd);
+	showLog(res);
+	response:setdata('message',res);
+	return 0;
+end
+
 g_all_function = 
 {
 	['50001'] = Func_ReloadScript,
@@ -68,6 +123,9 @@ g_all_function =
 	-- ['60003'] = Func_UpdateUserInfo,
 	-- ['60004'] = Func_DeleteUser,
 	['70001'] = Func_ReadFile,
+	['20001'] = Func_GetStyleList,
+	['20002'] = Func_GetFileList,
+	['20003'] = Func_GetFileData,
 }
 
 -- send message to client

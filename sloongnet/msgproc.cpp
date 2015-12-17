@@ -5,6 +5,7 @@
 #include <univ/luapacket.h>
 #include "globalfunction.h"
 #include "utility.h"
+#include <univ/exception.h>
 CMsgProc::CMsgProc()
 {
     m_pLua = new CLua();
@@ -58,7 +59,17 @@ int CMsgProc::MsgProcess( CLuaPacket* pUInfo, string& msg, string&res, char*& pB
 	else if (opt == "loadfile")
 	{
 		auto filename = response.GetData("message");
-		nSize = CUtility::ReadFile(filename, pBuf);
+        try
+        {
+            nSize = CUtility::ReadFile(filename, pBuf);
+        }
+        catch( normal_except e )
+        {
+            m_pLog->Log(e.what(),ERR);
+            res = string("-2|") + e.what();
+            return 0;
+        }
+
 		res = response.GetData("errno") + "|" + response.GetData("errmsg") + "|" + CUniversal::ntos(nSize);
 	}
 	else

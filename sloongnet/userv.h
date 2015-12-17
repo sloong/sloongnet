@@ -24,9 +24,11 @@ namespace Sloong
 	public:// static function
 		static void* HandleEventWorkLoop(void* pParam);
 
+
 	protected:
 		int m_sockServ;
 		int* m_sockClient;
+
 		CEpollEx* m_pEpoll;
 		CMsgProc* m_pMsgProc;
 		CThreadPool* m_pThreadPool;

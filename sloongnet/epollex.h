@@ -7,6 +7,7 @@
 #include <iostream>
 #include <map>
 #include <queue>
+#include <mutex>
 #include "sockinfo.h"
 using namespace std; //std 命名空间
 typedef unsigned char byte;
@@ -24,17 +25,17 @@ namespace Sloong
         CEpollEx();
 		virtual ~CEpollEx();
         int Initialize(CLog* pLog,int listenPort, int nThreadNum);
-		void SendMessage(int sock, const string& nSwift, string msg);
-		void SendMessage(int sock, const string& nSwift, char* msg, int nSize);
+        void SendMessage(int sock, const string& nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
 	protected:
 		int SetSocketNonblocking(int socket);
 		void CtlEpollEvent(int opt, int sock, int events);
 		// close the connected socket and remove the resources.
 		void CloseConnect(int socket);
+        void AddToSendList( int socket, const char* pBuf, int nSize, int nStart );
 	public:
 		static void* WorkLoop(void* params);
-		static bool SendEx(int sock, string msg, bool eagagin = false);
-		static bool SendEx(int sock, const char* buf, int nSize, bool eagagin = false);
+        static int SendEx(int sock, const char* buf, int nSize, int nStart, bool eagain = false);
+        static int RecvEx( int sock, char** buf, int nSize, bool eagain = false );
 	protected:
 		int     m_ListenSock;
 		int 	m_EpollHandle;
@@ -44,6 +45,8 @@ namespace Sloong
 	public:
 		map<int, CSockInfo*> m_SockList;
 		queue<int> m_EventSockList;
+        mutex m_oEventListMutex;
+        mutex m_oSockListMutex;
 	};
 }
 

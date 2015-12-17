@@ -47,12 +47,9 @@ void SloongWallUS::Run()
 {
 	m_pThreadPool->AddTask(SloongWallUS::HandleEventWorkLoop, this, true);
 	m_pThreadPool->Start();
-	char buff[256];
 	while (true)
 	{
-// 		cin >> buff;
-// 		cout << buff;
-		SLEEP(100);
+        SLEEP(1000);
 	}
 }
 
@@ -62,16 +59,26 @@ void* SloongWallUS::HandleEventWorkLoop( void* pParam )
 
 		if (pThis->m_pEpoll->m_EventSockList.size() > 0)
 		{
+            unique_lock<mutex> eventLoc(pThis->m_pEpoll->m_oEventListMutex);
+            if (pThis->m_pEpoll->m_EventSockList.size() == 0)
+                return NULL;
+
 			// process read list.
 			int sock = pThis->m_pEpoll->m_EventSockList.front();
 			pThis->m_pEpoll->m_EventSockList.pop();
+            eventLoc.unlock();
+
 			CSockInfo* info = pThis->m_pEpoll->m_SockList[sock];
             if (!info) return NULL;
+
 			while (info->m_ReadList.size() > 0)
 			{
+                unique_lock<mutex> readLoc(info->m_oReadMutex);
+                if(info->m_ReadList.size() == 0)
+                    continue;
 				string msg = info->m_ReadList.front();
 				info->m_ReadList.pop();
-
+                readLoc.unlock();
 				auto md5index = msg.find("|");
 				auto swiftindex = msg.find("|", md5index+1);
 				string md5 = msg.substr(0, md5index);
@@ -91,18 +98,14 @@ void* SloongWallUS::HandleEventWorkLoop( void* pParam )
 				string strRes;
 				char* pBuf = NULL;
 				int nSize = pThis->m_pMsgProc->MsgProcess(info->m_pUserInfo, tmsg, strRes, pBuf);
-				pThis->m_pEpoll->SendMessage(sock, swift, strRes);
-				if ( 0 < nSize )
-				{
-					pThis->m_pEpoll->SendMessage(sock, swift, pBuf, nSize);
-					SAFE_DELETE_ARR(pBuf)
-				}
+                pThis->m_pEpoll->SendMessage(sock, swift, strRes, pBuf, nSize);
 			}
 		}
 		else
 		{
 			SLEEP(500);
 		}
+        return NULL;
 }
 
 

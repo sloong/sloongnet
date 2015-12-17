@@ -3,6 +3,7 @@
 #include <stdio.h>	// for FILE open and close
 #include <fstream>
 #include <string.h> // for stricmp
+#include<univ/exception.h>
 using namespace std;
 using namespace Sloong;
 
@@ -74,7 +75,6 @@ int cal_cpuoccupy(CPU_OCCUPY *o, CPU_OCCUPY *n)
 void get_cpuoccupy(CPU_OCCUPY *cpust) //对无类型get函数含有一个形参结构体类弄的指针O
 {
 	FILE *fd;
-	int n;
 	char buff[256];
 	CPU_OCCUPY *cpu_occupy;
 	cpu_occupy = cpust;
@@ -105,13 +105,14 @@ int CUtility::GetCpuUsed(int nWaitTime)
 
 int Sloong::CUtility::ReadFile(string filepath, char*& pBuffer)
 {
+    if( -1 == access(filepath.c_str(),R_OK))
+        throw normal_except("File no exit or cannot read.file path is:" + filepath);
 	ifstream in(filepath.c_str(), ios::in | ios::binary);
 	streampos  pos = in.tellg();
 	in.seekg(0, ios::end);
 	int nSize = in.tellg();
 	in.seekg(pos);
 	pBuffer = new char[nSize];
-	//in.get(pBuffer, sizeof(char) * nSize);
 	in.read(pBuffer, nSize);
 	in.close();
 	return nSize;

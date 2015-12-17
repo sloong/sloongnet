@@ -139,7 +139,7 @@ void* CEpollEx::WorkLoop(void* pParam)
                         memset(&add,0,sizeof(add));
                         getpeername(conn_sock, (sockaddr*)&add, (socklen_t*)&nSize );
 
-                        info->m_Address = inet_ntoa(add.sin_addr);
+                        info->m_Address = string(inet_ntoa(add.sin_addr));
                         info->m_nPort = add.sin_port;
                         time_t tm;
                         time(&tm);
@@ -169,50 +169,47 @@ void* CEpollEx::WorkLoop(void* pParam)
                 {
                     // 先读取消息长度
                     int len = sizeof(long long);
-                    int readLen;
-					char dataLeng[sizeof(long long)+1] = { 0 };
-                    readLen = recv(fd,dataLeng,len,0);
-                    if(readLen < 0)
+                    char* dataLeng = new char[sizeof(long long)];
+                    int nRecvSize = RecvEx(fd,&dataLeng,len,true);
+                    if( nRecvSize == 0)
                     {
-                        //由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
-                        if(errno == EAGAIN)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            // 读取错误,将这个连接从监听中移除并关闭连接
-							pThis->CloseConnect(fd);
-                            break;
-                        }
+                        SAFE_DELETE_ARR(dataLeng);
+                        // 读取错误,将这个连接从监听中移除并关闭连接
+                        pThis->CloseConnect(fd);
+                        break;
                     }
-                    else if(readLen == 0)
+                    else if( nRecvSize < 0 )
                     {
-                        // The connect is disconnected.
-						pThis->CloseConnect(fd);
+                        SAFE_DELETE_ARR(dataLeng);
+                        //由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
                         break;
                     }
                     else
                     {
                         long dtlen = atol(dataLeng);
-                        dtlen++;
-                        char* data = new char[dtlen];
-                        memset(data,0,dtlen);
+                        SAFE_DELETE_ARR(dataLeng);
+                        char* data = new char[dtlen+1];
+                        memset(data,0,dtlen+1);
 
-                        readLen = recv(fd,data,dtlen,0);//一次性接受所有消息
-                        if(readLen >= dtlen)
-                            bLoop = true; // 需要再次读取
-                        else
-                            bLoop = false;
+                        nRecvSize = RecvEx(fd,&data,dtlen);//一次性接受所有消息
+                        if( nRecvSize == 0)
+                        {
+                            pThis->CloseConnect(fd);
+                            break;
+                        }
 
                         // Add the msg to the sock info list
                         string msg(data);
-                        CSockInfo* info = rSockList[fd];
-                        info->m_ReadList.push(msg);
                         delete[] data;
+                        CSockInfo* info = rSockList[fd];
+                        unique_lock<mutex> lck(info->m_oReadMutex);
+                        info->m_ReadList.push(msg);
+                        lck.unlock();
 
                         // Add the sock event to list
+                        unique_lock<mutex> elck(pThis->m_oEventListMutex);
                         pThis->m_EventSockList.push(fd);
+                        elck.unlock();
                     }
                 }
             }
@@ -220,16 +217,23 @@ void* CEpollEx::WorkLoop(void* pParam)
             {
                 // 可以写入事件
                 CSockInfo* info = rSockList[fd];
-                while (info->m_WriteList.size())
+                while( info->m_SendList.size())
                 {
-                    string msg = info->m_WriteList.front();
-                    info->m_WriteList.pop();
-					log->Log(CUniversal::Format("send message %1%", msg));
-                    if(!SendEx(fd,msg))
+                    unique_lock<mutex> lck(info->m_oSendMutex);
+                    SENDINFO* si = info->m_SendList.front();
+                    if ( si->nSent == si->nSize )
                     {
-						log->Log("write error.", ERR);
+                        info->m_SendList.pop();
+                        SAFE_DELETE_ARR(si->pSendBuffer);
+                        SAFE_DELETE(si);
                     }
+                    else
+                    {
+                        si->nSent = SendEx(fd,si->pSendBuffer,si->nSize,si->nSent);
+                    }
+                    lck.unlock();
                 }
+                pThis->CtlEpollEvent(EPOLL_CTL_MOD,fd,EPOLLIN|EPOLLET);
             }
             else
             {
@@ -251,29 +255,54 @@ void *check_connect_timeout(void* para)
     return 0;
 }
 
-void CEpollEx::SendMessage(int sock, const string& nSwift, string msg)
+void CEpollEx::SendMessage(int sock, const string& nSwift, string msg, const char* pExData, int nSize )
 {
 	// process msg
 	string md5 = CUniversal::MD5_Encoding(msg);
 	msg = md5 + "|" + nSwift + "|" + msg;
-    if( false == SendEx(sock,msg,true) )
+    	m_pLog->Log(msg);
+    long long len = msg.size() + 1;
+
+    char* pBuf = new char[msg.size()+8+1];
+    memcpy(pBuf, (void*)&len, 8);
+    memcpy(pBuf+8, msg.c_str(), msg.size()+1);
+    int nMsgSend = SendEx(sock, pBuf, msg.size()+8+1, 0, true);
+    if( nMsgSend != msg.size()+8+1 )
     {
-        CSockInfo* info = m_SockList[sock];
-        info->m_WriteList.push(msg);
-        // Add to epoll list
-        SetSocketNonblocking(sock);
-        CtlEpollEvent(EPOLL_CTL_ADD,sock,EPOLLOUT|EPOLLET);
+        AddToSendList(sock,pBuf, msg.size(), nMsgSend);
+        AddToSendList(sock,pExData, nSize, 0);
+        return;
+    }
+
+    if( pExData == NULL || nSize <= 0)
+    {
+        return;
+    }
+
+    int nExSent = SendEx(sock, pExData, nSize, 0, true);
+    if( nExSent != nSize )
+    {
+        AddToSendList(sock,pExData, nSize, nExSent);
+        return;
     }
 }
 
-bool CEpollEx::SendEx( int sock, string msg, bool eagain /* = false */ )
+void CEpollEx::AddToSendList(int socket, const char *pBuf, int nSize, int nStart)
 {
-	long long len = msg.size() + 1;
-	char* buf = new char[msg.size() + 8 + 1];
-	memcpy(buf, (void*)&len, 8);
-	memcpy(buf + 8, msg.c_str(), msg.size() + 1);
-	SendEx(sock, buf, msg.size() + 8 + 1, eagain);
+    if (pBuf == NULL || nSize <= 0 )
+        return;
+
+    CSockInfo* info = m_SockList[socket];
+    unique_lock<mutex> lck(info->m_oSendMutex);
+    SENDINFO *si = new SENDINFO();
+    si->nSent = nStart;
+    si->nSize = nSize;
+    si->pSendBuffer = pBuf;
+    info->m_SendList.push(si);
+    SetSocketNonblocking(socket);
+    CtlEpollEvent(EPOLL_CTL_MOD,socket,EPOLLOUT|EPOLLIN|EPOLLET);
 }
+
 
 void Sloong::CEpollEx::CloseConnect(int socket)
 {
@@ -295,26 +324,55 @@ void Sloong::CEpollEx::CloseConnect(int socket)
 	}
 }
 
-bool Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, bool eagain /*= false*/)
+int Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, int nStart, bool eagain /*= false*/)
 {	
-	int nSentSize = 0;
-	int nNosendSize = nSize;
+    int nAllSent = nStart;
+    int nSentSize = nStart;
+    int nNosendSize = nSize - nStart;
+
 	while (nNosendSize > 0)
 	{
 		nSentSize = write(sock, buf + nSize - nNosendSize, nNosendSize);
 		// if errno != EAGAIN or again for error and return is -1, return false
-		if (nSentSize == -1 && (errno != EAGAIN || eagain == true)) 
+		if (nSentSize == -1 ) 
 		{
-			return false;
+			if ( eagain == true || errno != EAGAIN )
+                return nAllSent;
+			else
+				continue;
 		}
-
 		nNosendSize -= nSentSize;
+        nAllSent += nSentSize;
 	}
-
-	return true;
+    return nAllSent;
 }
 
-void Sloong::CEpollEx::SendMessage(int sock, const string& nSwift, char* msg, int nSize)
+int Sloong::CEpollEx::RecvEx(int sock, char** buf, int nSize, bool eagain /* = false */)
 {
-	SendEx(sock, msg, nSize);
+    int nIsRecv = 0;
+    int nNoRecv = nSize;
+    int nRecv = 0;
+    char* pBuf = *buf;
+    while (nIsRecv < nSize)
+    {
+        nRecv = recv(sock, pBuf + nSize - nNoRecv, nNoRecv, 0 );
+        if (nRecv < 0 )
+        {
+            if ( errno != EAGAIN )
+                return 0;
+            else if ( eagain == true && errno == EAGAIN )
+                return -1;
+            else
+                continue;
+        }
+        else if( nRecv == 0)
+        {
+            return 0;
+        }
+        nNoRecv -= nRecv;
+        nIsRecv += nRecv;
+    }
+    return nIsRecv;
 }
+
+
