@@ -34,12 +34,12 @@
             this.listBoxLog = new System.Windows.Forms.ListBox();
             this.comboBoxTestCase = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.checkBoxSingle = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.textBoxNumInterval = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.textBoxMulNum = new System.Windows.Forms.TextBox();
             this.buttonSave = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
@@ -102,25 +102,25 @@
             this.label4.TabIndex = 18;
             this.label4.Text = "测试用例";
             // 
-            // checkBox1
+            // checkBoxSingle
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Checked = true;
-            this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox1.Location = new System.Drawing.Point(822, 11);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(48, 16);
-            this.checkBox1.TabIndex = 21;
-            this.checkBox1.Text = "单步";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            this.checkBoxSingle.AutoSize = true;
+            this.checkBoxSingle.Checked = true;
+            this.checkBoxSingle.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxSingle.Location = new System.Drawing.Point(822, 11);
+            this.checkBoxSingle.Name = "checkBoxSingle";
+            this.checkBoxSingle.Size = new System.Drawing.Size(48, 16);
+            this.checkBoxSingle.TabIndex = 21;
+            this.checkBoxSingle.Text = "单步";
+            this.checkBoxSingle.UseVisualStyleBackColor = true;
+            this.checkBoxSingle.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Controls.Add(this.textBox3);
+            this.groupBox1.Controls.Add(this.textBoxNumInterval);
             this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Controls.Add(this.textBox2);
+            this.groupBox1.Controls.Add(this.textBoxMulNum);
             this.groupBox1.Location = new System.Drawing.Point(688, 12);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(200, 93);
@@ -137,12 +137,12 @@
             this.label3.TabIndex = 26;
             this.label3.Text = "并发间隔";
             // 
-            // textBox3
+            // textBoxNumInterval
             // 
-            this.textBox3.Location = new System.Drawing.Point(96, 53);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(77, 21);
-            this.textBox3.TabIndex = 25;
+            this.textBoxNumInterval.Location = new System.Drawing.Point(96, 53);
+            this.textBoxNumInterval.Name = "textBoxNumInterval";
+            this.textBoxNumInterval.Size = new System.Drawing.Size(77, 21);
+            this.textBoxNumInterval.TabIndex = 25;
             // 
             // label1
             // 
@@ -153,12 +153,12 @@
             this.label1.TabIndex = 24;
             this.label1.Text = "并发次数";
             // 
-            // textBox2
+            // textBoxMulNum
             // 
-            this.textBox2.Location = new System.Drawing.Point(96, 26);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(77, 21);
-            this.textBox2.TabIndex = 23;
+            this.textBoxMulNum.Location = new System.Drawing.Point(96, 26);
+            this.textBoxMulNum.Name = "textBoxMulNum";
+            this.textBoxMulNum.Size = new System.Drawing.Size(77, 21);
+            this.textBoxMulNum.TabIndex = 23;
             // 
             // buttonSave
             // 
@@ -194,7 +194,7 @@
             this.Controls.Add(this.label5);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.buttonSave);
-            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.checkBoxSingle);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.comboBoxTestCase);
@@ -223,12 +223,12 @@
         private System.Windows.Forms.ListBox listBoxLog;
         private System.Windows.Forms.ComboBox comboBoxTestCase;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox checkBoxSingle;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TextBox textBoxNumInterval;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox textBoxMulNum;
         private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBox1;

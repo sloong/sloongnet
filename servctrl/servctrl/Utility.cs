@@ -78,10 +78,12 @@ namespace servctrl
 
         public static byte[] RecvEx( Socket sock, long len )
         {
+           
             byte[] recvRes = new byte[len];
             int nRecvSize = 0;
             int nBufferSize = sock.ReceiveBufferSize;
-
+            try
+            {
             while (nRecvSize < len)
             {
                 byte[] recv;
@@ -98,6 +100,11 @@ namespace servctrl
                 int readsize = sock.Receive(recv, recv.Length,0);
                 recv.CopyTo(recvRes, nRecvSize);
                 nRecvSize += readsize;
+            }
+            }
+           catch(Exception e)
+            {
+                Console.WriteLine(e.ToString());
             }
 
             return recvRes;
