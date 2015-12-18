@@ -164,30 +164,30 @@ void* CEpollEx::WorkLoop(void* pParam)
             else if(pThis->m_Events[i].events&EPOLLIN)
             {
                 // 已经连接的用户,收到数据,可以开始读入
+				int len = sizeof(long long);
+                char dataLeng[sizeof(long long)+1] = {0};
+				char* pLen = dataLeng;
                 bool bLoop = true;
                 while(bLoop)
                 {
                     // 先读取消息长度
-                    int len = sizeof(long long);
-                    char* dataLeng = new char[sizeof(long long)];
-                    int nRecvSize = RecvEx(fd,&dataLeng,len,true);
+
+					memset( pLen, 0, len+1 );
+					int nRecvSize = RecvEx(fd, &pLen, len, true);
                     if( nRecvSize == 0)
                     {
-                        SAFE_DELETE_ARR(dataLeng);
                         // 读取错误,将这个连接从监听中移除并关闭连接
                         pThis->CloseConnect(fd);
                         break;
                     }
                     else if( nRecvSize < 0 )
                     {
-                        SAFE_DELETE_ARR(dataLeng);
                         //由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
                         break;
                     }
                     else
                     {
                         long dtlen = atol(dataLeng);
-                        SAFE_DELETE_ARR(dataLeng);
                         char* data = new char[dtlen+1];
                         memset(data,0,dtlen+1);
 
