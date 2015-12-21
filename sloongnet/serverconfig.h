@@ -17,6 +17,7 @@ namespace Sloong
 		string m_strLogPath;
 		bool m_bDebug;
 		int m_nThreadNum;
+		string m_strScriptFolder;
 	};
 }
 

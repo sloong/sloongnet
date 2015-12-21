@@ -17,9 +17,10 @@ CMsgProc::~CMsgProc()
     delete m_pLua;
 }
 
-void CMsgProc::Initialize(CLog *pLog)
+void CMsgProc::Initialize(CLog *pLog, string scriptFolder)
 {
     m_pLog = pLog;
+	m_pLua->SetScriptFolder(scriptFolder);
     m_pGFunc->Initialize(m_pLog,m_pLua);
     InitLua();
 }

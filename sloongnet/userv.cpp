@@ -39,7 +39,7 @@ void SloongWallUS::Initialize(CServerConfig* config)
 {
 	m_pLog->Initialize(config->m_strLogPath, config->m_bDebug);
     m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nThreadNum);
-    m_pMsgProc->Initialize(m_pLog);
+    m_pMsgProc->Initialize(m_pLog,config->m_strScriptFolder);
 	m_pThreadPool->Initialize(config->m_nThreadNum);
 }
 
