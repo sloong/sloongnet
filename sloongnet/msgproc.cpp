@@ -20,12 +20,13 @@ CMsgProc::~CMsgProc()
 void CMsgProc::Initialize(CLog *pLog, string scriptFolder)
 {
     m_pLog = pLog;
+    m_strScriptFolder = scriptFolder;
 	m_pLua->SetScriptFolder(scriptFolder);
     m_pGFunc->Initialize(m_pLog,m_pLua);
-    InitLua();
+    InitLua(scriptFolder);
 }
 
-void CMsgProc::InitLua()
+void CMsgProc::InitLua(string path)
 {
     m_pLua->RunScript("init.lua");
     // get current path
@@ -33,7 +34,7 @@ void CMsgProc::InitLua()
 
     getcwd(szDir,MAX_PATH);
     string strDir(szDir);
-    strDir += "/";
+    strDir += "/" + path;
     m_pLua->RunFunction("Init",CUniversal::Format("'%s'",strDir));
 }
 
@@ -54,7 +55,7 @@ int CMsgProc::MsgProcess( CLuaPacket* pUInfo, string& msg, string&res, char*& pB
 	int nSize = 0;
     if( opt == "reload")
     {
-        InitLua();
+        InitLua(m_strScriptFolder);
         res = "0|succeed|Reload succeed";
     }
 	else if (opt == "loadfile")

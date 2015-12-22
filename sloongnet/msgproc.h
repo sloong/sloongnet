@@ -18,12 +18,13 @@ namespace Sloong
 		~CMsgProc();
         void Initialize(CLog* pLog, string scriptFolder);
 		int MsgProcess(CLuaPacket* pUInfo, string& msg, string&res, char*& pBuf);
-		void InitLua();
+		void InitLua(string folder);
 
 	protected:
 		CLua*	m_pLua;
 		CLog*	m_pLog;
 		CGlobalFunction*	m_pGFunc;
+                string m_strScriptFolder;
 	};
 }
 
