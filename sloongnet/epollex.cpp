@@ -261,13 +261,13 @@ void CEpollEx::SendMessage(int sock, const string& nSwift, string msg, const cha
 	string md5 = CUniversal::MD5_Encoding(msg);
 	msg = md5 + "|" + nSwift + "|" + msg;
     	m_pLog->Log(msg);
-    long long len = msg.size() + 1;
+    long long len = msg.size();
 
-    char* pBuf = new char[msg.size()+8+1];
+    char* pBuf = new char[msg.size()+8];
     memcpy(pBuf, (void*)&len, 8);
-    memcpy(pBuf+8, msg.c_str(), msg.size()+1);
-    int nMsgSend = SendEx(sock, pBuf, msg.size()+8+1, 0, true);
-    if( nMsgSend != msg.size()+8+1 )
+    memcpy(pBuf+8, msg.c_str(), msg.size());
+    int nMsgSend = SendEx(sock, pBuf, msg.size()+8, 0, true);
+    if( nMsgSend != msg.size()+8 )
     {
         AddToSendList(sock,pBuf, msg.size(), nMsgSend);
         AddToSendList(sock,pExData, nSize, 0);

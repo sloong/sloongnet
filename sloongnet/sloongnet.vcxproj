@@ -81,6 +81,7 @@
     <ClInclude Include="sockinfo.h" />
     <ClInclude Include="userv.h" />
     <ClInclude Include="utility.h" />
+    <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dbproc.cpp" />
