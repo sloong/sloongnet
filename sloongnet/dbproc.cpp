@@ -26,17 +26,21 @@ int Sloong::CDBProc::Query(string sqlCmd, vector<string>& vRes)
 	MYSQL_ROW row;
 	
 	mysql_query(&m_MySql, sqlCmd.c_str());
-    int nRes = mysql_affected_rows(&m_MySql);
-    if( nRes == 0 )
-        return 0;
-    else if( nRes == -1 )
-    {
-        vRes.push_back(GetError());
-        return -1;
-    }
-	res = mysql_store_result(&m_MySql);
+    res = mysql_store_result(&m_MySql);
     if( res == NULL )
-        return 0;
+    {
+        int nRes = mysql_affected_rows(&m_MySql);
+        if( nRes == 0 )
+            return 0;
+        else if( nRes == -1 )
+        {
+            vRes.push_back(GetError());
+            return -1;
+        }
+        else
+            return 0;
+    }
+
     int nNums = mysql_num_fields(res);
 	while ((row = mysql_fetch_row(res)))
 	{

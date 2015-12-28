@@ -270,7 +270,16 @@ void CEpollEx::SendMessage(int sock, const string& nSwift, string msg, const cha
     if( nMsgSend != msg.size()+8 )
     {
         AddToSendList(sock,pBuf, msg.size(), nMsgSend);
-        AddToSendList(sock,pExData, nSize, 0);
+        if( pExData != NULL  && nSize > 0 )
+        {
+            long long Exlen = nSize;
+
+            char* pExLenBuf = new char[8];
+            memcpy(pExLenBuf, (void*)&Exlen, 8);
+            AddToSendList(sock,pExLenBuf, 8, 0);
+            AddToSendList(sock,pExData, nSize, 0);
+        }
+
         return;
     }
 
@@ -279,6 +288,12 @@ void CEpollEx::SendMessage(int sock, const string& nSwift, string msg, const cha
         return;
     }
 
+
+    long long Exlen = nSize;
+
+    char* pExLenBuf = new char[8];
+    memcpy(pExLenBuf, (void*)&Exlen, 8);
+    SendEx(sock, pExLenBuf, 8, 0, false);
     int nExSent = SendEx(sock, pExData, nSize, 0, true);
     if( nExSent != nSize )
     {
