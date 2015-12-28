@@ -166,7 +166,7 @@ void* CEpollEx::WorkLoop(void* pParam)
                 // 已经连接的用户,收到数据,可以开始读入
 				int len = sizeof(long long);
                 char dataLeng[sizeof(long long)+1] = {0};
-				char* pLen = dataLeng;
+                char* pLen = dataLeng;
                 bool bLoop = true;
                 while(bLoop)
                 {

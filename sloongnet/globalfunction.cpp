@@ -48,16 +48,18 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 {
 	auto lua = g_pThis->m_pLua;
 	vector<string> res;
-	g_pThis->m_pDBProc->Query(lua->GetStringArgument(1), res);
+    g_pThis->m_pDBProc->Query(lua->GetStringArgument(1), res);
 	string allLine;
 	BOOST_FOREACH(string item, res)
 	{
+        string add = item;
+        CUniversal::Replace(add,"&","\&");
 		if ( allLine.empty())
 		{
-			allLine = item;
+            allLine = add;
 		}
 		else
-			allLine = allLine + "&" + item;
+            allLine = allLine + "&" + add;
 	}
 
 	lua->PushString(allLine);
