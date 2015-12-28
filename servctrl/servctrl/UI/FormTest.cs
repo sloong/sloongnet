@@ -53,7 +53,7 @@ namespace servctrl
         {
             "Get all user info;60001|",
             "Get all user name;60001|name",
-            "Get target user info:60001||name='test'",
+            "Get target user info;60001||name='test'",
             "Add new user;60002|testuser",
         };
 
@@ -165,7 +165,7 @@ namespace servctrl
                         
                          
                          // check the return.
-                         string strres = Encoding.ASCII.GetString(data);
+                         string strres = Encoding.UTF8.GetString(data);
                          var ress = strres.Split('|');
                          string log = strres;
                          if (ress[2] != "0")
