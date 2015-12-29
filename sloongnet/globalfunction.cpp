@@ -7,6 +7,7 @@ using namespace Sloong::Universal;
 #include <boost/foreach.hpp>
 #include "dbproc.h"
 #include "utility.h"
+#include "jpeg.h"
 #define ARRAYSIZE(a) (sizeof(a)/sizeof(a[0]))
 
 CGlobalFunction* CGlobalFunction::g_pThis = NULL;
@@ -17,6 +18,7 @@ LuaFunctionRegistr g_LuaFunc[] =
 	{ "querySql", CGlobalFunction::Lua_querySql },
 	{ "modifySql", CGlobalFunction::Lua_modifySql },
     { "getSqlError", CGlobalFunction::Lua_getSqlError },
+	{ "getThumbImage", CGlobalFunction::Lua_getThumbImage },
 };
 
 CGlobalFunction::CGlobalFunction()
@@ -80,6 +82,30 @@ int Sloong::CGlobalFunction::Lua_getSqlError(lua_State *l)
     g_pThis->m_pLua->PushString(g_pThis->m_pDBProc->GetError());
     return 1;
 }
+
+int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
+{
+	auto lua = g_pThis->m_pLua;
+	auto path = lua->GetStringArgument(1);
+	auto width = lua->GetNumberArgument(2);
+	auto height = lua->GetNumberArgument(3);
+	auto quality = lua->GetNumberArgument(4);
+	
+	if ( access(path.c_str(),ACC_E) != -1 )
+	{
+		string thumbpath = CUniversal::Format("%s_%d_%d_%d.%s", path.substr(0, path.length() - 4), width, height, path.substr(path.length() - 3), 3 );
+		if (access(thumbpath.c_str(), ACC_E) != 0)
+		{
+			CJPEG jpg;
+			jpg.Load(path);
+			jpg.Save(70, 0, 0, thumbpath);
+			
+		}
+		lua->PushString(thumbpath);
+	}
+	return 1;
+}
+
 
 void CGlobalFunction::HandleError(string err)
 {

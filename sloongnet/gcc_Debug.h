@@ -81,7 +81,7 @@
 #define __FINITE_MATH_ONLY__ 0
 #endif
 #ifndef __GNUC_PATCHLEVEL__
-#define __GNUC_PATCHLEVEL__ 3
+#define __GNUC_PATCHLEVEL__ 5
 #endif
 #ifndef __UINT_FAST8_MAX__
 #define __UINT_FAST8_MAX__ 255
@@ -337,7 +337,7 @@
 #define __FLT_MANT_DIG__ 24
 #endif
 #ifndef __VERSION__
-#define __VERSION__ "4.8.3 20140911 (Red Hat 4.8.3-9)"
+#define __VERSION__ "4.8.5 20150623 (Red Hat 4.8.5-4)"
 #endif
 #ifndef _STDC_PREDEF_H
 #define _STDC_PREDEF_H 1
@@ -394,7 +394,7 @@
 #define __LDBL_EPSILON__ 1.08420217248550443401e-19L
 #endif
 #ifndef __GNUC_RH_RELEASE__
-#define __GNUC_RH_RELEASE__ 9
+#define __GNUC_RH_RELEASE__ 4
 #endif
 #ifndef __k8
 #define __k8 1
@@ -727,16 +727,16 @@
 
 // --- Include directories begin --- //
 ///usr/include/glib-2.0/
-///usr/lib/gcc/x86_64-redhat-linux/4.8.3/../../../../include/c++/4.8.3
-///usr/lib/gcc/x86_64-redhat-linux/4.8.3/../../../../include/c++/4.8.3/x86_64-redhat-linux
-///usr/lib/gcc/x86_64-redhat-linux/4.8.3/../../../../include/c++/4.8.3/backward
-///usr/lib/gcc/x86_64-redhat-linux/4.8.3/include
+///usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5
+///usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/x86_64-redhat-linux
+///usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/backward
+///usr/lib/gcc/x86_64-redhat-linux/4.8.5/include
 ///usr/local/include
 ///usr/include
 // --- Include directories end --- //
 
 
 // --- Library directories begin --- //
-///usr/lib/gcc/x86_64-redhat-linux/4.8.3/:/usr/lib/gcc/x86_64-redhat-linux/4.8.3/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/4.8.3/../../../:/lib/:/usr/lib/
+///usr/lib/gcc/x86_64-redhat-linux/4.8.5/:/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../:/lib/:/usr/lib/
 // --- Library directories begin --- //
 
