@@ -22,3 +22,5 @@ dbproc.cpp
 dbproc.h
 globalfunction.cpp
 globalfunction.h
+jpeg.h
+jpeg.cpp
