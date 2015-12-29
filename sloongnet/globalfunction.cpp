@@ -7,6 +7,7 @@ using namespace Sloong::Universal;
 #include <boost/foreach.hpp>
 #include "dbproc.h"
 #include "utility.h"
+#include "jpeg.h"
 #define ARRAYSIZE(a) (sizeof(a)/sizeof(a[0]))
 
 CGlobalFunction* CGlobalFunction::g_pThis = NULL;
@@ -17,6 +18,7 @@ LuaFunctionRegistr g_LuaFunc[] =
 	{ "querySql", CGlobalFunction::Lua_querySql },
 	{ "modifySql", CGlobalFunction::Lua_modifySql },
     { "getSqlError", CGlobalFunction::Lua_getSqlError },
+	{ "getThumbImage", CGlobalFunction::Lua_getThumbImage },
 };
 
 CGlobalFunction::CGlobalFunction()
@@ -82,7 +84,10 @@ int Sloong::CGlobalFunction::Lua_getSqlError(lua_State *l)
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 0e9ce2205ca1529b4cd1887b3080e06308c23d4b
 int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
 {
 	auto lua = g_pThis->m_pLua;
@@ -93,12 +98,21 @@ int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
 	
 	if ( access(path.c_str(),ACC_E) != -1 )
 	{
+<<<<<<< HEAD
 		string thumbpath = CUniversal::Format("%s_%d_%d_%d.%s", path.substr(0, path.length() - 4), width, height, quality, path.substr(path.length() - 3));
+=======
+		string thumbpath = CUniversal::Format("%s_%d_%d_%d.%s", path.substr(0, path.length() - 4), width, height, path.substr(path.length() - 3), 3 );
+>>>>>>> 0e9ce2205ca1529b4cd1887b3080e06308c23d4b
 		if (access(thumbpath.c_str(), ACC_E) != 0)
 		{
 			CJPEG jpg;
 			jpg.Load(path);
+<<<<<<< HEAD
 			jpg.Save(quality, width, height, thumbpath);
+=======
+			jpg.Save(70, 0, 0, thumbpath);
+			
+>>>>>>> 0e9ce2205ca1529b4cd1887b3080e06308c23d4b
 		}
 		lua->PushString(thumbpath);
 	}
@@ -106,7 +120,10 @@ int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
 }
 
 
+<<<<<<< HEAD
 >>>>>>> a5283e8... modify: when send a message fialed, the message is add to epoll list, then function is returnd. but now the message is not send done, in this time, send a other message, the message should be add to epoll list. no should send with direct.
+=======
+>>>>>>> 0e9ce2205ca1529b4cd1887b3080e06308c23d4b
 void CGlobalFunction::HandleError(string err)
 {
 	g_pThis->m_pLog->Log(err, ERR, -2);

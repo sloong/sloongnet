@@ -1,17 +1,32 @@
 #ifndef JPEG_H
 #define JPEG_H
 
-#include <jpeglib.h>
+typedef unsigned char byte;
+
 #include <string>
 using std::string;
-
-class CJPEG
+namespace Sloong
 {
-public:
-    CJPEG();
-    void Read( string path );
+	struct jpeg_decompress_struc;
+	class CJPEG
+	{
+	public:
+		CJPEG();
+		virtual ~CJPEG();
+		bool Load(string path);
+		bool Save(int quality, int width = 0, int height = 0, string path = "");
 
-    struct jpeg_decompress_struct cinfo;
-};
+		int GetHeight();
+		int GetWidth();
+		int GetBPP();
+
+	protected:
+		string m_strPath;
+		int m_nWidth;
+		int m_nHeight;
+		int m_nBPP;
+		byte*	m_pData;
+	};
+}
 
 #endif // JPEG_H

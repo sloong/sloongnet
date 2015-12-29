@@ -71,6 +71,9 @@
     <ClInclude Include="version.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="jpeg.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="epollex.cpp">
@@ -98,6 +101,9 @@
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="dbproc.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
