@@ -60,7 +60,7 @@ int CMsgProc::MsgProcess( CLuaPacket* pUInfo, string& msg, string&res, char*& pB
     }
 	else if (opt == "loadfile")
 	{
-		auto filename = response.GetData("message");
+        auto filename = response.GetData("filepath");
         try
         {
             nSize = CUtility::ReadFile(filename, pBuf);
@@ -71,14 +71,10 @@ int CMsgProc::MsgProcess( CLuaPacket* pUInfo, string& msg, string&res, char*& pB
             res = string("-2|") + e.what();
             return 0;
         }
+    }
 
-		res = response.GetData("errno") + "|" + response.GetData("errmsg") + "|" + CUniversal::ntos(nSize);
-	}
-	else
-	{
-		res = response.GetData("errno") + "|" + response.GetData("errmsg") + "|" + response.GetData("message");
-	}
-	
+    res = response.GetData("errno") + "|" + response.GetData("errmsg") + "|" + response.GetData("message");
+
 	m_pLog->Log(res);
 	return nSize;
 }

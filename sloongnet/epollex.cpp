@@ -218,9 +218,13 @@ void* CEpollEx::WorkLoop(void* pParam)
             {
                 // 可以写入事件
                 CSockInfo* info = rSockList[fd];
+                if( false == info->m_oSendMutex.try_lock())
+                {
+                    break;
+                }
+                unique_lock<mutex> lck(info->m_oSendMutex,std::adopt_lock);
                 while( info->m_SendList.size())
                 {
-                    unique_lock<mutex> lck(info->m_oSendMutex);
                     SENDINFO* si = info->m_SendList.front();
                     if ( si->nSent == si->nSize )
                     {
@@ -232,8 +236,8 @@ void* CEpollEx::WorkLoop(void* pParam)
                     {
                         si->nSent = SendEx(fd,si->pSendBuffer,si->nSize,si->nSent);
                     }
-                    lck.unlock();
                 }
+                lck.unlock();
                 pThis->CtlEpollEvent(EPOLL_CTL_MOD,fd,EPOLLIN|EPOLLET);
             }
             else
@@ -267,11 +271,12 @@ void CEpollEx::SendMessage(int sock, const string& nSwift, string msg, const cha
     char* pBuf = new char[msg.size()+8];
     memcpy(pBuf, (void*)&len, 8);
     memcpy(pBuf+8, msg.c_str(), msg.size());
-    int nMsgSend = SendEx(sock, pBuf, msg.size()+8, 0, true);
-    if( nMsgSend != msg.size()+8 )
+
+    CSockInfo* info = m_SockList[sock];
+    if(info->m_SendList.size()!=0)
     {
-        AddToSendList(sock,pBuf, msg.size(), nMsgSend);
-        if( pExData != NULL  && nSize > 0 )
+        AddToSendList(sock,pBuf, msg.size()+8, 0);
+        if( pExData != NULL  && nSize > 0  )
         {
             long long Exlen = nSize;
 
@@ -284,23 +289,41 @@ void CEpollEx::SendMessage(int sock, const string& nSwift, string msg, const cha
         return;
     }
 
+
+    if( !SendMessageEx(sock,pBuf,msg.size()+8) && pExData != NULL  && nSize > 0 )
+    {
+        long long Exlen = nSize;
+
+        char* pExLenBuf = new char[8];
+        memcpy(pExLenBuf, (void*)&Exlen, 8);
+        AddToSendList(sock,pExLenBuf, 8, 0);
+        AddToSendList(sock,pExData, nSize, 0);
+        return;
+    }
+
     if( pExData == NULL || nSize <= 0)
     {
         return;
     }
-
 
     long long Exlen = nSize;
 
     char* pExLenBuf = new char[8];
     memcpy(pExLenBuf, (void*)&Exlen, 8);
     SendEx(sock, pExLenBuf, 8, 0, false);
-    int nExSent = SendEx(sock, pExData, nSize, 0, true);
-    if( nExSent != nSize )
+    SendMessageEx(sock,pExData,nSize);
+}
+
+bool CEpollEx::SendMessageEx(int sock, const char *pBuf, int nSize)
+{
+    int nMsgSend = SendEx(sock, pBuf, nSize, 0, true);
+    if( nMsgSend != nSize )
     {
-        AddToSendList(sock,pExData, nSize, nExSent);
-        return;
+        AddToSendList(sock,pBuf, nSize, nMsgSend);
+        return false;
     }
+    SAFE_DELETE_ARR(pBuf);
+    return true;
 }
 
 void CEpollEx::AddToSendList(int socket, const char *pBuf, int nSize, int nStart)

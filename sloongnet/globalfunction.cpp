@@ -81,6 +81,32 @@ int Sloong::CGlobalFunction::Lua_getSqlError(lua_State *l)
     return 1;
 }
 
+<<<<<<< HEAD
+=======
+int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
+{
+	auto lua = g_pThis->m_pLua;
+	auto path = lua->GetStringArgument(1);
+	auto width = lua->GetNumberArgument(2);
+	auto height = lua->GetNumberArgument(3);
+	auto quality = lua->GetNumberArgument(4);
+	
+	if ( access(path.c_str(),ACC_E) != -1 )
+	{
+		string thumbpath = CUniversal::Format("%s_%d_%d_%d.%s", path.substr(0, path.length() - 4), width, height, quality, path.substr(path.length() - 3));
+		if (access(thumbpath.c_str(), ACC_E) != 0)
+		{
+			CJPEG jpg;
+			jpg.Load(path);
+			jpg.Save(quality, width, height, thumbpath);
+		}
+		lua->PushString(thumbpath);
+	}
+	return 1;
+}
+
+
+>>>>>>> a5283e8... modify: when send a message fialed, the message is add to epoll list, then function is returnd. but now the message is not send done, in this time, send a other message, the message should be add to epoll list. no should send with direct.
 void CGlobalFunction::HandleError(string err)
 {
 	g_pThis->m_pLog->Log(err, ERR, -2);
