@@ -59,7 +59,7 @@
 MY_CFLAGS =
 
 # The linker options.
-MY_LIBS   = -lm -ldl -llua.5.3.1 -luniv -lglib-2.0 -lmysqlclient -ljpeg
+MY_LIBS   = -lm -ldl -llua.5.3.1 -luniv -lglib-2.0 -lmysqlclient -ljpeg -lpthread
 
 # The pre-processor options used by the cpp (man cpp for more).
 CPPFLAGS  = -Wall
