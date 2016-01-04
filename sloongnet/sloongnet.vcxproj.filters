@@ -68,12 +68,10 @@
     <ClInclude Include="dbproc.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="version.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="jpeg.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="..\version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="epollex.cpp">

@@ -72,6 +72,7 @@
     <None Include="script\init.lua" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\version.h" />
     <ClInclude Include="dbproc.h" />
     <ClInclude Include="epollex.h" />
     <ClInclude Include="globalfunction.h" />
@@ -82,7 +83,6 @@
     <ClInclude Include="sockinfo.h" />
     <ClInclude Include="userv.h" />
     <ClInclude Include="utility.h" />
-    <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dbproc.cpp" />
