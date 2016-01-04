@@ -12,6 +12,7 @@ CServerConfig::CServerConfig()
 	m_strLogPath = "./log.log";
 	m_strScriptFolder = "./";
 	m_nThreadNum = 1;
+	m_nPriorityLevel = -1;
 }
 
 bool CServerConfig::LoadConfigFile(string path)
@@ -50,6 +51,10 @@ bool CServerConfig::LoadConfigFile(string path)
 	if (!err)
 		m_strScriptFolder = strRes;
 
+	nRes = g_key_file_get_integer(conf, "Server", "PriorityLevel", &err);
+	if (!err)
+		m_nPriorityLevel = nRes;
+	
 	g_error_free(err);
 	g_key_file_free(conf);
 }

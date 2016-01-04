@@ -24,15 +24,15 @@ namespace Sloong
 	public:
         CEpollEx();
 		virtual ~CEpollEx();
-        int Initialize(CLog* pLog,int listenPort, int nThreadNum);
-        void SendMessage(int sock, const string& nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
-        bool SendMessageEx( int sock, const char* pData, int nSize);
+        int Initialize(CLog* pLog,int listenPort, int nThreadNum, int nPriorityLevel);
+        void SendMessage(int sock, int nPriority, const string& nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
+        bool SendMessageEx( int sock, int nPriority, const char* pData, int nSize);
 	protected:
 		int SetSocketNonblocking(int socket);
 		void CtlEpollEvent(int opt, int sock, int events);
 		// close the connected socket and remove the resources.
 		void CloseConnect(int socket);
-        void AddToSendList( int socket, const char* pBuf, int nSize, int nStart );
+        void AddToSendList( int socket,int nPriority, const char* pBuf, int nSize, int nStart );
 	public:
 		static void* WorkLoop(void* params);
         static int SendEx(int sock, const char* buf, int nSize, int nStart, bool eagain = false);
@@ -48,6 +48,7 @@ namespace Sloong
 		queue<int> m_EventSockList;
         mutex m_oEventListMutex;
         mutex m_oSockListMutex;
+		int m_nPriorityLevel;
 	};
 }
 

@@ -2,11 +2,12 @@
 #define SOCKINFO_H
 
 #include<queue>
-using namespace std;
 #include <string>
 #include <mutex>
 using std::string;
 using std::mutex;
+using std::vector;
+using std::queue;
 namespace Sloong
 {
 	namespace Universal
@@ -23,12 +24,14 @@ namespace Sloong
 	using namespace Universal;
 	class CSockInfo
 	{
+	private:
+		CSockInfo(){}
 	public:
-		CSockInfo();
+		CSockInfo( int nPriorityLevel );
 		~CSockInfo();
 
-		queue<string> m_ReadList;
-        queue<SENDINFO*> m_SendList; // the send list of the bytes.
+		queue<string>* m_pReadList;
+        queue<SENDINFO*>* m_pSendList; // the send list of the bytes.
 
 		string m_Address;
 		int m_nPort;
@@ -37,6 +40,8 @@ namespace Sloong
 		CLuaPacket* m_pUserInfo;
         mutex m_oReadMutex;
         mutex m_oSendMutex;
+		int m_nPriorityLevel;
+		int m_nLastSentTags;
 	};
 
 }

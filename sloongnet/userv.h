@@ -28,6 +28,7 @@ namespace Sloong
 	protected:
 		int m_sockServ;
 		int* m_sockClient;
+		int m_nPriorityLevel;
 
 		CEpollEx* m_pEpoll;
 		CMsgProc* m_pMsgProc;

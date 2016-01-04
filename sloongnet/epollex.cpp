@@ -33,8 +33,9 @@ void on_sigint(int signal)
 }
 
 // Initialize the epoll and the thread pool.
-int CEpollEx::Initialize( CLog* plog, int licensePort, int nThreadNum )
+int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel)
 {
+	m_nPriorityLevel = nPriorityLevel;
     m_pLog = plog;
 	m_pLog->Log(CUniversal::Format("epollex is initialize.license port is %d", licensePort));
     //SIGPIPE:在reader终止之后写pipe的时候发生
@@ -139,16 +140,17 @@ void* CEpollEx::WorkLoop(void* pParam)
                     int conn_sock = -1;
 					while ((conn_sock = accept(sockListen, NULL, NULL)) > 0)
                     {
-                        CSockInfo* info = new CSockInfo();
                         struct sockaddr_in add;
                         int nSize = sizeof(add);
                         memset(&add,0,sizeof(add));
                         getpeername(conn_sock, (sockaddr*)&add, (socklen_t*)&nSize );
+						
+						time_t tm;
+						time(&tm);
 
+						CSockInfo* info = new CSockInfo(pThis->m_nPriorityLevel);
                         info->m_Address = string(inet_ntoa(add.sin_addr));
                         info->m_nPort = add.sin_port;
-                        time_t tm;
-                        time(&tm);
                         info->m_ConnectTime = tm;
                         info->m_sock = conn_sock;
                         rSockList[conn_sock] = info;
@@ -204,12 +206,35 @@ void* CEpollEx::WorkLoop(void* pParam)
                             break;
                         }
 
+						CSockInfo* info = rSockList[fd];
+						unique_lock<mutex> lck(info->m_oReadMutex);
+						auto pList = info->m_pReadList[0];
+						string msg;
+
+						// check the priority level
+						if (pThis->m_nPriorityLevel != 0)
+						{
+							if (data[0] > pThis->m_nPriorityLevel || data[0] < 0 )
+							{
+								log->Log(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", data[0], pThis->m_nPriorityLevel));
+								pList = info->m_pReadList[pThis->m_nPriorityLevel - 1];
+							}
+							else
+							{
+								pList = info->m_pReadList[data[0]];
+							}
+							const char* msgdata = &data[1];
+							msg = msgdata;
+						}
+						else
+						{
+							pList = info->m_pReadList[0];
+							msg = data;
+						}
                         // Add the msg to the sock info list
-                        string msg(data);
                         delete[] data;
-                        CSockInfo* info = rSockList[fd];
-                        unique_lock<mutex> lck(info->m_oReadMutex);
-                        info->m_ReadList.push(msg);
+                        
+                        pList.push(msg);
                         lck.unlock();
 
                         // Add the sock event to list
@@ -228,22 +253,74 @@ void* CEpollEx::WorkLoop(void* pParam)
                     break;
                 }
                 unique_lock<mutex> lck(info->m_oSendMutex,std::adopt_lock);
-                while( info->m_SendList.size())
-                {
-                    SENDINFO* si = info->m_SendList.front();
-                    if ( si->nSent == si->nSize )
-                    {
-                        info->m_SendList.pop();
-                        SAFE_DELETE_ARR(si->pSendBuffer);
-                        SAFE_DELETE(si);
-                    }
-                    else
-                    {
-                        si->nSent = SendEx(fd,si->pSendBuffer,si->nSize,si->nSent);
-                    }
-                }
+				
+				bool bTrySend = true;
+
+				while (bTrySend)
+				{
+					auto list = info->m_pSendList[0];
+					// prev package no send end. find and try send it again.
+					if (-1 != info->m_nLastSentTags)
+					{
+						list = info->m_pSendList[info->m_nLastSentTags];
+					}
+					// find next package. 
+					else
+					{
+						for (int i = 0; i < info->m_nPriorityLevel; i++)
+						{
+							if (info->m_pSendList[i].size() == 0)
+								continue;
+							else
+							{
+								list = info->m_pSendList[i];
+							}
+						}
+					}
+					// if no find send info, is no need send anything , remove this sock from epoll.'
+					SENDINFO* si = NULL;
+					while (si == NULL)
+					{
+						if (list.size() != 0)
+						{
+							si = list.front();
+							if (si == NULL)
+							{
+								list.pop();
+							}
+						}
+					}
+
+					if (list.size() == 0 || si == NULL)
+					{
+						if (info->m_nLastSentTags != -1)
+							info->m_nLastSentTags = -1;
+						else
+							pThis->CtlEpollEvent(EPOLL_CTL_MOD, fd, EPOLLIN | EPOLLET);
+					}
+
+					// try send first.
+					si->nSent = SendEx(fd, si->pSendBuffer, si->nSize, si->nSent);
+
+					// check send result.
+					// send done, remove the is sent data and try send next package.
+					if (si->nSent == si->nSize)
+					{
+						list.pop();
+						info->m_nLastSentTags = -1;
+						SAFE_DELETE_ARR(si->pSendBuffer);
+						SAFE_DELETE(si);
+						bTrySend = true;
+					}
+					// send falied, wait next event.
+					else
+					{
+						bTrySend = false;
+					}
+				}
+
                 lck.unlock();
-                pThis->CtlEpollEvent(EPOLL_CTL_MOD,fd,EPOLLIN|EPOLLET);
+                pThis->CtlEpollEvent(EPOLL_CTL_MOD,fd,EPOLLIN|EPOLLET|EPOLLOUT);
             }
             else
             {
@@ -265,7 +342,7 @@ void *check_connect_timeout(void* para)
     return 0;
 }
 
-void CEpollEx::SendMessage(int sock, const string& nSwift, string msg, const char* pExData, int nSize )
+void CEpollEx::SendMessage(int sock, int nPriority, const string& nSwift, string msg, const char* pExData, int nSize )
 {
 	// process msg
 	string md5 = CUniversal::MD5_Encoding(msg);
@@ -278,60 +355,46 @@ void CEpollEx::SendMessage(int sock, const string& nSwift, string msg, const cha
     memcpy(pBuf+8, msg.c_str(), msg.size());
 
     CSockInfo* info = m_SockList[sock];
-    if(info->m_SendList.size()!=0)
-    {
-        AddToSendList(sock,pBuf, msg.size()+8, 0);
-        if( pExData != NULL  && nSize > 0  )
-        {
-            long long Exlen = nSize;
-
-            char* pExLenBuf = new char[8];
-            memcpy(pExLenBuf, (void*)&Exlen, 8);
-            AddToSendList(sock,pExLenBuf, 8, 0);
-            AddToSendList(sock,pExData, nSize, 0);
-        }
-
-        return;
-    }
-
-
-    if( !SendMessageEx(sock,pBuf,msg.size()+8) && pExData != NULL  && nSize > 0 )
-    {
-        long long Exlen = nSize;
-
-        char* pExLenBuf = new char[8];
-        memcpy(pExLenBuf, (void*)&Exlen, 8);
-        AddToSendList(sock,pExLenBuf, 8, 0);
-        AddToSendList(sock,pExData, nSize, 0);
-        return;
-    }
-
-    if( pExData == NULL || nSize <= 0)
-    {
-        return;
-    }
-
-    long long Exlen = nSize;
-
-    char* pExLenBuf = new char[8];
-    memcpy(pExLenBuf, (void*)&Exlen, 8);
-    SendEx(sock, pExLenBuf, 8, 0, false);
-    SendMessageEx(sock,pExData,nSize);
+	// if have exdata, directly add to epoll list.
+	if (pExData != NULL && nSize > 0)
+	{
+		AddToSendList(sock, nPriority, pBuf, msg.size() + 8, 0);
+		long long Exlen = nSize;
+		char* pExLenBuf = new char[8];
+		memcpy(pExLenBuf, (void*)&Exlen, 8);
+		AddToSendList(sock, nPriority, pExLenBuf, 8, 0);
+		AddToSendList(sock, nPriority, pExData, nSize, 0);
+	}
+	else
+	{
+		// check the send list size. if all empty, try send message directly.
+		for (int i = 0; i < info->m_nPriorityLevel; i++)
+		{
+			if ( info->m_pSendList[i].size() != 0 )
+			{
+				AddToSendList(sock, nPriority, pBuf, msg.size() + 8, 0);
+				return;
+			}
+		}
+	}
+    
+	// if code run here. the all list is empty. and no have exdata. try send message
+	SendMessageEx(sock, nPriority, pBuf, msg.size() + 8);
 }
 
-bool CEpollEx::SendMessageEx(int sock, const char *pBuf, int nSize)
+bool CEpollEx::SendMessageEx(int sock, int nPriority, const char *pBuf, int nSize)
 {
     int nMsgSend = SendEx(sock, pBuf, nSize, 0, true);
     if( nMsgSend != nSize )
     {
-        AddToSendList(sock,pBuf, nSize, nMsgSend);
+        AddToSendList(sock, nPriority, pBuf, nSize, nMsgSend);
         return false;
     }
     SAFE_DELETE_ARR(pBuf);
     return true;
 }
 
-void CEpollEx::AddToSendList(int socket, const char *pBuf, int nSize, int nStart)
+void CEpollEx::AddToSendList(int socket, int nPriority, const char *pBuf, int nSize, int nStart)
 {
     if (pBuf == NULL || nSize <= 0 )
         return;
@@ -342,7 +405,7 @@ void CEpollEx::AddToSendList(int socket, const char *pBuf, int nSize, int nStart
     si->nSent = nStart;
     si->nSize = nSize;
     si->pSendBuffer = pBuf;
-    info->m_SendList.push(si);
+    info->m_pSendList[nPriority].push(si);
     SetSocketNonblocking(socket);
     CtlEpollEvent(EPOLL_CTL_MOD,socket,EPOLLOUT|EPOLLIN|EPOLLET);
 }

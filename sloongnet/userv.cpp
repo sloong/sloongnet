@@ -37,8 +37,9 @@ SloongWallUS::~SloongWallUS()
 
 void SloongWallUS::Initialize(CServerConfig* config)
 {
+	m_nPriorityLevel = config->m_nPriorityLevel;
 	m_pLog->Initialize(config->m_strLogPath, config->m_bDebug);
-    m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nThreadNum);
+    m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nThreadNum,config->m_nPriorityLevel);
     m_pMsgProc->Initialize(m_pLog,config->m_strScriptFolder);
 	m_pThreadPool->Initialize(config->m_nThreadNum);
 }
@@ -53,59 +54,63 @@ void SloongWallUS::Run()
 	}
 }
 
-void* SloongWallUS::HandleEventWorkLoop( void* pParam )
+void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 {
 	SloongWallUS* pThis = (SloongWallUS*)pParam;
 
-		if (pThis->m_pEpoll->m_EventSockList.size() > 0)
+	if (pThis->m_pEpoll->m_EventSockList.size() > 0)
+	{
+		unique_lock<mutex> eventLoc(pThis->m_pEpoll->m_oEventListMutex);
+		if (pThis->m_pEpoll->m_EventSockList.size() == 0)
+			return NULL;
+
+		// process read list.
+		int sock = pThis->m_pEpoll->m_EventSockList.front();
+		pThis->m_pEpoll->m_EventSockList.pop();
+		eventLoc.unlock();
+
+		CSockInfo* info = pThis->m_pEpoll->m_SockList[sock];
+		if (!info) return NULL;
+
+		for (int i = 0; i < pThis->m_nPriorityLevel; i++ )
 		{
-            unique_lock<mutex> eventLoc(pThis->m_pEpoll->m_oEventListMutex);
-            if (pThis->m_pEpoll->m_EventSockList.size() == 0)
-                return NULL;
-
-			// process read list.
-			int sock = pThis->m_pEpoll->m_EventSockList.front();
-			pThis->m_pEpoll->m_EventSockList.pop();
-            eventLoc.unlock();
-
-			CSockInfo* info = pThis->m_pEpoll->m_SockList[sock];
-            if (!info) return NULL;
-
-			while (info->m_ReadList.size() > 0)
+			while (info->m_pReadList[i].size() > 0)
 			{
-                unique_lock<mutex> readLoc(info->m_oReadMutex);
-                if(info->m_ReadList.size() == 0)
-                    continue;
-				string msg = info->m_ReadList.front();
-				info->m_ReadList.pop();
-                readLoc.unlock();
+				unique_lock<mutex> readLoc(info->m_oReadMutex);
+				if (info->m_pReadList[i].size() == 0)
+					continue;
+				string msg = info->m_pReadList[i].front();
+				info->m_pReadList[i].pop();
+				readLoc.unlock();
 				auto md5index = msg.find("|");
-				auto swiftindex = msg.find("|", md5index+1);
+				auto swiftindex = msg.find("|", md5index + 1);
 				string md5 = msg.substr(0, md5index);
 				//int swift = boost::lexical_cast<int>(msg.substr(md5index, swiftindex - md5index));
-				string swift = (msg.substr(md5index+1, swiftindex - (md5index+1)));
-				string tmsg = msg.substr(swiftindex+1);
+				string swift = (msg.substr(md5index + 1, swiftindex - (md5index + 1)));
+				string tmsg = msg.substr(swiftindex + 1);
 				string rmd5 = CUniversal::MD5_Encoding(tmsg);
 				CUniversal::touper(md5);
 				CUniversal::touper(rmd5);
 				if (md5 != rmd5)
 				{
 					// handle error.
-					pThis->m_pEpoll->SendMessage(sock, swift, "-1|package check error");
+					pThis->m_pEpoll->SendMessage(sock, i, swift, "-1|package check error");
 					continue;
 				}
 
 				string strRes;
 				char* pBuf = NULL;
 				int nSize = pThis->m_pMsgProc->MsgProcess(info->m_pUserInfo, tmsg, strRes, pBuf);
-                pThis->m_pEpoll->SendMessage(sock, swift, strRes, pBuf, nSize);
+				pThis->m_pEpoll->SendMessage(sock, i, swift, strRes, pBuf, nSize);
 			}
 		}
-		else
-		{
-			SLEEP(500);
-		}
-        return NULL;
+		
+	}
+	else
+	{
+		SLEEP(500);
+	}
+	return NULL;
 }
 
 
