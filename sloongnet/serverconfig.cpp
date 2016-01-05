@@ -12,7 +12,7 @@ CServerConfig::CServerConfig()
 	m_strLogPath = "./log.log";
 	m_strScriptFolder = "./";
 	m_nThreadNum = 1;
-	m_nPriorityLevel = -1;
+    m_nPriorityLevel = 0;
 }
 
 bool CServerConfig::LoadConfigFile(string path)

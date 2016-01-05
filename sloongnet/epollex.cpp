@@ -208,7 +208,7 @@ void* CEpollEx::WorkLoop(void* pParam)
 
 						CSockInfo* info = rSockList[fd];
 						unique_lock<mutex> lck(info->m_oReadMutex);
-						auto pList = info->m_pReadList[0];
+                        queue<string>* pList = &info->m_pReadList[0];
 						string msg;
 
 						// check the priority level
@@ -217,24 +217,24 @@ void* CEpollEx::WorkLoop(void* pParam)
 							if (data[0] > pThis->m_nPriorityLevel || data[0] < 0 )
 							{
 								log->Log(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", data[0], pThis->m_nPriorityLevel));
-								pList = info->m_pReadList[pThis->m_nPriorityLevel - 1];
+                                pList = &info->m_pReadList[pThis->m_nPriorityLevel - 1];
 							}
 							else
 							{
-								pList = info->m_pReadList[data[0]];
+                                pList = &info->m_pReadList[data[0]];
 							}
 							const char* msgdata = &data[1];
 							msg = msgdata;
 						}
 						else
 						{
-							pList = info->m_pReadList[0];
+                            pList = &info->m_pReadList[0];
 							msg = data;
 						}
                         // Add the msg to the sock info list
                         delete[] data;
                         
-                        pList.push(msg);
+                        pList->push(msg);
                         lck.unlock();
 
                         // Add the sock event to list
@@ -361,7 +361,15 @@ void CEpollEx::SendMessage(int sock, int nPriority, const string& nSwift, string
 	// if have exdata, directly add to epoll list.
 	if (pExData != NULL && nSize > 0)
 	{
-		bAddToList = true;
+        long long len = msg.size();
+        long long Exlen = nSize;
+        char* pBuf = new char[msg.size() + 8 + 8];
+        memcpy(pBuf, (void*)&len, 8);
+        memcpy(pBuf + 8, msg.c_str(), msg.size());
+        memcpy(pBuf + 8 + msg.size(), (void*)&Exlen, 8);
+
+        AddToSendList(sock, nPriority, pBuf, msg.size() + 8 + 8, 0, pExData, nSize);
+        return;
 	}
 	else
 	{
@@ -371,22 +379,14 @@ void CEpollEx::SendMessage(int sock, int nPriority, const string& nSwift, string
 		{
 			if ( info->m_pSendList[i].size() != 0 )
 			{
-				bAddToList = true;
-				return;
+                long long len = msg.size();
+                char* pBuf = new char[msg.size() + 8];
+                memcpy(pBuf, (void*)&len, 8);
+                memcpy(pBuf + 8, msg.c_str(), msg.size());
+                AddToSendList(sock, nPriority, pBuf, msg.size() + 8, 0, pExData, nSize);
+                return;
 			}
 		}
-	}
-
-	if (bAddToList)
-	{
-		long long len = msg.size();
-		long long Exlen = nSize;
-		char* pBuf = new char[msg.size() + 8 + 8];
-		memcpy(pBuf, (void*)&len, 8);
-		memcpy(pBuf + 8, msg.c_str(), msg.size());
-		memcpy(pBuf + 8 + msg.size(), (void*)&Exlen, 8);
-
-		AddToSendList(sock, nPriority, pBuf, msg.size() + 8 + 8, 0, pExData, nSize);
 	}
     
 	// if code run here. the all list is empty. and no have exdata. try send message

@@ -72,7 +72,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 		CSockInfo* info = pThis->m_pEpoll->m_SockList[sock];
 		if (!info) return NULL;
 
-		for (int i = 0; i < pThis->m_nPriorityLevel; i++ )
+        for (int i = 0; i < pThis->m_nPriorityLevel || i == 0; i++ )
 		{
 			while (info->m_pReadList[i].size() > 0)
 			{
