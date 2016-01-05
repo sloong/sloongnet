@@ -110,6 +110,11 @@ int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
             {
                 width = height * ratio;
             }
+            if( width == 0 || height == 0 )
+            {
+                lua->PushString(path);
+                return 1;
+            }
             img.resize(width,height);
             img.save(thumbpath.c_str());
 		}
