@@ -12,6 +12,7 @@
 #include <univ/log.h>
 #include <univ/univ.h>
 #include <univ/threadpool.h>
+#include "progressbar.h"
 #define MAXRECVBUF 4096
 #define MAXBUF MAXRECVBUF+10
 
@@ -453,6 +454,8 @@ int Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, int nStart, bo
     int nAllSent = nStart;
     int nSentSize = nStart;
     int nNosendSize = nSize - nStart;
+    progress_t bar;
+    progress_init(&bar, "", nSize, PROGRESS_CHR_STYLE);
 
 	while (nNosendSize > 0)
 	{
@@ -467,7 +470,9 @@ int Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, int nStart, bo
 		}
 		nNosendSize -= nSentSize;
         nAllSent += nSentSize;
+        progress_show(&bar, nAllSent/nSize);
 	}
+    progress_destroy(&bar);
     return nAllSent;
 }
 
