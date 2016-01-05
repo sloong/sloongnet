@@ -18,6 +18,8 @@ namespace Sloong
     {
         const char* pSendBuffer;
         int nSize;
+		const char* pExBuffer;
+		int nExSize;
         int nSent;  // is send
     }SENDINFO;
 

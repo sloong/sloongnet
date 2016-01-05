@@ -300,15 +300,21 @@ void* CEpollEx::WorkLoop(void* pParam)
 					}
 
 					// try send first.
-					si->nSent = SendEx(fd, si->pSendBuffer, si->nSize, si->nSent);
+					if ( si->nSent >= si->nSize )
+						// Send ex data
+						si->nSent = SendEx(fd, si->pExBuffer, si->nExSize, si->nSent- si->nSize );
+					else
+						// send normal data.
+						si->nSent = SendEx(fd, si->pSendBuffer, si->nSize, si->nSent);
 
 					// check send result.
 					// send done, remove the is sent data and try send next package.
-					if (si->nSent == si->nSize)
+					if (si->nSent == (si->nSize+si->nExSize))
 					{
 						list.pop();
 						info->m_nLastSentTags = -1;
 						SAFE_DELETE_ARR(si->pSendBuffer);
+						SAFE_DELETE_ARR(si->pExBuffer);
 						SAFE_DELETE(si);
 						bTrySend = true;
 					}
@@ -347,38 +353,47 @@ void CEpollEx::SendMessage(int sock, int nPriority, const string& nSwift, string
 	// process msg
 	string md5 = CUniversal::MD5_Encoding(msg);
 	msg = md5 + "|" + nSwift + "|" + msg;
-    	m_pLog->Log(msg);
-    long long len = msg.size();
+    m_pLog->Log(msg);
+   
+	bool bAddToList = false;
 
-    char* pBuf = new char[msg.size()+8];
-    memcpy(pBuf, (void*)&len, 8);
-    memcpy(pBuf+8, msg.c_str(), msg.size());
-
-    CSockInfo* info = m_SockList[sock];
+   
 	// if have exdata, directly add to epoll list.
 	if (pExData != NULL && nSize > 0)
 	{
-		AddToSendList(sock, nPriority, pBuf, msg.size() + 8, 0);
-		long long Exlen = nSize;
-		char* pExLenBuf = new char[8];
-		memcpy(pExLenBuf, (void*)&Exlen, 8);
-		AddToSendList(sock, nPriority, pExLenBuf, 8, 0);
-		AddToSendList(sock, nPriority, pExData, nSize, 0);
+		bAddToList = true;
 	}
 	else
 	{
+		CSockInfo* info = m_SockList[sock];
 		// check the send list size. if all empty, try send message directly.
 		for (int i = 0; i < info->m_nPriorityLevel; i++)
 		{
 			if ( info->m_pSendList[i].size() != 0 )
 			{
-				AddToSendList(sock, nPriority, pBuf, msg.size() + 8, 0);
+				bAddToList = true;
 				return;
 			}
 		}
 	}
+
+	if (bAddToList)
+	{
+		long long len = msg.size();
+		long long Exlen = nSize;
+		char* pBuf = new char[msg.size() + 8 + 8];
+		memcpy(pBuf, (void*)&len, 8);
+		memcpy(pBuf + 8, msg.c_str(), msg.size());
+		memcpy(pBuf + 8 + msg.size(), (void*)&Exlen, 8);
+
+		AddToSendList(sock, nPriority, pBuf, msg.size() + 8 + 8, 0, pExData, nSize);
+	}
     
 	// if code run here. the all list is empty. and no have exdata. try send message
+	long long len = msg.size();
+	char* pBuf = new char[msg.size() + 8];
+	memcpy(pBuf, (void*)&len, 8);
+	memcpy(pBuf + 8, msg.c_str(), msg.size());
 	SendMessageEx(sock, nPriority, pBuf, msg.size() + 8);
 }
 
@@ -387,14 +402,14 @@ bool CEpollEx::SendMessageEx(int sock, int nPriority, const char *pBuf, int nSiz
     int nMsgSend = SendEx(sock, pBuf, nSize, 0, true);
     if( nMsgSend != nSize )
     {
-        AddToSendList(sock, nPriority, pBuf, nSize, nMsgSend);
+        AddToSendList(sock, nPriority, pBuf, nSize, nMsgSend, NULL, 0);
         return false;
     }
     SAFE_DELETE_ARR(pBuf);
     return true;
 }
 
-void CEpollEx::AddToSendList(int socket, int nPriority, const char *pBuf, int nSize, int nStart)
+void CEpollEx::AddToSendList(int socket, int nPriority, const char *pBuf, int nSize, int nStart, const char* pExBuf, int nExSize )
 {
     if (pBuf == NULL || nSize <= 0 )
         return;
@@ -405,6 +420,8 @@ void CEpollEx::AddToSendList(int socket, int nPriority, const char *pBuf, int nS
     si->nSent = nStart;
     si->nSize = nSize;
     si->pSendBuffer = pBuf;
+	si->pExBuffer = pExBuf;
+	si->nExSize = nExSize;
     info->m_pSendList[nPriority].push(si);
     SetSocketNonblocking(socket);
     CtlEpollEvent(EPOLL_CTL_MOD,socket,EPOLLOUT|EPOLLIN|EPOLLET);

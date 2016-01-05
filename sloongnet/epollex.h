@@ -32,7 +32,7 @@ namespace Sloong
 		void CtlEpollEvent(int opt, int sock, int events);
 		// close the connected socket and remove the resources.
 		void CloseConnect(int socket);
-        void AddToSendList( int socket,int nPriority, const char* pBuf, int nSize, int nStart );
+		void AddToSendList(int socket, int nPriority, const char* pBuf, int nSize, int nStart, const char* pExBuf, int nExSize);
 	public:
 		static void* WorkLoop(void* params);
         static int SendEx(int sock, const char* buf, int nSize, int nStart, bool eagain = false);
