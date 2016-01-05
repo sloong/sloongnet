@@ -258,11 +258,11 @@ void* CEpollEx::WorkLoop(void* pParam)
 
 				while (bTrySend)
 				{
-					auto list = info->m_pSendList[0];
+                    queue<SENDINFO*>* list = &info->m_pSendList[0];
 					// prev package no send end. find and try send it again.
 					if (-1 != info->m_nLastSentTags)
 					{
-						list = info->m_pSendList[info->m_nLastSentTags];
+                        list = &info->m_pSendList[info->m_nLastSentTags];
 					}
 					// find next package. 
 					else
@@ -273,7 +273,7 @@ void* CEpollEx::WorkLoop(void* pParam)
 								continue;
 							else
 							{
-								list = info->m_pSendList[i];
+                                list = &info->m_pSendList[i];
 							}
 						}
 					}
@@ -281,17 +281,17 @@ void* CEpollEx::WorkLoop(void* pParam)
 					SENDINFO* si = NULL;
 					while (si == NULL)
 					{
-						if (list.size() != 0)
+                        if (list->size() != 0)
 						{
-							si = list.front();
+                            si = list->front();
 							if (si == NULL)
 							{
-								list.pop();
+                                list->pop();
 							}
 						}
 					}
 
-					if (list.size() == 0 || si == NULL)
+                    if (list->size() == 0 || si == NULL)
 					{
 						if (info->m_nLastSentTags != -1)
 							info->m_nLastSentTags = -1;
@@ -302,7 +302,7 @@ void* CEpollEx::WorkLoop(void* pParam)
 					// try send first.
 					if ( si->nSent >= si->nSize )
 						// Send ex data
-						si->nSent = SendEx(fd, si->pExBuffer, si->nExSize, si->nSent- si->nSize );
+                        si->nSent = SendEx(fd, si->pExBuffer, si->nExSize, si->nSent- si->nSize ) + si->nSize;
 					else
 						// send normal data.
 						si->nSent = SendEx(fd, si->pSendBuffer, si->nSize, si->nSent);
@@ -311,7 +311,8 @@ void* CEpollEx::WorkLoop(void* pParam)
 					// send done, remove the is sent data and try send next package.
 					if (si->nSent == (si->nSize+si->nExSize))
 					{
-						list.pop();
+                        log->Log(CUniversal::Format("package is send done, send data length is:%d. remove from list.",si->nSent));
+                        list->pop();
 						info->m_nLastSentTags = -1;
 						SAFE_DELETE_ARR(si->pSendBuffer);
 						SAFE_DELETE_ARR(si->pExBuffer);
