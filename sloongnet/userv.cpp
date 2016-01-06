@@ -76,7 +76,11 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 		{
 			while (info->m_pReadList[i].size() > 0)
 			{
-				unique_lock<mutex> readLoc(info->m_oReadMutex);
+                if( info->m_oReadMutex.try_lock() == false )
+                {
+                    continue;
+                }
+                unique_lock<mutex> readLoc(info->m_oReadMutex,std::adopt_lock);
 				if (info->m_pReadList[i].size() == 0)
 					continue;
 				string msg = info->m_pReadList[i].front();

@@ -7,61 +7,55 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <univ/defines.h>
  
 #include "progressbar.h"
- 
-/**
- * initialize the progress bar.
- * @max = 0
- * @val = 0
- *
- * @param   style
- * @param   tip words.
- */
-extern void progress_init(
-    progress_t *bar, char *title, int max, int style)
+using namespace Sloong;
+
+CProgressBar::CProgressBar( char *title, int max, PROGRESS_STYLE style )
 {
-    bar->chr = '#';
-    bar->title = title;
-    bar->style = style;
-    bar->max = max;
-    bar->offset = 100 / (float)max;
-    bar->pro = new char[max+1];
-    if ( style == PROGRESS_BGC_STYLE )
-    memset(bar->pro, 0, max+1);
-    else {
-    memset(bar->pro, 32, max);
-    memset(bar->pro+max, 0x00, 1);
-    }
-}
- 
-extern void progress_show( progress_t *bar, float bit )
-{
-    int val = (int)(bit * bar->max);
-    switch ( bar->style ) 
+    m_cChr = '#';
+    m_szTitle = title;
+    m_emStyle = style;
+    m_nMax = max;
+    m_fOffset = 100.0f / (float)max;
+    m_szPro = new char[max+1];
+
+    if ( style == BackgroundColor )
+        memset(m_szPro, 0, max+1);
+    else
     {
-        case PROGRESS_NUM_STYLE:
+        memset(m_szPro, 32, max);
+        memset(m_szPro+max, 0x00, 1);
+    }
+}
+
+CProgressBar::~CProgressBar()
+{
+    SAFE_DELETE_ARR(m_szPro);
+}
+ 
+void CProgressBar::Update( float bit )
+{
+    int val = (int)(bit * m_nMax);
+    switch ( m_emStyle )
+    {
+        case Number:
             printf("\033[?25l\033[31m\033[1m%s%d%%\033[?25h\033[0m\r",
-                bar->title, (int)(bar->offset * val));
+                m_szTitle, (int)(m_fOffset * val));
             fflush(stdout);
             break;
-        case PROGRESS_CHR_STYLE:
-            memset(bar->pro, '#', val);
+        case Chr:
+            memset(m_szPro, '#', val);
             printf("\033[?25l\033[31m\033[1m%s[%-s] %d%%\033[?25h\033[0m\r",
-                bar->title, bar->pro, (int)(bar->offset * val));
+                m_szTitle, m_szPro, (int)(m_fOffset * val));
             fflush(stdout);
             break;
-        case PROGRESS_BGC_STYLE:
-            memset(bar->pro, 32, val);
+        case BackgroundColor:
+            memset(m_szPro, 32, val);
             printf("\033[?25l\033[31m\033[1m%s\033[41m %d%% %s\033[?25h\033[0m\r",
-                bar->title, (int)(bar->offset * val), bar->pro);
+                m_szTitle, (int)(m_fOffset * val), m_szPro);
             fflush(stdout);
             break;
     }
-}
- 
-//destroy the the progress bar.
-extern void progress_destroy(progress_t *bar)
-{
-    delete[] bar->pro;
 }

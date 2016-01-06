@@ -12,8 +12,10 @@ Sloong::CSockInfo::CSockInfo(int nPriorityLevel)
 	m_nPriorityLevel = nPriorityLevel;
 	m_pReadList = new queue<string>[nPriorityLevel]();
 	m_pSendList = new queue<SENDINFO*>[nPriorityLevel]();
+    m_pPrepareSendList = new queue<PRESENDINFO>;
 	m_pUserInfo = new CLuaPacket();
 	m_nLastSentTags = -1;
+    m_bIsSendListEmpty = true;
 }
 
 CSockInfo::~CSockInfo()
@@ -27,8 +29,20 @@ CSockInfo::~CSockInfo()
 			SENDINFO* si = m_pSendList[i].front();
 			m_pSendList[i].pop();
 			SAFE_DELETE_ARR(si->pSendBuffer);
+            SAFE_DELETE_ARR(si->pExBuffer);
 			SAFE_DELETE(si);
-		}
+        }
 	}
 	SAFE_DELETE_ARR(m_pSendList);
+
+    while (m_pPrepareSendList->size())
+    {
+        PRESENDINFO* psi = &m_pPrepareSendList->front();
+        SENDINFO* si = psi->pSendInfo;
+        m_pPrepareSendList->pop();
+        SAFE_DELETE_ARR(si->pSendBuffer);
+        SAFE_DELETE_ARR(si->pExBuffer);
+        SAFE_DELETE(si);
+    }
+    SAFE_DELETE(m_pPrepareSendList);
 }

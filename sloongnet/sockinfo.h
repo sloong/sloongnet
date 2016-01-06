@@ -23,6 +23,12 @@ namespace Sloong
         int nSent;  // is send
     }SENDINFO;
 
+    typedef struct _PrepareSendInfo
+    {
+        SENDINFO* pSendInfo;
+        int nPriorityLevel;
+    }PRESENDINFO;
+
 	using namespace Universal;
 	class CSockInfo
 	{
@@ -34,6 +40,7 @@ namespace Sloong
 
 		queue<string>* m_pReadList;
         queue<SENDINFO*>* m_pSendList; // the send list of the bytes.
+        queue<PRESENDINFO>* m_pPrepareSendList;
 
 		string m_Address;
 		int m_nPort;
@@ -42,8 +49,10 @@ namespace Sloong
 		CLuaPacket* m_pUserInfo;
         mutex m_oReadMutex;
         mutex m_oSendMutex;
+        mutex m_oPreSendMutex;
 		int m_nPriorityLevel;
 		int m_nLastSentTags;
+        bool m_bIsSendListEmpty;
 	};
 
 }

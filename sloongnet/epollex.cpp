@@ -12,6 +12,7 @@
 #include <univ/log.h>
 #include <univ/univ.h>
 #include <univ/threadpool.h>
+#include <univ/exception.h>
 #include "progressbar.h"
 #define MAXRECVBUF 4096
 #define MAXBUF MAXRECVBUF+10
@@ -68,7 +69,7 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
     // 绑定端口
     errno = bind(m_ListenSock,(struct sockaddr*)&address,sizeof(address));
     if( errno == -1 )
-        cout<<"bind to "<<licensePort<<" field. errno = "<<errno<<endl;
+        new normal_except(CUniversal::Format("bind to %d field. errno = %d",licensePort,errno));
 
     // 监听端口,监听队列大小为1024.可修改为SOMAXCONN
     errno = listen(m_ListenSock,1024);
@@ -180,7 +181,6 @@ void* CEpollEx::WorkLoop(void* pParam)
                 while(bLoop)
                 {
                     // 先读取消息长度
-
 					memset( pLen, 0, len+1 );
 					int nRecvSize = RecvEx(fd, &pLen, len, true);
                     if( nRecvSize == 0)
@@ -249,9 +249,32 @@ void* CEpollEx::WorkLoop(void* pParam)
             {
                 // 可以写入事件
                 CSockInfo* info = rSockList[fd];
+                // progress the prepare send list first
+                if( info->m_pPrepareSendList->size() != 0 )
+                {
+                    if( false == info->m_oPreSendMutex.try_lock() )
+                    {
+                        continue;
+                    }
+                    unique_lock<mutex> prelck(info->m_oPreSendMutex,std::adopt_lock);
+                    if( info->m_pPrepareSendList->size() == 0 )
+                        continue;
+
+                    // TODO:: in here i think no need lock the send list. just push data.
+                    while (info->m_pPrepareSendList->size()>0)
+                    {
+                        PRESENDINFO* psi = &info->m_pPrepareSendList->front();
+                        info->m_pPrepareSendList->pop();
+                        info->m_pSendList[psi->nPriorityLevel].push(psi->pSendInfo);
+                    }
+
+                    prelck.unlock();
+                }
+
+                // when prepare list process done, do send operation.
                 if( false == info->m_oSendMutex.try_lock())
                 {
-                    break;
+                    continue;
                 }
                 unique_lock<mutex> lck(info->m_oSendMutex,std::adopt_lock);
 				
@@ -297,7 +320,10 @@ void* CEpollEx::WorkLoop(void* pParam)
 						if (info->m_nLastSentTags != -1)
 							info->m_nLastSentTags = -1;
 						else
+                        {
 							pThis->CtlEpollEvent(EPOLL_CTL_MOD, fd, EPOLLIN | EPOLLET);
+                            info->m_bIsSendListEmpty = true;
+                        }
 					}
 
 					// try send first.
@@ -357,9 +383,7 @@ void CEpollEx::SendMessage(int sock, int nPriority, const string& nSwift, string
 	msg = md5 + "|" + nSwift + "|" + msg;
     m_pLog->Log(msg);
    
-	bool bAddToList = false;
 
-   
 	// if have exdata, directly add to epoll list.
 	if (pExData != NULL && nSize > 0)
 	{
@@ -376,18 +400,20 @@ void CEpollEx::SendMessage(int sock, int nPriority, const string& nSwift, string
 	else
 	{
 		CSockInfo* info = m_SockList[sock];
+        if(!info)
+        {
+            CloseConnect(sock);
+            return;
+        }
 		// check the send list size. if all empty, try send message directly.
-		for (int i = 0; i < info->m_nPriorityLevel; i++)
-		{
-			if ( info->m_pSendList[i].size() != 0 )
-			{
+        if( info->m_bIsSendListEmpty == false && info->m_pPrepareSendList->size() > 0 )
+        {
                 long long len = msg.size();
                 char* pBuf = new char[msg.size() + 8];
                 memcpy(pBuf, (void*)&len, 8);
                 memcpy(pBuf + 8, msg.c_str(), msg.size());
                 AddToSendList(sock, nPriority, pBuf, msg.size() + 8, 0, pExData, nSize);
                 return;
-			}
 		}
 	}
     
@@ -417,14 +443,18 @@ void CEpollEx::AddToSendList(int socket, int nPriority, const char *pBuf, int nS
         return;
 
     CSockInfo* info = m_SockList[socket];
-    unique_lock<mutex> lck(info->m_oSendMutex);
+    unique_lock<mutex> lck(info->m_oPreSendMutex);
     SENDINFO *si = new SENDINFO();
     si->nSent = nStart;
     si->nSize = nSize;
     si->pSendBuffer = pBuf;
 	si->pExBuffer = pExBuf;
 	si->nExSize = nExSize;
-    info->m_pSendList[nPriority].push(si);
+    PRESENDINFO psi;
+    psi.pSendInfo = si;
+    psi.nPriorityLevel = nPriority;
+    info->m_pPrepareSendList->push(psi);
+    info->m_bIsSendListEmpty = false;
     SetSocketNonblocking(socket);
     CtlEpollEvent(EPOLL_CTL_MOD,socket,EPOLLOUT|EPOLLIN|EPOLLET);
 }
@@ -432,10 +462,21 @@ void CEpollEx::AddToSendList(int socket, int nPriority, const char *pBuf, int nS
 
 void Sloong::CEpollEx::CloseConnect(int socket)
 {
+    CtlEpollEvent(EPOLL_CTL_DEL, socket, EPOLLIN | EPOLLOUT | EPOLLET);
+    close(socket);
 	CSockInfo* info = m_SockList[socket];
-	m_pLog->Log(CUniversal::Format("close connect:%s.",info->m_Address));
-	CtlEpollEvent(EPOLL_CTL_DEL, socket, EPOLLIN | EPOLLOUT | EPOLLET);
-	SAFE_DELETE(info);
+    if( !info )
+        return;
+
+    unique_lock<mutex> lsck(info->m_oSendMutex);
+    unique_lock<mutex> lrck(info->m_oReadMutex);
+    auto key = m_SockList.find(socket);
+    if(key == m_SockList.end())
+        return;
+
+    m_pLog->Log(CUniversal::Format("close connect:%s.",info->m_Address));
+
+
 	for (map<int, CSockInfo*>::iterator i = m_SockList.begin(); i != m_SockList.end();)
 	{
 		if (i->first == socket)
@@ -448,6 +489,10 @@ void Sloong::CEpollEx::CloseConnect(int socket)
 			i++;
 		}
 	}
+
+    lsck.unlock();
+    lrck.unlock();
+    SAFE_DELETE(info);
 }
 
 int Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, int nStart, bool eagain /*= false*/)
@@ -455,8 +500,7 @@ int Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, int nStart, bo
     int nAllSent = nStart;
     int nSentSize = nStart;
     int nNosendSize = nSize - nStart;
-    progress_t bar;
-    progress_init(&bar, "", 100, PROGRESS_NUM_STYLE);
+    CProgressBar pbar("", 100, Number);
 
 	while (nNosendSize > 0)
 	{
@@ -471,9 +515,8 @@ int Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, int nStart, bo
 		}
 		nNosendSize -= nSentSize;
         nAllSent += nSentSize;
-        progress_show(&bar, (float)nAllSent/(float)nSize);
+        pbar.Update((float)nAllSent/(float)nSize);
 	}
-    progress_destroy(&bar);
     return nAllSent;
 }
 
