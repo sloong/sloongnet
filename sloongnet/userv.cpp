@@ -27,9 +27,9 @@ SloongWallUS::SloongWallUS()
 
 SloongWallUS::~SloongWallUS()
 {
+	m_pThreadPool->End();
 	SAFE_DELETE(m_pEpoll);
 	SAFE_DELETE(m_pMsgProc);
-	m_pThreadPool->End();
 	SAFE_DELETE(m_pThreadPool);
 	SAFE_DELETE(m_pLog);
 }
@@ -48,9 +48,15 @@ void SloongWallUS::Run()
 {
 	m_pThreadPool->AddTask(SloongWallUS::HandleEventWorkLoop, this, true);
 	m_pThreadPool->Start();
+	string cmd;
 	while (true)
 	{
-        SLEEP(1000);
+		cmd.clear();
+		cin >> cmd;
+		if (cmd == "exit")
+			return;
+		else
+			SLEEP(1000);
 	}
 }
 
