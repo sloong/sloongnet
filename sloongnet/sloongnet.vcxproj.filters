@@ -71,7 +71,10 @@
     <ClInclude Include="jpeg.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="..\version.h" />
+    <ClInclude Include="version.h" />
+    <ClInclude Include="progressbar.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="epollex.cpp">
@@ -102,6 +105,9 @@
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="jpeg.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="progressbar.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -72,17 +72,18 @@
     <None Include="script\init.lua" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\version.h" />
     <ClInclude Include="dbproc.h" />
     <ClInclude Include="epollex.h" />
     <ClInclude Include="globalfunction.h" />
     <ClInclude Include="jpeg.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="msgproc.h" />
+    <ClInclude Include="progressbar.h" />
     <ClInclude Include="serverconfig.h" />
     <ClInclude Include="sockinfo.h" />
     <ClInclude Include="userv.h" />
     <ClInclude Include="utility.h" />
+    <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dbproc.cpp" />
@@ -91,6 +92,7 @@
     <ClCompile Include="jpeg.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="msgproc.cpp" />
+    <ClCompile Include="progressbar.cpp" />
     <ClCompile Include="serverconfig.cpp" />
     <ClCompile Include="sockinfo.cpp" />
     <ClCompile Include="userv.cpp" />

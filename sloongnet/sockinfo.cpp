@@ -24,7 +24,7 @@ CSockInfo::~CSockInfo()
 	SAFE_DELETE_ARR(m_pReadList);
 	for (int i = 0; i < m_nPriorityLevel;i++)
 	{
-		while (m_pSendList[i].size())
+		while (!m_pSendList[i].empty())
 		{
 			SENDINFO* si = m_pSendList[i].front();
 			m_pSendList[i].pop();
@@ -35,7 +35,7 @@ CSockInfo::~CSockInfo()
 	}
 	SAFE_DELETE_ARR(m_pSendList);
 
-    while (m_pPrepareSendList->size())
+    while (!m_pPrepareSendList->empty())
     {
         PRESENDINFO* psi = &m_pPrepareSendList->front();
         SENDINFO* si = psi->pSendInfo;

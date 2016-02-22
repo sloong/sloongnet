@@ -6,6 +6,7 @@
 #include "serverconfig.h"
 #include "version.h"
 #include "jpeg.h"
+#include "univ/exception.h"
 using namespace std;
 using namespace Sloong;
 int main( int argc, char** args )
@@ -25,7 +26,21 @@ int main( int argc, char** args )
 		else if ((strCmd == "-r" || strCmd == "--r" || strCmd == "run") && (argc >= 3))
 		{
 			if (access(args[2], ACC_R) == 0)
-				config.LoadConfigFile(args[2]);
+			{
+				try
+				{
+					config.LoadConfigFile(args[2]);
+				}
+				catch (normal_except e)
+				{
+					cout << "Error when load config. error meesage is: " << e.what() << endl;
+					cout << "if you want run continue with default config, input 'r'." << endl;
+					char key;
+					cin >> key;
+					if (key != 'r' && key != 'R')
+						return 0;
+				}
+			}
 			else
 			{
 				if (access(args[2], ACC_E) == 0)

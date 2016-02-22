@@ -250,18 +250,21 @@ void* CEpollEx::WorkLoop(void* pParam)
                 // 可以写入事件
                 CSockInfo* info = rSockList[fd];
                 // progress the prepare send list first
-                if( info->m_pPrepareSendList->size() != 0 )
+                if( !info->m_pPrepareSendList->empty() )
                 {
                     if( false == info->m_oPreSendMutex.try_lock() )
                     {
                         continue;
                     }
                     unique_lock<mutex> prelck(info->m_oPreSendMutex,std::adopt_lock);
-                    if( info->m_pPrepareSendList->size() == 0 )
-                        continue;
-
+					if (info->m_pPrepareSendList->empty())
+					{
+						prelck.unlock();
+						continue;
+					}
+                        
                     // TODO:: in here i think no need lock the send list. just push data.
-                    while (info->m_pPrepareSendList->size()>0)
+                    while (!info->m_pPrepareSendList->empty())
                     {
                         PRESENDINFO* psi = &info->m_pPrepareSendList->front();
                         info->m_pPrepareSendList->pop();
@@ -293,7 +296,7 @@ void* CEpollEx::WorkLoop(void* pParam)
 					{
 						for (int i = 0; i < info->m_nPriorityLevel; i++)
 						{
-							if (info->m_pSendList[i].size() == 0)
+							if (info->m_pSendList[i].empty())
 								continue;
 							else
 							{
@@ -305,7 +308,7 @@ void* CEpollEx::WorkLoop(void* pParam)
 					SENDINFO* si = NULL;
 					while (si == NULL)
 					{
-                        if (list->size() != 0)
+                        if (!list->empty())
 						{
                             si = list->front();
 							if (si == NULL)
@@ -315,7 +318,7 @@ void* CEpollEx::WorkLoop(void* pParam)
 						}
 					}
 
-                    if (list->size() == 0 || si == NULL)
+                    if (list->empty() || si == NULL)
 					{
 						if (info->m_nLastSentTags != -1)
 							info->m_nLastSentTags = -1;
@@ -383,18 +386,17 @@ void CEpollEx::SendMessage(int sock, int nPriority, const string& nSwift, string
 	msg = md5 + "|" + nSwift + "|" + msg;
     m_pLog->Log(msg);
    
-
+	long long len = msg.size();
 	// if have exdata, directly add to epoll list.
 	if (pExData != NULL && nSize > 0)
 	{
-        long long len = msg.size();
         long long Exlen = nSize;
-        char* pBuf = new char[msg.size() + 8 + 8];
+		char* pBuf = new char[len + 8 + 8];
         memcpy(pBuf, (void*)&len, 8);
-        memcpy(pBuf + 8, msg.c_str(), msg.size());
-        memcpy(pBuf + 8 + msg.size(), (void*)&Exlen, 8);
+		memcpy(pBuf + 8, msg.c_str(), len);
+		memcpy(pBuf + 8 + len, (void*)&Exlen, 8);
 
-        AddToSendList(sock, nPriority, pBuf, msg.size() + 8 + 8, 0, pExData, nSize);
+		AddToSendList(sock, nPriority, pBuf, len + 8 + 8, 0, pExData, nSize);
         return;
 	}
 	else
@@ -406,23 +408,21 @@ void CEpollEx::SendMessage(int sock, int nPriority, const string& nSwift, string
             return;
         }
 		// check the send list size. if all empty, try send message directly.
-        if( info->m_bIsSendListEmpty == false && info->m_pPrepareSendList->size() > 0 )
+        if( info->m_bIsSendListEmpty == false && !info->m_pPrepareSendList->empty() )
         {
-                long long len = msg.size();
-                char* pBuf = new char[msg.size() + 8];
+				char* pBuf = new char[len + 8];
                 memcpy(pBuf, (void*)&len, 8);
-                memcpy(pBuf + 8, msg.c_str(), msg.size());
-                AddToSendList(sock, nPriority, pBuf, msg.size() + 8, 0, pExData, nSize);
+				memcpy(pBuf + 8, msg.c_str(), len);
+				AddToSendList(sock, nPriority, pBuf, len + 8, 0, pExData, nSize);
                 return;
 		}
 	}
     
 	// if code run here. the all list is empty. and no have exdata. try send message
-	long long len = msg.size();
-	char* pBuf = new char[msg.size() + 8];
+	char* pBuf = new char[len + 8];
 	memcpy(pBuf, (void*)&len, 8);
-	memcpy(pBuf + 8, msg.c_str(), msg.size());
-	SendMessageEx(sock, nPriority, pBuf, msg.size() + 8);
+	memcpy(pBuf + 8, msg.c_str(), len);
+	SendMessageEx(sock, nPriority, pBuf, len + 8);
 }
 
 bool CEpollEx::SendMessageEx(int sock, int nPriority, const char *pBuf, int nSize)

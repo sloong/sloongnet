@@ -58,10 +58,10 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 {
 	SloongWallUS* pThis = (SloongWallUS*)pParam;
 
-	if (pThis->m_pEpoll->m_EventSockList.size() > 0)
+	if (!pThis->m_pEpoll->m_EventSockList.empty())
 	{
 		unique_lock<mutex> eventLoc(pThis->m_pEpoll->m_oEventListMutex);
-		if (pThis->m_pEpoll->m_EventSockList.size() == 0)
+		if (pThis->m_pEpoll->m_EventSockList.empty())
 			return NULL;
 
 		// process read list.
@@ -74,15 +74,21 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 
         for (int i = 0; i < pThis->m_nPriorityLevel || i == 0; i++ )
 		{
-			while (info->m_pReadList[i].size() > 0)
+			// if not empty
+			while (!info->m_pReadList[i].empty())
 			{
                 if( info->m_oReadMutex.try_lock() == false )
                 {
                     continue;
                 }
                 unique_lock<mutex> readLoc(info->m_oReadMutex,std::adopt_lock);
-				if (info->m_pReadList[i].size() == 0)
+				// recheck is not empty when lock done.
+				if (info->m_pReadList[i].empty())
+				{
+					readLoc.unlock();
 					continue;
+				}
+
 				string msg = info->m_pReadList[i].front();
 				info->m_pReadList[i].pop();
 				readLoc.unlock();
