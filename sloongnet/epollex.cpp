@@ -128,7 +128,14 @@ void* CEpollEx::WorkLoop(void* pParam)
     {
         // 返回需要处理的事件数
 		n = epoll_wait(pThis->m_EpollHandle, pThis->m_Events, 1024, -1);
-        if( n<=0 ) continue;
+
+        if( n==0 ) continue;
+        else if( n == -1 )
+        {
+            cout<< "epoll error . errno is:"<<strerror(errno)<<endl;
+            continue;
+        }
+
 
         for(i=0; i<n; ++i)
         {
@@ -316,6 +323,11 @@ void* CEpollEx::WorkLoop(void* pParam)
                                 list->pop();
 							}
 						}
+                        else
+                        {
+                            // the send list is empty, so no need loop.
+                            break;
+                        }
 					}
 
                     if (list->empty() || si == NULL)

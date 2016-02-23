@@ -46,8 +46,9 @@ void SloongWallUS::Initialize(CServerConfig* config)
 
 void SloongWallUS::Run()
 {
-	m_pThreadPool->AddTask(SloongWallUS::HandleEventWorkLoop, this, true);
-	m_pThreadPool->Start();
+	//m_pThreadPool->AddTask(SloongWallUS::HandleEventWorkLoop, this, true);
+	m_pThreadPool->AddWorkThread(SloongWallUS::HandleEventWorkLoop, this, 1);
+	//m_pThreadPool->Start();
 	string cmd;
 	while (true)
 	{
@@ -56,7 +57,7 @@ void SloongWallUS::Run()
 		if (cmd == "exit")
 			return;
 		else
-			SLEEP(1000);
+			SLEEP(10000);
 	}
 }
 
@@ -64,7 +65,9 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 {
 	SloongWallUS* pThis = (SloongWallUS*)pParam;
 
-	if (!pThis->m_pEpoll->m_EventSockList.empty())
+	while (true)
+{
+	if(!pThis->m_pEpoll->m_EventSockList.empty())
 	{
 		unique_lock<mutex> eventLoc(pThis->m_pEpoll->m_oEventListMutex);
 		if (pThis->m_pEpoll->m_EventSockList.empty())
@@ -124,8 +127,9 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 	}
 	else
 	{
-		SLEEP(500);
+		SLEEP(5000);
 	}
+}
 	return NULL;
 }
 
