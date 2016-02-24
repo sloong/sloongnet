@@ -39,7 +39,12 @@ void SloongWallUS::Initialize(CServerConfig* config)
 {
 	m_nPriorityLevel = config->m_nPriorityLevel;
 	m_pLog->Initialize(config->m_strLogPath, config->m_bDebug);
+<<<<<<< HEAD
     m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nThreadNum,config->m_nPriorityLevel);
+=======
+    m_pLog->SetWorkInterval(config->m_nSleepInterval);
+    m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel);
+>>>>>>> 7c765d4... modify when config item get failed, other item will not get value between this item .
     m_pMsgProc->Initialize(m_pLog,config->m_strScriptFolder);
 	m_pThreadPool->Initialize(config->m_nThreadNum);
 }

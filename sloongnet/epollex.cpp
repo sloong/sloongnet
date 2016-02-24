@@ -49,9 +49,7 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
     signal(SIGINT,&on_sigint);
 	struct sigaction act;
 	act.sa_handler = SIG_IGN;
-	if (sigaction(SIGPIPE, &act, NULL) == 0) {
-		cout<<("SIGPIPE ignore");
-	}
+    sigaction(SIGPIPE, &act, NULL);
 
     // 初始化socket
     m_ListenSock=socket(AF_INET,SOCK_STREAM,0);
