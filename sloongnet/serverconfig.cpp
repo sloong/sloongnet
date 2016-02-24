@@ -11,8 +11,10 @@ CServerConfig::CServerConfig()
 	m_bDebug = true;
 	m_strLogPath = "./log.log";
 	m_strScriptFolder = "./";
-	m_nThreadNum = 1;
+	m_nEPoolThreadQuantity = 1;
+	m_nProcessThreadQuantity = 1;
     m_nPriorityLevel = 0;
+	m_nSleepInterval = 100;
 }
 
 bool CServerConfig::LoadConfigFile(string path)
@@ -47,11 +49,8 @@ bool CServerConfig::LoadConfigFile(string path)
 		m_bDebug = bRes;
     g_clear_error(&err);
 
-	nRes = g_key_file_get_integer(conf, "Server", "ThreadNum", &err);
+	nRes = g_key_file_get_integer(conf, "Server", "ProcessThreadQuantity", &err);
 	if (!err)
-<<<<<<< HEAD
-		m_nThreadNum = nRes;
-=======
 		m_nProcessThreadQuantity = nRes;
     g_clear_error(&err);
 
@@ -59,7 +58,6 @@ bool CServerConfig::LoadConfigFile(string path)
 	if (!err)
 		m_nEPoolThreadQuantity = nRes;
     g_clear_error(&err);
->>>>>>> 7c765d4... modify when config item get failed, other item will not get value between this item .
 
 	strRes = g_key_file_get_string(conf, "Server", "ScriptFolder", &err);
 	if (!err)
@@ -69,15 +67,12 @@ bool CServerConfig::LoadConfigFile(string path)
 	nRes = g_key_file_get_integer(conf, "Server", "PriorityLevel", &err);
 	if (!err)
 		m_nPriorityLevel = nRes;
-<<<<<<< HEAD
-=======
     g_clear_error(&err);
 
 	nRes = g_key_file_get_integer(conf, "Server", "SleepInterval", &err);
 	if (!err)
 		m_nSleepInterval = nRes;
     g_clear_error(&err);
->>>>>>> 7c765d4... modify when config item get failed, other item will not get value between this item .
 	
 	g_key_file_free(conf);
 }

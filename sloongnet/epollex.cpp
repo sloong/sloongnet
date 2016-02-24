@@ -127,55 +127,45 @@ void* CEpollEx::WorkLoop(void* pParam)
         // 返回需要处理的事件数
 		n = epoll_wait(pThis->m_EpollHandle, pThis->m_Events, 1024, -1);
 
-        if( n==0 ) continue;
-        else if( n == -1 )
-        {
-            cout<< "epoll error . errno is:"<<strerror(errno)<<endl;
-            continue;
-        }
-
-
+        if( n<=0 ) continue;
+        
         for(i=0; i<n; ++i)
         {
             int fd =pThis->m_Events[i].data.fd;
 			if (fd == sockListen)
-            {
-                // 新连接接入
-                while(true)
-                {
-                    // accept the connect and add it to the list
-                    int conn_sock = -1;
-					while ((conn_sock = accept(sockListen, NULL, NULL)) > 0)
-                    {
-                        struct sockaddr_in add;
-                        int nSize = sizeof(add);
-                        memset(&add,0,sizeof(add));
-                        getpeername(conn_sock, (sockaddr*)&add, (socklen_t*)&nSize );
-						
-						time_t tm;
-						time(&tm);
+			{
+				// accept the connect and add it to the list
+				int conn_sock = -1;
+				while ((conn_sock = accept(sockListen, NULL, NULL)) > 0)
+				{
+					struct sockaddr_in add;
+					int nSize = sizeof(add);
+					memset(&add, 0, sizeof(add));
+					getpeername(conn_sock, (sockaddr*)&add, (socklen_t*)&nSize);
 
-						CSockInfo* info = new CSockInfo(pThis->m_nPriorityLevel);
-                        info->m_Address = string(inet_ntoa(add.sin_addr));
-                        info->m_nPort = add.sin_port;
-                        info->m_ConnectTime = tm;
-                        info->m_sock = conn_sock;
-                        rSockList[conn_sock] = info;
-						log->Log(CUniversal::Format("accept client:%s.", info->m_Address));
-                        //将接受的连接添加到Epoll的事件中.
-                        // Add the recv event to epoll;
-                        pThis->SetSocketNonblocking(conn_sock);
-                        pThis->CtlEpollEvent(EPOLL_CTL_ADD,conn_sock,EPOLLIN|EPOLLET);
-                    }
-                    if (conn_sock == -1) {
-                        if (errno == EAGAIN )
-                            break;
-                        else
-							log->Log("accept error.");
+					time_t tm;
+					time(&tm);
 
-                    }
-                }
-            }
+					CSockInfo* info = new CSockInfo(pThis->m_nPriorityLevel);
+					info->m_Address = string(inet_ntoa(add.sin_addr));
+					info->m_nPort = add.sin_port;
+					info->m_ConnectTime = tm;
+					info->m_sock = conn_sock;
+					rSockList[conn_sock] = info;
+					log->Log(CUniversal::Format("accept client:%s.", info->m_Address));
+					//将接受的连接添加到Epoll的事件中.
+					// Add the recv event to epoll;
+					pThis->SetSocketNonblocking(conn_sock);
+					pThis->CtlEpollEvent(EPOLL_CTL_ADD, conn_sock, EPOLLIN | EPOLLET);
+				}
+				if (conn_sock == -1) 
+				{
+					if (errno == EAGAIN)
+						break;
+					else
+						log->Log("accept error.");
+				}
+			}
             else if(pThis->m_Events[i].events&EPOLLIN)
             {
                 // 已经连接的用户,收到数据,可以开始读入

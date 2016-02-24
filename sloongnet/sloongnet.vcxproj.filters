@@ -75,6 +75,9 @@
     <ClInclude Include="progressbar.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="CmdProcess.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="epollex.cpp">
@@ -108,6 +111,9 @@
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="progressbar.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdProcess.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
