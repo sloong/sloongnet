@@ -11,8 +11,10 @@ CServerConfig::CServerConfig()
 	m_bDebug = true;
 	m_strLogPath = "./log.log";
 	m_strScriptFolder = "./";
-	m_nThreadNum = 1;
+	m_nEPoolThreadQuantity = 1;
+	m_nProcessThreadQuantity = 1;
     m_nPriorityLevel = 0;
+	m_nSleepInterval = 100;
 }
 
 bool CServerConfig::LoadConfigFile(string path)
@@ -43,9 +45,13 @@ bool CServerConfig::LoadConfigFile(string path)
 	if (!err)
 		m_bDebug = bRes;
 
-	nRes = g_key_file_get_integer(conf, "Server", "ThreadNum", &err);
+	nRes = g_key_file_get_integer(conf, "Server", "ProcessThreadQuantity", &err);
 	if (!err)
-		m_nThreadNum = nRes;
+		m_nProcessThreadQuantity = nRes;
+
+	nRes = g_key_file_get_integer(conf, "Server", "EPoolThreadQuantity", &err);
+	if (!err)
+		m_nEPoolThreadQuantity = nRes;
 
 	strRes = g_key_file_get_string(conf, "Server", "ScriptFolder", &err);
 	if (!err)
@@ -54,6 +60,10 @@ bool CServerConfig::LoadConfigFile(string path)
 	nRes = g_key_file_get_integer(conf, "Server", "PriorityLevel", &err);
 	if (!err)
 		m_nPriorityLevel = nRes;
+
+	nRes = g_key_file_get_integer(conf, "Server", "SleepInterval", &err);
+	if (!err)
+		m_nSleepInterval = nRes;
 	
 	g_error_free(err);
 	g_key_file_free(conf);
