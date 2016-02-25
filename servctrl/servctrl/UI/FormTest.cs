@@ -144,11 +144,11 @@ namespace servctrl
                                 System.Threading.Thread.Sleep(nInt);
                         }
                             
-                   // }
+                    }
                     
 
-//                      for (int i = 0; i < nMul; i++)
-//                      {
+                      for (int i = 0; i < nMul; i++)
+                      {
                          // send end, rece the return.
                          byte[] leng = Utility.RecvEx(sockCurrent, 8);
                          long nlen = 0;

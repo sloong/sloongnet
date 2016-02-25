@@ -17,7 +17,7 @@
       <UniqueIdentifier>{04dbcfc6-32c5-4c14-bccc-de143428ec5c}</UniqueIdentifier>
       <Extensions>*.mak</Extensions>
     </Filter>
-    <Filter Include="script">
+    <Filter Include="scripts">
       <UniqueIdentifier>{d910d274-a871-4d10-bee2-edd0bd9aef9a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -28,17 +28,17 @@
     <None Include="release.mak">
       <Filter>Make files</Filter>
     </None>
-    <None Include="script\comm.lua">
-      <Filter>script</Filter>
-    </None>
-    <None Include="script\epollproc.lua">
-      <Filter>script</Filter>
-    </None>
-    <None Include="script\init.lua">
-      <Filter>script</Filter>
-    </None>
     <None Include="Makefile_VGDB" />
     <None Include="default.conf" />
+    <None Include="scripts\comm.lua">
+      <Filter>scripts</Filter>
+    </None>
+    <None Include="scripts\epollproc.lua">
+      <Filter>scripts</Filter>
+    </None>
+    <None Include="scripts\init.lua">
+      <Filter>scripts</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="epollex.h">

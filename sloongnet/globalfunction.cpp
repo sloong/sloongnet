@@ -10,10 +10,13 @@ using namespace Sloong::Universal;
 #include "jpeg.h"
 #define cimg_display 0
 #include "CImg.h"
+#include <mutex>
+using namespace std;
 using namespace cimg_library;
 #define ARRAYSIZE(a) (sizeof(a)/sizeof(a[0]))
 
 CGlobalFunction* CGlobalFunction::g_pThis = NULL;
+mutex g_SQLMutex;
 
 LuaFunctionRegistr g_LuaFunc[] =
 {
@@ -53,7 +56,9 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 {
 	auto lua = g_pThis->m_pLua;
 	vector<string> res;
+	unique_lock<mutex> lck(g_SQLMutex);
     g_pThis->m_pDBProc->Query(lua->GetStringArgument(1), res);
+	lck.unlock();
 	string allLine;
 	BOOST_FOREACH(string item, res)
 	{

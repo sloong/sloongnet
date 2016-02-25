@@ -67,9 +67,9 @@
     <None Include="debug.mak" />
     <None Include="Makefile_VGDB" />
     <None Include="release.mak" />
-    <None Include="script\comm.lua" />
-    <None Include="script\epollproc.lua" />
-    <None Include="script\init.lua" />
+    <None Include="scripts\comm.lua" />
+    <None Include="scripts\epollproc.lua" />
+    <None Include="scripts\init.lua" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CmdProcess.h" />
