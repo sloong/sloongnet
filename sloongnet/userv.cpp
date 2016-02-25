@@ -2,6 +2,7 @@
 #include<sys/types.h>
 #include<sys/socket.h>
 #include<netinet/in.h>
+#include "semaphore.h"
 using namespace std;
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
@@ -35,11 +36,12 @@ SloongWallUS::~SloongWallUS()
 
 void SloongWallUS::Initialize(CServerConfig* config)
 {
+    m_pConfig = config;
 	m_nPriorityLevel = config->m_nPriorityLevel;
 	m_pLog->Initialize(config->m_strLogPath, config->m_bDebug);
     m_pLog->SetWorkInterval(config->m_nSleepInterval);
     m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel);
-    m_pMsgProc->Initialize(m_pLog,config->m_strScriptFolder);
+    //m_pMsgProc->Initialize(m_pLog,config->m_strScriptFolder);
 	//m_pThreadPool->Initialize(config->m_nThreadNum);
 	CThreadPool::AddWorkThread(SloongWallUS::HandleEventWorkLoop, this, config->m_nProcessThreadQuantity);
 	m_nSleepInterval = config->m_nSleepInterval;
@@ -65,11 +67,16 @@ void SloongWallUS::Run()
 void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 {
 	SloongWallUS* pThis = (SloongWallUS*)pParam;
-
+    auto log = pThis->m_pLog;
+    auto pid = this_thread::get_id();
+    string spid = CUniversal::ntos(pid);
+    log->Log("Event process thread is running." + spid);
+    CMsgProc msgproc;
+    msgproc.Initialize(pThis->m_pLog,pThis->m_pConfig->m_strScriptFolder);
 	while (true)
 	{
 		if (!pThis->m_pEpoll->m_EventSockList.empty())
-		{
+        {
 			unique_lock<mutex> eventLoc(pThis->m_pEpoll->m_oEventListMutex);
 			if (pThis->m_pEpoll->m_EventSockList.empty())
 				continue;
@@ -120,7 +127,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 
 					string strRes;
 					char* pBuf = NULL;
-					int nSize = pThis->m_pMsgProc->MsgProcess(info->m_pUserInfo, tmsg, strRes, pBuf);
+                    int nSize = msgproc.MsgProcess(info->m_pUserInfo, tmsg, strRes, pBuf);
 					pThis->m_pEpoll->SendMessage(sock, i, swift, strRes, pBuf, nSize);
 				}
 			}
@@ -128,7 +135,9 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 		}
 		else
 		{
-			SLEEP(pThis->m_nSleepInterval);
+            log->Log("Event process thread is wait event."+ spid);
+            sem_wait(&pThis->m_pEpoll->sem12);
+            log->Log("Event happend. process thread run contine."+ spid);
 		}
 	}
 	return NULL;

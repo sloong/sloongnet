@@ -42,7 +42,6 @@ int CMsgProc::MsgProcess( CLuaPacket* pUInfo, string& msg, string&res, char*& pB
 {
     // In process, need add the lua script runtime and call lua to process.
     // In here, just show log to test.
-	m_pLog->Log("Message is processed. call lua func.");
 
 	// process msg, get the md5 code and the swift number.
     CLuaPacket request, response;
@@ -75,7 +74,7 @@ int CMsgProc::MsgProcess( CLuaPacket* pUInfo, string& msg, string&res, char*& pB
 
     res = response.GetData("errno") + "|" + response.GetData("errmsg") + "|" + response.GetData("message");
 
-	m_pLog->Log(res);
+    m_pLog->Log(res);
 	return nSize;
 }
 

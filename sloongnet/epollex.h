@@ -9,6 +9,7 @@
 #include <queue>
 #include <mutex>
 #include "sockinfo.h"
+#include "semaphore.h"
 using namespace std; //std 命名空间
 typedef unsigned char byte;
 
@@ -24,7 +25,7 @@ namespace Sloong
 	public:
         CEpollEx();
 		virtual ~CEpollEx();
-        int Initialize(CLog* pLog,int listenPort, int nThreadNum, int nPriorityLevel);
+        int Initialize(CLog* pLog,int listenPort, int nThreadNum, int nPriorityLevel, bool bShowSendMessage = false );
         void SendMessage(int sock, int nPriority, const string& nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
         bool SendMessageEx( int sock, int nPriority, const char* pData, int nSize);
 	protected:
@@ -49,6 +50,8 @@ namespace Sloong
         mutex m_oEventListMutex;
         mutex m_oSockListMutex;
 		int m_nPriorityLevel;
+        sem_t sem12;
+        bool m_bShowSendMessage;
 	};
 }
 

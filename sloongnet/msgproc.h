@@ -24,7 +24,7 @@ namespace Sloong
 		CLua*	m_pLua;
 		CLog*	m_pLog;
 		CGlobalFunction*	m_pGFunc;
-                string m_strScriptFolder;
+        string m_strScriptFolder;
 	};
 }
 

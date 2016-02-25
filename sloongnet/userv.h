@@ -30,6 +30,7 @@ namespace Sloong
 		int* m_sockClient;
 		int m_nPriorityLevel;
 		int m_nSleepInterval;
+        CServerConfig* m_pConfig;
 
 		CEpollEx* m_pEpoll;
 		CMsgProc* m_pMsgProc;

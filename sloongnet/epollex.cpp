@@ -35,8 +35,9 @@ void on_sigint(int signal)
 }
 
 // Initialize the epoll and the thread pool.
-int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel)
+int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bShowSendMessage /* = false */)
 {
+    m_bShowSendMessage = bShowSendMessage;
 	m_nPriorityLevel = nPriorityLevel;
     m_pLog = plog;
 	m_pLog->Log(CUniversal::Format("epollex is initialize.license port is %d", licensePort));
@@ -46,11 +47,9 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
     //SIGINT:由Interrupt Key产生,通常是Ctrl+c或者Delete,发送给所有的ForeGroundGroup进程.
     signal(SIGPIPE,SIG_IGN);
     signal(SIGCHLD,SIG_IGN);
+    signal(SIGPIPE,SIG_IGN);
     signal(SIGINT,&on_sigint);
-	struct sigaction act;
-	act.sa_handler = SIG_IGN;
-    sigaction(SIGPIPE, &act, NULL);
-
+    sem_init(&sem12,0,0);
     // 初始化socket
     m_ListenSock=socket(AF_INET,SOCK_STREAM,0);
     int sock_op = 1;
@@ -236,6 +235,8 @@ void* CEpollEx::WorkLoop(void* pParam)
                         // Add the sock event to list
                         unique_lock<mutex> elck(pThis->m_oEventListMutex);
                         pThis->m_EventSockList.push(fd);
+                        sem_post(&pThis->sem12);
+
                         elck.unlock();
                     }
                 }
@@ -384,7 +385,8 @@ void CEpollEx::SendMessage(int sock, int nPriority, const string& nSwift, string
 	// process msg
 	string md5 = CUniversal::MD5_Encoding(msg);
 	msg = md5 + "|" + nSwift + "|" + msg;
-    m_pLog->Log(msg);
+    if( m_bShowSendMessage )
+        m_pLog->Log(msg);
    
 	long long len = msg.size();
 	// if have exdata, directly add to epoll list.
