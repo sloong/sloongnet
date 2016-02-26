@@ -26,6 +26,7 @@ namespace Sloong
 		CLog*			m_pLog;
 		CGlobalFunction*	m_pGFunc;
         string m_strScriptFolder;
+        mutex           m_luaMutex;
 	};
 }
 

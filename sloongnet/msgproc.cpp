@@ -84,9 +84,15 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 
 int Sloong::CMsgProc::NewThreadInit()
 {
+
 	CLua* pLua = new CLua();
 	pLua->SetScriptFolder(m_strScriptFolder);
 	m_pGFunc->InitLua(pLua);
 	InitLua(pLua,m_strScriptFolder);
+    m_luaMutex.lock();
+    m_pLuaList.push_back(pLua);
+    int id = m_pLuaList.size()-1;
+    m_luaMutex.unlock();
+    return id;
 }
 
