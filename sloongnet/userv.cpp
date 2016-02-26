@@ -86,49 +86,25 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 			eventLoc.unlock();
 
 			CSockInfo* info = pThis->m_pEpoll->m_SockList[sock];
-			if (!info) continue;
+			if (!info)
+			{
+				log->Log(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", sock), LOGLEVEL::WARN);
+				continue;
+			}
 
 			for (int i = 0; i < pThis->m_nPriorityLevel || i == 0; i++)
 			{
-				// if not empty
-				while (!info->m_pReadList[i].empty())
+				// try to lock the process mutex in current priority level.
+				if (info->m_pProcessMutexList[i].try_lock() == false)
 				{
-					if (info->m_oReadMutex.try_lock() == false)
-					{
-						continue;
-					}
-					unique_lock<mutex> readLoc(info->m_oReadMutex, std::adopt_lock);
-					// recheck is not empty when lock done.
-					if (info->m_pReadList[i].empty())
-					{
-						readLoc.unlock();
-						continue;
-					}
-
-					string msg = info->m_pReadList[i].front();
-					info->m_pReadList[i].pop();
-					readLoc.unlock();
-					auto md5index = msg.find("|");
-					auto swiftindex = msg.find("|", md5index + 1);
-					string md5 = msg.substr(0, md5index);
-					//int swift = boost::lexical_cast<int>(msg.substr(md5index, swiftindex - md5index));
-					string swift = (msg.substr(md5index + 1, swiftindex - (md5index + 1)));
-					string tmsg = msg.substr(swiftindex + 1);
-					string rmd5 = CUniversal::MD5_Encoding(tmsg);
-					CUniversal::touper(md5);
-					CUniversal::touper(rmd5);
-					if (md5 != rmd5)
-					{
-						// handle error.
-						pThis->m_pEpoll->SendMessage(sock, i, swift, "-1|package check error");
-						continue;
-					}
-
-					string strRes;
-					char* pBuf = NULL;
-					int nSize = pThis->m_pMsgProc->MsgProcess(id,info->m_pUserInfo, tmsg, strRes, pBuf);
-					pThis->m_pEpoll->SendMessage(sock, i, swift, strRes, pBuf, nSize);
+					// this sock is processed in other thread. continue
+					continue;
 				}
+
+				ProcessEventList(id, &info->m_pReadList[i], info->m_oReadMutex, sock, i, info->m_pUserInfo, pThis->m_pEpoll, pThis->m_pMsgProc);
+
+				// unlock current level.
+				info->m_pProcessMutexList[i].unlock();
 			}
 
 		}
@@ -141,3 +117,52 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 	}
 	return NULL;
 }
+
+void Sloong::SloongWallUS::ProcessEventList(int id, queue<string>* pList, mutex& oLock, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc)
+{
+	// if not empty
+	while (!pList->empty())
+	{
+		if (oLock.try_lock() == false)
+		{
+			continue;
+		}
+		unique_lock<mutex> readLoc(oLock, std::adopt_lock);
+		// recheck is not empty when lock done.
+		if (pList->empty())
+		{
+			oLock.unlock();
+			continue;
+		}
+
+		string msg = pList->front();
+		pList->pop();
+		ProcessEvent(id, msg, sock, nPriorityLevel, pUserInfo, pEpoll,pMsgProc);
+		oLock.unlock();
+	}
+}
+
+
+void Sloong::SloongWallUS::ProcessEvent(int id, string& strMsg, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc)
+{
+	auto md5index = strMsg.find("|");
+	auto swiftindex = strMsg.find("|", md5index + 1);
+	string md5 = strMsg.substr(0, md5index);
+	string swift = (strMsg.substr(md5index + 1, swiftindex - (md5index + 1)));
+	string tmsg = strMsg.substr(swiftindex + 1);
+	string rmd5 = CUniversal::MD5_Encoding(tmsg);
+	CUniversal::touper(md5);
+	CUniversal::touper(rmd5);
+	if (md5 != rmd5)
+	{
+		// handle error.
+		pEpoll->SendMessage(sock, nPriorityLevel, swift, "-1|package check error");
+		return;
+	}
+
+	string strRes;
+	char* pBuf = NULL;
+	int nSize = pMsgProc->MsgProcess(id, pUserInfo, tmsg, strRes, pBuf);
+	pEpoll->SendMessage(sock, nPriorityLevel, swift, strRes, pBuf, nSize);
+}
+

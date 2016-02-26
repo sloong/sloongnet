@@ -50,6 +50,10 @@ namespace Sloong
         mutex m_oReadMutex;
         mutex m_oSendMutex;
         mutex m_oPreSendMutex;
+		// for the process thread. in epoll thread, it always add the event sock to event list. so in process thread
+		// maybe happed two thread process one socket. 
+		// this mutex number is base on Priority level numbers.
+		mutex* m_pProcessMutexList;
 		int m_nPriorityLevel;
 		int m_nLastSentTags;
         bool m_bIsSendListEmpty;

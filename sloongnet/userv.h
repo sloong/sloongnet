@@ -6,6 +6,7 @@ namespace Sloong
 	namespace Universal
 	{
 		class CThreadPool;
+		class CLuaPacket;
 	}
 	using namespace Universal;
 
@@ -23,7 +24,8 @@ namespace Sloong
 
 	public:// static function
 		static void* HandleEventWorkLoop(void* pParam);
-
+		static void ProcessEvent(int id, string& strMsg, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc);
+		static void ProcessEventList(int id, queue<string>* pList, mutex& oLock, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc);
 
 	protected:
 		int m_sockServ;
@@ -31,7 +33,6 @@ namespace Sloong
 		int m_nPriorityLevel;
 		int m_nSleepInterval;
         CServerConfig* m_pConfig;
-
 		CEpollEx* m_pEpoll;
 		CMsgProc* m_pMsgProc;
 		CLog* m_pLog;

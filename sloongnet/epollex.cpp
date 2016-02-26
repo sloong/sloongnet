@@ -236,7 +236,6 @@ void* CEpollEx::WorkLoop(void* pParam)
                         unique_lock<mutex> elck(pThis->m_oEventListMutex);
                         pThis->m_EventSockList.push(fd);
                         sem_post(&pThis->sem12);
-
                         elck.unlock();
                     }
                 }
