@@ -41,7 +41,7 @@ void SloongWallUS::Initialize(CServerConfig* config)
 	m_pLog->Initialize(config->m_strLogPath, config->m_bDebug);
     m_pLog->SetWorkInterval(config->m_nSleepInterval);
     m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel);
-    //m_pMsgProc->Initialize(m_pLog,config->m_strScriptFolder);
+    m_pMsgProc->Initialize(m_pLog,config->m_strScriptFolder);
 	//m_pThreadPool->Initialize(config->m_nThreadNum);
 	CThreadPool::AddWorkThread(SloongWallUS::HandleEventWorkLoop, this, config->m_nProcessThreadQuantity);
 	m_nSleepInterval = config->m_nSleepInterval;
@@ -71,8 +71,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
     auto pid = this_thread::get_id();
     string spid = CUniversal::ntos(pid);
     log->Log("Event process thread is running." + spid);
-    CMsgProc msgproc;
-    msgproc.Initialize(pThis->m_pLog,pThis->m_pConfig->m_strScriptFolder);
+	int id = pThis->m_pMsgProc->NewThreadInit();
 	while (true)
 	{
 		if (!pThis->m_pEpoll->m_EventSockList.empty())
@@ -127,7 +126,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 
 					string strRes;
 					char* pBuf = NULL;
-                    int nSize = msgproc.MsgProcess(info->m_pUserInfo, tmsg, strRes, pBuf);
+					int nSize = pThis->m_pMsgProc->MsgProcess(id,info->m_pUserInfo, tmsg, strRes, pBuf);
 					pThis->m_pEpoll->SendMessage(sock, i, swift, strRes, pBuf, nSize);
 				}
 			}

@@ -38,7 +38,7 @@ void CMsgProc::InitLua(string path)
     m_pLua->RunFunction("Init",CUniversal::Format("'%s'",strDir));
 }
 
-int CMsgProc::MsgProcess( CLuaPacket* pUInfo, string& msg, string&res, char*& pBuf)
+int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, char*& pBuf)
 {
     // In process, need add the lua script runtime and call lua to process.
     // In here, just show log to test.
@@ -46,7 +46,7 @@ int CMsgProc::MsgProcess( CLuaPacket* pUInfo, string& msg, string&res, char*& pB
 	// process msg, get the md5 code and the swift number.
     CLuaPacket request, response;
 	request.SetData("message", msg);
-	if (!m_pLua->RunFunction("OnRecvMessage", pUInfo, &request, &response))
+	if (!m_pLua->RunFunction("OnRecvMessage", pUInfo, &request, &response,id))
 		m_pLog->Log(m_pLua->GetErrorString());
 
     // check the return ;
@@ -76,6 +76,13 @@ int CMsgProc::MsgProcess( CLuaPacket* pUInfo, string& msg, string&res, char*& pB
 
     m_pLog->Log(res);
 	return nSize;
+}
+
+
+// call lua new thread function and get the new thread static and return the id.
+int Sloong::CMsgProc::NewThreadInit()
+{
+	return m_pLua->CreateNewThread();
 }
 
 

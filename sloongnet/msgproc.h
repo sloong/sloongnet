@@ -17,7 +17,8 @@ namespace Sloong
         CMsgProc();
 		~CMsgProc();
         void Initialize(CLog* pLog, string scriptFolder);
-		int MsgProcess(CLuaPacket* pUInfo, string& msg, string&res, char*& pBuf);
+		int MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, char*& pBuf);
+		int NewThreadInit();
 		void InitLua(string folder);
 
 	protected:
