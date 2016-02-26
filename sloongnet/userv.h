@@ -36,6 +36,7 @@ namespace Sloong
 		CEpollEx* m_pEpoll;
 		CMsgProc* m_pMsgProc;
 		CLog* m_pLog;
+		sem_t m_oSem;
 	};
 
 }

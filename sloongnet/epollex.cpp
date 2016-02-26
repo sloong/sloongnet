@@ -49,7 +49,7 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
     signal(SIGCHLD,SIG_IGN);
     signal(SIGPIPE,SIG_IGN);
     signal(SIGINT,&on_sigint);
-    sem_init(&sem12,0,0);
+
     // 初始化socket
     m_ListenSock=socket(AF_INET,SOCK_STREAM,0);
     int sock_op = 1;
@@ -133,231 +133,15 @@ void* CEpollEx::WorkLoop(void* pParam)
             int fd =pThis->m_Events[i].data.fd;
 			if (fd == sockListen)
 			{
-				// accept the connect and add it to the list
-				int conn_sock = -1;
-				while ((conn_sock = accept(sockListen, NULL, NULL)) > 0)
-				{
-					struct sockaddr_in add;
-					int nSize = sizeof(add);
-					memset(&add, 0, sizeof(add));
-					getpeername(conn_sock, (sockaddr*)&add, (socklen_t*)&nSize);
-
-					time_t tm;
-					time(&tm);
-
-					CSockInfo* info = new CSockInfo(pThis->m_nPriorityLevel);
-					info->m_Address = string(inet_ntoa(add.sin_addr));
-					info->m_nPort = add.sin_port;
-					info->m_ConnectTime = tm;
-					info->m_sock = conn_sock;
-					rSockList[conn_sock] = info;
-					log->Log(CUniversal::Format("accept client:%s.", info->m_Address));
-					//将接受的连接添加到Epoll的事件中.
-					// Add the recv event to epoll;
-					pThis->SetSocketNonblocking(conn_sock);
-					pThis->CtlEpollEvent(EPOLL_CTL_ADD, conn_sock, EPOLLIN | EPOLLET);
-				}
-				if (conn_sock == -1) 
-				{
-					if (errno == EAGAIN)
-						break;
-					else
-						log->Log("accept error.");
-				}
+				pThis->OnNewAccept();
 			}
             else if(pThis->m_Events[i].events&EPOLLIN)
             {
-                // 已经连接的用户,收到数据,可以开始读入
-				int len = sizeof(long long);
-                char dataLeng[sizeof(long long)+1] = {0};
-                char* pLen = dataLeng;
-                bool bLoop = true;
-                while(bLoop)
-                {
-                    // 先读取消息长度
-					memset( pLen, 0, len+1 );
-					int nRecvSize = RecvEx(fd, &pLen, len, true);
-                    if( nRecvSize == 0)
-                    {
-                        // 读取错误,将这个连接从监听中移除并关闭连接
-                        pThis->CloseConnect(fd);
-                        break;
-                    }
-                    else if( nRecvSize < 0 )
-                    {
-                        //由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
-                        break;
-                    }
-                    else
-                    {
-                        long dtlen = atol(dataLeng);
-                        char* data = new char[dtlen+1];
-                        memset(data,0,dtlen+1);
-
-                        nRecvSize = RecvEx(fd,&data,dtlen);//一次性接受所有消息
-                        if( nRecvSize == 0)
-                        {
-                            pThis->CloseConnect(fd);
-                            break;
-                        }
-
-						CSockInfo* info = rSockList[fd];
-						unique_lock<mutex> lck(info->m_oReadMutex);
-                        queue<string>* pList = &info->m_pReadList[0];
-						string msg;
-
-						// check the priority level
-						if (pThis->m_nPriorityLevel != 0)
-						{
-							if (data[0] > pThis->m_nPriorityLevel || data[0] < 0 )
-							{
-								log->Log(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", data[0], pThis->m_nPriorityLevel));
-                                pList = &info->m_pReadList[pThis->m_nPriorityLevel - 1];
-							}
-							else
-							{
-                                pList = &info->m_pReadList[data[0]];
-							}
-							const char* msgdata = &data[1];
-							msg = msgdata;
-						}
-						else
-						{
-                            pList = &info->m_pReadList[0];
-							msg = data;
-						}
-                        // Add the msg to the sock info list
-                        delete[] data;
-                        
-                        pList->push(msg);
-                        lck.unlock();
-
-                        // Add the sock event to list
-                        unique_lock<mutex> elck(pThis->m_oEventListMutex);
-                        pThis->m_EventSockList.push(fd);
-                        sem_post(&pThis->sem12);
-                        elck.unlock();
-                    }
-                }
+				pThis->OnDataCanReceive(fd);
             }
             else if(pThis->m_Events[i].events&EPOLLOUT)
             {
-                // 可以写入事件
-                CSockInfo* info = rSockList[fd];
-                // progress the prepare send list first
-                if( !info->m_pPrepareSendList->empty() )
-                {
-                    if( false == info->m_oPreSendMutex.try_lock() )
-                    {
-                        continue;
-                    }
-                    unique_lock<mutex> prelck(info->m_oPreSendMutex,std::adopt_lock);
-					if (info->m_pPrepareSendList->empty())
-					{
-						prelck.unlock();
-						continue;
-					}
-                        
-                    // TODO:: in here i think no need lock the send list. just push data.
-                    while (!info->m_pPrepareSendList->empty())
-                    {
-                        PRESENDINFO* psi = &info->m_pPrepareSendList->front();
-                        info->m_pPrepareSendList->pop();
-                        info->m_pSendList[psi->nPriorityLevel].push(psi->pSendInfo);
-                    }
-
-                    prelck.unlock();
-                }
-
-                // when prepare list process done, do send operation.
-                if( false == info->m_oSendMutex.try_lock())
-                {
-                    continue;
-                }
-                unique_lock<mutex> lck(info->m_oSendMutex,std::adopt_lock);
-				
-				bool bTrySend = true;
-
-				while (bTrySend)
-				{
-                    queue<SENDINFO*>* list = &info->m_pSendList[0];
-					// prev package no send end. find and try send it again.
-					if (-1 != info->m_nLastSentTags)
-					{
-                        list = &info->m_pSendList[info->m_nLastSentTags];
-					}
-					// find next package. 
-					else
-					{
-						for (int i = 0; i < info->m_nPriorityLevel; i++)
-						{
-							if (info->m_pSendList[i].empty())
-								continue;
-							else
-							{
-                                list = &info->m_pSendList[i];
-							}
-						}
-					}
-					// if no find send info, is no need send anything , remove this sock from epoll.'
-					SENDINFO* si = NULL;
-					while (si == NULL)
-					{
-                        if (!list->empty())
-						{
-                            si = list->front();
-							if (si == NULL)
-							{
-                                list->pop();
-							}
-						}
-                        else
-                        {
-                            // the send list is empty, so no need loop.
-                            break;
-                        }
-					}
-
-                    if (list->empty() || si == NULL)
-					{
-						if (info->m_nLastSentTags != -1)
-							info->m_nLastSentTags = -1;
-						else
-                        {
-							pThis->CtlEpollEvent(EPOLL_CTL_MOD, fd, EPOLLIN | EPOLLET);
-                            info->m_bIsSendListEmpty = true;
-                        }
-					}
-
-					// try send first.
-					if ( si->nSent >= si->nSize )
-						// Send ex data
-                        si->nSent = SendEx(fd, si->pExBuffer, si->nExSize, si->nSent- si->nSize ) + si->nSize;
-					else
-						// send normal data.
-						si->nSent = SendEx(fd, si->pSendBuffer, si->nSize, si->nSent);
-
-					// check send result.
-					// send done, remove the is sent data and try send next package.
-					if (si->nSent == (si->nSize+si->nExSize))
-					{
-                        log->Log(CUniversal::Format("package is send done, send data length is:%d. remove from list.",si->nSent));
-                        list->pop();
-						info->m_nLastSentTags = -1;
-						SAFE_DELETE_ARR(si->pSendBuffer);
-						SAFE_DELETE_ARR(si->pExBuffer);
-						SAFE_DELETE(si);
-						bTrySend = true;
-					}
-					// send falied, wait next event.
-					else
-					{
-						bTrySend = false;
-					}
-				}
-
-                lck.unlock();
-                pThis->CtlEpollEvent(EPOLL_CTL_MOD,fd,EPOLLIN|EPOLLET|EPOLLOUT);
+				pThis->OnCanWriteData(fd);
             }
             else
             {
@@ -547,6 +331,242 @@ int Sloong::CEpollEx::RecvEx(int sock, char** buf, int nSize, bool eagain /* = f
         nIsRecv += nRecv;
     }
     return nIsRecv;
+}
+
+void Sloong::CEpollEx::OnNewAccept()
+{
+	// accept the connect and add it to the list
+	int conn_sock = -1;
+	while ((conn_sock = accept(m_ListenSock, NULL, NULL)) > 0)
+	{
+		struct sockaddr_in add;
+		int nSize = sizeof(add);
+		memset(&add, 0, sizeof(add));
+		getpeername(conn_sock, (sockaddr*)&add, (socklen_t*)&nSize);
+
+		time_t tm;
+		time(&tm);
+
+		CSockInfo* info = new CSockInfo(m_nPriorityLevel);
+		info->m_Address = string(inet_ntoa(add.sin_addr));
+		info->m_nPort = add.sin_port;
+		info->m_ConnectTime = tm;
+		info->m_sock = conn_sock;
+		m_SockList[conn_sock] = info;
+		m_pLog->Log(CUniversal::Format("accept client:%s.", info->m_Address));
+		//将接受的连接添加到Epoll的事件中.
+		// Add the recv event to epoll;
+		SetSocketNonblocking(conn_sock);
+		CtlEpollEvent(EPOLL_CTL_ADD, conn_sock, EPOLLIN | EPOLLET);
+	}
+	if (conn_sock == -1)
+	{
+		if (errno == EAGAIN)
+			return;
+		else
+			m_pLog->Log("accept error.");
+	}
+}
+
+void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
+{
+	// 已经连接的用户,收到数据,可以开始读入
+	int len = sizeof(long long);
+	char dataLeng[sizeof(long long) + 1] = { 0 };
+	char* pLen = dataLeng;
+	bool bLoop = true;
+	while (bLoop)
+	{
+		// 先读取消息长度
+		memset(pLen, 0, len + 1);
+		int nRecvSize = RecvEx(nSocket, &pLen, len, true);
+		if (nRecvSize == 0)
+		{
+			// 读取错误,将这个连接从监听中移除并关闭连接
+			CloseConnect(nSocket);
+			break;
+		}
+		else if (nRecvSize < 0)
+		{
+			//由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
+			break;
+		}
+		else
+		{
+			long dtlen = atol(dataLeng);
+			char* data = new char[dtlen + 1];
+			memset(data, 0, dtlen + 1);
+
+			nRecvSize = RecvEx(nSocket, &data, dtlen);//一次性接受所有消息
+			if (nRecvSize == 0)
+			{
+				CloseConnect(nSocket);
+				break;
+			}
+
+			CSockInfo* info = m_SockList[nSocket];
+			unique_lock<mutex> lck(info->m_oReadMutex);
+			queue<string>* pList = &info->m_pReadList[0];
+			string msg;
+
+			// check the priority level
+			if (m_nPriorityLevel != 0)
+			{
+				if (data[0] > m_nPriorityLevel || data[0] < 0)
+				{
+					m_pLog->Log(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", data[0], m_nPriorityLevel));
+					pList = &info->m_pReadList[m_nPriorityLevel - 1];
+				}
+				else
+				{
+					pList = &info->m_pReadList[data[0]];
+				}
+				const char* msgdata = &data[1];
+				msg = msgdata;
+			}
+			else
+			{
+				pList = &info->m_pReadList[0];
+				msg = data;
+			}
+			// Add the msg to the sock info list
+			delete[] data;
+
+			pList->push(msg);
+			lck.unlock();
+
+			// Add the sock event to list
+			unique_lock<mutex> elck(m_oEventListMutex);
+			m_EventSockList.push(nSocket);
+			sem_post(m_pSEM);
+			elck.unlock();
+		}
+	}
+}
+
+void Sloong::CEpollEx::OnCanWriteData(int nSocket)
+{
+	// 可以写入事件
+	CSockInfo* info = m_SockList[nSocket];
+	// progress the prepare send list first
+	if (!info->m_pPrepareSendList->empty())
+	{
+		if (false == info->m_oPreSendMutex.try_lock())
+		{
+			return;
+		}
+		unique_lock<mutex> prelck(info->m_oPreSendMutex, std::adopt_lock);
+		if (info->m_pPrepareSendList->empty())
+		{
+			prelck.unlock();
+			return;
+		}
+
+		// TODO:: in here i think no need lock the send list. just push data.
+		while (!info->m_pPrepareSendList->empty())
+		{
+			PRESENDINFO* psi = &info->m_pPrepareSendList->front();
+			info->m_pPrepareSendList->pop();
+			info->m_pSendList[psi->nPriorityLevel].push(psi->pSendInfo);
+		}
+
+		prelck.unlock();
+	}
+
+	// when prepare list process done, do send operation.
+	if (false == info->m_oSendMutex.try_lock())
+	{
+		return;
+	}
+	unique_lock<mutex> lck(info->m_oSendMutex, std::adopt_lock);
+
+	bool bTrySend = true;
+
+	while (bTrySend)
+	{
+		queue<SENDINFO*>* list = &info->m_pSendList[0];
+		// prev package no send end. find and try send it again.
+		if (-1 != info->m_nLastSentTags)
+		{
+			list = &info->m_pSendList[info->m_nLastSentTags];
+		}
+		// find next package. 
+		else
+		{
+			for (int i = 0; i < info->m_nPriorityLevel; i++)
+			{
+				if (info->m_pSendList[i].empty())
+					continue;
+				else
+				{
+					list = &info->m_pSendList[i];
+				}
+			}
+		}
+		// if no find send info, is no need send anything , remove this sock from epoll.'
+		SENDINFO* si = NULL;
+		while (si == NULL)
+		{
+			if (!list->empty())
+			{
+				si = list->front();
+				if (si == NULL)
+				{
+					list->pop();
+				}
+			}
+			else
+			{
+				// the send list is empty, so no need loop.
+				break;
+			}
+		}
+
+		if (list->empty() || si == NULL)
+		{
+			if (info->m_nLastSentTags != -1)
+				info->m_nLastSentTags = -1;
+			else
+			{
+				CtlEpollEvent(EPOLL_CTL_MOD, nSocket, EPOLLIN | EPOLLET);
+				info->m_bIsSendListEmpty = true;
+			}
+		}
+
+		// try send first.
+		if (si->nSent >= si->nSize)
+			// Send ex data
+			si->nSent = SendEx(nSocket, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
+		else
+			// send normal data.
+			si->nSent = SendEx(nSocket, si->pSendBuffer, si->nSize, si->nSent);
+
+		// check send result.
+		// send done, remove the is sent data and try send next package.
+		if (si->nSent == (si->nSize + si->nExSize))
+		{
+			m_pLog->Log(CUniversal::Format("package is send done, send data length is:%d. remove from list.", si->nSent));
+			list->pop();
+			info->m_nLastSentTags = -1;
+			SAFE_DELETE_ARR(si->pSendBuffer);
+			SAFE_DELETE_ARR(si->pExBuffer);
+			SAFE_DELETE(si);
+			bTrySend = true;
+		}
+		// send falied, wait next event.
+		else
+		{
+			bTrySend = false;
+		}
+	}
+
+	lck.unlock();
+	CtlEpollEvent(EPOLL_CTL_MOD, nSocket, EPOLLIN | EPOLLET | EPOLLOUT);
+}
+
+void Sloong::CEpollEx::SetSEM(sem_t* pSem)
+{
+	m_pSEM = pSem;
 }
 
 
