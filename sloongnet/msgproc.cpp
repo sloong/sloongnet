@@ -8,34 +8,36 @@
 #include <univ/exception.h>
 CMsgProc::CMsgProc()
 {
-    m_pLua = new CLua();
     m_pGFunc = new CGlobalFunction();
 }
 
 CMsgProc::~CMsgProc()
 {
-    delete m_pLua;
+	for (int i = 0; i < m_pLuaList.size(); i++)
+    {
+		SAFE_DELETE(m_pLuaList[i]);
+    }
+	SAFE_DELETE(m_pGFunc);
 }
 
 void CMsgProc::Initialize(CLog *pLog, string scriptFolder)
 {
     m_pLog = pLog;
     m_strScriptFolder = scriptFolder;
-	m_pLua->SetScriptFolder(scriptFolder);
-    m_pGFunc->Initialize(m_pLog,m_pLua);
-    InitLua(scriptFolder);
+	
+    m_pGFunc->Initialize(m_pLog);
 }
 
-void CMsgProc::InitLua(string path)
+void CMsgProc::InitLua(CLua* pLua, string path)
 {
-    m_pLua->RunScript("init.lua");
+	pLua->RunScript("init.lua");
     // get current path
     char szDir[MAX_PATH] = {0};
 
     getcwd(szDir,MAX_PATH);
     string strDir(szDir);
     strDir += "/" + path;
-    m_pLua->RunFunction("Init",CUniversal::Format("'%s'",strDir));
+	pLua->RunFunction("Init", CUniversal::Format("'%s'", strDir));
 }
 
 int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, char*& pBuf)
@@ -44,17 +46,19 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
     // In here, just show log to test.
 
 	// process msg, get the md5 code and the swift number.
+	CLua* pLua = m_pLuaList[id];
+
     CLuaPacket request, response;
 	request.SetData("message", msg);
-	if (!m_pLua->RunFunction("OnRecvMessage", pUInfo, &request, &response,id))
-		m_pLog->Log(m_pLua->GetErrorString());
+	if (!pLua->RunFunction("OnRecvMessage", pUInfo, &request, &response))
+		m_pLog->Log(pLua->GetErrorString());
 
     // check the return ;
     string opt = response.GetData("operation");
 	int nSize = 0;
     if( opt == "reload")
     {
-        InitLua(m_strScriptFolder);
+		InitLua(pLua,m_strScriptFolder);
         res = "0|succeed|Reload succeed";
     }
 	else if (opt == "loadfile")
@@ -78,11 +82,11 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 	return nSize;
 }
 
-
-// call lua new thread function and get the new thread static and return the id.
 int Sloong::CMsgProc::NewThreadInit()
 {
-	return m_pLua->CreateNewThread();
+	CLua* pLua = new CLua();
+	pLua->SetScriptFolder(m_strScriptFolder);
+	m_pGFunc->InitLua(pLua);
+	InitLua(pLua,m_strScriptFolder);
 }
-
 

@@ -17,11 +17,11 @@ namespace Sloong
         CGlobalFunction();
 		~CGlobalFunction();
 
-        void Initialize(CLog* plog ,CLua* pLua);
+        void Initialize(CLog* plog );
+		void InitLua(CLua* pLua);
 	protected:
         CUtility * m_pUtility;
 		CDBProc* m_pDBProc;
-		CLua*	m_pLua;
 		CLog*	m_pLog;
 	public:
 		static void HandleError(string err);

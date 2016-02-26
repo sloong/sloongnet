@@ -19,11 +19,11 @@ namespace Sloong
         void Initialize(CLog* pLog, string scriptFolder);
 		int MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, char*& pBuf);
 		int NewThreadInit();
-		void InitLua(string folder);
+		void InitLua(CLua* pLua, string folder);
 
 	protected:
-		CLua*	m_pLua;
-		CLog*	m_pLog;
+		vector<CLua*>	m_pLuaList;
+		CLog*			m_pLog;
 		CGlobalFunction*	m_pGFunc;
         string m_strScriptFolder;
 	};

@@ -37,27 +37,24 @@ CGlobalFunction::CGlobalFunction()
 
 CGlobalFunction::~CGlobalFunction()
 {
+	SAFE_DELETE(m_pUtility);
+	SAFE_DELETE(m_pDBProc);
 }
 
-void Sloong::CGlobalFunction::Initialize( CLog* plog,CLua* pLua)
+void Sloong::CGlobalFunction::Initialize( CLog* plog)
 {
     m_pLog = plog;
-    m_pLua = pLua;
-	m_pLua->SetErrorHandle(CGlobalFunction::HandleError);
-
-    vector<LuaFunctionRegistr> funcList(g_LuaFunc, g_LuaFunc + ARRAYSIZE(g_LuaFunc));
-	m_pLua->AddFunctions(&funcList);
-
     // connect to db
     m_pDBProc->Connect("localhost","root","sloong","sloong",0);
 }
 
+
+
 int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 {
-	auto lua = g_pThis->m_pLua;
 	vector<string> res;
 	unique_lock<mutex> lck(g_SQLMutex);
-    g_pThis->m_pDBProc->Query(lua->GetStringArgument(1), res);
+    g_pThis->m_pDBProc->Query(CLua::GetStringArgument(l,1), res);
 	lck.unlock();
 	string allLine;
 	BOOST_FOREACH(string item, res)
@@ -72,33 +69,31 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
             allLine = allLine + "&" + add;
 	}
 
-	lua->PushString(allLine);
+	CLua::PushString(l,allLine);
 	return 1;
 }
 
 int Sloong::CGlobalFunction::Lua_modifySql(lua_State* l)
 {
-	auto lua = g_pThis->m_pLua;
-	int nRes = g_pThis->m_pDBProc->Modify(lua->GetStringArgument(1));
+	int nRes = g_pThis->m_pDBProc->Modify(CLua::GetStringArgument(l,1));
 
-	lua->PushString(CUniversal::ntos(nRes));
+	CLua::PushString(l,CUniversal::ntos(nRes));
 	return 1;
 }
 
 int Sloong::CGlobalFunction::Lua_getSqlError(lua_State *l)
 {
-    g_pThis->m_pLua->PushString(g_pThis->m_pDBProc->GetError());
+    CLua::PushString(l,g_pThis->m_pDBProc->GetError());
     return 1;
 }
 
 
 int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
 {
-	auto lua = g_pThis->m_pLua;
-	auto path = lua->GetStringArgument(1);
-	auto width = lua->GetNumberArgument(2);
-	auto height = lua->GetNumberArgument(3);
-	auto quality = lua->GetNumberArgument(4);
+	auto path = CLua::GetStringArgument(l,1);
+	auto width = CLua::GetNumberArgument(l,2);
+	auto height = CLua::GetNumberArgument(l,3);
+	auto quality = CLua::GetNumberArgument(l,4);
 	
 	if ( access(path.c_str(),ACC_E) != -1 )
 	{
@@ -117,16 +112,24 @@ int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
             }
             if( width == 0 || height == 0 )
             {
-                lua->PushString(path);
+				CLua::PushString(l,path);
                 return 1;
             }
             img.resize(width,height);
             img.save(thumbpath.c_str());
 		}
-		lua->PushString(thumbpath);
+		CLua::PushString(l,thumbpath);
 	}
 	return 1;
 }
+
+void Sloong::CGlobalFunction::InitLua(CLua* pLua)
+{
+	pLua->SetErrorHandle(CGlobalFunction::HandleError);
+	vector<LuaFunctionRegistr> funcList(g_LuaFunc, g_LuaFunc + ARRAYSIZE(g_LuaFunc));
+	pLua->AddFunctions(&funcList);
+}
+
 
 
 void CGlobalFunction::HandleError(string err)
@@ -137,7 +140,7 @@ void CGlobalFunction::HandleError(string err)
 
 int CGlobalFunction::Lua_showLog(lua_State* l)
 {
-    g_pThis->m_pLog->Log(g_pThis->m_pLua->GetStringArgument(1));
+	g_pThis->m_pLog->Log(CLua::GetStringArgument(l,1));
 }
 
 
