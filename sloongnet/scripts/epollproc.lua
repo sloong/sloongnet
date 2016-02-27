@@ -12,7 +12,7 @@ OnRecvMessage = function( uinfo, request, response )
 		response:setdata('errmsg',msg or "success");
 	else
 		response:setdata("errno","2");
-		response:setdata('errmsg','not find the processer. the name is %s.' .. msg[1]);
+		response:setdata('errmsg','not find the processer. the name is:' .. msg[1]);
 	end
 end
 
@@ -60,17 +60,8 @@ local Func_ReadFile = function( uinfo, request, response, msg )
 	return 0
 end
 
-local Func_GetStyleList = function( uinfo, request, response, msg )
-	local row = msg[2];
-	if not row or row == '' then
-		row = '*';
-	end
-	local where = msg[3] or '';
-	if where and where ~= '' then
-		where = 'WHERE ' .. where;
-	end
-	
-	local cmd = 'SELECT ' .. row .. ' FROM styleList ' .. where
+local Func_SqlTest = function( uinfo, request, response, msg )
+	local cmd = msg[2]
 	showLog("run sql cmd:" .. cmd);
 	local res = querySql(cmd);
 	showLog(res);
@@ -78,35 +69,12 @@ local Func_GetStyleList = function( uinfo, request, response, msg )
 	return 0;
 end
 
-
-local Func_GetFileList = function( uinfo, request, response, msg )
-	local row = msg[2];
-	if not row or row == '' then
-		row = '*';
-	end
-	local where = msg[3] or '';
-	if where and where ~= '' then
-		where = 'WHERE ' .. where;
-	end
-	
-	local cmd = 'SELECT ' .. row .. ' FROM fileList ' .. where
-	showLog("run sql cmd:" .. cmd);
-	local res = querySql(cmd);
-	showLog(res);
-	response:setdata('message',res);
+local Func_TextTest = function( uinfo, request, response, msg )
+	response:setdata('message','0.3.0.82 -- Sloong Network Engine -- Copyright 2015 Sloong.com. All Rights Reserved');
 	return 0;
 end
 
 local Func_GetFileData = function( uinfo, request, response, msg )
--- 	local row = msg[2];
--- 	if not row or row == '' then
--- 		row = '*';
--- 	end
--- 	local where = msg[3] or '';
--- 	if where and where ~= '' then
--- 		where = 'WHERE ' .. where;
--- 	end
-	
 	local cmd = "SELECT * FROM `fileList` WHERE `fileMD5`='" .. msg[2] .. "'"
 	showLog("run sql cmd:" .. cmd);
 	local res = querySql(cmd);
@@ -120,11 +88,8 @@ g_all_function =
 	['50001'] = Func_ReloadScript,
 	['60001'] = Func_QueryUserInfo,
 	['60002'] = Func_AddUser,
-	-- ['60003'] = Func_UpdateUserInfo,
-	-- ['60004'] = Func_DeleteUser,
-	['70001'] = Func_ReadFile,
-	['20001'] = Func_GetStyleList,
-	['20002'] = Func_GetFileList,
+	['TextTest'] = Func_TextTest,
+	['SqlTest'] = Func_SqlTest,
 	['20003'] = Func_GetFileData,
 }
 

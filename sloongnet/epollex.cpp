@@ -22,7 +22,8 @@ using namespace Sloong::Universal;
 
 CEpollEx::CEpollEx()
 {
-
+	m_pSEM = NULL;
+	m_bIsRunning = false;
 }
 
 CEpollEx::~CEpollEx()
@@ -76,7 +77,7 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
     m_EpollHandle=epoll_create(65535);
     // 创建epoll事件对象
     CtlEpollEvent(EPOLL_CTL_ADD,m_ListenSock,EPOLLIN|EPOLLET|EPOLLOUT);
-
+	m_bIsRunning = true;
     // Init the thread pool
 	CThreadPool::AddWorkThread(WorkLoop, this, nThreadNum);
 	
@@ -116,15 +117,13 @@ int CEpollEx::SetSocketNonblocking(int socket)
 void* CEpollEx::WorkLoop(void* pParam)
 {
 	CEpollEx* pThis = (CEpollEx*)pParam;
-	auto log = pThis->m_pLog;
-	log->Log("epoll is start work loop.");
+	pThis->m_pLog->Log("epoll is start work loop.");
 	int sockListen = pThis->m_ListenSock;
-	auto& rSockList = pThis->m_SockList;
     int n,i;
-    while(true)
+    while(pThis->m_bIsRunning)
     {
         // 返回需要处理的事件数
-		n = epoll_wait(pThis->m_EpollHandle, pThis->m_Events, 1024, -1);
+		n = epoll_wait(pThis->m_EpollHandle, pThis->m_Events, 1024, 1000);
 
         if( n<=0 ) continue;
         
@@ -438,7 +437,8 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			// Add the sock event to list
 			unique_lock<mutex> elck(m_oEventListMutex);
 			m_EventSockList.push(nSocket);
-			sem_post(m_pSEM);
+			if ( m_pSEM )
+				sem_post(m_pSEM);
 			elck.unlock();
 		}
 	}
@@ -448,6 +448,25 @@ void Sloong::CEpollEx::OnCanWriteData(int nSocket)
 {
 	// 可以写入事件
 	CSockInfo* info = m_SockList[nSocket];
+	
+	ProcessPrepareSendList(info);
+	ProcessSendList(info);
+
+	CtlEpollEvent(EPOLL_CTL_MOD, nSocket, EPOLLIN | EPOLLET | EPOLLOUT);
+}
+
+
+
+void Sloong::CEpollEx::SetSEM(sem_t* pSem)
+{
+	m_pSEM = pSem;
+}
+
+void Sloong::CEpollEx::ProcessPrepareSendList(CSockInfo* info)
+{
+	if (info == NULL)
+		return;
+
 	// progress the prepare send list first
 	if (!info->m_pPrepareSendList->empty())
 	{
@@ -472,37 +491,43 @@ void Sloong::CEpollEx::OnCanWriteData(int nSocket)
 
 		prelck.unlock();
 	}
+}
 
+void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
+{
 	// when prepare list process done, do send operation.
-	if (false == info->m_oSendMutex.try_lock())
+	if (false == pInfo->m_oSendMutex.try_lock())
 	{
 		return;
 	}
-	unique_lock<mutex> lck(info->m_oSendMutex, std::adopt_lock);
+	unique_lock<mutex> lck(pInfo->m_oSendMutex, std::adopt_lock);
 
 	bool bTrySend = true;
 
 	while (bTrySend)
 	{
-		queue<SENDINFO*>* list = &info->m_pSendList[0];
+		queue<SENDINFO*>* list = NULL;
 		// prev package no send end. find and try send it again.
-		if (-1 != info->m_nLastSentTags)
+		if (-1 != pInfo->m_nLastSentTags)
 		{
-			list = &info->m_pSendList[info->m_nLastSentTags];
+			list = &pInfo->m_pSendList[pInfo->m_nLastSentTags];
 		}
 		// find next package. 
 		else
 		{
-			for (int i = 0; i < info->m_nPriorityLevel; i++)
+			for (int i = 0; i < pInfo->m_nPriorityLevel; i++)
 			{
-				if (info->m_pSendList[i].empty())
+				if (pInfo->m_pSendList[i].empty())
 					continue;
 				else
 				{
-					list = &info->m_pSendList[i];
+					list = &pInfo->m_pSendList[i];
 				}
 			}
 		}
+		if (list == NULL)
+			return;
+
 		// if no find send info, is no need send anything , remove this sock from epoll.'
 		SENDINFO* si = NULL;
 		while (si == NULL)
@@ -522,24 +547,24 @@ void Sloong::CEpollEx::OnCanWriteData(int nSocket)
 			}
 		}
 
-		if (list->empty() || si == NULL)
+		if ( si == NULL)
 		{
-			if (info->m_nLastSentTags != -1)
-				info->m_nLastSentTags = -1;
+			if (pInfo->m_nLastSentTags != -1)
+				pInfo->m_nLastSentTags = -1;
 			else
 			{
-				CtlEpollEvent(EPOLL_CTL_MOD, nSocket, EPOLLIN | EPOLLET);
-				info->m_bIsSendListEmpty = true;
+				CtlEpollEvent(EPOLL_CTL_MOD, pInfo->m_sock, EPOLLIN | EPOLLET);
+				pInfo->m_bIsSendListEmpty = true;
 			}
 		}
 
 		// try send first.
 		if (si->nSent >= si->nSize)
 			// Send ex data
-			si->nSent = SendEx(nSocket, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
+			si->nSent = SendEx(pInfo->m_sock, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
 		else
 			// send normal data.
-			si->nSent = SendEx(nSocket, si->pSendBuffer, si->nSize, si->nSent);
+			si->nSent = SendEx(pInfo->m_sock, si->pSendBuffer, si->nSize, si->nSent);
 
 		// check send result.
 		// send done, remove the is sent data and try send next package.
@@ -547,7 +572,7 @@ void Sloong::CEpollEx::OnCanWriteData(int nSocket)
 		{
 			m_pLog->Log(CUniversal::Format("package is send done, send data length is:%d. remove from list.", si->nSent));
 			list->pop();
-			info->m_nLastSentTags = -1;
+			pInfo->m_nLastSentTags = -1;
 			SAFE_DELETE_ARR(si->pSendBuffer);
 			SAFE_DELETE_ARR(si->pExBuffer);
 			SAFE_DELETE(si);
@@ -561,12 +586,12 @@ void Sloong::CEpollEx::OnCanWriteData(int nSocket)
 	}
 
 	lck.unlock();
-	CtlEpollEvent(EPOLL_CTL_MOD, nSocket, EPOLLIN | EPOLLET | EPOLLOUT);
 }
 
-void Sloong::CEpollEx::SetSEM(sem_t* pSem)
+void Sloong::CEpollEx::Exit()
 {
-	m_pSEM = pSem;
+	m_bIsRunning = false;
 }
 
 
+ 

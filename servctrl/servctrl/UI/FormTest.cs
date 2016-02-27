@@ -227,7 +227,14 @@ namespace servctrl
 
         private void comboBoxTestCase_SelectedIndexChanged(object sender, EventArgs e)
         {
-            textBoxMsg.Text = testCaseMap[comboBoxTestCase.Text];
+            try
+            {
+                textBoxMsg.Text = testCaseMap[comboBoxTestCase.Text];
+            }
+            catch(Exception)
+            {
+
+            }
         }
 
         private void FormTest_FormClosed(object sender, FormClosedEventArgs e)

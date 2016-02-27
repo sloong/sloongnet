@@ -21,6 +21,7 @@ namespace Sloong
 
 		void Initialize(CServerConfig* config);
 		void Run();
+		void Exit();
 
 	public:// static function
 		static void* HandleEventWorkLoop(void* pParam);
@@ -31,12 +32,12 @@ namespace Sloong
 		int m_sockServ;
 		int* m_sockClient;
 		int m_nPriorityLevel;
-		int m_nSleepInterval;
         CServerConfig* m_pConfig;
 		CEpollEx* m_pEpoll;
 		CMsgProc* m_pMsgProc;
 		CLog* m_pLog;
-		sem_t m_oSem;
+		sem_t m_oSem; 
+		bool	m_bIsRunning;
 	};
 
 }

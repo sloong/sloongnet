@@ -15,7 +15,7 @@ using namespace Sloong::Universal;
 #include "epollex.h"
 #include "msgproc.h"
 #include "serverconfig.h"
-
+#include "CmdProcess.h"
 #include "userv.h"
 
 SloongWallUS::SloongWallUS()
@@ -23,10 +23,12 @@ SloongWallUS::SloongWallUS()
 	m_pLog = new CLog();
     m_pEpoll = new CEpollEx();
     m_pMsgProc = new CMsgProc();
+	m_bIsRunning = false;
 }
 
 SloongWallUS::~SloongWallUS()
 {
+	m_bIsRunning = false;
 	CThreadPool::End();
 	SAFE_DELETE(m_pEpoll);
 	SAFE_DELETE(m_pMsgProc);
@@ -44,25 +46,26 @@ void SloongWallUS::Initialize(CServerConfig* config)
     m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel);
 	m_pEpoll->SetSEM(&m_oSem);
     m_pMsgProc->Initialize(m_pLog,config->m_strScriptFolder);
-	//m_pThreadPool->Initialize(config->m_nThreadNum);
-	CThreadPool::AddWorkThread(SloongWallUS::HandleEventWorkLoop, this, config->m_nProcessThreadQuantity);
-	m_nSleepInterval = config->m_nSleepInterval;
 }
 
 void SloongWallUS::Run()
 {
-	//m_pThreadPool->AddTask(SloongWallUS::HandleEventWorkLoop, this, true);
-	
-	//m_pThreadPool->Start();
+	m_bIsRunning = true;
+	CThreadPool::AddWorkThread(SloongWallUS::HandleEventWorkLoop, this, m_pConfig->m_nProcessThreadQuantity);
 	string cmd;
-	while (true)
+	while (m_bIsRunning)
 	{
 		cmd.clear();
 		cin >> cmd;
 		if (cmd == "exit")
+		{
+			Exit();
 			return;
+		}
 		else
-			SLEEP(10000);
+		{
+			CCmdProcess::Parser(cmd);
+		}
 	}
 }
 
@@ -74,7 +77,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
     string spid = CUniversal::ntos(pid);
     log->Log("Event process thread is running." + spid);
 	int id = pThis->m_pMsgProc->NewThreadInit();
-	while (true)
+	while (pThis->m_bIsRunning)
 	{
 		if (!pThis->m_pEpoll->m_EventSockList.empty())
         {
@@ -103,10 +106,12 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 					continue;
 				}
 
+				unique_lock<mutex> lock(info->m_pProcessMutexList[i], std::adopt_lock);
+
 				ProcessEventList(id, &info->m_pReadList[i], info->m_oReadMutex, sock, i, info->m_pUserInfo, pThis->m_pEpoll, pThis->m_pMsgProc);
 
 				// unlock current level.
-				info->m_pProcessMutexList[i].unlock();
+				lock.unlock();
 			}
 
 		}
@@ -166,5 +171,12 @@ void Sloong::SloongWallUS::ProcessEvent(int id, string& strMsg, int sock, int nP
 	char* pBuf = NULL;
 	int nSize = pMsgProc->MsgProcess(id, pUserInfo, tmsg, strRes, pBuf);
 	pEpoll->SendMessage(sock, nPriorityLevel, swift, strRes, pBuf, nSize);
+}
+
+void Sloong::SloongWallUS::Exit()
+{
+	m_pEpoll->Exit();
+	m_bIsRunning = false;
+	sem_post(&m_oSem);
 }
 
