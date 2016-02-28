@@ -371,8 +371,8 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 {
 	// 已经连接的用户,收到数据,可以开始读入
 	int len = sizeof(long long);
-	char dataLeng[sizeof(long long) + 1] = { 0 };
-	char* pLen = dataLeng;
+	//char dataLeng[sizeof(long long) + 1] = { 0 };
+	char* pLen = new char[sizeof(long long) + 1]();//dataLeng;
 	bool bLoop = true;
 	while (bLoop)
 	{
@@ -392,7 +392,12 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 		}
 		else
 		{
-			long dtlen = atol(dataLeng);
+			long dtlen = atol(pLen);
+			if (dtlen <= 0)
+			{
+				m_pLog->Log("Receive data length error.");
+				continue;
+			}
 			char* data = new char[dtlen + 1];
 			memset(data, 0, dtlen + 1);
 
@@ -442,6 +447,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			elck.unlock();
 		}
 	}
+	SAFE_DELETE_ARR(pLen);
 }
 
 void Sloong::CEpollEx::OnCanWriteData(int nSocket)
