@@ -49,9 +49,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectInfo.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="Interfaqce\GlobalShare.cs" />
-    <Compile Include="Interfaqce\IPageHost.cs" />
+    <Compile Include="Interfaqce\Constants.cs" />
+    <Compile Include="Interfaqce\DataCenter.cs" />
+    <Compile Include="Interfaqce\IDataCenter.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="NetworkThread.cs" />
     <Compile Include="SerializableDictionary.cs" />

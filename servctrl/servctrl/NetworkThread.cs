@@ -1,4 +1,5 @@
-﻿using Sloong.Interfaqce;
+﻿using Sloong;
+using Sloong.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,47 +8,77 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
-namespace servctrl
+namespace Sloong
 {
     class NetworkThread
     {
-        IPageHost m_PageHost = null;
-        Socket m_Socket = null;
-        Thread m_WorkThread = null;
+        IDataCenter _DC = null;
+        public Socket m_Socket = null;
+        public IPEndPoint ip;
+        Thread m_SendWorkThread = null;
+        Thread m_RecvWorkThread = null;
+
         ApplicationStatus AppStatus
         {
             get
             {
-                return m_PageHost[ShareItem.AppStatus] as ApplicationStatus;
+                return _DC[ShareItem.AppStatus] as ApplicationStatus;
             }
         }
-        public NetworkThread(IPageHost pageHost)
-        {
-            m_PageHost = pageHost;
 
-            m_WorkThread = new Thread(() => WorkLoop());
-            m_WorkThread.Name = "Network Thread";
+        Dictionary<long, MessagePackage> MsgList
+        {
+            get
+            {
+                return _DC[ShareItem.MessageList] as Dictionary<long, MessagePackage>;
+            }
+        }
+
+        Queue<MessagePackage> SendList
+        {
+            get
+            {
+                return _DC[ShareItem.SendList] as Queue<MessagePackage>;
+            }
+        }
+
+
+        public NetworkThread(IDataCenter dc)
+        {
+            _DC = dc;
+
+            m_SendWorkThread = new Thread(() => SendWorkLoop());
+            m_SendWorkThread.Name = "Network Send Thread";
+
+            m_RecvWorkThread = new Thread(() => RecvWorkLoop());
+            m_RecvWorkThread.Name = "Network Recv Thread";
         }
 
         public Log log
         {
             get
             {
-                return m_PageHost[ShareItem.Log] as Log;
+                return _DC[ShareItem.Log] as Log;
             }
         }
 
         public void Run()
         {
-            m_WorkThread.Start();
+            m_SendWorkThread.Start();
+            m_RecvWorkThread.Start();
         }
 
         public void Exit()
         {
-            if (m_WorkThread.ThreadState == ThreadState.Running)
+            if (m_SendWorkThread.ThreadState == ThreadState.Running)
             {
-                m_WorkThread.Abort();
+                m_SendWorkThread.Abort();
+            }
+            if (m_RecvWorkThread.ThreadState == ThreadState.Running)
+            {
+                m_RecvWorkThread.Abort();
             }
             if (m_Socket != null)
             {
@@ -59,7 +90,8 @@ namespace servctrl
         {
             if (!Utility.TestNetwork(AppStatus.ServerIP))
             {
-                throw new Exception();
+                log.Write(string.Format("Ping to {0} fialed.", AppStatus.ServerIP.ToString()));
+                return;
             }
             if (s == null || !s.Connected)
             {
@@ -67,9 +99,9 @@ namespace servctrl
                 IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Parse(AppStatus.ServerIP), AppStatus.SendProt);
                 s.Connect(ipEndPoint);
                 AppStatus.RecvBufferSize = s.ReceiveBufferSize;
-
-                string connectMsg = "SloongWalls Client is connect.";
-                m_PageHost.SendMessage(MessageType.SendPake, connectMsg);
+                _DC.Add(ShareItem.ConnectStatus, m_Socket.Connected);
+                //string connectMsg = "SloongWalls Client is connect.";
+                //m_PageHost.SendMessage(MessageType.send, connectMsg);
                 //m_hSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 5000); //设置接收数据超时                    
                 //sRecvPicTemp.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, 5000);//设置发送数据超时                    
                 //sRecvPicTemp.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendBuffer, 1024);//设置发送缓冲区大小--1K大小                   
@@ -78,13 +110,15 @@ namespace servctrl
             }
         }
 
-        public void WorkLoop()
+        public void SendWorkLoop()
         {
             while (AppStatus != null && AppStatus.RunStatus != RunStatus.Exit)
             {
                 try
                 {
-                    ConnectToServer(ref m_Socket, AppStatus.ServerIP);
+                    if (m_Socket == null || !m_Socket.Connected)
+                        ConnectToServer(ref m_Socket, AppStatus.ServerIP);
+                    _DC[ShareItem.ConnectStatus] = m_Socket.Connected;
                 }
                 catch (Exception e)
                 {
@@ -95,66 +129,110 @@ namespace servctrl
                 try
                 {
                     // Process send list
-                    var sendMsg = m_PageHost[ShareItem.SendPack] as Queue<string>;
-
-                    if (sendMsg != null && sendMsg.Count > 0)
+                    if (SendList != null && SendList.Count > 0)
                     {
-                        var msg = sendMsg.Dequeue();
-
-                        byte[] bmsg = Encoding.ASCII.GetBytes(msg);
-                        var len = string.Format("{0:D8}", bmsg.Length);
-                        msg = len + msg;
-                        log.Write("Send Message:" + msg);
-                        byte[] sendByte = Encoding.ASCII.GetBytes(msg);
-                        lock (m_Socket)
+                        //   if (MsgList.ContainsKey(nProcIndex))
                         {
-                            m_Socket.Send(sendByte, sendByte.Length, 0);
+                            var pack = SendList.Dequeue();
+                            var msg = pack.SendMessage;
+                            string md5 = Utility.MD5_Encoding(msg, Encoding.UTF8);
+                            var sendmsg = string.Format("{0}|{1}|{2}", md5, pack.SwiftNumber, msg);
+                            var len = string.Format("{0:D8}", sendmsg.Length);
+                            sendmsg = len + sendmsg;
+                            
+                            byte[] sendByte = Encoding.ASCII.GetBytes(sendmsg);
+                            lock (m_Socket)
+                            {
+                                Utility.SendEx(m_Socket, sendByte);
+                                pack.IsSent = true;
+                                MsgList.Add(pack.SwiftNumber, pack);
+                            }
                         }
                     }
+                    else
+                    {
+                        Thread.Sleep(500);
+                        continue;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Write(ex.Message);
+                }
+                finally
+                {
+                }
+            }
+        }
 
+        public static long RecvDataLength(Socket sock, int overTime)
+        {
+            byte[] leng = Utility.RecvEx(sock, 8, overTime);
+
+            long packSize = BitConverter.ToInt64(leng, 0);
+            if (packSize <= 0)
+            {
+                throw new Exception(string.Format("Recv length error. the size is less than zero. the length is:{0}. the data is:{1}", packSize, leng.ToString()));
+            }
+
+            return packSize;
+        }
+
+        public void RecvWorkLoop()
+        {
+            while (AppStatus != null && AppStatus.RunStatus != RunStatus.Exit)
+            {
+                try
+                {
+                    if (m_Socket == null || !m_Socket.Connected)
+                    {
+                        System.Threading.Thread.Sleep(100);
+                        continue;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                    System.Threading.Thread.Sleep(500);
+                    continue;
+                }
+                try
+                {
                     // Receive message
-                    byte[] header = new byte[24];
-                    byte[] msgSize = new byte[4];
+                    // TODO:: add the static hread 
+                    //                     byte[] header = new byte[24];
+                    //                     m_Socket.Receive(header, 24, 0);
+                    //                     string temp = (Encoding.Unicode.GetString(header));
+                    //                     if ("SloongWalls\0" != temp)
+                    //                     {
+                    //                         continue;
+                    //                     }
 
-                    m_Socket.Receive(header, 24, 0);
-                    string temp = (Encoding.Unicode.GetString(header));
-                    if ("SloongWalls\0" != temp)
-                    {
-                        continue;
-                    }
-                    m_Socket.Receive(msgSize, 4, 0);
-                    long packSize = BitConverter.ToInt64(msgSize, 0);
-                    if (packSize <= 0)
-                    {
-                        continue;
-                    }
 
-                    byte[] recvPackBytes = new byte[packSize];
-                    int nSize = 0;
-                    Dictionary<byte[], int> list = new Dictionary<byte[], int>();
-                    while (nSize < recvPackBytes.Length)
+                    byte[] data = Utility.RecvEx(m_Socket, RecvDataLength(m_Socket, 10000), 10000);
+
+                    string strRecv = Encoding.UTF8.GetString(data);
+                    var RecvDatas = strRecv.Split('|');
+                    long nIndex = Convert.ToInt64(RecvDatas[1]);
+                    if (MsgList.ContainsKey(nIndex))
                     {
-                        try
+                        var pack = MsgList[nIndex];
+                        pack.ReceivedMessages = RecvDatas;
+                        if (pack.NeedExData)
                         {
-                            byte[] recvPic;
-                            if (recvPackBytes.Length - nSize > AppStatus.RecvBufferSize)
-                            {
-                                recvPic = new byte[recvPackBytes.Length - nSize];
-                            }
-                            else
-                            {
-                                recvPic = new byte[AppStatus.RecvBufferSize];
-                            }
-                            int readsize = m_Socket.Receive(recvPic);
-                            recvPic.CopyTo(recvPackBytes, nSize);
-                            nSize += readsize;
+                            byte[] exData = Utility.RecvEx(m_Socket, RecvDataLength(m_Socket, 0), 0);
+                            pack.ReceivedExData = exData;
                         }
-                        catch (Exception e)
+                        pack.IsReceived = true;
+                        if (pack.ReceivedHandler != null)
                         {
-                            Console.WriteLine(e.ToString());
-                            break;
+                            pack.ReceivedHandler.BeginInvoke(pack, WhenRecvDone, pack.SwiftNumber);
                         }
-
+                    }
+                    else
+                    {
+                        // no the swift number, error.
+                        throw new Exception("Received message but no checked the swift number. please check the message:" + strRecv);
 
                     }
                 }
@@ -166,6 +244,12 @@ namespace servctrl
                 {
                 }
             }
+        }
+
+        public void WhenRecvDone(IAsyncResult res)
+        {
+            long nIndex = (long)res.AsyncState;
+            MsgList.Remove(nIndex);
         }
     }
 }

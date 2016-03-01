@@ -1,4 +1,4 @@
-﻿using Sloong.Interfaqce;
+﻿using Sloong.Interface;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,8 +15,8 @@ namespace servctrl
 {
     public partial class FormStatus : Form
     {
-        private IPageHost pageHost = null;
-        public FormStatus( IPageHost _pageHost )
+        private IDataCenter pageHost = null;
+        public FormStatus(IDataCenter _pageHost)
         {
             InitializeComponent();
             this.TopLevel = false;

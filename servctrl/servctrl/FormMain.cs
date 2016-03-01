@@ -1,5 +1,5 @@
 ﻿using Sloong;
-using Sloong.Interfaqce;
+using Sloong.Interface;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,13 +16,13 @@ namespace servctrl
 {
     public partial class FormMain : Form
     {
-        private GlobalShare share { get; set; }
+        private DataCenter share { get; set; }
 
-        IPageHost pageHost
+        IDataCenter pageHost
         {
             get
             {
-                return share as IPageHost;
+                return share as IDataCenter;
             }
 
             set { }
@@ -34,7 +34,10 @@ namespace servctrl
         private FormStatus formStatus = null;
         private FormTest formTest = null;
         private Log log = null;
-
+        private NetworkThread _Nt = null;
+        private Queue<MessagePackage> _SendList = null;
+        Dictionary<long, MessagePackage> _MessageList = null;
+        int _SwiftNum = 0;
 
         public Dictionary<string, ConnectInfo> SocketMap
         {
@@ -60,7 +63,13 @@ namespace servctrl
 
             set { }
         }
-
+        Queue<MessagePackage> SendList
+        {
+            get
+            {
+                return pageHost[ShareItem.SendList] as Queue<MessagePackage>;
+            }
+        }
         ComboBox ServList
         {
             get
@@ -84,38 +93,45 @@ namespace servctrl
             InitMemberVariable();
             InitPageHost();
             InitFormStatus();
+            _Nt.Run();
+            Control.CheckForIllegalCrossThreadCalls = false;
         }
 
         private void InitMemberVariable()
         {
-            this.share = new GlobalShare();
+            this.share = new DataCenter();
             appStatus = new ApplicationStatus();
-
-            try
-            {
-                sockMap = (Dictionary<string, ConnectInfo>)Utility.Deserialize(sockMapPath);
-                foreach( var item in sockMap )
-                {
-                    try
-                    {
-                        var info = ConnectToServer(item.Value.m_URL, item.Value.m_IPInfo.Port);
-                        item.Value.m_IPInfo = info.m_IPInfo;
-                        item.Value.m_Socket = info.m_Socket;
-                        if (!comboBoxServList.Items.Contains(item.Value.m_URL))
-                            comboBoxServList.Items.Add(item.Value.m_URL);
-                    }
-                    catch(Exception e)
-                    {
-                        log.Write(e.ToString());
-                    }
-                }
-            }
-            catch(Exception e)
-            {
-                log.Write(e.ToString());
-                sockMap = new Dictionary<string, ConnectInfo>();
-            }
+            _Nt = new NetworkThread(this.share);
+            _SendList = new Queue<MessagePackage>();
+            _MessageList = new Dictionary<long, MessagePackage>();
+            appStatus.ExitApp = false;
+            appStatus.RunStatus = RunStatus.Run;
             
+//             try
+//             {
+//                 sockMap = (Dictionary<string, ConnectInfo>)Utility.Deserialize(sockMapPath);
+//                 foreach( var item in sockMap )
+//                 {
+//                     try
+//                     {
+//                         var info = ConnectToServer(item.Value.m_URL, item.Value.m_IPInfo.Port);
+//                         item.Value.m_IPInfo = info.m_IPInfo;
+//                         item.Value.m_Socket = info.m_Socket;
+//                         if (!comboBoxServList.Items.Contains(item.Value.m_URL))
+//                             comboBoxServList.Items.Add(item.Value.m_URL);
+//                     }
+//                     catch(Exception e)
+//                     {
+//                         log.Write(e.ToString());
+//                     }
+//                 }
+//             }
+//             catch(Exception e)
+//             {
+//                 log.Write(e.ToString());
+//                 sockMap = new Dictionary<string, ConnectInfo>();
+//             }
+//             
             formStatus = new FormStatus(share);
             formTest = new FormTest(share);
 
@@ -123,6 +139,8 @@ namespace servctrl
             formStatus.Show();
             tabPageTest.Controls.Add(formTest);
             formTest.Show();
+
+            
         }
 
         private void InitFormStatus()
@@ -135,9 +153,11 @@ namespace servctrl
         {
             this.share.PageMessage += PageMessageHandler;
 
-            this.share.Add(ShareItem.AppStatus, appStatus);
+            pageHost.Add(ShareItem.AppStatus, appStatus);
             this.share.Add(ShareItem.SocketMap, sockMap);
             this.share.Add(ShareItem.ConfigSelecter, comboBoxServList);
+            share.Add(ShareItem.SendList, _SendList);
+            share.Add(ShareItem.MessageList, _MessageList);
         }
 
         private ConnectInfo ConnectToServer( string url , int port )
@@ -177,12 +197,16 @@ namespace servctrl
            
             try
             {
-                var info = ConnectToServer(textBoxAddr.Text, Convert.ToInt32(textBoxPort.Text));
-
-                // connect succeed
-                SocketMap[textBoxAddr.Text] = info;
-                if (!ServList.Items.Contains(textBoxAddr.Text))
-                    ServList.SelectedIndex = ServList.Items.Add(textBoxAddr.Text);
+//                 var info = ConnectToServer(textBoxAddr.Text, Convert.ToInt32(textBoxPort.Text));
+// 
+//                 // connect succeed
+//                 SocketMap[textBoxAddr.Text] = info;
+//                 if (!ServList.Items.Contains(textBoxAddr.Text))
+//                     ServList.SelectedIndex = ServList.Items.Add(textBoxAddr.Text);
+                if( _Nt.m_Socket != null && _Nt.m_Socket.Connected )
+                    _Nt.m_Socket.Close();
+                appStatus.SendProt = Convert.ToInt32(textBoxPort.Text);
+                appStatus.ServerIP = Dns.GetHostAddresses(textBoxAddr.Text)[0].ToString();;
             }
             catch (Exception ex)
             {
@@ -197,6 +221,12 @@ namespace servctrl
             {
                 case MessageType.ExitApp:
                     break;
+                case MessageType.SendRequest:
+                    AddMessageRequest(e.Params, false, e.CallBackFunc);
+                    break;
+                case MessageType.SendRequestWithData:
+                    AddMessageRequest(e.Params, true, e.CallBackFunc);
+                    break;
             }
         }
 
@@ -205,16 +235,44 @@ namespace servctrl
             var ip = sockMap[ServList.Text];
             textBoxAddr.Text = ServList.Text;// ip.Address.ToString();
             textBoxPort.Text = ip.m_IPInfo.Port.ToString();
+
+            _Nt.m_Socket = SocketMap[textBoxAddr.Text].m_Socket;
+            _Nt.ip = SocketMap[textBoxAddr.Text].m_IPInfo;
         }
 
         private void FormMain_FormClosed(object sender, FormClosedEventArgs e)
         {
-            foreach( var item in SocketMap )
-            {
-                item.Value.m_Socket = null;
-            }
-            Utility.Serialize(SocketMap, sockMapPath);
+//             foreach( var item in SocketMap )
+//             {
+//                 item.Value.m_Socket = null;
+//             }
+            _Nt.Exit();
+            //Utility.Serialize(SocketMap, sockMapPath);
             log.Dispose();
+        }
+
+        void AddMessageRequest(object[] Params, bool bExData, Func<MessagePackage, bool> pCallBack)
+        {
+            try
+            {
+                string msg = Params[0].ToString();
+                if (msg == null)
+                    return;
+                MessagePackage pack = new MessagePackage();
+                pack.SendMessage = msg;
+                pack.SwiftNumber = _SwiftNum;
+                pack.NeedExData = bExData;
+                pack.MessageExInfo = Params;
+                if (pCallBack != null)
+                    pack.ReceivedHandler = new CallBackFunc(pCallBack);
+                SendList.Enqueue(pack);
+                _SwiftNum++;
+
+            }
+            catch(Exception e)
+            {
+                log.Write(e.ToString());
+            }
         }
     }
 

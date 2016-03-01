@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 
-namespace servctrl
+namespace Sloong
 {
     /// <summary>
     /// 企业应用框架的日志类
