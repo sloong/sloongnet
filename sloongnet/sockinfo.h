@@ -44,11 +44,13 @@ namespace Sloong
 
 		string m_Address;
 		int m_nPort;
-		time_t m_ConnectTime;
+		time_t m_ActiveTime;
 		int m_sock;
 		CLuaPacket* m_pUserInfo;
-        mutex m_oReadMutex;
-        mutex m_oSendMutex;
+        mutex m_oSockReadMutex;
+        mutex m_oSockSendMutex;
+		mutex m_oReadListMutex;
+		mutex m_oSendListMutex;
         mutex m_oPreSendMutex;
 		// for the process thread. in epoll thread, it always add the event sock to event list. so in process thread
 		// maybe happed two thread process one socket. 

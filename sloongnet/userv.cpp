@@ -77,6 +77,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
     string spid = CUniversal::ntos(pid);
     log->Log("Event process thread is running." + spid);
 	int id = pThis->m_pMsgProc->NewThreadInit();
+	struct timespec ts;
 	while (pThis->m_bIsRunning)
 	{
 		if (!pThis->m_pEpoll->m_EventSockList.empty())
@@ -108,7 +109,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 
 				unique_lock<mutex> lock(info->m_pProcessMutexList[i], std::adopt_lock);
 
-				ProcessEventList(id, &info->m_pReadList[i], info->m_oReadMutex, sock, i, info->m_pUserInfo, pThis->m_pEpoll, pThis->m_pMsgProc);
+				ProcessEventList(id, &info->m_pReadList[i], info->m_oReadListMutex, sock, i, info->m_pUserInfo, pThis->m_pEpoll, pThis->m_pMsgProc);
 
 				// unlock current level.
 				lock.unlock();
@@ -117,9 +118,8 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 		}
 		else
 		{
-            log->Log("Event process thread is wait event."+ spid);
-			sem_wait(&pThis->m_oSem);
-            log->Log("Event happend. process thread run contine."+ spid);
+			ts.tv_sec = time(NULL) + 1;
+			sem_timedwait(&pThis->m_oSem,&ts);
 		}
 	}
 	return NULL;
@@ -144,8 +144,8 @@ void Sloong::SloongWallUS::ProcessEventList(int id, queue<string>* pList, mutex&
 
 		string msg = pList->front();
 		pList->pop();
-		ProcessEvent(id, msg, sock, nPriorityLevel, pUserInfo, pEpoll,pMsgProc);
 		oLock.unlock();
+		ProcessEvent(id, msg, sock, nPriorityLevel, pUserInfo, pEpoll,pMsgProc);
 	}
 }
 

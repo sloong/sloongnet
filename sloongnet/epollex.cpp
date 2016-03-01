@@ -46,9 +46,8 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
     //SIG_IGN:忽略信号的处理程序
     //SIGCHLD: 进程Terminate或Stop的时候,SIGPIPE会发送给进程的父进程,缺省情况下该Signal会被忽略
     //SIGINT:由Interrupt Key产生,通常是Ctrl+c或者Delete,发送给所有的ForeGroundGroup进程.
-    signal(SIGPIPE,SIG_IGN);
+    signal(SIGPIPE,SIG_IGN); // this signal should call the socket check function. and remove the timeout socket.
     signal(SIGCHLD,SIG_IGN);
-    signal(SIGPIPE,SIG_IGN);
     signal(SIGINT,&on_sigint);
 
     // 初始化socket
@@ -76,7 +75,7 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
     // 创建epoll
     m_EpollHandle=epoll_create(65535);
     // 创建epoll事件对象
-    CtlEpollEvent(EPOLL_CTL_ADD,m_ListenSock,EPOLLIN|EPOLLET|EPOLLOUT);
+    CtlEpollEvent(EPOLL_CTL_ADD,m_ListenSock,EPOLLIN|EPOLLOUT);
 	m_bIsRunning = true;
     // Init the thread pool
 	CThreadPool::AddWorkThread(WorkLoop, this, nThreadNum);
@@ -89,7 +88,7 @@ void CEpollEx::CtlEpollEvent(int opt, int sock, int events)
     struct epoll_event ent;
     memset(&ent,0,sizeof(ent));
     ent.data.fd=sock;
-    ent.events=events;
+	ent.events = events | EPOLLET;
 
     // 设置事件到epoll对象
     epoll_ctl(m_EpollHandle,opt,sock,&ent);
@@ -117,7 +116,9 @@ int CEpollEx::SetSocketNonblocking(int socket)
 void* CEpollEx::WorkLoop(void* pParam)
 {
 	CEpollEx* pThis = (CEpollEx*)pParam;
-	pThis->m_pLog->Log("epoll is start work loop.");
+	auto pid = this_thread::get_id();
+	string spid = CUniversal::ntos(pid);
+	pThis->m_pLog->Log("epoll work thread is running." + spid);
 	int sockListen = pThis->m_ListenSock;
     int n,i;
     while(pThis->m_bIsRunning)
@@ -125,7 +126,8 @@ void* CEpollEx::WorkLoop(void* pParam)
         // 返回需要处理的事件数
 		n = epoll_wait(pThis->m_EpollHandle, pThis->m_Events, 1024, 1000);
 
-        if( n<=0 ) continue;
+        if( n<=0 ) 
+			continue;
         
         for(i=0; i<n; ++i)
         {
@@ -170,6 +172,7 @@ void CEpollEx::SendMessage(int sock, int nPriority, const string& nSwift, string
     if( m_bShowSendMessage )
         m_pLog->Log(msg);
    
+	CSockInfo* pInfo = NULL;
 	long long len = msg.size();
 	// if have exdata, directly add to epoll list.
 	if (pExData != NULL && nSize > 0)
@@ -185,14 +188,14 @@ void CEpollEx::SendMessage(int sock, int nPriority, const string& nSwift, string
 	}
 	else
 	{
-		CSockInfo* info = m_SockList[sock];
-        if(!info)
+		pInfo = m_SockList[sock];
+		if (!pInfo)
         {
             CloseConnect(sock);
             return;
         }
 		// check the send list size. if all empty, try send message directly.
-        if( info->m_bIsSendListEmpty == false && !info->m_pPrepareSendList->empty() )
+		if ((pInfo->m_bIsSendListEmpty == false && !pInfo->m_pPrepareSendList->empty()) || pInfo->m_oSockSendMutex.try_lock() == false)
         {
 				char* pBuf = new char[len + 8];
                 memcpy(pBuf, (void*)&len, 8);
@@ -202,11 +205,13 @@ void CEpollEx::SendMessage(int sock, int nPriority, const string& nSwift, string
 		}
 	}
     
+	unique_lock<mutex> lck(pInfo->m_oSockSendMutex, std::adopt_lock);
 	// if code run here. the all list is empty. and no have exdata. try send message
 	char* pBuf = new char[len + 8];
 	memcpy(pBuf, (void*)&len, 8);
 	memcpy(pBuf + 8, msg.c_str(), len);
 	SendMessageEx(sock, nPriority, pBuf, len + 8);
+	lck.unlock();
 }
 
 bool CEpollEx::SendMessageEx(int sock, int nPriority, const char *pBuf, int nSize)
@@ -240,20 +245,20 @@ void CEpollEx::AddToSendList(int socket, int nPriority, const char *pBuf, int nS
     info->m_pPrepareSendList->push(psi);
     info->m_bIsSendListEmpty = false;
     SetSocketNonblocking(socket);
-    CtlEpollEvent(EPOLL_CTL_MOD,socket,EPOLLOUT|EPOLLIN|EPOLLET);
+    CtlEpollEvent(EPOLL_CTL_MOD,socket,EPOLLOUT|EPOLLIN);
 }
 
 
 void Sloong::CEpollEx::CloseConnect(int socket)
 {
-    CtlEpollEvent(EPOLL_CTL_DEL, socket, EPOLLIN | EPOLLOUT | EPOLLET);
+    CtlEpollEvent(EPOLL_CTL_DEL, socket, EPOLLIN | EPOLLOUT );
     close(socket);
 	CSockInfo* info = m_SockList[socket];
     if( !info )
         return;
 
-    unique_lock<mutex> lsck(info->m_oSendMutex);
-    unique_lock<mutex> lrck(info->m_oReadMutex);
+    unique_lock<mutex> lsck(info->m_oSendListMutex);
+    unique_lock<mutex> lrck(info->m_oReadListMutex);
     auto key = m_SockList.find(socket);
     if(key == m_SockList.end())
         return;
@@ -292,8 +297,10 @@ int Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, int nStart, bo
 		// if errno != EAGAIN or again for error and return is -1, return false
 		if (nSentSize == -1 ) 
 		{
-			if ( eagain == true || errno != EAGAIN )
-                return nAllSent;
+			if (eagain == true || errno != EAGAIN)
+				return nAllSent;
+			else if(errno == SIGPIPE)
+				return -1;
 			else
 				continue;
 		}
@@ -315,9 +322,9 @@ int Sloong::CEpollEx::RecvEx(int sock, char** buf, int nSize, bool eagain /* = f
         nRecv = recv(sock, pBuf + nSize - nNoRecv, nNoRecv, 0 );
         if (nRecv < 0 )
         {
-            if ( errno != EAGAIN )
+			if (errno != EAGAIN && errno != EINTR)
                 return 0;
-            else if ( eagain == true && errno == EAGAIN )
+			else if (eagain == true && (errno == EAGAIN || errno == EINTR) && nIsRecv == 0)
                 return -1;
             else
                 continue;
@@ -343,20 +350,18 @@ void Sloong::CEpollEx::OnNewAccept()
 		memset(&add, 0, sizeof(add));
 		getpeername(conn_sock, (sockaddr*)&add, (socklen_t*)&nSize);
 
-		time_t tm;
-		time(&tm);
 
 		CSockInfo* info = new CSockInfo(m_nPriorityLevel);
 		info->m_Address = string(inet_ntoa(add.sin_addr));
 		info->m_nPort = add.sin_port;
-		info->m_ConnectTime = tm;
+		info->m_ActiveTime = time(NULL);
 		info->m_sock = conn_sock;
 		m_SockList[conn_sock] = info;
 		m_pLog->Log(CUniversal::Format("accept client:%s.", info->m_Address));
 		//将接受的连接添加到Epoll的事件中.
 		// Add the recv event to epoll;
 		SetSocketNonblocking(conn_sock);
-		CtlEpollEvent(EPOLL_CTL_ADD, conn_sock, EPOLLIN | EPOLLET);
+		CtlEpollEvent(EPOLL_CTL_ADD, conn_sock, EPOLLIN);
 	}
 	if (conn_sock == -1)
 	{
@@ -369,6 +374,13 @@ void Sloong::CEpollEx::OnNewAccept()
 
 void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 {
+	CSockInfo* info = m_SockList[nSocket];
+	// The app is used ET mode, so should wait the mutex. 
+	unique_lock<mutex> srlck(info->m_oSockReadMutex);
+
+	auto pid = this_thread::get_id();
+	string spid = CUniversal::ntos(pid);
+
 	// 已经连接的用户,收到数据,可以开始读入
 	int len = sizeof(long long);
 	//char dataLeng[sizeof(long long) + 1] = { 0 };
@@ -396,7 +408,8 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			if (dtlen <= 0)
 			{
 				m_pLog->Log("Receive data length error.");
-				continue;
+				CloseConnect(nSocket);
+				break;
 			}
 			char* data = new char[dtlen + 1];
 			memset(data, 0, dtlen + 1);
@@ -407,12 +420,10 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 				CloseConnect(nSocket);
 				break;
 			}
-
-			CSockInfo* info = m_SockList[nSocket];
-			unique_lock<mutex> lck(info->m_oReadMutex);
+						
 			queue<string>* pList = &info->m_pReadList[0];
 			string msg;
-
+			
 			// check the priority level
 			if (m_nPriorityLevel != 0)
 			{
@@ -436,9 +447,11 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			// Add the msg to the sock info list
 			delete[] data;
 
+			unique_lock<mutex> lrlck(info->m_oReadListMutex);
 			pList->push(msg);
-			lck.unlock();
-
+			lrlck.unlock();
+			// update the socket time
+			info->m_ActiveTime = time(NULL);
 			// Add the sock event to list
 			unique_lock<mutex> elck(m_oEventListMutex);
 			m_EventSockList.push(nSocket);
@@ -447,6 +460,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			elck.unlock();
 		}
 	}
+	srlck.unlock();
 	SAFE_DELETE_ARR(pLen);
 }
 
@@ -458,7 +472,7 @@ void Sloong::CEpollEx::OnCanWriteData(int nSocket)
 	ProcessPrepareSendList(info);
 	ProcessSendList(info);
 
-	CtlEpollEvent(EPOLL_CTL_MOD, nSocket, EPOLLIN | EPOLLET | EPOLLOUT);
+	CtlEpollEvent(EPOLL_CTL_MOD, nSocket, EPOLLIN | EPOLLOUT);
 }
 
 
@@ -476,11 +490,7 @@ void Sloong::CEpollEx::ProcessPrepareSendList(CSockInfo* info)
 	// progress the prepare send list first
 	if (!info->m_pPrepareSendList->empty())
 	{
-		if (false == info->m_oPreSendMutex.try_lock())
-		{
-			return;
-		}
-		unique_lock<mutex> prelck(info->m_oPreSendMutex, std::adopt_lock);
+		unique_lock<mutex> prelck(info->m_oPreSendMutex);
 		if (info->m_pPrepareSendList->empty())
 		{
 			prelck.unlock();
@@ -502,11 +512,7 @@ void Sloong::CEpollEx::ProcessPrepareSendList(CSockInfo* info)
 void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 {
 	// when prepare list process done, do send operation.
-	if (false == pInfo->m_oSendMutex.try_lock())
-	{
-		return;
-	}
-	unique_lock<mutex> lck(pInfo->m_oSendMutex, std::adopt_lock);
+	unique_lock<mutex> lck(pInfo->m_oSockSendMutex);
 
 	bool bTrySend = true;
 
@@ -559,7 +565,7 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 				pInfo->m_nLastSentTags = -1;
 			else
 			{
-				CtlEpollEvent(EPOLL_CTL_MOD, pInfo->m_sock, EPOLLIN | EPOLLET);
+				CtlEpollEvent(EPOLL_CTL_MOD, pInfo->m_sock, EPOLLIN );
 				pInfo->m_bIsSendListEmpty = true;
 			}
 		}
@@ -572,11 +578,17 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 			// send normal data.
 			si->nSent = SendEx(pInfo->m_sock, si->pSendBuffer, si->nSize, si->nSent);
 
+		if ( si->nSent == -1 )
+		{
+			// socket closed
+			lck.unlock();
+			CloseConnect(pInfo->m_sock);
+			break;
+		}
 		// check send result.
 		// send done, remove the is sent data and try send next package.
 		if (si->nSent == (si->nSize + si->nExSize))
 		{
-			m_pLog->Log(CUniversal::Format("package is send done, send data length is:%d. remove from list.", si->nSent));
 			list->pop();
 			pInfo->m_nLastSentTags = -1;
 			SAFE_DELETE_ARR(si->pSendBuffer);
