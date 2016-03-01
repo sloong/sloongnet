@@ -25,6 +25,7 @@ namespace Sloong
 		// Message show/hide
 		bool m_bShowSendMessage;
 		bool m_bShowReceiveMessage;
+		bool m_bLogWriteToOneFile;
 	};
 }
 

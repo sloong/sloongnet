@@ -17,6 +17,7 @@ CServerConfig::CServerConfig()
 	m_nSleepInterval = 100;
 	m_bShowSendMessage = false;
 	m_bShowReceiveMessage = false;
+	m_bLogWriteToOneFile = false;
 }
 
 bool CServerConfig::LoadConfigFile(string path)
@@ -85,6 +86,11 @@ bool CServerConfig::LoadConfigFile(string path)
 	bRes = g_key_file_get_boolean(conf, "Log", "ShowSendMessage", &err);
 	if (!err)
 		m_bShowSendMessage = bRes;
+	g_clear_error(&err);
+
+	bRes = g_key_file_get_boolean(conf, "Log", "WriteToOneFile", &err);
+	if (!err)
+		m_bLogWriteToOneFile = bRes;
 	g_clear_error(&err);
 	
 	
