@@ -26,6 +26,7 @@ namespace Sloong
         CEpollEx();
 		virtual ~CEpollEx();
         int Initialize(CLog* pLog,int listenPort, int nThreadNum, int nPriorityLevel, bool bShowSendMessage = false );
+		void SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage);
 		void Exit();
         void SendMessage(int sock, int nPriority, const string& nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
         bool SendMessageEx( int sock, int nPriority, const char* pData, int nSize);
@@ -61,6 +62,7 @@ namespace Sloong
 		int m_nPriorityLevel;
         sem_t* m_pSEM;
         bool m_bShowSendMessage;
+		bool m_bShowReceiveMessage;
 		bool m_bIsRunning;
 	};
 }

@@ -119,9 +119,6 @@
 #ifndef __UINT32_MAX__
 #define __UINT32_MAX__ 4294967295U
 #endif
-#ifndef __GXX_EXPERIMENTAL_CXX0X__
-#define __GXX_EXPERIMENTAL_CXX0X__ 1
-#endif
 #ifndef LUA_USE_READLINE
 #define LUA_USE_READLINE 1
 #endif
@@ -196,9 +193,6 @@
 #endif
 #ifndef __LDBL_HAS_QUIET_NAN__
 #define __LDBL_HAS_QUIET_NAN__ 1
-#endif
-#ifndef _REENTRANT
-#define _REENTRANT 1
 #endif
 #ifndef __GNUC__
 #define __GNUC__ 4

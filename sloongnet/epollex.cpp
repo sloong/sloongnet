@@ -446,7 +446,9 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			}
 			// Add the msg to the sock info list
 			delete[] data;
-
+			if (m_bShowReceiveMessage)
+				m_pLog->Log(msg);
+			
 			unique_lock<mutex> lrlck(info->m_oReadListMutex);
 			pList->push(msg);
 			lrlck.unlock();
@@ -609,6 +611,12 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 void Sloong::CEpollEx::Exit()
 {
 	m_bIsRunning = false;
+}
+
+void Sloong::CEpollEx::SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage)
+{
+	m_bShowSendMessage = bShowSendMessage;
+	m_bShowReceiveMessage = bShowReceiveMessage;
 }
 
 

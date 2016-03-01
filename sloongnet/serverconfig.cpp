@@ -15,6 +15,8 @@ CServerConfig::CServerConfig()
 	m_nProcessThreadQuantity = 1;
     m_nPriorityLevel = 0;
 	m_nSleepInterval = 100;
+	m_bShowSendMessage = false;
+	m_bShowReceiveMessage = false;
 }
 
 bool CServerConfig::LoadConfigFile(string path)
@@ -73,6 +75,18 @@ bool CServerConfig::LoadConfigFile(string path)
 	if (!err)
 		m_nSleepInterval = nRes;
     g_clear_error(&err);
+
+
+	bRes = g_key_file_get_boolean(conf, "Log", "ShowReceiveMessage", &err);
+	if (!err)
+		m_bShowReceiveMessage = bRes;
+	g_clear_error(&err);
+
+	bRes = g_key_file_get_boolean(conf, "Log", "ShowSendMessage", &err);
+	if (!err)
+		m_bShowSendMessage = bRes;
+	g_clear_error(&err);
+	
 	
 	g_key_file_free(conf);
 }

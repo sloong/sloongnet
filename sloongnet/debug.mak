@@ -21,7 +21,7 @@ MACOS_FRAMEWORKS :=
 LINUX_PACKAGES := 
 
 CFLAGS := -ggdb -ffunction-sections -O0
-CXXFLAGS := -ggdb -ffunction-sections -O0 -std=c++11 -pthread -DLUA_USE_READLINE
+CXXFLAGS := -ggdb -ffunction-sections -O0 -std=c++11 -DLUA_USE_READLINE
 ASFLAGS := 
 LDFLAGS := -Wl,-gc-sections -Wl,-rpath=/usr/local/lib/sloong -Wl,-rpath=/usr/lib64/mysql
 COMMONFLAGS := 

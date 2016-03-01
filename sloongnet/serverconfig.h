@@ -21,6 +21,10 @@ namespace Sloong
 		int m_nPriorityLevel;
 		string m_strScriptFolder;
 		int m_nSleepInterval;
+
+		// Message show/hide
+		bool m_bShowSendMessage;
+		bool m_bShowReceiveMessage;
 	};
 }
 
