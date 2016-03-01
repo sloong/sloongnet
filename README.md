@@ -12,6 +12,8 @@ A open source network engine form sloong.com group.
 * Framework is use `lua script + c++ engine`.
 
 ## History
+* ###v0.3.0
+ * ####Fix bugs
 * ###v0.2.0
  * #####New feature
    *  Support priority controls.
