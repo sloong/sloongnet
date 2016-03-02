@@ -62,6 +62,7 @@ bool CJPEG::Load(string path)
 	jpeg_destroy_decompress(&cinfo_decompress);
 
 	fclose(infile);
+	return true;
 }
 
 
