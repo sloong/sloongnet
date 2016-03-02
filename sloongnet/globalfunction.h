@@ -31,6 +31,7 @@ namespace Sloong
 		static int Lua_modifySql(lua_State* l);
         static int Lua_getSqlError(lua_State* l);
 		static int Lua_getThumbImage(lua_State* l);
+		static int Lua_getEngineVer(lua_State* l);
 		
 	public:
 		static CGlobalFunction* g_pThis;

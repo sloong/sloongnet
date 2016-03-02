@@ -11,6 +11,7 @@ using namespace Sloong::Universal;
 #define cimg_display 0
 #include "CImg.h"
 #include <mutex>
+#include "version.h"
 using namespace std;
 using namespace cimg_library;
 #define ARRAYSIZE(a) (sizeof(a)/sizeof(a[0]))
@@ -25,6 +26,7 @@ LuaFunctionRegistr g_LuaFunc[] =
 	{ "modifySql", CGlobalFunction::Lua_modifySql },
     { "getSqlError", CGlobalFunction::Lua_getSqlError },
 	{ "getThumbImage", CGlobalFunction::Lua_getThumbImage },
+	{ "getEngineVer", CGlobalFunction::Lua_getEngineVer },
 };
 
 CGlobalFunction::CGlobalFunction()
@@ -130,7 +132,11 @@ void Sloong::CGlobalFunction::InitLua(CLua* pLua)
 	pLua->AddFunctions(&funcList);
 }
 
-
+int Sloong::CGlobalFunction::Lua_getEngineVer(lua_State* l)
+{
+	CLua::PushString(l, VERSION_TEXT);
+	return 1;
+}
 
 void CGlobalFunction::HandleError(string err)
 {
@@ -141,6 +147,7 @@ void CGlobalFunction::HandleError(string err)
 int CGlobalFunction::Lua_showLog(lua_State* l)
 {
 	g_pThis->m_pLog->Log(CLua::GetStringArgument(l,1));
+	return 1;
 }
 
 
