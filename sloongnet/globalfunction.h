@@ -32,6 +32,9 @@ namespace Sloong
         static int Lua_getSqlError(lua_State* l);
 		static int Lua_getThumbImage(lua_State* l);
 		static int Lua_getEngineVer(lua_State* l);
+		static int Lua_Base64_Encode(lua_State* l);
+		static int Lua_Base64_Decode(lua_State* l);
+		static int Lua_MD5_Encode(lua_State* l);
 		
 	public:
 		static CGlobalFunction* g_pThis;

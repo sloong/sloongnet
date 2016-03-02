@@ -27,6 +27,9 @@ LuaFunctionRegistr g_LuaFunc[] =
     { "getSqlError", CGlobalFunction::Lua_getSqlError },
 	{ "getThumbImage", CGlobalFunction::Lua_getThumbImage },
 	{ "getEngineVer", CGlobalFunction::Lua_getEngineVer },
+	{ "Base64_encode", CGlobalFunction::Lua_Base64_Encode },
+	{ "Base64_decode", CGlobalFunction::Lua_Base64_Decode },
+	{ "MD5_encode", CGlobalFunction::Lua_MD5_Encode },
 };
 
 CGlobalFunction::CGlobalFunction()
@@ -135,6 +138,27 @@ void Sloong::CGlobalFunction::InitLua(CLua* pLua)
 int Sloong::CGlobalFunction::Lua_getEngineVer(lua_State* l)
 {
 	CLua::PushString(l, VERSION_TEXT);
+	return 1;
+}
+
+int Sloong::CGlobalFunction::Lua_Base64_Encode(lua_State* l)
+{
+	string res = CUniversal::Base64_Encoding(CLua::GetStringArgument(l, 1, ""));
+	CLua::PushString(l, res);
+	return 1;
+}
+
+int Sloong::CGlobalFunction::Lua_Base64_Decode(lua_State* l)
+{
+	string res = CUniversal::Base64_Decoding(CLua::GetStringArgument(l, 1, ""));
+	CLua::PushString(l, res);
+	return 1;
+}
+
+int Sloong::CGlobalFunction::Lua_MD5_Encode(lua_State* l)
+{
+	string res = CUniversal::MD5_Encoding(CLua::GetStringArgument(l, 1, ""));
+	CLua::PushString(l, res);
 	return 1;
 }
 
