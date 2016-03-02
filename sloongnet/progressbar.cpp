@@ -12,7 +12,7 @@
 #include "progressbar.h"
 using namespace Sloong;
 
-CProgressBar::CProgressBar( char *title, int max, PROGRESS_STYLE style )
+CProgressBar::CProgressBar( const char *title, int max, PROGRESS_STYLE style )
 {
     m_cChr = '#';
     m_szTitle = title;

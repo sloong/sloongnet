@@ -13,7 +13,8 @@ CMsgProc::CMsgProc()
 
 CMsgProc::~CMsgProc()
 {
-	for (int i = 0; i < m_pLuaList.size(); i++)
+	int nLen = m_pLuaList.size();
+	for (int i = 0; i < nLen; i++)
     {
 		SAFE_DELETE(m_pLuaList[i]);
     }
@@ -66,7 +67,8 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 	int nSize = 0;
     if( opt == "ReloadScript")
     {
-		for (int i = 0; i < m_pLuaList.size(); i++)
+		int nlen = m_pLuaList.size();
+		for (int i = 0; i < nlen; i++)
 		{
 			m_pReloadTagList[i] = true;
 		}

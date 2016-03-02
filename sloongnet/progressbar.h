@@ -22,14 +22,14 @@ namespace Sloong
     class CProgressBar
     {
     public:
-        CProgressBar(char *, int, PROGRESS_STYLE);
+		CProgressBar(const char *, int, PROGRESS_STYLE);
         ~CProgressBar();
         void Update( float );
 
     protected:
         PROGRESS_STYLE m_emStyle;
         int m_nMax;
-        char* m_szTitle;
+        const char* m_szTitle;
         char m_cChr;
         float m_fOffset;
         char* m_szPro;

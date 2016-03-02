@@ -434,7 +434,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 				}
 				else
 				{
-					pList = &info->m_pReadList[data[0]];
+					pList = &info->m_pReadList[(int)data[0]];
 				}
 				const char* msgdata = &data[1];
 				msg = msgdata;

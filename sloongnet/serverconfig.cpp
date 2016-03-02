@@ -95,6 +95,7 @@ bool CServerConfig::LoadConfigFile(string path)
 	
 	
 	g_key_file_free(conf);
+	return true;
 }
 
 

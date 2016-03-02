@@ -62,16 +62,16 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
     g_pThis->m_pDBProc->Query(CLua::GetStringArgument(l,1), res);
 	lck.unlock();
 	string allLine;
+	char line = 0x0A;
 	BOOST_FOREACH(string item, res)
 	{
         string add = item;
-        CUniversal::Replace(add,"&","\&");
 		if ( allLine.empty())
 		{
             allLine = add;
 		}
 		else
-            allLine = allLine + "&" + add;
+            allLine = allLine + line + add;
 	}
 
 	CLua::PushString(l,allLine);

@@ -10,7 +10,7 @@ namespace Sloong
 		CDBProc();
 		virtual ~CDBProc();
 
-		bool Connect(string ip, string user, string passwd, string db, int port);
+		void Connect(string ip, string user, string passwd, string db, int port);
 		int Modify(string sqlCmd);
 		int Query(string sqlCmd, vector<string>& vRes);
 
