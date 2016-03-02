@@ -18,6 +18,7 @@ CMsgProc::~CMsgProc()
 		SAFE_DELETE(m_pLuaList[i]);
     }
 	SAFE_DELETE(m_pGFunc);
+	SAFE_DELETE_ARR(m_pReloadTagList);
 }
 
 void CMsgProc::Initialize(CLog *pLog, string scriptFolder)
@@ -48,17 +49,29 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 	// process msg, get the md5 code and the swift number.
 	CLua* pLua = m_pLuaList[id];
 
+	if (m_pReloadTagList[id] == true)
+	{
+		InitLua(pLua, m_strScriptFolder);
+		m_pReloadTagList[id] = false;
+	}
+		
+
     CLuaPacket request, response;
 	request.SetData("message", msg);
-	if (!pLua->RunFunction("OnRecvMessage", pUInfo, &request, &response))
+	if (!pLua->RunFunction("ProgressMessage", pUInfo, &request, &response))
 		m_pLog->Log(pLua->GetErrorString());
 
     // check the return ;
     string opt = response.GetData("operation");
 	int nSize = 0;
-    if( opt == "reload")
+    if( opt == "ReloadScript")
     {
+		for (int i = 0; i < m_pLuaList.size(); i++)
+		{
+			m_pReloadTagList[i] = true;
+		}
 		InitLua(pLua,m_strScriptFolder);
+		m_pReloadTagList[id] = false;
         res = "0|succeed|Reload succeed";
     }
 	else if (opt == "loadfile")
@@ -92,6 +105,9 @@ int Sloong::CMsgProc::NewThreadInit()
     m_luaMutex.lock();
     m_pLuaList.push_back(pLua);
     int id = m_pLuaList.size()-1;
+	SAFE_DELETE_ARR(m_pReloadTagList);
+	m_pReloadTagList = new bool[m_pLuaList.size()];
+	memset(m_pReloadTagList, 0, m_pLuaList.size()*sizeof(bool));
     m_luaMutex.unlock();
     return id;
 }

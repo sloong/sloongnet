@@ -23,6 +23,7 @@ namespace Sloong
 
 	protected:
 		vector<CLua*>	m_pLuaList;
+		bool*		m_pReloadTagList;
 		CLog*			m_pLog;
 		CGlobalFunction*	m_pGFunc;
         string m_strScriptFolder;
