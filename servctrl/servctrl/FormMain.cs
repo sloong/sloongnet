@@ -1,4 +1,6 @@
-﻿using Sloong;
+﻿using Newtonsoft.Json.Linq;
+using servctrl.UI;
+using Sloong;
 using Sloong.Interface;
 using System;
 using System.Collections.Generic;
@@ -33,6 +35,8 @@ namespace servctrl
         // UI defines
         private FormStatus formStatus = null;
         private FormTest formTest = null;
+        FormLogin formLogin = null;
+        FormManage formManage = null;
         private Log log = null;
         private NetworkThread _Nt = null;
         private Queue<MessagePackage> _SendList = null;
@@ -134,13 +138,17 @@ namespace servctrl
 //             
             formStatus = new FormStatus(share);
             formTest = new FormTest(share);
+            formLogin = new FormLogin(share);
+            formManage = new FormManage(share);
 
             tabPageStatus.Controls.Add(formStatus);
             formStatus.Show();
             tabPageTest.Controls.Add(formTest);
             formTest.Show();
-
-            
+            tabPageLogin.Controls.Add(formLogin);
+            formLogin.Show();
+            tabPageManage.Controls.Add(formManage);
+            formManage.Show();
         }
 
         private void InitFormStatus()
@@ -246,6 +254,8 @@ namespace servctrl
 //             {
 //                 item.Value.m_Socket = null;
 //             }
+            appStatus.RunStatus = RunStatus.Exit;
+            appStatus.ExitApp = true;
             _Nt.Exit();
             //Utility.Serialize(SocketMap, sockMapPath);
             log.Dispose();
@@ -255,11 +265,11 @@ namespace servctrl
         {
             try
             {
-                string msg = Params[0].ToString();
+                JObject msg = Params[0] as JObject;
                 if (msg == null)
                     return;
                 MessagePackage pack = new MessagePackage();
-                pack.SendMessage = msg;
+                pack.SendMessage = msg.ToString();
                 pack.SwiftNumber = _SwiftNum;
                 pack.NeedExData = bExData;
                 pack.MessageExInfo = Params;

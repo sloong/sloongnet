@@ -1,4 +1,5 @@
-﻿using Sloong;
+﻿using Newtonsoft.Json.Linq;
+using Sloong;
 using Sloong.Interface;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace servctrl
     public partial class FormTest : Form
     {
         private IDataCenter pageHost;
-        private Dictionary<string, string> testCaseMap = null;
+        private Dictionary<string, string> testCaseMap = new Dictionary<string, string>();
         const string TestCastMapPath = "UI\\TestCase.bin";
 
         public Dictionary<string, ConnectInfo> SocketMap
@@ -47,14 +48,6 @@ namespace servctrl
             set { }
         }
 
-        string[] defTestCase = 
-        {
-            "Get all user info;60001|",
-            "Get all user name;60001|name",
-            "Get target user info;60001||name='test'",
-            "Add new user;60002|testuser",
-        };
-
         public FormTest(IDataCenter _pageHost)
         {
             InitializeComponent();
@@ -62,25 +55,6 @@ namespace servctrl
             pageHost = _pageHost;
 
             pageHost.PageMessage += PageMessageHandler;
-
-            // read the cache
-            try
-            {
-                testCaseMap = (Dictionary<string, string>)Utility.Deserialize(TestCastMapPath);
-            }
-            catch (Exception)
-            {
-                testCaseMap = new Dictionary<string, string>();
-            }
-            if (testCaseMap.Count == 0)
-            {
-                // add the default test case.
-                foreach (var item in defTestCase)
-                {
-                    var list = item.Split(';');
-                    testCaseMap[list[0]] = list[1];
-                }
-            }
         }
 
         void PageMessageHandler(object sender, PageMessage e)
@@ -95,19 +69,25 @@ namespace servctrl
 
         private void buttonSend_Click(object sender, EventArgs e)
         {
+            JObject pam = JObject.Parse("{}");
+            var AllMsg = textBoxMsg.Text.Split('|');
+            foreach( var item in AllMsg )
+            {
+                var sitem = item.Split('=');
+                pam[sitem[0]] = sitem[1];
+            }
+
             int nMul = 0;
             if (checkBoxSingle.Checked)
                 nMul = 1;
             else
                 nMul = Convert.ToInt32(textBoxMulNum.Text);
 
-
-
             try
             {
                 for (int i = 0; i < nMul; i++)
                 {
-                    pageHost.SendMessage(MessageType.SendRequest, textBoxMsg.Text, ProcResult);
+                    pageHost.SendMessage(MessageType.SendRequest, pam, ProcResult);
                     listBoxLog.Items.Add(textBoxMsg.Text);
                 }
 
@@ -223,7 +203,7 @@ namespace servctrl
             }
             else
             {
-                listBoxLog.SelectedIndex = listBoxLog.Items.Add(pack.SwiftNumber.ToString()+"|"+msgs[4]);
+                listBoxLog.SelectedIndex = listBoxLog.Items.Add(pack.SwiftNumber.ToString()+"|"+msgs[3]);
             }
             return true;
         }
