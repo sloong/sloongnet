@@ -18,5 +18,6 @@ namespace servctrl
         public Socket m_Socket;
         public IPEndPoint m_IPInfo;
         public string m_URL;
+        public ProtocolType m_Type = ProtocolType.Tcp;
     }
 }

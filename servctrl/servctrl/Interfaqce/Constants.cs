@@ -164,5 +164,6 @@ namespace Sloong.Interface
         public long SwiftNumber = -1;
         public CallBackFunc ReceivedHandler = null;
         public object[] MessageExInfo = null;
+        public int SocketID = 0;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Sloong;
+﻿using servctrl;
+using Sloong;
 using Sloong.Interface;
 using System;
 using System.Collections.Generic;
@@ -15,10 +16,9 @@ namespace Sloong
     class NetworkThread
     {
         IDataCenter _DC = null;
-        public Socket m_Socket = null;
-        public IPEndPoint ip;
         Thread m_SendWorkThread = null;
-        Thread m_RecvWorkThread = null;
+        int m_nCurrentSocket = 0;
+        Dictionary<int, Thread> m_RecvThreadList = null;
 
         ApplicationStatus AppStatus
         {
@@ -44,6 +44,14 @@ namespace Sloong
             }
         }
 
+        List<ConnectInfo> SocketMap
+        {
+            get
+            {
+                return _DC[ShareItem.SocketMap] as List<ConnectInfo>;
+            }
+        }
+
 
         public NetworkThread(IDataCenter dc)
         {
@@ -52,8 +60,7 @@ namespace Sloong
             m_SendWorkThread = new Thread(() => SendWorkLoop());
             m_SendWorkThread.Name = "Network Send Thread";
 
-            m_RecvWorkThread = new Thread(() => RecvWorkLoop());
-            m_RecvWorkThread.Name = "Network Recv Thread";
+            m_RecvThreadList = new Dictionary<int, Thread>();
         }
 
         public Log log
@@ -67,7 +74,10 @@ namespace Sloong
         public void Run()
         {
             m_SendWorkThread.Start();
-            m_RecvWorkThread.Start();
+            foreach( var item in m_RecvThreadList)
+            {
+                item.Value.Start(item.Key);
+            }
         }
 
         public void Exit()
@@ -76,30 +86,35 @@ namespace Sloong
             {
                 m_SendWorkThread.Abort();
             }
-            if (m_RecvWorkThread.ThreadState == ThreadState.Running)
+            foreach( var item in m_RecvThreadList )
             {
-                m_RecvWorkThread.Abort();
+                if (item.Value.ThreadState == ThreadState.Running)
+                {
+                    item.Value.Abort();
+                }
             }
-            if (m_Socket != null)
+            
+            foreach (var item in SocketMap)
             {
-                m_Socket.Close();
+                if (item.m_Socket != null && item.m_Socket.Connected)
+                    item.m_Socket.Close();
             }
         }
 
-        public void ConnectToServer(ref Socket s, string ip)
+        public void ConnectToServer(int nIndex)
         {
-            if (!Utility.TestNetwork(AppStatus.ServerIP))
+            var info = SocketMap[nIndex];
+            if (!Utility.TestNetwork(info.m_URL))
             {
                 log.Write(string.Format("Ping to {0} fialed.", AppStatus.ServerIP.ToString()));
                 return;
             }
-            if (s == null || !s.Connected)
+            if (info.m_Socket == null || !info.m_Socket.Connected)
             {
-                s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Parse(AppStatus.ServerIP), AppStatus.SendProt);
-                s.Connect(ipEndPoint);
-                AppStatus.RecvBufferSize = s.ReceiveBufferSize;
-                _DC.Add(ShareItem.ConnectStatus, m_Socket.Connected);
+                info.m_Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, info.m_Type);
+                info.m_Socket.Connect(info.m_IPInfo);
+                //AppStatus.RecvBufferSize = s.ReceiveBufferSize;
+                /*_DC.Add(ShareItem.ConnectStatus, m_Socket.Connected);*/
                 //string connectMsg = "SloongWalls Client is connect.";
                 //m_PageHost.SendMessage(MessageType.send, connectMsg);
                 //m_hSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 5000); //设置接收数据超时                    
@@ -116,9 +131,10 @@ namespace Sloong
             {
                 try
                 {
-                    if (m_Socket == null || !m_Socket.Connected)
-                        ConnectToServer(ref m_Socket, AppStatus.ServerIP);
-                    _DC[ShareItem.ConnectStatus] = m_Socket.Connected;
+                    var CurSock = SocketMap[m_nCurrentSocket].m_Socket;
+                    if (CurSock == null || !CurSock.Connected)
+                        ConnectToServer(m_nCurrentSocket);
+                    //_DC[ShareItem.ConnectStatus] = m_Socket.Connected;
                 }
                 catch (Exception e)
                 {
@@ -131,22 +147,28 @@ namespace Sloong
                     // Process send list
                     if (SendList != null && SendList.Count > 0)
                     {
-                        //   if (MsgList.ContainsKey(nProcIndex))
+                        var pack = SendList.Dequeue();
+                        var msg = pack.SendMessage;
+                        string md5 = Utility.MD5_Encoding(msg, Encoding.UTF8);
+                        var sendmsg = string.Format("{0}|{1}|{2}", md5, pack.SwiftNumber, msg);
+                        var len = string.Format("{0:D8}", sendmsg.Length);
+                        sendmsg = len + sendmsg;
+
+                        byte[] sendByte = Encoding.ASCII.GetBytes(sendmsg);
+                        var Sock = SocketMap[pack.SocketID].m_Socket;
+                        if( !m_RecvThreadList.ContainsKey(pack.SocketID))
                         {
-                            var pack = SendList.Dequeue();
-                            var msg = pack.SendMessage;
-                            string md5 = Utility.MD5_Encoding(msg, Encoding.UTF8);
-                            var sendmsg = string.Format("{0}|{1}|{2}", md5, pack.SwiftNumber, msg);
-                            var len = string.Format("{0:D8}", sendmsg.Length);
-                            sendmsg = len + sendmsg;
-                            
-                            byte[] sendByte = Encoding.ASCII.GetBytes(sendmsg);
-                            lock (m_Socket)
-                            {
-                                Utility.SendEx(m_Socket, sendByte);
-                                pack.IsSent = true;
-                                MsgList.Add(pack.SwiftNumber, pack);
-                            }
+                            var mainRecv = new Thread(() => RecvWorkLoop(pack.SocketID));
+                            mainRecv.Name = "Network Recv Thread :" + pack.SocketID.ToString();
+                            m_RecvThreadList[pack.SocketID] = mainRecv;
+                            mainRecv.Start();
+                        }
+                        
+                        lock (Sock)
+                        {
+                            Utility.SendEx(Sock, sendByte);
+                            pack.IsSent = true;
+                            MsgList.Add(pack.SwiftNumber, pack);
                         }
                     }
                     else
@@ -178,13 +200,14 @@ namespace Sloong
             return packSize;
         }
 
-        public void RecvWorkLoop()
+        public void RecvWorkLoop( int id )
         {
             while (AppStatus != null && AppStatus.RunStatus != RunStatus.Exit)
             {
+                var info = SocketMap[id];
                 try
                 {
-                    if (m_Socket == null || !m_Socket.Connected)
+                    if (info.m_Socket == null || !info.m_Socket.Connected)
                     {
                         System.Threading.Thread.Sleep(100);
                         continue;
@@ -209,7 +232,7 @@ namespace Sloong
                     //                     }
 
 
-                    byte[] data = Utility.RecvEx(m_Socket, RecvDataLength(m_Socket, 10000), 10000);
+                    byte[] data = Utility.RecvEx(info.m_Socket, RecvDataLength(info.m_Socket, 10000), 10000);
 
                     string strRecv = Encoding.UTF8.GetString(data);
                     var RecvDatas = strRecv.Split('|');
@@ -220,7 +243,7 @@ namespace Sloong
                         pack.ReceivedMessages = RecvDatas;
                         if (pack.NeedExData)
                         {
-                            byte[] exData = Utility.RecvEx(m_Socket, RecvDataLength(m_Socket, 0), 0);
+                            byte[] exData = Utility.RecvEx(info.m_Socket, RecvDataLength(info.m_Socket, 0), 0);
                             pack.ReceivedExData = exData;
                         }
                         pack.IsReceived = true;
@@ -233,7 +256,6 @@ namespace Sloong
                     {
                         // no the swift number, error.
                         throw new Exception("Received message but no checked the swift number. please check the message:" + strRecv);
-
                     }
                 }
                 catch (Exception ex)

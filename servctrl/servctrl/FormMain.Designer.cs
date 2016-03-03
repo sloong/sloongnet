@@ -31,14 +31,14 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPageStatus = new System.Windows.Forms.TabPage();
             this.tabPageTest = new System.Windows.Forms.TabPage();
+            this.tabPageLogin = new System.Windows.Forms.TabPage();
+            this.tabPageManage = new System.Windows.Forms.TabPage();
             this.buttonConnect = new System.Windows.Forms.Button();
             this.comboBoxServList = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.textBoxPort = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.textBoxAddr = new System.Windows.Forms.TextBox();
-            this.tabPageLogin = new System.Windows.Forms.TabPage();
-            this.tabPageManage = new System.Windows.Forms.TabPage();
             this.tabControl1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -73,6 +73,26 @@
             this.tabPageTest.TabIndex = 1;
             this.tabPageTest.Text = "Test";
             this.tabPageTest.UseVisualStyleBackColor = true;
+            // 
+            // tabPageLogin
+            // 
+            this.tabPageLogin.Location = new System.Drawing.Point(4, 22);
+            this.tabPageLogin.Name = "tabPageLogin";
+            this.tabPageLogin.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageLogin.Size = new System.Drawing.Size(902, 499);
+            this.tabPageLogin.TabIndex = 2;
+            this.tabPageLogin.Text = "Login";
+            this.tabPageLogin.UseVisualStyleBackColor = true;
+            // 
+            // tabPageManage
+            // 
+            this.tabPageManage.Location = new System.Drawing.Point(4, 22);
+            this.tabPageManage.Name = "tabPageManage";
+            this.tabPageManage.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageManage.Size = new System.Drawing.Size(902, 499);
+            this.tabPageManage.TabIndex = 3;
+            this.tabPageManage.Text = "Manage";
+            this.tabPageManage.UseVisualStyleBackColor = true;
             // 
             // buttonConnect
             // 
@@ -110,6 +130,7 @@
             this.textBoxPort.Size = new System.Drawing.Size(56, 21);
             this.textBoxPort.TabIndex = 19;
             this.textBoxPort.Text = "8055";
+            this.textBoxPort.TextChanged += new System.EventHandler(this.textBoxAddr_TextChanged);
             // 
             // label1
             // 
@@ -127,26 +148,7 @@
             this.textBoxAddr.Size = new System.Drawing.Size(166, 21);
             this.textBoxAddr.TabIndex = 16;
             this.textBoxAddr.Text = "127.0.0.1";
-            // 
-            // tabPageLogin
-            // 
-            this.tabPageLogin.Location = new System.Drawing.Point(4, 22);
-            this.tabPageLogin.Name = "tabPageLogin";
-            this.tabPageLogin.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageLogin.Size = new System.Drawing.Size(902, 499);
-            this.tabPageLogin.TabIndex = 2;
-            this.tabPageLogin.Text = "Login";
-            this.tabPageLogin.UseVisualStyleBackColor = true;
-            // 
-            // tabPageManage
-            // 
-            this.tabPageManage.Location = new System.Drawing.Point(4, 22);
-            this.tabPageManage.Name = "tabPageManage";
-            this.tabPageManage.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageManage.Size = new System.Drawing.Size(902, 499);
-            this.tabPageManage.TabIndex = 3;
-            this.tabPageManage.Text = "Manage";
-            this.tabPageManage.UseVisualStyleBackColor = true;
+            this.textBoxAddr.TextChanged += new System.EventHandler(this.textBoxAddr_TextChanged);
             // 
             // FormMain
             // 

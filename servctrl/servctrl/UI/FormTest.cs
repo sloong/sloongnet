@@ -32,6 +32,24 @@ namespace servctrl
             set { }
         }
 
+        string[] DefTestCastMapKay =
+        {
+            "Reload",
+            "GetText",
+            "RunSql",
+            "GetUInfo",
+            "SetUInfo",
+        };
+
+        string[] DefTestCastMapValue =
+        {
+            "funcid=Reload",
+            "funcid=GetText",
+            "funcid=RunSql|cmd=Test",
+            "funcid=GetUInfo|key=Test",
+            "funcid=SetUInfo|key=Test|value=TestV",
+        };
+
 
         Socket sockCurrent
         {
@@ -55,6 +73,23 @@ namespace servctrl
             pageHost = _pageHost;
 
             pageHost.PageMessage += PageMessageHandler;
+
+            try
+            {
+                testCaseMap = (Dictionary<string, string>)Utility.Deserialize(TestCastMapPath);
+            }
+            catch(Exception)
+            {
+                for( int i = 0; i< DefTestCastMapKay.Length; i++ )
+                {
+                    testCaseMap.Add(DefTestCastMapKay[i], DefTestCastMapValue[i]);
+                }
+            }
+            foreach (var item in testCaseMap)
+            {
+                comboBoxTestCase.Items.Add(item.Key);
+            }
+            comboBoxTestCase.SelectedIndex = 0;
         }
 
         void PageMessageHandler(object sender, PageMessage e)
@@ -89,102 +124,7 @@ namespace servctrl
                 {
                     pageHost.SendMessage(MessageType.SendRequest, pam, ProcResult);
                     listBoxLog.Items.Add(textBoxMsg.Text);
-                }
-
-                //                     sockCurrent.ReceiveTimeout = 5000;
-                //                                     // real message
-                //                                     var msg = textBoxMsg.Text;
-                //                                     var msgs = msg.Split('|');
-                //                                     
-                //                                     {
-                //                                         nSwift++;
-                //                                         
-                //                                         string md5 = Utility.MD5_Encoding(msg, Encoding.UTF8);
-                //                 
-                //                                         var sendmsg = string.Format("{0}|{1}|{2}", md5, nSwift, msg);
-                //                                         listBoxLog.Items.Add(sendmsg);
-                //                                         var len = string.Format("{0:D8}", sendmsg.Length);
-                //                                         sendmsg = len + sendmsg;
-                //                 
-                //                                         byte[] sendByte = Encoding.ASCII.GetBytes(sendmsg);
-                //                                         lock (sockCurrent)
-                //                                         {
-                //                 
-                //                                             Utility.SendEx(sockCurrent, sendByte);
-                //                                         }
-                //                                         if (nMul > 1)
-                //                                         {
-                //                                             int nInt;
-                //                                             try
-                //                                             {
-                //                                                 nInt = Convert.ToInt32(textBoxNumInterval.Text);
-                //                                             }
-                //                                             catch(Exception)
-                //                                             {
-                //                                                 nInt = 0;
-                //                                             }
-                //                                             if( nInt > 0 )
-                //                                                 System.Threading.Thread.Sleep(nInt);
-                //                                         }
-                //                                             
-                //                                     }
-                //                                     
-                //                 
-                //                                       for (int i = 0; i < nMul; i++)
-                //                                       {
-                //                                          // send end, rece the return.
-                //                                          byte[] leng = Utility.RecvEx(sockCurrent, 8,0);
-                //                                          long nlen = 0;
-                //                                          byte[] data = null;
-                //                                          try
-                //                                          {
-                //                                              nlen = BitConverter.ToInt32(leng, 0);
-                //                                              data  = Utility.RecvEx(sockCurrent, nlen,0);
-                //                                          }
-                //                                          catch(Exception ex)
-                //                                          {
-                //                                              listBoxLog.SelectedIndex = listBoxLog.Items.Add(ex.ToString());
-                //                                          }
-                //                                         
-                //                                          
-                //                                          // check the return.
-                //                                          string strres = Encoding.UTF8.GetString(data);
-                //                                          var ress = strres.Split('|');
-                //                                          string log = strres;
-                //                                          try
-                //                                          {
-                //                                              if (ress[2] != "0")
-                //                                              {
-                //                                                  listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + ress[3]);
-                //                                                  return;
-                //                                              }
-                //                 
-                //                                          }
-                //                                           catch(Exception)
-                //                                          {
-                //                 
-                //                                          }
-                //                                          listBoxLog.SelectedIndex = listBoxLog.Items.Add(log);
-                //                                          if (msgs[0] == "70001")
-                //                                          {
-                //                                              int nPicSize = Convert.ToInt32(ress[4]);
-                //                 
-                //                                              byte[] img = Utility.RecvEx(sockCurrent, nPicSize,0);
-                //                 
-                //                                              string filename = "receivePic";
-                //                 
-                //                                              if (!Directory.Exists("D:\\images\\"))
-                //                                                  Directory.CreateDirectory("D:\\images\\");
-                //                 
-                //                                              FileStream fs = new FileStream("D:\\images\\" + filename + ".jpg", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                //                 
-                //                                              fs.Write(img, 0, nPicSize);
-                //                                              fs.Dispose();
-                //                                              fs.Close();
-                //                 
-                //                                          }
-                //                                      }
-                //                                    
+                }                    
             }
             catch (Exception ex)
             {

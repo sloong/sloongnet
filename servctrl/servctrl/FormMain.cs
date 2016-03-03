@@ -29,9 +29,9 @@ namespace servctrl
 
             set { }
         }
-        private Dictionary<string, ConnectInfo> sockMap { get; set; }
+        private List<ConnectInfo> sockMap { get; set; }
 
-        private ApplicationStatus appStatus {get; set;}
+        private ApplicationStatus appStatus { get; set; }
         // UI defines
         private FormStatus formStatus = null;
         private FormTest formTest = null;
@@ -42,31 +42,17 @@ namespace servctrl
         private Queue<MessagePackage> _SendList = null;
         Dictionary<long, MessagePackage> _MessageList = null;
         int _SwiftNum = 0;
+        int nCurrentSocketIndex = 0;
 
-        public Dictionary<string, ConnectInfo> SocketMap
+        public List<ConnectInfo> SocketMap
         {
             get
             {
-                return pageHost[ShareItem.SocketMap] as Dictionary<string, ConnectInfo>;
+                return pageHost[ShareItem.SocketMap] as List<ConnectInfo>;
             }
             set { }
         }
 
-
-        Socket sockCurrent
-        {
-            get
-            {
-                var cbox = pageHost[ShareItem.ConfigSelecter] as ComboBox;
-                if (cbox != null)
-                {
-                    return SocketMap[cbox.SelectedText].m_Socket;
-                }
-                return null;
-            }
-
-            set { }
-        }
         Queue<MessagePackage> SendList
         {
             get
@@ -110,32 +96,32 @@ namespace servctrl
             _MessageList = new Dictionary<long, MessagePackage>();
             appStatus.ExitApp = false;
             appStatus.RunStatus = RunStatus.Run;
-            
-//             try
-//             {
-//                 sockMap = (Dictionary<string, ConnectInfo>)Utility.Deserialize(sockMapPath);
-//                 foreach( var item in sockMap )
-//                 {
-//                     try
-//                     {
-//                         var info = ConnectToServer(item.Value.m_URL, item.Value.m_IPInfo.Port);
-//                         item.Value.m_IPInfo = info.m_IPInfo;
-//                         item.Value.m_Socket = info.m_Socket;
-//                         if (!comboBoxServList.Items.Contains(item.Value.m_URL))
-//                             comboBoxServList.Items.Add(item.Value.m_URL);
-//                     }
-//                     catch(Exception e)
-//                     {
-//                         log.Write(e.ToString());
-//                     }
-//                 }
-//             }
-//             catch(Exception e)
-//             {
-//                 log.Write(e.ToString());
-//                 sockMap = new Dictionary<string, ConnectInfo>();
-//             }
-//             
+
+            try
+            {
+                sockMap = (List<ConnectInfo>)Utility.Deserialize(sockMapPath);
+                foreach (var item in sockMap)
+                {
+                    try
+                    {
+                        var info = ConnectToServer(item.m_URL, item.m_IPInfo.Port);
+                        item.m_IPInfo = info.m_IPInfo;
+                        item.m_Socket = info.m_Socket;
+                        if (!comboBoxServList.Items.Contains(item.m_URL))
+                            comboBoxServList.Items.Add(item.m_URL);
+                    }
+                    catch (Exception e)
+                    {
+                        log.Write(e.ToString());
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                log.Write(e.ToString());
+                sockMap = new List<ConnectInfo>();
+            }
+
             formStatus = new FormStatus(share);
             formTest = new FormTest(share);
             formLogin = new FormLogin(share);
@@ -153,7 +139,7 @@ namespace servctrl
 
         private void InitFormStatus()
         {
-            if(ServList.Items.Count>0)
+            if (ServList.Items.Count > 0)
                 ServList.SelectedIndex = 0;
         }
 
@@ -168,7 +154,7 @@ namespace servctrl
             share.Add(ShareItem.MessageList, _MessageList);
         }
 
-        private ConnectInfo ConnectToServer( string url , int port )
+        private ConnectInfo ConnectToServer(string url, int port)
         {
             if (string.IsNullOrEmpty(url))
                 throw new Exception("url is empty.");
@@ -202,24 +188,40 @@ namespace servctrl
         {
             if (string.IsNullOrEmpty(textBoxAddr.Text))
                 return;
-           
+
             try
             {
-//                 var info = ConnectToServer(textBoxAddr.Text, Convert.ToInt32(textBoxPort.Text));
-// 
-//                 // connect succeed
-//                 SocketMap[textBoxAddr.Text] = info;
-//                 if (!ServList.Items.Contains(textBoxAddr.Text))
-//                     ServList.SelectedIndex = ServList.Items.Add(textBoxAddr.Text);
-                if( _Nt.m_Socket != null && _Nt.m_Socket.Connected )
-                    _Nt.m_Socket.Close();
-                appStatus.SendProt = Convert.ToInt32(textBoxPort.Text);
-                appStatus.ServerIP = Dns.GetHostAddresses(textBoxAddr.Text)[0].ToString();;
+                foreach (var item in SocketMap)
+                {
+                    if (item.m_URL == textBoxAddr.Text)
+                    {
+                        if (item.m_Socket.Connected)
+                        {
+                            item.m_Socket.Disconnect(true);
+                        }
+                        else
+                        {
+                            item.m_Socket.Connect(item.m_IPInfo);
+                        }
+                        UpdateButtonText();
+                        return;
+                    }
+                }
+
+                // no found
+                var info = ConnectToServer(textBoxAddr.Text, Convert.ToInt32(textBoxPort.Text));
+                if (info.m_Socket.Connected)
+                {
+                    SocketMap.Add(info);
+                    comboBoxServList.SelectedIndex = comboBoxServList.Items.Add(textBoxAddr.Text);
+                }
+                UpdateButtonText();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format("connect to {1} fialed. error message:", textBoxAddr.Text,ex.Message));
+                MessageBox.Show(string.Format("connect to {1} fialed. error message:", textBoxAddr.Text, ex.Message));
             }
+
         }
 
         void PageMessageHandler(object sender, PageMessage e)
@@ -240,24 +242,31 @@ namespace servctrl
 
         private void comboBoxServList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var ip = sockMap[ServList.Text];
-            textBoxAddr.Text = ServList.Text;// ip.Address.ToString();
-            textBoxPort.Text = ip.m_IPInfo.Port.ToString();
+            foreach (var item in SocketMap)
+            {
+                if (item.m_URL == comboBoxServList.Text)
+                {
+                    textBoxAddr.Text = item.m_URL;
+                    textBoxPort.Text = item.m_IPInfo.Port.ToString();
+                    UpdateButtonText();
 
-            _Nt.m_Socket = SocketMap[textBoxAddr.Text].m_Socket;
-            _Nt.ip = SocketMap[textBoxAddr.Text].m_IPInfo;
+                    nCurrentSocketIndex = SocketMap.IndexOf(item);
+                }
+            }
         }
 
         private void FormMain_FormClosed(object sender, FormClosedEventArgs e)
         {
-//             foreach( var item in SocketMap )
-//             {
-//                 item.Value.m_Socket = null;
-//             }
+            foreach (var item in SocketMap)
+            {
+                if (item.m_Socket != null && item.m_Socket.Connected)
+                    item.m_Socket.Close();
+                item.m_Socket = null;
+            }
             appStatus.RunStatus = RunStatus.Exit;
             appStatus.ExitApp = true;
             _Nt.Exit();
-            //Utility.Serialize(SocketMap, sockMapPath);
+            Utility.Serialize(SocketMap, sockMapPath);
             log.Dispose();
         }
 
@@ -279,10 +288,32 @@ namespace servctrl
                 _SwiftNum++;
 
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 log.Write(e.ToString());
             }
+        }
+
+        void UpdateButtonText()
+        {
+            foreach (var item in SocketMap)
+            {
+                if (item.m_URL == textBoxAddr.Text && item.m_IPInfo.Port.ToString() == textBoxPort.Text)
+                {
+                    if( item.m_Socket.Connected )
+                    {
+                        buttonConnect.Text = "Disconnect";
+                        return;
+                    }
+                }
+            }
+
+            buttonConnect.Text = "Connect";
+        }
+
+        private void textBoxAddr_TextChanged(object sender, EventArgs e)
+        {
+            UpdateButtonText();
         }
     }
 

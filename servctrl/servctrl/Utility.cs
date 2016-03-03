@@ -586,6 +586,8 @@ namespace Sloong
 
         public static void Serialize(object obj, string path)
         {
+            if (obj == null)
+                return;
             string temp = path + ".tmp";
             BinaryFormatter formatter = new BinaryFormatter();
             Stream stream = new FileStream(temp, FileMode.Create, FileAccess.Write);
