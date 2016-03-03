@@ -9,6 +9,7 @@
 CMsgProc::CMsgProc()
 {
     m_pGFunc = new CGlobalFunction();
+    m_pReloadTagList = NULL;
 }
 
 CMsgProc::~CMsgProc()
