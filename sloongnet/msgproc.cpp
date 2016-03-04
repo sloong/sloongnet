@@ -51,56 +51,36 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 	// process msg, get the md5 code and the swift number.
 	CLua* pLua = m_pLuaList[id];
 
-	if (m_pReloadTagList[id] == true)
+	if (m_pGFunc->m_pReloadTagList[id] == true)
 	{
 		InitLua(pLua, m_strScriptFolder);
-		m_pReloadTagList[id] = false;
+		m_pGFunc->m_pReloadTagList[id] = false;
 	}
 		
 
-    CLuaPacket request, response;
-	request.SetData("message", msg);
-	if (!pLua->RunFunction("ProgressMessage", pUInfo, &request, &response))
-		m_pLog->Log(pLua->GetErrorString());
-
-    // check the return ;
-    string opt = response.GetData("operation");
-	int nSize = 0;
-    if( opt == "ReloadScript")
-    {
-		int nlen = m_pLuaList.size();
-		for (int i = 0; i < nlen; i++)
-		{
-			m_pReloadTagList[i] = true;
-		}
-		InitLua(pLua,m_strScriptFolder);
-		m_pReloadTagList[id] = false;
-        res = "0|succeed|Reload succeed";
-    }
-	else if (opt == "loadfile")
+//     CLuaPacket request, response;
+// 	request.SetData("message", msg);
+	int nRes = pLua->RunFunction("ProgressMessage", pUInfo, &msg, &res);
+	if (nRes >= 0 && nRes < m_pGFunc->m_oSendExMapList.size())
 	{
-        auto filename = response.GetData("filepath");
-        try
-        {
-            nSize = CUtility::ReadFile(filename, pBuf);
-        }
-        catch( normal_except e )
-        {
-            m_pLog->Log(e.what(),ERR);
-            res = string("-2|") + e.what();
-            return 0;
-        }
-    }
+		pBuf = m_pGFunc->m_oSendExMapList[nRes].m_pData;
+		int nSize = m_pGFunc->m_oSendExMapList[nRes].m_nDataSize;
+		unique_lock<mutex> lck(m_pGFunc->m_oListMutex);
+		m_pGFunc->m_oSendExMapList[nRes].m_pData = NULL;
+		m_pGFunc->m_oSendExMapList[nRes].m_nDataSize = 0;
+		m_pGFunc->m_oSendExMapList[nRes].m_bIsEmpty = true;
+		lck.unlock();
+		return nSize;
+	}
+	else if( nRes == -2) 
+		m_pLog->Log(res);
 
-    res = response.GetData("errno") + "|" + response.GetData("errmsg") + "|" + response.GetData("message");
-
-    m_pLog->Log(res);
-	return nSize;
+    //m_pLog->Log(res);
+	return nRes;
 }
 
 int Sloong::CMsgProc::NewThreadInit()
 {
-
 	CLua* pLua = new CLua();
 	pLua->SetScriptFolder(m_strScriptFolder);
 	m_pGFunc->InitLua(pLua);
@@ -108,9 +88,10 @@ int Sloong::CMsgProc::NewThreadInit()
     m_luaMutex.lock();
     m_pLuaList.push_back(pLua);
     int id = m_pLuaList.size()-1;
-	SAFE_DELETE_ARR(m_pReloadTagList);
-	m_pReloadTagList = new bool[m_pLuaList.size()];
-	memset(m_pReloadTagList, 0, m_pLuaList.size()*sizeof(bool));
+	SAFE_DELETE_ARR(m_pGFunc->m_pReloadTagList);
+	m_pGFunc->m_nTagSize = m_pLuaList.size();
+	m_pGFunc->m_pReloadTagList = new bool[m_pGFunc->m_nTagSize];
+	memset(m_pGFunc->m_pReloadTagList, 0, m_pGFunc->m_nTagSize*sizeof(bool));
     m_luaMutex.unlock();
     return id;
 }

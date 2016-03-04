@@ -10,6 +10,7 @@ using namespace Sloong::Universal;
 #include "jpeg.h"
 #define cimg_display 0
 #include "CImg.h"
+#include "univ/exception.h"
 #include <mutex>
 #include "version.h"
 using namespace std;
@@ -30,6 +31,8 @@ LuaFunctionRegistr g_LuaFunc[] =
 	{ "Base64_encode", CGlobalFunction::Lua_Base64_Encode },
 	{ "Base64_decode", CGlobalFunction::Lua_Base64_Decode },
 	{ "MD5_encode", CGlobalFunction::Lua_MD5_Encode },
+	{ "SendFile", CGlobalFunction::Lua_SendFile },
+	{ "ReloadScript", CGlobalFunction::Lua_ReloadScript },
 };
 
 CGlobalFunction::CGlobalFunction()
@@ -44,9 +47,18 @@ CGlobalFunction::~CGlobalFunction()
 {
 	SAFE_DELETE(m_pUtility);
 	SAFE_DELETE(m_pDBProc);
+
+	unique_lock<mutex> lck(m_oListMutex);
+	for (int i = 0; i < m_oSendExMapList.size(); i++ )
+	{
+		if (!m_oSendExMapList[i].m_bIsEmpty)
+			SAFE_DELETE_ARR(m_oSendExMapList[i].m_pData)
+			m_oSendExMapList[i].m_bIsEmpty = true;
+	}
+	lck.unlock();
 }
 
-void Sloong::CGlobalFunction::Initialize( CLog* plog)
+void Sloong::CGlobalFunction::Initialize( CLog* plog )
 {
     m_pLog = plog;
     // connect to db
@@ -59,7 +71,7 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 {
 	vector<string> res;
 	unique_lock<mutex> lck(g_SQLMutex);
-    g_pThis->m_pDBProc->Query(CLua::GetStringArgument(l,1), res);
+    int nRes = g_pThis->m_pDBProc->Query(CLua::GetStringArgument(l,1), res);
 	lck.unlock();
 	string allLine;
 	char line = 0x0A;
@@ -75,7 +87,8 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 	}
 
 	CLua::PushString(l,allLine);
-	return 1;
+	CLua::PushNumber(l, nRes);
+	return 2;
 }
 
 int Sloong::CGlobalFunction::Lua_modifySql(lua_State* l)
@@ -161,6 +174,63 @@ int Sloong::CGlobalFunction::Lua_MD5_Encode(lua_State* l)
 	CLua::PushString(l, res);
 	return 1;
 }
+
+int Sloong::CGlobalFunction::Lua_SendFile(lua_State* l)
+{
+	auto filename = CLua::GetStringArgument(l, 1, "");
+	if (filename == "")
+	{
+		CLua::PushNumber(l,-1);
+		CLua::PushString(l,"Param is empty.");
+		return 2;
+	}
+		
+	char* pBuf = NULL;
+	int nSize = 0;
+	try
+	{
+		nSize = CUtility::ReadFile(filename, pBuf);
+	}
+	catch (normal_except e)
+	{
+		g_pThis->m_pLog->Log(e.what(), ERR);
+		CLua::PushNumber(l, -1);
+		CLua::PushString(l, e.what());
+		return 2;
+	}
+
+	auto& rList = g_pThis->m_oSendExMapList;
+	unique_lock<mutex> lck(g_pThis->m_oListMutex);
+	for (int i = 0; i < rList.size(); i++)
+	{
+		if (rList[i].m_bIsEmpty)
+		{
+			rList[i].m_nDataSize = nSize;
+			rList[i].m_pData = pBuf;
+			rList[i].m_bIsEmpty = false;
+			lck.unlock();
+			CLua::PushNumber(l, i);
+			return 1;
+		}
+	}
+
+	SendExDataInfo info;
+	info.m_nDataSize = nSize;
+	info.m_pData = pBuf;
+	info.m_bIsEmpty = false;
+	rList[rList.size()] = info;
+	return rList.size() - 1;
+}
+
+int Sloong::CGlobalFunction::Lua_ReloadScript(lua_State* l)
+{
+	for (int i = 0; i < g_pThis->m_nTagSize; i++)
+	{
+		g_pThis->m_pReloadTagList[i] = true;
+	}
+	return 0;
+}
+
 
 void CGlobalFunction::HandleError(string err)
 {
