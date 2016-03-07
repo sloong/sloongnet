@@ -4,7 +4,7 @@ require_ex('ex');
 local main_Req = {};
 
 main_Req.ReloadScript = function( u, req, res )
-	res:setdata('operation','ReloadScript');
+	ReloadScript();
 	return 0;
 end
 

@@ -2,11 +2,24 @@ local Ex_Req = {};
 
 
 Ex_Req.GetFileData = function( u, req, res )
-	local cmd = "SELECT * FROM `fileList` WHERE `fileMD5`='" .. req['md5'] .. "'"
+	local md5 = req['MD5'] or nil;
+	local h = tonumber(req['height']) or nil
+	local w = tonumber(req['width']) or nil
+	local q = tonumber(req['quality']) or 5
+	if not md5 or not h or not w then
+		return -1,'param error';
+	end
+	local cmd = "SELECT `Path` FROM `Walls_FileList` WHERE `MD5`='" .. md5 .. "'"
 	showLog("run sql cmd:" .. cmd);
 	local res = querySql(cmd);
 	showLog(res);
-	return 0,res;
+	local thumbpath = getThumbImage(res,w,h,q)
+	local errno,errmsg=SendFile(thumbpath);
+	if errno == -1 then
+		return errno,errmsg;
+	else
+		return 0,thumbpath,errno;
+	end
 end
 
 Ex_Req.SetUInfo = function( u, req, res )
