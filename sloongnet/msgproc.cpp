@@ -9,7 +9,7 @@
 CMsgProc::CMsgProc()
 {
     m_pGFunc = new CGlobalFunction();
-    m_pReloadTagList = NULL;
+    
 }
 
 CMsgProc::~CMsgProc()
@@ -20,7 +20,6 @@ CMsgProc::~CMsgProc()
 		SAFE_DELETE(m_pLuaList[i]);
     }
 	SAFE_DELETE(m_pGFunc);
-	SAFE_DELETE_ARR(m_pReloadTagList);
 }
 
 void CMsgProc::Initialize(CLog *pLog, string scriptFolder)

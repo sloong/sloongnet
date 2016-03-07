@@ -40,6 +40,7 @@ CGlobalFunction::CGlobalFunction()
     m_pUtility = new CUtility();
     m_pDBProc = new CDBProc();
 	g_pThis = this;
+	m_pReloadTagList = NULL;
 }
 
 
@@ -56,6 +57,7 @@ CGlobalFunction::~CGlobalFunction()
 			m_oSendExMapList[i].m_bIsEmpty = true;
 	}
 	lck.unlock();
+	SAFE_DELETE_ARR(m_pReloadTagList);
 }
 
 void Sloong::CGlobalFunction::Initialize( CLog* plog )
