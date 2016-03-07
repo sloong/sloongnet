@@ -59,7 +59,7 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 
 //     CLuaPacket request, response;
 // 	request.SetData("message", msg);
-	int nRes = pLua->RunFunction("ProgressMessage", pUInfo, &msg, &res);
+	int nRes = pLua->RunFunction("ProgressMessage", pUInfo, msg, res);
 	if (nRes >= 0 && nRes < m_pGFunc->m_oSendExMapList.size())
 	{
 		pBuf = m_pGFunc->m_oSendExMapList[nRes].m_pData;

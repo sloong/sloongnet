@@ -16,14 +16,15 @@ Init = function( path )
 end
 
 OnError = function( msg )
-    print('error proc:' .. msg);
+    print('error proc:' .. tostring(msg));
 end
 
 
-ProgressMessage = function( uinfo, request, response )
+ProgressMessage = function( uinfo, request )
+    print('progress called')
     local jreq = JSON:decode(request)
     local jres = JSON:decode('{}')
-    local func = g_all_request_processer[param['funcid']];
+    local func = g_all_request_processer[jreq['funcid']];
 
     if type(func) == 'function' then
       local code,msg,res = func( uinfo, jreq, jres );

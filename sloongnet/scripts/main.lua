@@ -17,7 +17,8 @@ main_Req.SqlTest = function( u, req, res )
 end
 
 main_Req.TextTest = function( u, req, res )
-	return 0, getEngineVer()  .. ' -- Sloong Network Engine -- Copyright 2015 Sloong.com. All Rights Reserved';
+        res['TestText'] = getEngineVer()  .. ' -- Sloong Network Engine -- Copyright 2015 Sloong.com. All Rights Reserved';
+        return 0
 end
 
 g_all_request_processer = 
