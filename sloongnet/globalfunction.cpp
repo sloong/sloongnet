@@ -50,7 +50,8 @@ CGlobalFunction::~CGlobalFunction()
 	SAFE_DELETE(m_pDBProc);
 
 	unique_lock<mutex> lck(m_oListMutex);
-	for (int i = 0; i < m_oSendExMapList.size(); i++ )
+	int nSize = m_oSendExMapList.size();
+	for (int i = 0; i < nSize; i++)
 	{
 		if (!m_oSendExMapList[i].m_bIsEmpty)
 			SAFE_DELETE_ARR(m_oSendExMapList[i].m_pData)
@@ -203,7 +204,8 @@ int Sloong::CGlobalFunction::Lua_SendFile(lua_State* l)
 
 	auto& rList = g_pThis->m_oSendExMapList;
 	unique_lock<mutex> lck(g_pThis->m_oListMutex);
-	for (int i = 0; i < rList.size(); i++)
+	int nListSize = rList.size();
+	for (int i = 0; i < nListSize; i++)
 	{
 		if (rList[i].m_bIsEmpty)
 		{
