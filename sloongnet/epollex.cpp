@@ -172,8 +172,7 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
 
 	// process msg
 	char* pBuf = NULL;
-	long long nMsgLen = msg.size();
-	int nBufLen = nMsgLen;
+	long long nBufLen = msg.size();
 	string md5;
 	if (m_bSwiftNumberSupport)
 	{
@@ -190,6 +189,7 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
 	}
 
 	pBuf = new char[nBufLen+8];
+	memset(pBuf, 0, nBufLen + 8);
 	char* pCpyPoint = pBuf;
 	memcpy(pCpyPoint, (void*)&nBufLen, 8);
 	pCpyPoint += 8;
@@ -203,6 +203,8 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
 		memcpy(pCpyPoint, md5.c_str(), md5.length());
 		pCpyPoint += md5.length();
 	}
+	memcpy(pCpyPoint, msg.c_str(), msg.length());
+	pCpyPoint += msg.length();
 	if (pExData != NULL && nSize > 0)
 	{
 		long long Exlen = nSize;
@@ -474,17 +476,22 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 
 			if ( m_bSwiftNumberSupport )
 			{
-				memcpy(&recvInfo.nSwiftNumber, pMsg, sizeof(long long));
+				memset(pLen, 0, 8);
+				memcpy(pLen, pMsg, sizeof(long long));
+				recvInfo.nSwiftNumber = atol(pLen);
 				pMsg += sizeof(long long);
 			}
 
 			if (m_bMD5Support)
 			{
-				memcpy(&recvInfo.strMD5, pMsg, 32);
+				char tmd5[33] = { 0 };
+				memcpy(tmd5, pMsg, 32);
+				recvInfo.strMD5 = tmd5;
 				pMsg += 32;
 			}
 			
-			recvInfo.strMessage = pMsg;
+			recvInfo.strMessage.clear();
+			recvInfo.strMessage = string(pMsg);
 
 			// Add the msg to the sock info list
 			delete[] data;

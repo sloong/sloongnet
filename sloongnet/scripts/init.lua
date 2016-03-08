@@ -21,7 +21,6 @@ end
 
 
 ProgressMessage = function( uinfo, request )
-    print('progress called')
     local jreq = JSON:decode(request)
     local jres = JSON:decode('{}')
     local func = g_all_request_processer[jreq['funcid']];

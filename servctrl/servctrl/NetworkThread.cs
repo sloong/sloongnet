@@ -150,7 +150,7 @@ namespace Sloong
                         var pack = SendList.Dequeue();
                         var msg = pack.SendMessage;
                         string md5 = Utility.MD5_Encoding(msg, Encoding.UTF8);
-                        var sendmsg = string.Format("{0}|{1}|{2}", md5, pack.SwiftNumber, msg);
+                        var sendmsg = string.Format("{0:D8}{1}{2}", pack.SwiftNumber, md5, msg);
                         var len = string.Format("{0:D8}", sendmsg.Length);
                         sendmsg = len + sendmsg;
 
@@ -237,7 +237,8 @@ namespace Sloong
                     byte[] data = Utility.RecvEx(info.m_Socket, nLength-8-32, 10000);
                     
                     string strRecv = Encoding.UTF8.GetString(data);
-                    long nIndex = Convert.ToInt64(nSwift);
+
+                    long nIndex = BitConverter.ToInt64(nSwift,0);
                     if (MsgList.ContainsKey(nIndex))
                     {
                         var pack = MsgList[nIndex];
