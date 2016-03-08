@@ -10,7 +10,7 @@ Sloong::CSockInfo::CSockInfo(int nPriorityLevel)
 		nPriorityLevel = 1;
 	}
 	m_nPriorityLevel = nPriorityLevel;
-	m_pReadList = new queue<string>[nPriorityLevel]();
+	m_pReadList = new queue<RECVINFO>[nPriorityLevel]();
 	m_pSendList = new queue<SENDINFO*>[nPriorityLevel]();
 	m_pProcessMutexList = new mutex[nPriorityLevel]();
     m_pPrepareSendList = new queue<PRESENDINFO>;

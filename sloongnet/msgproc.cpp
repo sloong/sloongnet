@@ -55,10 +55,7 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 		InitLua(pLua, m_strScriptFolder);
 		m_pGFunc->m_pReloadTagList[id] = false;
 	}
-		
 
-//     CLuaPacket request, response;
-// 	request.SetData("message", msg);
 	int nRes = pLua->RunFunction("ProgressMessage", pUInfo, msg, res);
 	if (nRes >= 0 && nRes < m_pGFunc->m_oSendExMapList.size())
 	{

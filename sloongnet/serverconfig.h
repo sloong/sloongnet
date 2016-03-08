@@ -13,6 +13,7 @@ namespace Sloong
 
 		bool LoadConfigFile(string path);
 
+		// Server config
 		int m_nPort;
 		string m_strLogPath;
 		bool m_bDebug;
@@ -21,6 +22,8 @@ namespace Sloong
 		int m_nPriorityLevel;
 		string m_strScriptFolder;
 		int m_nSleepInterval;
+		bool m_bEnableSwiftNumberSup;
+		bool m_bEnableMD5Check;
 
 		// Message show/hide
 		bool m_bShowSendMessage;

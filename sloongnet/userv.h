@@ -13,6 +13,7 @@ namespace Sloong
 	class CServerConfig;
 	class CEpollEx;
 	class CMsgProc;
+	struct _stRecvInfo;
 	class SloongWallUS
 	{
 	public:
@@ -25,8 +26,8 @@ namespace Sloong
 
 	public:// static function
 		static void* HandleEventWorkLoop(void* pParam);
-		static void ProcessEvent(int id, string& strMsg, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc);
-		static void ProcessEventList(int id, queue<string>* pList, mutex& oLock, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc);
+		static void ProcessEvent(int id, _stRecvInfo* info, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc);
+		static void ProcessEventList(int id, queue<_stRecvInfo>* pList, mutex& oLock, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc);
 
 	protected:
 		int m_sockServ;

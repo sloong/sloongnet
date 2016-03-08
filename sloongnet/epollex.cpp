@@ -36,9 +36,10 @@ void on_sigint(int signal)
 }
 
 // Initialize the epoll and the thread pool.
-int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bShowSendMessage /* = false */)
+int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support)
 {
-    m_bShowSendMessage = bShowSendMessage;
+	m_bMD5Support = bMD5Support;
+	m_bSwiftNumberSupport = bSwiftNumSupprot;
 	m_nPriorityLevel = nPriorityLevel;
     m_pLog = plog;
 	m_pLog->Log(CUniversal::Format("epollex is initialize.license port is %d", licensePort));
@@ -164,26 +165,58 @@ void *check_connect_timeout(void* para)
     return 0;
 }
 
-void CEpollEx::SendMessage(int sock, int nPriority, const string& nSwift, string msg, const char* pExData, int nSize )
+void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData, int nSize )
 {
+	if (m_bShowSendMessage)
+		m_pLog->Log(msg);
+
 	// process msg
-	string md5 = CUniversal::MD5_Encoding(msg);
-	msg = md5 + "|" + nSwift + "|" + msg;
-    if( m_bShowSendMessage )
-        m_pLog->Log(msg);
+	char* pBuf = NULL;
+	long long nMsgLen = msg.size();
+	int nBufLen = nMsgLen;
+	string md5;
+	if (m_bSwiftNumberSupport)
+	{
+		nBufLen += sizeof(long long);
+	}
+	if (m_bMD5Support)
+	{
+		md5 = CUniversal::MD5_Encoding(msg);
+		nBufLen += md5.length();
+	}
+	if (pExData != NULL && nSize > 0)
+	{
+		nBufLen += 8;
+	}
+
+	pBuf = new char[nBufLen+8];
+	char* pCpyPoint = pBuf;
+	memcpy(pCpyPoint, (void*)&nBufLen, 8);
+	pCpyPoint += 8;
+	if (m_bSwiftNumberSupport)
+	{
+		memcpy(pCpyPoint, (void*)&nSwift, 8);
+		pCpyPoint += sizeof(long long);
+	}
+	if (m_bMD5Support)
+	{
+		memcpy(pCpyPoint, md5.c_str(), md5.length());
+		pCpyPoint += md5.length();
+	}
+	if (pExData != NULL && nSize > 0)
+	{
+		long long Exlen = nSize;
+		memcpy(pCpyPoint, (void*)&Exlen, 8);
+		pCpyPoint += md5.length();
+		nBufLen += 8;
+	}
    
 	CSockInfo* pInfo = NULL;
-	long long len = msg.size();
+	
 	// if have exdata, directly add to epoll list.
 	if (pExData != NULL && nSize > 0)
 	{
-        long long Exlen = nSize;
-		char* pBuf = new char[len + 8 + 8];
-        memcpy(pBuf, (void*)&len, 8);
-		memcpy(pBuf + 8, msg.c_str(), len);
-		memcpy(pBuf + 8 + len, (void*)&Exlen, 8);
-
-		AddToSendList(sock, nPriority, pBuf, len + 8 + 8, 0, pExData, nSize);
+		AddToSendList(sock, nPriority, pBuf, nBufLen + 8, 0, pExData, nSize);
         return;
 	}
 	else
@@ -197,20 +230,14 @@ void CEpollEx::SendMessage(int sock, int nPriority, const string& nSwift, string
 		// check the send list size. if all empty, try send message directly.
 		if ((pInfo->m_bIsSendListEmpty == false && !pInfo->m_pPrepareSendList->empty()) || pInfo->m_oSockSendMutex.try_lock() == false)
         {
-				char* pBuf = new char[len + 8];
-                memcpy(pBuf, (void*)&len, 8);
-				memcpy(pBuf + 8, msg.c_str(), len);
-				AddToSendList(sock, nPriority, pBuf, len + 8, 0, pExData, nSize);
-                return;
+			AddToSendList(sock, nPriority, pBuf, nBufLen + 8, 0, pExData, nSize);
+			return;
 		}
 	}
     
 	unique_lock<mutex> lck(pInfo->m_oSockSendMutex, std::adopt_lock);
 	// if code run here. the all list is empty. and no have exdata. try send message
-	char* pBuf = new char[len + 8];
-	memcpy(pBuf, (void*)&len, 8);
-	memcpy(pBuf + 8, msg.c_str(), len);
-	SendMessageEx(sock, nPriority, pBuf, len + 8);
+	SendMessageEx(sock, nPriority, pBuf, nBufLen + 8);
 	lck.unlock();
 }
 
@@ -420,10 +447,11 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 				CloseConnect(nSocket);
 				break;
 			}
-						
-			queue<string>* pList = &info->m_pReadList[0];
-			string msg;
 			
+			queue<RECVINFO>* pList = &info->m_pReadList[0];
+			RECVINFO recvInfo;
+			
+			const char* pMsg = NULL;
 			// check the priority level
 			if (m_nPriorityLevel != 0)
 			{
@@ -436,21 +464,35 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 				{
 					pList = &info->m_pReadList[(int)data[0]];
 				}
-				const char* msgdata = &data[1];
-				msg = msgdata;
+				pMsg = &data[1];
 			}
 			else
 			{
 				pList = &info->m_pReadList[0];
-				msg = data;
+				pMsg = data;
 			}
+
+			if ( m_bSwiftNumberSupport )
+			{
+				memcpy(&recvInfo.nSwiftNumber, pMsg, sizeof(long long));
+				pMsg += sizeof(long long);
+			}
+
+			if (m_bMD5Support)
+			{
+				memcpy(&recvInfo.strMD5, pMsg, 32);
+				pMsg += 32;
+			}
+			
+			recvInfo.strMessage = pMsg;
+
 			// Add the msg to the sock info list
 			delete[] data;
 			if (m_bShowReceiveMessage)
-				m_pLog->Log(msg);
+				m_pLog->Log(recvInfo.strMessage);
 			
 			unique_lock<mutex> lrlck(info->m_oReadListMutex);
-			pList->push(msg);
+			pList->push(recvInfo);
 			lrlck.unlock();
 			// update the socket time
 			info->m_ActiveTime = time(NULL);
