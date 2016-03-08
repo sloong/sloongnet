@@ -76,6 +76,7 @@ namespace servctrl
         public FormMain()
         {
             InitializeComponent();
+            Control.CheckForIllegalCrossThreadCalls = false;
 
             // Init log
             log = new Log();
@@ -84,7 +85,6 @@ namespace servctrl
             InitPageHost();
             InitFormStatus();
             _Nt.Run();
-            Control.CheckForIllegalCrossThreadCalls = false;
         }
 
         private void InitMemberVariable()

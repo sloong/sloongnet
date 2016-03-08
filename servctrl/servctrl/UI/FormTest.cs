@@ -69,6 +69,7 @@ namespace servctrl
         public FormTest(IDataCenter _pageHost)
         {
             InitializeComponent();
+            Control.CheckForIllegalCrossThreadCalls = false;
             this.TopLevel = false;
             pageHost = _pageHost;
 
@@ -135,15 +136,15 @@ namespace servctrl
         public bool ProcResult(object param)
         {
             MessagePackage pack = param as MessagePackage;
-            var msgs = pack.ReceivedMessages;
-            if (msgs[2] != "0")
+            JObject res = JObject.Parse(pack.ReceivedMessages);
+            if (res["errno"].ToString() != "0")
             {
-                listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + msgs[3]);
+                listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + res["errmsg"]);
                 return false;
             }
             else
             {
-                listBoxLog.SelectedIndex = listBoxLog.Items.Add(pack.SwiftNumber.ToString()+"|"+msgs[3]);
+                listBoxLog.SelectedIndex = listBoxLog.Items.Add(pack.SwiftNumber.ToString() + "|" + res.ToString());
             }
             return true;
         }

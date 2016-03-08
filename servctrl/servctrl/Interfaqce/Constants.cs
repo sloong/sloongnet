@@ -157,7 +157,7 @@ namespace Sloong.Interface
     {
         public string SendMessage = string.Empty;
         public bool IsSent = false;
-        public string[] ReceivedMessages = null;
+        public string ReceivedMessages = null;
         public bool IsReceived = false;
         public byte[] ReceivedExData = null;
         public bool NeedExData = false;
