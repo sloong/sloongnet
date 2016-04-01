@@ -158,7 +158,7 @@ namespace Sloong
                         string swift = "";
                         if (AppStatus.bEnableSwift)
                         {
-                        var sendmsg = string.Format("{0:D8}{1}{2}", pack.SwiftNumber, md5, msg);
+                        	swift = string.Format("{0:D8}", pack.SwiftNumber);
                         }
 
                         var len = string.Format("{0:D8}", msg.Length + md5.Length + swift.Length);
