@@ -61,11 +61,11 @@ CGlobalFunction::~CGlobalFunction()
 	SAFE_DELETE_ARR(m_pReloadTagList);
 }
 
-void Sloong::CGlobalFunction::Initialize( CLog* plog )
+void Sloong::CGlobalFunction::Initialize( CLog* plog, MySQLConnectInfo* info)
 {
     m_pLog = plog;
     // connect to db
-    m_pDBProc->Connect("localhost","root","sloong","sloong",0);
+    m_pDBProc->Connect(info);
 }
 
 

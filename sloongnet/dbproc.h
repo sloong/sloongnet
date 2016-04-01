@@ -4,13 +4,14 @@
 #include <mysql/mysql.h>
 namespace Sloong
 {
+	struct MySQLConnectInfo;
 	class CDBProc
 	{
 	public:
 		CDBProc();
 		virtual ~CDBProc();
 
-		void Connect(string ip, string user, string passwd, string db, int port);
+		void Connect(MySQLConnectInfo* info);
 		int Modify(string sqlCmd);
 		int Query(string sqlCmd, vector<string>& vRes);
 

@@ -22,12 +22,12 @@ CMsgProc::~CMsgProc()
 	SAFE_DELETE(m_pGFunc);
 }
 
-void CMsgProc::Initialize(CLog *pLog, string scriptFolder)
+void CMsgProc::Initialize(CLog *pLog, string scriptFolder, MySQLConnectInfo* info)
 {
     m_pLog = pLog;
     m_strScriptFolder = scriptFolder;
-	
-    m_pGFunc->Initialize(m_pLog);
+
+    m_pGFunc->Initialize(m_pLog,info);
 }
 
 void CMsgProc::InitLua(CLua* pLua, string path)

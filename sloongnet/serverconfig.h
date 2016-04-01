@@ -2,6 +2,7 @@
 #define SERVERCONFIG_H
 
 #include <string>
+#include "structs.h"
 using namespace std;
 namespace Sloong
 {
@@ -12,6 +13,9 @@ namespace Sloong
 		~CServerConfig();
 
 		bool LoadConfigFile(string path);
+
+		// DB config
+		MySQLConnectInfo m_oConnectInfo;
 
 		// Server config
 		int m_nPort;

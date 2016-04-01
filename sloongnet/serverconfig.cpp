@@ -7,6 +7,14 @@ using namespace Sloong;
 using namespace Sloong::Universal;
 CServerConfig::CServerConfig()
 {
+	// DB init
+	m_oConnectInfo.Port = 3306;
+	m_oConnectInfo.Address = "localhost";
+	m_oConnectInfo.User = "root";
+	m_oConnectInfo.Password = "sloong";
+	m_oConnectInfo.Database = "sloong";
+
+	// Server init
 	m_nPort = 9009;
 	m_bDebug = true;
 	m_strLogPath = "./log.log";
@@ -39,6 +47,29 @@ bool CServerConfig::LoadConfigFile(string path)
 	int nRes;
 	string strRes;
 	bool bRes;
+
+	// load connect info
+	nRes = g_key_file_get_integer(conf, "MySQL", "Port", &err);
+	if (!err)
+		m_oConnectInfo.Port = nRes;
+	g_clear_error(&err);
+	strRes = g_key_file_get_string(conf, "MySQL", "Address", &err);
+	if (!err)
+		m_oConnectInfo.Address = strRes;
+	g_clear_error(&err);
+	strRes = g_key_file_get_string(conf, "MySQL", "User", &err);
+	if (!err)
+		m_oConnectInfo.User = strRes;
+	g_clear_error(&err);
+	strRes = g_key_file_get_string(conf, "MySQL", "Password", &err);
+	if (!err)
+		m_oConnectInfo.Password = strRes;
+	g_clear_error(&err);
+	strRes = g_key_file_get_string(conf, "MySQL", "Database", &err);
+	if (!err)
+		m_oConnectInfo.Database = strRes;
+	g_clear_error(&err);
+
 	nRes = g_key_file_get_integer(conf, "Server", "Port", &err);
 	if ( !err)
 		m_nPort = nRes;

@@ -11,12 +11,13 @@ namespace Sloong
 {
 	using namespace Universal;
 	class CGlobalFunction;
+	struct MySQLConnectInfo;
 	class CMsgProc
 	{
 	public:
         CMsgProc();
 		~CMsgProc();
-        void Initialize(CLog* pLog, string scriptFolder);
+        void Initialize(CLog* pLog, string scriptFolder, MySQLConnectInfo* info);
 		int MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, char*& pBuf);
 		int NewThreadInit();
 		void InitLua(CLua* pLua, string folder);

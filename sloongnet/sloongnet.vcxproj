@@ -85,6 +85,7 @@
     <ClInclude Include="progressbar.h" />
     <ClInclude Include="serverconfig.h" />
     <ClInclude Include="sockinfo.h" />
+    <ClInclude Include="structs.h" />
     <ClInclude Include="userv.h" />
     <ClInclude Include="utility.h" />
     <ClInclude Include="version.h" />

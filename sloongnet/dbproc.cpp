@@ -1,7 +1,7 @@
 #include <univ/univ.h>
 #include <univ/log.h>
 #include "dbproc.h"
-#include <mysql/mysql.h>
+#include "structs.h"
 using namespace Sloong;
 using namespace Sloong::Universal;
 CDBProc::CDBProc()
@@ -14,9 +14,10 @@ CDBProc::~CDBProc()
 	mysql_close(&m_MySql);
 }
 
-void Sloong::CDBProc::Connect(string ip, string user, string passwd, string db, int port)
+void Sloong::CDBProc::Connect(MySQLConnectInfo* info)
 {
-	mysql_real_connect(&m_MySql, ip.c_str(), user.c_str(), passwd.c_str(), db.c_str(), port, NULL, 0);
+	mysql_real_connect(&m_MySql, info->Address.c_str(), info->User.c_str(), 
+		info->Password.c_str(), info->Database.c_str(), info->Port, NULL, 0);
     mysql_set_character_set(&m_MySql, "utf8");
 }
 

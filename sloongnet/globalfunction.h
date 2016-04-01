@@ -18,13 +18,14 @@ namespace Sloong
 	using namespace Universal;
 	class CUtility;
 	class CDBProc;
+	struct MySQLConnectInfo;
 	class CGlobalFunction
 	{
 	public:
         CGlobalFunction();
 		~CGlobalFunction();
 
-		void Initialize(CLog* plog);
+		void Initialize(CLog* plog,MySQLConnectInfo* info);
 		void InitLua(CLua* pLua);
 	protected:
         CUtility * m_pUtility;

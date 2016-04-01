@@ -87,6 +87,9 @@
     <ClInclude Include="CmdProcess.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="structs.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="epollex.cpp">
