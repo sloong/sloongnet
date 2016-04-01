@@ -29,6 +29,13 @@ namespace Sloong
         int nPriorityLevel;
     }PRESENDINFO;
 
+	typedef struct _stRecvInfo
+	{
+		long long nSwiftNumber = -1;
+		string strMD5 = "";
+		string strMessage = "";
+	}RECVINFO;
+
 	using namespace Universal;
 	class CSockInfo
 	{
@@ -38,7 +45,7 @@ namespace Sloong
 		CSockInfo( int nPriorityLevel );
 		~CSockInfo();
 
-		queue<string>* m_pReadList;
+		queue<RECVINFO>* m_pReadList;
         queue<SENDINFO*>* m_pSendList; // the send list of the bytes.
         queue<PRESENDINFO>* m_pPrepareSendList;
 

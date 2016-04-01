@@ -24,3 +24,9 @@ globalfunction.cpp
 globalfunction.h
 jpeg.h
 jpeg.cpp
+scripts/comm.lua
+scripts/ex.lua
+scripts/init.lua
+scripts/json.lua
+scripts/main.lua
+scripts/sql.lua

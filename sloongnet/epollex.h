@@ -25,10 +25,10 @@ namespace Sloong
 	public:
         CEpollEx();
 		virtual ~CEpollEx();
-        int Initialize(CLog* pLog,int listenPort, int nThreadNum, int nPriorityLevel, bool bShowSendMessage = false );
+        int Initialize(CLog* pLog,int listenPort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support);
 		void SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage);
 		void Exit();
-        void SendMessage(int sock, int nPriority, const string& nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
+        void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
         bool SendMessageEx( int sock, int nPriority, const char* pData, int nSize);
 		void SetSEM(sem_t* pSem);
 		void ProcessPrepareSendList( CSockInfo* info );
@@ -64,6 +64,8 @@ namespace Sloong
         bool m_bShowSendMessage;
 		bool m_bShowReceiveMessage;
 		bool m_bIsRunning;
+		bool m_bSwiftNumberSupport;
+		bool m_bMD5Support;
 	};
 }
 

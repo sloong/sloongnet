@@ -13,7 +13,7 @@ OBJCOPY := objcopy
 
 #Additional flags
 PREPROCESSOR_MACROS := DEBUG
-INCLUDE_DIRS := /usr/include/glib-2.0/
+INCLUDE_DIRS := /usr/include/glib-2.0/ /usr/lib64/glib-2.0/include/
 LIBRARY_DIRS := /usr/local/lib/sloong /usr/lib64/mysql
 LIBRARY_NAMES := m dl lua.5.3.1 univ pthread glib-2.0 mysqlclient crypto jpeg
 ADDITIONAL_LINKER_INPUTS := 

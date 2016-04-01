@@ -149,12 +149,22 @@ namespace Sloong
                     {
                         var pack = SendList.Dequeue();
                         var msg = pack.SendMessage;
-                        string md5 = Utility.MD5_Encoding(msg, Encoding.UTF8);
-                        var sendmsg = string.Format("{0}|{1}|{2}", md5, pack.SwiftNumber, msg);
-                        var len = string.Format("{0:D8}", sendmsg.Length);
-                        sendmsg = len + sendmsg;
+                        string md5 = "";
 
-                        byte[] sendByte = Encoding.ASCII.GetBytes(sendmsg);
+                        if (AppStatus.bEnableMD5)
+                        {
+                            md5 = Utility.MD5_Encoding(msg, Encoding.UTF8);
+                        }
+                        string swift = "";
+                        if (AppStatus.bEnableSwift)
+                        {
+                        var sendmsg = string.Format("{0:D8}{1}{2}", pack.SwiftNumber, md5, msg);
+                        }
+
+                        var len = string.Format("{0:D8}", msg.Length + md5.Length + swift.Length);
+                        msg = len + swift + md5 + msg;
+
+                        byte[] sendByte = Encoding.ASCII.GetBytes(msg);
                         var Sock = SocketMap[pack.SocketID].m_Socket;
                         if( !m_RecvThreadList.ContainsKey(pack.SocketID))
                         {
@@ -168,7 +178,9 @@ namespace Sloong
                         {
                             Utility.SendEx(Sock, sendByte);
                             pack.IsSent = true;
-                            MsgList.Add(pack.SwiftNumber, pack);
+                            // only add to list when enable swift.
+                            if (AppStatus.bEnableSwift)
+                                MsgList.Add(pack.SwiftNumber, pack);
                         }
                     }
                     else
@@ -231,16 +243,29 @@ namespace Sloong
                     //                         continue;
                     //                     }
 
-
+                    long nLength = RecvDataLength(info.m_Socket, 10000);
                     byte[] data = Utility.RecvEx(info.m_Socket, RecvDataLength(info.m_Socket, 10000), 10000);
 
-                    string strRecv = Encoding.UTF8.GetString(data);
-                    var RecvDatas = strRecv.Split('|');
-                    long nIndex = Convert.ToInt64(RecvDatas[1]);
-                    if (MsgList.ContainsKey(nIndex))
+                    long nSwift = -1;
+                    string md5 = "";
+                    int index = 0;
+                    if (AppStatus.bEnableSwift)
                     {
-                        var pack = MsgList[nIndex];
-                        pack.ReceivedMessages = RecvDatas;
+                        nSwift = BitConverter.ToInt64(data, 0);
+                        index = 8;
+                    }
+                    string strRecv = Encoding.UTF8.GetString(data);
+
+                    if (AppStatus.bEnableMD5)
+                    {
+                        md5 = strRecv.Substring(index, 32);
+                        index += 32;
+                    }
+                   
+                    if (MsgList.ContainsKey(nSwift))
+                    {
+                        var pack = MsgList[nSwift];
+                        pack.ReceivedMessages = strRecv;
                         if (pack.NeedExData)
                         {
                             byte[] exData = Utility.RecvEx(info.m_Socket, RecvDataLength(info.m_Socket, 0), 0);

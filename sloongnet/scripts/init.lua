@@ -16,22 +16,26 @@ Init = function( path )
 end
 
 OnError = function( msg )
-    print('error proc:' .. msg);
+    print('error proc:' .. tostring(msg));
 end
 
 
-ProgressMessage = function( uinfo, request, response )
-  local param = JSON:decode(request:getdata('message'))
+ProgressMessage = function( uinfo, request )
+    local jreq = JSON:decode(request)
+    local jres = JSON:decode('{}')
+    local func = g_all_request_processer[jreq['funcid']];
+    showLog('Call process function : ' .. jreq['funcid'] );
    
-    local func = g_all_request_processer[param['funcid']];
-
-  if type(func) == 'function' then
-    local code,res = func( uinfo, param, response );
-    response:setdata('errno', tostring(code));
-    response:setdata('errmsg',res or "success");
-  else
-    response:setdata("errno","-999");
-    response:setdata('errmsg','not find the processer. the name is %s.' .. param['funcid']);
-  end
+    if type(func) == 'function' then
+      local code,msg,res = func( uinfo, jreq, jres );
+      jres['errno'] = tostring(code);
+      jres['errmsg'] = msg or 'success';
+    else
+      jres['errno'] = "-999"
+      jres['errmsg'] = 'not find the processer. the name is %s.' .. jreq['funcid'];
+    end
+    showLog('code:' .. jres['errno'] .. ',msg:' .. jres['errmsg'])
+    res = res or -1
+    return JSON:encode(jres),res;
 end
 

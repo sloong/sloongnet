@@ -117,6 +117,8 @@ namespace Sloong.Interface
         public int RecvBufferSize { get; set; }
         public bool AutoHide { get; set; }
         public bool ExitApp { get; set; }
+        public bool bEnableMD5 { get; set; }
+        public bool bEnableSwift { get; set; }
     }
 
     [Serializable()]
@@ -157,7 +159,7 @@ namespace Sloong.Interface
     {
         public string SendMessage = string.Empty;
         public bool IsSent = false;
-        public string[] ReceivedMessages = null;
+        public string ReceivedMessages = null;
         public bool IsReceived = false;
         public byte[] ReceivedExData = null;
         public bool NeedExData = false;

@@ -48,7 +48,7 @@ void SloongWallUS::Initialize(CServerConfig* config)
 		m_pLog->SetConfiguration(NULL, NULL, &oType, NULL, config->m_bDebug);
 	}
     m_pLog->SetWorkInterval(config->m_nSleepInterval);
-    m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel);
+    m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel, config->m_bEnableSwiftNumberSup, config->m_bEnableMD5Check);
 	m_pEpoll->SetSEM(&m_oSem);
     m_pMsgProc->Initialize(m_pLog,config->m_strScriptFolder);
 }
@@ -114,7 +114,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 
 				unique_lock<mutex> lock(info->m_pProcessMutexList[i], std::adopt_lock);
 
-				ProcessEventList(id, &info->m_pReadList[i], info->m_oReadListMutex, sock, i, info->m_pUserInfo, pThis->m_pEpoll, pThis->m_pMsgProc);
+				pThis->ProcessEventList(id, &info->m_pReadList[i], info->m_oReadListMutex, sock, i, info->m_pUserInfo, pThis->m_pEpoll, pThis->m_pMsgProc);
 
 				// unlock current level.
 				lock.unlock();
@@ -130,7 +130,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 	return NULL;
 }
 
-void Sloong::SloongWallUS::ProcessEventList(int id, queue<string>* pList, mutex& oLock, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc)
+void Sloong::SloongWallUS::ProcessEventList(int id, queue<RECVINFO>* pList, mutex& oLock, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc)
 {
 	// if not empty
 	while (!pList->empty())
@@ -147,35 +147,33 @@ void Sloong::SloongWallUS::ProcessEventList(int id, queue<string>* pList, mutex&
 			continue;
 		}
 
-		string msg = pList->front();
+		RECVINFO msg = pList->front();
 		pList->pop();
 		oLock.unlock();
-		ProcessEvent(id, msg, sock, nPriorityLevel, pUserInfo, pEpoll,pMsgProc);
+		ProcessEvent(id, &msg, sock, nPriorityLevel, pUserInfo, pEpoll,pMsgProc);
 	}
 }
 
 
-void Sloong::SloongWallUS::ProcessEvent(int id, string& strMsg, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc)
+void Sloong::SloongWallUS::ProcessEvent(int id, RECVINFO* info, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc)
 {
-	auto md5index = strMsg.find("|");
-	auto swiftindex = strMsg.find("|", md5index + 1);
-	string md5 = strMsg.substr(0, md5index);
-	string swift = (strMsg.substr(md5index + 1, swiftindex - (md5index + 1)));
-	string tmsg = strMsg.substr(swiftindex + 1);
-	string rmd5 = CUniversal::MD5_Encoding(tmsg);
-	CUniversal::touper(md5);
-	CUniversal::touper(rmd5);
-	if (md5 != rmd5)
+	if (m_pConfig->m_bEnableMD5Check)
 	{
-		// handle error.
-		pEpoll->SendMessage(sock, nPriorityLevel, swift, "-1|package check error");
-		return;
+		string rmd5 = CUniversal::MD5_Encoding(info->strMessage);
+		CUniversal::touper(info->strMD5);
+		CUniversal::touper(rmd5);
+		if (info->strMD5 != rmd5)
+		{
+			// handle error.
+			pEpoll->SendMessage(sock, nPriorityLevel, info->nSwiftNumber, "{\"errno\": \"-1\",\"errmsg\" : \"package check error\"}");
+			return;
+		}
 	}
-
-	string strRes;
+	
+	string strRes("");
 	char* pBuf = NULL;
-	int nSize = pMsgProc->MsgProcess(id, pUserInfo, tmsg, strRes, pBuf);
-	pEpoll->SendMessage(sock, nPriorityLevel, swift, strRes, pBuf, nSize);
+	int nSize = pMsgProc->MsgProcess(id, pUserInfo, info->strMessage, strRes, pBuf);
+	pEpoll->SendMessage(sock, nPriorityLevel, info->nSwiftNumber, strRes, pBuf, nSize);
 }
 
 void Sloong::SloongWallUS::Exit()
@@ -183,5 +181,6 @@ void Sloong::SloongWallUS::Exit()
 	m_pEpoll->Exit();
 	m_bIsRunning = false;
 	sem_post(&m_oSem);
+	m_pLog->End();
 }
 

@@ -41,8 +41,11 @@
             this.label1 = new System.Windows.Forms.Label();
             this.textBoxMulNum = new System.Windows.Forms.TextBox();
             this.buttonSave = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.checkBoxEnableSwift = new System.Windows.Forms.CheckBox();
+            this.checkBoxEnableMD5 = new System.Windows.Forms.CheckBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -170,28 +173,66 @@
             this.buttonSave.UseVisualStyleBackColor = true;
             this.buttonSave.Click += new System.EventHandler(this.button1_Click);
             // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(52, 123);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(41, 12);
-            this.label5.TabIndex = 28;
-            this.label5.Text = "流水号";
-            // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(127, 120);
+            this.textBox1.Location = new System.Drawing.Point(127, 118);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(77, 21);
             this.textBox1.TabIndex = 27;
+            // 
+            // checkBoxEnableSwift
+            // 
+            this.checkBoxEnableSwift.AutoSize = true;
+            this.checkBoxEnableSwift.Checked = true;
+            this.checkBoxEnableSwift.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxEnableSwift.Location = new System.Drawing.Point(592, 123);
+            this.checkBoxEnableSwift.Name = "checkBoxEnableSwift";
+            this.checkBoxEnableSwift.Size = new System.Drawing.Size(84, 16);
+            this.checkBoxEnableSwift.TabIndex = 29;
+            this.checkBoxEnableSwift.Text = "启用流水号";
+            this.checkBoxEnableSwift.UseVisualStyleBackColor = true;
+            this.checkBoxEnableSwift.CheckedChanged += new System.EventHandler(this.checkBoxEnableSwift_CheckedChanged);
+            // 
+            // checkBoxEnableMD5
+            // 
+            this.checkBoxEnableMD5.AutoSize = true;
+            this.checkBoxEnableMD5.Checked = true;
+            this.checkBoxEnableMD5.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxEnableMD5.Location = new System.Drawing.Point(592, 101);
+            this.checkBoxEnableMD5.Name = "checkBoxEnableMD5";
+            this.checkBoxEnableMD5.Size = new System.Drawing.Size(66, 16);
+            this.checkBoxEnableMD5.TabIndex = 30;
+            this.checkBoxEnableMD5.Text = "启用MD5";
+            this.checkBoxEnableMD5.UseVisualStyleBackColor = true;
+            this.checkBoxEnableMD5.CheckedChanged += new System.EventHandler(this.checkBoxEnableMD5_CheckedChanged);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(64, 121);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(41, 12);
+            this.label5.TabIndex = 31;
+            this.label5.Text = "流水号";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(589, 142);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(281, 12);
+            this.label6.TabIndex = 32;
+            this.label6.Text = "更改MD5和流水号选项前,请确认所有消息以收发完毕";
             // 
             // FormTest
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(900, 500);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
+            this.Controls.Add(this.checkBoxEnableMD5);
+            this.Controls.Add(this.checkBoxEnableSwift);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.buttonSave);
             this.Controls.Add(this.checkBoxSingle);
@@ -230,7 +271,10 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBoxMulNum;
         private System.Windows.Forms.Button buttonSave;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.CheckBox checkBoxEnableSwift;
+        private System.Windows.Forms.CheckBox checkBoxEnableMD5;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
     }
 }

@@ -18,6 +18,8 @@ CServerConfig::CServerConfig()
 	m_bShowSendMessage = false;
 	m_bShowReceiveMessage = false;
 	m_bLogWriteToOneFile = false;
+	m_bEnableMD5Check = false;
+	m_bEnableSwiftNumberSup = false;
 }
 
 bool CServerConfig::LoadConfigFile(string path)
@@ -76,6 +78,16 @@ bool CServerConfig::LoadConfigFile(string path)
 	if (!err)
 		m_nSleepInterval = nRes;
     g_clear_error(&err);
+
+	bRes = g_key_file_get_boolean(conf, "Server", "EnableMD5Check", &err);
+	if (!err)
+		m_bEnableMD5Check = bRes;
+	g_clear_error(&err);
+
+	bRes = g_key_file_get_boolean(conf, "Server", "EnableSwiftNumberSupport", &err);
+	if (!err)
+		m_bEnableSwiftNumberSup = bRes;
+	g_clear_error(&err);
 
 
 	bRes = g_key_file_get_boolean(conf, "Log", "ShowReceiveMessage", &err);

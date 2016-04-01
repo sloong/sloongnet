@@ -19,7 +19,7 @@ namespace servctrl
 {
     public partial class FormTest : Form
     {
-        private IDataCenter pageHost;
+        private IDataCenter _DC;
         private Dictionary<string, string> testCaseMap = new Dictionary<string, string>();
         const string TestCastMapPath = "UI\\TestCase.bin";
 
@@ -27,7 +27,7 @@ namespace servctrl
         {
             get
             {
-                return pageHost[ShareItem.SocketMap] as Dictionary<string, ConnectInfo>;
+                return _DC[ShareItem.SocketMap] as Dictionary<string, ConnectInfo>;
             }
             set { }
         }
@@ -55,7 +55,7 @@ namespace servctrl
         {
             get
             {
-                var cbox = pageHost[ShareItem.ConfigSelecter] as ComboBox;
+                var cbox = _DC[ShareItem.ConfigSelecter] as ComboBox;
                 if (cbox != null)
                 {
                     return SocketMap[cbox.Text].m_Socket;
@@ -69,10 +69,11 @@ namespace servctrl
         public FormTest(IDataCenter _pageHost)
         {
             InitializeComponent();
+            Control.CheckForIllegalCrossThreadCalls = false;
             this.TopLevel = false;
-            pageHost = _pageHost;
+            _DC = _pageHost;
 
-            pageHost.PageMessage += PageMessageHandler;
+            _DC.PageMessage += PageMessageHandler;
 
             try
             {
@@ -122,7 +123,7 @@ namespace servctrl
             {
                 for (int i = 0; i < nMul; i++)
                 {
-                    pageHost.SendMessage(MessageType.SendRequest, pam, ProcResult);
+                    _DC.SendMessage(MessageType.SendRequest, pam, ProcResult);
                     listBoxLog.Items.Add(textBoxMsg.Text);
                 }                    
             }
@@ -135,15 +136,15 @@ namespace servctrl
         public bool ProcResult(object param)
         {
             MessagePackage pack = param as MessagePackage;
-            var msgs = pack.ReceivedMessages;
-            if (msgs[2] != "0")
+            JObject jres = JObject.Parse(pack.ReceivedMessages);
+            if (jres["errno"].ToString() != "0")
             {
-                listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + msgs[3]);
+                listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + jres["errmsg"].ToString());
                 return false;
             }
             else
             {
-                listBoxLog.SelectedIndex = listBoxLog.Items.Add(pack.SwiftNumber.ToString()+"|"+msgs[3]);
+                listBoxLog.SelectedIndex = listBoxLog.Items.Add(pack.SwiftNumber.ToString()+"|"+jres.ToString());
             }
             return true;
         }
@@ -168,7 +169,8 @@ namespace servctrl
 
         private void FormTest_Shown(object sender, EventArgs e)
         {
-
+            checkBoxEnableMD5.Checked = (_DC[ShareItem.AppStatus] as ApplicationStatus).bEnableMD5;
+            checkBoxEnableSwift.Checked = (_DC[ShareItem.AppStatus] as ApplicationStatus).bEnableSwift;
         }
 
         private void comboBoxTestCase_SelectedIndexChanged(object sender, EventArgs e)
@@ -186,6 +188,16 @@ namespace servctrl
         private void FormTest_FormClosed(object sender, FormClosedEventArgs e)
         {
             Utility.Serialize(testCaseMap, TestCastMapPath);
+        }
+
+        private void checkBoxEnableMD5_CheckedChanged(object sender, EventArgs e)
+        {
+            (_DC[ShareItem.AppStatus] as ApplicationStatus).bEnableMD5 = checkBoxEnableMD5.Checked;
+        }
+
+        private void checkBoxEnableSwift_CheckedChanged(object sender, EventArgs e)
+        {
+            (_DC[ShareItem.AppStatus] as ApplicationStatus).bEnableSwift = checkBoxEnableSwift.Checked;
         }
     }
 }
