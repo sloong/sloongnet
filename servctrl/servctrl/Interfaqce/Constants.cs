@@ -117,6 +117,8 @@ namespace Sloong.Interface
         public int RecvBufferSize { get; set; }
         public bool AutoHide { get; set; }
         public bool ExitApp { get; set; }
+        public bool bEnableMD5 { get; set; }
+        public bool bEnableSwift { get; set; }
     }
 
     [Serializable()]

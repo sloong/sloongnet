@@ -114,7 +114,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 
 				unique_lock<mutex> lock(info->m_pProcessMutexList[i], std::adopt_lock);
 
-				ProcessEventList(id, &info->m_pReadList[i], info->m_oReadListMutex, sock, i, info->m_pUserInfo, pThis->m_pEpoll, pThis->m_pMsgProc);
+				pThis->ProcessEventList(id, &info->m_pReadList[i], info->m_oReadListMutex, sock, i, info->m_pUserInfo, pThis->m_pEpoll, pThis->m_pMsgProc);
 
 				// unlock current level.
 				lock.unlock();
@@ -157,17 +157,19 @@ void Sloong::SloongWallUS::ProcessEventList(int id, queue<RECVINFO>* pList, mute
 
 void Sloong::SloongWallUS::ProcessEvent(int id, RECVINFO* info, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc)
 {
-	
-	string rmd5 = CUniversal::MD5_Encoding(info->strMessage);
-	CUniversal::touper(info->strMD5);
-	CUniversal::touper(rmd5);
-	if (info->strMD5 != rmd5)
+	if (m_pConfig->m_bEnableMD5Check)
 	{
-		// handle error.
-		pEpoll->SendMessage(sock, nPriorityLevel, info->nSwiftNumber, "{\"errno\": \"-1\",\"errmsg\" : \"package check error\"}");
-		return;
+		string rmd5 = CUniversal::MD5_Encoding(info->strMessage);
+		CUniversal::touper(info->strMD5);
+		CUniversal::touper(rmd5);
+		if (info->strMD5 != rmd5)
+		{
+			// handle error.
+			pEpoll->SendMessage(sock, nPriorityLevel, info->nSwiftNumber, "{\"errno\": \"-1\",\"errmsg\" : \"package check error\"}");
+			return;
+		}
 	}
-
+	
 	string strRes("");
 	char* pBuf = NULL;
 	int nSize = pMsgProc->MsgProcess(id, pUserInfo, info->strMessage, strRes, pBuf);
@@ -179,5 +181,6 @@ void Sloong::SloongWallUS::Exit()
 	m_pEpoll->Exit();
 	m_bIsRunning = false;
 	sem_post(&m_oSem);
+	m_pLog->Close();
 }
 

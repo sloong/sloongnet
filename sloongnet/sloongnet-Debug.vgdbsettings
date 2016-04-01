@@ -7,14 +7,14 @@
       <PathStyle>RemoteUnix</PathStyle>
     </CustomSourceDirectories>
     <BuildHost>
-      <HostName>www.sloong.com:8005</HostName>
+      <HostName>www.sloong.com:8006</HostName>
       <Transport>SSH</Transport>
       <UserName>root</UserName>
     </BuildHost>
     <MainSourceTransferCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>www.sloong.com:8005</HostName>
+        <HostName>www.sloong.com:8006</HostName>
         <Transport>SSH</Transport>
         <UserName>root</UserName>
       </RemoteHost>
@@ -47,7 +47,7 @@
     <MakeConfigurationName>Debug</MakeConfigurationName>
     <AdditionalMakeArguments />
     <Toolchain>
-      <Name>Default GCC toolchain on www.sloong.com:8005</Name>
+      <Name>Default GCC toolchain on www.sloong.com:8006</Name>
       <UnixSystem>true</UnixSystem>
       <GCC>gcc</GCC>
       <GXX>g++</GXX>
@@ -79,12 +79,11 @@
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>www.sloong.com:8005</HostName>
+        <HostName>www.sloong.com:8006</HostName>
         <Transport>SSH</Transport>
         <UserName>root</UserName>
       </RemoteHost>
       <Command>make</Command>
-      <Arguments />
       <WorkingDirectory>$(BuildDir)</WorkingDirectory>
       <Environment>
         <Records>

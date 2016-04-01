@@ -41,7 +41,7 @@ namespace servctrl
         private NetworkThread _Nt = null;
         private Queue<MessagePackage> _SendList = null;
         Dictionary<long, MessagePackage> _MessageList = null;
-        int _SwiftNum = 0;
+        int _SwiftNum = 1;
         int nCurrentSocketIndex = 0;
 
         public List<ConnectInfo> SocketMap
@@ -96,7 +96,8 @@ namespace servctrl
             _MessageList = new Dictionary<long, MessagePackage>();
             appStatus.ExitApp = false;
             appStatus.RunStatus = RunStatus.Run;
-
+            appStatus.bEnableMD5 = true;
+            appStatus.bEnableSwift = true;
             try
             {
                 sockMap = (List<ConnectInfo>)Utility.Deserialize(sockMapPath);
@@ -110,9 +111,9 @@ namespace servctrl
                         if (!comboBoxServList.Items.Contains(item.m_URL))
                             comboBoxServList.Items.Add(item.m_URL);
                     }
-                    catch (Exception e)
+                    catch(Exception ex)
                     {
-                        log.Write(e.ToString());
+                        throw ex;
                     }
                 }
             }

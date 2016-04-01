@@ -721,6 +721,7 @@
 
 // --- Include directories begin --- //
 ///usr/include/glib-2.0/
+///usr/lib64/glib-2.0/include/
 ///usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5
 ///usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/x86_64-redhat-linux
 ///usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/backward
