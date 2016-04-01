@@ -65,6 +65,7 @@ void SloongWallUS::Run()
 		if (cmd == "exit")
 		{
 			Exit();
+			SLEEP(500);
 			return;
 		}
 		else
@@ -179,5 +180,6 @@ void Sloong::SloongWallUS::Exit()
 	m_pEpoll->Exit();
 	m_bIsRunning = false;
 	sem_post(&m_oSem);
+	m_pLog->End();
 }
 
