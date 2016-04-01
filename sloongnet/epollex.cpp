@@ -125,7 +125,7 @@ void* CEpollEx::WorkLoop(void* pParam)
     while(pThis->m_bIsRunning)
     {
         // 返回需要处理的事件数
-		n = epoll_wait(pThis->m_EpollHandle, pThis->m_Events, 1024, 1000);
+		n = epoll_wait(pThis->m_EpollHandle, pThis->m_Events, 1024, 500);
 
         if( n<=0 ) 
 			continue;
@@ -195,7 +195,7 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
 	pCpyPoint += 8;
 	if (m_bSwiftNumberSupport)
 	{
-		memcpy(pCpyPoint, (void*)&nSwift, 8);
+        memcpy(pCpyPoint, (void*)&nSwift, 8);
 		pCpyPoint += sizeof(long long);
 	}
 	if (m_bMD5Support)
@@ -669,4 +669,3 @@ void Sloong::CEpollEx::SetLogConfiguration(bool bShowSendMessage, bool bShowRece
 }
 
 
- 

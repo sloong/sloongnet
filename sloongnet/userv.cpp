@@ -181,6 +181,6 @@ void Sloong::SloongWallUS::Exit()
 	m_pEpoll->Exit();
 	m_bIsRunning = false;
 	sem_post(&m_oSem);
-	m_pLog->Close();
+	m_pLog->End();
 }
 
