@@ -257,7 +257,8 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
 	int nRes = rename(orgName.c_str(), newName.c_str());
 	if (0 != nRes)
 		g_pThis->m_pLog->Log(CUniversal::Format("Move File error. errno is %d,", errno));
-	
+	else
+		remove(orgName.c_str());
 	// if succeed return 0, else return nozero
 	CLua::PushNumber(l, nRes);
 	return 1;
