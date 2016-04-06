@@ -13,6 +13,7 @@ using namespace Sloong::Universal;
 #include "univ/exception.h"
 #include <mutex>
 #include "version.h"
+#include "serverconfig.h"
 using namespace std;
 using namespace cimg_library;
 #define ARRAYSIZE(a) (sizeof(a)/sizeof(a[0]))
@@ -33,6 +34,8 @@ LuaFunctionRegistr g_LuaFunc[] =
 	{ "MD5_encode", CGlobalFunction::Lua_MD5_Encode },
 	{ "SendFile", CGlobalFunction::Lua_SendFile },
 	{ "ReloadScript", CGlobalFunction::Lua_ReloadScript },
+	{ "Get", CGlobalFunction::Lua_GetConfig },
+	{ "MoveFile", CGlobalFunction::Lua_MoveFile },
 };
 
 CGlobalFunction::CGlobalFunction()
@@ -41,6 +44,7 @@ CGlobalFunction::CGlobalFunction()
     m_pDBProc = new CDBProc();
 	g_pThis = this;
 	m_pReloadTagList = NULL;
+	m_strUploadUrl = "";
 }
 
 
@@ -235,12 +239,34 @@ int Sloong::CGlobalFunction::Lua_ReloadScript(lua_State* l)
 	return 0;
 }
 
+int Sloong::CGlobalFunction::Lua_GetConfig(lua_State* l)
+{
+	if ( g_pThis->m_strUploadUrl == "" )
+	{
+		g_pThis->m_strUploadUrl = CServerConfig::GetStringConfig("Path", "UploadUrl", "");
+	}
+
+	CLua::PushString(l, g_pThis->m_strUploadUrl);
+	return 1;
+}
+
+int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
+{
+	string orgName = CLua::GetStringArgument(l, 1, "");
+	string newName = CLua::GetStringArgument(l, 2, "");
+	int nRes = rename(orgName.c_str(), newName.c_str());
+	if (0 != nRes)
+		g_pThis->m_pLog->Log(CUniversal::Format("Move File error. errno is %d,", errno));
+	
+	// if succeed return 0, else return nozero
+	CLua::PushNumber(l, nRes);
+	return 1;
+}
 
 void CGlobalFunction::HandleError(string err)
 {
 	g_pThis->m_pLog->Log(err, ERR, -2);
 }
-
 
 int CGlobalFunction::Lua_showLog(lua_State* l)
 {

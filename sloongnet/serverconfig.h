@@ -4,6 +4,7 @@
 #include <string>
 #include "structs.h"
 using namespace std;
+#include <glib.h>
 namespace Sloong
 {
 	class CServerConfig
@@ -12,8 +13,21 @@ namespace Sloong
 		CServerConfig();
 		~CServerConfig();
 
-		bool LoadConfigFile(string path);
+		bool Initialize(string path);
+		void LoadConfig();
 
+	public: 
+		// Load string config, if load error, the value will the origin value. if succeed, the value will change to config.
+		static string GetStringConfig(string strSection, string strKey, string strDef, bool bThrowWhenFialed = false );
+		static bool GetBoolenConfig(string strSection, string strKey, bool& bDef, bool bThrowWhenFialed = false);
+		static int GetIntConfig(string strSection, string strKey, int& nDef, bool bThrowWhenFialed = false);
+		static CServerConfig* g_pThis;
+
+	private:
+		GError* m_pErr;
+		GKeyFile* m_pFile;
+		string m_strConfigPath;
+	public:
 		// DB config
 		MySQLConnectInfo m_oConnectInfo;
 

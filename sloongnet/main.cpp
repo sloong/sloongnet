@@ -18,14 +18,14 @@ int main( int argc, char** args )
 		string strCmd(args[1]);
 		CUniversal::tolower(strCmd);
 		
-		
 		if ((strCmd == "-r" || strCmd == "--r" || strCmd == "run") && (argc >= 3))
 		{
 			if (access(args[2], ACC_R) == 0)
 			{
 				try
 				{
-					config.LoadConfigFile(args[2]);
+					config.Initialize(args[2]);
+					config.LoadConfig();
 				}
 				catch (normal_except e)
 				{
@@ -51,7 +51,7 @@ int main( int argc, char** args )
 			CCmdProcess::Parser(strCmd);
 		}
 	}
-		
+	
     SloongWallUS us;
 	us.Initialize(&config);
     us.Run();

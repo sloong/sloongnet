@@ -45,6 +45,8 @@ namespace Sloong
 		static int Lua_MD5_Encode(lua_State* l);
 		static int Lua_SendFile(lua_State* l);
 		static int Lua_ReloadScript(lua_State* l);
+		static int Lua_GetConfig(lua_State* l);
+		static int Lua_MoveFile(lua_State* l);
 		
 	public:
 		static CGlobalFunction* g_pThis;
@@ -52,6 +54,7 @@ namespace Sloong
 		mutex		m_oListMutex;
 		bool*		m_pReloadTagList;
 		int			m_nTagSize;
+		string		m_strUploadUrl;
 	};
 }
 #endif // !CGLOBALFUNCTION_H
