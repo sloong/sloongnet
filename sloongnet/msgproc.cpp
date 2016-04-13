@@ -56,6 +56,7 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 		m_pGFunc->m_pReloadTagList[id] = false;
 	}
 
+	m_pLog->Log("Progress Message:" + msg);
 	int nRes = pLua->RunFunction("ProgressMessage", pUInfo, msg, res);
 	if (nRes >= 0 && nRes < (int)m_pGFunc->m_oSendExMapList.size())
 	{

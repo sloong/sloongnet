@@ -21,6 +21,7 @@ namespace Sloong
 		int GetMemory(int& total, int& free);
 
 		static int ReadFile(string filepath, char*& bBuffer);
+		static string GenUUID();
 	};
 
 

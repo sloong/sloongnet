@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string.h> // for stricmp
 #include<univ/exception.h>
+#include <uuid/uuid.h>
 using namespace std;
 using namespace Sloong;
 
@@ -117,3 +118,14 @@ int Sloong::CUtility::ReadFile(string filepath, char*& pBuffer)
 	in.close();
 	return nSize;
 }
+
+string Sloong::CUtility::GenUUID()
+{
+	char uuid[37] = { 0 };
+	uuid_t uu;
+	uuid_generate(uu);
+	uuid_unparse(uu, uuid);
+	return uuid;
+}
+
+

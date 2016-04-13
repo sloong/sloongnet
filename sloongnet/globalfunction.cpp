@@ -36,6 +36,7 @@ LuaFunctionRegistr g_LuaFunc[] =
 	{ "ReloadScript", CGlobalFunction::Lua_ReloadScript },
 	{ "Get", CGlobalFunction::Lua_GetConfig },
 	{ "MoveFile", CGlobalFunction::Lua_MoveFile },
+	{ "GenUUID", CGlobalFunction::Lua_GenUUID },
 };
 
 CGlobalFunction::CGlobalFunction()
@@ -44,7 +45,6 @@ CGlobalFunction::CGlobalFunction()
     m_pDBProc = new CDBProc();
 	g_pThis = this;
 	m_pReloadTagList = NULL;
-	m_strUploadUrl = "";
 }
 
 
@@ -241,12 +241,14 @@ int Sloong::CGlobalFunction::Lua_ReloadScript(lua_State* l)
 
 int Sloong::CGlobalFunction::Lua_GetConfig(lua_State* l)
 {
-	if ( g_pThis->m_strUploadUrl == "" )
-	{
-		g_pThis->m_strUploadUrl = CServerConfig::GetStringConfig("Path", "UploadUrl", "");
-	}
+	string section = CLua::GetStringArgument(l,1);
+	string key = CLua::GetStringArgument(l,2);
+	string def = CLua::GetStringArgument(l,3);
+	
+	string value = CServerConfig::GetStringConfig(section, key, def);
+	
 
-	CLua::PushString(l, g_pThis->m_strUploadUrl);
+	CLua::PushString(l, value);
 	return 1;
 }
 
@@ -261,6 +263,12 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
 		remove(orgName.c_str());
 	// if succeed return 0, else return nozero
 	CLua::PushNumber(l, nRes);
+	return 1;
+}
+
+int Sloong::CGlobalFunction::Lua_GenUUID(lua_State* l)
+{
+	CLua::PushString(l, CUtility::GenUUID());
 	return 1;
 }
 

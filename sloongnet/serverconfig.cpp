@@ -145,7 +145,7 @@ void Sloong::CServerConfig::LoadConfig()
 	m_strLogPath = GetStringConfig("Path", "LogPath", m_strLogPath);
 
 	// Load log config
-	m_bShowReceiveMessage = GetBoolenConfig("Server", "ShowReceiveMessage", m_bShowReceiveMessage);
-	m_bShowSendMessage = GetBoolenConfig("Server", "ShowSendMessage", m_bShowSendMessage);
-	m_bLogWriteToOneFile = GetBoolenConfig("Server", "WriteToOneFile", m_bLogWriteToOneFile);
+	m_bShowReceiveMessage = GetBoolenConfig("Log", "ShowReceiveMessage", m_bShowReceiveMessage);
+	m_bShowSendMessage = GetBoolenConfig("Log", "ShowSendMessage", m_bShowSendMessage);
+	m_bLogWriteToOneFile = GetBoolenConfig("Log", "WriteToOneFile", m_bLogWriteToOneFile);
 }
