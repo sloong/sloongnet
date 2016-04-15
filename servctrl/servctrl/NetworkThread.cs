@@ -254,7 +254,7 @@ namespace Sloong
                         nSwift = BitConverter.ToInt64(data, 0);
                         index = 8;
                     }
-                    string strRecv = Encoding.UTF8.GetString(data);
+                    string strRecv = Encoding.GetEncoding("GB2312").GetString(data);
 
                     if (AppStatus.bEnableMD5)
                     {
