@@ -150,10 +150,11 @@ namespace Sloong
                         var pack = SendList.Dequeue();
                         var msg = pack.SendMessage;
                         string md5 = "";
+                        var gbk = Encoding.GetEncoding("GB2312");
 
                         if (AppStatus.bEnableMD5)
                         {
-                            md5 = Utility.MD5_Encoding(msg, Encoding.UTF8);
+                            md5 = Utility.MD5_Encoding(msg, gbk);
                         }
                         string swift = "";
                         if (AppStatus.bEnableSwift)
@@ -161,10 +162,10 @@ namespace Sloong
                         	swift = string.Format("{0:D8}", pack.SwiftNumber);
                         }
 
-                        var len = string.Format("{0:D8}", msg.Length + md5.Length + swift.Length);
+                        var len = string.Format("{0:D8}", gbk.GetByteCount(msg) + md5.Length + swift.Length);
                         msg = len + swift + md5 + msg;
 
-                        byte[] sendByte = Encoding.ASCII.GetBytes(msg);
+                        byte[] sendByte = gbk.GetBytes(msg);
                         var Sock = SocketMap[pack.SocketID].m_Socket;
                         if( !m_RecvThreadList.ContainsKey(pack.SocketID))
                         {
@@ -243,7 +244,6 @@ namespace Sloong
                     //                         continue;
                     //                     }
 
-                    long nLength = RecvDataLength(info.m_Socket, 10000);
                     byte[] data = Utility.RecvEx(info.m_Socket, RecvDataLength(info.m_Socket, 10000), 10000);
 
                     long nSwift = -1;
@@ -265,7 +265,7 @@ namespace Sloong
                     if (MsgList.ContainsKey(nSwift))
                     {
                         var pack = MsgList[nSwift];
-                        pack.ReceivedMessages = strRecv;
+                        pack.ReceivedMessages = strRecv.Substring(index);
                         if (pack.NeedExData)
                         {
                             byte[] exData = Utility.RecvEx(info.m_Socket, RecvDataLength(info.m_Socket, 0), 0);

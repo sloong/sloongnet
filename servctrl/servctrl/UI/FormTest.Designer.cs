@@ -46,6 +46,7 @@
             this.checkBoxEnableMD5 = new System.Windows.Forms.CheckBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
+            this.buttonUpload = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -224,11 +225,22 @@
             this.label6.TabIndex = 32;
             this.label6.Text = "更改MD5和流水号选项前,请确认所有消息以收发完毕";
             // 
+            // buttonUpload
+            // 
+            this.buttonUpload.Location = new System.Drawing.Point(795, 179);
+            this.buttonUpload.Name = "buttonUpload";
+            this.buttonUpload.Size = new System.Drawing.Size(75, 23);
+            this.buttonUpload.TabIndex = 33;
+            this.buttonUpload.Text = "Upload";
+            this.buttonUpload.UseVisualStyleBackColor = true;
+            this.buttonUpload.Click += new System.EventHandler(this.buttonUpload_Click);
+            // 
             // FormTest
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(900, 500);
+            this.Controls.Add(this.buttonUpload);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.checkBoxEnableMD5);
@@ -276,5 +288,6 @@
         private System.Windows.Forms.CheckBox checkBoxEnableMD5;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button buttonUpload;
     }
 }

@@ -199,5 +199,46 @@ namespace servctrl
         {
             (_DC[ShareItem.AppStatus] as ApplicationStatus).bEnableSwift = checkBoxEnableSwift.Checked;
         }
+
+        private void buttonUpload_Click(object sender, EventArgs e)
+        {
+            // Show dialog to select file
+            OpenFileDialog fd = new OpenFileDialog();
+            if( DialogResult.OK == fd.ShowDialog())
+            {
+                foreach( var item in fd.FileNames)
+                {
+                    FileInfo fi = new FileInfo(item);
+                    JObject pam = JObject.Parse("{}");
+                    pam["funcid"] = "UploadStart";
+                    pam["filename"] = fi.Name;
+                    pam["MD5"] = Utility.GetMD5HashFromFile(item);
+                    _DC.SendMessage(MessageType.SendRequest, pam, ReadToUpdate);
+                }
+            }
+        }
+
+        private bool ReadToUpdate(object param)
+        {
+            MessagePackage pack = param as MessagePackage;
+            if(!Utility.Check(pack.ReceivedMessages))
+            {
+                listBoxLog.Items.Add("Receive message is empty");
+                return false;
+            }
+            JObject jres = JObject.Parse(pack.ReceivedMessages);
+            if (jres["errno"].ToString() != "0")
+            {
+                listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + jres["errmsg"].ToString());
+                return false;
+            }
+            else
+            {
+                listBoxLog.SelectedIndex = listBoxLog.Items.Add("Upload url:" + jres["UploadURL"].ToString());
+                Utility.FTPUpload(jres["ftpuser"].ToString(), jres["ftppwd"].ToString(), jres["filename"].ToString(), jres["filepath"].ToString());
+                jres["funcid"] = "UploadEnd";
+                return true;
+            }
+        }
     }
 }
