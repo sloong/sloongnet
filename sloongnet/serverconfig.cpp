@@ -63,8 +63,11 @@ CServerConfig::~CServerConfig()
 
 string Sloong::CServerConfig::GetStringConfig(string strSection, string strKey, string strDef, bool bThrowWhenFialed /*= false */)
 {
-	if (g_pThis == NULL || g_pThis->m_pFile == NULL)
+	if (g_pThis == NULL || g_pThis->m_pFile == NULL  )
 		throw normal_except("Config object no initialize");
+
+	if (strSection == "" || strKey == "")
+		throw normal_except("Param empty.");
 
 	string strRes;
 

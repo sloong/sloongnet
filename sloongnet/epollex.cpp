@@ -35,6 +35,7 @@ void on_sigint(int signal)
     exit(0);
 }
 
+
 // Initialize the epoll and the thread pool.
 int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support)
 {

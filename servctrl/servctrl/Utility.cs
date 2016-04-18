@@ -767,12 +767,13 @@ namespace Sloong
         }
 
         //ftp的上传功能  
-        public static void FTPUpload(string userId, string pwd, string filename, string ftpPath)
+        public static void FTPUpload(string userId, string pwd, string filepath, string ftpurl, string ftpPath)
         {
-            FileInfo fileInf = new FileInfo(filename);
+            FtpCheckDirectoryExist( userId, pwd, ftpurl, ftpPath);  
+            FileInfo fileInf = new FileInfo(filepath);
             FtpWebRequest reqFTP;
             // 根据uri创建FtpWebRequest对象   
-            reqFTP = (FtpWebRequest)FtpWebRequest.Create(new Uri(ftpPath + fileInf.Name));
+            reqFTP = (FtpWebRequest)FtpWebRequest.Create(new Uri(ftpurl + "/" + ftpPath + fileInf.Name));
             // ftp用户名和密码  
             reqFTP.Credentials = new NetworkCredential(userId, pwd);
 
@@ -811,7 +812,7 @@ namespace Sloong
             }
             catch (Exception ex)
             {
-
+                throw ex;
             }
         }
 
@@ -868,6 +869,103 @@ namespace Sloong
             {
                 throw ex;
             }
+        }
+
+        public static void FtpCheckDirectoryExist(string ftpUserID, string ftpPassword, string ftpurl, string destFilePath)
+        {
+
+            string fullDir = FtpParseDirectory(destFilePath);
+            string[] dirs = fullDir.Split('/');
+            string curDir = "/";
+            for (int i = 0; i < dirs.Length; i++)
+            {
+                string dir = dirs[i];
+                //如果是以/开始的路径,第一个为空    
+                if (dir != null && dir.Length > 0)
+                {
+                    try
+                    {
+                        curDir += dir + "/";
+                        FtpMakeDir(ftpUserID, ftpPassword, ftpurl, curDir );
+                    }
+                    catch (Exception)
+                    { }
+                }
+            }
         }  
+
+        public static string FtpParseDirectory(string destFilePath)
+        {
+            return destFilePath.Substring(0, destFilePath.LastIndexOf("/"));
+        }
+
+        //创建目录  
+        public static bool FtpMakeDir( string ftpUserID,string ftpPassword, string ftpurl,string ftpPath )
+        {
+            FtpWebRequest req = (FtpWebRequest)WebRequest.Create(ftpurl+ftpPath);
+            req.Credentials = new NetworkCredential(ftpUserID, ftpPassword);
+            req.Method = WebRequestMethods.Ftp.MakeDirectory;
+            try
+            {
+                FtpWebResponse response = (FtpWebResponse)req.GetResponse();
+                response.Close();
+            }
+            catch (Exception)
+            {
+                req.Abort();
+                return false;
+            }
+            req.Abort();
+            return true;
+        }
+
+        /// <summary>
+        /// 检测目录是否存在
+        /// </summary>
+        /// <param name="pFtpServerIP"></param>
+        /// <param name="pFtpUserID"></param>
+        /// <param name="pFtpPW"></param>
+        /// <returns>false不存在，true存在</returns>
+        public static bool DirectoryIsExist(string targetFtpPath, string pFtpUserID, string pFtpPW)
+        {
+            string[] value = GetFileList(targetFtpPath, pFtpUserID, pFtpPW);
+            if (value == null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public static string[] GetFileList(string targetFtpPath, string pFtpUserID, string pFtpPW)
+        {
+            StringBuilder result = new StringBuilder();
+            try
+            {
+                FtpWebRequest reqFTP = (FtpWebRequest)WebRequest.Create(targetFtpPath);
+                reqFTP.UseBinary = true;
+                reqFTP.Credentials = new NetworkCredential(pFtpUserID, pFtpPW);
+                reqFTP.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
+
+                WebResponse response = reqFTP.GetResponse();
+                StreamReader reader = new StreamReader(response.GetResponseStream());
+                string line = reader.ReadLine();
+                while (line != null)
+                {
+                    result.Append(line);
+                    result.Append("\n");
+                    line = reader.ReadLine();
+                }
+                reader.Close();
+                response.Close();
+                return result.ToString().Split('\n');
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }
