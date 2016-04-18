@@ -151,7 +151,7 @@ namespace servctrl
             }
             catch(Exception e)
             {
-
+                listBoxLog.SelectedIndex = listBoxLog.Items.Add("Proc Result Fialed:" + e.ToString());
             }
             
             return true;
@@ -230,6 +230,7 @@ namespace servctrl
         private bool ReadToUpdate(object param)
         {
             MessagePackage pack = param as MessagePackage;
+            
             if(!Utility.Check(pack.ReceivedMessages))
             {
                 listBoxLog.Items.Add("Receive message is empty");
@@ -246,7 +247,8 @@ namespace servctrl
                 listBoxLog.SelectedIndex = listBoxLog.Items.Add("Upload url:" + jres["UploadURL"].ToString());
                 try
                 {
-                    Utility.FTPUpload(jres["ftpuser"].ToString(), jres["ftppwd"].ToString(), jres["fullname"].ToString(), jres["ftpurl"].ToString(), jres["filepath"].ToString());
+                    FTP ftp = new FTP(jres["ftpuser"].ToString(), jres["ftppwd"].ToString(),jres["ftpurl"].ToString());
+                    ftp.Upload(jres["fullname"].ToString(), jres["filepath"].ToString());
                     jres["funcid"] = "UploadEnd";
                     _DC.SendMessage(MessageType.SendRequest, jres, UploadEnd);
                 }

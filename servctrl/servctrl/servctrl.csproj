@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectInfo.cs" />
+    <Compile Include="FTP.cs" />
     <Compile Include="Interfaqce\Constants.cs" />
     <Compile Include="Interfaqce\DataCenter.cs" />
     <Compile Include="Interfaqce\IDataCenter.cs" />
