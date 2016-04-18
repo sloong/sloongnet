@@ -250,7 +250,7 @@ int Sloong::CGlobalFunction::Lua_GetConfig(lua_State* l)
 	{
 		value = CServerConfig::GetStringConfig(section, key, def);
 	}
-	catch (exception e)
+	catch (normal_except e)
 	{
 		CLua::PushString(l, "");
 		CLua::PushString(l, e.what());
@@ -265,10 +265,34 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
 {
 	string orgName = CLua::GetStringArgument(l, 1, "");
 	string newName = CLua::GetStringArgument(l, 2, "");
+	if (orgName == "" || newName == "")
+	{
+		string errmsg = "Move File error. File name cannot empty. orgName:" + orgName + ";newName:" + newName;
+		g_pThis->m_pLog->Log(errmsg);
+		CLua::PushNumber(l, -2);
+		CLua::PushString(l, errmsg);
+		return 2;
+	}
+
+	if (access(orgName.c_str(), ACC_E) != 0)
+	{
+		string errmsg = "Move File error. Origin file not exist" + orgName;
+		g_pThis->m_pLog->Log(errmsg);
+		CLua::PushNumber(l, -1);
+		CLua::PushString(l, errmsg);
+		return 2;
+	}
+
+	CUtility::Mkdir(newName);
+
 	int nRes = rename(orgName.c_str(), newName.c_str());
 	if (0 != nRes)
-		g_pThis->m_pLog->Log(CUniversal::Format("Move File error. errno is %d,", errno));
-
+	{
+		string errmsg = CUniversal::Format("Move File error. errno is %d,", errno);
+		g_pThis->m_pLog->Log(errmsg);
+		CLua::PushString(l, errmsg);
+	}
+		
 	// if succeed return 0, else return nozero
 	CLua::PushNumber(l, nRes);
 	return 1;
