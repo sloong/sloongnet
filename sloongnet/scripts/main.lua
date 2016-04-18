@@ -21,15 +21,15 @@ main_Req.TextTest = function( u, req, res )
         return 0
 end
 
--- ÉÏ´«ÎÄ¼şÁ÷³Ì
--- ¿Í»§¶Ë×¼±¸ÒªÉÏ´«µÄÎÄ¼şĞÅÏ¢,°üÀ¨style ºÍ ÎÄ¼şµÄmd5,ÒÔ¼°À©Õ¹Ãû
--- ·şÎñ¶Ë¼ì²émd5ĞÅÏ¢,²¢¸ù¾İ¼ì²é½á¹û,·µ»ØÊÇ·ñĞèÒªÉÏ´«.ÈçÎŞĞèÉÏ´«ÔòÖ±½ÓÃë´«²¢±£´æÎÄ¼ş¼ÇÂ¼
--- ÈçĞèÒªÉÏ´«,Ôò¹¹½¨Ò»¸öuuid, ½«Â·¾¶¸ÄÎªuploadurl/user/uuid+À©Õ¹ÃûµÄ¸ñÊ½·µ»Ø.
--- ¿Í»§¶Ë¸ù¾İ·µ»Ø,½«ĞèÒªÉÏ´«µÄÎÄ¼ş´«ÖÁÖ¸¶¨Ä¿Â¼.
--- ¿Í»§¶Ë·¢ËÍUploadEndÏûÏ¢,²¢¸½´ø²ÎÊıÎªÄ¿±êÂ·¾¶
+-- ä¸Šä¼ æ–‡ä»¶æµç¨‹
+-- å®¢æˆ·ç«¯å‡†å¤‡è¦ä¸Šä¼ çš„æ–‡ä»¶ä¿¡æ¯,åŒ…æ‹¬style å’Œ æ–‡ä»¶çš„md5,ä»¥åŠæ‰©å±•å
+-- æœåŠ¡ç«¯æ£€æŸ¥md5ä¿¡æ¯,å¹¶æ ¹æ®æ£€æŸ¥ç»“æœ,è¿”å›æ˜¯å¦éœ€è¦ä¸Šä¼ .å¦‚æ— éœ€ä¸Šä¼ åˆ™ç›´æ¥ç§’ä¼ å¹¶ä¿å­˜æ–‡ä»¶è®°å½•
+-- å¦‚éœ€è¦ä¸Šä¼ ,åˆ™æ„å»ºä¸€ä¸ªuuid, å°†è·¯å¾„æ”¹ä¸ºuploadurl/user/uuid+æ‰©å±•åçš„æ ¼å¼è¿”å›.
+-- å®¢æˆ·ç«¯æ ¹æ®è¿”å›,å°†éœ€è¦ä¸Šä¼ çš„æ–‡ä»¶ä¼ è‡³æŒ‡å®šç›®å½•.
+-- å®¢æˆ·ç«¯å‘é€UploadEndæ¶ˆæ¯,å¹¶é™„å¸¦å‚æ•°ä¸ºç›®æ ‡è·¯å¾„
 -- 
 -- 
--- ·şÎñ¶Ë°´ÕÕÄê/ÔÂ/ÈÕ/uuidµÄ½á¹¹À´´æ´¢ÎÄ¼ş
+-- æœåŠ¡ç«¯æŒ‰ç…§å¹´/æœˆ/æ—¥/uuidçš„ç»“æ„æ¥å­˜å‚¨æ–‡ä»¶
 -- get the total for the file need upload
 -- then check the all file md5, if file is have one server, 
 -- then gen the new guid and create the folder with the guid name.
@@ -40,12 +40,15 @@ function main_Req.UploadStart(u, req, res)
 	res['ftppwd']=Get('FTP','Password','');
 	showLog(res['filename'])
 	res['filename']=req['filename'];
-	
+	res['fullname']=req['fullname'];
+	local baseUrl = Get('FTP','UploadUrl','') 
+	res['ftpurl']=baseUrl
 	-- get guid from c++
 	--GetGUID()
-	local guid = GenUUID();
+	local uuid = GenUUID();
+	res['uuid']=uuid;
 	-- Return a floder path.
-	local path = Get('FTP','UploadUrl','') .. '/' .. guid;
+	local path = uuid .. '/';
 	res['filepath']=path;
 	res['UploadURL'] = path;
 	return 0;

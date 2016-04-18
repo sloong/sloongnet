@@ -245,9 +245,18 @@ int Sloong::CGlobalFunction::Lua_GetConfig(lua_State* l)
 	string key = CLua::GetStringArgument(l,2);
 	string def = CLua::GetStringArgument(l,3);
 	
-	string value = CServerConfig::GetStringConfig(section, key, def);
+	string value("");
+	try
+	{
+		value = CServerConfig::GetStringConfig(section, key, def);
+	}
+	catch (exception e)
+	{
+		CLua::PushString(l, "");
+		CLua::PushString(l, e.what());
+		return 2;
+	}
 	
-
 	CLua::PushString(l, value);
 	return 1;
 }
