@@ -136,16 +136,24 @@ namespace servctrl
         public bool ProcResult(object param)
         {
             MessagePackage pack = param as MessagePackage;
-            JObject jres = JObject.Parse(pack.ReceivedMessages);
-            if (jres["errno"].ToString() != "0")
+            try
             {
-                listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + jres["errmsg"].ToString());
-                return false;
+                JObject jres = JObject.Parse(pack.ReceivedMessages);
+                if (jres["errno"].ToString() != "0")
+                {
+                    listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + jres["errmsg"].ToString());
+                    return false;
+                }
+                else
+                {
+                    listBoxLog.SelectedIndex = listBoxLog.Items.Add(pack.SwiftNumber.ToString()+"|"+jres.ToString());
+                }
             }
-            else
+            catch(Exception e)
             {
-                listBoxLog.SelectedIndex = listBoxLog.Items.Add(pack.SwiftNumber.ToString()+"|"+jres.ToString());
+
             }
+            
             return true;
         }
 
@@ -212,6 +220,7 @@ namespace servctrl
                     JObject pam = JObject.Parse("{}");
                     pam["funcid"] = "UploadStart";
                     pam["filename"] = fi.Name;
+                    pam["fullname"] = fi.FullName;
                     pam["MD5"] = Utility.GetMD5HashFromFile(item);
                     _DC.SendMessage(MessageType.SendRequest, pam, ReadToUpdate);
                 }
@@ -235,10 +244,25 @@ namespace servctrl
             else
             {
                 listBoxLog.SelectedIndex = listBoxLog.Items.Add("Upload url:" + jres["UploadURL"].ToString());
-                Utility.FTPUpload(jres["ftpuser"].ToString(), jres["ftppwd"].ToString(), jres["filename"].ToString(), jres["filepath"].ToString());
-                jres["funcid"] = "UploadEnd";
+                try
+                {
+                    Utility.FTPUpload(jres["ftpuser"].ToString(), jres["ftppwd"].ToString(), jres["fullname"].ToString(), jres["ftpurl"].ToString(), jres["filepath"].ToString());
+                    jres["funcid"] = "UploadEnd";
+                    _DC.SendMessage(MessageType.SendRequest, jres, UploadEnd);
+                }
+                catch(Exception e)
+                {
+                    listBoxLog.Items.Add("Upload file to ftp fialed. error message:" + e.ToString());
+                }
+                
                 return true;
             }
+        }
+
+        private bool UploadEnd(object param)
+        {
+            listBoxLog.Items.Add("Upload end.");
+            return true;
         }
     }
 }
