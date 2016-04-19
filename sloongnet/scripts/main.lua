@@ -55,9 +55,11 @@ function main_Req.UploadStart(u, req, res)
 end
 
 function main_Req.UploadEnd( u, req, res )
-	local path = req['UploadURL'];
-	local newPath = Get('UploadFolder');
-	MoveFile(newPath,path);
+	local folder = Get('FTP','UploadFolder','')
+	local path = folder .. req['UploadURL'] .. req['filename'];
+	local newPath = folder .. os.date('%Y%m%d') .. '/' .. req['filename'];
+	local errmsg ,errcode = MoveFile(path,newPath);
+	return errcode, errmsg;
 end
 
 g_all_request_processer = 
