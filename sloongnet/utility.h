@@ -22,7 +22,7 @@ namespace Sloong
 
 		static int ReadFile(string filepath, char*& bBuffer);
 		static string GenUUID();
-		static bool Mkdir(string dir);
+		static string CheckFileDirectory(string filePath);
 	};
 
 

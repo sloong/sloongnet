@@ -141,17 +141,18 @@ string Sloong::CUtility::GenUUID()
 	return uuid;
 }
 
-bool Sloong::CUtility::Mkdir(string dir)
+string Sloong::CUtility::CheckFileDirectory(string filePath)
 {
-	if (dir == "")
+	if (filePath == "")
 	{
-		return false;
+		return "";
 	}
 
-	int iLen = dir.size();
+	int iLen = filePath.size();
 	char* pszDir = new char[iLen+1];
 	memset(pszDir, 0, iLen+1);
-	memcpy(pszDir, dir.c_str(), iLen);
+	memcpy(pszDir, filePath.c_str(), iLen);
+	string strDir;
 	int iRet;
 	// 创建中间目录  
 	for (int i = 1; i < iLen; i++)
@@ -159,6 +160,7 @@ bool Sloong::CUtility::Mkdir(string dir)
 		if (pszDir[i] == '\\' || pszDir[i] == '/')
 		{
 			pszDir[i] = '\0';
+			strDir = pszDir;
 
 			//如果不存在,创建  
 			iRet = ACCESS(pszDir, 0);
@@ -175,9 +177,8 @@ bool Sloong::CUtility::Mkdir(string dir)
 		}
 	}
 
-	iRet = MKDIR(pszDir);
 	SAFE_DELETE_ARR(pszDir);
-	return iRet == 0 ? true : false;
+	return strDir;
 }
 
 
