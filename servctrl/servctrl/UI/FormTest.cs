@@ -249,8 +249,11 @@ namespace servctrl
                 {
                     FTP ftp = new FTP(jres["ftpuser"].ToString(), jres["ftppwd"].ToString(),jres["ftpurl"].ToString());
                     ftp.Upload(jres["fullname"].ToString(), jres["filepath"].ToString());
-                    jres["funcid"] = "UploadEnd";
-                    _DC.SendMessage(MessageType.SendRequest, jres, UploadEnd);
+                    JObject jreq = JObject.Parse("{}");
+                    jreq["funcid"] = "UploadEnd";
+                    jreq["UploadURL"] = jres["UploadURL"].ToString();
+                    jreq["filename"] = jres["filename"].ToString();
+                    _DC.SendMessage(MessageType.SendRequest, jreq, UploadEnd);
                 }
                 catch(Exception e)
                 {
@@ -263,7 +266,23 @@ namespace servctrl
 
         private bool UploadEnd(object param)
         {
-            listBoxLog.Items.Add("Upload end.");
+            MessagePackage pack = param as MessagePackage;
+
+            if (!Utility.Check(pack.ReceivedMessages))
+            {
+                listBoxLog.Items.Add("Receive message is empty");
+                return false;
+            }
+            JObject jres = JObject.Parse(pack.ReceivedMessages);
+            if (jres["errno"].ToString() != "0")
+            {
+                listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + jres["errmsg"].ToString());
+                return false;
+            }
+            else
+            {
+                listBoxLog.Items.Add("Upload end.");
+            }
             return true;
         }
     }
