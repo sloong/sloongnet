@@ -25,7 +25,7 @@ namespace Sloong
         CGlobalFunction();
 		~CGlobalFunction();
 
-		void Initialize(CLog* plog,MySQLConnectInfo* info);
+		void Initialize(CLog* plog,MySQLConnectInfo* info,bool bShowCmd, bool bShowRes);
 		void InitLua(CLua* pLua);
 	protected:
         CUtility * m_pUtility;
@@ -36,7 +36,6 @@ namespace Sloong
 
 		static int Lua_showLog(lua_State* l);
 		static int Lua_querySql(lua_State* l);
-		static int Lua_modifySql(lua_State* l);
         static int Lua_getSqlError(lua_State* l);
 		static int Lua_getThumbImage(lua_State* l);
 		static int Lua_getEngineVer(lua_State* l);
@@ -55,6 +54,8 @@ namespace Sloong
 		mutex		m_oListMutex;
 		bool*		m_pReloadTagList;
 		int			m_nTagSize;
+		bool		m_bShowSQLCmd;
+		bool		m_bShowSQLResult;
 	};
 }
 #endif // !CGLOBALFUNCTION_H

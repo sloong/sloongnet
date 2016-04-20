@@ -35,6 +35,8 @@ CServerConfig::CServerConfig()
 	m_bLogWriteToOneFile = false;
 	m_bEnableMD5Check = false;
 	m_bEnableSwiftNumberSup = false;
+	m_bShowSQLCmd = false;
+	m_bShowSQLResult = false;
 }
 
 bool CServerConfig::Initialize(string path)
@@ -151,4 +153,6 @@ void Sloong::CServerConfig::LoadConfig()
 	m_bShowReceiveMessage = GetBoolenConfig("Log", "ShowReceiveMessage", m_bShowReceiveMessage);
 	m_bShowSendMessage = GetBoolenConfig("Log", "ShowSendMessage", m_bShowSendMessage);
 	m_bLogWriteToOneFile = GetBoolenConfig("Log", "WriteToOneFile", m_bLogWriteToOneFile);
+	m_bShowSQLCmd = GetBoolenConfig("Log", "ShowSQLCmd", m_bShowSQLCmd);
+	m_bShowSQLResult = GetBoolenConfig("Log", "ShowSQLResult", m_bShowSQLResult);
 }

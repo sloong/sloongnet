@@ -47,6 +47,8 @@ namespace Sloong
 		bool m_bShowSendMessage;
 		bool m_bShowReceiveMessage;
 		bool m_bLogWriteToOneFile;
+		bool m_bShowSQLCmd;
+		bool m_bShowSQLResult;
 	};
 }
 

@@ -169,7 +169,7 @@ string Sloong::CUtility::CheckFileDirectory(string filePath)
 				iRet = MKDIR(pszDir);
 				if (iRet != 0)
 				{
-					return false;
+					return pszDir;
 				}
 			}
 			//支持linux,将所有\换成/  

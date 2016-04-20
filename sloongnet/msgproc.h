@@ -17,7 +17,7 @@ namespace Sloong
 	public:
         CMsgProc();
 		~CMsgProc();
-        void Initialize(CLog* pLog, string scriptFolder, MySQLConnectInfo* info);
+        void Initialize(CLog* pLog, string scriptFolder, MySQLConnectInfo* info, bool showSQLCmd, bool showSQLRes);
 		int MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, char*& pBuf);
 		int NewThreadInit();
 		void InitLua(CLua* pLua, string folder);

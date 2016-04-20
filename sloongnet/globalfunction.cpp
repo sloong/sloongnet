@@ -23,12 +23,10 @@ mutex g_SQLMutex;
 
 LuaFunctionRegistr g_LuaFunc[] =
 {
-	{ "showLog", CGlobalFunction::Lua_showLog },
-	{ "querySql", CGlobalFunction::Lua_querySql },
-	{ "modifySql", CGlobalFunction::Lua_modifySql },
-    { "getSqlError", CGlobalFunction::Lua_getSqlError },
-	{ "getThumbImage", CGlobalFunction::Lua_getThumbImage },
-	{ "getEngineVer", CGlobalFunction::Lua_getEngineVer },
+	{ "ShowLog", CGlobalFunction::Lua_showLog },
+	{ "QuerySQL", CGlobalFunction::Lua_querySql },
+	{ "GetThumbImage", CGlobalFunction::Lua_getThumbImage },
+	{ "GetEngineVer", CGlobalFunction::Lua_getEngineVer },
 	{ "Base64_encode", CGlobalFunction::Lua_Base64_Encode },
 	{ "Base64_decode", CGlobalFunction::Lua_Base64_Decode },
 	{ "MD5_encode", CGlobalFunction::Lua_MD5_Encode },
@@ -65,9 +63,11 @@ CGlobalFunction::~CGlobalFunction()
 	SAFE_DELETE_ARR(m_pReloadTagList);
 }
 
-void Sloong::CGlobalFunction::Initialize( CLog* plog, MySQLConnectInfo* info)
+void Sloong::CGlobalFunction::Initialize(CLog* plog, MySQLConnectInfo* info, bool bShowCmd, bool bShowRes)
 {
     m_pLog = plog;
+	m_bShowSQLCmd = bShowCmd;
+	m_bShowSQLResult = bShowRes;
     // connect to db
     m_pDBProc->Connect(info);
 }
@@ -76,9 +76,12 @@ void Sloong::CGlobalFunction::Initialize( CLog* plog, MySQLConnectInfo* info)
 
 int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 {
+	string cmd = CLua::GetStringArgument(l, 1);
+	if ( g_pThis->m_bShowSQLCmd )
+		g_pThis->m_pLog->Log(cmd);
 	vector<string> res;
 	unique_lock<mutex> lck(g_SQLMutex);
-    int nRes = g_pThis->m_pDBProc->Query(CLua::GetStringArgument(l,1), res);
+	int nRes = g_pThis->m_pDBProc->Query(cmd, &res);
 	lck.unlock();
 	string allLine;
 	char line = 0x0A;
@@ -92,26 +95,16 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 		else
             allLine = allLine + line + add;
 	}
-
-	CLua::PushString(l,allLine);
+	if (g_pThis->m_bShowSQLResult)
+	{
+		g_pThis->m_pLog->Log(CUniversal::ntos(nRes));
+		g_pThis->m_pLog->Log(allLine);
+	}
+	
 	CLua::PushNumber(l, nRes);
+	CLua::PushString(l,allLine);
 	return 2;
 }
-
-int Sloong::CGlobalFunction::Lua_modifySql(lua_State* l)
-{
-	int nRes = g_pThis->m_pDBProc->Modify(CLua::GetStringArgument(l,1));
-
-	CLua::PushString(l,CUniversal::ntos(nRes));
-	return 1;
-}
-
-int Sloong::CGlobalFunction::Lua_getSqlError(lua_State *l)
-{
-    CLua::PushString(l,g_pThis->m_pDBProc->GetError());
-    return 1;
-}
-
 
 int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
 {
@@ -293,7 +286,7 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
 	{
 		g_pThis->m_pLog->Log(e.what());
 		CLua::PushString(l, e.what());
-		CLua::PushNumber(l, -2);
+		CLua::PushNumber(l, nRes);
 		return 2;
 	}
 	
