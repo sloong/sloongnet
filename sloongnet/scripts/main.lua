@@ -60,6 +60,11 @@ function main_Req.UploadEnd( u, req, res )
 	return errcode, errmsg;
 end
 
+function main_Req.GetIP( u, req, res )
+	res['IPInfo'] = u:getdata('ip') .. ':' .. u:getdata('port')
+	return 0;
+end
+
 g_all_request_processer = 
 {
 	['Reload'] = main_Req.ReloadScript,
@@ -67,5 +72,6 @@ g_all_request_processer =
 	['RunSql'] = main_Req.SqlTest,
 	['UploadStart'] = main_Req.UploadStart,
 	['UploadEnd'] = main_Req.UploadEnd,
+	['GetIP'] = main_Req.GetIP,
 }
 AddModule(g_ex_function);
