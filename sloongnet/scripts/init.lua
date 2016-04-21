@@ -34,7 +34,7 @@ ProgressMessage = function( uinfo, request )
       jres['errno'] = "-999"
       jres['errmsg'] = 'not find the processer. the name is %s.' .. jreq['funcid'];
     end
-    ShowLog('code:' .. jres['errno'] .. ',msg:' .. jres['errmsg'])
+    ShowLog('code:' .. jres['errno'] .. ',msg:' .. jres['errmsg'], 'Global')
     res = res or -1
     return JSON:encode(jres),res;
 end

@@ -78,7 +78,7 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 {
 	string cmd = CLua::GetStringArgument(l, 1);
 	if ( g_pThis->m_bShowSQLCmd )
-		g_pThis->m_pLog->Log(cmd);
+		g_pThis->m_pLog->Info(cmd,"SQL");
 	vector<string> res;
 	unique_lock<mutex> lck(g_SQLMutex);
 	int nRes = g_pThis->m_pDBProc->Query(cmd, &res);
@@ -96,12 +96,9 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
             allLine = allLine + line + add;
 	}
 	if (g_pThis->m_bShowSQLResult)
-	{
-		g_pThis->m_pLog->Log(CUniversal::ntos(nRes));
-		g_pThis->m_pLog->Log(allLine);
-	}
+		g_pThis->m_pLog->Info(CUniversal::Format("Rows:[%d],Res:[%s]", nRes, allLine.c_str()), "SQL");
 	
-	CLua::PushNumber(l, nRes);
+	CLua::PushInteger(l, nRes);
 	CLua::PushString(l,allLine);
 	return 2;
 }
@@ -309,7 +306,16 @@ void CGlobalFunction::HandleError(string err)
 
 int CGlobalFunction::Lua_showLog(lua_State* l)
 {
-	g_pThis->m_pLog->Log(CLua::GetStringArgument(l,1));
+	string luaMode = CLua::GetStringArgument(l, 2, "");
+	if ( luaMode == "" )
+	{
+		luaMode = "Script";
+	}
+	else
+	{
+		luaMode = CUniversal::Format("Script:%s", luaMode);
+	}
+	g_pThis->m_pLog->Info(CLua::GetStringArgument(l,1),luaMode.c_str());
 	return 1;
 }
 

@@ -10,8 +10,8 @@ end
 
 main_Req.SqlTest = function( u, req, res )
 	local cmd = req['cmd'] or '';
-	local res = QuerySQL(cmd);
-	return 0,res;
+	local code,res = QuerySQL(cmd);
+	return code,res
 end
 
 main_Req.TextTest = function( u, req, res )
