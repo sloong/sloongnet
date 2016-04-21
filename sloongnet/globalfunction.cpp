@@ -35,6 +35,7 @@ LuaFunctionRegistr g_LuaFunc[] =
 	{ "Get", CGlobalFunction::Lua_GetConfig },
 	{ "MoveFile", CGlobalFunction::Lua_MoveFile },
 	{ "GenUUID", CGlobalFunction::Lua_GenUUID },
+    { "GetSQLError", CGlobalFunction::Lua_getSqlError},
 };
 
 CGlobalFunction::CGlobalFunction()
@@ -69,7 +70,14 @@ void Sloong::CGlobalFunction::Initialize(CLog* plog, MySQLConnectInfo* info, boo
 	m_bShowSQLCmd = bShowCmd;
 	m_bShowSQLResult = bShowRes;
     // connect to db
-    m_pDBProc->Connect(info);
+    try
+    { 
+        m_pDBProc->Connect(info);
+    }
+    catch(normal_except e)
+    {
+         g_pThis->m_pLog->Info(e.what(),"ERR");
+    }
 }
 
 
@@ -102,6 +110,13 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 	CLua::PushString(l,allLine);
 	return 2;
 }
+
+int Sloong::CGlobalFunction::Lua_getSqlError(lua_State *l)
+{
+    CLua::PushString(l,g_pThis->m_pDBProc->GetError());
+    return 1;
+}
+
 
 int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
 {
