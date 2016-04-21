@@ -386,6 +386,8 @@ void Sloong::CEpollEx::OnNewAccept()
 		info->m_nPort = add.sin_port;
 		info->m_ActiveTime = time(NULL);
 		info->m_sock = conn_sock;
+		info->m_pUserInfo->SetData("ip", info->m_Address);
+		info->m_pUserInfo->SetData("port", CUniversal::ntos(info->m_nPort));
 		m_SockList[conn_sock] = info;
 		m_pLog->Log(CUniversal::Format("accept client:%s.", info->m_Address));
 		//将接受的连接添加到Epoll的事件中.
