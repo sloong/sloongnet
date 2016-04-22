@@ -51,7 +51,7 @@ void SloongWallUS::Initialize(CServerConfig* config)
     m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel, config->m_bEnableSwiftNumberSup, config->m_bEnableMD5Check);
 	m_pEpoll->SetLogConfiguration(m_pConfig->m_bShowSendMessage, m_pConfig->m_bShowReceiveMessage);
 	m_pEpoll->SetSEM(&m_oSem);
-    m_pMsgProc->Initialize(m_pLog,config->m_strScriptFolder,&config->m_oConnectInfo, config->m_bShowSQLCmd, config->m_bShowSQLResult);
+    m_pMsgProc->Initialize(m_pLog,&config->m_oConnectInfo, &config->m_oLuaConfigInfo, config->m_bShowSQLCmd, config->m_bShowSQLResult);
 }
 
 void SloongWallUS::Run()

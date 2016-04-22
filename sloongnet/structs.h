@@ -13,6 +13,14 @@ namespace Sloong
 		string Password;
 		string Database;
 	};
+
+	struct LuaScriptConfigInfo
+	{
+		string EntryFile;
+		string EntryFunction;
+		string ProcessFunction;
+		string ScriptFolder;
+	};
 }
 
 

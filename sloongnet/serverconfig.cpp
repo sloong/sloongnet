@@ -25,18 +25,19 @@ CServerConfig::CServerConfig()
 	m_nPort = 9009;
 	m_bDebug = true;
 	m_strLogPath = "./log.log";
-	m_strScriptFolder = "./";
 	m_nEPoolThreadQuantity = 1;
 	m_nProcessThreadQuantity = 1;
     m_nPriorityLevel = 0;
 	m_nSleepInterval = 100;
+	m_bEnableMD5Check = false;
+	m_bEnableSwiftNumberSup = false;
+
+	// Log config init
+	m_bShowSQLCmd = false;
+	m_bShowSQLResult = false;
 	m_bShowSendMessage = false;
 	m_bShowReceiveMessage = false;
 	m_bLogWriteToOneFile = false;
-	m_bEnableMD5Check = false;
-	m_bEnableSwiftNumberSup = false;
-	m_bShowSQLCmd = false;
-	m_bShowSQLResult = false;
 }
 
 bool CServerConfig::Initialize(string path)
@@ -146,7 +147,6 @@ void Sloong::CServerConfig::LoadConfig()
 	m_nEPoolThreadQuantity = GetIntConfig("Performance", "EPoolThreadQuantity", m_nEPoolThreadQuantity);
 
 	// path
-	m_strScriptFolder = GetStringConfig("Path", "ScriptFolder", m_strScriptFolder);
 	m_strLogPath = GetStringConfig("Path", "LogPath", m_strLogPath);
 
 	// Load log config
@@ -155,4 +155,10 @@ void Sloong::CServerConfig::LoadConfig()
 	m_bLogWriteToOneFile = GetBoolenConfig("Log", "WriteToOneFile", m_bLogWriteToOneFile);
 	m_bShowSQLCmd = GetBoolenConfig("Log", "ShowSQLCmd", m_bShowSQLCmd);
 	m_bShowSQLResult = GetBoolenConfig("Log", "ShowSQLResult", m_bShowSQLResult);
+
+	// load lua config 
+	m_oLuaConfigInfo.ScriptFolder = GetStringConfig("Lua", "ScriptFolder", "./");
+	m_oLuaConfigInfo.EntryFile = GetStringConfig("Lua", "EntryFile", "init.lua");
+	m_oLuaConfigInfo.EntryFunction = GetStringConfig("Lua", "EntryFunction", "Init");
+	m_oLuaConfigInfo.ProcessFunction = GetStringConfig("Lua", "ProcessFunction", "MessageProcess");
 }
