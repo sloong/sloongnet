@@ -56,6 +56,7 @@ namespace Sloong
 		int			m_nTagSize;
 		bool		m_bShowSQLCmd;
 		bool		m_bShowSQLResult;
+		MySQLConnectInfo* m_pSQLInfo;
 	};
 }
 #endif // !CGLOBALFUNCTION_H

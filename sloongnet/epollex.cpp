@@ -83,7 +83,7 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
 	m_bIsRunning = true;
     // Init the thread pool
 	CThreadPool::AddWorkThread(WorkLoop, this, nThreadNum);
-	
+	CThreadPool::AddWorkThread(CheckTimeoutConnect, this);
 	return true;
 }
 

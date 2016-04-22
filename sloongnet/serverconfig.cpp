@@ -15,6 +15,7 @@ CServerConfig::CServerConfig()
 	m_pFile = NULL;
 
 	// DB init
+	m_oConnectInfo.Enable = false;
 	m_oConnectInfo.Port = 3306;
 	m_oConnectInfo.Address = "localhost";
 	m_oConnectInfo.User = "root";
@@ -136,6 +137,7 @@ int Sloong::CServerConfig::GetIntConfig(string strSection, string strKey, int& n
 void Sloong::CServerConfig::LoadConfig()
 {
 	// load connect info
+	m_oConnectInfo.Enable = GetBoolenConfig("MySQL", "Enable", m_oConnectInfo.Enable);
 	m_oConnectInfo.Port = GetIntConfig("MySQL", "Port", m_oConnectInfo.Port);
 	m_oConnectInfo.Address = GetStringConfig("MySQL", "Address", m_oConnectInfo.Address);
 	m_oConnectInfo.User = GetStringConfig("MySQL", "User", m_oConnectInfo.User);

@@ -28,7 +28,7 @@ namespace Sloong
 		CLog*			m_pLog;
 		CGlobalFunction*	m_pGFunc;
         mutex           m_luaMutex;
-		LuaScriptConfigInfo* m_stLuaConfig;
+		LuaScriptConfigInfo* m_pLuaConfig;
 	};
 }
 

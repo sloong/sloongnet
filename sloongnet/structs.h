@@ -7,6 +7,7 @@ namespace Sloong
 {
 	struct MySQLConnectInfo
 	{
+		bool Enable;
 		string Address;
 		int Port;
 		string User;
