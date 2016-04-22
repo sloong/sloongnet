@@ -168,80 +168,82 @@ void *check_connect_timeout(void* para)
 
 void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData, int nSize )
 {
-	if (m_bShowSendMessage)
-		m_pLog->Info(msg,"SEND");
+    if (m_bShowSendMessage)
+        m_pLog->Info(msg,"SEND");
 
-	// process msg
-	char* pBuf = NULL;
-	long long nBufLen = msg.size();
-	string md5;
-	if (m_bSwiftNumberSupport)
-	{
-		nBufLen += sizeof(long long);
-	}
-	if (m_bMD5Support)
-	{
-		md5 = CUniversal::MD5_Encoding(msg);
-		nBufLen += md5.length();
-	}
-	if (pExData != NULL && nSize > 0)
-	{
-		nBufLen += 8;
-	}
+    // process msg
+    char* pBuf = NULL;
+    long long nBufLen = 8 + msg.size();
+    string md5;
+    if (m_bSwiftNumberSupport)
+    {
+        nBufLen += sizeof(long long);
+    }
+    if (m_bMD5Support)
+    {
+        md5 = CUniversal::MD5_Encoding(msg);
+        nBufLen += md5.length();
+    }
+    // in here, the exdata size no should include the buffer length,
+    // nBufLen不应该包含exdata的长度,所以如果有附加数据,那么这里应该只增加Buff空间,但是前8位的长度中不包含buff长度的8位指示符.
+    long long nMsgLen = nBufLen - 8;
+    if (pExData != NULL && nSize > 0)
+    {
+        nBufLen += 8;
+    }
 
-	pBuf = new char[nBufLen+8];
-	memset(pBuf, 0, nBufLen + 8);
-	char* pCpyPoint = pBuf;
-	memcpy(pCpyPoint, (void*)&nBufLen, 8);
-	pCpyPoint += 8;
-	if (m_bSwiftNumberSupport)
-	{
+    pBuf = new char[nBufLen];
+    memset(pBuf, 0, nBufLen);
+    char* pCpyPoint = pBuf;
+    memcpy(pCpyPoint, (void*)&nMsgLen, 8);
+    pCpyPoint += 8;
+    if (m_bSwiftNumberSupport)
+    {
         memcpy(pCpyPoint, (void*)&nSwift, 8);
-		pCpyPoint += sizeof(long long);
-	}
-	if (m_bMD5Support)
-	{
-		memcpy(pCpyPoint, md5.c_str(), md5.length());
-		pCpyPoint += md5.length();
-	}
-	memcpy(pCpyPoint, msg.c_str(), msg.length());
-	pCpyPoint += msg.length();
-	if (pExData != NULL && nSize > 0)
-	{
-		long long Exlen = nSize;
-		memcpy(pCpyPoint, (void*)&Exlen, 8);
-		pCpyPoint += md5.length();
-		nBufLen += 8;
-	}
-   
-	CSockInfo* pInfo = NULL;
-	
-	// if have exdata, directly add to epoll list.
-	if (pExData != NULL && nSize > 0)
-	{
-		AddToSendList(sock, nPriority, pBuf, nBufLen + 8, 0, pExData, nSize);
+        pCpyPoint += sizeof(long long);
+    }
+    if (m_bMD5Support)
+    {
+        memcpy(pCpyPoint, md5.c_str(), md5.length());
+        pCpyPoint += md5.length();
+    }
+    memcpy(pCpyPoint, msg.c_str(), msg.length());
+    pCpyPoint += msg.length();
+    if (pExData != NULL && nSize > 0)
+    {
+        long long Exlen = nSize;
+        memcpy(pCpyPoint, (void*)&Exlen, 8);
+        pCpyPoint += 8;
+    }
+
+    CSockInfo* pInfo = NULL;
+
+    // if have exdata, directly add to epoll list.
+    if (pExData != NULL && nSize > 0)
+    {
+        AddToSendList(sock, nPriority, pBuf, nBufLen, 0, pExData, nSize);
         return;
-	}
-	else
-	{
-		pInfo = m_SockList[sock];
-		if (!pInfo)
+    }
+    else
+    {
+        pInfo = m_SockList[sock];
+        if (!pInfo)
         {
             CloseConnect(sock);
             return;
         }
-		// check the send list size. if all empty, try send message directly.
-		if ((pInfo->m_bIsSendListEmpty == false && !pInfo->m_pPrepareSendList->empty()) || pInfo->m_oSockSendMutex.try_lock() == false)
+        // check the send list size. if all empty, try send message directly.
+        if ((pInfo->m_bIsSendListEmpty == false && !pInfo->m_pPrepareSendList->empty()) || pInfo->m_oSockSendMutex.try_lock() == false)
         {
-			AddToSendList(sock, nPriority, pBuf, nBufLen + 8, 0, pExData, nSize);
-			return;
-		}
-	}
-    
-	unique_lock<mutex> lck(pInfo->m_oSockSendMutex, std::adopt_lock);
-	// if code run here. the all list is empty. and no have exdata. try send message
-	SendMessageEx(sock, nPriority, pBuf, nBufLen + 8);
-	lck.unlock();
+            AddToSendList(sock, nPriority, pBuf, nBufLen, 0, pExData, nSize);
+            return;
+        }
+    }
+
+    unique_lock<mutex> lck(pInfo->m_oSockSendMutex, std::adopt_lock);
+    // if code run here. the all list is empty. and no have exdata. try send message
+    SendMessageEx(sock, nPriority, pBuf, nBufLen);
+    lck.unlock();
 }
 
 bool CEpollEx::SendMessageEx(int sock, int nPriority, const char *pBuf, int nSize)
