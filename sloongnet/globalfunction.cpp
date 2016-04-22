@@ -77,6 +77,7 @@ void Sloong::CGlobalFunction::Initialize(CLog* plog, MySQLConnectInfo* info, boo
     catch(normal_except e)
     {
          g_pThis->m_pLog->Info(e.what(),"ERR");
+		 throw e;
     }
 }
 
@@ -89,8 +90,23 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 		g_pThis->m_pLog->Info(cmd,"SQL");
 	vector<string> res;
 	unique_lock<mutex> lck(g_SQLMutex);
-	int nRes = g_pThis->m_pDBProc->Query(cmd, &res);
+	int nRes = 0;
+	try
+	{
+		nRes = g_pThis->m_pDBProc->Query(cmd, &res);
+	}
+	catch (normal_except e)
+	{
+		lck.unlock();
+		string err = CUniversal::Format("SQL Query error:[%s]", e.what());
+		g_pThis->m_pLog->Info( err , "ERROR");
+		CLua::PushInteger(l, -1);
+		CLua::PushString(l, err);
+		return 2;
+	}
+	
 	lck.unlock();
+	
 	string allLine;
 	char line = 0x0A;
 	BOOST_FOREACH(string item, res)
