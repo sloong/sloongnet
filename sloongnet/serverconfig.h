@@ -35,14 +35,20 @@ namespace Sloong
 
 		// Server config
 		int m_nPort;
-		string m_strLogPath;
 		bool m_bDebug;
-		int m_nProcessThreadQuantity;
-		int m_nEPoolThreadQuantity;
 		int m_nPriorityLevel;
-		int m_nSleepInterval;
 		bool m_bEnableSwiftNumberSup;
 		bool m_bEnableMD5Check;
+		int m_nTimeout;
+
+		// Performance
+		int m_nSleepInterval;
+		int m_nProcessThreadQuantity;
+		int m_nEPoolThreadQuantity;
+		int m_nTimeoutInterval;
+
+		// Path
+		string m_strLogPath;
 
 		// Message show/hide
 		bool m_bShowSendMessage;

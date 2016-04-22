@@ -102,7 +102,7 @@ void get_cpuoccupy(CPU_OCCUPY *cpust) //对无类型get函数含有一个形参�
 }
 
 
-int CUtility::GetCpuUsed(int nWaitTime)
+int CUtility::GetCpuUsed(double nWaitTime)
 {
 	CPU_OCCUPY cpu_stat1;
 	CPU_OCCUPY cpu_stat2;

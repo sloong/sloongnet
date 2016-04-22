@@ -48,7 +48,8 @@ void SloongWallUS::Initialize(CServerConfig* config)
 		m_pLog->SetConfiguration(NULL, NULL, &oType, NULL, config->m_bDebug);
 	}
     m_pLog->SetWorkInterval(config->m_nSleepInterval);
-    m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel, config->m_bEnableSwiftNumberSup, config->m_bEnableMD5Check);
+    m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel, 
+				config->m_bEnableSwiftNumberSup, config->m_bEnableMD5Check, config->m_nTimeout, config->m_nTimeoutInterval);
 	m_pEpoll->SetLogConfiguration(m_pConfig->m_bShowSendMessage, m_pConfig->m_bShowReceiveMessage);
 	m_pEpoll->SetSEM(&m_oSem);
     m_pMsgProc->Initialize(m_pLog,&config->m_oConnectInfo, &config->m_oLuaConfigInfo, config->m_bShowSQLCmd, config->m_bShowSQLResult);

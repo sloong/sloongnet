@@ -17,7 +17,7 @@ namespace Sloong
 
 		// Initialize the global variable. and register the function to lua.
 
-		int GetCpuUsed(int nWaitTime = 10);
+		int GetCpuUsed(double nWaitTime = 0.1);
 		int GetMemory(int& total, int& free);
 
 		static int ReadFile(string filepath, char*& bBuffer);
