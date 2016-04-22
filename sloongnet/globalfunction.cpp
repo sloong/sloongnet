@@ -69,28 +69,55 @@ void Sloong::CGlobalFunction::Initialize(CLog* plog, MySQLConnectInfo* info, boo
     m_pLog = plog;
 	m_bShowSQLCmd = bShowCmd;
 	m_bShowSQLResult = bShowRes;
+	m_pSQLInfo = info;
     // connect to db
-    try
-    { 
-        m_pDBProc->Connect(info);
-    }
-    catch(normal_except e)
-    {
-         g_pThis->m_pLog->Info(e.what(),"ERR");
-    }
+	if (info->Enable)
+	{
+		try
+		{
+			m_pDBProc->Connect(info);
+		}
+		catch (normal_except e)
+		{
+			g_pThis->m_pLog->Info(e.what(), "ERR");
+			throw e;
+		}
+	}
 }
 
 
 
 int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 {
+	if (!g_pThis->m_pSQLInfo->Enable)
+	{
+		CLua::PushInteger(l, -1);
+		CLua::PushString(l, "SQL Server is no enable in config file.");
+		return 2;
+	}
+
 	string cmd = CLua::GetStringArgument(l, 1);
 	if ( g_pThis->m_bShowSQLCmd )
 		g_pThis->m_pLog->Info(cmd,"SQL");
 	vector<string> res;
 	unique_lock<mutex> lck(g_SQLMutex);
-	int nRes = g_pThis->m_pDBProc->Query(cmd, &res);
+	int nRes = 0;
+	try
+	{
+		nRes = g_pThis->m_pDBProc->Query(cmd, &res);
+	}
+	catch (normal_except e)
+	{
+		lck.unlock();
+		string err = CUniversal::Format("SQL Query error:[%s]", e.what());
+		g_pThis->m_pLog->Info( err , "ERROR");
+		CLua::PushInteger(l, -1);
+		CLua::PushString(l, err);
+		return 2;
+	}
+	
 	lck.unlock();
+	
 	string allLine;
 	char line = 0x0A;
 	BOOST_FOREACH(string item, res)
@@ -113,7 +140,10 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 
 int Sloong::CGlobalFunction::Lua_getSqlError(lua_State *l)
 {
-    CLua::PushString(l,g_pThis->m_pDBProc->GetError());
+	if (!g_pThis->m_pSQLInfo->Enable)
+		CLua::PushString(l, "SQL Server is no enable in config file.");
+	else
+	   CLua::PushString(l,g_pThis->m_pDBProc->GetError());
     return 1;
 }
 

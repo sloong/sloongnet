@@ -55,7 +55,7 @@ int main( int argc, char** args )
     SloongWallUS us;
 	us.Initialize(&config);
     us.Run();
-	SLEEP(500);
+	SLEEP(1);
 	return 0;
 }
 

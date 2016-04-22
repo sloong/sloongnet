@@ -7,11 +7,20 @@ namespace Sloong
 {
 	struct MySQLConnectInfo
 	{
+		bool Enable;
 		string Address;
 		int Port;
 		string User;
 		string Password;
 		string Database;
+	};
+
+	struct LuaScriptConfigInfo
+	{
+		string EntryFile;
+		string EntryFunction;
+		string ProcessFunction;
+		string ScriptFolder;
 	};
 }
 

@@ -15,6 +15,7 @@ CServerConfig::CServerConfig()
 	m_pFile = NULL;
 
 	// DB init
+	m_oConnectInfo.Enable = false;
 	m_oConnectInfo.Port = 3306;
 	m_oConnectInfo.Address = "localhost";
 	m_oConnectInfo.User = "root";
@@ -24,19 +25,26 @@ CServerConfig::CServerConfig()
 	// Server init
 	m_nPort = 9009;
 	m_bDebug = true;
-	m_strLogPath = "./log.log";
-	m_strScriptFolder = "./";
+    m_nPriorityLevel = 0;
+	m_bEnableMD5Check = false;
+	m_bEnableSwiftNumberSup = false;
+	m_nTimeout = 2;
+
+	// Performance
+	m_nSleepInterval = 100;
 	m_nEPoolThreadQuantity = 1;
 	m_nProcessThreadQuantity = 1;
-    m_nPriorityLevel = 0;
-	m_nSleepInterval = 100;
+	m_nTimeoutInterval = 5;
+
+	// Path
+	m_strLogPath = "./log.log";
+
+	// Log config init
+	m_bShowSQLCmd = false;
+	m_bShowSQLResult = false;
 	m_bShowSendMessage = false;
 	m_bShowReceiveMessage = false;
 	m_bLogWriteToOneFile = false;
-	m_bEnableMD5Check = false;
-	m_bEnableSwiftNumberSup = false;
-	m_bShowSQLCmd = false;
-	m_bShowSQLResult = false;
 }
 
 bool CServerConfig::Initialize(string path)
@@ -129,6 +137,7 @@ int Sloong::CServerConfig::GetIntConfig(string strSection, string strKey, int& n
 void Sloong::CServerConfig::LoadConfig()
 {
 	// load connect info
+	m_oConnectInfo.Enable = GetBoolenConfig("MySQL", "Enable", m_oConnectInfo.Enable);
 	m_oConnectInfo.Port = GetIntConfig("MySQL", "Port", m_oConnectInfo.Port);
 	m_oConnectInfo.Address = GetStringConfig("MySQL", "Address", m_oConnectInfo.Address);
 	m_oConnectInfo.User = GetStringConfig("MySQL", "User", m_oConnectInfo.User);
@@ -141,12 +150,16 @@ void Sloong::CServerConfig::LoadConfig()
 	m_nPriorityLevel = GetIntConfig("Server", "PriorityLevel", m_nPriorityLevel);
 	m_bEnableMD5Check = GetBoolenConfig("Server", "EnableMD5Check", m_bEnableMD5Check);
 	m_bEnableSwiftNumberSup = GetBoolenConfig("Server", "EnableSwiftNumberSupport", m_bEnableSwiftNumberSup);
+	m_nTimeout = GetIntConfig("Server", "Timeout", m_nTimeout);
+
+	// Performance
 	m_nSleepInterval = GetIntConfig("Performance", "SleepInterval", m_nSleepInterval);
 	m_nProcessThreadQuantity = GetIntConfig("Performance", "ProcessThreadQuantity", m_nProcessThreadQuantity);
 	m_nEPoolThreadQuantity = GetIntConfig("Performance", "EPoolThreadQuantity", m_nEPoolThreadQuantity);
+	m_nTimeoutInterval = GetIntConfig("Performance", "TimeoutInterval", m_nTimeoutInterval);
+	
 
 	// path
-	m_strScriptFolder = GetStringConfig("Path", "ScriptFolder", m_strScriptFolder);
 	m_strLogPath = GetStringConfig("Path", "LogPath", m_strLogPath);
 
 	// Load log config
@@ -155,4 +168,10 @@ void Sloong::CServerConfig::LoadConfig()
 	m_bLogWriteToOneFile = GetBoolenConfig("Log", "WriteToOneFile", m_bLogWriteToOneFile);
 	m_bShowSQLCmd = GetBoolenConfig("Log", "ShowSQLCmd", m_bShowSQLCmd);
 	m_bShowSQLResult = GetBoolenConfig("Log", "ShowSQLResult", m_bShowSQLResult);
+
+	// load lua config 
+	m_oLuaConfigInfo.ScriptFolder = GetStringConfig("Lua", "ScriptFolder", "./");
+	m_oLuaConfigInfo.EntryFile = GetStringConfig("Lua", "EntryFile", "init.lua");
+	m_oLuaConfigInfo.EntryFunction = GetStringConfig("Lua", "EntryFunction", "Init");
+	m_oLuaConfigInfo.ProcessFunction = GetStringConfig("Lua", "ProcessFunction", "MessageProcess");
 }

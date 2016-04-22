@@ -25,7 +25,8 @@ namespace Sloong
 	public:
         CEpollEx();
 		virtual ~CEpollEx();
-        int Initialize(CLog* pLog,int listenPort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support);
+        int Initialize(CLog* pLog,int listenPort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, 
+				int nTimeout, int nTimeoutInterval);
 		void SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage);
 		void Exit();
         void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
@@ -46,6 +47,7 @@ namespace Sloong
 		void OnCanWriteData( int nSocket );
 	public:
 		static void* WorkLoop(void* params);
+		static void* CheckTimeoutConnect(void* params);
 	    static int SendEx(int sock, const char* buf, int nSize, int nStart, bool eagain = false);
         static int RecvEx( int sock, char** buf, int nSize, bool eagain = false );
 	protected:
@@ -66,6 +68,8 @@ namespace Sloong
 		bool m_bIsRunning;
 		bool m_bSwiftNumberSupport;
 		bool m_bMD5Support;
+		int m_nTimeout;
+		int m_nTimeoutInterval;
 	};
 }
 

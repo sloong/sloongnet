@@ -8,6 +8,9 @@ using namespace Sloong::Universal;
 CDBProc::CDBProc()
 {
     mysql_init(&m_MySql);
+	// enable re connect;
+	char value = 1;
+	mysql_options(&m_MySql, MYSQL_OPT_RECONNECT, &value);
 }
 
 CDBProc::~CDBProc()
@@ -27,7 +30,12 @@ void Sloong::CDBProc::Connect(MySQLConnectInfo* info)
 
 int Sloong::CDBProc::Query(string sqlCmd, vector<string>* vRes)
 {
-	mysql_query(&m_MySql, sqlCmd.c_str());
+	mysql_ping(&m_MySql);
+	if(0 != mysql_query(&m_MySql, sqlCmd.c_str()))
+	{
+		throw normal_except(GetError());
+	}
+
 	int nRes = mysql_affected_rows(&m_MySql);
 
 	if ( vRes )
@@ -39,15 +47,7 @@ int Sloong::CDBProc::Query(string sqlCmd, vector<string>* vRes)
 
 		if (res == NULL)
 		{
-			if (nRes == 0)
-				return 0;
-			else if (nRes == -1)
-			{
-				vRes->push_back(GetError());
-				return -1;
-			}
-			else
-				return 0;
+			return 0;
 		}
 
 		int nNums = mysql_num_fields(res);

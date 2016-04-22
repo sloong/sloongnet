@@ -12,12 +12,13 @@ namespace Sloong
 	using namespace Universal;
 	class CGlobalFunction;
 	struct MySQLConnectInfo;
+	struct LuaScriptConfigInfo;
 	class CMsgProc
 	{
 	public:
         CMsgProc();
 		~CMsgProc();
-        void Initialize(CLog* pLog, string scriptFolder, MySQLConnectInfo* info, bool showSQLCmd, bool showSQLRes);
+        void Initialize(CLog* pLog, MySQLConnectInfo* mysqlinfo, LuaScriptConfigInfo* luainfo, bool showSQLCmd, bool showSQLRes);
 		int MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, char*& pBuf);
 		int NewThreadInit();
 		void InitLua(CLua* pLua, string folder);
@@ -26,8 +27,8 @@ namespace Sloong
 		vector<CLua*>	m_pLuaList;
 		CLog*			m_pLog;
 		CGlobalFunction*	m_pGFunc;
-        string m_strScriptFolder;
         mutex           m_luaMutex;
+		LuaScriptConfigInfo* m_pLuaConfig;
 	};
 }
 

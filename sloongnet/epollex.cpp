@@ -37,11 +37,13 @@ void on_sigint(int signal)
 
 
 // Initialize the epoll and the thread pool.
-int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support)
+int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, int nTimeout, int nTimeoutInterval)
 {
 	m_bMD5Support = bMD5Support;
 	m_bSwiftNumberSupport = bSwiftNumSupprot;
 	m_nPriorityLevel = nPriorityLevel;
+	m_nTimeout = nTimeout;
+	m_nTimeoutInterval = nTimeoutInterval;
     m_pLog = plog;
 	m_pLog->Log(CUniversal::Format("epollex is initialize.license port is %d", licensePort));
     //SIGPIPE:在reader终止之后写pipe的时候发生
@@ -81,7 +83,7 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
 	m_bIsRunning = true;
     // Init the thread pool
 	CThreadPool::AddWorkThread(WorkLoop, this, nThreadNum);
-	
+	CThreadPool::AddWorkThread(CheckTimeoutConnect, this);
 	return true;
 }
 
@@ -161,8 +163,32 @@ void* CEpollEx::WorkLoop(void* pParam)
 * Output: *
 * Others: *
 *************************************************/
-void *check_connect_timeout(void* para)
+void* CEpollEx::CheckTimeoutConnect(void* pParam)
 {
+	CEpollEx* pThis = (CEpollEx*)pParam;
+	int tout = pThis->m_nTimeout * 60;
+	int tinterval = pThis->m_nTimeoutInterval * 60;
+	time_t prevWorkTime = 0;
+	while (pThis->m_bIsRunning)
+	{
+		// 每隔500毫秒唤醒一次,避免因线程长时间睡眠导致错过程序退出
+		if (time(NULL) - prevWorkTime > tinterval)
+		{
+			for (map<int, CSockInfo*>::iterator it = pThis->m_SockList.begin(); it != pThis->m_SockList.end(); ++it)
+			{
+				if (time(NULL) - it->second->m_ActiveTime > tout)
+				{
+					pThis->m_pLog->Info("Close Timeout connect:" + it->second->m_Address, "Timeout");
+					pThis->CloseConnect(it->first);
+				}
+			}
+			prevWorkTime = time(NULL);
+		}
+		else
+		{
+			SLEEP(0.5);
+		}
+	}
     return 0;
 }
 

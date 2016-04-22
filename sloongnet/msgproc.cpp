@@ -6,10 +6,10 @@
 #include "globalfunction.h"
 #include "utility.h"
 #include <univ/exception.h>
+#include "structs.h"
 CMsgProc::CMsgProc()
 {
     m_pGFunc = new CGlobalFunction();
-    
 }
 
 CMsgProc::~CMsgProc()
@@ -22,24 +22,23 @@ CMsgProc::~CMsgProc()
 	SAFE_DELETE(m_pGFunc);
 }
 
-void CMsgProc::Initialize(CLog *pLog, string scriptFolder, MySQLConnectInfo* info, bool showSQLCmd, bool showSQLRes)
+void CMsgProc::Initialize(CLog *pLog, MySQLConnectInfo* mysqlinfo, LuaScriptConfigInfo* luainfo, bool showSQLCmd, bool showSQLRes)
 {
     m_pLog = pLog;
-    m_strScriptFolder = scriptFolder;
-
-    m_pGFunc->Initialize(m_pLog,info,showSQLCmd,showSQLRes);
+	m_pLuaConfig = luainfo;
+	m_pGFunc->Initialize(m_pLog, mysqlinfo, showSQLCmd, showSQLRes);
 }
 
 void CMsgProc::InitLua(CLua* pLua, string path)
 {
-	pLua->RunScript("init.lua");
+	pLua->RunScript(m_pLuaConfig->EntryFile);
     // get current path
     char szDir[MAX_PATH] = {0};
 
     getcwd(szDir,MAX_PATH);
     string strDir(szDir);
     strDir += "/" + path;
-	pLua->RunFunction("Init", CUniversal::Format("'%s'", strDir));
+	pLua->RunFunction(m_pLuaConfig->EntryFunction, CUniversal::Format("'%s'", strDir));
 }
 
 int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, char*& pBuf)
@@ -52,11 +51,11 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 
 	if (m_pGFunc->m_pReloadTagList[id] == true)
 	{
-		InitLua(pLua, m_strScriptFolder);
+		InitLua(pLua, m_pLuaConfig->ScriptFolder);
 		m_pGFunc->m_pReloadTagList[id] = false;
 	}
 
-	int nRes = pLua->RunFunction("ProgressMessage", pUInfo, msg, res);
+	int nRes = pLua->RunFunction(m_pLuaConfig->ProcessFunction, pUInfo, msg, res);
 	if (nRes >= 0 && nRes < (int)m_pGFunc->m_oSendExMapList.size())
 	{
 		pBuf = m_pGFunc->m_oSendExMapList[nRes].m_pData;
@@ -78,9 +77,9 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 int Sloong::CMsgProc::NewThreadInit()
 {
 	CLua* pLua = new CLua();
-	pLua->SetScriptFolder(m_strScriptFolder);
+	pLua->SetScriptFolder(m_pLuaConfig->ScriptFolder);
 	m_pGFunc->InitLua(pLua);
-	InitLua(pLua,m_strScriptFolder);
+	InitLua(pLua, m_pLuaConfig->ScriptFolder);
     m_luaMutex.lock();
     m_pLuaList.push_back(pLua);
     int id = m_pLuaList.size()-1;
