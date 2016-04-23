@@ -1,6 +1,9 @@
 #ifndef SLOONGWALLUS_H
 #define SLOONGWALLUS_H
 
+#include<mutex>
+#include<condition_variable>
+
 namespace Sloong
 {
 	namespace Universal
@@ -37,7 +40,8 @@ namespace Sloong
 		CEpollEx* m_pEpoll;
 		CMsgProc* m_pMsgProc;
 		CLog* m_pLog;
-		sem_t m_oSem; 
+        mutex m_oEventMutex;
+        condition_variable m_oEventCV;
 		bool	m_bIsRunning;
 	};
 

@@ -22,7 +22,7 @@ using namespace Sloong::Universal;
 
 CEpollEx::CEpollEx()
 {
-	m_pSEM = NULL;
+    m_pEventCV = NULL;
 	m_bIsRunning = false;
 }
 
@@ -154,6 +154,7 @@ void* CEpollEx::WorkLoop(void* pParam)
             }
         }
     }
+    pThis->m_pLog->Info("epoll work thread is exit " + spid);
     return 0;
 }
 /*************************************************
@@ -168,27 +169,20 @@ void* CEpollEx::CheckTimeoutConnect(void* pParam)
 	CEpollEx* pThis = (CEpollEx*)pParam;
 	int tout = pThis->m_nTimeout * 60;
 	int tinterval = pThis->m_nTimeoutInterval * 60;
-	time_t prevWorkTime = 0;
+	unique_lock<mutex> lck(pThis->m_oExitMutex);
 	while (pThis->m_bIsRunning)
 	{
-		// 每隔500毫秒唤醒一次,避免因线程长时间睡眠导致错过程序退出
-		if (time(NULL) - prevWorkTime > tinterval)
+		for (map<int, CSockInfo*>::iterator it = pThis->m_SockList.begin(); it != pThis->m_SockList.end(); ++it)
 		{
-			for (map<int, CSockInfo*>::iterator it = pThis->m_SockList.begin(); it != pThis->m_SockList.end(); ++it)
+			if (time(NULL) - it->second->m_ActiveTime > tout)
 			{
-				if (time(NULL) - it->second->m_ActiveTime > tout)
-				{
-					pThis->m_pLog->Info("Close Timeout connect:" + it->second->m_Address, "Timeout");
-					pThis->CloseConnect(it->first);
-				}
+				pThis->m_pLog->Info("Close Timeout connect:" + it->second->m_Address, "Timeout");
+				pThis->CloseConnect(it->first);
 			}
-			prevWorkTime = time(NULL);
 		}
-		else
-		{
-			SLEEP(0.5);
-		}
+		pThis->m_oExitCV.wait_for(lck,chrono::seconds(tinterval));
 	}
+    pThis->m_pLog->Info("check timeout connect thread is exit ");
     return 0;
 }
 
@@ -537,8 +531,8 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			// Add the sock event to list
 			unique_lock<mutex> elck(m_oEventListMutex);
 			m_EventSockList.push(nSocket);
-			if ( m_pSEM )
-				sem_post(m_pSEM);
+            if ( m_pEventCV )
+                m_pEventCV->notify_all();
 			elck.unlock();
 		}
 	}
@@ -559,9 +553,9 @@ void Sloong::CEpollEx::OnCanWriteData(int nSocket)
 
 
 
-void Sloong::CEpollEx::SetSEM(sem_t* pSem)
+void Sloong::CEpollEx::SetEvent(condition_variable* pCV )
 {
-	m_pSEM = pSem;
+    m_pEventCV = pCV;
 }
 
 void Sloong::CEpollEx::ProcessPrepareSendList(CSockInfo* info)
@@ -691,6 +685,8 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 void Sloong::CEpollEx::Exit()
 {
 	m_bIsRunning = false;
+	unique_lock<mutex> lck(m_oExitMutex);
+	m_oExitCV.notify_all();
 }
 
 void Sloong::CEpollEx::SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage)

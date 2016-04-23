@@ -8,8 +8,8 @@
 #include <map>
 #include <queue>
 #include <mutex>
+#include <condition_variable>
 #include "sockinfo.h"
-#include "semaphore.h"
 using namespace std; //std 命名空间
 typedef unsigned char byte;
 
@@ -31,7 +31,7 @@ namespace Sloong
 		void Exit();
         void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
         bool SendMessageEx( int sock, int nPriority, const char* pData, int nSize);
-		void SetSEM(sem_t* pSem);
+        void SetEvent( condition_variable* pCV );
 		void ProcessPrepareSendList( CSockInfo* info );
 		void ProcessSendList(CSockInfo* pInfo);
 	protected:
@@ -62,7 +62,6 @@ namespace Sloong
         mutex m_oEventListMutex;
         mutex m_oSockListMutex;
 		int m_nPriorityLevel;
-        sem_t* m_pSEM;
         bool m_bShowSendMessage;
 		bool m_bShowReceiveMessage;
 		bool m_bIsRunning;
@@ -70,6 +69,9 @@ namespace Sloong
 		bool m_bMD5Support;
 		int m_nTimeout;
 		int m_nTimeoutInterval;
+		mutex m_oExitMutex;
+		condition_variable m_oExitCV;
+        condition_variable* m_pEventCV;
 	};
 }
 

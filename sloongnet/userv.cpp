@@ -2,7 +2,6 @@
 #include<sys/types.h>
 #include<sys/socket.h>
 #include<netinet/in.h>
-#include "semaphore.h"
 using namespace std;
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
@@ -32,13 +31,13 @@ SloongWallUS::~SloongWallUS()
 	CThreadPool::End();
 	SAFE_DELETE(m_pEpoll);
 	SAFE_DELETE(m_pMsgProc);
+    m_pLog->End();
 	SAFE_DELETE(m_pLog);
 }
 
 
 void SloongWallUS::Initialize(CServerConfig* config)
 {
-	sem_init(&m_oSem, 0, 0);
     m_pConfig = config;
 	m_nPriorityLevel = config->m_nPriorityLevel;
 	m_pLog->Initialize(config->m_strLogPath, config->m_bDebug);
@@ -51,7 +50,7 @@ void SloongWallUS::Initialize(CServerConfig* config)
     m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel, 
 				config->m_bEnableSwiftNumberSup, config->m_bEnableMD5Check, config->m_nTimeout, config->m_nTimeoutInterval);
 	m_pEpoll->SetLogConfiguration(m_pConfig->m_bShowSendMessage, m_pConfig->m_bShowReceiveMessage);
-	m_pEpoll->SetSEM(&m_oSem);
+    m_pEpoll->SetEvent(&m_oEventCV);
     m_pMsgProc->Initialize(m_pLog,&config->m_oConnectInfo, &config->m_oLuaConfigInfo, config->m_bShowSQLCmd, config->m_bShowSQLResult);
 }
 
@@ -85,6 +84,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
     log->Log("Event process thread is running." + spid);
 	int id = pThis->m_pMsgProc->NewThreadInit();
 	struct timespec ts;
+    unique_lock<mutex> lck(pThis->m_oEventMutex);
 	while (pThis->m_bIsRunning)
 	{
 		if (!pThis->m_pEpoll->m_EventSockList.empty())
@@ -125,9 +125,8 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 		}
 		else
 		{
-			ts.tv_sec = time(NULL) + 1;
-			sem_timedwait(&pThis->m_oSem,&ts);
-		}
+            pThis->m_oEventCV.wait_for(lck,chrono::minutes(1));
+        }
 	}
 	return NULL;
 }
@@ -182,7 +181,7 @@ void Sloong::SloongWallUS::Exit()
 {
 	m_pEpoll->Exit();
 	m_bIsRunning = false;
-	sem_post(&m_oSem);
-	m_pLog->End();
+    unique_lock<mutex> lck(m_oEventMutex);
+    m_oEventCV.notify_all();
 }
 
