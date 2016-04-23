@@ -245,28 +245,34 @@ namespace Sloong
                     //                         continue;
                     //                     }
 
-                    byte[] data = Utility.RecvEx(info.m_Socket, RecvDataLength(info.m_Socket, 10000), 10000);
+                    long nLength = RecvDataLength(info.m_Socket, 10000);
+                    
+                    
+                    
 
                     long nSwift = -1;
                     string md5 = "";
                     int index = 0;
                     if (AppStatus.bEnableSwift)
                     {
-                        nSwift = BitConverter.ToInt64(data, 0);
+                        byte[] bSwift = Utility.RecvEx(info.m_Socket, 8, 10000);
+                        nSwift = BitConverter.ToInt64(bSwift, 0);
                         index = 8;
                     }
-                    string strRecv = Encoding.GetEncoding("GB2312").GetString(data);
+                    
 
                     if (AppStatus.bEnableMD5)
                     {
-                        md5 = strRecv.Substring(index, 32);
+                        byte[] bMD5 = Utility.RecvEx(info.m_Socket, 32, 10000);
+                        md5 = Encoding.GetEncoding("GB2312").GetString(bMD5);
                         index += 32;
                     }
-                   
+                    byte[] data = Utility.RecvEx(info.m_Socket, nLength - index, 10000);
+                    string strRecv = Encoding.GetEncoding("GB2312").GetString(data);
                     if (MsgList.ContainsKey(nSwift))
                     {
                         var pack = MsgList[nSwift];
-                        pack.ReceivedMessages = strRecv.Substring(index);
+                        pack.ReceivedMessages = strRecv;
                         if (pack.NeedExData)
                         {
                             byte[] exData = Utility.RecvEx(info.m_Socket, RecvDataLength(info.m_Socket, 0), 0);
