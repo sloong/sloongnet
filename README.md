@@ -2,6 +2,8 @@
 A open source network engine form sloong.com group.
 
 ***
+## Language 
+[简体中文](https://github.com/soaringloong/sloongnet/blob/develop/README_CN.md)
 
 ## Overview
 * Base on `linux` OS. test OS is CentOS 7 64bit.
