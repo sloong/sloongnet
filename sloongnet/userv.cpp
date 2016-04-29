@@ -83,7 +83,6 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
     string spid = CUniversal::ntos(pid);
     log->Log("Event process thread is running." + spid);
 	int id = pThis->m_pMsgProc->NewThreadInit();
-	struct timespec ts;
     unique_lock<mutex> lck(pThis->m_oEventMutex);
 	while (pThis->m_bIsRunning)
 	{

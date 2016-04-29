@@ -37,18 +37,15 @@ int Sloong::CDBProc::Query(string sqlCmd, vector<string>* vRes)
 	}
 
 	int nRes = mysql_affected_rows(&m_MySql);
-
+	MYSQL_RES* res;
+	res = mysql_store_result(&m_MySql);
+	if (res == NULL)
+	{
+			return nRes;
+	}
 	if ( vRes )
 	{
-		MYSQL_RES* res;
 		MYSQL_ROW row;
-
-		res = mysql_store_result(&m_MySql);
-
-		if (res == NULL)
-		{
-			return 0;
-		}
 
 		int nNums = mysql_num_fields(res);
 		char tab = 0x09;
