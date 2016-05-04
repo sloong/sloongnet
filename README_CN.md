@@ -12,6 +12,11 @@
 * 框架基于 `lua script + c++ engine`.
 
 ## 历史
+* ### v0.6.6
+    * #### 修复BUG
+        * [#23](https://git.sloong.com/public/sloongnet/issues/23) 添加超时检测后空闲时间CPU占用较高
+        * [#22](https://git.sloong.com/public/sloongnet/issues/22) 在进行大规模并发的时候有问题
+		* [#24](https://git.sloong.com/public/sloongnet/issues/24) 脚本执行插入,修改，删除这类只有影响行数没有返回结果的命令，返回0的问题
 * ### v0.6.4
     * #### 新功能
         * userinfo添加ip和prot信息
