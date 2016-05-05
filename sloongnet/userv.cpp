@@ -27,7 +27,7 @@ SloongWallUS::SloongWallUS()
 
 SloongWallUS::~SloongWallUS()
 {
-	m_bIsRunning = false;
+	Exit();
 	CThreadPool::End();
 	SAFE_DELETE(m_pEpoll);
 	SAFE_DELETE(m_pMsgProc);
@@ -58,21 +58,12 @@ void SloongWallUS::Run()
 {
 	m_bIsRunning = true;
 	CThreadPool::AddWorkThread(SloongWallUS::HandleEventWorkLoop, this, m_pConfig->m_nProcessThreadQuantity);
-	string cmd;
+	unique_lock<mutex> lck(m_oEventMutex);
 	while (m_bIsRunning)
 	{
-		cmd.clear();
-		cin >> cmd;
-		if (cmd == "exit")
-		{
-			Exit();
-			return;
-		}
-		else
-		{
-			CCmdProcess::Parser(cmd);
-		}
+		m_oEventCV.wait(lck);
 	}
+	Exit();
 }
 
 void* SloongWallUS::HandleEventWorkLoop(void* pParam)
