@@ -40,12 +40,14 @@ void SloongWallUS::Initialize(CServerConfig* config)
 {
     m_pConfig = config;
 	m_nPriorityLevel = config->m_nPriorityLevel;
-	m_pLog->Initialize(config->m_strLogPath, config->m_bDebug);
-	if (config->m_bLogWriteToOneFile)
+
+    LOGTYPE oType = LOGTYPE::ONEFILE;
+    if (!config->m_bLogWriteToOneFile)
 	{
-		LOGTYPE oType = LOGTYPE::DAY;
-		m_pLog->SetConfiguration(NULL, NULL, &oType, NULL, config->m_bDebug);
+        oType = LOGTYPE::DAY;
 	}
+    m_pLog->Initialize(config->m_strLogPath, config->m_bDebug, LOGLEVEL::All, oType);
+
     m_pLog->SetWorkInterval(config->m_nSleepInterval);
     m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel, 
 				config->m_bEnableSwiftNumberSup, config->m_bEnableMD5Check, config->m_nTimeout, config->m_nTimeoutInterval);

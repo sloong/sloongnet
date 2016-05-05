@@ -89,7 +89,7 @@ HDREXTS = .h .H .hh .hpp .HPP .h++ .hxx .hp
 # Users can override those variables from the command line.
 CFLAGS  = -g -pthread
 DFLAG = -g -pg 
-CXXFLAGS= -std=c++11 -DLUA_USE_READLINE -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -L/usr/local/lib/sloong -Wl,-rpath=/usr/local/lib/sloong -L/usr/lib64/mysql -Wl,-rpath=/usr/lib64/mysql
+CXXFLAG= -std=c++11 -DLUA_USE_READLINE -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -L/usr/local/lib/sloong -Wl,-rpath=/usr/local/lib/sloong -L/usr/lib64/mysql -Wl,-rpath=/usr/lib64/mysql
 
 # The C program compiler.
 #CC	 = gcc
@@ -145,11 +145,12 @@ LINK.cxx = $(CXX) $(MY_CFLAGS) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS)
 
 all: $(PROGRAM)
 
-Debug : CXXFLAGS = $DFLAG $CXXFLAGS 
+Debug : CXXFLAGS = $(DFLAG) $(CXXFLAG)
 Debug :	$(PROGRAM)
 
 debug : Debug
 
+Release : CXXFLAGS = $(CXXFLAG)
 Release: $(PROGRAM)
 
 release : Release
