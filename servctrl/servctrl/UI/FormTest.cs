@@ -22,7 +22,7 @@ namespace servctrl
         private IDataCenter _DC;
         private Dictionary<string, string> testCaseMap = new Dictionary<string, string>();
         const string TestCastMapPath = "UI\\TestCase.bin";
-
+        delegate void InvokeCallback(string log);
         public Dictionary<string, ConnectInfo> SocketMap
         {
             get
@@ -114,22 +114,57 @@ namespace servctrl
             }
 
             int nMul = 0;
+            int nInterval = 0;
             if (checkBoxSingle.Checked)
+            {
                 nMul = 1;
+                nInterval = 0;
+            }
             else
+            {
                 nMul = Convert.ToInt32(textBoxMulNum.Text);
+                try
+                {
+                    nInterval = Convert.ToInt32(textBoxNumInterval.Text);
+                }
+                catch(Exception)
+                {
+                    nInterval = 0;
+                }
+            }
 
+            var send = new System.Threading.Thread(() => SendMessage(pam, nMul, nInterval));
+            send.Start();
+        }
+
+        void SendMessage( JObject jreq, int nMul, int nInterval)
+        {
             try
             {
                 for (int i = 0; i < nMul; i++)
                 {
-                    _DC.SendMessage(MessageType.SendRequest, pam, ProcResult);
-                    listBoxLog.Items.Add(textBoxMsg.Text);
-                }                    
+                    _DC.SendMessage(MessageType.SendRequest, jreq, ProcResult);
+                    AddLogItem(jreq.ToString());
+                    if (nInterval > 0)
+                        System.Threading.Thread.Sleep(nInterval);
+                }
             }
             catch (Exception ex)
             {
-                listBoxLog.SelectedIndex = listBoxLog.Items.Add(ex.ToString());
+                AddLogItem(ex.ToString());
+            }
+        }
+
+
+        void AddLogItem( string log )
+        {
+            if(listBoxLog.InvokeRequired)
+            {
+                listBoxLog.Invoke(new InvokeCallback(AddLogItem), new object[] { log });
+            }
+            else
+            {
+                listBoxLog.SelectedIndex = listBoxLog.Items.Add(log);
             }
         }
 
@@ -141,17 +176,17 @@ namespace servctrl
                 JObject jres = JObject.Parse(pack.ReceivedMessages);
                 if (jres["errno"].ToString() != "0")
                 {
-                    listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + jres["errmsg"].ToString());
+                    AddLogItem("Fialed! The Error Message is:" + jres["errmsg"].ToString());
                     return false;
                 }
                 else
                 {
-                    listBoxLog.SelectedIndex = listBoxLog.Items.Add(pack.SwiftNumber.ToString()+"|"+jres.ToString());
+                    AddLogItem(pack.SwiftNumber.ToString() + "|" + jres.ToString());
                 }
             }
             catch(Exception e)
             {
-                listBoxLog.SelectedIndex = listBoxLog.Items.Add("Proc Result Fialed:" + e.ToString());
+                AddLogItem("Proc Result Fialed:" + e.ToString());
             }
             
             return true;
