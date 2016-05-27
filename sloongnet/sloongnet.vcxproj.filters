@@ -22,83 +22,31 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="debug.mak">
-      <Filter>Make files</Filter>
-    </None>
-    <None Include="release.mak">
-      <Filter>Make files</Filter>
-    </None>
-    <None Include="Makefile_VGDB" />
-    <None Include="default.conf" />
-    <None Include="scripts\comm.lua">
-      <Filter>scripts</Filter>
-    </None>
-    <None Include="scripts\init.lua">
-      <Filter>scripts</Filter>
-    </None>
-    <None Include="scripts\ex.lua">
-      <Filter>scripts</Filter>
-    </None>
-    <None Include="scripts\json.lua">
-      <Filter>scripts</Filter>
-    </None>
-    <None Include="scripts\main.lua">
-      <Filter>scripts</Filter>
-    </None>
-    <None Include="scripts\sql.lua">
-      <Filter>scripts</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="epollex.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="main.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="msgproc.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="sockinfo.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="userv.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="serverconfig.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="utility.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="globalfunction.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="dbproc.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="jpeg.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="version.h" />
-    <ClInclude Include="progressbar.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="CmdProcess.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="structs.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="epollex.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="CmdProcess.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="dbproc.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="epollex.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="globalfunction.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
     <ClCompile Include="msgproc.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="progressbar.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="serverconfig.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="sockinfo.cpp">
@@ -107,26 +55,61 @@
     <ClCompile Include="userv.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="serverconfig.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="utility.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="globalfunction.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="dbproc.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="jpeg.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="progressbar.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="CmdProcess.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CImg.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdProcess.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="dbproc.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="epollex.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Debug.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Release.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="globalfunction.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="jpeg.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="msgproc.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="progressbar.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="serverconfig.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="sockinfo.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="structs.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="userv.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="utility.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="version.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

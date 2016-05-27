@@ -1,95 +1,72 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
+    <ProjectConfiguration Include="Debug|x86">
       <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>x86</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
+    <ProjectConfiguration Include="Release|x86">
       <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E89B0F2A-F74B-43CC-934F-3B8DB35F3E5B}</ProjectGuid>
+    <ProjectGuid>{4e5586db-2ada-4851-b997-74d8745f8cb0}</ProjectGuid>
+    <Keyword>Linux</Keyword>
+    <RootNamespace>sloongnet</RootNamespace>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <ApplicationType>Linux</ApplicationType>
+    <ApplicationTypeRevision>1.0</ApplicationTypeRevision>
+    <TargetLinuxPlatform>Generic</TargetLinuxPlatform>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Makefile</ConfigurationType>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Makefile</ConfigurationType>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0000\include\glib-2.0\;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0006\include\;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0004\4.8.5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0004\4.8.5\x86_64-redhat-linux;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0004\4.8.5\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0005\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0000\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
-    <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
-    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
-    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
-    <NMakeOutput>$(ProjectDir)sloongnet-Debug.vgdbsettings</NMakeOutput>
-    <IncludePath />
-    <ReferencePath />
-    <LibraryPath />
-    <LibraryWPath />
-    <SourcePath />
-    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>/usr/include/glib-2.0;/usr/lib64/glib-2.0/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0001\4.8.3;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0001\4.8.3\x86_64-redhat-linux;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0001\4.8.3\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0002\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\www.sloong.com\0000\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
-    <NMakeForcedIncludes>$(ProjectDir)\gcc_Release.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
-    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
-    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
-    <NMakeOutput>$(ProjectDir)sloongnet-Release.vgdbsettings</NMakeOutput>
-    <IncludePath />
-    <ReferencePath />
-    <LibraryPath />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>/usr/include/glib-2.0;/usr/lib64/glib-2.0/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
-  <ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Link>
+      <LibraryDependencies>m;dl;lua.5.3.1;glib-2.0;mysqlclient;jpeg;univ;uuid</LibraryDependencies>
+      <SharedLibrarySearchPath>/usr/local/lib/sloong;/usr/lib64/mysql;%(SharedLibrarySearchPath)</SharedLibrarySearchPath>
+      <AdditionalLibraryDirectories>/usr/local/lib/sloong;/usr/lib64/mysql;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <ClCompile>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+    </ClCompile>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <None Include="default.conf" />
-    <None Include="debug.mak" />
-    <None Include="Makefile_VGDB" />
-    <None Include="release.mak" />
-    <None Include="scripts\comm.lua" />
-    <None Include="scripts\ex.lua" />
-    <None Include="scripts\init.lua" />
-    <None Include="scripts\json.lua" />
-    <None Include="scripts\main.lua" />
-    <None Include="scripts\sql.lua" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="CmdProcess.h" />
-    <ClInclude Include="dbproc.h" />
-    <ClInclude Include="epollex.h" />
-    <ClInclude Include="globalfunction.h" />
-    <ClInclude Include="jpeg.h" />
-    <ClInclude Include="main.h" />
-    <ClInclude Include="msgproc.h" />
-    <ClInclude Include="progressbar.h" />
-    <ClInclude Include="serverconfig.h" />
-    <ClInclude Include="sockinfo.h" />
-    <ClInclude Include="structs.h" />
-    <ClInclude Include="userv.h" />
-    <ClInclude Include="utility.h" />
-    <ClInclude Include="version.h" />
-  </ItemGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Link>
+      <AdditionalLibraryDirectories>/usr/local/lib/sloong;/usr/lib64/mysql;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <LibraryDependencies>m;dl;lua.5.3.1;glib-2.0;mysqlclient;jpeg;univ;uuid</LibraryDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CmdProcess.cpp" />
     <ClCompile Include="dbproc.cpp" />
@@ -104,7 +81,25 @@
     <ClCompile Include="userv.cpp" />
     <ClCompile Include="utility.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CImg.h" />
+    <ClInclude Include="CmdProcess.h" />
+    <ClInclude Include="dbproc.h" />
+    <ClInclude Include="epollex.h" />
+    <ClInclude Include="gcc_Debug.h" />
+    <ClInclude Include="gcc_Release.h" />
+    <ClInclude Include="globalfunction.h" />
+    <ClInclude Include="jpeg.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="msgproc.h" />
+    <ClInclude Include="progressbar.h" />
+    <ClInclude Include="serverconfig.h" />
+    <ClInclude Include="sockinfo.h" />
+    <ClInclude Include="structs.h" />
+    <ClInclude Include="userv.h" />
+    <ClInclude Include="utility.h" />
+    <ClInclude Include="version.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>
