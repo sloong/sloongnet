@@ -24,7 +24,7 @@ CServerConfig::CServerConfig()
 
 	// Server init
 	m_nPort = 9009;
-	m_bDebug = true;
+	m_bDebugMode = true;
     m_nPriorityLevel = 0;
 	m_bEnableMD5Check = false;
 	m_bEnableSwiftNumberSup = false;
@@ -146,7 +146,7 @@ void Sloong::CServerConfig::LoadConfig()
 
 	// Load server info
 	m_nPort = GetIntConfig("Server", "Port", m_nPort);
-	m_bDebug = GetBoolenConfig("Server", "RunType", m_bDebug);
+	m_bDebugMode = GetBoolenConfig("Server", "DebugMode", m_bDebugMode);
 	m_nPriorityLevel = GetIntConfig("Server", "PriorityLevel", m_nPriorityLevel);
 	m_bEnableMD5Check = GetBoolenConfig("Server", "EnableMD5Check", m_bEnableMD5Check);
 	m_bEnableSwiftNumberSup = GetBoolenConfig("Server", "EnableSwiftNumberSupport", m_bEnableSwiftNumberSup);

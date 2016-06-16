@@ -35,7 +35,7 @@ namespace Sloong
 
 		// Server config
 		int m_nPort;
-		bool m_bDebug;
+		bool m_bDebugMode;
 		int m_nPriorityLevel;
 		bool m_bEnableSwiftNumberSup;
 		bool m_bEnableMD5Check;

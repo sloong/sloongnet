@@ -112,4 +112,24 @@
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="scripts\comm.lua">
+      <Filter>scripts</Filter>
+    </None>
+    <None Include="scripts\ex.lua">
+      <Filter>scripts</Filter>
+    </None>
+    <None Include="scripts\init.lua">
+      <Filter>scripts</Filter>
+    </None>
+    <None Include="scripts\json.lua">
+      <Filter>scripts</Filter>
+    </None>
+    <None Include="scripts\main.lua">
+      <Filter>scripts</Filter>
+    </None>
+    <None Include="scripts\sql.lua">
+      <Filter>scripts</Filter>
+    </None>
+  </ItemGroup>
 </Project>

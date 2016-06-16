@@ -46,7 +46,7 @@ void SloongWallUS::Initialize(CServerConfig* config)
 	{
         oType = LOGTYPE::DAY;
 	}
-    m_pLog->Initialize(config->m_strLogPath, config->m_bDebug, LOGLEVEL::All, oType);
+    m_pLog->Initialize(config->m_strLogPath, config->m_bDebugMode, LOGLEVEL::All, oType);
 
     m_pLog->SetWorkInterval(config->m_nSleepInterval);
     m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel, 
