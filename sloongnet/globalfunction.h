@@ -47,6 +47,7 @@ namespace Sloong
 		static int Lua_GetConfig(lua_State* l);
 		static int Lua_MoveFile(lua_State* l);
 		static int Lua_GenUUID(lua_State* l);
+		static int Lua_ReceiveFile(lua_State* l);
 		
 	public:
 		static CGlobalFunction* g_pThis;

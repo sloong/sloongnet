@@ -70,7 +70,7 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
     // 绑定端口
     errno = bind(m_ListenSock,(struct sockaddr*)&address,sizeof(address));
     if( errno == -1 )
-        new normal_except(CUniversal::Format("bind to %d field. errno = %d",licensePort,errno));
+        throw new normal_except(CUniversal::Format("bind to %d field. errno = %d",licensePort,errno));
 
     // 监听端口,监听队列大小为1024.可修改为SOMAXCONN
     errno = listen(m_ListenSock,1024);
