@@ -65,6 +65,21 @@ function main_Req.GetIP( u, req, res )
 	return 0;
 end
 
+function main_Req.UploadWithTCP( u, req, res )
+	res['uuid'] = GenUUID();
+	res['port'] = '9009';
+	return 0;
+end
+
+function main_Req.UploadWithTCPStart(u, req, res)
+	local res,msg = ReceiveFile(req['uuid'],9999,5600*1024,'/tmp/temptest.jpg',10);
+	if res == 0 then
+		return -1,msg;
+	else
+		return 0;
+	end
+end
+
 g_all_request_processer = 
 {
 	['Reload'] = main_Req.ReloadScript,
@@ -72,6 +87,8 @@ g_all_request_processer =
 	['RunSql'] = main_Req.SqlTest,
 	['UploadStart'] = main_Req.UploadStart,
 	['UploadEnd'] = main_Req.UploadEnd,
+	['UploadWithTCP'] = main_Req.UploadWithTCP,
+	['UploadWithTCPStart'] = main_Req.UploadWithTCPStart,
 	['GetIP'] = main_Req.GetIP,
 }
 AddModule(g_ex_function);

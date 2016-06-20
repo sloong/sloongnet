@@ -23,11 +23,11 @@ namespace servctrl
         private Dictionary<string, string> testCaseMap = new Dictionary<string, string>();
         const string TestCastMapPath = "UI\\TestCase.bin";
         delegate void InvokeCallback(string log);
-        public Dictionary<string, ConnectInfo> SocketMap
+        public List<ConnectInfo> SocketMap
         {
             get
             {
-                return _DC[ShareItem.SocketMap] as Dictionary<string, ConnectInfo>;
+                return _DC[ShareItem.SocketMap] as List<ConnectInfo>;
             }
             set { }
         }
@@ -51,20 +51,20 @@ namespace servctrl
         };
 
 
-        Socket sockCurrent
-        {
-            get
-            {
-                var cbox = _DC[ShareItem.ConfigSelecter] as ComboBox;
-                if (cbox != null)
-                {
-                    return SocketMap[cbox.Text].m_Socket;
-                }
-                return null;
-            }
-
-            set { }
-        }
+//         Socket sockCurrent
+//         {
+//             get
+//             {
+//                 var cbox = _DC[ShareItem.ConfigSelecter] as ComboBox;
+//                 if (cbox != null)
+//                 {
+//                     return SocketMap[0].m_Socket;
+//                 }
+//                 return null;
+//             }
+// 
+//             set { }
+//         }
 
         public FormTest(IDataCenter _pageHost)
         {
@@ -319,6 +319,122 @@ namespace servctrl
                 listBoxLog.Items.Add("Upload end.");
             }
             return true;
+        }
+
+        private void buttonUploadTCP_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog fd = new OpenFileDialog();
+            if (DialogResult.OK == fd.ShowDialog())
+            {
+                foreach (var item in fd.FileNames)
+                {
+                    FileInfo fi = new FileInfo(item);
+                    JObject pam = JObject.Parse("{}");
+                    pam["funcid"] = "UploadWithTCP";
+                    pam["filename"] = fi.Name;
+                    pam["fullname"] = fi.FullName;
+                    pam["MD5"] = Utility.GetMD5HashFromFile(item);
+                    _DC.SendMessage(MessageType.SendRequest, pam, UploadTCPResult);
+                }
+            }
+        }
+
+        private bool UploadTCPResult(object param)
+        {
+            MessagePackage pack = param as MessagePackage;
+
+            if (!Utility.Check(pack.ReceivedMessages))
+            {
+                listBoxLog.Items.Add("Receive message is empty");
+                return false;
+            }
+            JObject jres = JObject.Parse(pack.ReceivedMessages);
+            if (jres["errno"].ToString() != "0")
+            {
+                listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + jres["errmsg"].ToString());
+                return false;
+            }
+            else
+            {
+                JObject pam = JObject.Parse("{}");
+                pam["funcid"] = "UploadWithTCPStart";
+                pam["uuid"] = jres["uuid"].ToString();
+                _DC.SendMessage(MessageType.SendRequest, pam, UploadTCPStart);
+
+                FileStream fs = null;
+                // 发送之后不需要等待直接准备连接
+                try
+                {
+                    string servIp = SocketMap[0].m_IPInfo.Address.ToString();
+                    Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    if (jres["ip"] != null)
+                    {
+                        servIp = jres["ip"].ToString();
+                    }
+
+                    try
+                    {
+                        sock.Connect(servIp, Convert.ToInt32(jres["port"].ToString()));
+                    }
+                    catch(Exception e)
+                    {
+                        AddLogItem(e.ToString());
+                        return false;
+                    }
+                    
+
+                    string uuid = jres["uuid"].ToString();
+                    Utility.SendEx(sock, Encoding.ASCII.GetBytes(uuid));
+                    JObject orgReq = JObject.Parse(pack.SendMessage);
+                    fs = File.Open(orgReq["fullname"].ToString(), FileMode.Open);
+
+                    string len = string.Format("{0:D8}", fs.Length);
+                    Utility.SendEx(sock, Encoding.ASCII.GetBytes(len));
+
+                    int buffLength = 2048;
+                    byte[] buff = new byte[buffLength];
+                    int contentLen;
+                    contentLen = fs.Read(buff, 0, buffLength);
+                    while (contentLen != 0)
+                    {
+                        // 把内容从file stream 写入 upload stream  
+                        Utility.SendEx(sock, buff);
+                        contentLen = fs.Read(buff, 0, buffLength);
+                    }
+                    fs.Close();
+
+                }
+                catch (Exception ex)
+                {
+                    if (fs != null)
+                        fs.Close();
+                    MessageBox.Show(ex.ToString());
+                }
+                return true;
+            }
+        }
+
+        private bool UploadTCPStart( object param )
+        {
+            MessagePackage pack = param as MessagePackage;
+
+            if (!Utility.Check(pack.ReceivedMessages))
+            {
+                listBoxLog.Items.Add("Receive message is empty");
+                return false;
+            }
+            JObject jres = JObject.Parse(pack.ReceivedMessages);
+            if (jres["errno"].ToString() != "0")
+            {
+                listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + jres["errmsg"].ToString());
+                return false;
+            }
+            else
+            {
+                AddLogItem("Upload succeed");
+
+                return true;
+            }
         }
     }
 }

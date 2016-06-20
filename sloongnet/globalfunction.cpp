@@ -16,6 +16,7 @@ using namespace Sloong::Universal;
 #include "serverconfig.h"
 #include "epollex.h"
 #include<sys/socket.h>
+#include <netinet/in.h>
 using namespace std;
 using namespace cimg_library;
 #define ARRAYSIZE(a) (sizeof(a)/sizeof(a[0]))
@@ -341,27 +342,27 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
 	return 2;
 }
 
-int Sloong::CGlobalFunction::Lua_GenUUID(lua_State* l)
+int CGlobalFunction::Lua_GenUUID(lua_State* l)
 {
 	CLua::PushString(l, CUtility::GenUUID());
 	return 1;
 }
 
-int Sloong::CGlobalFunction::Lua_ReceiveFile(lua_State * l)
+int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 {
 	try
 	{
 		string uuid = CLua::GetStringArgument(l, 1);
 		if (uuid.empty() || uuid == "")
 		{
-			throw new string("uuid is empty");
+			throw normal_except("uuid is empty");
 		}
 		int port = CLua::GetNumberArgument(l, 2);
 		if (port < 1024 || port > 65535)
 		{
-			throw new string("port is illegal");
+			throw normal_except("port is illegal");
 		}
-		int max_size = CLua::GetNumerArgument(l, 3);
+		int max_size = CLua::GetNumberArgument(l, 3);
 		string save_path = CLua::GetStringArgument(l, 4);
 		int otime = CLua::GetNumberArgument(l, 5, 5);
 
@@ -373,7 +374,7 @@ int Sloong::CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 		errno = bind(rSocket, (struct sockaddr*)&address, sizeof(address));
 		if (errno == -1)
 		{
-			throw new CUniversal::Format("bind to %d field. errno = %d", port, errno);
+			throw normal_except(CUniversal::Format("bind to %d field. errno = %d", port, errno));
 		}
 
 		time_t tListen = time(NULL);
@@ -385,30 +386,33 @@ int Sloong::CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 		struct timeval tv;
 		tv.tv_sec = otime;
 		tv.tv_usec = 0;
-		int res = select(2, &rset, NULL, NULL, &tv);
+		int res = select(rSocket+1, &rset, &rset, NULL, &tv);
 		int cSocket = -1;
 		if (res == 0)
 		{
-			throw new string("client no connect in set time.");
+			close(rSocket);
+			throw normal_except("client no connect in set time.");
 		}
-		else if (FD_ISSET(rSocket, &rset))
+		else if ( res > 0 )
 		{
-			socket = accept(rSocket, NULL, NULL);
+			cSocket = accept(rSocket, NULL, NULL);
 			close(rSocket);
 		}
 		else
 		{
 			// unknown error
-			throw new string("unknown error happened when wait client connect.");
+			close(rSocket);
+			throw normal_except("unknown error happened when wait client connect.");
 		}
 		char* pBuf = NULL;
 		// receive the uuid
-		char strUuid[33] = { 0 };
+		char strUuid[37] = { 0 };
 		pBuf = strUuid;
-		res = CEpollEx::RecvEx(cSocket, &pBuf, 32, 0);
+		res = CEpollEx::RecvEx(cSocket, &pBuf, 36, 0);
 		if (string(strUuid) != uuid)
 		{
-			throw new string("uuid check error.");
+			close(rSocket);
+			throw normal_except("uuid check error.");
 		}
 		// receive the length
 		char strLen[9] = { 0 };
@@ -418,7 +422,8 @@ int Sloong::CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 		// check the length
 		if (max_size < nRecvLen)
 		{
-			throw new string("");
+			close(rSocket);
+			throw normal_except("size error");
 		}
 		// receive the data
 		pBuf = new char[nRecvLen];
@@ -430,18 +435,18 @@ int Sloong::CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 
 		// save to file
 		ofstream of;
-		of.open(save_path, ios::out | ios::trunc | ios::binary, 0);
+		of.open(save_path, ios::out | ios::trunc | ios::binary);
 		of.write(pBuf, nRecvLen);
 		of.close();
 
-		CLua::PushInteger(l, 0);
+		CLua::PushInteger(l, nRecvLen);
 		CLua::PushString(l, save_path);
 		return 2;
 	}
-	catch (string ex)
+	catch (normal_except ex)
 	{
-		CLua::PushInteger(l, -1);
-		CLua::PushString(l, ex);
+		CLua::PushInteger(l, 0);
+		CLua::PushString(l, ex.what());
 		return 2;
 	}
 	

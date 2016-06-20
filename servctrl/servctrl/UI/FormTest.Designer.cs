@@ -47,6 +47,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.buttonUpload = new System.Windows.Forms.Button();
+            this.buttonUploadTCP = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -227,19 +228,30 @@
             // 
             // buttonUpload
             // 
-            this.buttonUpload.Location = new System.Drawing.Point(795, 179);
+            this.buttonUpload.Location = new System.Drawing.Point(786, 178);
             this.buttonUpload.Name = "buttonUpload";
-            this.buttonUpload.Size = new System.Drawing.Size(75, 23);
+            this.buttonUpload.Size = new System.Drawing.Size(91, 23);
             this.buttonUpload.TabIndex = 33;
             this.buttonUpload.Text = "Upload";
             this.buttonUpload.UseVisualStyleBackColor = true;
             this.buttonUpload.Click += new System.EventHandler(this.buttonUpload_Click);
+            // 
+            // buttonUploadTCP
+            // 
+            this.buttonUploadTCP.Location = new System.Drawing.Point(784, 222);
+            this.buttonUploadTCP.Name = "buttonUploadTCP";
+            this.buttonUploadTCP.Size = new System.Drawing.Size(93, 23);
+            this.buttonUploadTCP.TabIndex = 34;
+            this.buttonUploadTCP.Text = "UploadWithTCP";
+            this.buttonUploadTCP.UseVisualStyleBackColor = true;
+            this.buttonUploadTCP.Click += new System.EventHandler(this.buttonUploadTCP_Click);
             // 
             // FormTest
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(900, 500);
+            this.Controls.Add(this.buttonUploadTCP);
             this.Controls.Add(this.buttonUpload);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
@@ -289,5 +301,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button buttonUpload;
+        private System.Windows.Forms.Button buttonUploadTCP;
     }
 }
