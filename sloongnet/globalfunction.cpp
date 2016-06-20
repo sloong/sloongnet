@@ -349,75 +349,102 @@ int Sloong::CGlobalFunction::Lua_GenUUID(lua_State* l)
 
 int Sloong::CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 {
-	string uuid = CLua::GetStringArgument(l, 1);
-	if (uuid.empty() || uuid == "")
+	try
 	{
-		CLua::PushInteger(l,-1);
-		CLua::PushString(l, "uuid is empty");
+		string uuid = CLua::GetStringArgument(l, 1);
+		if (uuid.empty() || uuid == "")
+		{
+			throw new string("uuid is empty");
+		}
+		int port = CLua::GetNumberArgument(l, 2);
+		if (port < 1024 || port > 65535)
+		{
+			throw new string("port is illegal");
+		}
+		int max_size = CLua::GetNumerArgument(l, 3);
+		string save_path = CLua::GetStringArgument(l, 4);
+		int otime = CLua::GetNumberArgument(l, 5, 5);
+
+		int rSocket = socket(AF_INET, SOCK_STREAM, 0);
+		struct sockaddr_in address;
+		memset(&address, 0, sizeof(address));
+		address.sin_addr.s_addr = htonl(INADDR_ANY);
+		address.sin_port = htons(port);
+		errno = bind(rSocket, (struct sockaddr*)&address, sizeof(address));
+		if (errno == -1)
+		{
+			throw new CUniversal::Format("bind to %d field. errno = %d", port, errno);
+		}
+
+		time_t tListen = time(NULL);
+		errno = listen(rSocket, 1);
+
+		fd_set rset;
+		FD_ZERO(&rset);
+		FD_SET(rSocket, &rset);
+		struct timeval tv;
+		tv.tv_sec = otime;
+		tv.tv_usec = 0;
+		int res = select(2, &rset, NULL, NULL, &tv);
+		int cSocket = -1;
+		if (res == 0)
+		{
+			throw new string("client no connect in set time.");
+		}
+		else if (FD_ISSET(rSocket, &rset))
+		{
+			socket = accept(rSocket, NULL, NULL);
+			close(rSocket);
+		}
+		else
+		{
+			// unknown error
+			throw new string("unknown error happened when wait client connect.");
+		}
+		char* pBuf = NULL;
+		// receive the uuid
+		char strUuid[33] = { 0 };
+		pBuf = strUuid;
+		res = CEpollEx::RecvEx(cSocket, &pBuf, 32, 0);
+		if (string(strUuid) != uuid)
+		{
+			throw new string("uuid check error.");
+		}
+		// receive the length
+		char strLen[9] = { 0 };
+		pBuf = strLen;
+		res = CEpollEx::RecvEx(cSocket, &pBuf, 8, 0);
+		long long nRecvLen = atoi(strLen);
+		// check the length
+		if (max_size < nRecvLen)
+		{
+			throw new string("");
+		}
+		// receive the data
+		pBuf = new char[nRecvLen];
+		memset(pBuf, 0, nRecvLen);
+		res = CEpollEx::RecvEx(cSocket, &pBuf, nRecvLen, 0);
+
+		// Close the socket
+		close(cSocket);
+
+		// save to file
+		ofstream of;
+		of.open(save_path, ios::out | ios::trunc | ios::binary, 0);
+		of.write(pBuf, nRecvLen);
+		of.close();
+
+		CLua::PushInteger(l, 0);
+		CLua::PushString(l, save_path);
 		return 2;
 	}
-	int port = CLua::GetNumberArgument(l, 2);
-	if (port < 1024 || port > 65535)
+	catch (string ex)
 	{
 		CLua::PushInteger(l, -1);
-		CLua::PushString(l, "port is illegal");
+		CLua::PushString(l, ex);
 		return 2;
 	}
-	int max_size = CLua::GetNumerArgument(l, 3);
-	string save_path = CLua::GetStringArgument(l, 4);
-	int otime = CLua::GetNumberArgument(l, 5, 5);
-
-	int rSocket = socket(AF_INET, SOCK_STREAM, 0);
-	struct sockaddr_in address;
-	memset(&address, 0, sizeof(address));
-	address.sin_addr.s_addr = htonl(INADDR_ANY);
-	address.sin_port = htons(port);
-	errno = bind(rSocket, (struct sockaddr*)&address, sizeof(address));
-	if (errno == -1)
-	{
-		CLua::PushInteger(l, -1);
-		CLua::PushString(l, CUniversal::Format("bind to %d field. errno = %d", port, errno));
-		return 2;
-	}
-
-	time_t tListen = time(NULL);
-	errno = listen(rSocket, 1);
-
-	fd_set rset;
-	FD_ZERO(&rset);
-	FD_SET(rSocket, &rset);
-	struct timeval tv;
-	tv.tv_sec = otime;
-	tv.tv_usec = 0;
-	int res = select(2, &rset, NULL, NULL, &tv);
-	if (res == 0)
-	{
-		CLua::PushInteger(l, -1);
-		CLua::PushString(l, "client no connect in set time.");
-		return 2;
-	}
-	else if (FD_ISSET(rSocket, &rset))
-	{
-		int socket = accept(rSocket, NULL, NULL);
-	}
-	else
-	{
-		// unknown error
-	}
-
-	// receive the uuid
-	// receive the length
-	char* pBuf = NULL;
-	char strLen[9] = { 0 };
-	pBuf = strLen;
-	res = CEpollEx::RecvEx(rSocket, &pBuf, 8, 0);
-	long long nRecvLen = atoi(strLen);
-	// check the length
-	// receive the data
-	pBuf = new char[nRecvLen];
-	memset(pBuf, 0, nRecvLen);
-	res = CEpollEx::RecvEx(rSocket, &pBuf, nRecvLen, 0);
-
+	
 
 	return 0;
 }
