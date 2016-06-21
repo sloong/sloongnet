@@ -33,3 +33,5 @@ Debug
 /sloongnet/VisualGDBCache/
 *.suo
 *.opensdf
+*.db
+*.user
