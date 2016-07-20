@@ -1,4 +1,5 @@
 #!/bin/sh
+#
 cd sloongnet
 make clean
 make debug

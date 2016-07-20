@@ -1,3 +1,5 @@
+#!/bin/sh
+#
 ./build_d.sh
 rm -f /prod/sloong/sloongnet
 rm -rdf /prod/sloong/scripts

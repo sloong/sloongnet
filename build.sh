@@ -1,3 +1,5 @@
+#!/bin/sh
+#
 cd sloongnet
 make clean
 make release
