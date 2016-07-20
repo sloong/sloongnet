@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 ./build_d.sh
 rm -f /prod/sloong/sloongnet

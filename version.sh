@@ -1,4 +1,5 @@
 #!/bin/bash
+#
 VER_PATH=sloongnet/version.h
 rm -f $VER_PATH
 _GIT_VERSION=`git rev-list --all | wc -l`
