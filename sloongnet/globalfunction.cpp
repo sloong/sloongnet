@@ -377,7 +377,6 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			throw normal_except(CUniversal::Format("bind to %d field. errno = %d", port, errno));
 		}
 
-		time_t tListen = time(NULL);
 		errno = listen(rSocket, 1);
 
 		fd_set rset;
@@ -386,7 +385,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 		struct timeval tv;
 		tv.tv_sec = otime;
 		tv.tv_usec = 0;
-		int res = select(rSocket+1, &rset, &rset, NULL, &tv);
+		int res = select(rSocket+1, &rset, NULL, NULL, &tv);
 		int cSocket = -1;
 		if (res == 0)
 		{
