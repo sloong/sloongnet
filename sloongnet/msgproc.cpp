@@ -56,10 +56,16 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 	}
 
 	int nRes = pLua->RunFunction(m_pLuaConfig->ProcessFunction, pUInfo, msg, res);
-	if (nRes >= 0 && nRes < (int)m_pGFunc->m_oSendExMapList.size())
+	if (nRes >= 0 )
 	{
+		if (nRes >= (int)m_pGFunc->m_oSendExMapList.size())
+		{
+			m_pLog->Log(CUniversal::Format("Call function end, but the res is error: res [%d], SendMapList size[%d]", nRes, m_pGFunc->m_oSendExMapList.size()), LOGLEVEL::ERR);
+			return 0;
+		}
 		pBuf = m_pGFunc->m_oSendExMapList[nRes].m_pData;
 		int nSize = m_pGFunc->m_oSendExMapList[nRes].m_nDataSize;
+		m_pLog->Log(CUniversal::Format("Send Ex Data, Size[%d], Message[%s]", nSize,msg.c_str()), LOGLEVEL::ERR);
 		unique_lock<mutex> lck(m_pGFunc->m_oListMutex);
 		m_pGFunc->m_oSendExMapList[nRes].m_pData = NULL;
 		m_pGFunc->m_oSendExMapList[nRes].m_nDataSize = 0;

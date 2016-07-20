@@ -257,7 +257,8 @@ int Sloong::CGlobalFunction::Lua_SendFile(lua_State* l)
 			rList[i].m_bIsEmpty = false;
 			lck.unlock();
 			CLua::PushNumber(l, i);
-			return 1;
+			CLua::PushString(l, "succeed");
+			return 2;
 		}
 	}
 
@@ -266,7 +267,9 @@ int Sloong::CGlobalFunction::Lua_SendFile(lua_State* l)
 	info.m_pData = pBuf;
 	info.m_bIsEmpty = false;
 	rList[rList.size()] = info;
-	return rList.size() - 1;
+	CLua::PushNumber(l, rList.size() - 1);
+	CLua::PushString(l, "succeed");
+	return 2;
 }
 
 int Sloong::CGlobalFunction::Lua_ReloadScript(lua_State* l)
@@ -448,9 +451,6 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 		CLua::PushString(l, ex.what());
 		return 2;
 	}
-	
-
-	return 0;
 }
 
 void CGlobalFunction::HandleError(string err)
