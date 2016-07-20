@@ -174,4 +174,5 @@ void Sloong::CServerConfig::LoadConfig()
 	m_oLuaConfigInfo.EntryFile = GetStringConfig("Lua", "EntryFile", "init.lua");
 	m_oLuaConfigInfo.EntryFunction = GetStringConfig("Lua", "EntryFunction", "Init");
 	m_oLuaConfigInfo.ProcessFunction = GetStringConfig("Lua", "ProcessFunction", "MessageProcess");
+	m_oLuaConfigInfo.SocketCloseFunction = GetStringConfig("Lua", "SocketCloseFunction", "SocketCloseProcess");
 }

@@ -10,6 +10,7 @@
 #include <mutex>
 #include <condition_variable>
 #include "sockinfo.h"
+#include "structs.h"
 using namespace std; //std 命名空间
 typedef unsigned char byte;
 
@@ -34,13 +35,19 @@ namespace Sloong
         void SetEvent( condition_variable* pCV );
 		void ProcessPrepareSendList( CSockInfo* info );
 		void ProcessSendList(CSockInfo* pInfo);
+		//////////////////////////////////////////////////////////////////////////
+		// Add for #20 [https://git.sloong.com/public/sloongnet/issues/20] 
+		// 在下面的CloseConnect函数中，将只关闭socket连接和发送event，并不删除相对应的信息
+		// 直到外层监听该事件的处理者处理之后调用该函数才移除对应的信息
+		//////////////////////////////////////////////////////////////////////////
+		void CloseSocket(int socket);
 	protected:
 		int SetSocketNonblocking(int socket);
 		void CtlEpollEvent(int opt, int sock, int events);
 		// close the connected socket and remove the resources.
 		void CloseConnect(int socket);
 		void AddToSendList(int socket, int nPriority, const char* pBuf, int nSize, int nStart, const char* pExBuf, int nExSize);
-
+		
 		// event function
 		void OnNewAccept();
 		void OnDataCanReceive( int nSocket );
@@ -58,7 +65,7 @@ namespace Sloong
 		CLog*		m_pLog;
 	public:
 		map<int, CSockInfo*> m_SockList;
-		queue<int> m_EventSockList;
+		queue<EventListItem> m_EventSockList;
         mutex m_oEventListMutex;
         mutex m_oSockListMutex;
 		int m_nPriorityLevel;

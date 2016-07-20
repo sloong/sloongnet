@@ -16,6 +16,7 @@ using namespace Sloong::Universal;
 #include "serverconfig.h"
 #include "CmdProcess.h"
 #include "userv.h"
+#include "structs.h"
 
 SloongWallUS::SloongWallUS()
 {
@@ -86,34 +87,44 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 				continue;
 
 			// process read list.
-			int sock = pThis->m_pEpoll->m_EventSockList.front();
+			EventListItem item = pThis->m_pEpoll->m_EventSockList.front();
 			pThis->m_pEpoll->m_EventSockList.pop();
 			eventLoc.unlock();
 
-			CSockInfo* info = pThis->m_pEpoll->m_SockList[sock];
+			CSockInfo* info = pThis->m_pEpoll->m_SockList[item.nSocket];
 			if (!info)
 			{
-				log->Log(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", sock), LOGLEVEL::WARN);
+				log->Log(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", item.nSocket), LOGLEVEL::WARN);
 				continue;
 			}
 
-			for (int i = 0; i < pThis->m_nPriorityLevel || i == 0; i++)
+			if (item.emType == EventType::ReceivedData)
 			{
-				// try to lock the process mutex in current priority level.
-				if (info->m_pProcessMutexList[i].try_lock() == false)
+				for (int i = 0; i < pThis->m_nPriorityLevel || i == 0; i++)
 				{
-					// this sock is processed in other thread. continue
-					continue;
+					// try to lock the process mutex in current priority level.
+					if (info->m_pProcessMutexList[i].try_lock() == false)
+					{
+						// this sock is processed in other thread. continue
+						continue;
+					}
+
+					unique_lock<mutex> lock(info->m_pProcessMutexList[i], std::adopt_lock);
+
+					pThis->ProcessEventList(id, &info->m_pReadList[i], info->m_oReadListMutex, item.nSocket, i, info->m_pUserInfo, pThis->m_pEpoll, pThis->m_pMsgProc);
+
+					// unlock current level.
+					lock.unlock();
 				}
 
-				unique_lock<mutex> lock(info->m_pProcessMutexList[i], std::adopt_lock);
-
-				pThis->ProcessEventList(id, &info->m_pReadList[i], info->m_oReadListMutex, sock, i, info->m_pUserInfo, pThis->m_pEpoll, pThis->m_pMsgProc);
-
-				// unlock current level.
-				lock.unlock();
 			}
-
+			else if (item.emType == EventType::SocketClose)
+			{
+				// call close function.
+				pThis->m_pMsgProc->CloseSocket(id,info->m_pUserInfo);
+				pThis->m_pEpoll->CloseSocket(item.nSocket);
+			}
+			
 		}
 		else
 		{
@@ -146,7 +157,6 @@ void Sloong::SloongWallUS::ProcessEventList(int id, queue<RECVINFO>* pList, mute
 		ProcessEvent(id, &msg, sock, nPriorityLevel, pUserInfo, pEpoll,pMsgProc);
 	}
 }
-
 
 void Sloong::SloongWallUS::ProcessEvent(int id, RECVINFO* info, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc)
 {

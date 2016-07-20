@@ -20,7 +20,20 @@ namespace Sloong
 		string EntryFile;
 		string EntryFunction;
 		string ProcessFunction;
+		string SocketCloseFunction;
 		string ScriptFolder;
+	};
+
+	enum EventType
+	{
+		ReceivedData,
+		SocketClose,
+	};
+
+	struct EventListItem
+	{
+		EventType emType;
+		int nSocket;
 	};
 }
 

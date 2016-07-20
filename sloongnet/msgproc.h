@@ -20,6 +20,7 @@ namespace Sloong
 		~CMsgProc();
         void Initialize(CLog* pLog, MySQLConnectInfo* mysqlinfo, LuaScriptConfigInfo* luainfo, bool showSQLCmd, bool showSQLRes);
 		int MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, char*& pBuf);
+		void CloseSocket(int id, CLuaPacket* pUInfo);
 		int NewThreadInit();
 		void InitLua(CLua* pLua, string folder);
 

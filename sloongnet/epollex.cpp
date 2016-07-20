@@ -310,33 +310,19 @@ void Sloong::CEpollEx::CloseConnect(int socket)
 	CSockInfo* info = m_SockList[socket];
     if( !info )
         return;
+	m_pLog->Log(CUniversal::Format("close connect:%s.", info->m_Address));
 
-    unique_lock<mutex> lsck(info->m_oSendListMutex);
-    unique_lock<mutex> lrck(info->m_oReadListMutex);
-    auto key = m_SockList.find(socket);
-    if(key == m_SockList.end())
-        return;
-
-    m_pLog->Log(CUniversal::Format("close connect:%s.",info->m_Address));
-
-
-	for (map<int, CSockInfo*>::iterator i = m_SockList.begin(); i != m_SockList.end();)
-	{
-		if (i->first == socket)
-		{
-			m_SockList.erase(i);
-			break;
-		}
-		else
-		{
-			i++;
-		}
-	}
-
-    lsck.unlock();
-    lrck.unlock();
-    SAFE_DELETE(info);
+	unique_lock<mutex> elck(m_oEventListMutex);
+	EventListItem item;
+	item.emType = SocketClose;
+	item.nSocket = socket;
+	m_EventSockList.push(item);
+	if (m_pEventCV)
+		m_pEventCV->notify_all();
+	elck.unlock();
 }
+
+
 
 int Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, int nStart, bool eagain /*= false*/)
 {	
@@ -532,7 +518,10 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			info->m_ActiveTime = time(NULL);
 			// Add the sock event to list
 			unique_lock<mutex> elck(m_oEventListMutex);
-			m_EventSockList.push(nSocket);
+			EventListItem item;
+			item.emType = ReceivedData;
+			item.nSocket = nSocket;
+			m_EventSockList.push(item);
             if ( m_pEventCV )
                 m_pEventCV->notify_all();
 			elck.unlock();
@@ -719,6 +708,41 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 
 	lck.unlock();
 }
+
+void Sloong::CEpollEx::CloseSocket(int socket)
+{
+	CSockInfo* info = m_SockList[socket];
+	if (!info)
+		return;
+
+	unique_lock<mutex> lsck(info->m_oSendListMutex);
+	unique_lock<mutex> lrck(info->m_oReadListMutex);
+	auto key = m_SockList.find(socket);
+	if (key == m_SockList.end())
+		return;
+
+	// in here no need delete the send list and read list
+	// when delete the SocketInfo object , it will delete the list .
+
+	for (map<int, CSockInfo*>::iterator i = m_SockList.begin(); i != m_SockList.end();)
+	{
+		if (i->first == socket)
+		{
+			m_SockList.erase(i);
+			break;
+		}
+		else
+		{
+			i++;
+		}
+	}
+
+	lsck.unlock();
+	lrck.unlock();
+	SAFE_DELETE(info);
+}
+
+
 
 void Sloong::CEpollEx::Exit()
 {
