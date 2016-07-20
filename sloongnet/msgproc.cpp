@@ -67,11 +67,11 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 		lck.unlock();
 		return nSize;
 	}
-	else if( nRes == -2) 
+	else
+	{
 		m_pLog->Log(res);
-
-    //m_pLog->Log(res);
-	return nRes;
+		return 0;
+	}
 }
 
 int Sloong::CMsgProc::NewThreadInit()

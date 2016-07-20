@@ -701,6 +701,16 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 			bTrySend = true;
 		}
 		// send falied, wait next event.
+		else if (si->nSent >= (si->nSize + si->nExSize))
+		{
+			m_pLog->Log(CUniversal::Format("Message package send succeed,but SentSize[%d] is big than AllSize[%d]=nSize[%d] + nExSize[%d]. remove from send list.",si->nSent,si->nExSize+si->nSize,si->nSent,si->nExSize), LOGLEVEL::INF);
+			list->pop();
+			pInfo->m_nLastSentTags = -1;
+			SAFE_DELETE_ARR(si->pSendBuffer);
+			SAFE_DELETE_ARR(si->pExBuffer);
+			SAFE_DELETE(si);
+			bTrySend = true;
+		}
 		else
 		{
 			bTrySend = false;
