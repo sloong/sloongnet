@@ -174,7 +174,7 @@ void* CEpollEx::CheckTimeoutConnect(void* pParam)
 	{
 		for (map<int, CSockInfo*>::iterator it = pThis->m_SockList.begin(); it != pThis->m_SockList.end(); ++it)
 		{
-			if (time(NULL) - it->second->m_ActiveTime > tout)
+			if (it->second != NULL && time(NULL) - it->second->m_ActiveTime > tout)
 			{
 				pThis->m_pLog->Info("Close Timeout connect:" + it->second->m_Address, "Timeout");
 				pThis->CloseConnect(it->first);
