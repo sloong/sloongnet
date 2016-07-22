@@ -8,20 +8,12 @@
 using namespace std;
 using namespace Sloong;
 #ifdef _WINDOWS  
-#include <direct.h>  
-#include <io.h>  
+
 #else
-#include <stdarg.h>  
-#include <sys/stat.h>  
+
 #endif  
 
-#ifdef _WINDOWS  
-#define ACCESS _access  
-#define MKDIR(a) _mkdir((a))  
-#else 
-#define ACCESS access  
-#define MKDIR(a) mkdir((a),0755)  
-#endif  
+
 
 CUtility::CUtility()
 {
@@ -140,45 +132,4 @@ string Sloong::CUtility::GenUUID()
 	uuid_unparse(uu, uuid);
 	return uuid;
 }
-
-string Sloong::CUtility::CheckFileDirectory(string filePath)
-{
-	if (filePath == "")
-	{
-		return "";
-	}
-
-	int iLen = filePath.size();
-	char* pszDir = new char[iLen+1];
-	memset(pszDir, 0, iLen+1);
-	memcpy(pszDir, filePath.c_str(), iLen);
-	string strDir;
-	int iRet;
-	// 创建中间目录  
-	for (int i = 1; i < iLen; i++)
-	{
-		if (pszDir[i] == '\\' || pszDir[i] == '/')
-		{
-			pszDir[i] = '\0';
-			strDir = pszDir;
-
-			//如果不存在,创建  
-			iRet = ACCESS(pszDir, 0);
-			if (iRet != 0)
-			{
-				iRet = MKDIR(pszDir);
-				if (iRet != 0)
-				{
-					return pszDir;
-				}
-			}
-			//支持linux,将所有\换成/  
-			pszDir[i] = '/';
-		}
-	}
-
-	SAFE_DELETE_ARR(pszDir);
-	return strDir;
-}
-
 

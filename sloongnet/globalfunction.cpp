@@ -322,7 +322,7 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
 			throw normal_except("Move File error. Origin file not exist or can not write" + orgName);
 		}
 
-		string dir = CUtility::CheckFileDirectory(newName);
+		string dir = CUniversal::CheckFileDirectory(newName);
 		if (access(dir.c_str(), ACC_RW) != 0)
 		{
 			nRes = -1;
@@ -366,7 +366,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			throw normal_except("port is illegal");
 		}
 		int max_size = CLua::GetNumberArgument(l, 3);
-		string save_path = CLua::GetStringArgument(l, 4);
+		auto fileList = CLua::GetTableParam(l, 4);
 		int otime = CLua::GetNumberArgument(l, 5, 5);
 
 		int rSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -388,14 +388,14 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 		struct timeval tv;
 		tv.tv_sec = otime;
 		tv.tv_usec = 0;
-		int res = select(rSocket+1, &rset, NULL, NULL, &tv);
+		int res = select(rSocket + 1, &rset, NULL, NULL, &tv);
 		int cSocket = -1;
 		if (res == 0)
 		{
 			close(rSocket);
 			throw normal_except("client no connect in set time.");
 		}
-		else if ( res > 0 )
+		else if (res > 0)
 		{
 			cSocket = accept(rSocket, NULL, NULL);
 			close(rSocket);
@@ -406,6 +406,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			close(rSocket);
 			throw normal_except("unknown error happened when wait client connect.");
 		}
+
 		char* pBuf = NULL;
 		// receive the uuid
 		char strUuid[37] = { 0 };
@@ -416,33 +417,50 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			close(rSocket);
 			throw normal_except("uuid check error.");
 		}
-		// receive the length
-		char strLen[9] = { 0 };
-		pBuf = strLen;
-		res = CEpollEx::RecvEx(cSocket, &pBuf, 8, 0);
-		long long nRecvLen = atoi(strLen);
-		// check the length
-		if (max_size < nRecvLen)
+
+		for (map<string, string>::iterator i = fileList.begin();i != fileList.end();i++)
 		{
-			close(rSocket);
-			throw normal_except("size error");
+			// receive the length
+			char strLen[9] = { 0 };
+			pBuf = strLen;
+			res = CEpollEx::RecvEx(cSocket, &pBuf, 8, 0);
+			long long nRecvLen = atoi(strLen);
+			// check the length
+			if (max_size < nRecvLen)
+			{
+				close(rSocket);
+				throw normal_except("size error");
+			}
+			// receive the data
+			pBuf = new char[nRecvLen];
+			memset(pBuf, 0, nRecvLen);
+			res = CEpollEx::RecvEx(cSocket, &pBuf, nRecvLen, 0);
+
+			// Close the socket
+			close(cSocket);
+
+			static char* s_temp_file_path = "/tmp/sloong/sloongnet/receivefile/temp.tmp";
+			// save to file
+			ofstream of;
+			of.open(s_temp_file_path, ios::out | ios::trunc | ios::binary);
+			of.write(pBuf, nRecvLen);
+			of.close();
+			// check md5
+			string md5 = CUniversal::MD5_Encoding(s_temp_file_path, true);
+			if (fileList.count(md5) > 0)
+			{
+				string netpath = fileList[md5];
+				system(CUniversal::Format("mv -f %s %s", s_temp_file_path, netpath.c_str()).c_str());
+			}
+			else
+			{
+				// 没有目标md5，表示文件有问题
+				throw new normal_except("receive file md5 is " + md5 + ", no find target path.");
+			}
 		}
-		// receive the data
-		pBuf = new char[nRecvLen];
-		memset(pBuf, 0, nRecvLen);
-		res = CEpollEx::RecvEx(cSocket, &pBuf, nRecvLen, 0);
-
-		// Close the socket
-		close(cSocket);
-
-		// save to file
-		ofstream of;
-		of.open(save_path, ios::out | ios::trunc | ios::binary);
-		of.write(pBuf, nRecvLen);
-		of.close();
-
-		CLua::PushInteger(l, nRecvLen);
-		CLua::PushString(l, save_path);
+		
+		CLua::PushInteger(l, 1);
+		CLua::PushString(l, "succeed");
 		return 2;
 	}
 	catch (normal_except ex)
