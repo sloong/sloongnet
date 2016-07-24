@@ -353,6 +353,7 @@ int CGlobalFunction::Lua_GenUUID(lua_State* l)
 
 int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 {
+	int succeed_num = 0;
 	try
 	{
 		string uuid = CLua::GetStringArgument(l, 1);
@@ -418,7 +419,8 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			throw normal_except("uuid check error.");
 		}
 
-		for (map<string, string>::iterator i = fileList.begin();i != fileList.end();i++)
+		string succeed_md5_list("");
+		for (map<string, string>::iterator i = fileList.begin(); i != fileList.end(); i++)
 		{
 			// receive the length
 			char strLen[9] = { 0 };
@@ -429,7 +431,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			if (max_size < nRecvLen)
 			{
 				close(rSocket);
-				throw normal_except("size error");
+				throw normal_except(succeed_md5_list);
 			}
 			// receive the data
 			pBuf = new char[nRecvLen];
@@ -439,7 +441,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			// Close the socket
 			close(cSocket);
 
-			static char* s_temp_file_path = "/tmp/sloong/sloongnet/receivefile/temp.tmp";
+			static const char* s_temp_file_path = "/tmp/sloong/sloongnet/receivefile/temp.tmp";
 			// save to file
 			ofstream of;
 			of.open(s_temp_file_path, ios::out | ios::trunc | ios::binary);
@@ -451,21 +453,23 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			{
 				string netpath = fileList[md5];
 				system(CUniversal::Format("mv -f %s %s", s_temp_file_path, netpath.c_str()).c_str());
+				succeed_md5_list = succeed_md5_list + md5 + ";";
+				succeed_num++;
 			}
 			else
 			{
 				// 没有目标md5，表示文件有问题
-				throw new normal_except("receive file md5 is " + md5 + ", no find target path.");
+				throw new normal_except(succeed_md5_list);
 			}
 		}
 		
-		CLua::PushInteger(l, 1);
-		CLua::PushString(l, "succeed");
+		CLua::PushInteger(l, succeed_num);
+		CLua::PushString(l, succeed_md5_list);
 		return 2;
 	}
 	catch (normal_except ex)
 	{
-		CLua::PushInteger(l, 0);
+		CLua::PushInteger(l, succeed_num);
 		CLua::PushString(l, ex.what());
 		return 2;
 	}
