@@ -24,6 +24,8 @@ using namespace cimg_library;
 CGlobalFunction* CGlobalFunction::g_pThis = NULL;
 mutex g_SQLMutex;
 
+static char* g_temp_file_path = "/tmp/sloong/receivefile/temp.tmp";
+
 LuaFunctionRegistr g_LuaFunc[] =
 {
 	{ "ShowLog", CGlobalFunction::Lua_showLog },
@@ -369,7 +371,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 		int max_size = CLua::GetNumberArgument(l, 3);
 		auto fileList = CLua::GetTableParam(l, 4);
 		int otime = CLua::GetNumberArgument(l, 5, 5);
-
+		string temp_file_path = CLua::GetStringArgument(l, 6, g_temp_file_path);
 		int rSocket = socket(AF_INET, SOCK_STREAM, 0);
 		struct sockaddr_in address;
 		memset(&address, 0, sizeof(address));
@@ -415,7 +417,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 		res = CEpollEx::RecvEx(cSocket, &pBuf, 36, 0);
 		if (string(strUuid) != uuid)
 		{
-			close(rSocket);
+			close(cSocket);
 			throw normal_except("uuid check error.");
 		}
 
@@ -430,7 +432,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			// check the length
 			if (max_size < nRecvLen)
 			{
-				close(rSocket);
+				close(cSocket);
 				throw normal_except(succeed_md5_list);
 			}
 			// receive the data
@@ -438,31 +440,38 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			memset(pBuf, 0, nRecvLen);
 			res = CEpollEx::RecvEx(cSocket, &pBuf, nRecvLen, 0);
 
-			// Close the socket
-			close(cSocket);
+			// check target file path is not exist
+			CUniversal::CheckFileDirectory(temp_file_path);
 
-			static const char* s_temp_file_path = "/tmp/sloong/sloongnet/receivefile/temp.tmp";
 			// save to file
 			ofstream of;
-			of.open(s_temp_file_path, ios::out | ios::trunc | ios::binary);
+			of.open(temp_file_path.c_str(), ios::out | ios::trunc | ios::binary);
 			of.write(pBuf, nRecvLen);
 			of.close();
 			// check md5
-			string md5 = CUniversal::MD5_Encoding(s_temp_file_path, true);
-			if (fileList.count(md5) > 0)
+			string md5 = CUniversal::MD5_Encoding(temp_file_path.c_str(), true);
+		    CUniversal::tolower(md5);
+			if (fileList.count(md5) == 0 )
 			{
-				string netpath = fileList[md5];
-				system(CUniversal::Format("mv -f %s %s", s_temp_file_path, netpath.c_str()).c_str());
-				succeed_md5_list = succeed_md5_list + md5 + ";";
-				succeed_num++;
+				CUniversal::touper(md5);
+				if (fileList.count(md5) == 0)
+				{
+					// 没有目标md5，表示文件有问题
+					// Close the socket
+					close(cSocket);
+					throw new normal_except(succeed_md5_list);
+				}
 			}
-			else
-			{
-				// 没有目标md5，表示文件有问题
-				throw new normal_except(succeed_md5_list);
-			}
+			
+			string netpath = fileList[md5];
+			system(CUniversal::Format("mv -f %s %s", temp_file_path.c_str(), netpath.c_str()).c_str());
+			succeed_md5_list = succeed_md5_list + md5 + ";";
+			succeed_num++;
 		}
 		
+		// Close the socket
+		close(cSocket);
+
 		CLua::PushInteger(l, succeed_num);
 		CLua::PushString(l, succeed_md5_list);
 		return 2;

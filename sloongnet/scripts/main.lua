@@ -67,12 +67,20 @@ end
 
 function main_Req.UploadWithTCP( u, req, res )
 	res['uuid'] = GenUUID();
-	res['port'] = '9009';
+	res['port'] = '17001';
 	return 0;
 end
 
 function main_Req.UploadWithTCPStart(u, req, res)
-	local res,msg = ReceiveFile(req['uuid'],9999,5600*1024,'/tmp/temptest.jpg',10);
+	local total = tonumber(req['total']) or 0
+	local fielList = {};
+	for i=1,total do
+		local md5 = req['md5' .. tostring(i)]
+		local filename = req['filename' .. tostring(i)]
+		local path = '/tmp/sloong/'  .. filename;
+		fielList[md5] = path;
+	end
+	local res,msg = ReceiveFile(req['uuid'],17001,5600*1024,fielList,10,'/tmp/temp.tmp');
 	if res == 0 then
 		return -1,msg;
 	else

@@ -23,6 +23,7 @@ namespace servctrl
         private Dictionary<string, string> testCaseMap = new Dictionary<string, string>();
         const string TestCastMapPath = "UI\\TestCase.bin";
         delegate void InvokeCallback(string log);
+        public List<string> uploadlist = new List<string>();
         public List<ConnectInfo> SocketMap
         {
             get
@@ -324,18 +325,16 @@ namespace servctrl
         private void buttonUploadTCP_Click(object sender, EventArgs e)
         {
             OpenFileDialog fd = new OpenFileDialog();
+            fd.Multiselect = true;
             if (DialogResult.OK == fd.ShowDialog())
             {
-                foreach (var item in fd.FileNames)
-                {
-                    FileInfo fi = new FileInfo(item);
-                    JObject pam = JObject.Parse("{}");
-                    pam["funcid"] = "UploadWithTCP";
-                    pam["filename"] = fi.Name;
-                    pam["fullname"] = fi.FullName;
-                    pam["MD5"] = Utility.GetMD5HashFromFile(item);
-                    _DC.SendMessage(MessageType.SendRequest, pam, UploadTCPResult);
-                }
+                uploadlist.Clear();
+                uploadlist.AddRange(fd.FileNames);
+                
+                JObject pam = JObject.Parse("{}");
+                pam["funcid"] = "UploadWithTCP";
+                _DC.SendMessage(MessageType.SendRequest, pam, UploadTCPResult);
+    
             }
         }
 
@@ -359,6 +358,15 @@ namespace servctrl
                 JObject pam = JObject.Parse("{}");
                 pam["funcid"] = "UploadWithTCPStart";
                 pam["uuid"] = jres["uuid"].ToString();
+                pam["total"] = uploadlist.Count;
+                int i = 1;
+                foreach (var item in uploadlist)
+                {
+                    pam["md5" + i.ToString()] = Utility.GetMD5HashFromFile(item.ToString());
+                    FileInfo fi = new FileInfo(item);
+                    pam["filename" + i.ToString()] = fi.Name;
+                    i++;
+                }
                 _DC.SendMessage(MessageType.SendRequest, pam, UploadTCPStart);
 
                 FileStream fs = null;
@@ -385,24 +393,26 @@ namespace servctrl
 
                     string uuid = jres["uuid"].ToString();
                     Utility.SendEx(sock, Encoding.ASCII.GetBytes(uuid));
-                    JObject orgReq = JObject.Parse(pack.SendMessage);
-                    fs = File.Open(orgReq["fullname"].ToString(), FileMode.Open);
 
-                    string len = string.Format("{0:D8}", fs.Length);
-                    Utility.SendEx(sock, Encoding.ASCII.GetBytes(len));
-
-                    int buffLength = 2048;
-                    byte[] buff = new byte[buffLength];
-                    int contentLen;
-                    contentLen = fs.Read(buff, 0, buffLength);
-                    while (contentLen != 0)
+                    foreach(var item in uploadlist)
                     {
-                        // 把内容从file stream 写入 upload stream  
-                        Utility.SendEx(sock, buff);
-                        contentLen = fs.Read(buff, 0, buffLength);
-                    }
-                    fs.Close();
+                        fs = File.Open(item, FileMode.Open);
 
+                        string len = string.Format("{0:D8}", fs.Length);
+                        Utility.SendEx(sock, Encoding.ASCII.GetBytes(len));
+
+                        int buffLength = 2048;
+                        byte[] buff = new byte[buffLength];
+                        int contentLen;
+                        contentLen = fs.Read(buff, 0, buffLength);
+                        while (contentLen != 0)
+                        {
+                            // 把内容从file stream 写入 upload stream  
+                            Utility.SendEx(sock, buff,contentLen);
+                            contentLen = fs.Read(buff, 0, buffLength);
+                        }
+                        fs.Close();
+                    }
                 }
                 catch (Exception ex)
                 {

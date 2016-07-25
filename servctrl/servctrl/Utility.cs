@@ -681,12 +681,17 @@ namespace Sloong
 
         public static void SendEx(Socket sock, byte[] data)
         {
+            SendEx(sock, data, data.Length);
+        }
+
+        public static void SendEx(Socket sock, byte[] data,int nSendLength)
+        {
             int nSentSize = 0;
             int nBufferSize = sock.SendBufferSize;
-            while (nSentSize < data.Length)
+            while (nSentSize < nSendLength)
             {
                 byte[] send;
-                int nNosendSize = data.Length - nSentSize;
+                int nNosendSize = nSendLength - nSentSize;
                 if (nNosendSize > nBufferSize)
                 {
                     send = SubByte(data, nSentSize, nBufferSize);
