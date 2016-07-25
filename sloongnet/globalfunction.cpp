@@ -24,7 +24,7 @@ using namespace cimg_library;
 CGlobalFunction* CGlobalFunction::g_pThis = NULL;
 mutex g_SQLMutex;
 
-static char* g_temp_file_path = "/tmp/sloong/receivefile/temp.tmp";
+static string g_temp_file_path = "/tmp/sloong/receivefile/temp.tmp";
 
 LuaFunctionRegistr g_LuaFunc[] =
 {
@@ -160,10 +160,18 @@ int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
 	auto width = CLua::GetNumberArgument(l,2);
 	auto height = CLua::GetNumberArgument(l,3);
 	auto quality = CLua::GetNumberArgument(l,4);
+	auto folder = CLua::GetStringArgument(l, 5, "");
 	
 	if ( access(path.c_str(),ACC_E) != -1 )
 	{
-		string thumbpath = CUniversal::Format("%s_%d_%d_%d.%s", path.substr(0, path.length() - 4), width, height, quality, path.substr(path.length() - 3));
+		if (folder == "")
+			folder = path.substr(0, path.find_last_of('/'));
+
+		string fileName = path.substr(path.find_last_of('/') + 1);
+		string extension = fileName.substr(fileName.find_last_of('.')+1);
+		fileName = fileName.substr(0, fileName.length() - extension.length()-1);
+		string thumbpath = CUniversal::Format("%s/%s_%d_%d_%d.%s", folder, fileName, width, height, quality,extension);
+		CUniversal::CheckFileDirectory(thumbpath);	
 		if (access(thumbpath.c_str(), ACC_E) != 0)
 		{
             CImg<byte> img(path.c_str());

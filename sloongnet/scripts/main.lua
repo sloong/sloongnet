@@ -88,6 +88,11 @@ function main_Req.UploadWithTCPStart(u, req, res)
 	end
 end
 
+function main_Req.GetThumbImage(u,req, res)
+    local path = GetThumbImage(req['path'],100,100,5,'/tmp/thumbpath');
+    return 0,path
+end
+
 g_all_request_processer = 
 {
 	['Reload'] = main_Req.ReloadScript,
@@ -98,5 +103,6 @@ g_all_request_processer =
 	['UploadWithTCP'] = main_Req.UploadWithTCP,
 	['UploadWithTCPStart'] = main_Req.UploadWithTCPStart,
 	['GetIP'] = main_Req.GetIP,
+    ['GetThumbImage'] = main_Req.GetThumbImage,
 }
 AddModule(g_ex_function);
