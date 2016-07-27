@@ -30,11 +30,6 @@ CEpollEx::~CEpollEx()
 {
 }
 
-void on_sigint(int signal)
-{
-    exit(0);
-}
-
 
 // Initialize the epoll and the thread pool.
 int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, int nTimeout, int nTimeoutInterval)
@@ -46,14 +41,7 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
 	m_nTimeoutInterval = nTimeoutInterval;
     m_pLog = plog;
 	m_pLog->Log(CUniversal::Format("epollex is initialize.license port is %d", licensePort));
-    //SIGPIPE:在reader终止之后写pipe的时候发生
-    //SIG_IGN:忽略信号的处理程序
-    //SIGCHLD: 进程Terminate或Stop的时候,SIGPIPE会发送给进程的父进程,缺省情况下该Signal会被忽略
-    //SIGINT:由Interrupt Key产生,通常是Ctrl+c或者Delete,发送给所有的ForeGroundGroup进程.
-    signal(SIGPIPE,SIG_IGN); // this signal should call the socket check function. and remove the timeout socket.
-    signal(SIGCHLD,SIG_IGN);
-    signal(SIGINT,&on_sigint);
-
+  
     // 初始化socket
     m_ListenSock=socket(AF_INET,SOCK_STREAM,0);
     int sock_op = 1;
@@ -70,7 +58,7 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
     // 绑定端口
     errno = bind(m_ListenSock,(struct sockaddr*)&address,sizeof(address));
     if( errno == -1 )
-        throw new normal_except(CUniversal::Format("bind to %d field. errno = %d",licensePort,errno));
+        throw normal_except(CUniversal::Format("bind to %d field. errno = %d",licensePort,errno));
 
     // 监听端口,监听队列大小为1024.可修改为SOMAXCONN
     errno = listen(m_ListenSock,1024);

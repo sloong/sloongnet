@@ -80,7 +80,7 @@ function main_Req.UploadWithTCPStart(u, req, res)
 		local path = '/tmp/sloong/'  .. filename;
 		fielList[md5] = path;
 	end
-	local suc_num,suc_list,errmsg = ReceiveFile(req['uuid'],17001,5600*1024,fielList,10,'/tmp/temp.tmp');
+	local suc_num,suc_list,errmsg = ReceiveFile(req['uuid'],17001,100*1024*1024,fielList,10,'/tmp/temp.tmp');
 	if res == 0 then
 		return -1,errmsg;
 	else

@@ -83,7 +83,7 @@ void Sloong::CGlobalFunction::Initialize(CLog* plog, MySQLConnectInfo* info, boo
 		{
 			m_pDBProc->Connect(info);
 		}
-		catch (normal_except e)
+		catch (normal_except& e)
 		{
 			g_pThis->m_pLog->Info(e.what(), "ERR");
 			throw e;
@@ -112,7 +112,7 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 	{
 		nRes = g_pThis->m_pDBProc->Query(cmd, &res);
 	}
-	catch (normal_except e)
+	catch (normal_except& e)
 	{
 		lck.unlock();
 		string err = CUniversal::Format("SQL Query error:[%s]", e.what());
@@ -194,6 +194,7 @@ int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
 		}
 		CLua::PushString(l,thumbpath);
 	}
+	CLua::PushString(l, "");
 	return 1;
 }
 
@@ -247,7 +248,7 @@ int Sloong::CGlobalFunction::Lua_SendFile(lua_State* l)
 	{
 		nSize = CUtility::ReadFile(filename, pBuf);
 	}
-	catch (normal_except e)
+	catch (normal_except& e)
 	{
 		g_pThis->m_pLog->Log(e.what(), ERR);
 		CLua::PushNumber(l, -1);
@@ -302,7 +303,7 @@ int Sloong::CGlobalFunction::Lua_GetConfig(lua_State* l)
 	{
 		value = CServerConfig::GetStringConfig(section, key, def);
 	}
-	catch (normal_except e)
+	catch (normal_except& e)
 	{
 		CLua::PushString(l, "");
 		CLua::PushString(l, e.what());
@@ -341,7 +342,7 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
 
 		system(CUniversal::Format("mv -f %s %s", orgName.c_str(), newName.c_str()).c_str());
 	}
-	catch (normal_except e)
+	catch (normal_except& e)
 	{
 		g_pThis->m_pLog->Log(e.what());
 		CLua::PushString(l, e.what());
@@ -467,7 +468,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 					// 没有目标md5，表示文件有问题
 					// Close the socket
 					close(cSocket);
-					throw new normal_except(CUniversal::Format("no find target md5[%s] in list.",md5.c_str()));
+					throw normal_except(CUniversal::Format("no find target md5[%s] in list.",md5.c_str()));
 				}
 			}
 			
@@ -486,7 +487,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 		CLua::PushString(l, "succeed");
 		return 3;
 	}
-	catch (normal_except ex)
+	catch (normal_except& ex)
 	{
 		CLua::PushInteger(l, succeed_num);
 		CLua::PushString(l, succeed_md5_list);
