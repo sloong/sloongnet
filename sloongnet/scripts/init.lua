@@ -19,6 +19,9 @@ OnError = function( msg )
     print('error proc:' .. tostring(msg));
 end
 
+SocketCloseProcess = function( u) 
+	ShowLog("socket closed")
+end
 
 ProgressMessage = function( uinfo, request )
     local jreq = JSON:decode(request)
