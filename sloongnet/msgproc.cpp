@@ -83,9 +83,7 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 void Sloong::CMsgProc::CloseSocket(int id, CLuaPacket* pUInfo)
 {
 	CLua* pLua = m_pLuaList[id];
-	string tmp("");
-	string res("");
-	pLua->RunFunction(m_pLuaConfig->SocketCloseFunction, pUInfo, tmp, res);
+	pLua->RunFunction(m_pLuaConfig->SocketCloseFunction, pUInfo);
 }
 
 int Sloong::CMsgProc::NewThreadInit()
