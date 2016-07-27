@@ -193,6 +193,7 @@ int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
             img.save(thumbpath.c_str());
 		}
 		CLua::PushString(l,thumbpath);
+		return 1;
 	}
 	CLua::PushString(l, "");
 	return 1;
