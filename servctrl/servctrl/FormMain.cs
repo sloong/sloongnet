@@ -276,6 +276,7 @@ namespace servctrl
             try
             {
                 JObject msg = Params[0] as JObject;
+
                 if (msg == null)
                     return;
                 MessagePackage pack = new MessagePackage();
@@ -283,6 +284,7 @@ namespace servctrl
                 pack.SwiftNumber = _SwiftNum;
                 pack.NeedExData = bExData;
                 pack.MessageExInfo = Params;
+                pack.level = (byte)Params[1];
                 if (pCallBack != null)
                     pack.ReceivedHandler = new CallBackFunc(pCallBack);
                 SendList.Enqueue(pack);

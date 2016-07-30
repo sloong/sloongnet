@@ -167,5 +167,6 @@ namespace Sloong.Interface
         public CallBackFunc ReceivedHandler = null;
         public object[] MessageExInfo = null;
         public int SocketID = 0;
+        public byte level = 0;
     }
 }

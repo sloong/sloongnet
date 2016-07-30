@@ -134,17 +134,17 @@ namespace servctrl
                 }
             }
 
-            var send = new System.Threading.Thread(() => SendMessage(pam, nMul, nInterval));
+            var send = new System.Threading.Thread(() => SendMessage(pam, nMul, nInterval,Convert.ToByte(textBoxLevel.Text)));
             send.Start();
         }
 
-        void SendMessage( JObject jreq, int nMul, int nInterval)
+        void SendMessage( JObject jreq, int nMul, int nInterval, byte level)
         {
             try
             {
                 for (int i = 0; i < nMul; i++)
                 {
-                    _DC.SendMessage(MessageType.SendRequest, jreq, ProcResult);
+                    _DC.SendMessage(MessageType.SendRequest, new object[] { jreq, level }, ProcResult);
                     AddLogItem(jreq.ToString());
                     if (nInterval > 0)
                         System.Threading.Thread.Sleep(nInterval);
