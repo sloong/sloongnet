@@ -163,8 +163,8 @@ namespace Sloong
                         	swift = string.Format("{0:D8}", pack.SwiftNumber);
                         }
 
-                        var len = string.Format("{0:D8}", gbk.GetByteCount(msg) + md5.Length + swift.Length);
-                        msg = len + swift + md5 + msg;
+                        var len = string.Format("{0:D8}", gbk.GetByteCount(msg) + md5.Length + swift.Length + 1);
+                        msg = len + pack.level + swift + md5 + msg;
 
                         byte[] sendByte = gbk.GetBytes(msg);
                         var Sock = SocketMap[pack.SocketID].m_Socket;

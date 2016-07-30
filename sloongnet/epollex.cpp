@@ -458,14 +458,17 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			// check the priority level
 			if (m_nPriorityLevel != 0)
 			{
-				if (data[0] > m_nPriorityLevel || data[0] < 0)
+				char pLevel[2] = { 0 };
+				pLevel[0] = data[0];
+				int level = atoi(pLevel);
+				if (level > m_nPriorityLevel || level < 0)
 				{
-					m_pLog->Log(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", data[0], m_nPriorityLevel));
+					m_pLog->Log(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", level, m_nPriorityLevel));
 					pList = &info->m_pReadList[m_nPriorityLevel - 1];
 				}
 				else
 				{
-					pList = &info->m_pReadList[(int)data[0]];
+					pList = &info->m_pReadList[level];
 				}
 				pMsg = &data[1];
 			}
