@@ -9,14 +9,54 @@
 
 ## 特性
 * 使用 `多线程 & epoll` 技术.
-* 框架基于 `lua script + c++ engine`.
+* 框架基于 `lua script & c++ engine`.
+* 支持消息优先级模式，高优先级的优先处理
+* 使用消息标识区分每个消息，避免传统的一问一答模式，耗时消息将不会影响其他消息的处理和返回，配合消息优先级模式，让高优先级的操作不在“卡”
 
-## 历史
+## 更新历史
+* ### v0.7.6
+   * #### 新功能 
+      * [#42 ](https://git.sloong.com/public/sloongnet/issues/42)GetThumbImage返回值问题 
+      * [#43 ](https://git.sloong.com/public/sloongnet/issues/42)MD5校验失败后添加相关信息以便定位问题
+* ### v0.7.5
+   * #### 优化
+      * [#38 ](https://git.sloong.com/public/sloongnet/issues/38)完善程序异常捕捉
+   * #### 修复BUG
+      * [#39 ](https://git.sloong.com/public/sloongnet/issues/39)GetThumbImage返回值问题
+* ### v0.7.4
+   * #### 新功能
+      * [#20 ](https://git.sloong.com/public/sloongnet/issues/20)关闭连接时通知脚本
+* ### v0.7.3
+   * #### 新功能
+      * [#37 ](https://git.sloong.com/public/sloongnet/issues/37)接收文件接口函数返回值支持指示成功文件数量以及md列表以及错误信息
+* ### v0.7.2
+   * #### 新功能
+      * [#31 ](https://git.sloong.com/public/sloongnet/issues/31)获取缩率图接口函数支持自定义路径
+      * [#35 ](https://git.sloong.com/public/sloongnet/issues/35)接收文件接口函数返回值支持指示成功文件数量以及错误信息
+   * #### 修复BUG
+      * [#36 ](https://git.sloong.com/public/sloongnet/issues/36)ReceiveFile接口问题
+* ### v0.7.1
+   * #### 新功能
+      * [#30 ](https://git.sloong.com/public/sloongnet/issues/30)添加多文件接收功能
+   * #### 修复BUG
+      * [#32 ](https://git.sloong.com/public/sloongnet/issues/32)启用超时检测后异常崩溃问题
+* ### v0.7.0
+   * #### 新功能 
+      * [#28 ](https://git.sloong.com/public/sloongnet/issues/28)添加文件接收（TCP）功能
+   * #### 修复BUG
+      * [#33 ](https://git.sloong.com/public/sloongnet/issues/33)请求图片文件时发送异常问题 
+* ### v0.6.8
+   * #### 优化
+      * 配置文件中的RunType修改为DebugMode
+* ### v0.6.7
+   * #### 修复BUG
+       * [#26 ](https://git.sloong.com/public/sloongnet/issues/26)服务模式下运行，log文件被写入了大量的帮助信息
+      * [#27 ](https://git.sloong.com/public/sloongnet/issues/27)log配置不生效的问题
 * ### v0.6.6
     * #### 修复BUG
-        * [#23](https://git.sloong.com/public/sloongnet/issues/23) 添加超时检测后空闲时间CPU占用较高
-        * [#22](https://git.sloong.com/public/sloongnet/issues/22) 在进行大规模并发的时候有问题
-		* [#24](https://git.sloong.com/public/sloongnet/issues/24) 脚本执行插入,修改，删除这类只有影响行数没有返回结果的命令，返回0的问题
+        * [#23 ](https://git.sloong.com/public/sloongnet/issues/23) 添加超时检测后空闲时间CPU占用较高
+        * [#22 ](https://git.sloong.com/public/sloongnet/issues/22) 在进行大规模并发的时候有问题
+		* [#24 ](https://git.sloong.com/public/sloongnet/issues/24) 脚本执行插入,修改，删除这类只有影响行数没有返回结果的命令，返回0的问题
 * ### v0.6.4
     * #### 新功能
         * userinfo添加ip和prot信息
