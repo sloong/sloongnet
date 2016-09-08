@@ -168,7 +168,7 @@ void Sloong::SloongWallUS::ProcessEvent(int id, RECVINFO* info, int sock, int nP
 		if (info->strMD5 != rmd5)
 		{
 			// handle error.
-			pEpoll->SendMessage(sock, nPriorityLevel, info->nSwiftNumber, "{\"errno\": \"-1\",\"errmsg\" : \"package check error\"}");
+			pEpoll->SendMessage(sock, nPriorityLevel, info->nSwiftNumber, CUniversal::Format("{\"errno\": \"-1\",\"errmsg\" : \"package check error\",\"server_md5\":\"%s\",\"client_md5\":\"%s\",\"check_string\":\"%s\"}",rmd5,info->strMD5,info->strMessage));
 			return;
 		}
 	}
