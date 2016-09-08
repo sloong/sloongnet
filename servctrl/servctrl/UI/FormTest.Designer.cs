@@ -48,6 +48,8 @@
             this.label6 = new System.Windows.Forms.Label();
             this.buttonUpload = new System.Windows.Forms.Button();
             this.buttonUploadTCP = new System.Windows.Forms.Button();
+            this.label7 = new System.Windows.Forms.Label();
+            this.textBoxLevel = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -246,11 +248,29 @@
             this.buttonUploadTCP.UseVisualStyleBackColor = true;
             this.buttonUploadTCP.Click += new System.EventHandler(this.buttonUploadTCP_Click);
             // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(328, 121);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(41, 12);
+            this.label7.TabIndex = 36;
+            this.label7.Text = "优先级";
+            // 
+            // textBoxLevel
+            // 
+            this.textBoxLevel.Location = new System.Drawing.Point(391, 118);
+            this.textBoxLevel.Name = "textBoxLevel";
+            this.textBoxLevel.Size = new System.Drawing.Size(77, 21);
+            this.textBoxLevel.TabIndex = 35;
+            // 
             // FormTest
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(900, 500);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.textBoxLevel);
             this.Controls.Add(this.buttonUploadTCP);
             this.Controls.Add(this.buttonUpload);
             this.Controls.Add(this.label6);
@@ -302,5 +322,7 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button buttonUpload;
         private System.Windows.Forms.Button buttonUploadTCP;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox textBoxLevel;
     }
 }
