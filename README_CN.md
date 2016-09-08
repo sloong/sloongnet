@@ -18,6 +18,8 @@
    * #### 新功能 
       * [#42 ](https://git.sloong.com/public/sloongnet/issues/42)GetThumbImage返回值问题 
       * [#43 ](https://git.sloong.com/public/sloongnet/issues/42)MD5校验失败后添加相关信息以便定位问题
+   * #### 优化
+      * [#40 ](https://git.sloong.com/public/sloongnet/issues/40)优先级标志位使用char型的数字优先级
 * ### v0.7.5
    * #### 优化
       * [#38 ](https://git.sloong.com/public/sloongnet/issues/38)完善程序异常捕捉
