@@ -112,6 +112,7 @@ int main( int argc, char** args )
 			else if (strCmd != "-rd")
 			{
 				CCmdProcess::Parser(strCmd);
+				return 0;
 			}
 		}
 
