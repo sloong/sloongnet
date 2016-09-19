@@ -103,7 +103,7 @@
 * 安装所需要的依赖包
 
 ```
-yum install -y gcc gcc-c++ glib2 glib2-devel libuuid libuuid-devel mariadb mariadb-devel openssl-devel ImageMagick GraphicsMagick boost-devel readline-devel    
+yum install -y gcc gcc-c++ glib2 glib2-devel libuuid libuuid-devel mariadb mariadb-devel openssl-devel ImageMagick GraphicsMagick boost-devel readline-devel libjpeb-devel    
 git clone https://git.sloong.com/public/library.git    
 cd library/
 ./install.sh
