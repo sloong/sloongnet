@@ -101,20 +101,20 @@
 
 ## 如何编译
 * 安装所需要的依赖包
+
 ```
-yum install -y gcc gcc-c++ glib2 glib2-devel libuuid libuuid-devel mariadb mariadb-devel openssl-devel ImageMagick GraphicsMagick
-git clone http://git.sloong.com:3333/public/library.git  
-cd library/lua
-make linux
-make install
-cd ../univ
-make update
+yum install -y gcc gcc-c++ glib2 glib2-devel libuuid libuuid-devel mariadb mariadb-devel openssl-devel ImageMagick GraphicsMagick boost-devel readline-devel    
+git clone https://git.sloong.com/public/library.git    
+cd library/
+./install.sh
 ```
+
 * 开始编译
+
 ```
-git clone http://git.sloong.com:3333/public/sloongnet.git
-cd sloongnet
-make
+git clone https://git.sloong.com/public/sloongnet.git    
+cd sloongnet    
+./install.sh    
 ```
 
 
