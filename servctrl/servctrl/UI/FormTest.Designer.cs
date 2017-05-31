@@ -50,6 +50,7 @@
             this.buttonUploadTCP = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
             this.textBoxLevel = new System.Windows.Forms.TextBox();
+            this.checkBoxEnableZip = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -264,11 +265,24 @@
             this.textBoxLevel.Size = new System.Drawing.Size(77, 21);
             this.textBoxLevel.TabIndex = 35;
             // 
+            // checkBoxEnableZip
+            // 
+            this.checkBoxEnableZip.AutoSize = true;
+            this.checkBoxEnableZip.Checked = true;
+            this.checkBoxEnableZip.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxEnableZip.Location = new System.Drawing.Point(688, 120);
+            this.checkBoxEnableZip.Name = "checkBoxEnableZip";
+            this.checkBoxEnableZip.Size = new System.Drawing.Size(66, 16);
+            this.checkBoxEnableZip.TabIndex = 37;
+            this.checkBoxEnableZip.Text = "启用Zip";
+            this.checkBoxEnableZip.UseVisualStyleBackColor = true;
+            // 
             // FormTest
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(900, 500);
+            this.Controls.Add(this.checkBoxEnableZip);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.textBoxLevel);
             this.Controls.Add(this.buttonUploadTCP);
@@ -324,5 +338,6 @@
         private System.Windows.Forms.Button buttonUploadTCP;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox textBoxLevel;
+        private System.Windows.Forms.CheckBox checkBoxEnableZip;
     }
 }

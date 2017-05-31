@@ -42,6 +42,8 @@ LuaFunctionRegistr g_LuaFunc[] =
 	{ "GenUUID", CGlobalFunction::Lua_GenUUID },
     { "GetSQLError", CGlobalFunction::Lua_getSqlError},
 	{ "ReceiveFile", CGlobalFunction::Lua_ReceiveFile},
+	{ "SetCommData", CGlobalFunction::Lua_SetCommData},
+	{ "GetCommData", CGlobalFunction::Lua_GetCommData },
 };
 
 CGlobalFunction::CGlobalFunction()
@@ -518,3 +520,12 @@ int CGlobalFunction::Lua_showLog(lua_State* l)
 }
 
 
+int CGlobalFunction::Lua_SetCommData(lua_State* l)
+{
+	
+}
+
+int CGlobalFunction::Lua_GetCommData(lua_State* l)
+{
+
+}

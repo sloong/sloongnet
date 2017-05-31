@@ -731,5 +731,88 @@ namespace Sloong
             fs.Dispose();
             fs.Close();
         }
+
+        /// <summary>  
+        /// 字符串压缩  
+        /// </summary>  
+        /// <param name="strSource"></param>  
+        /// <returns></returns>  
+        public static byte[] Compress(byte[] data)
+        {
+            try
+            {
+                MemoryStream ms = new MemoryStream();
+                System.IO.Compression.GZipStream zip = new System.IO.Compression.GZipStream(ms, System.IO.Compression.CompressionMode.Compress, true);
+                zip.Write(data, 0, data.Length);
+                zip.Close();
+                byte[] buffer = new byte[ms.Length];
+                ms.Position = 0;
+                ms.Read(buffer, 0, buffer.Length);
+                ms.Close();
+                return buffer;
+
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        /// <summary>  
+        /// 字符串解压缩  
+        /// </summary>  
+        /// <param name="strSource"></param>  
+        /// <returns></returns>  
+        public static byte[] Decompress(byte[] data)
+        {
+            try
+            {
+                MemoryStream ms = new MemoryStream(data);
+                System.IO.Compression.GZipStream zip = new System.IO.Compression.GZipStream(ms, System.IO.Compression.CompressionMode.Decompress, true);
+                MemoryStream msreader = new MemoryStream();
+                byte[] buffer = new byte[0x1000];
+                while (true)
+                {
+                    int reader = zip.Read(buffer, 0, buffer.Length);
+                    if (reader <= 0)
+                    {
+                        break;
+                    }
+                    msreader.Write(buffer, 0, reader);
+                }
+                zip.Close();
+                ms.Close();
+                msreader.Position = 0;
+                buffer = msreader.ToArray();
+                msreader.Close();
+                return buffer;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public static string CompressString(string str,Encoding enc = null)
+        {
+            if (enc == null)
+                enc = Encoding.ASCII;
+            string compressString = "";
+            byte[] compressBeforeByte = enc.GetBytes(str);
+            byte[] compressAfterByte = Compress(compressBeforeByte);
+            compressString = enc.GetString(compressAfterByte);
+            return compressString;
+        }
+
+        public static string DecompressString(string str,Encoding enc = null)
+        {
+            if (enc == null)
+                enc = Encoding.ASCII;
+            string compressString = "";
+            byte[] compressBeforeByte = enc.GetBytes(str);
+            byte[] compressAfterByte = Decompress(compressBeforeByte);
+            compressString = enc.GetString(compressAfterByte);
+            return compressString;
+        }
     }
 }
