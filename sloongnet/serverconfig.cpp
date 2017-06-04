@@ -68,7 +68,8 @@ bool CServerConfig::Initialize(string path)
 
 CServerConfig::~CServerConfig()
 {
-	g_key_file_free(m_pFile);
+	if( m_pFile != NULL )
+		g_key_file_free(m_pFile);
 }
 
 string Sloong::CServerConfig::GetStringConfig(string strSection, string strKey, string strDef, bool bThrowWhenFialed /*= false */)
@@ -78,6 +79,11 @@ string Sloong::CServerConfig::GetStringConfig(string strSection, string strKey, 
 
 	if (strSection == "" || strKey == "")
 		throw normal_except("Param empty.");
+
+	if (!g_key_file_has_key(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), NULL))
+	{
+		return strDef;
+	}
 
 	string strRes;
 
@@ -99,6 +105,11 @@ bool Sloong::CServerConfig::GetBoolenConfig(string strSection, string strKey, bo
 	if (g_pThis == NULL || g_pThis->m_pFile == NULL)
 		throw normal_except("Config object no initialize");
 
+	if (!g_key_file_has_key(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), NULL))
+	{
+		return bDef;
+	}
+
 	bool bRes;
 
 	// load connect info
@@ -118,6 +129,11 @@ int Sloong::CServerConfig::GetIntConfig(string strSection, string strKey, int& n
 {
 	if (g_pThis == NULL|| g_pThis->m_pFile == NULL)
 		throw normal_except("Config object no initialize");
+
+	if (!g_key_file_has_key(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), NULL))
+	{
+		return nDef;
+	}
 
 	int nRes;
 	
