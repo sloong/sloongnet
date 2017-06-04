@@ -87,7 +87,7 @@ int main( int argc, char** args )
 				{
 					try
 					{
-						if ( argc >= 3 )
+						if ( argc > 3 )
 							config.Initialize(args[2],args[3]);
 						else
 							config.Initialize(args[2]);

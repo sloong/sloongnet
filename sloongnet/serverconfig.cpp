@@ -14,6 +14,7 @@ CServerConfig::CServerConfig()
 	m_pErr = NULL;
 	m_pFile = NULL;
 	m_pExFile = NULL;
+	m_bExConfig = false;
 
 	// DB init
 	m_oConnectInfo.Enable = false;
@@ -103,7 +104,9 @@ string Sloong::CServerConfig::GetStringConfig(string strSection, string strKey, 
 		throw normal_except("Param empty.");
 
 	bool bHas = g_key_file_has_key(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), NULL);
-	bool bExHas = g_key_file_has_key(g_pThis->m_pExFile, strSection.c_str(), strKey.c_str(), NULL);
+	bool bExHas = false;
+	if(g_pThis->m_bExConfig )
+		bExHas = g_key_file_has_key(g_pThis->m_pExFile, strSection.c_str(), strKey.c_str(), NULL);
 	if (!bHas && !bExHas)
 	{
 		return strDef;
@@ -134,7 +137,9 @@ bool Sloong::CServerConfig::GetBoolenConfig(string strSection, string strKey, bo
 		throw normal_except("Config object no initialize");
 
 	bool bHas = g_key_file_has_key(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), NULL);
-	bool bExHas = g_key_file_has_key(g_pThis->m_pExFile, strSection.c_str(), strKey.c_str(), NULL);
+	bool bExHas = false;
+	if (g_pThis->m_bExConfig)
+		bExHas = g_key_file_has_key(g_pThis->m_pExFile, strSection.c_str(), strKey.c_str(), NULL);
 	if (!bHas && !bExHas)
 	{
 		return bDef;
@@ -165,7 +170,9 @@ int Sloong::CServerConfig::GetIntConfig(string strSection, string strKey, int& n
 		throw normal_except("Config object no initialize");
 
 	bool bHas = g_key_file_has_key(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), NULL);
-	bool bExHas = g_key_file_has_key(g_pThis->m_pExFile, strSection.c_str(), strKey.c_str(), NULL);
+	bool bExHas = false;
+	if (g_pThis->m_bExConfig)
+		bExHas = g_key_file_has_key(g_pThis->m_pExFile, strSection.c_str(), strKey.c_str(), NULL);
 	if (!bHas && !bExHas)
 	{
 		return nDef;
