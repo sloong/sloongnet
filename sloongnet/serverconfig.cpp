@@ -13,6 +13,7 @@ CServerConfig::CServerConfig()
 
 	m_pErr = NULL;
 	m_pFile = NULL;
+	m_pExFile = NULL;
 
 	// DB init
 	m_oConnectInfo.Enable = false;
@@ -37,7 +38,7 @@ CServerConfig::CServerConfig()
 	m_nTimeoutInterval = 5;
 
 	// Path
-	m_strLogPath = "./log.log";
+	m_strLogPath = "./sloongnet.log";
 
 	// Log config init
 	m_bShowSQLCmd = false;
@@ -47,14 +48,21 @@ CServerConfig::CServerConfig()
 	m_bLogWriteToOneFile = false;
 }
 
-bool CServerConfig::Initialize(string path)
+bool CServerConfig::Initialize(string path, string exConfig)
 {
 	m_strConfigPath = path;
-	if (0 != access(path.c_str(), ACC_R))
+	m_strExConfigPath = exConfig;
+	if (exConfig != "")
+		m_bExConfig = true;
+
+	if (0 != access(m_strConfigPath.c_str(), ACC_R))
 		return false;
+	if (m_bExConfig && 0 != access(m_strExConfigPath.c_str(), ACC_R))
+		throw normal_except("cannot read the exConfig file:" + exConfig);
+		//return false;
 
 	m_pFile = g_key_file_new();
-	g_key_file_load_from_file(m_pFile, path.c_str(), G_KEY_FILE_NONE, &m_pErr);
+	g_key_file_load_from_file(m_pFile, m_strConfigPath.c_str(), G_KEY_FILE_NONE, &m_pErr);
 	if (m_pErr)
 	{
 		string strErr = m_pErr->message;
@@ -62,6 +70,18 @@ bool CServerConfig::Initialize(string path)
 		throw normal_except(strErr);
 	}
 
+	if (m_bExConfig)
+	{
+		m_pExFile = g_key_file_new();
+		g_key_file_load_from_file(m_pExFile, m_strExConfigPath.c_str(), G_KEY_FILE_NONE, &m_pErr);
+	}
+	
+	if (m_pErr)
+	{
+		string strErr = m_pErr->message;
+		g_error_free(m_pErr);
+		throw normal_except(strErr);
+	}
 	return true;
 }
 
@@ -70,6 +90,8 @@ CServerConfig::~CServerConfig()
 {
 	if( m_pFile != NULL )
 		g_key_file_free(m_pFile);
+	if( m_pExFile != NULL )
+		g_key_file_free(m_pExFile);
 }
 
 string Sloong::CServerConfig::GetStringConfig(string strSection, string strKey, string strDef, bool bThrowWhenFialed /*= false */)
@@ -80,18 +102,24 @@ string Sloong::CServerConfig::GetStringConfig(string strSection, string strKey, 
 	if (strSection == "" || strKey == "")
 		throw normal_except("Param empty.");
 
-	if (!g_key_file_has_key(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), NULL))
+	bool bHas = g_key_file_has_key(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), NULL);
+	bool bExHas = g_key_file_has_key(g_pThis->m_pExFile, strSection.c_str(), strKey.c_str(), NULL);
+	if (!bHas && !bExHas)
 	{
 		return strDef;
 	}
 
 	string strRes;
+	if (bExHas)
+		strRes = g_key_file_get_string(g_pThis->m_pExFile, strSection.c_str(), strKey.c_str(), &g_pThis->m_pErr);
+	else
+		strRes = g_key_file_get_string(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), &g_pThis->m_pErr);
 
-	// load connect info
-	strRes = g_key_file_get_string(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), &g_pThis->m_pErr);
 	if (g_pThis->m_pErr)
 	{
-		if (bThrowWhenFialed)
+		if (bThrowWhenFialed && bExHas )
+			throw normal_except(CUniversal::Format("Load config error.Message:[%s].Path:[%s].Section:[%s].Key:[%s].", g_pThis->m_pErr->message, g_pThis->m_strExConfigPath, strSection, strKey));
+		else if(bThrowWhenFialed)
 			throw normal_except(CUniversal::Format("Load config error.Message:[%s].Path:[%s].Section:[%s].Key:[%s].", g_pThis->m_pErr->message, g_pThis->m_strConfigPath, strSection, strKey));
 		else
 			strRes = strDef;
@@ -105,18 +133,24 @@ bool Sloong::CServerConfig::GetBoolenConfig(string strSection, string strKey, bo
 	if (g_pThis == NULL || g_pThis->m_pFile == NULL)
 		throw normal_except("Config object no initialize");
 
-	if (!g_key_file_has_key(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), NULL))
+	bool bHas = g_key_file_has_key(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), NULL);
+	bool bExHas = g_key_file_has_key(g_pThis->m_pExFile, strSection.c_str(), strKey.c_str(), NULL);
+	if (!bHas && !bExHas)
 	{
 		return bDef;
 	}
 
 	bool bRes;
 
-	// load connect info
-	bRes = g_key_file_get_boolean(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), &g_pThis->m_pErr);
+	if (bExHas)
+		bRes = g_key_file_get_boolean(g_pThis->m_pExFile, strSection.c_str(), strKey.c_str(), &g_pThis->m_pErr);
+	else
+		bRes = g_key_file_get_boolean(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), &g_pThis->m_pErr);
 	if (g_pThis->m_pErr)
 	{
-		if (bThrowWhenFialed)
+		if (bThrowWhenFialed && bExHas)
+			throw normal_except(CUniversal::Format("Load config error.Message:[%s].Path:[%s].Section:[%s].Key:[%s].", g_pThis->m_pErr->message, g_pThis->m_strExConfigPath, strSection, strKey));
+		else if (bThrowWhenFialed)
 			throw normal_except(CUniversal::Format("Load config error.Message:[%s].Path:[%s].Section:[%s].Key:[%s].", g_pThis->m_pErr->message, g_pThis->m_strConfigPath, strSection, strKey));
 		else
 			bRes = bDef;
@@ -130,18 +164,23 @@ int Sloong::CServerConfig::GetIntConfig(string strSection, string strKey, int& n
 	if (g_pThis == NULL|| g_pThis->m_pFile == NULL)
 		throw normal_except("Config object no initialize");
 
-	if (!g_key_file_has_key(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), NULL))
+	bool bHas = g_key_file_has_key(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), NULL);
+	bool bExHas = g_key_file_has_key(g_pThis->m_pExFile, strSection.c_str(), strKey.c_str(), NULL);
+	if (!bHas && !bExHas)
 	{
 		return nDef;
 	}
 
 	int nRes;
-	
-	// load connect info
-	nRes = g_key_file_get_integer(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), &g_pThis->m_pErr);
+	if (bExHas)
+		nRes = g_key_file_get_integer(g_pThis->m_pExFile, strSection.c_str(), strKey.c_str(), &g_pThis->m_pErr);
+	else
+		nRes = g_key_file_get_integer(g_pThis->m_pFile, strSection.c_str(), strKey.c_str(), &g_pThis->m_pErr);
 	if (g_pThis->m_pErr)
 	{
-		if (bThrowWhenFialed)
+		if (bThrowWhenFialed && bExHas)
+			throw normal_except(CUniversal::Format("Load config error.Message:[%s].Path:[%s].Section:[%s].Key:[%s].", g_pThis->m_pErr->message, g_pThis->m_strExConfigPath, strSection, strKey));
+		else if (bThrowWhenFialed)
 			throw normal_except(CUniversal::Format("Load config error.Message:[%s].Path:[%s].Section:[%s].Key:[%s].", g_pThis->m_pErr->message, g_pThis->m_strConfigPath, strSection, strKey));
 		else
 			nRes = nDef;

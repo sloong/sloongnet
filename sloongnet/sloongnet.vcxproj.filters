@@ -48,6 +48,7 @@
     <None Include="scripts\sql.lua">
       <Filter>scripts</Filter>
     </None>
+    <None Include="ex.conf" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="epollex.h">

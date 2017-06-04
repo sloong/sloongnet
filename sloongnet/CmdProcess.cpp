@@ -14,7 +14,7 @@ void Sloong::CCmdProcess::Parser(string strCmd)
 	else 
 	{
 		cout << "-v/--v/version: show the version info." << endl;
-		cout << "-r/--r/run [filepath] : run with the config file." << endl;
+		cout << "-r/--r/run [filepath] [ex config file path] : run with the config file." << endl;
 		cout << "-rd : run with default config." << endl;
 		return;
 	}

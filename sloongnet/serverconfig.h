@@ -13,7 +13,7 @@ namespace Sloong
 		CServerConfig();
 		~CServerConfig();
 
-		bool Initialize(string path);
+		bool Initialize(string path, string exConfig="");
 		void LoadConfig();
 
 	public: 
@@ -26,7 +26,10 @@ namespace Sloong
 	private:
 		GError* m_pErr;
 		GKeyFile* m_pFile;
+		GKeyFile* m_pExFile;
 		string m_strConfigPath;
+		string m_strExConfigPath;
+		bool m_bExConfig;
 	public:
 		// DB config
 		MySQLConnectInfo m_oConnectInfo;

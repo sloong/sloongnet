@@ -87,7 +87,10 @@ int main( int argc, char** args )
 				{
 					try
 					{
-						config.Initialize(args[2]);
+						if ( argc >= 3 )
+							config.Initialize(args[2],args[3]);
+						else
+							config.Initialize(args[2]);
 						config.LoadConfig();
 					}
 					catch (normal_except& e)
@@ -103,9 +106,9 @@ int main( int argc, char** args )
 				else
 				{
 					if (access(args[2], ACC_E) == 0)
-						cerr << "cannot read file. file path is : " << args[2] << endl;
+						cerr << "cannot read config file. file path is : " << args[2] << endl;
 					else
-						cerr << "file not exist. file path is : " << args[2] << endl;
+						cerr << "config file not exist. file path is : " << args[2] << endl;
 					return -1;
 				}
 			}

@@ -65,6 +65,7 @@
   <ItemGroup>
     <None Include="default.conf" />
     <None Include="debug.mak" />
+    <None Include="ex.conf" />
     <None Include="Makefile_VGDB" />
     <None Include="release.mak" />
     <None Include="scripts\comm.lua" />
