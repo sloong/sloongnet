@@ -23,10 +23,11 @@ namespace Sloong
 		void CloseSocket(int id, CLuaPacket* pUInfo);
 		int NewThreadInit();
 		void InitLua(CLua* pLua, string folder);
+		static void HandleError(string err);
 
 	protected:
 		vector<CLua*>	m_pLuaList;
-		CLog*			m_pLog;
+		static CLog*	m_pLog;
 		CGlobalFunction*	m_pGFunc;
         mutex           m_luaMutex;
 		LuaScriptConfigInfo* m_pLuaConfig;

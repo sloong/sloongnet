@@ -203,7 +203,6 @@ int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
 
 void Sloong::CGlobalFunction::InitLua(CLua* pLua)
 {
-	pLua->SetErrorHandle(CGlobalFunction::HandleError);
 	vector<LuaFunctionRegistr> funcList(g_LuaFunc, g_LuaFunc + ARRAYSIZE(g_LuaFunc));
 	pLua->AddFunctions(&funcList);
 }
@@ -497,11 +496,6 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 		CLua::PushString(l, ex.what());
 		return 3;
 	}
-}
-
-void CGlobalFunction::HandleError(string err)
-{
-	g_pThis->m_pLog->Log(err, ERR, -2);
 }
 
 int CGlobalFunction::Lua_showLog(lua_State* l)

@@ -76,7 +76,17 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
     auto pid = this_thread::get_id();
     string spid = CUniversal::ntos(pid);
     log->Log("Event process thread is running." + spid);
-	int id = pThis->m_pMsgProc->NewThreadInit();
+	int id = -1;
+	try
+	{
+		id = pThis->m_pMsgProc->NewThreadInit();
+	}
+	catch (exception& e)
+	{
+		log->Log("Exception happened in start message process thread. info:[" + string(e.what()) + "]");
+		throw e;
+	}
+	
     unique_lock<mutex> lck(pThis->m_oEventMutex);
 	while (pThis->m_bIsRunning)
 	{

@@ -33,7 +33,7 @@ namespace Sloong
 		CLog*	m_pLog;
 		
 	public:
-		static void HandleError(string err);
+
 
 		static int Lua_showLog(lua_State* l);
 		static int Lua_querySql(lua_State* l);

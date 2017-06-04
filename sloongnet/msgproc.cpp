@@ -7,6 +7,9 @@
 #include "utility.h"
 #include <univ/exception.h>
 #include "structs.h"
+
+CLog* CMsgProc::m_pLog = NULL;
+
 CMsgProc::CMsgProc()
 {
     m_pGFunc = new CGlobalFunction();
@@ -31,7 +34,10 @@ void CMsgProc::Initialize(CLog *pLog, MySQLConnectInfo* mysqlinfo, LuaScriptConf
 
 void CMsgProc::InitLua(CLua* pLua, string path)
 {
-	pLua->RunScript(m_pLuaConfig->EntryFile);
+	if (!pLua->RunScript(m_pLuaConfig->EntryFile))
+	{
+		throw normal_except("Run Script Fialed.");
+	}
     // get current path
     char szDir[MAX_PATH] = {0};
 
@@ -86,9 +92,15 @@ void Sloong::CMsgProc::CloseSocket(int id, CLuaPacket* pUInfo)
 	pLua->RunFunction(m_pLuaConfig->SocketCloseFunction, pUInfo);
 }
 
+void Sloong::CMsgProc::HandleError(string err)
+{
+	m_pLog->Log(err, ERR, -2);
+}
+
 int Sloong::CMsgProc::NewThreadInit()
 {
 	CLua* pLua = new CLua();
+	pLua->SetErrorHandle(HandleError);
 	pLua->SetScriptFolder(m_pLuaConfig->ScriptFolder);
 	m_pGFunc->InitLua(pLua);
 	InitLua(pLua, m_pLuaConfig->ScriptFolder);

@@ -5,6 +5,9 @@
 	It is needed for IntelliSense to parse other header files correctly.
 */
 #if defined(_MSC_VER) || defined (__SYSPROGS_CODESENSE__)
+#pragma clang diagnostic push
+
+#pragma clang diagnostic ignored "-Wreserved-id-macro"
 #ifndef __DBL_MIN_EXP__
 #define __DBL_MIN_EXP__ (-1021)
 #endif
@@ -238,6 +241,7 @@
 #endif
 //VS2005-2012 treats all files as C++, while VS2013+ can treat C files correctly.
 #if defined(_MSC_VER) && (_MSC_VER < 1800 || defined(__cplusplus))
+#undef __cplusplus
 #define __cplusplus 201103L
 #endif
 #ifndef __DEC128_MAX__
@@ -735,3 +739,4 @@
 ///usr/lib/gcc/x86_64-redhat-linux/4.8.5/:/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../:/lib/:/usr/lib/
 // --- Library directories begin --- //
 
+#pragma clang diagnostic pop
