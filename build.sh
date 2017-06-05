@@ -14,7 +14,7 @@ build(){
 	make clean
 	make $MAKEFLAG
 	cd ..
-	rm -rdf OUTPATH
+	rm -rdf $OUTPATH
 	mkdir -p $OUTPATH
 	cp -f $TARGPATH/sloongnet $OUTPATH/sloongnet
 	cp -rf scripts $OUTPATH/scripts
