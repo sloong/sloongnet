@@ -7,6 +7,7 @@ using namespace std;
 #include <boost/algorithm/string.hpp>
 #include <univ/log.h>
 #include <univ/univ.h>
+#include <univ/MD5.h>
 #include <univ/threadpool.h>
 using namespace Sloong;
 using namespace Sloong::Universal;
@@ -172,7 +173,7 @@ void Sloong::SloongWallUS::ProcessEvent(int id, RECVINFO* info, int sock, int nP
 {
 	if (m_pConfig->m_bEnableMD5Check)
 	{
-		string rmd5 = CUniversal::MD5_Encoding(info->strMessage);
+		string rmd5 = CMD5::Encoding(info->strMessage);
 		CUniversal::touper(info->strMD5);
 		CUniversal::touper(rmd5);
 		if (info->strMD5 != rmd5)

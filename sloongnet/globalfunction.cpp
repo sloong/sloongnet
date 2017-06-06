@@ -11,6 +11,8 @@ using namespace Sloong::Universal;
 #define cimg_display 0
 #include "CImg.h"
 #include "univ/exception.h"
+#include <univ/Base64.h>
+#include <univ/MD5.h>
 #include <mutex>
 #include "version.h"
 #include "serverconfig.h"
@@ -215,21 +217,23 @@ int Sloong::CGlobalFunction::Lua_getEngineVer(lua_State* l)
 
 int Sloong::CGlobalFunction::Lua_Base64_Encode(lua_State* l)
 {
-	string res = CUniversal::Base64_Encoding(CLua::GetStringArgument(l, 1, ""));
+    string req = CLua::GetStringArgument(l, 1, "");
+    string res = CBase64::Encoding((const unsigned char*)req.c_str(),req.length());
 	CLua::PushString(l, res);
 	return 1;
 }
 
 int Sloong::CGlobalFunction::Lua_Base64_Decode(lua_State* l)
 {
-	string res = CUniversal::Base64_Decoding(CLua::GetStringArgument(l, 1, ""));
+    string req = CLua::GetStringArgument(l, 1, "");
+    string res = CBase64::Decoding(req);
 	CLua::PushString(l, res);
 	return 1;
 }
 
 int Sloong::CGlobalFunction::Lua_MD5_Encode(lua_State* l)
 {
-	string res = CUniversal::MD5_Encoding(CLua::GetStringArgument(l, 1, ""));
+    string res = CMD5::Encoding(CLua::GetStringArgument(l, 1, ""));
 	CLua::PushString(l, res);
 	return 1;
 }
@@ -460,7 +464,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			of.write(pBuf, nRecvLen);
 			of.close();
 			// check md5
-			string md5 = CUniversal::MD5_Encoding(temp_file_path.c_str(), true);
+            string md5 = CMD5::Encoding(temp_file_path, true);
 		    CUniversal::tolower(md5);
 			if (fileList.count(md5) == 0 )
 			{

@@ -130,6 +130,11 @@ int main( int argc, char** args )
 		cout << "exception happened, system will shutdown. message:" << e.what() << endl;
 		write_call_stack();
 	}
+	catch(normal_except& e)
+    {
+        cout << "exception happened, system will shutdown. message:" << e.what() << endl;
+        write_call_stack();
+    }
 	catch (...)
 	{
 		cout << "Unhandle exception happened, system will shutdown. "<< endl;

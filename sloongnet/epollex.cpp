@@ -13,6 +13,7 @@
 #include <univ/univ.h>
 #include <univ/threadpool.h>
 #include <univ/exception.h>
+#include <univ/MD5.h>
 #include "progressbar.h"
 #define MAXRECVBUF 4096
 #define MAXBUF MAXRECVBUF+10
@@ -189,7 +190,7 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
     }
     if (m_bMD5Support)
     {
-        md5 = CUniversal::MD5_Encoding(msg);
+        md5 = CMD5::Encoding(msg);
         nBufLen += md5.length();
     }
     // in here, the exdata size no should include the buffer length,
