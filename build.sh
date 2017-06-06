@@ -5,7 +5,8 @@ show_help(){
 }
 
 # default value is release
-OUTPATH=output/release
+VERSION_STR=$(cat version)
+OUTPATH=sloongnet_v$VERSION_STR
 TARGPATH=sloongnet
 MAKEFLAG=release
 
@@ -23,13 +24,12 @@ build(){
 }
 
 build_debug(){
-	OUTPATH=output/debug
+	OUTPATH=sloongnet_debug_v$VERSION_STR
 	MAKEFLAG=debug
 	build
 }
 
 zip(){
-	VERSION_STR=$(cat version)
 	tar -czf sloongnet_v$VERSION_STR.tar.gz $OUTPATH/*
 }
 
