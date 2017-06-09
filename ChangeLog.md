@@ -1,87 +1,87 @@
-# ¸üĞÂÀúÊ·
+# æ›´æ–°å†å²
 ***
 
 ### v0.7.6
-#### ĞÂÔöÌØĞÔ 
-* [#42 ](https://git.sloong.com/public/sloongnet/issues/42)GetThumbImage·µ»ØÖµÎÊÌâ 
-* [#43 ](https://git.sloong.com/public/sloongnet/issues/42)MD5Ğ£ÑéÊ§°ÜºóÌí¼ÓÏà¹ØĞÅÏ¢ÒÔ±ã¶¨Î»ÎÊÌâ
-#### ¹¦ÄÜ¸Ä½ø
-* [#40 ](https://git.sloong.com/public/sloongnet/issues/40)ÓÅÏÈ¼¶±êÖ¾Î»Ê¹ÓÃcharĞÍµÄÊı×ÖÓÅÏÈ¼¶
+#### æ–°å¢ç‰¹æ€§ 
+* [#42 ](https://git.sloong.com/public/sloongnet/issues/42)GetThumbImageè¿”å›å€¼é—®é¢˜ 
+* [#43 ](https://git.sloong.com/public/sloongnet/issues/42)MD5æ ¡éªŒå¤±è´¥åæ·»åŠ ç›¸å…³ä¿¡æ¯ä»¥ä¾¿å®šä½é—®é¢˜
+#### åŠŸèƒ½æ”¹è¿›
+* [#40 ](https://git.sloong.com/public/sloongnet/issues/40)ä¼˜å…ˆçº§æ ‡å¿—ä½ä½¿ç”¨charå‹çš„æ•°å­—ä¼˜å…ˆçº§
 ### v0.7.5
-#### ¹¦ÄÜ¸Ä½ø
-* [#38 ](https://git.sloong.com/public/sloongnet/issues/38)ÍêÉÆ³ÌĞòÒì³£²¶×½
-#### BUGĞŞ¸´
-* [#39 ](https://git.sloong.com/public/sloongnet/issues/39)GetThumbImage·µ»ØÖµÎÊÌâ
+#### åŠŸèƒ½æ”¹è¿›
+* [#38 ](https://git.sloong.com/public/sloongnet/issues/38)å®Œå–„ç¨‹åºå¼‚å¸¸æ•æ‰
+#### BUGä¿®å¤
+* [#39 ](https://git.sloong.com/public/sloongnet/issues/39)GetThumbImageè¿”å›å€¼é—®é¢˜
 ### v0.7.4
-#### ĞÂÔöÌØĞÔ
-* [#20 ](https://git.sloong.com/public/sloongnet/issues/20)¹Ø±ÕÁ¬½ÓÊ±Í¨Öª½Å±¾
+#### æ–°å¢ç‰¹æ€§
+* [#20 ](https://git.sloong.com/public/sloongnet/issues/20)å…³é—­è¿æ¥æ—¶é€šçŸ¥è„šæœ¬
 ### v0.7.3
-#### ĞÂÔöÌØĞÔ
-* [#37 ](https://git.sloong.com/public/sloongnet/issues/37)½ÓÊÕÎÄ¼ş½Ó¿Úº¯Êı·µ»ØÖµÖ§³ÖÖ¸Ê¾³É¹¦ÎÄ¼şÊıÁ¿ÒÔ¼°mdÁĞ±íÒÔ¼°´íÎóĞÅÏ¢
+#### æ–°å¢ç‰¹æ€§
+* [#37 ](https://git.sloong.com/public/sloongnet/issues/37)æ¥æ”¶æ–‡ä»¶æ¥å£å‡½æ•°è¿”å›å€¼æ”¯æŒæŒ‡ç¤ºæˆåŠŸæ–‡ä»¶æ•°é‡ä»¥åŠmdåˆ—è¡¨ä»¥åŠé”™è¯¯ä¿¡æ¯
 ### v0.7.2
-#### ĞÂÔöÌØĞÔ
-* [#31 ](https://git.sloong.com/public/sloongnet/issues/31)»ñÈ¡ËõÂÊÍ¼½Ó¿Úº¯ÊıÖ§³Ö×Ô¶¨ÒåÂ·¾¶
-* [#35 ](https://git.sloong.com/public/sloongnet/issues/35)½ÓÊÕÎÄ¼ş½Ó¿Úº¯Êı·µ»ØÖµÖ§³ÖÖ¸Ê¾³É¹¦ÎÄ¼şÊıÁ¿ÒÔ¼°´íÎóĞÅÏ¢
-#### BUGĞŞ¸´
-* [#36 ](https://git.sloong.com/public/sloongnet/issues/36)ReceiveFile½Ó¿ÚÎÊÌâ
+#### æ–°å¢ç‰¹æ€§
+* [#31 ](https://git.sloong.com/public/sloongnet/issues/31)è·å–ç¼©ç‡å›¾æ¥å£å‡½æ•°æ”¯æŒè‡ªå®šä¹‰è·¯å¾„
+* [#35 ](https://git.sloong.com/public/sloongnet/issues/35)æ¥æ”¶æ–‡ä»¶æ¥å£å‡½æ•°è¿”å›å€¼æ”¯æŒæŒ‡ç¤ºæˆåŠŸæ–‡ä»¶æ•°é‡ä»¥åŠé”™è¯¯ä¿¡æ¯
+#### BUGä¿®å¤
+* [#36 ](https://git.sloong.com/public/sloongnet/issues/36)ReceiveFileæ¥å£é—®é¢˜
 ### v0.7.1
-#### ĞÂÔöÌØĞÔ
-* [#30 ](https://git.sloong.com/public/sloongnet/issues/30)Ìí¼Ó¶àÎÄ¼ş½ÓÊÕ¹¦ÄÜ
-#### BUGĞŞ¸´
-* [#32 ](https://git.sloong.com/public/sloongnet/issues/32)ÆôÓÃ³¬Ê±¼ì²âºóÒì³£±ÀÀ£ÎÊÌâ
+#### æ–°å¢ç‰¹æ€§
+* [#30 ](https://git.sloong.com/public/sloongnet/issues/30)æ·»åŠ å¤šæ–‡ä»¶æ¥æ”¶åŠŸèƒ½
+#### BUGä¿®å¤
+* [#32 ](https://git.sloong.com/public/sloongnet/issues/32)å¯ç”¨è¶…æ—¶æ£€æµ‹åå¼‚å¸¸å´©æºƒé—®é¢˜
 ### v0.7.0
-#### ĞÂÔöÌØĞÔ 
-* [#28 ](https://git.sloong.com/public/sloongnet/issues/28)Ìí¼ÓÎÄ¼ş½ÓÊÕ£¨TCP£©¹¦ÄÜ
-#### BUGĞŞ¸´
-* [#33 ](https://git.sloong.com/public/sloongnet/issues/33)ÇëÇóÍ¼Æ¬ÎÄ¼şÊ±·¢ËÍÒì³£ÎÊÌâ 
+#### æ–°å¢ç‰¹æ€§ 
+* [#28 ](https://git.sloong.com/public/sloongnet/issues/28)æ·»åŠ æ–‡ä»¶æ¥æ”¶ï¼ˆTCPï¼‰åŠŸèƒ½
+#### BUGä¿®å¤
+* [#33 ](https://git.sloong.com/public/sloongnet/issues/33)è¯·æ±‚å›¾ç‰‡æ–‡ä»¶æ—¶å‘é€å¼‚å¸¸é—®é¢˜ 
 ### v0.6.8
-#### ¹¦ÄÜ¸Ä½ø
-* ÅäÖÃÎÄ¼şÖĞµÄRunTypeĞŞ¸ÄÎªDebugMode
+#### åŠŸèƒ½æ”¹è¿›
+* é…ç½®æ–‡ä»¶ä¸­çš„RunTypeä¿®æ”¹ä¸ºDebugMode
 ### v0.6.7
-#### BUGĞŞ¸´
-* [#26 ](https://git.sloong.com/public/sloongnet/issues/26)·şÎñÄ£Ê½ÏÂÔËĞĞ£¬logÎÄ¼ş±»Ğ´ÈëÁË´óÁ¿µÄ°ïÖúĞÅÏ¢
-* [#27 ](https://git.sloong.com/public/sloongnet/issues/27)logÅäÖÃ²»ÉúĞ§µÄÎÊÌâ
+#### BUGä¿®å¤
+* [#26 ](https://git.sloong.com/public/sloongnet/issues/26)æœåŠ¡æ¨¡å¼ä¸‹è¿è¡Œï¼Œlogæ–‡ä»¶è¢«å†™å…¥äº†å¤§é‡çš„å¸®åŠ©ä¿¡æ¯
+* [#27 ](https://git.sloong.com/public/sloongnet/issues/27)logé…ç½®ä¸ç”Ÿæ•ˆçš„é—®é¢˜
 ### v0.6.6
-#### BUGĞŞ¸´
-* [#23 ](https://git.sloong.com/public/sloongnet/issues/23) Ìí¼Ó³¬Ê±¼ì²âºó¿ÕÏĞÊ±¼äCPUÕ¼ÓÃ½Ï¸ß
-* [#22 ](https://git.sloong.com/public/sloongnet/issues/22) ÔÚ½øĞĞ´ó¹æÄ£²¢·¢µÄÊ±ºòÓĞÎÊÌâ
-* [#24 ](https://git.sloong.com/public/sloongnet/issues/24) ½Å±¾Ö´ĞĞ²åÈë,ĞŞ¸Ä£¬É¾³ıÕâÀàÖ»ÓĞÓ°ÏìĞĞÊıÃ»ÓĞ·µ»Ø½á¹ûµÄÃüÁî£¬·µ»Ø0µÄÎÊÌâ
+#### BUGä¿®å¤
+* [#23 ](https://git.sloong.com/public/sloongnet/issues/23) æ·»åŠ è¶…æ—¶æ£€æµ‹åç©ºé—²æ—¶é—´CPUå ç”¨è¾ƒé«˜
+* [#22 ](https://git.sloong.com/public/sloongnet/issues/22) åœ¨è¿›è¡Œå¤§è§„æ¨¡å¹¶å‘çš„æ—¶å€™æœ‰é—®é¢˜
+* [#24 ](https://git.sloong.com/public/sloongnet/issues/24) è„šæœ¬æ‰§è¡Œæ’å…¥,ä¿®æ”¹ï¼Œåˆ é™¤è¿™ç±»åªæœ‰å½±å“è¡Œæ•°æ²¡æœ‰è¿”å›ç»“æœçš„å‘½ä»¤ï¼Œè¿”å›0çš„é—®é¢˜
 ### v0.6.4
-#### ĞÂÔöÌØĞÔ
-* userinfoÌí¼ÓipºÍprotĞÅÏ¢
-* Ìí¼Ó³¬Ê±¼ì²â.¿É×ÔÓÉÅäÖÃ³¬Ê±Ê±¼äÓë¼ì²â¼ä¸ô
-#### BUGĞŞ¸´
-* SQLÁ¬½ÓÊ§°ÜµÄÊ±ºòÃ»ÓĞÌáÊ¾ĞÅÏ¢
-* Ê¹ÓÃSendFile·¢ËÍÎÄ¼ş´íÎóµÄÎÊÌâ
+#### æ–°å¢ç‰¹æ€§
+* userinfoæ·»åŠ ipå’Œprotä¿¡æ¯
+* æ·»åŠ è¶…æ—¶æ£€æµ‹.å¯è‡ªç”±é…ç½®è¶…æ—¶æ—¶é—´ä¸æ£€æµ‹é—´éš”
+#### BUGä¿®å¤
+* SQLè¿æ¥å¤±è´¥çš„æ—¶å€™æ²¡æœ‰æç¤ºä¿¡æ¯
+* ä½¿ç”¨SendFileå‘é€æ–‡ä»¶é”™è¯¯çš„é—®é¢˜
 ### v0.6.0
-#### ĞÂÔöÌØĞÔ
-* Ìí¼ÓÎÄ¼şÉÏ´«¹¦ÄÜ
-* Ìí¼ÓSQLÔËĞĞÊ±LOGÅäÖÃÏî
-#### BUGĞŞ¸´
-* ³ÌĞòÍË³öÊ±Ã»ÓĞ³¹µ×ÍË³öËùÓĞÏß³ÌµÄÎÊÌâ
-* ÅäÖÃÎÄ¼şÖĞÊı¾İ¿âÅäÖÃÏî²»Æğ×÷ÓÃµÄÎÊÌâ
+#### æ–°å¢ç‰¹æ€§
+* æ·»åŠ æ–‡ä»¶ä¸Šä¼ åŠŸèƒ½
+* æ·»åŠ SQLè¿è¡Œæ—¶LOGé…ç½®é¡¹
+#### BUGä¿®å¤
+* ç¨‹åºé€€å‡ºæ—¶æ²¡æœ‰å½»åº•é€€å‡ºæ‰€æœ‰çº¿ç¨‹çš„é—®é¢˜
+* é…ç½®æ–‡ä»¶ä¸­æ•°æ®åº“é…ç½®é¡¹ä¸èµ·ä½œç”¨çš„é—®é¢˜
 ### v0.5.0
-#### ĞÂÔöÌØĞÔ
-* Ê¹ÓÃĞÂµÄ·¢ËÍÎÄ¼ş·½Ê½.
-* Á÷Ë®ºÅºÍMD5Ğ£ÑéÖ§³Ö¿ÉÅäÖÃ
+#### æ–°å¢ç‰¹æ€§
+* ä½¿ç”¨æ–°çš„å‘é€æ–‡ä»¶æ–¹å¼.
+* æµæ°´å·å’ŒMD5æ ¡éªŒæ”¯æŒå¯é…ç½®
 ### v0.4.2
-#### ĞÂÔöÌØĞÔ
-* ÎªLua½Å±¾Ìí¼ÓAPI.
-* Ö§³Ö³ÌĞòÖ±½ÓÖØĞÂ¼ÓÔØ½Å±¾
-* ĞŞ¸ÄMysql·µ»ØÖµÖĞ,ÁĞ·Ö¸ô·ûÎª0x09,ĞĞ·Ö¸ô·ûÎª0x0a
+#### æ–°å¢ç‰¹æ€§
+* ä¸ºLuaè„šæœ¬æ·»åŠ API.
+* æ”¯æŒç¨‹åºç›´æ¥é‡æ–°åŠ è½½è„šæœ¬
+* ä¿®æ”¹Mysqlè¿”å›å€¼ä¸­,åˆ—åˆ†éš”ç¬¦ä¸º0x09,è¡Œåˆ†éš”ç¬¦ä¸º0x0a
 ### v0.4.0
-#### BUGĞŞ¸´
-* ½ÓÊÕÊı¾İ¹ı³ÌÖĞÊÕµ½EAGAIN/EINTRÖĞ¶Ïºó,Ö®ºóËùÓĞ½ÓÊÕµÄÏûÏ¢²»ÍêÕûµÄÎÊÌâ.
-* ÎÈ¶¨ĞÔÌáÉı
-#### ĞÂÔöÌØĞÔ
-* Ìí¼ÓÁËShowSendMessageºÍShowReceiveMessageÅäÖÃÏî,¿ÉÒÔ¿ØÖÆ½ÓÊÕºÍ·¢ËÍµÄÏûÏ¢ÊÇ·ñÏÔÊ¾.
+#### BUGä¿®å¤
+* æ¥æ”¶æ•°æ®è¿‡ç¨‹ä¸­æ”¶åˆ°EAGAIN/EINTRä¸­æ–­å,ä¹‹åæ‰€æœ‰æ¥æ”¶çš„æ¶ˆæ¯ä¸å®Œæ•´çš„é—®é¢˜.
+* ç¨³å®šæ€§æå‡
+#### æ–°å¢ç‰¹æ€§
+* æ·»åŠ äº†ShowSendMessageå’ŒShowReceiveMessageé…ç½®é¡¹,å¯ä»¥æ§åˆ¶æ¥æ”¶å’Œå‘é€çš„æ¶ˆæ¯æ˜¯å¦æ˜¾ç¤º.
 ### v0.3.0
-#### BUGĞŞ¸´
-* ÔÚ´ó¹æÄ£Êı¾İÇé¿öÏÂ,³ÌĞò¾­³£±ÀÀ£ÎÊÌâ.
+#### BUGä¿®å¤
+* åœ¨å¤§è§„æ¨¡æ•°æ®æƒ…å†µä¸‹,ç¨‹åºç»å¸¸å´©æºƒé—®é¢˜.
 ### v0.2.0
-#### ĞÂÔöÌØĞÔ
-*  ·¢ËÍÁĞ±íÖ§³ÖÓÅÏÈ¼¶¿ØÖÆ
-#### BUGĞŞ¸´
-*  ÔÚ·¢ËÍÊı¾İÖ®Ç°,¼ì²é·¢ËÍÁĞ±íÊÇ²»ÊÇ¿ÕÁĞ±í.
+#### æ–°å¢ç‰¹æ€§
+*  å‘é€åˆ—è¡¨æ”¯æŒä¼˜å…ˆçº§æ§åˆ¶
+#### BUGä¿®å¤
+*  åœ¨å‘é€æ•°æ®ä¹‹å‰,æ£€æŸ¥å‘é€åˆ—è¡¨æ˜¯ä¸æ˜¯ç©ºåˆ—è¡¨.
 ### v0.1.0
-#### µÚÒ»¸ö°æ±¾.
+#### ç¬¬ä¸€ä¸ªç‰ˆæœ¬.
