@@ -14,15 +14,7 @@ A open source network engine form sloong.com group.
 * Framework is use `lua script + c++ engine`.
 
 ## History
-* ###v0.3.0
- * ####Fix bugs
-* ###v0.2.0
- * #####New feature
-   *  Support priority controls.
- * ####Fix bugs
-   *  Before send message, check the send list is not empty first.
-* ###v0.1.0
- * ####First version.
+[View](https://git.sloong.com/public/sloongnet/src/master/ChangeLog.md)
 
 ## Contact US
 If have any question, tell us.
