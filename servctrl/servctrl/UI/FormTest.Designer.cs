@@ -184,6 +184,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(77, 21);
             this.textBox1.TabIndex = 27;
+            this.textBox1.Text = "1";
             // 
             // checkBoxEnableSwift
             // 
@@ -264,6 +265,7 @@
             this.textBoxLevel.Name = "textBoxLevel";
             this.textBoxLevel.Size = new System.Drawing.Size(77, 21);
             this.textBoxLevel.TabIndex = 35;
+            this.textBoxLevel.Text = "1";
             // 
             // checkBoxEnableZip
             // 

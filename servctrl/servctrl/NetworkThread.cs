@@ -163,9 +163,10 @@ namespace Sloong
                         	swift = string.Format("{0:D8}", pack.SwiftNumber);
                         }
 
-                        var len = string.Format("{0:D8}", gbk.GetByteCount(msg) + md5.Length + swift.Length + 1);
-                        msg = len + pack.level + swift + md5 + msg;
-
+                        long lLen = gbk.GetByteCount(msg) + md5.Length + swift.Length + 1;
+                        msg = pack.level + swift + md5 + msg;
+                        long netLen = IPAddress.HostToNetworkOrder(lLen);
+                        byte[] bNetLen = BitConverter.GetBytes(netLen);
                         byte[] sendByte = gbk.GetBytes(msg);
                         var Sock = SocketMap[pack.SocketID].m_Socket;
                         if( !m_RecvThreadList.ContainsKey(pack.SocketID))
@@ -178,6 +179,7 @@ namespace Sloong
                         
                         lock (Sock)
                         {
+                            Utility.SendEx(Sock, bNetLen);
                             Utility.SendEx(Sock, sendByte);
                             pack.IsSent = true;
                             // only add to list when enable swift.
@@ -206,12 +208,13 @@ namespace Sloong
             byte[] leng = Utility.RecvEx(sock, 8, overTime);
 
             long packSize = BitConverter.ToInt64(leng, 0);
-            if (packSize <= 0)
+            long hostLen = IPAddress.NetworkToHostOrder(packSize);
+            if (hostLen <= 0 || hostLen > 2147483648)
             {
-                throw new Exception(string.Format("Recv length error. the size is less than zero. the length is:{0}. the data is:{1}", packSize, leng.ToString()));
+                throw new Exception(string.Format("Recv length error. the length is:{0}. the data is:{1}", packSize, leng.ToString()));
             }
 
-            return packSize;
+            return hostLen;
         }
 
         public void RecvWorkLoop( int id )
