@@ -204,7 +204,9 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
     pBuf = new char[nBufLen];
     memset(pBuf, 0, nBufLen);
     char* pCpyPoint = pBuf;
-    memcpy(pCpyPoint, (void*)&nMsgLen, 8);
+	char pMsgLen[9] = { 0 };
+	sprintf(pMsgLen, "%08lld", nMsgLen);
+    memcpy(pCpyPoint, pMsgLen, 8);
     pCpyPoint += 8;
     if (m_bSwiftNumberSupport)
     {
