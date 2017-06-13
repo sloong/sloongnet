@@ -1,6 +1,16 @@
 # 更新历史
 ***
-
+### v0.8.0
+* 在这个版本中调整了消息包的长度返回格式，不兼容以前的版本！！
+#### BUG修复
+* [#47 ](https://git.sloong.com/public/sloongnet/issues/47)修改返回数据时，长度的返回样式和接收统一
+### v0.7.7
+#### 新增特性 
+* [#44 ](https://git.sloong.com/public/sloongnet/issues/44)添加扩展配置文件支持 
+#### BUG修复
+* [#45 ](https://git.sloong.com/public/sloongnet/issues/45)配置文件中配置不全时，程序崩溃
+#### 功能改进
+* [#29 ](https://git.sloong.com/public/sloongnet/issues/29)脚本有错误的情况下程序直接启动失败
 ### v0.7.6
 #### 新增特性 
 * [#42 ](https://git.sloong.com/public/sloongnet/issues/42)GetThumbImage返回值问题 
