@@ -18,8 +18,8 @@ build(){
 	rm -rdf $OUTPATH
 	mkdir -p $OUTPATH
 	cp -f $TARGPATH/sloongnet $OUTPATH/sloongnet
-	cp -rf scripts $OUTPATH/scripts
-	cp -f default.conf $OUTPATH/default.conf
+	cp -rf $TARGPATH/scripts $OUTPATH/scripts
+	cp -f $TARGPATH/default.conf $OUTPATH/default.conf
 	cp -f install.sh $OUTPATH/install.sh
 }
 
