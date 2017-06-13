@@ -449,9 +449,9 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 		{
 			long long netLen = 0;
 			memcpy(&netLen, pLen, s_llLen);
-			//long dtlen2 = atol(pLen);
 			long long dtlen = ntohll(netLen);
-			if (dtlen <= 0)
+			// package length cannot big than 2147483648. this is max value for int.
+			if (dtlen <= 0 || dtlen > 2147483648)
 			{
 				m_pLog->Log("Receive data length error.");
 				CloseConnect(nSocket);
