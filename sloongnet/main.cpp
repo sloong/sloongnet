@@ -16,13 +16,12 @@ using namespace Sloong;
 
 #define MAX_STACK_LAYERS 256
 
-
 void write_call_stack()
 {
-	int fd = open("/usr/local/info.dat", O_RDWR | O_CREAT | O_APPEND);
+	/*int fd = open("/usr/local/info.dat", O_RDWR | O_CREAT | O_APPEND);
 	void *array[MAX_STACK_LAYERS];
 	size_t size;
-	char **strings;
+	char **strings;*/
 	/*//string strRet("");
 	size = backtrace(array, MAX_STACK_LAYERS);
 	strings = backtrace_symbols(array, size);
@@ -41,7 +40,7 @@ void write_call_stack()
 	write(fd, "\n", 1);
 
 	free(strings);*/
-	backtrace_symbols_fd(array, size, fd);
+	//backtrace_symbols_fd(array, size, fd);
 }
 
 

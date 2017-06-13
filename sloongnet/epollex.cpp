@@ -21,6 +21,8 @@
 using namespace Sloong;
 using namespace Sloong::Universal;
 
+const int s_llLen = 8;
+
 CEpollEx::CEpollEx()
 {
     m_pEventCV = NULL;
@@ -31,6 +33,14 @@ CEpollEx::~CEpollEx()
 {
 }
 
+#include  <inttypes.h> 
+uint64_t htonll(uint64_t val) { 
+return  (((uint64_t)htonl(val)) << 32) + htonl(val >> 32);
+}
+
+uint64_t ntohll(uint64_t val) {
+	return  (((uint64_t)ntohl(val)) << 32) + ntohl(val >> 32);
+}
 
 // Initialize the epoll and the thread pool.
 int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, int nTimeout, int nTimeoutInterval)
@@ -182,11 +192,11 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
 
     // process msg
     char* pBuf = NULL;
-    long long nBufLen = 8 + msg.size();
+    long long nBufLen = s_llLen + msg.size();
     string md5;
     if (m_bSwiftNumberSupport)
     {
-        nBufLen += sizeof(long long);
+		nBufLen += s_llLen;
     }
     if (m_bMD5Support)
     {
@@ -195,23 +205,25 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
     }
     // in here, the exdata size no should include the buffer length,
     // nBufLen不应该包含exdata的长度,所以如果有附加数据,那么这里应该只增加Buff空间,但是前8位的长度中不包含buff长度的8位指示符.
-    long long nMsgLen = nBufLen - 8;
+    long long nMsgLen = nBufLen - s_llLen;
     if (pExData != NULL && nSize > 0)
     {
-        nBufLen += 8;
+        nBufLen += s_llLen;
     }
 
     pBuf = new char[nBufLen];
     memset(pBuf, 0, nBufLen);
     char* pCpyPoint = pBuf;
 	char pMsgLen[9] = { 0 };
-	sprintf(pMsgLen, "%08lld", nMsgLen);
-    memcpy(pCpyPoint, pMsgLen, 8);
+	
+	//sprintf(pMsgLen, "%08lld", nMsgLen);
+	auto ul_MessageLen = htonll(nMsgLen);
+    memcpy(pCpyPoint, (void*)&ul_MessageLen, s_llLen);
     pCpyPoint += 8;
     if (m_bSwiftNumberSupport)
     {
         memcpy(pCpyPoint, (void*)&nSwift, 8);
-        pCpyPoint += sizeof(long long);
+        pCpyPoint += s_llLen;
     }
     if (m_bMD5Support)
     {
@@ -415,15 +427,13 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 	string spid = CUniversal::ntos(pid);
 
 	// 已经连接的用户,收到数据,可以开始读入
-	int len = sizeof(long long);
-	//char dataLeng[sizeof(long long) + 1] = { 0 };
-	char* pLen = new char[sizeof(long long) + 1]();//dataLeng;
+	char* pLen = new char[s_llLen + 1]();//dataLeng;
 	bool bLoop = true;
 	while (bLoop)
 	{
 		// 先读取消息长度
-		memset(pLen, 0, len + 1);
-		int nRecvSize = RecvEx(nSocket, &pLen, len, true);
+		memset(pLen, 0, s_llLen + 1);
+		int nRecvSize = RecvEx(nSocket, &pLen, s_llLen, true);
 		if (nRecvSize == 0)
 		{
 			// 读取错误,将这个连接从监听中移除并关闭连接
@@ -437,7 +447,10 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 		}
 		else
 		{
-			long dtlen = atol(pLen);
+			long long netLen = 0;
+			memcpy(&netLen, pLen, s_llLen);
+			//long dtlen2 = atol(pLen);
+			long long dtlen = ntohll(netLen);
 			if (dtlen <= 0)
 			{
 				m_pLog->Log("Receive data length error.");
@@ -483,10 +496,10 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 
 			if ( m_bSwiftNumberSupport )
 			{
-				memset(pLen, 0, 8);
-				memcpy(pLen, pMsg, sizeof(long long));
+				memset(pLen, 0, s_llLen);
+				memcpy(pLen, pMsg, s_llLen);
 				recvInfo.nSwiftNumber = atol(pLen);
-				pMsg += sizeof(long long);
+				pMsg += s_llLen;
 			}
 
 			if (m_bMD5Support)
