@@ -34,12 +34,25 @@ CEpollEx::~CEpollEx()
 }
 
 #include  <inttypes.h> 
-uint64_t htonll(uint64_t val) { 
+inline uint64_t htonll(uint64_t val) { 
 return  (((uint64_t)htonl(val)) << 32) + htonl(val >> 32);
 }
 
-uint64_t ntohll(uint64_t val) {
+inline uint64_t ntohll(uint64_t val) {
 	return  (((uint64_t)ntohl(val)) << 32) + ntohl(val >> 32);
+}
+
+inline void LongToBytes(long long l, char* pBuf)
+{
+	auto ul_MessageLen = htonll(l);
+	memcpy(pBuf, (void*)&ul_MessageLen, s_llLen);
+}
+
+inline long long BytesToLong(char* point)
+{
+	long long netLen = 0;
+	memcpy(&netLen, point, s_llLen);
+	return ntohll(netLen);
 }
 
 // Initialize the epoll and the thread pool.
@@ -214,11 +227,8 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
     pBuf = new char[nBufLen];
     memset(pBuf, 0, nBufLen);
     char* pCpyPoint = pBuf;
-	char pMsgLen[9] = { 0 };
 	
-	//sprintf(pMsgLen, "%08lld", nMsgLen);
-	auto ul_MessageLen = htonll(nMsgLen);
-    memcpy(pCpyPoint, (void*)&ul_MessageLen, s_llLen);
+	LongToBytes(nMsgLen, pCpyPoint);
     pCpyPoint += 8;
     if (m_bSwiftNumberSupport)
     {
@@ -234,8 +244,8 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
     pCpyPoint += msg.length();
     if (pExData != NULL && nSize > 0)
     {
-        long long Exlen = nSize;
-        memcpy(pCpyPoint, (void*)&Exlen, 8);
+		long long Exlen = nSize;
+		LongToBytes(Exlen, pCpyPoint);
         pCpyPoint += 8;
     }
 
@@ -447,9 +457,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 		}
 		else
 		{
-			long long netLen = 0;
-			memcpy(&netLen, pLen, s_llLen);
-			long long dtlen = ntohll(netLen);
+			long long dtlen = BytesToLong(pLen);
 			// package length cannot big than 2147483648. this is max value for int.
 			if (dtlen <= 0 || dtlen > 2147483648)
 			{
