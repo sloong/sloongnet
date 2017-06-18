@@ -232,7 +232,7 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
     pCpyPoint += 8;
     if (m_bSwiftNumberSupport)
     {
-        memcpy(pCpyPoint, (void*)&nSwift, 8);
+		LongToBytes(nSize, pCpyPoint);
         pCpyPoint += s_llLen;
     }
     if (m_bMD5Support)
@@ -323,7 +323,7 @@ void Sloong::CEpollEx::CloseConnect(int socket)
 	CSockInfo* info = m_SockList[socket];
     if( !info )
         return;
-	m_pLog->Log(CUniversal::Format("close connect:%s.", info->m_Address));
+	m_pLog->Log(CUniversal::Format("close connect:%s:%d.", info->m_Address,info->m_nPort));
 
 	unique_lock<mutex> elck(m_oEventListMutex);
 	EventListItem item;
@@ -437,13 +437,13 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 	string spid = CUniversal::ntos(pid);
 
 	// 已经连接的用户,收到数据,可以开始读入
-	char* pLen = new char[s_llLen + 1]();//dataLeng;
+	char* pLongBuffer = new char[s_llLen + 1]();//dataLeng;
 	bool bLoop = true;
 	while (bLoop)
 	{
 		// 先读取消息长度
-		memset(pLen, 0, s_llLen + 1);
-		int nRecvSize = RecvEx(nSocket, &pLen, s_llLen, true);
+		memset(pLongBuffer, 0, s_llLen + 1);
+		int nRecvSize = RecvEx(nSocket, &pLongBuffer, s_llLen, true);
 		if (nRecvSize == 0)
 		{
 			// 读取错误,将这个连接从监听中移除并关闭连接
@@ -457,7 +457,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 		}
 		else
 		{
-			long long dtlen = BytesToLong(pLen);
+			long long dtlen = BytesToLong(pLongBuffer);
 			// package length cannot big than 2147483648. this is max value for int.
 			if (dtlen <= 0 || dtlen > 2147483648)
 			{
@@ -484,7 +484,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			{
 				char pLevel[2] = { 0 };
 				pLevel[0] = data[0];
-				int level = atoi(pLevel);
+				int level = pLevel[0];
 				if (level > m_nPriorityLevel || level < 0)
 				{
 					m_pLog->Log(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", level, m_nPriorityLevel));
@@ -504,9 +504,9 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 
 			if ( m_bSwiftNumberSupport )
 			{
-				memset(pLen, 0, s_llLen);
-				memcpy(pLen, pMsg, s_llLen);
-				recvInfo.nSwiftNumber = atol(pLen);
+				memset(pLongBuffer, 0, s_llLen);
+				memcpy(pLongBuffer, pMsg, s_llLen);
+				recvInfo.nSwiftNumber = BytesToLong(pLongBuffer);
 				pMsg += s_llLen;
 			}
 
@@ -543,7 +543,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 		}
 	}
 	srlck.unlock();
-	SAFE_DELETE_ARR(pLen);
+	SAFE_DELETE_ARR(pLongBuffer);
 }
 
 void Sloong::CEpollEx::OnCanWriteData(int nSocket)
