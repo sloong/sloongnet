@@ -14,6 +14,9 @@
 #include <univ/threadpool.h>
 #include <univ/exception.h>
 #include <univ/MD5.h>
+#include <sys/types.h> 
+#include <sys/times.h> 
+#include <sys/select.h> 
 #include "progressbar.h"
 #define MAXRECVBUF 4096
 #define MAXBUF MAXRECVBUF+10
@@ -56,13 +59,14 @@ inline long long BytesToLong(char* point)
 }
 
 // Initialize the epoll and the thread pool.
-int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, int nTimeout, int nTimeoutInterval)
+int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, int nConnectTimeout, int nTimeoutInterval, int nRecvTimeout)
 {
 	m_bMD5Support = bMD5Support;
 	m_bSwiftNumberSupport = bSwiftNumSupprot;
 	m_nPriorityLevel = nPriorityLevel;
-	m_nTimeout = nTimeout;
+	m_nConnectTimeout = nConnectTimeout;
 	m_nTimeoutInterval = nTimeoutInterval;
+	m_nReceiveTimeout = nRecvTimeout;
     m_pLog = plog;
 	m_pLog->Log(CUniversal::Format("epollex is initialize.license port is %d", licensePort));
   
@@ -179,7 +183,7 @@ void* CEpollEx::WorkLoop(void* pParam)
 void* CEpollEx::CheckTimeoutConnect(void* pParam)
 {
 	CEpollEx* pThis = (CEpollEx*)pParam;
-	int tout = pThis->m_nTimeout * 60;
+	int tout = pThis->m_nConnectTimeout * 60;
 	int tinterval = pThis->m_nTimeoutInterval * 60;
 	unique_lock<mutex> lck(pThis->m_oExitMutex);
 	while (pThis->m_bIsRunning)
@@ -364,30 +368,61 @@ int Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, int nStart, bo
     return nAllSent;
 }
 
-int Sloong::CEpollEx::RecvEx(int sock, char** buf, int nSize, bool eagain /* = false */)
+
+
+int Sloong::CEpollEx::RecvEx(int sock, char* buf, int nSize, int nTimeout, bool bAgain /* = false */)
 {
     int nIsRecv = 0;
     int nNoRecv = nSize;
     int nRecv = 0;
-    char* pBuf = *buf;
+    char* pBuf = buf;
+	fd_set reset, eset;
+	struct timeval tv;
+	FD_ZERO(&reset);
+	FD_ZERO(&eset);
+	FD_SET(sock, &reset);
+	FD_SET(sock, &eset);
+	tv.tv_sec = nTimeout;
+	tv.tv_usec = 0;
     while (nIsRecv < nSize)
     {
-        nRecv = recv(sock, pBuf + nSize - nNoRecv, nNoRecv, 0 );
-        if (nRecv < 0 )
-        {
-			if (errno != EAGAIN && errno != EINTR)
-                return 0;
-			else if (eagain == true && (errno == EAGAIN || errno == EINTR) && nIsRecv == 0)
-                return -1;
-            else
-                continue;
-        }
-        else if( nRecv == 0)
-        {
-            return 0;
-        }
-        nNoRecv -= nRecv;
-        nIsRecv += nRecv;
+		auto error = select(0, &reset, NULL, &eset, nTimeout > 0 ? &tv : NULL);
+		if (error == 0)
+		{
+			// timeout
+			return -2;
+		}
+		else if (FD_ISSET(sock, &reset))
+		{
+			nRecv = recv(sock, pBuf + nSize - nNoRecv, nNoRecv, 0);
+			if (nRecv < 0)
+			{
+				// 在非阻塞模式下，socket可能会收到EAGAIN和EINTR这两个错误，
+				// 不过这两个错误不应该直接返回。
+				if (errno == EAGAIN || errno == EINTR)
+				{
+					// 如果bAgain为true，并且已经在接收数据，那么开始重试
+					if (bAgain == true && nIsRecv != 0)
+					{
+						continue;
+					}
+					else
+					{
+						return nIsRecv;
+					}
+				}
+				// 如果是其他错误，则直接返回
+				else
+				{
+					return -1;
+				}
+			}
+		}
+		else
+		{
+			// other error
+			return -3;
+		}
     }
     return nIsRecv;
 }
@@ -402,6 +437,21 @@ void Sloong::CEpollEx::OnNewAccept()
 		int nSize = sizeof(add);
 		memset(&add, 0, sizeof(add));
 		getpeername(conn_sock, (sockaddr*)&add, (socklen_t*)&nSize);
+
+		// start client check when acdept
+		if (m_bEnableClientCheck)
+		{
+			char* pCheckBuf = new char[m_nCheckKeyLength + 1];
+			memset(pCheckBuf, 0, m_nCheckKeyLength + 1);
+			// In Check function, client need send the check key in 3 second. 
+			int nLen = RecvEx(conn_sock, pCheckBuf, m_nCheckKeyLength,3);
+			if (nLen != m_nCheckKeyLength || 0 != strcmp(pCheckBuf, m_strClientCheckKey.c_str()))
+			{
+				m_pLog->Log(CUniversal::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nCheckKeyLength,nLen,m_strClientCheckKey.c_str(), pCheckBuf));
+				close(conn_sock);
+				return;
+			}
+		}
 
 
 		CSockInfo* info = new CSockInfo(m_nPriorityLevel);
@@ -443,14 +493,14 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 	{
 		// 先读取消息长度
 		memset(pLongBuffer, 0, s_llLen + 1);
-		int nRecvSize = RecvEx(nSocket, &pLongBuffer, s_llLen, true);
-		if (nRecvSize == 0)
+		int nRecvSize = RecvEx(nSocket, pLongBuffer, s_llLen, m_nReceiveTimeout);
+		if (nRecvSize < 0 || nRecvSize != s_llLen)
 		{
 			// 读取错误,将这个连接从监听中移除并关闭连接
 			CloseConnect(nSocket);
 			break;
 		}
-		else if (nRecvSize < 0)
+		else if (nRecvSize == 0)
 		{
 			//由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
 			break;
@@ -468,8 +518,8 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			char* data = new char[dtlen + 1];
 			memset(data, 0, dtlen + 1);
 
-			nRecvSize = RecvEx(nSocket, &data, dtlen);//一次性接受所有消息
-			if (nRecvSize == 0)
+			nRecvSize = RecvEx(nSocket, data, dtlen, m_nReceiveTimeout, true);//一次性接受所有消息
+			if (nRecvSize < 0)
 			{
 				CloseConnect(nSocket);
 				break;

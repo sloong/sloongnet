@@ -430,7 +430,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 		// receive the uuid
 		char strUuid[37] = { 0 };
 		pBuf = strUuid;
-		res = CEpollEx::RecvEx(cSocket, &pBuf, 36, 0);
+		res = CEpollEx::RecvEx(cSocket, pBuf, 36, otime);
 		if (string(strUuid) != uuid)
 		{
 			close(cSocket);
@@ -442,7 +442,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			// receive the length
 			char strLen[9] = { 0 };
 			pBuf = strLen;
-			res = CEpollEx::RecvEx(cSocket, &pBuf, 8, 0);
+			res = CEpollEx::RecvEx(cSocket, pBuf, 8, otime);
 			long long nRecvLen = atoi(strLen);
 			// check the length
 			if (max_size < nRecvLen)
@@ -453,7 +453,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			// receive the data
 			pBuf = new char[nRecvLen];
 			memset(pBuf, 0, nRecvLen);
-			res = CEpollEx::RecvEx(cSocket, &pBuf, nRecvLen, 0);
+			res = CEpollEx::RecvEx(cSocket, pBuf, nRecvLen, otime);
 
 			// check target file path is not exist
 			CUniversal::CheckFileDirectory(temp_file_path);

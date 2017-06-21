@@ -30,7 +30,8 @@ CServerConfig::CServerConfig()
     m_nPriorityLevel = 0;
 	m_bEnableMD5Check = false;
 	m_bEnableSwiftNumberSup = false;
-	m_nTimeout = 2;
+	m_nConnectTimeout = 2;
+	m_nReceiveTimeout = 20;
 
 	// Performance
 	m_nSleepInterval = 100;
@@ -212,7 +213,8 @@ void Sloong::CServerConfig::LoadConfig()
 	m_nPriorityLevel = GetIntConfig("Server", "PriorityLevel", m_nPriorityLevel);
 	m_bEnableMD5Check = GetBoolenConfig("Server", "EnableMD5Check", m_bEnableMD5Check);
 	m_bEnableSwiftNumberSup = GetBoolenConfig("Server", "EnableSwiftNumberSupport", m_bEnableSwiftNumberSup);
-	m_nTimeout = GetIntConfig("Server", "Timeout", m_nTimeout);
+	m_nConnectTimeout = GetIntConfig("Server", "ConnectTimeout", m_nConnectTimeout);
+	m_nReceiveTimeout = GetIntConfig("Server", "ReceiveTimeout", m_nReceiveTimeout);
 
 	// Performance
 	m_nSleepInterval = GetIntConfig("Performance", "SleepInterval", m_nSleepInterval);

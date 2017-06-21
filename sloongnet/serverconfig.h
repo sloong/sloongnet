@@ -42,7 +42,8 @@ namespace Sloong
 		int m_nPriorityLevel;
 		bool m_bEnableSwiftNumberSup;
 		bool m_bEnableMD5Check;
-		int m_nTimeout;
+		int m_nConnectTimeout;
+		int m_nReceiveTimeout;
 
 		// Performance
 		int m_nSleepInterval;

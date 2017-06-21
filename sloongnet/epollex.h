@@ -27,7 +27,7 @@ namespace Sloong
         CEpollEx();
 		virtual ~CEpollEx();
         int Initialize(CLog* pLog,int listenPort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, 
-				int nTimeout, int nTimeoutInterval);
+				int nTimeout, int nTimeoutInterval, int nRecvTimeout);
 		void SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage);
 		void Exit();
         void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
@@ -56,7 +56,22 @@ namespace Sloong
 		static void* WorkLoop(void* params);
 		static void* CheckTimeoutConnect(void* params);
 	    static int SendEx(int sock, const char* buf, int nSize, int nStart, bool eagain = false);
-        static int RecvEx( int sock, char** buf, int nSize, bool eagain = false );
+		/************************************************************************/
+		/*		ReceEx function.                 
+			Params:
+					sock	-> the socket handle
+					buf		-> the data buffer
+					nSize	-> the receive size
+					nTimeout-> timeout time, default is 0. no need timeout
+					eagain	-> continue when the EINTR,EAGAIN error if value is true.
+								else return direct. in default is false.
+			Return:
+					return -1 when receive error.
+					return -2 when receive timeout.
+					return -3 when have other error.
+					else return the receive length*/
+		/************************************************************************/
+        static int RecvEx( int sock, char* buf, int nSize, int nTimeout = 0, bool bAgain = false );
 	protected:
 		int     m_ListenSock;
 		int 	m_EpollHandle;
@@ -74,7 +89,13 @@ namespace Sloong
 		bool m_bIsRunning;
 		bool m_bSwiftNumberSupport;
 		bool m_bMD5Support;
-		int m_nTimeout;
+		bool m_bEnableClientCheck;
+		string m_strClientCheckKey;
+		int m_nCheckKeyLength;
+		// client check timeout num.
+		int m_nClientCheckTime;
+		int m_nConnectTimeout;
+		int m_nReceiveTimeout;
 		int m_nTimeoutInterval;
 		mutex m_oExitMutex;
 		condition_variable m_oExitCV;
