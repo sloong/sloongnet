@@ -354,7 +354,7 @@ int Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, int nStart, bo
     int nAllSent = nStart;
     int nSentSize = nStart;
     int nNosendSize = nSize - nStart;
-    CProgressBar pbar("", 100, Number);
+    //CProgressBar pbar("", 100, Number);
 
 	while (nNosendSize > 0)
 	{
@@ -371,7 +371,7 @@ int Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, int nStart, bo
 		}
 		nNosendSize -= nSentSize;
         nAllSent += nSentSize;
-        pbar.Update((float)nAllSent/(float)nSize);
+        //pbar.Update((float)nAllSent/(float)nSize);
 	}
     return nAllSent;
 }
