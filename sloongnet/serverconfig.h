@@ -45,6 +45,10 @@ namespace Sloong
 		int m_nConnectTimeout;
 		int m_nReceiveTimeout;
 
+		// Security
+		int m_nClientCheckTime;
+		string m_strClientCheckKey;
+
 		// Performance
 		int m_nSleepInterval;
 		int m_nProcessThreadQuantity;

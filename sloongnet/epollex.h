@@ -27,7 +27,7 @@ namespace Sloong
         CEpollEx();
 		virtual ~CEpollEx();
         int Initialize(CLog* pLog,int listenPort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, 
-				int nTimeout, int nTimeoutInterval, int nRecvTimeout);
+				int nTimeout, int nTimeoutInterval, int nRecvTimeout, int nCheckTimeout,string strCheckKey);
 		void SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage);
 		void Exit();
         void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
@@ -66,10 +66,11 @@ namespace Sloong
 					eagain	-> continue when the EINTR,EAGAIN error if value is true.
 								else return direct. in default is false.
 			Return:
-					return -1 when receive error.
-					return -2 when receive timeout.
-					return -3 when have other error.
-					else return the receive length*/
+					如果请求成功，返回大于0的接收数据长度。
+					如果接收超时，返回0。
+					如果发生EINTR,EAGAIN错误且eagain为true，返回0。
+					如果发生其他错误，返回-1。
+					*/
 		/************************************************************************/
         static int RecvEx( int sock, char* buf, int nSize, int nTimeout = 0, bool bAgain = false );
 	protected:

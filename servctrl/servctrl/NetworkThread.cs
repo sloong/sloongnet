@@ -114,6 +114,12 @@ namespace Sloong
             {
                 info.m_Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, info.m_Type);
                 info.m_Socket.Connect(info.m_IPInfo);
+                // send check key
+                var key = "clinecheckkeyforsloongnet";
+                var gbk = Encoding.GetEncoding("GB2312");
+                byte[] sendByte = gbk.GetBytes(key);
+                Utility.SendEx(info.m_Socket, sendByte);
+
                 //AppStatus.RecvBufferSize = s.ReceiveBufferSize;
                 /*_DC.Add(ShareItem.ConnectStatus, m_Socket.Connected);*/
                 //string connectMsg = "SloongWalls Client is connect.";
@@ -151,23 +157,34 @@ namespace Sloong
                         var pack = SendList.Dequeue();
                         var msg = pack.SendMessage;
                         string md5 = "";
+                        List<byte> sendList = new List<byte>();
                         var gbk = Encoding.GetEncoding("GB2312");
 
+                        // 计算长度
+                        long lLen = gbk.GetByteCount(msg) + 32 + 8 + 1;
+
+                        // 开始准备数据
+                        /// 长度
+                        sendList.AddRange(Utility.LongToBytes(lLen));
+
+                        /// 优先级
+                        sendList.Add(pack.level);
+
+                        /// 流水号
+                        if (AppStatus.bEnableSwift)
+                        {
+                            sendList.AddRange(Utility.LongToBytes(pack.SwiftNumber));
+                        }
+
+                        /// md5
                         if (AppStatus.bEnableMD5)
                         {
                             md5 = Utility.MD5_Encoding(msg, gbk);
-                        }
-                        string swift = "";
-                        if (AppStatus.bEnableSwift)
-                        {
-                        	swift = string.Format("{0:D8}", pack.SwiftNumber);
+                            sendList.AddRange(gbk.GetBytes(md5));
                         }
 
-                        long lLen = gbk.GetByteCount(msg) + md5.Length + swift.Length + 1;
-                        msg = pack.level + swift + md5 + msg;
-                        long netLen = IPAddress.HostToNetworkOrder(lLen);
-                        byte[] bNetLen = BitConverter.GetBytes(netLen);
-                        byte[] sendByte = gbk.GetBytes(msg);
+
+                        sendList.AddRange(gbk.GetBytes(msg));
                         var Sock = SocketMap[pack.SocketID].m_Socket;
                         if( !m_RecvThreadList.ContainsKey(pack.SocketID))
                         {
@@ -179,8 +196,7 @@ namespace Sloong
                         
                         lock (Sock)
                         {
-                            Utility.SendEx(Sock, bNetLen);
-                            Utility.SendEx(Sock, sendByte);
+                            Utility.SendEx(Sock, sendList);
                             pack.IsSent = true;
                             // only add to list when enable swift.
                             if (AppStatus.bEnableSwift)
@@ -207,11 +223,10 @@ namespace Sloong
         {
             byte[] leng = Utility.RecvEx(sock, 8, overTime);
 
-            long packSize = BitConverter.ToInt64(leng, 0);
-            long hostLen = IPAddress.NetworkToHostOrder(packSize);
+            var hostLen = Utility.BytesToLong(leng);
             if (hostLen <= 0 || hostLen > 2147483648)
             {
-                throw new Exception(string.Format("Recv length error. the length is:{0}. the data is:{1}", packSize, leng.ToString()));
+                throw new Exception(string.Format("Recv length error. the length is:{0}. the data is:{1}", hostLen, leng.ToString()));
             }
 
             return hostLen;
@@ -250,20 +265,16 @@ namespace Sloong
 
                     long nLength = RecvDataLength(info.m_Socket, 10000);
                     
-                    
-                    
 
                     long nSwift = -1;
                     string md5 = "";
                     int index = 0;
                     if (AppStatus.bEnableSwift)
                     {
-                        byte[] bSwift = Utility.RecvEx(info.m_Socket, 8, 10000);
-                        nSwift = BitConverter.ToInt64(bSwift, 0);
+                        nSwift = Utility.BytesToLong(Utility.RecvEx(info.m_Socket, 8, 10000));
                         index = 8;
                     }
                     
-
                     if (AppStatus.bEnableMD5)
                     {
                         byte[] bMD5 = Utility.RecvEx(info.m_Socket, 32, 10000);

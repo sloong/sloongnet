@@ -33,6 +33,10 @@ CServerConfig::CServerConfig()
 	m_nConnectTimeout = 2;
 	m_nReceiveTimeout = 20;
 
+	// Security
+	m_strClientCheckKey = "";
+	m_nClientCheckTime = 0;
+
 	// Performance
 	m_nSleepInterval = 100;
 	m_nEPoolThreadQuantity = 1;
@@ -215,6 +219,10 @@ void Sloong::CServerConfig::LoadConfig()
 	m_bEnableSwiftNumberSup = GetBoolenConfig("Server", "EnableSwiftNumberSupport", m_bEnableSwiftNumberSup);
 	m_nConnectTimeout = GetIntConfig("Server", "ConnectTimeout", m_nConnectTimeout);
 	m_nReceiveTimeout = GetIntConfig("Server", "ReceiveTimeout", m_nReceiveTimeout);
+
+	// Security
+	m_nClientCheckTime = GetIntConfig("Security", "ClientCkeckTime", m_nClientCheckTime);
+	m_strClientCheckKey = GetStringConfig("Security", "ClientCheckKey", m_strClientCheckKey);
 
 	// Performance
 	m_nSleepInterval = GetIntConfig("Performance", "SleepInterval", m_nSleepInterval);

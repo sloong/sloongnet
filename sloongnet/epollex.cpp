@@ -30,6 +30,7 @@ CEpollEx::CEpollEx()
 {
     m_pEventCV = NULL;
 	m_bIsRunning = false;
+	m_bEnableClientCheck = false;
 }
 
 CEpollEx::~CEpollEx()
@@ -59,7 +60,7 @@ inline long long BytesToLong(char* point)
 }
 
 // Initialize the epoll and the thread pool.
-int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, int nConnectTimeout, int nTimeoutInterval, int nRecvTimeout)
+int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, int nConnectTimeout, int nTimeoutInterval, int nRecvTimeout, int nCheckTimtoue, string strCheckKey)
 {
 	m_bMD5Support = bMD5Support;
 	m_bSwiftNumberSupport = bSwiftNumSupprot;
@@ -67,6 +68,13 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
 	m_nConnectTimeout = nConnectTimeout;
 	m_nTimeoutInterval = nTimeoutInterval;
 	m_nReceiveTimeout = nRecvTimeout;
+	m_strClientCheckKey = strCheckKey;
+	m_nClientCheckTime = nCheckTimtoue;
+	m_nCheckKeyLength = m_strClientCheckKey.length();
+	if (nCheckTimtoue > 0 && m_nCheckKeyLength > 0)
+	{
+		m_bEnableClientCheck = true;
+	}
     m_pLog = plog;
 	m_pLog->Log(CUniversal::Format("epollex is initialize.license port is %d", licensePort));
   
@@ -236,7 +244,7 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
     pCpyPoint += 8;
     if (m_bSwiftNumberSupport)
     {
-		LongToBytes(nSize, pCpyPoint);
+		LongToBytes(nSwift, pCpyPoint);
         pCpyPoint += s_llLen;
     }
     if (m_bMD5Support)
@@ -372,25 +380,26 @@ int Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, int nStart, bo
 
 int Sloong::CEpollEx::RecvEx(int sock, char* buf, int nSize, int nTimeout, bool bAgain /* = false */)
 {
+	if (nSize <= 0)
+		return 0;
+
     int nIsRecv = 0;
     int nNoRecv = nSize;
     int nRecv = 0;
     char* pBuf = buf;
-	fd_set reset, eset;
+	fd_set reset;
 	struct timeval tv;
 	FD_ZERO(&reset);
-	FD_ZERO(&eset);
 	FD_SET(sock, &reset);
-	FD_SET(sock, &eset);
 	tv.tv_sec = nTimeout;
 	tv.tv_usec = 0;
     while (nIsRecv < nSize)
     {
-		auto error = select(0, &reset, NULL, &eset, nTimeout > 0 ? &tv : NULL);
+		auto error = select(sock+1, &reset, NULL, NULL, nTimeout > 0 ? &tv : NULL);
 		if (error == 0)
 		{
 			// timeout
-			return -2;
+			return 0;
 		}
 		else if (FD_ISSET(sock, &reset))
 		{
@@ -408,7 +417,7 @@ int Sloong::CEpollEx::RecvEx(int sock, char* buf, int nSize, int nTimeout, bool 
 					}
 					else
 					{
-						return nIsRecv;
+						return -1;
 					}
 				}
 				// 如果是其他错误，则直接返回
@@ -421,8 +430,10 @@ int Sloong::CEpollEx::RecvEx(int sock, char* buf, int nSize, int nTimeout, bool 
 		else
 		{
 			// other error
-			return -3;
+			return -1;
 		}
+		nNoRecv -= nRecv;
+		nIsRecv += nRecv;
     }
     return nIsRecv;
 }
@@ -444,7 +455,7 @@ void Sloong::CEpollEx::OnNewAccept()
 			char* pCheckBuf = new char[m_nCheckKeyLength + 1];
 			memset(pCheckBuf, 0, m_nCheckKeyLength + 1);
 			// In Check function, client need send the check key in 3 second. 
-			int nLen = RecvEx(conn_sock, pCheckBuf, m_nCheckKeyLength,3);
+			int nLen = RecvEx(conn_sock, pCheckBuf, m_nCheckKeyLength,m_nClientCheckTime);
 			if (nLen != m_nCheckKeyLength || 0 != strcmp(pCheckBuf, m_strClientCheckKey.c_str()))
 			{
 				m_pLog->Log(CUniversal::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nCheckKeyLength,nLen,m_strClientCheckKey.c_str(), pCheckBuf));
@@ -494,7 +505,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 		// 先读取消息长度
 		memset(pLongBuffer, 0, s_llLen + 1);
 		int nRecvSize = RecvEx(nSocket, pLongBuffer, s_llLen, m_nReceiveTimeout);
-		if (nRecvSize < 0 || nRecvSize != s_llLen)
+		if (nRecvSize < 0)
 		{
 			// 读取错误,将这个连接从监听中移除并关闭连接
 			CloseConnect(nSocket);
@@ -509,7 +520,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 		{
 			long long dtlen = BytesToLong(pLongBuffer);
 			// package length cannot big than 2147483648. this is max value for int.
-			if (dtlen <= 0 || dtlen > 2147483648)
+			if (dtlen <= 0 || dtlen > 2147483648 || nRecvSize != s_llLen)
 			{
 				m_pLog->Log("Receive data length error.");
 				CloseConnect(nSocket);

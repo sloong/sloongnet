@@ -619,6 +619,16 @@ namespace Sloong
             return BitConverter.ToString(md.ComputeHash(enc.GetBytes(str))).Replace("-", "");
         }
 
+        public static byte[] LongToBytes(long l)
+        {
+            return BitConverter.GetBytes(IPAddress.HostToNetworkOrder(l));
+        }
+
+        public static long BytesToLong(byte[] b)
+        {
+            return IPAddress.NetworkToHostOrder(BitConverter.ToInt64(b, 0));
+        }
+
         public static byte[] RecvEx(Socket sock, long len, int nOverTime)
         {
             byte[] recvRes = new byte[len];
@@ -682,6 +692,11 @@ namespace Sloong
         public static void SendEx(Socket sock, byte[] data)
         {
             SendEx(sock, data, data.Length);
+        }
+        
+        public static void SendEx(Socket sock, List<byte> data)
+        {
+            SendEx(sock, data.ToArray());
         }
 
         public static void SendEx(Socket sock, byte[] data,int nSendLength)

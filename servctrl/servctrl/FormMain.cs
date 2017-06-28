@@ -171,6 +171,10 @@ namespace servctrl
             try
             {
                 sock.Connect(ipEndPoint);
+                var key = "clinecheckkeyforsloongnet";
+                var gbk = Encoding.GetEncoding("GB2312");
+                byte[] sendByte = gbk.GetBytes(key);
+                Utility.SendEx(sock, sendByte);
 
                 ConnectInfo info = new ConnectInfo();
                 info.m_Socket = sock;
