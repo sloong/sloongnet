@@ -77,7 +77,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
     auto log = pThis->m_pLog;
     auto pid = this_thread::get_id();
     string spid = CUniversal::ntos(pid);
-    log->Log("Event process thread is running." + spid);
+    log->Info("Event process thread is running." + spid);
 	int id = -1;
 	try
 	{
@@ -85,7 +85,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 	}
 	catch (exception& e)
 	{
-		log->Log("Exception happened in start message process thread. info:[" + string(e.what()) + "]");
+		log->Fatal("Exception happened in start message process thread. info:[" + string(e.what()) + "]");
 		throw e;
 	}
 	
@@ -106,7 +106,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 			CSockInfo* info = pThis->m_pEpoll->m_SockList[item.nSocket];
 			if (!info)
 			{
-				log->Log(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", item.nSocket), LOGLEVEL::WARN);
+				log->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", item.nSocket));
 				continue;
 			}
 

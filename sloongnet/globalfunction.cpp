@@ -30,22 +30,22 @@ static string g_temp_file_path = "/tmp/sloong/receivefile/temp.tmp";
 
 LuaFunctionRegistr g_LuaFunc[] =
 {
-	{ "ShowLog", CGlobalFunction::Lua_showLog },
-	{ "QuerySQL", CGlobalFunction::Lua_querySql },
-	{ "GetThumbImage", CGlobalFunction::Lua_getThumbImage },
-	{ "GetEngineVer", CGlobalFunction::Lua_getEngineVer },
-	{ "Base64_encode", CGlobalFunction::Lua_Base64_Encode },
-	{ "Base64_decode", CGlobalFunction::Lua_Base64_Decode },
-	{ "MD5_encode", CGlobalFunction::Lua_MD5_Encode },
-	{ "SendFile", CGlobalFunction::Lua_SendFile },
-	{ "ReloadScript", CGlobalFunction::Lua_ReloadScript },
-	{ "Get", CGlobalFunction::Lua_GetConfig },
-	{ "MoveFile", CGlobalFunction::Lua_MoveFile },
-	{ "GenUUID", CGlobalFunction::Lua_GenUUID },
-    { "GetSQLError", CGlobalFunction::Lua_getSqlError},
-	{ "ReceiveFile", CGlobalFunction::Lua_ReceiveFile},
-	{ "SetCommData", CGlobalFunction::Lua_SetCommData},
-	{ "GetCommData", CGlobalFunction::Lua_GetCommData },
+	{ "Sloongnet_ShowLog", CGlobalFunction::Lua_showLog },
+	{ "Sloongnet_QuerySQL", CGlobalFunction::Lua_querySql },
+	{ "Sloongnet_GetThumbImage", CGlobalFunction::Lua_getThumbImage },
+	{ "Sloongnet_GetEngineVer", CGlobalFunction::Lua_getEngineVer },
+	{ "Sloongnet_Base64_encode", CGlobalFunction::Lua_Base64_Encode },
+	{ "Sloongnet_Base64_decode", CGlobalFunction::Lua_Base64_Decode },
+	{ "Sloongnet_MD5_encode", CGlobalFunction::Lua_MD5_Encode },
+	{ "Sloongnet_SendFile", CGlobalFunction::Lua_SendFile },
+	{ "Sloongnet_ReloadScript", CGlobalFunction::Lua_ReloadScript },
+	{ "Sloongnet_Get", CGlobalFunction::Lua_GetConfig },
+	{ "Sloongnet_MoveFile", CGlobalFunction::Lua_MoveFile },
+	{ "Sloongnet_GenUUID", CGlobalFunction::Lua_GenUUID },
+    { "Sloongnet_GetSQLError", CGlobalFunction::Lua_getSqlError},
+	{ "Sloongnet_ReceiveFile", CGlobalFunction::Lua_ReceiveFile},
+	{ "Sloongnet_SetCommData", CGlobalFunction::Lua_SetCommData},
+	{ "Sloongnet_GetCommData", CGlobalFunction::Lua_GetCommData },
 };
 
 CGlobalFunction::CGlobalFunction()
@@ -89,7 +89,7 @@ void Sloong::CGlobalFunction::Initialize(CLog* plog, MySQLConnectInfo* info, boo
 		}
 		catch (normal_except& e)
 		{
-			g_pThis->m_pLog->Info(e.what(), "ERR");
+			g_pThis->m_pLog->Fatal(e.what());
 			throw e;
 		}
 	}
@@ -108,7 +108,7 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 
 	string cmd = CLua::GetStringArgument(l, 1);
 	if ( g_pThis->m_bShowSQLCmd )
-		g_pThis->m_pLog->Info(cmd,"SQL");
+		g_pThis->m_pLog->Verbos(CUniversal::Format("[SQL]:[%s]",cmd));
 	vector<string> res;
 	unique_lock<mutex> lck(g_SQLMutex);
 	int nRes = 0;
@@ -120,7 +120,7 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
 	{
 		lck.unlock();
 		string err = CUniversal::Format("SQL Query error:[%s]", e.what());
-		g_pThis->m_pLog->Info( err , "ERROR");
+		g_pThis->m_pLog->Warn(CUniversal::Format("[SQL]:[%s]", err));
 		CLua::PushInteger(l, -1);
 		CLua::PushString(l, err);
 		return 2;
@@ -141,7 +141,7 @@ int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
             allLine = allLine + line + add;
 	}
 	if (g_pThis->m_bShowSQLResult)
-		g_pThis->m_pLog->Info(CUniversal::Format("Rows:[%d],Res:[%s]", nRes, allLine.c_str()), "SQL");
+		g_pThis->m_pLog->Verbos(CUniversal::Format("[SQL]:[Rows:[%d],Res:[%s]]", nRes, allLine.c_str()));
 	
 	CLua::PushInteger(l, nRes);
 	CLua::PushString(l,allLine);
@@ -256,7 +256,7 @@ int Sloong::CGlobalFunction::Lua_SendFile(lua_State* l)
 	}
 	catch (normal_except& e)
 	{
-		g_pThis->m_pLog->Log(e.what(), ERR);
+		g_pThis->m_pLog->Error(e.what());
 		CLua::PushNumber(l, -1);
 		CLua::PushString(l, e.what());
 		return 2;
@@ -350,7 +350,7 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
 	}
 	catch (normal_except& e)
 	{
-		g_pThis->m_pLog->Log(e.what());
+		g_pThis->m_pLog->Error(e.what());
 		CLua::PushString(l, e.what());
 		CLua::PushNumber(l, nRes);
 		return 2;
@@ -504,17 +504,31 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 
 int CGlobalFunction::Lua_showLog(lua_State* l)
 {
-	string luaMode = CLua::GetStringArgument(l, 2, "");
-	if ( luaMode == "" )
-	{
-		luaMode = "Script";
-	}
+	string luaTitle = CLua::GetStringArgument(l, 2, "Info");
+	string msg = CLua::GetStringArgument(l, 1);
+	if (msg == "")
+		return 0;
 	else
-	{
-		luaMode = CUniversal::Format("Script:%s", luaMode);
-	}
-	g_pThis->m_pLog->Info(CLua::GetStringArgument(l,1),luaMode.c_str());
-	return 1;
+		msg = CUniversal::Format("[Script]:[%s]", msg);
+
+	auto log = g_pThis->m_pLog;
+	if (luaTitle == "Info")
+		log->Info(msg);
+	else if (luaTitle == "Warn")
+		log->Warn(msg);
+	else if (luaTitle=="Debug")
+		log->Debug(msg);
+	else if (luaTitle == "Error")
+		log->Error(msg);
+	else if (luaTitle == "Verbos")
+		log->Verbos(msg);
+	else if (luaTitle == "Assert")
+		log->Assert(msg);
+	else if (luaTitle == "Fatal")
+		log->Fatal(msg);
+	else
+		log->Log(msg,luaTitle);
+	return 0;
 }
 
 

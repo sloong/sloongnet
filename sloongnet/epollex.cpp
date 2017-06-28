@@ -76,7 +76,7 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
 		m_bEnableClientCheck = true;
 	}
     m_pLog = plog;
-	m_pLog->Log(CUniversal::Format("epollex is initialize.license port is %d", licensePort));
+	m_pLog->Info(CUniversal::Format("epollex is initialize.license port is %d", licensePort));
   
     // 初始化socket
     m_ListenSock=socket(AF_INET,SOCK_STREAM,0);
@@ -146,7 +146,7 @@ void* CEpollEx::WorkLoop(void* pParam)
 	CEpollEx* pThis = (CEpollEx*)pParam;
 	auto pid = this_thread::get_id();
 	string spid = CUniversal::ntos(pid);
-	pThis->m_pLog->Log("epoll work thread is running." + spid);
+	pThis->m_pLog->Info("epoll work thread is running." + spid);
 	int sockListen = pThis->m_ListenSock;
     int n,i;
     while(pThis->m_bIsRunning)
@@ -200,7 +200,7 @@ void* CEpollEx::CheckTimeoutConnect(void* pParam)
 		{
 			if (it->second != NULL && time(NULL) - it->second->m_ActiveTime > tout)
 			{
-				pThis->m_pLog->Info("Close Timeout connect:" + it->second->m_Address, "Timeout");
+				pThis->m_pLog->Info(CUniversal::Format("[Timeout]:[Close Timeout connect:%s]", it->second->m_Address));
 				pThis->CloseConnect(it->first);
 			}
 		}
@@ -213,7 +213,7 @@ void* CEpollEx::CheckTimeoutConnect(void* pParam)
 void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData, int nSize )
 {
     if (m_bShowSendMessage)
-        m_pLog->Info(msg,"SEND");
+        m_pLog->Info(string("SEND>>>")+msg);
 
     // process msg
     char* pBuf = NULL;
@@ -274,7 +274,7 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
         pInfo = m_SockList[sock];
         if (!pInfo)
         {
-			m_pLog->Log(CUniversal::Format("Get socket[%d] info from socket list failed. Close the socket.", sock), LOGLEVEL::WARN);
+			m_pLog->Warn(CUniversal::Format("Get socket[%d] info from socket list failed. Close the socket.", sock));
             CloseConnect(sock);
             return;
         }
@@ -288,7 +288,7 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
 
     unique_lock<mutex> lck(pInfo->m_oSockSendMutex, std::adopt_lock);
     // if code run here. the all list is empty. and no have exdata. try send message
-	m_pLog->Log(CUniversal::Format("No need use epoll send, call SendMessageEx with Priority[%d],Size[%d].", nPriority,nBufLen), LOGLEVEL::INF);
+	m_pLog->Verbos(CUniversal::Format("No need use epoll send, call SendMessageEx with Priority[%d],Size[%d].", nPriority,nBufLen));
     SendMessageEx(sock, nPriority, pBuf, nBufLen);
     lck.unlock();
 }
@@ -335,7 +335,7 @@ void Sloong::CEpollEx::CloseConnect(int socket)
 	CSockInfo* info = m_SockList[socket];
     if( !info )
         return;
-	m_pLog->Log(CUniversal::Format("close connect:%s:%d.", info->m_Address,info->m_nPort));
+	m_pLog->Info(CUniversal::Format("close connect:%s:%d.", info->m_Address,info->m_nPort));
 
 	unique_lock<mutex> elck(m_oEventListMutex);
 	EventListItem item;
@@ -458,7 +458,7 @@ void Sloong::CEpollEx::OnNewAccept()
 			int nLen = RecvEx(conn_sock, pCheckBuf, m_nCheckKeyLength,m_nClientCheckTime);
 			if (nLen != m_nCheckKeyLength || 0 != strcmp(pCheckBuf, m_strClientCheckKey.c_str()))
 			{
-				m_pLog->Log(CUniversal::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nCheckKeyLength,nLen,m_strClientCheckKey.c_str(), pCheckBuf));
+				m_pLog->Warn(CUniversal::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nCheckKeyLength,nLen,m_strClientCheckKey.c_str(), pCheckBuf));
 				close(conn_sock);
 				return;
 			}
@@ -473,7 +473,7 @@ void Sloong::CEpollEx::OnNewAccept()
 		info->m_pUserInfo->SetData("ip", info->m_Address);
 		info->m_pUserInfo->SetData("port", CUniversal::ntos(info->m_nPort));
 		m_SockList[conn_sock] = info;
-		m_pLog->Log(CUniversal::Format("accept client:%s.", info->m_Address));
+		m_pLog->Info(CUniversal::Format("accept client:%s.", info->m_Address));
 		//将接受的连接添加到Epoll的事件中.
 		// Add the recv event to epoll;
 		SetSocketNonblocking(conn_sock);
@@ -484,7 +484,7 @@ void Sloong::CEpollEx::OnNewAccept()
 		if (errno == EAGAIN)
 			return;
 		else
-			m_pLog->Log("accept error.");
+			m_pLog->Warn("accept error.");
 	}
 }
 
@@ -522,7 +522,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			// package length cannot big than 2147483648. this is max value for int.
 			if (dtlen <= 0 || dtlen > 2147483648 || nRecvSize != s_llLen)
 			{
-				m_pLog->Log("Receive data length error.");
+				m_pLog->Error("Receive data length error.");
 				CloseConnect(nSocket);
 				break;
 			}
@@ -548,7 +548,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 				int level = pLevel[0];
 				if (level > m_nPriorityLevel || level < 0)
 				{
-					m_pLog->Log(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", level, m_nPriorityLevel));
+					m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", level, m_nPriorityLevel));
 					pList = &info->m_pReadList[m_nPriorityLevel - 1];
 				}
 				else
@@ -585,7 +585,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			// Add the msg to the sock info list
 			delete[] data;
 			if (m_bShowReceiveMessage)
-				m_pLog->Info(recvInfo.strMessage,"RECV");
+				m_pLog->Info(string("RECV<<<")+recvInfo.strMessage);
 			
 			unique_lock<mutex> lrlck(info->m_oReadListMutex);
 			pList->push(recvInfo);
@@ -665,7 +665,7 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 		// prev package no send end. find and try send it again.
 		if (-1 != pInfo->m_nLastSentTags)
 		{
-			m_pLog->Log(CUniversal::Format("Send prev time list, Priority level:%d", pInfo->m_nLastSentTags), LOGLEVEL::INF);
+			m_pLog->Verbos(CUniversal::Format("Send prev time list, Priority level:%d", pInfo->m_nLastSentTags));
 			list = &pInfo->m_pSendList[pInfo->m_nLastSentTags];
 		}
 		// find next package. 
@@ -679,13 +679,13 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 				{
 					list = &pInfo->m_pSendList[i];
 					pInfo->m_nLastSentTags = i;
-					m_pLog->Log(CUniversal::Format("Send list, Priority level:%d", i), LOGLEVEL::INF);
+					m_pLog->Verbos(CUniversal::Format("Send list, Priority level:%d", i));
 				}
 			}
 		}
 		if (list == NULL)
 		{
-			m_pLog->Log("Send list is null, send function return.", LOGLEVEL::WARN);
+			m_pLog->Info("Send list is null, send function return.");
 			return;
 		}
 			
@@ -699,14 +699,14 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 				si = list->front();
 				if (si == NULL)
 				{
-					m_pLog->Log("The list front is NULL, pop it and get next.", LOGLEVEL::WARN);
+					m_pLog->Info("The list front is NULL, pop it and get next.");
 					list->pop();
 				}
 			}
 			else
 			{
 				// the send list is empty, so no need loop.
-				m_pLog->Log("Send list is empty list. no need send message", LOGLEVEL::WARN);
+				m_pLog->Info("Send list is empty list. no need send message");
 				break;
 			}
 		}
@@ -715,12 +715,12 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 		{
 			if (pInfo->m_nLastSentTags != -1)
 			{
-				m_pLog->Log("Current list no send message, clear the LastSentTags flag.", LOGLEVEL::WARN);
+				m_pLog->Info("Current list no send message, clear the LastSentTags flag.");
 				pInfo->m_nLastSentTags = -1;
 			}
 			else
 			{
-				m_pLog->Log(CUniversal::Format("No message need send, remove socket[%d] from Epoll",pInfo->m_sock), LOGLEVEL::WARN);
+				m_pLog->Info(CUniversal::Format("No message need send, remove socket[%d] from Epoll",pInfo->m_sock));
 				CtlEpollEvent(EPOLL_CTL_MOD, pInfo->m_sock, EPOLLIN );
 				pInfo->m_bIsSendListEmpty = true;
 			}
@@ -742,13 +742,13 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 				si->nSent = SendEx(pInfo->m_sock, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
 			}
 		}
-		m_pLog->Log(CUniversal::Format("Send Info : AllSize[%d],ExSize[%d],Sent[%d]", si->nExSize+si->nSize, si->nExSize, si->nSent), LOGLEVEL::INF);
+		m_pLog->Info(CUniversal::Format("Send Info : AllSize[%d],ExSize[%d],Sent[%d]", si->nExSize+si->nSize, si->nExSize, si->nSent));
 			
 
 		if ( si->nSent == -1 )
 		{
 			// socket closed
-			m_pLog->Log(CUniversal::Format("Send failed, close socket:[%d]", pInfo->m_sock), LOGLEVEL::WARN);
+			m_pLog->Warn(CUniversal::Format("Send failed, close socket:[%d]", pInfo->m_sock));
 			lck.unlock();
 			CloseConnect(pInfo->m_sock);
 			break;
@@ -757,7 +757,7 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 		// send done, remove the is sent data and try send next package.
 		if (si->nSent == (si->nSize + si->nExSize))
 		{
-			m_pLog->Log(CUniversal::Format("Message package send succeed, remove from send list. All size[%d]",si->nSent), LOGLEVEL::INF);
+			m_pLog->Verbos(CUniversal::Format("Message package send succeed, remove from send list. All size[%d]",si->nSent));
 			list->pop();
 			pInfo->m_nLastSentTags = -1;
 			SAFE_DELETE_ARR(si->pSendBuffer);
@@ -768,7 +768,7 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 		// send falied, wait next event.
 		else if (si->nSent >= (si->nSize + si->nExSize))
 		{
-			m_pLog->Log(CUniversal::Format("Message package send succeed,but SentSize[%d] is big than AllSize[%d]=nSize[%d] + nExSize[%d]. remove from send list.",si->nSent,si->nExSize+si->nSize,si->nSent,si->nExSize), LOGLEVEL::INF);
+			m_pLog->Warn(CUniversal::Format("Message package send succeed,but SentSize[%d] is big than AllSize[%d]=nSize[%d] + nExSize[%d]. remove from send list.",si->nSent,si->nExSize+si->nSize,si->nSent,si->nExSize));
 			list->pop();
 			pInfo->m_nLastSentTags = -1;
 			SAFE_DELETE_ARR(si->pSendBuffer);

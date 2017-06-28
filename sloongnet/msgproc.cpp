@@ -66,12 +66,12 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 	{
 		if (nRes >= (int)m_pGFunc->m_oSendExMapList.size())
 		{
-			m_pLog->Log(CUniversal::Format("Call function end, but the res is error: res [%d], SendMapList size[%d]", nRes, m_pGFunc->m_oSendExMapList.size()), LOGLEVEL::ERR);
+			m_pLog->Warn(CUniversal::Format("Call function end, but the res is error: res [%d], SendMapList size[%d]", nRes, m_pGFunc->m_oSendExMapList.size()));
 			return 0;
 		}
 		pBuf = m_pGFunc->m_oSendExMapList[nRes].m_pData;
 		int nSize = m_pGFunc->m_oSendExMapList[nRes].m_nDataSize;
-		m_pLog->Log(CUniversal::Format("Send Ex Data, Size[%d], Message[%s]", nSize,msg.c_str()), LOGLEVEL::ERR);
+		m_pLog->Verbos(CUniversal::Format("Send Ex Data, Size[%d], Message[%s]", nSize,msg.c_str()));
 		unique_lock<mutex> lck(m_pGFunc->m_oListMutex);
 		m_pGFunc->m_oSendExMapList[nRes].m_pData = NULL;
 		m_pGFunc->m_oSendExMapList[nRes].m_nDataSize = 0;
@@ -81,7 +81,7 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 	}
 	else
 	{
-		m_pLog->Log(res);
+		m_pLog->Warn(res);
 		return 0;
 	}
 }
@@ -94,7 +94,7 @@ void Sloong::CMsgProc::CloseSocket(int id, CLuaPacket* pUInfo)
 
 void Sloong::CMsgProc::HandleError(string err)
 {
-	m_pLog->Log(err, ERR, -2);
+	m_pLog->Error(CUniversal::Format("[Script]:[%s]",err));
 }
 
 int Sloong::CMsgProc::NewThreadInit()
