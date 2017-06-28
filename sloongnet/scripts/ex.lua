@@ -13,8 +13,8 @@ Ex_Req.GetFileData = function( u, req, res )
 	showLog("run sql cmd:" .. cmd);
 	local res = querySql(cmd);
 	showLog(res);
-	local thumbpath = GetThumbImage(res,w,h,q)
-	local errno,errmsg=SendFile(thumbpath);
+	local thumbpath = Sloongnet_GetThumbImage(res,w,h,q)
+	local errno,errmsg=Sloongnet_SendFile(thumbpath);
 	if errno == -1 then
 		return errno,errmsg;
 	else

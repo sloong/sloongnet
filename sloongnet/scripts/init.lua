@@ -20,14 +20,14 @@ OnError = function( msg )
 end
 
 SocketCloseProcess = function( u) 
-	ShowLog("socket closed")
+	Info("socket closed")
 end
 
 ProgressMessage = function( uinfo, request )
     local jreq = JSON:decode(request)
     local jres = JSON:decode('{}')
     local func = g_all_request_processer[jreq['funcid']];
-    ShowLog('Call process function : ' .. jreq['funcid'] );
+    Info('Call process function : ' .. jreq['funcid'] );
    
     if type(func) == 'function' then
       local code,msg,res = func( uinfo, jreq, jres );
@@ -37,7 +37,7 @@ ProgressMessage = function( uinfo, request )
       jres['errno'] = "-999"
       jres['errmsg'] = 'not find the processer. the name is %s.' .. jreq['funcid'];
     end
-    ShowLog('code:' .. jres['errno'] .. ',msg:' .. jres['errmsg'], 'Global')
+    Info('code:' .. jres['errno'] .. ',msg:' .. jres['errmsg'], 'Global')
     res = res or -1
     return JSON:encode(jres),res;
 end
