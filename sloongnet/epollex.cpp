@@ -213,7 +213,7 @@ void* CEpollEx::CheckTimeoutConnect(void* pParam)
 void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData, int nSize )
 {
     if (m_bShowSendMessage)
-        m_pLog->Info(string("SEND>>>")+msg);
+        m_pLog->Verbos(string("SEND>>>")+msg);
 
     // process msg
     char* pBuf = NULL;
@@ -585,7 +585,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			// Add the msg to the sock info list
 			delete[] data;
 			if (m_bShowReceiveMessage)
-				m_pLog->Info(string("RECV<<<")+recvInfo.strMessage);
+				m_pLog->Verbos(string("RECV<<<")+recvInfo.strMessage);
 			
 			unique_lock<mutex> lrlck(info->m_oReadListMutex);
 			pList->push(recvInfo);

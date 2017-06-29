@@ -81,7 +81,7 @@ int CMsgProc::MsgProcess( int id, CLuaPacket* pUInfo, string& msg, string&res, c
 	}
 	else
 	{
-		m_pLog->Warn(res);
+		m_pLog->Verbos(res);
 		return 0;
 	}
 }
