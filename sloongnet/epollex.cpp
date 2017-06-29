@@ -613,9 +613,11 @@ void Sloong::CEpollEx::OnCanWriteData(int nSocket)
 	CSockInfo* info = m_SockList[nSocket];
 	
 	ProcessPrepareSendList(info);
-	ProcessSendList(info);
+	int flag = EPOLLIN;
+	if (!ProcessSendList(info))
+		flag = EPOLLIN | EPOLLOUT;
 
-	CtlEpollEvent(EPOLL_CTL_MOD, nSocket, EPOLLIN | EPOLLOUT);
+	CtlEpollEvent(EPOLL_CTL_MOD, nSocket, flag);
 }
 
 
@@ -652,7 +654,7 @@ void Sloong::CEpollEx::ProcessPrepareSendList(CSockInfo* info)
 	}
 }
 
-void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
+bool Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 {
 	// when prepare list process done, do send operation.
 	unique_lock<mutex> lck(pInfo->m_oSockSendMutex);
@@ -685,10 +687,10 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 		}
 		if (list == NULL)
 		{
-			m_pLog->Info("Send list is null, send function return.");
-			return;
+			m_pLog->Verbos("Send list is null, send function return.");
+			return true;
 		}
-			
+
 
 		// if no find send info, is no need send anything , remove this sock from epoll.'
 		SENDINFO* si = NULL;
@@ -699,14 +701,14 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 				si = list->front();
 				if (si == NULL)
 				{
-					m_pLog->Info("The list front is NULL, pop it and get next.");
+					m_pLog->Verbos("The list front is NULL, pop it and get next.");
 					list->pop();
 				}
 			}
 			else
 			{
 				// the send list is empty, so no need loop.
-				m_pLog->Info("Send list is empty list. no need send message");
+				m_pLog->Verbos("Send list is empty list. no need send message");
 				break;
 			}
 		}
@@ -715,12 +717,12 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 		{
 			if (pInfo->m_nLastSentTags != -1)
 			{
-				m_pLog->Info("Current list no send message, clear the LastSentTags flag.");
+				m_pLog->Verbos("Current list no send message, clear the LastSentTags flag.");
 				pInfo->m_nLastSentTags = -1;
 			}
 			else
 			{
-				m_pLog->Info(CUniversal::Format("No message need send, remove socket[%d] from Epoll",pInfo->m_sock));
+				m_pLog->Verbos(CUniversal::Format("No message need send, remove socket[%d] from Epoll",pInfo->m_sock));
 				CtlEpollEvent(EPOLL_CTL_MOD, pInfo->m_sock, EPOLLIN );
 				pInfo->m_bIsSendListEmpty = true;
 			}
@@ -742,7 +744,7 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 				si->nSent = SendEx(pInfo->m_sock, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
 			}
 		}
-		m_pLog->Info(CUniversal::Format("Send Info : AllSize[%d],ExSize[%d],Sent[%d]", si->nExSize+si->nSize, si->nExSize, si->nSent));
+		m_pLog->Verbos(CUniversal::Format("Send Info : AllSize[%d],ExSize[%d],Sent[%d]", si->nExSize+si->nSize, si->nExSize, si->nSent));
 			
 
 		if ( si->nSent == -1 )
@@ -783,6 +785,7 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 	}
 
 	lck.unlock();
+	return false;
 }
 
 void Sloong::CEpollEx::CloseSocket(int socket)

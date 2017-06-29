@@ -34,7 +34,11 @@ namespace Sloong
         bool SendMessageEx( int sock, int nPriority, const char* pData, int nSize);
         void SetEvent( condition_variable* pCV );
 		void ProcessPrepareSendList( CSockInfo* info );
-		void ProcessSendList(CSockInfo* pInfo);
+		/************************************************************************/
+		/* If need listen write event, return false, else return true
+		*/
+		/************************************************************************/
+		bool ProcessSendList(CSockInfo* pInfo);
 		//////////////////////////////////////////////////////////////////////////
 		// Add for #20 [https://git.sloong.com/public/sloongnet/issues/20] 
 		// 在下面的CloseConnect函数中，将只关闭socket连接和发送event，并不删除相对应的信息
