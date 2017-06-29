@@ -24,6 +24,18 @@ namespace Sloong
 		string ScriptFolder;
 	};
 
+	struct LogConfigInfo
+	{
+		bool	DebugMode;
+		bool	ShowSendMessage;
+		bool	ShowReceiveMessage;
+		bool	LogWriteToOneFile;
+		bool	ShowSQLCmd;
+		bool	ShowSQLResult;
+		int		LogLevel;
+		string	LogPath;
+	};
+
 	enum EventType
 	{
 		ReceivedData,

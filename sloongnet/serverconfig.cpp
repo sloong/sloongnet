@@ -24,9 +24,18 @@ CServerConfig::CServerConfig()
 	m_oConnectInfo.Password = "sloong";
 	m_oConnectInfo.Database = "sloong";
 
+	// Log config init
+	m_oLogInfo.DebugMode = true;
+	m_oLogInfo.ShowSQLCmd = false;
+	m_oLogInfo.ShowSQLResult = false;
+	m_oLogInfo.ShowSendMessage = false;
+	m_oLogInfo.ShowReceiveMessage = false;
+	m_oLogInfo.LogWriteToOneFile = false;
+	m_oLogInfo.LogPath = "./sloongnet.log";
+	m_oLogInfo.LogLevel = 0;
+
 	// Server init
 	m_nPort = 9009;
-	m_bDebugMode = true;
     m_nPriorityLevel = 0;
 	m_bEnableMD5Check = false;
 	m_bEnableSwiftNumberSup = false;
@@ -42,16 +51,6 @@ CServerConfig::CServerConfig()
 	m_nEPoolThreadQuantity = 1;
 	m_nProcessThreadQuantity = 1;
 	m_nTimeoutInterval = 5;
-
-	// Path
-	m_strLogPath = "./sloongnet.log";
-
-	// Log config init
-	m_bShowSQLCmd = false;
-	m_bShowSQLResult = false;
-	m_bShowSendMessage = false;
-	m_bShowReceiveMessage = false;
-	m_bLogWriteToOneFile = false;
 }
 
 bool CServerConfig::Initialize(string path, string exConfig)
@@ -136,7 +135,7 @@ string Sloong::CServerConfig::GetStringConfig(string strSection, string strKey, 
 	return strRes;
 }
 
-bool Sloong::CServerConfig::GetBoolenConfig(string strSection, string strKey, bool& bDef, bool bThrowWhenFialed /*= false*/)
+bool Sloong::CServerConfig::GetBoolenConfig(string strSection, string strKey, bool bDef, bool bThrowWhenFialed /*= false*/)
 {
 	if (g_pThis == NULL || g_pThis->m_pFile == NULL)
 		throw normal_except("Config object no initialize");
@@ -169,7 +168,7 @@ bool Sloong::CServerConfig::GetBoolenConfig(string strSection, string strKey, bo
 	return bRes;
 }
 
-int Sloong::CServerConfig::GetIntConfig(string strSection, string strKey, int& nDef, bool bThrowWhenFialed /*= false*/)
+int Sloong::CServerConfig::GetIntConfig(string strSection, string strKey, int nDef, bool bThrowWhenFialed /*= false*/)
 {
 	if (g_pThis == NULL|| g_pThis->m_pFile == NULL)
 		throw normal_except("Config object no initialize");
@@ -211,9 +210,26 @@ void Sloong::CServerConfig::LoadConfig()
 	m_oConnectInfo.Password = GetStringConfig("MySQL", "Password", m_oConnectInfo.Password);
 	m_oConnectInfo.Database = GetStringConfig("MySQL", "Database", m_oConnectInfo.Database);
 
+	// load lua config 
+	m_oLuaConfigInfo.ScriptFolder = GetStringConfig("Lua", "ScriptFolder", "./");
+	m_oLuaConfigInfo.EntryFile = GetStringConfig("Lua", "EntryFile", "init.lua");
+	m_oLuaConfigInfo.EntryFunction = GetStringConfig("Lua", "EntryFunction", "Init");
+	m_oLuaConfigInfo.ProcessFunction = GetStringConfig("Lua", "ProcessFunction", "MessageProcess");
+	m_oLuaConfigInfo.SocketCloseFunction = GetStringConfig("Lua", "SocketCloseFunction", "SocketCloseProcess");
+
+	// Load Log config info
+	m_oLogInfo.DebugMode = GetBoolenConfig("Log", "DebugMode", m_oLogInfo.DebugMode);
+	m_oLogInfo.LogPath = GetStringConfig("Log", "LogPath", m_oLogInfo.LogPath);
+	m_oLogInfo.ShowReceiveMessage = GetBoolenConfig("Log", "ShowReceiveMessage", m_oLogInfo.ShowReceiveMessage);
+	m_oLogInfo.ShowSendMessage = GetBoolenConfig("Log", "ShowSendMessage", m_oLogInfo.ShowSendMessage);
+	m_oLogInfo.LogWriteToOneFile = GetBoolenConfig("Log", "WriteToOneFile", m_oLogInfo.LogWriteToOneFile);
+	m_oLogInfo.ShowSQLCmd = GetBoolenConfig("Log", "ShowSQLCmd", m_oLogInfo.ShowSQLCmd);
+	m_oLogInfo.ShowSQLResult = GetBoolenConfig("Log", "ShowSQLResult", m_oLogInfo.ShowSQLResult);
+	m_oLogInfo.LogLevel = GetIntConfig("Log", "LogLevel", m_oLogInfo.LogLevel);
+
 	// Load server info
 	m_nPort = GetIntConfig("Server", "Port", m_nPort);
-	m_bDebugMode = GetBoolenConfig("Server", "DebugMode", m_bDebugMode);
+	
 	m_nPriorityLevel = GetIntConfig("Server", "PriorityLevel", m_nPriorityLevel);
 	m_bEnableMD5Check = GetBoolenConfig("Server", "EnableMD5Check", m_bEnableMD5Check);
 	m_bEnableSwiftNumberSup = GetBoolenConfig("Server", "EnableSwiftNumberSupport", m_bEnableSwiftNumberSup);
@@ -228,23 +244,5 @@ void Sloong::CServerConfig::LoadConfig()
 	m_nSleepInterval = GetIntConfig("Performance", "SleepInterval", m_nSleepInterval);
 	m_nProcessThreadQuantity = GetIntConfig("Performance", "ProcessThreadQuantity", m_nProcessThreadQuantity);
 	m_nEPoolThreadQuantity = GetIntConfig("Performance", "EPoolThreadQuantity", m_nEPoolThreadQuantity);
-	m_nTimeoutInterval = GetIntConfig("Performance", "TimeoutInterval", m_nTimeoutInterval);
-	
-
-	// path
-	m_strLogPath = GetStringConfig("Path", "LogPath", m_strLogPath);
-
-	// Load log config
-	m_bShowReceiveMessage = GetBoolenConfig("Log", "ShowReceiveMessage", m_bShowReceiveMessage);
-	m_bShowSendMessage = GetBoolenConfig("Log", "ShowSendMessage", m_bShowSendMessage);
-	m_bLogWriteToOneFile = GetBoolenConfig("Log", "WriteToOneFile", m_bLogWriteToOneFile);
-	m_bShowSQLCmd = GetBoolenConfig("Log", "ShowSQLCmd", m_bShowSQLCmd);
-	m_bShowSQLResult = GetBoolenConfig("Log", "ShowSQLResult", m_bShowSQLResult);
-
-	// load lua config 
-	m_oLuaConfigInfo.ScriptFolder = GetStringConfig("Lua", "ScriptFolder", "./");
-	m_oLuaConfigInfo.EntryFile = GetStringConfig("Lua", "EntryFile", "init.lua");
-	m_oLuaConfigInfo.EntryFunction = GetStringConfig("Lua", "EntryFunction", "Init");
-	m_oLuaConfigInfo.ProcessFunction = GetStringConfig("Lua", "ProcessFunction", "MessageProcess");
-	m_oLuaConfigInfo.SocketCloseFunction = GetStringConfig("Lua", "SocketCloseFunction", "SocketCloseProcess");
+	m_nTimeoutInterval = GetIntConfig("Performance", "TimeoutInterval", m_nTimeoutInterval);	
 }

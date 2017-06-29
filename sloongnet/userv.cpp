@@ -44,19 +44,19 @@ void SloongWallUS::Initialize(CServerConfig* config)
 	m_nPriorityLevel = config->m_nPriorityLevel;
 
     LOGTYPE oType = LOGTYPE::ONEFILE;
-    if (!config->m_bLogWriteToOneFile)
+    if (!config->m_oLogInfo.LogWriteToOneFile)
 	{
         oType = LOGTYPE::DAY;
 	}
-    m_pLog->Initialize(config->m_strLogPath, config->m_bDebugMode, LOGLEVEL::All, oType);
+    m_pLog->Initialize(config->m_oLogInfo.LogPath, config->m_oLogInfo.DebugMode, LOGLEVEL(config->m_oLogInfo.LogLevel), oType);
 
     m_pLog->SetWorkInterval(config->m_nSleepInterval);
     m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel, 
 				config->m_bEnableSwiftNumberSup, config->m_bEnableMD5Check, config->m_nConnectTimeout, 
 		config->m_nTimeoutInterval,config->m_nReceiveTimeout, config->m_nClientCheckTime, config->m_strClientCheckKey);
-	m_pEpoll->SetLogConfiguration(m_pConfig->m_bShowSendMessage, m_pConfig->m_bShowReceiveMessage);
+	m_pEpoll->SetLogConfiguration(m_pConfig->m_oLogInfo.ShowSendMessage, m_pConfig->m_oLogInfo.ShowReceiveMessage);
     m_pEpoll->SetEvent(&m_oEventCV);
-    m_pMsgProc->Initialize(m_pLog,&config->m_oConnectInfo, &config->m_oLuaConfigInfo, config->m_bShowSQLCmd, config->m_bShowSQLResult);
+    m_pMsgProc->Initialize(m_pLog,&config->m_oConnectInfo, &config->m_oLuaConfigInfo, config->m_oLogInfo.ShowSQLCmd, config->m_oLogInfo.ShowSQLResult);
 }
 
 void SloongWallUS::Run()

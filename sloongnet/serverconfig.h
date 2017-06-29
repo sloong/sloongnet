@@ -19,8 +19,8 @@ namespace Sloong
 	public: 
 		// Load string config, if load error, the value will the origin value. if succeed, the value will change to config.
 		static string GetStringConfig(string strSection, string strKey, string strDef, bool bThrowWhenFialed = false );
-		static bool GetBoolenConfig(string strSection, string strKey, bool& bDef, bool bThrowWhenFialed = false);
-		static int GetIntConfig(string strSection, string strKey, int& nDef, bool bThrowWhenFialed = false);
+		static bool GetBoolenConfig(string strSection, string strKey, bool bDef, bool bThrowWhenFialed = false);
+		static int GetIntConfig(string strSection, string strKey, int nDef, bool bThrowWhenFialed = false);
 		static CServerConfig* g_pThis;
 
 	private:
@@ -35,10 +35,11 @@ namespace Sloong
 		MySQLConnectInfo m_oConnectInfo;
 		// Lua script config
 		LuaScriptConfigInfo m_oLuaConfigInfo;
+		// Log
+		LogConfigInfo m_oLogInfo;
 
 		// Server config
 		int m_nPort;
-		bool m_bDebugMode;
 		int m_nPriorityLevel;
 		bool m_bEnableSwiftNumberSup;
 		bool m_bEnableMD5Check;
@@ -54,16 +55,6 @@ namespace Sloong
 		int m_nProcessThreadQuantity;
 		int m_nEPoolThreadQuantity;
 		int m_nTimeoutInterval;
-
-		// Path
-		string m_strLogPath;
-
-		// Message show/hide
-		bool m_bShowSendMessage;
-		bool m_bShowReceiveMessage;
-		bool m_bLogWriteToOneFile;
-		bool m_bShowSQLCmd;
-		bool m_bShowSQLResult;
 	};
 }
 
