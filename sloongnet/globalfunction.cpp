@@ -471,7 +471,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 				CUniversal::touper(md5);
 				if (fileList.count(md5) == 0)
 				{
-					// 没有目标md5，表示文件有问题
+					// 娌℃湁鐩爣md5锛岃〃绀烘枃浠舵湁闂
 					// Close the socket
 					close(cSocket);
 					throw normal_except(CUniversal::Format("no find target md5[%s] in list.",md5.c_str()));
