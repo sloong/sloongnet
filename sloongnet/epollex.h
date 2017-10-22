@@ -59,24 +59,6 @@ namespace Sloong
 	public:
 		static void* WorkLoop(void* params);
 		static void* CheckTimeoutConnect(void* params);
-	    static int SendEx(int sock, const char* buf, int nSize, int nStart, bool eagain = false);
-		/************************************************************************/
-		/*		ReceEx function.                 
-			Params:
-					sock	-> the socket handle
-					buf		-> the data buffer
-					nSize	-> the receive size
-					nTimeout-> timeout time, default is 0. no need timeout
-					eagain	-> continue when the EINTR,EAGAIN error if value is true.
-								else return direct. in default is false.
-			Return:
-					如果请求成功，返回大于0的接收数据长度。
-					如果接收超时，返回0。
-					如果发生EINTR,EAGAIN错误且eagain为true，返回0。
-					如果发生其他错误，返回-1。
-					*/
-		/************************************************************************/
-        static int RecvEx( int sock, char* buf, int nSize, int nTimeout = 0, bool bAgain = false );
 	protected:
 		int     m_ListenSock;
 		int 	m_EpollHandle;
