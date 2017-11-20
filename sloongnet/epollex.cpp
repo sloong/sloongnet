@@ -37,27 +37,6 @@ CEpollEx::~CEpollEx()
 {
 }
 
-#include  <inttypes.h> 
-inline uint64_t htonll(uint64_t val) { 
-return  (((uint64_t)htonl(val)) << 32) + htonl(val >> 32);
-}
-
-inline uint64_t ntohll(uint64_t val) {
-	return  (((uint64_t)ntohl(val)) << 32) + ntohl(val >> 32);
-}
-
-inline void LongToBytes(long long l, char* pBuf)
-{
-	auto ul_MessageLen = htonll(l);
-	memcpy(pBuf, (void*)&ul_MessageLen, s_llLen);
-}
-
-inline long long BytesToLong(char* point)
-{
-	long long netLen = 0;
-	memcpy(&netLen, point, s_llLen);
-	return ntohll(netLen);
-}
 
 // Initialize the epoll and the thread pool.
 int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, int nConnectTimeout, int nTimeoutInterval, int nRecvTimeout, int nCheckTimtoue, string strCheckKey)
@@ -240,11 +219,11 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
     memset(pBuf, 0, nBufLen);
     char* pCpyPoint = pBuf;
 	
-	LongToBytes(nMsgLen, pCpyPoint);
+    CUniversal::LongToBytes(nMsgLen, pCpyPoint);
     pCpyPoint += 8;
     if (m_bSwiftNumberSupport)
     {
-		LongToBytes(nSwift, pCpyPoint);
+        CUniversal::LongToBytes(nSwift, pCpyPoint);
         pCpyPoint += s_llLen;
     }
     if (m_bMD5Support)
@@ -257,7 +236,7 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
     if (pExData != NULL && nSize > 0)
     {
 		long long Exlen = nSize;
-		LongToBytes(Exlen, pCpyPoint);
+        CUniversal::LongToBytes(Exlen, pCpyPoint);
         pCpyPoint += 8;
     }
 
@@ -295,7 +274,7 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
 
 bool CEpollEx::SendMessageEx(int sock, int nPriority, const char *pBuf, int nSize)
 {
-    int nMsgSend = SendEx(sock, pBuf, nSize, 0, true);
+    int nMsgSend = CUniversal::SendEx(sock, pBuf, nSize, 0, true);
     if( nMsgSend != nSize )
     {
         AddToSendList(sock, nPriority, pBuf, nSize, nMsgSend, NULL, 0);
@@ -347,97 +326,6 @@ void Sloong::CEpollEx::CloseConnect(int socket)
 	elck.unlock();
 }
 
-
-
-int Sloong::CEpollEx::SendEx(int sock,const char* buf, int nSize, int nStart, bool eagain /*= false*/)
-{	
-    int nAllSent = nStart;
-    int nSentSize = nStart;
-    int nNosendSize = nSize - nStart;
-    //CProgressBar pbar("", 100, Number);
-
-	while (nNosendSize > 0)
-	{
-		nSentSize = write(sock, buf + nSize - nNosendSize, nNosendSize);
-		// if errno != EAGAIN or again for error and return is -1, return false
-		if (nSentSize == -1 ) 
-		{
-			if (eagain == true || errno != EAGAIN)
-				return nAllSent;
-			else if(errno == SIGPIPE)
-				return -1;
-			else
-				continue;
-		}
-		nNosendSize -= nSentSize;
-        nAllSent += nSentSize;
-        //pbar.Update((float)nAllSent/(float)nSize);
-	}
-    return nAllSent;
-}
-
-
-
-int Sloong::CEpollEx::RecvEx(int sock, char* buf, int nSize, int nTimeout, bool bAgain /* = false */)
-{
-	if (nSize <= 0)
-		return 0;
-
-    int nIsRecv = 0;
-    int nNoRecv = nSize;
-    int nRecv = 0;
-    char* pBuf = buf;
-	fd_set reset;
-	struct timeval tv;
-	FD_ZERO(&reset);
-	FD_SET(sock, &reset);
-	tv.tv_sec = nTimeout;
-	tv.tv_usec = 0;
-    while (nIsRecv < nSize)
-    {
-		auto error = select(sock+1, &reset, NULL, NULL, nTimeout > 0 ? &tv : NULL);
-		if (error == 0)
-		{
-			// timeout
-			return 0;
-		}
-		else if (FD_ISSET(sock, &reset))
-		{
-			nRecv = recv(sock, pBuf + nSize - nNoRecv, nNoRecv, 0);
-			if (nRecv < 0)
-			{
-				// 在非阻塞模式下，socket可能会收到EAGAIN和EINTR这两个错误，
-				// 不过这两个错误不应该直接返回。
-				if (errno == EAGAIN || errno == EINTR)
-				{
-					// 如果bAgain为true，并且已经在接收数据，那么开始重试
-					if (bAgain == true && nIsRecv != 0)
-					{
-						continue;
-					}
-					else
-					{
-						return -1;
-					}
-				}
-				// 如果是其他错误，则直接返回
-				else
-				{
-					return -1;
-				}
-			}
-		}
-		else
-		{
-			// other error
-			return -1;
-		}
-		nNoRecv -= nRecv;
-		nIsRecv += nRecv;
-    }
-    return nIsRecv;
-}
-
 void Sloong::CEpollEx::OnNewAccept()
 {
 	// accept the connect and add it to the list
@@ -455,7 +343,7 @@ void Sloong::CEpollEx::OnNewAccept()
 			char* pCheckBuf = new char[m_nCheckKeyLength + 1];
 			memset(pCheckBuf, 0, m_nCheckKeyLength + 1);
 			// In Check function, client need send the check key in 3 second. 
-			int nLen = RecvEx(conn_sock, pCheckBuf, m_nCheckKeyLength,m_nClientCheckTime);
+            int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, m_nCheckKeyLength,m_nClientCheckTime);
 			if (nLen != m_nCheckKeyLength || 0 != strcmp(pCheckBuf, m_strClientCheckKey.c_str()))
 			{
 				m_pLog->Warn(CUniversal::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nCheckKeyLength,nLen,m_strClientCheckKey.c_str(), pCheckBuf));
@@ -504,7 +392,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 	{
 		// 先读取消息长度
 		memset(pLongBuffer, 0, s_llLen + 1);
-		int nRecvSize = RecvEx(nSocket, pLongBuffer, s_llLen, m_nReceiveTimeout);
+        int nRecvSize = CUniversal::RecvEx(nSocket, pLongBuffer, s_llLen, m_nReceiveTimeout);
 		if (nRecvSize < 0)
 		{
 			// 读取错误,将这个连接从监听中移除并关闭连接
@@ -518,7 +406,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 		}
 		else
 		{
-			long long dtlen = BytesToLong(pLongBuffer);
+            long long dtlen = CUniversal::BytesToLong(pLongBuffer);
 			// package length cannot big than 2147483648. this is max value for int.
 			if (dtlen <= 0 || dtlen > 2147483648 || nRecvSize != s_llLen)
 			{
@@ -529,7 +417,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			char* data = new char[dtlen + 1];
 			memset(data, 0, dtlen + 1);
 
-			nRecvSize = RecvEx(nSocket, data, dtlen, m_nReceiveTimeout, true);//一次性接受所有消息
+            nRecvSize = CUniversal::RecvEx(nSocket, data, dtlen, m_nReceiveTimeout, true);//一次性接受所有消息
 			if (nRecvSize < 0)
 			{
 				CloseConnect(nSocket);
@@ -567,7 +455,7 @@ void Sloong::CEpollEx::OnDataCanReceive( int nSocket )
 			{
 				memset(pLongBuffer, 0, s_llLen);
 				memcpy(pLongBuffer, pMsg, s_llLen);
-				recvInfo.nSwiftNumber = BytesToLong(pLongBuffer);
+                recvInfo.nSwiftNumber = CUniversal::BytesToLong(pLongBuffer);
 				pMsg += s_llLen;
 			}
 
@@ -732,16 +620,16 @@ bool Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 		if (si->nSent >= si->nSize)
 		{
 			// Send ex data
-			si->nSent = SendEx(pInfo->m_sock, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
+            si->nSent = CUniversal::SendEx(pInfo->m_sock, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
 		}
 		else
 		{
 			// send normal data.
-			si->nSent = SendEx(pInfo->m_sock, si->pSendBuffer, si->nSize, si->nSent);
+            si->nSent = CUniversal::SendEx(pInfo->m_sock, si->pSendBuffer, si->nSize, si->nSent);
 			// when send nurmal data succeeded, try send exdata in one time.
 			if ( si->nSent != -1 && si->nSent == si->nSize )
 			{
-				si->nSent = SendEx(pInfo->m_sock, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
+                si->nSent = CUniversal::SendEx(pInfo->m_sock, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
 			}
 		}
 		m_pLog->Verbos(CUniversal::Format("Send Info : AllSize[%d],ExSize[%d],Sent[%d]", si->nExSize+si->nSize, si->nExSize, si->nSent));
