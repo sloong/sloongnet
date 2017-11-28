@@ -28,6 +28,7 @@ namespace Sloong
 		virtual ~CEpollEx();
         int Initialize(CLog* pLog,int listenPort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, 
 				int nTimeout, int nTimeoutInterval, int nRecvTimeout, int nCheckTimeout,string strCheckKey);
+		void EnableSSL(string certFile, string keyFile);
 		void SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage);
 		void Exit();
         void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
@@ -46,16 +47,29 @@ namespace Sloong
 		//////////////////////////////////////////////////////////////////////////
 		void CloseSocket(int socket);
 	protected:
+		/// 设置socket到非阻塞模式
 		int SetSocketNonblocking(int socket);
+		/// 修改socket的epoll监听事件
 		void CtlEpollEvent(int opt, int sock, int events);
-		// close the connected socket and remove the resources.
+		/// close the connected socket and remove the resources.
 		void CloseConnect(int socket);
+		/// 将响应消息加入到epoll发送列表中
 		void AddToSendList(int socket, int nPriority, const char* pBuf, int nSize, int nStart, const char* pExBuf, int nExSize);
 		
 		// event function
 		void OnNewAccept();
 		void OnDataCanReceive( int nSocket );
 		void OnCanWriteData( int nSocket );
+
+		/// 加载SSL的证书文件
+		void LoadCertificate(SSL_CTX* ctx, const char* certFile, const char* keyFile);
+		/// 初始化SSL环境
+		SSL_CTX* InitializeSSL();
+
+		/// 发送数据。自动区分普通发送或者SSL发送
+		int SendEx(int sock, const char* data, int len, int index);
+		int RecvEx(int socket, const char* data, int len, int timeout, bool bagain);
+		
 	public:
 		static void* WorkLoop(void* params);
 		static void* CheckTimeoutConnect(void* params);
@@ -87,6 +101,7 @@ namespace Sloong
 		mutex m_oExitMutex;
 		condition_variable m_oExitCV;
         condition_variable* m_pEventCV;
+		bool m_bEnableSSL;
 	};
 }
 

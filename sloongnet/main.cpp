@@ -63,10 +63,10 @@ int main( int argc, char** args )
 	set_terminate(sloong_terminator);
 	set_unexpected(sloong_terminator);
 
-	//SIGPIPE:ÔÚreaderÖÕÖ¹Ö®ºóĞ´pipeµÄÊ±ºò·¢Éú
-	//SIG_IGN:ºöÂÔĞÅºÅµÄ´¦Àí³ÌĞò
-	//SIGCHLD: ½ø³ÌTerminate»òStopµÄÊ±ºò,SIGPIPE»á·¢ËÍ¸ø½ø³ÌµÄ¸¸½ø³Ì,È±Ê¡Çé¿öÏÂ¸ÃSignal»á±»ºöÂÔ
-	//SIGINT:ÓÉInterrupt Key²úÉú,Í¨³£ÊÇCtrl+c»òÕßDelete,·¢ËÍ¸øËùÓĞµÄForeGroundGroup½ø³Ì.
+	//SIGPIPE:åœ¨readerç»ˆæ­¢ä¹‹åå†™pipeçš„æ—¶å€™å‘ç”Ÿ
+	//SIG_IGN:å¿½ç•¥ä¿¡å·çš„å¤„ç†ç¨‹åº
+	//SIGCHLD: è¿›ç¨‹Terminateæˆ–Stopçš„æ—¶å€™,SIGPIPEä¼šå‘é€ç»™è¿›ç¨‹çš„çˆ¶è¿›ç¨‹,ç¼ºçœæƒ…å†µä¸‹è¯¥Signalä¼šè¢«å¿½ç•¥
+	//SIGINT:ç”±Interrupt Keyäº§ç”Ÿ,é€šå¸¸æ˜¯Ctrl+cæˆ–è€…Delete,å‘é€ç»™æ‰€æœ‰çš„ForeGroundGroupè¿›ç¨‹.
 	signal(SIGPIPE, SIG_IGN); // this signal should call the socket check function. and remove the timeout socket.
 	signal(SIGCHLD, SIG_IGN);
 	signal(SIGINT, &on_sigint);

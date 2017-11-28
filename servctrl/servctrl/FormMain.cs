@@ -35,6 +35,7 @@ namespace servctrl
         // UI defines
         private FormStatus formStatus = null;
         private FormTest formTest = null;
+        private FormLog formLog = null;
         FormLogin formLogin = null;
         FormManage formManage = null;
         private Log log = null;
@@ -127,6 +128,7 @@ namespace servctrl
             formTest = new FormTest(share);
             formLogin = new FormLogin(share);
             formManage = new FormManage(share);
+            formLog = new FormLog(share);
 
             tabPageStatus.Controls.Add(formStatus);
             formStatus.Show();
@@ -136,6 +138,8 @@ namespace servctrl
             formLogin.Show();
             tabPageManage.Controls.Add(formManage);
             formManage.Show();
+            tabPageLog.Controls.Add(formLog);
+            formLog.Show();
         }
 
         private void InitFormStatus()
