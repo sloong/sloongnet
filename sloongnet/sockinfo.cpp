@@ -17,6 +17,7 @@ Sloong::CSockInfo::CSockInfo(int nPriorityLevel)
 	m_pUserInfo = new CLuaPacket();
 	m_nLastSentTags = -1;
     m_bIsSendListEmpty = true;
+	m_ssl = NULL;
 }
 
 CSockInfo::~CSockInfo()

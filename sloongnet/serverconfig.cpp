@@ -41,6 +41,7 @@ CServerConfig::CServerConfig()
 	m_bEnableSwiftNumberSup = false;
 	m_nConnectTimeout = 2;
 	m_nReceiveTimeout = 20;
+	m_bEnableSSL = false;
 
 	// Security
 	m_strClientCheckKey = "";
@@ -229,7 +230,7 @@ void Sloong::CServerConfig::LoadConfig()
 
 	// Load server info
 	m_nPort = GetIntConfig("Server", "Port", m_nPort);
-	
+	m_bEnableSSL = GetBoolenConfig("Server", "EnableSSL", m_bEnableSSL);
 	m_nPriorityLevel = GetIntConfig("Server", "PriorityLevel", m_nPriorityLevel);
 	m_bEnableMD5Check = GetBoolenConfig("Server", "EnableMD5Check", m_bEnableMD5Check);
 	m_bEnableSwiftNumberSup = GetBoolenConfig("Server", "EnableSwiftNumberSupport", m_bEnableSwiftNumberSup);

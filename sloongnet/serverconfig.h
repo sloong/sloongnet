@@ -55,6 +55,8 @@ namespace Sloong
 		int m_nProcessThreadQuantity;
 		int m_nEPoolThreadQuantity;
 		int m_nTimeoutInterval;
+
+		bool m_bEnableSSL;
 	};
 }
 

@@ -53,6 +53,8 @@ namespace Sloong
 		int m_nPort;
 		time_t m_ActiveTime;
 		int m_sock;
+		SSL* m_ssl;
+
 		CLuaPacket* m_pUserInfo;
         mutex m_oSockReadMutex;
         mutex m_oSockSendMutex;

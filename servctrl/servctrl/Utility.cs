@@ -829,5 +829,18 @@ namespace Sloong
             compressString = enc.GetString(compressAfterByte);
             return compressString;
         }
+
+        public static long RecvDataLength(Socket sock, int overTime)
+        {
+            byte[] leng = Utility.RecvEx(sock, 8, overTime);
+
+            var hostLen = Utility.BytesToLong(leng);
+            if (hostLen <= 0 || hostLen > 2147483648)
+            {
+                throw new Exception(string.Format("Recv length error. the length is:{0}. the data is:{1}", hostLen, leng.ToString()));
+            }
+
+            return hostLen;
+        }
     }
 }
