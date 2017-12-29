@@ -52,6 +52,7 @@ void SloongWallUS::Initialize(CServerConfig* config)
 
     m_pLog->SetWorkInterval(config->m_nSleepInterval);
     m_pLog->EnableNetworkLog(10623);
+	m_pEpoll->EnableSSL("/root/keys/walls-server/server.pem", "/root/keys/walls-server/server.pem");
     m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel, 
 				config->m_bEnableSwiftNumberSup, config->m_bEnableMD5Check, config->m_nConnectTimeout, 
 		config->m_nTimeoutInterval,config->m_nReceiveTimeout, config->m_nClientCheckTime, config->m_strClientCheckKey);

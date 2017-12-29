@@ -373,7 +373,7 @@ namespace servctrl
                 // 发送之后不需要等待直接准备连接
                 try
                 {
-                    string servIp = SocketMap[0].m_IPInfo.Address.ToString();
+                    string servIp = SocketMap[0].m_URL;// m_IPInfo.Address.ToString();
                     Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                     if (jres["ip"] != null)
                     {

@@ -1,9 +1,10 @@
 #ifndef SOCKINFO_H
 #define SOCKINFO_H
 
-#include<queue>
+#include <queue>
 #include <string>
 #include <mutex>
+#include <openssl/ssl.h>
 using std::string;
 using std::mutex;
 using std::vector;

@@ -46,6 +46,7 @@ namespace Sloong.Interface
         SwitchUI,
         ShowBalloonMessage,
         WaitThumbImage,
+        ConnectToNetwork,
     }
 
     public enum UIType

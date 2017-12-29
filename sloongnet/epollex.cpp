@@ -33,6 +33,7 @@ CEpollEx::CEpollEx()
 	m_pEventCV = NULL;
 	m_bIsRunning = false;
 	m_bEnableClientCheck = false;
+	m_pCTX = NULL;
 }
 
 CEpollEx::~CEpollEx()
@@ -98,30 +99,28 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
 
 void CEpollEx::EnableSSL(string certFile, string keyFile)
 {
-	//string certFile = "/home/stud/kawsar/mycert.pem";
-	//string keyFile = "/home/stud/kawsar/mycert.pem";
 	m_bEnableSSL = true;
 	m_pCTX = InitializeSSL(); // Initialize SSL
-	LoadCertificates(m_pCTX, certFile.c_str(), keyFile.c_str()); //Load certs
+	LoadCertificate(m_pCTX, certFile.c_str(), keyFile.c_str()); //Load certs
 }
 
 
 void CEpollEx::LoadCertificate(SSL_CTX* ctx, const char* certFile, const char* keyFile)
 {
 	//New lines
-	if (SSL_CTX_load_verify_locations(ctx, CertFile, KeyFile) != 1)
+	if (SSL_CTX_load_verify_locations(ctx, certFile, keyFile) != 1)
 		ERR_print_errors_fp(stderr);
 	if (SSL_CTX_set_default_verify_paths(ctx) != 1)
 		ERR_print_errors_fp(stderr);
 	//End new lines
 	/* set the local certificate from CertFile */
-	if (SSL_CTX_use_certificate_file(ctx, CertFile, SSL_FILETYPE_PEM) <= 0)
+	if (SSL_CTX_use_certificate_file(ctx, certFile, SSL_FILETYPE_PEM) <= 0)
 	{
 		ERR_print_errors_fp(stderr);
 		abort();
 	}
 	/* set the private key from KeyFile (may be the same as CertFile) */
-	if (SSL_CTX_use_PrivateKey_file(ctx, KeyFile, SSL_FILETYPE_PEM) <= 0)
+	if (SSL_CTX_use_PrivateKey_file(ctx, keyFile, SSL_FILETYPE_PEM) <= 0)
 	{
 		ERR_print_errors_fp(stderr);
 		abort();
@@ -329,13 +328,13 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
 	unique_lock<mutex> lck(pInfo->m_oSockSendMutex, std::adopt_lock);
 	// if code run here. the all list is empty. and no have exdata. try send message
 	m_pLog->Verbos(CUniversal::Format("No need use epoll send, call SendMessageEx with Priority[%d],Size[%d].", nPriority, nBufLen));
-	SendMessageEx(sock, pInfo->m_ssl, nPriority, pBuf, nBufLen);
+	SendMessageEx(sock, nPriority, pBuf, nBufLen);
 	lck.unlock();
 }
 
 bool CEpollEx::SendMessageEx(int sock, int nPriority, const char *pBuf, int nSize)
 {
-	int nMsgSend = SendEx(sock, pBuf, nSize, 0, true);
+	int nMsgSend = SendEx(sock, pBuf, nSize, 0);
 	if (nMsgSend != nSize)
 	{
 		AddToSendList(sock, nPriority, pBuf, nSize, nMsgSend, NULL, 0);
@@ -397,11 +396,11 @@ void Servlet(SSL* ssl) /* Serve the connection -- threadable */
 	char reply[1024];
 	int sd, bytes;
 	const char* HTMLecho = "<html><body><pre>%s</pre></body></html>nn";
-	if (SSL_accept(ssl) == FAIL)     /* do SSL-protocol accept */
+	if (SSL_accept(ssl) != 1)     /* do SSL-protocol accept */
 		ERR_print_errors_fp(stderr);
 	else
 	{
-		ShowCerts(ssl);        /* get any certificates */
+		//ShowCerts(ssl);        /* get any certificates */
 		bytes = SSL_read(ssl, buf, sizeof(buf)); /* get request */
 		if (bytes > 0)
 		{
@@ -438,7 +437,8 @@ void Sloong::CEpollEx::OnNewAccept()
 			char* pCheckBuf = new char[m_nCheckKeyLength + 1];
 			memset(pCheckBuf, 0, m_nCheckKeyLength + 1);
 			// In Check function, client need send the check key in 3 second. 
-			int nLen = RecvEx(conn_sock, info->m_ssl, pCheckBuf, m_nCheckKeyLength, m_nClientCheckTime);
+			// 这里仍然使用Universal提供的ReceEx。这里不需要进行SSL接收
+			int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, m_nCheckKeyLength, m_nClientCheckTime);
 			if (nLen != m_nCheckKeyLength || 0 != strcmp(pCheckBuf, m_strClientCheckKey.c_str()))
 			{
 				m_pLog->Warn(CUniversal::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nCheckKeyLength, nLen, m_strClientCheckKey.c_str(), pCheckBuf));
@@ -482,15 +482,16 @@ void Sloong::CEpollEx::OnNewAccept()
 }
 
 
-void Sloong::CEpollEx::RecvEx(int socket, const char* buf, int size, int timeout, bool bagain)
+int Sloong::CEpollEx::RecvEx(int socket, char* buf, int size, int timeout, bool bagain)
 {
 	if (m_bEnableSSL)
 	{
-		auto ssl = m_SockList[sock]->m_ssl;
+		auto ssl = m_SockList[socket]->m_ssl;
 		if (ssl)
-			SSL_read(ssl, buf, size);
+			return SSL_read(ssl, buf, size);
 		else
 			m_pLog->Error("Recv data with ssl error. the ssl is null ptr.");
+		return -1;
 	}
 	else
 	{
@@ -498,19 +499,20 @@ void Sloong::CEpollEx::RecvEx(int socket, const char* buf, int size, int timeout
 	}
 }
 
-void Sloong::CEpollEx::SendEx(int sock, const char* data, int len, int index)
+int Sloong::CEpollEx::SendEx(int sock, const char* data, int len, int index)
 {
 	if( m_bEnableSSL)
 	{
 		auto ssl = m_SockList[sock]->m_ssl;
 		if (ssl)
-			SSL_write(ssl, data, len);
+			return SSL_write(ssl, data, len);
 		else
 			m_pLog->Error("Send data with ssl error. the ssl is null ptr.");
+		return -1;
 	}
 	else
 	{
-		CUniversal::SendEx(sock, data, len, index);
+		return CUniversal::SendEx(sock, data, len, index);
 	}
 }
 
@@ -530,7 +532,7 @@ void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 	{
 		// 先读取消息长度
 		memset(pLongBuffer, 0, s_llLen + 1);
-		int nRecvSize = RecvEx(nSocket, info->m_ssl, pLongBuffer, s_llLen, m_nReceiveTimeout);
+		int nRecvSize = RecvEx(nSocket, pLongBuffer, s_llLen, m_nReceiveTimeout);
 		if (nRecvSize < 0)
 		{
 			// 读取错误,将这个连接从监听中移除并关闭连接
@@ -555,7 +557,7 @@ void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 			char* data = new char[dtlen + 1];
 			memset(data, 0, dtlen + 1);
 
-			nRecvSize = RecvEx(nSocket, info->m_ssl, data, dtlen, m_nReceiveTimeout, true);//一次性接受所有消息
+			nRecvSize = RecvEx(nSocket, data, dtlen, m_nReceiveTimeout, true);//一次性接受所有消息
 			if (nRecvSize < 0)
 			{
 				CloseConnect(nSocket);
@@ -758,7 +760,7 @@ bool Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 		if (si->nSent >= si->nSize)
 		{
 			// Send ex data
-			si->nSent = SendEx(pInfo->m_sock, pInfo->m_ssl, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
+			si->nSent = SendEx(pInfo->m_sock, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
 		}
 		else
 		{
@@ -767,7 +769,7 @@ bool Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 			// when send nurmal data succeeded, try send exdata in one time.
 			if (si->nSent != -1 && si->nSent == si->nSize)
 			{
-				si->nSent = SendEx(pInfo->m_sock, pInfo->m_ssl, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
+				si->nSent = SendEx(pInfo->m_sock, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
 			}
 		}
 		m_pLog->Verbos(CUniversal::Format("Send Info : AllSize[%d],ExSize[%d],Sent[%d]", si->nExSize + si->nSize, si->nExSize, si->nSent));

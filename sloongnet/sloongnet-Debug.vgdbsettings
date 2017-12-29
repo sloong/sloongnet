@@ -7,14 +7,14 @@
       <PathStyle>RemoteUnix</PathStyle>
     </CustomSourceDirectories>
     <BuildHost>
-      <HostName>develop.lwallpapers.sloong.com</HostName>
+      <HostName>10.0.0.60</HostName>
       <Transport>SSH</Transport>
       <UserName>root</UserName>
     </BuildHost>
     <MainSourceTransferCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>develop.lwallpapers.sloong.com</HostName>
+        <HostName>10.0.0.60</HostName>
         <Transport>SSH</Transport>
         <UserName>root</UserName>
       </RemoteHost>
@@ -82,9 +82,8 @@
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>develop.lwallpapers.sloong.com</HostName>
-        <Transport>SSH</Transport>
-        <UserName>root</UserName>
+        <HostName>BuildMachine</HostName>
+        <Transport>BuiltinShortcut</Transport>
       </RemoteHost>
       <Command>make</Command>
       <WorkingDirectory>$(BuildDir)</WorkingDirectory>

@@ -68,7 +68,7 @@ namespace Sloong
 
 		/// 发送数据。自动区分普通发送或者SSL发送
 		int SendEx(int sock, const char* data, int len, int index);
-		int RecvEx(int socket, const char* data, int len, int timeout, bool bagain);
+		int RecvEx(int socket, char* data, int len, int timeout, bool bagain = false);
 		
 	public:
 		static void* WorkLoop(void* params);
@@ -102,6 +102,7 @@ namespace Sloong
 		condition_variable m_oExitCV;
         condition_variable* m_pEventCV;
 		bool m_bEnableSSL;
+		SSL_CTX* m_pCTX;
 	};
 }
 

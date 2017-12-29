@@ -106,9 +106,10 @@ namespace servctrl
                 {
                     try
                     {
-                        var info = ConnectToServer(item.m_URL, item.m_IPInfo.Port);
+                        /*var info = ConnectToServer(item.m_URL, iten.Port);
                         item.m_IPInfo = info.m_IPInfo;
-                        item.m_Socket = info.m_Socket;
+                        item.m_Socket = info.m_Socket;*/
+                        share.SendMessage(MessageType.ConnectToNetwork, sockMap.IndexOf(item));
                         if (!comboBoxServList.Items.Contains(item.m_URL))
                             comboBoxServList.Items.Add(item.m_URL);
                     }
@@ -181,8 +182,6 @@ namespace servctrl
                 Utility.SendEx(sock, sendByte);
 
                 ConnectInfo info = new ConnectInfo();
-                info.m_Socket = sock;
-                info.m_IPInfo = ipEndPoint;
                 info.m_URL = url;
 
                 return info;
@@ -200,37 +199,64 @@ namespace servctrl
 
             try
             {
+                // 这里首先确认是否是已经添加过的。
+                // 如果是已经添加过的，那么发送连接消息由NetworkThread来进行连接操作
+                // 如果是没有添加过的，那么首先将相关的信息添加到SocketMap中
+                bool bAdded = false;
+                int index = -1;
                 foreach (var item in SocketMap)
                 {
                     if (item.m_URL == textBoxAddr.Text)
                     {
-                        if (item.m_Socket.Connected)
-                        {
-                            item.m_Socket.Disconnect(true);
-                        }
-                        else
-                        {
-                            item.m_Socket.Connect(item.m_IPInfo);
-                        }
-                        UpdateButtonText();
-                        return;
+                        bAdded = true;
+                        index = SocketMap.IndexOf(item);
                     }
                 }
 
+                if ( !bAdded)
+                {
+                    ConnectInfo cinfo = new ConnectInfo();
+                    cinfo.m_URL = textBoxAddr.Text;
+                    cinfo.m_nPort = Convert.ToInt32(textBoxPort.Text);
+                    SocketMap.Add(cinfo);
+                    index = sockMap.Count-1;
+                }
+                share.SendMessage(MessageType.ConnectToNetwork, index, OnConnectToNetworkDown);
+                
+
+                //        if (item.m_Socket.Connected)
+                //        {
+                //            item.m_Socket.Disconnect(true);
+                //        }
+                //        else
+                //        {
+                //            item.m_Socket.Connect(item.m_IPInfo);
+                //        }
+                //        UpdateButtonText();
+                //        return;
+                //    }
+                //}
+
                 // no found
-                var info = ConnectToServer(textBoxAddr.Text, Convert.ToInt32(textBoxPort.Text));
+                /*var info = ConnectToServer(textBoxAddr.Text, );
                 if (info.m_Socket.Connected)
                 {
                     SocketMap.Add(info);
                     comboBoxServList.SelectedIndex = comboBoxServList.Items.Add(textBoxAddr.Text);
                 }
-                UpdateButtonText();
+                UpdateButtonText();*/
             }
             catch (Exception ex)
             {
                 MessageBox.Show(string.Format("connect to {1} fialed. error message:", textBoxAddr.Text, ex.Message));
             }
 
+        }
+
+        bool OnConnectToNetworkDown(object p)
+        {
+            UpdateButtonText();
+            return true;
         }
 
         void PageMessageHandler(object sender, PageMessage e)
@@ -256,7 +282,7 @@ namespace servctrl
                 if (item.m_URL == comboBoxServList.Text)
                 {
                     textBoxAddr.Text = item.m_URL;
-                    textBoxPort.Text = item.m_IPInfo.Port.ToString();
+                    textBoxPort.Text = item.m_nPort.ToString();
                     UpdateButtonText();
 
                     nCurrentSocketIndex = SocketMap.IndexOf(item);
@@ -268,9 +294,9 @@ namespace servctrl
         {
             foreach (var item in SocketMap)
             {
-                if (item.m_Socket != null && item.m_Socket.Connected)
-                    item.m_Socket.Close();
-                item.m_Socket = null;
+                if (item.m_Client != null && item.m_Client.Connected)
+                    item.m_Client.Close();
+                item.m_Client = null;
             }
             appStatus.RunStatus = RunStatus.Exit;
             appStatus.ExitApp = true;
@@ -309,9 +335,9 @@ namespace servctrl
         {
             foreach (var item in SocketMap)
             {
-                if (item.m_URL == textBoxAddr.Text && item.m_IPInfo.Port.ToString() == textBoxPort.Text)
+                if (item.m_URL == textBoxAddr.Text && item.m_nPort.ToString() == textBoxPort.Text)
                 {
-                    if( item.m_Socket.Connected )
+                    if( item.m_Client.Connected )
                     {
                         buttonConnect.Text = "Disconnect";
                         return;
