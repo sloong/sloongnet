@@ -21,6 +21,43 @@ namespace Sloong
 		class CLog;
 	}
 	using namespace Universal;
+
+	struct EpollExConfig
+	{
+		// 优先级分级数量，最高为255
+		int m_nPriorityLevel;
+		// 在日志记录中显示发送消息
+		bool m_bShowSendMessage;
+		// 在日志记录中显示接收消息
+		bool m_bShowReceiveMessage;
+		// 是否启用流水号支持
+		bool m_bSwiftNumberSupport;
+		// 是否启用MD5支持
+		bool m_bMD5Support;
+		// 是否启用客户端连接检查
+		bool m_bEnableClientCheck;
+		// 客户端检查密匙
+		string m_strClientCheckKey;
+		// 客户单密匙长度
+		int m_nCheckKeyLength;
+		// 客户端检查超时
+		int m_nClientCheckTime;
+		// 连接超时
+		int m_nConnectTimeout;
+		// 接收超时
+		int m_nReceiveTimeout;
+		// 主动进行超时检查的间隔。
+		int m_nTimeoutInterval;
+		// 是否启用SSL
+		bool m_bEnableSSL;
+		// 运行的线程数
+		int m_nWorkThreadNum;
+		EpollExConfig()
+		{
+			m_bEnableClientCheck = false;
+		}
+	};
+
 	class CEpollEx
 	{
 	public:
@@ -28,11 +65,12 @@ namespace Sloong
 		virtual ~CEpollEx();
         int Initialize(CLog* pLog,int listenPort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, 
 				int nTimeout, int nTimeoutInterval, int nRecvTimeout, int nCheckTimeout,string strCheckKey);
-		void EnableSSL(string certFile, string keyFile);
+		void SetConfig(EpollExConfig& conf);
+		void Run();
+		void EnableSSL(string certFile, string keyFile, string passwd);
 		void SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage);
 		void Exit();
         void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
-        bool SendMessageEx( int sock, int nPriority, const char* pData, int nSize);
         void SetEvent( condition_variable* pCV );
 		void ProcessPrepareSendList( CSockInfo* info );
 		/************************************************************************/
@@ -61,15 +99,6 @@ namespace Sloong
 		void OnDataCanReceive( int nSocket );
 		void OnCanWriteData( int nSocket );
 
-		/// 加载SSL的证书文件
-		void LoadCertificate(SSL_CTX* ctx, const char* certFile, const char* keyFile);
-		/// 初始化SSL环境
-		SSL_CTX* InitializeSSL();
-
-		/// 发送数据。自动区分普通发送或者SSL发送
-		int SendEx(int sock, const char* data, int len, int index);
-		int RecvEx(int socket, char* data, int len, int timeout, bool bagain = false);
-		
 	public:
 		static void* WorkLoop(void* params);
 		static void* CheckTimeoutConnect(void* params);
@@ -84,25 +113,12 @@ namespace Sloong
 		queue<EventListItem> m_EventSockList;
         mutex m_oEventListMutex;
         mutex m_oSockListMutex;
-		int m_nPriorityLevel;
-        bool m_bShowSendMessage;
-		bool m_bShowReceiveMessage;
-		bool m_bIsRunning;
-		bool m_bSwiftNumberSupport;
-		bool m_bMD5Support;
-		bool m_bEnableClientCheck;
-		string m_strClientCheckKey;
-		int m_nCheckKeyLength;
-		// client check timeout num.
-		int m_nClientCheckTime;
-		int m_nConnectTimeout;
-		int m_nReceiveTimeout;
-		int m_nTimeoutInterval;
 		mutex m_oExitMutex;
 		condition_variable m_oExitCV;
         condition_variable* m_pEventCV;
-		bool m_bEnableSSL;
 		SSL_CTX* m_pCTX;
+		bool m_bIsRunning;
+		EpollExConfig m_oConfig;
 	};
 }
 

@@ -4,7 +4,7 @@
 #include <queue>
 #include <string>
 #include <mutex>
-#include <openssl/ssl.h>
+#include "lconnect.h"
 using std::string;
 using std::mutex;
 using std::vector;
@@ -53,8 +53,7 @@ namespace Sloong
 		string m_Address;
 		int m_nPort;
 		time_t m_ActiveTime;
-		int m_sock;
-		SSL* m_ssl;
+		lConnect* m_pCon;
 
 		CLuaPacket* m_pUserInfo;
         mutex m_oSockReadMutex;

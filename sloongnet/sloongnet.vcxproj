@@ -77,6 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CmdProcess.h" />
+    <ClInclude Include="lconnect.h" />
     <ClInclude Include="dbproc.h" />
     <ClInclude Include="epollex.h" />
     <ClInclude Include="globalfunction.h" />
@@ -93,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CmdProcess.cpp" />
+    <ClCompile Include="lconnect.cpp" />
     <ClCompile Include="dbproc.cpp" />
     <ClCompile Include="epollex.cpp" />
     <ClCompile Include="globalfunction.cpp" />

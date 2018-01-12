@@ -154,7 +154,7 @@ namespace Sloong
                 var gbk = Encoding.GetEncoding("GB2312");
                 byte[] sendByte = gbk.GetBytes(key);
                 var stream = info.m_Client.GetStream();
-                stream.Write(sendByte, 0, sendByte.Length);
+                //stream.Write(sendByte, 0, sendByte.Length);
                 //Utility.SendEx(info.m_Socket, sendByte);
 
                 info.m_SSL = new SslStream(stream,
@@ -162,12 +162,55 @@ namespace Sloong
                     new RemoteCertificateValidationCallback(ValidateServerCertificate),
                     null);
                 X509CertificateCollection certs = new X509CertificateCollection();
-                X509Certificate cert = X509Certificate.CreateFromCertFile(System.Environment.CurrentDirectory + @"\" + "client.cer");
+                //X509Certificate cert = X509Certificate.CreateFromCertFile( Environment.CurrentDirectory + @"\" + "client.cer");
+                X509Certificate cert = X509Certificate.CreateFromCertFile("D:\\Temp\\client.crt");
                 certs.Add(cert);
 
                 try
                 {
-                    info.m_SSL.AuthenticateAsClient("test", certs, SslProtocols.Tls, false);
+                    
+                    try
+                    {
+                        //info.m_SSL.AuthenticateAsClient("Sloong.com", certs, SslProtocols.Tls, false);
+                        info.m_SSL.AuthenticateAsClient("Sloong");
+                    }
+                    catch (Exception e)
+                    {
+                     }
+
+
+                    var msg = "Test";
+                    string md5 = "";
+                    List<byte> sendList = new List<byte>();
+                    var gbk1 = Encoding.GetEncoding("GB2312");
+
+                    // 计算长度
+                    long lLen = gbk.GetByteCount(msg) + 32 + 8 + 1;
+
+                    // 开始准备数据
+                    /// 长度
+                    sendList.AddRange(Utility.LongToBytes(lLen));
+
+                    /// 优先级
+                    sendList.Add(1);
+
+                    /// 流水号
+                    if (AppStatus.bEnableSwift)
+                    {
+                        sendList.AddRange(Utility.LongToBytes(1));
+                    }
+
+                    /// md5
+                    if (AppStatus.bEnableMD5)
+                    {
+                        md5 = Utility.MD5_Encoding(msg, gbk);
+                        sendList.AddRange(gbk.GetBytes(md5));
+                    }
+
+
+                    sendList.AddRange(gbk.GetBytes(msg));
+
+                    info.m_SSL.Write(sendList.ToArray());
                 }
                 catch (AuthenticationException e)
                 {
@@ -178,6 +221,7 @@ namespace Sloong
                     }
                     Console.WriteLine("Authentication failed - closing the connection.");
                     info.m_SSL.Close();
+                    info.m_Client.Close();
                     Console.ReadLine();
                     return;
                 }

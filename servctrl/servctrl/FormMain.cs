@@ -301,7 +301,8 @@ namespace servctrl
             appStatus.RunStatus = RunStatus.Exit;
             appStatus.ExitApp = true;
             _Nt.Exit();
-            Utility.Serialize(SocketMap, sockMapPath);
+            // TODO:
+            //Utility.Serialize(SocketMap, sockMapPath);
             log.Dispose();
         }
 

@@ -91,6 +91,9 @@
     <ClInclude Include="structs.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="lconnect.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="epollex.cpp">
@@ -127,6 +130,9 @@
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="CmdProcess.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="lconnect.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>

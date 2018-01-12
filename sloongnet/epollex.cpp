@@ -9,6 +9,7 @@
 #include <queue>
 #include "epollex.h"
 #include "utility.h"
+#include "lconnect.h"
 #include <univ/log.h>
 #include <univ/univ.h>
 #include <univ/threadpool.h>
@@ -28,15 +29,14 @@ using namespace Sloong::Universal;
 
 const int s_llLen = 8;
 
-CEpollEx::CEpollEx()
+Sloong::CEpollEx::CEpollEx()
 {
 	m_pEventCV = NULL;
 	m_bIsRunning = false;
-	m_bEnableClientCheck = false;
 	m_pCTX = NULL;
 }
 
-CEpollEx::~CEpollEx()
+Sloong::CEpollEx::~CEpollEx()
 {
 	if (m_pCTX)
 	{
@@ -46,20 +46,21 @@ CEpollEx::~CEpollEx()
 
 
 // Initialize the epoll and the thread pool.
-int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, int nConnectTimeout, int nTimeoutInterval, int nRecvTimeout, int nCheckTimtoue, string strCheckKey)
+int Sloong::CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, int nConnectTimeout, int nTimeoutInterval, int nRecvTimeout, int nCheckTimtoue, string strCheckKey)
 {
-	m_bMD5Support = bMD5Support;
-	m_bSwiftNumberSupport = bSwiftNumSupprot;
-	m_nPriorityLevel = nPriorityLevel;
-	m_nConnectTimeout = nConnectTimeout;
-	m_nTimeoutInterval = nTimeoutInterval;
-	m_nReceiveTimeout = nRecvTimeout;
-	m_strClientCheckKey = strCheckKey;
-	m_nClientCheckTime = nCheckTimtoue;
-	m_nCheckKeyLength = m_strClientCheckKey.length();
-	if (nCheckTimtoue > 0 && m_nCheckKeyLength > 0)
+	m_oConfig.m_bMD5Support = bMD5Support;
+	m_oConfig.m_bSwiftNumberSupport = bSwiftNumSupprot;
+	m_oConfig.m_nPriorityLevel = nPriorityLevel;
+	m_oConfig.m_nConnectTimeout = nConnectTimeout;
+	m_oConfig.m_nTimeoutInterval = nTimeoutInterval;
+	m_oConfig.m_nReceiveTimeout = nRecvTimeout;
+	m_oConfig.m_strClientCheckKey = strCheckKey;
+	m_oConfig.m_nClientCheckTime = nCheckTimtoue;
+	m_oConfig.m_nCheckKeyLength = strCheckKey.length();
+	m_oConfig.m_nWorkThreadNum = nThreadNum;
+	if (nCheckTimtoue > 0 && m_oConfig.m_nCheckKeyLength > 0)
 	{
-		m_bEnableClientCheck = true;
+		m_oConfig.m_bEnableClientCheck = true;
 	}
 	m_pLog = plog;
 	m_pLog->Info(CUniversal::Format("epollex is initialize.license port is %d", licensePort));
@@ -82,6 +83,16 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
 	if (errno == -1)
 		throw normal_except(CUniversal::Format("bind to %d field. errno = %d", licensePort, errno));
 
+	return true;
+}
+
+void Sloong::CEpollEx::SetConfig(EpollExConfig & conf)
+{
+	m_oConfig = conf;
+}
+
+void Sloong::CEpollEx::Run()
+{
 	// 监听端口,监听队列大小为1024.可修改为SOMAXCONN
 	errno = listen(m_ListenSock, 1024);
 	// 设置socket为非阻塞模式
@@ -92,65 +103,22 @@ int CEpollEx::Initialize(CLog* plog, int licensePort, int nThreadNum, int nPrior
 	CtlEpollEvent(EPOLL_CTL_ADD, m_ListenSock, EPOLLIN | EPOLLOUT);
 	m_bIsRunning = true;
 	// Init the thread pool
-	CThreadPool::AddWorkThread(WorkLoop, this, nThreadNum);
+	CThreadPool::AddWorkThread(WorkLoop, this, m_oConfig.m_nWorkThreadNum);
 	CThreadPool::AddWorkThread(CheckTimeoutConnect, this);
-	return true;
 }
 
-void CEpollEx::EnableSSL(string certFile, string keyFile)
+void Sloong::CEpollEx::EnableSSL(string certFile, string keyFile, string passwd)
 {
-	m_bEnableSSL = true;
-	m_pCTX = InitializeSSL(); // Initialize SSL
-	LoadCertificate(m_pCTX, certFile.c_str(), keyFile.c_str()); //Load certs
+	int ret = lConnect::G_InitializeSSL(&m_pCTX,certFile, keyFile, passwd);
+	if (ret != S_OK)
+	{
+		m_pLog->Error("Initialize SSL environment error.");
+		m_pLog->Error(lConnect::G_FormatSSLErrorMsg(ret));
+	}
 }
 
 
-void CEpollEx::LoadCertificate(SSL_CTX* ctx, const char* certFile, const char* keyFile)
-{
-	//New lines
-	if (SSL_CTX_load_verify_locations(ctx, certFile, keyFile) != 1)
-		ERR_print_errors_fp(stderr);
-	if (SSL_CTX_set_default_verify_paths(ctx) != 1)
-		ERR_print_errors_fp(stderr);
-	//End new lines
-	/* set the local certificate from CertFile */
-	if (SSL_CTX_use_certificate_file(ctx, certFile, SSL_FILETYPE_PEM) <= 0)
-	{
-		ERR_print_errors_fp(stderr);
-		abort();
-	}
-	/* set the private key from KeyFile (may be the same as CertFile) */
-	if (SSL_CTX_use_PrivateKey_file(ctx, keyFile, SSL_FILETYPE_PEM) <= 0)
-	{
-		ERR_print_errors_fp(stderr);
-		abort();
-	}
-	/* verify private key */
-	if (!SSL_CTX_check_private_key(ctx))
-	{
-		fprintf(stderr, "Private key does not match the public certificaten");
-		abort();
-	}
-	printf("LoadCertificates Compleate Successfully.....n");
-}
-
-SSL_CTX* CEpollEx::InitializeSSL()
-{
-	SSL_CTX* ctx = NULL;
-	SSL_library_init();
-	OpenSSL_add_all_algorithms();/* load & register all cryptos, etc. */
-	SSL_load_error_strings();/* load all error messages */
-	ctx = SSL_CTX_new(SSLv23_client_method());/* create new server-method instance */
-	if (ctx == NULL)
-	{
-		ERR_print_errors_fp(stderr);
-		abort();
-	}
-	return ctx;
-}
-
-
-void CEpollEx::CtlEpollEvent(int opt, int sock, int events)
+void Sloong::CEpollEx::CtlEpollEvent(int opt, int sock, int events)
 {
 	struct epoll_event ent;
 	memset(&ent, 0, sizeof(ent));
@@ -163,7 +131,7 @@ void CEpollEx::CtlEpollEvent(int opt, int sock, int events)
 
 
 // 设置套接字为非阻塞模式
-int CEpollEx::SetSocketNonblocking(int socket)
+int Sloong::CEpollEx::SetSocketNonblocking(int socket)
 {
 	int op;
 
@@ -180,7 +148,7 @@ int CEpollEx::SetSocketNonblocking(int socket)
 * Output: *
 * Others: *
 *************************************************/
-void* CEpollEx::WorkLoop(void* pParam)
+void* Sloong::CEpollEx::WorkLoop(void* pParam)
 {
 	CEpollEx* pThis = (CEpollEx*)pParam;
 	auto pid = this_thread::get_id();
@@ -196,7 +164,7 @@ void* CEpollEx::WorkLoop(void* pParam)
 		if (n <= 0)
 			continue;
 
-		for (i = 0; i<n; ++i)
+		for (i = 0; i < n; ++i)
 		{
 			int fd = pThis->m_Events[i].data.fd;
 			if (fd == sockListen)
@@ -227,11 +195,11 @@ void* CEpollEx::WorkLoop(void* pParam)
 * Output: *
 * Others: *
 *************************************************/
-void* CEpollEx::CheckTimeoutConnect(void* pParam)
+void* Sloong::CEpollEx::CheckTimeoutConnect(void* pParam)
 {
 	CEpollEx* pThis = (CEpollEx*)pParam;
-	int tout = pThis->m_nConnectTimeout * 60;
-	int tinterval = pThis->m_nTimeoutInterval * 60;
+	int tout = pThis->m_oConfig.m_nConnectTimeout * 60;
+	int tinterval = pThis->m_oConfig.m_nTimeoutInterval * 60;
 	unique_lock<mutex> lck(pThis->m_oExitMutex);
 	while (pThis->m_bIsRunning)
 	{
@@ -249,20 +217,20 @@ void* CEpollEx::CheckTimeoutConnect(void* pParam)
 	return 0;
 }
 
-void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData, int nSize)
+void Sloong::CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData, int nSize)
 {
-	if (m_bShowSendMessage)
+	if (m_oConfig.m_bShowSendMessage)
 		m_pLog->Verbos(string("SEND>>>") + msg);
 
 	// process msg
 	char* pBuf = NULL;
 	long long nBufLen = s_llLen + msg.size();
 	string md5;
-	if (m_bSwiftNumberSupport)
+	if (m_oConfig.m_bSwiftNumberSupport)
 	{
 		nBufLen += s_llLen;
 	}
-	if (m_bMD5Support)
+	if (m_oConfig.m_bMD5Support)
 	{
 		md5 = CMD5::Encoding(msg);
 		nBufLen += md5.length();
@@ -281,12 +249,12 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
 
 	CUniversal::LongToBytes(nMsgLen, pCpyPoint);
 	pCpyPoint += 8;
-	if (m_bSwiftNumberSupport)
+	if (m_oConfig.m_bSwiftNumberSupport)
 	{
 		CUniversal::LongToBytes(nSwift, pCpyPoint);
 		pCpyPoint += s_llLen;
 	}
-	if (m_bMD5Support)
+	if (m_oConfig.m_bMD5Support)
 	{
 		memcpy(pCpyPoint, md5.c_str(), md5.length());
 		pCpyPoint += md5.length();
@@ -327,24 +295,18 @@ void CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg
 
 	unique_lock<mutex> lck(pInfo->m_oSockSendMutex, std::adopt_lock);
 	// if code run here. the all list is empty. and no have exdata. try send message
-	m_pLog->Verbos(CUniversal::Format("No need use epoll send, call SendMessageEx with Priority[%d],Size[%d].", nPriority, nBufLen));
-	SendMessageEx(sock, nPriority, pBuf, nBufLen);
+	int nMsgSend = pInfo->m_pCon->Write(pBuf, nSize, 0);
+	if (nMsgSend != nSize)
+	{
+		m_pLog->Verbos(CUniversal::Format("Add to send list with Priority[%d],Size[%d/%d].", nPriority, nMsgSend,nSize));
+		AddToSendList(sock, nPriority, pBuf, nSize, nMsgSend, NULL, 0);
+	}
+	SAFE_DELETE_ARR(pBuf);
 	lck.unlock();
 }
 
-bool CEpollEx::SendMessageEx(int sock, int nPriority, const char *pBuf, int nSize)
-{
-	int nMsgSend = SendEx(sock, pBuf, nSize, 0);
-	if (nMsgSend != nSize)
-	{
-		AddToSendList(sock, nPriority, pBuf, nSize, nMsgSend, NULL, 0);
-		return false;
-	}
-	SAFE_DELETE_ARR(pBuf);
-	return true;
-}
 
-void CEpollEx::AddToSendList(int socket, int nPriority, const char *pBuf, int nSize, int nStart, const char* pExBuf, int nExSize)
+void Sloong::CEpollEx::AddToSendList(int socket, int nPriority, const char *pBuf, int nSize, int nStart, const char* pExBuf, int nExSize)
 {
 	if (pBuf == NULL || nSize <= 0)
 		return;
@@ -371,10 +333,8 @@ void Sloong::CEpollEx::CloseConnect(int socket)
 {
 	CtlEpollEvent(EPOLL_CTL_DEL, socket, EPOLLIN | EPOLLOUT);
 	CSockInfo* info = m_SockList[socket];
-	SSL_shutdown(info->m_ssl);
-	SSL_free(info->m_ssl);
-	close(socket);
-	
+	SAFE_DELETE(info->m_pCon);
+
 	if (!info)
 		return;
 	m_pLog->Info(CUniversal::Format("close connect:%s:%d.", info->m_Address, info->m_nPort));
@@ -387,34 +347,6 @@ void Sloong::CEpollEx::CloseConnect(int socket)
 	if (m_pEventCV)
 		m_pEventCV->notify_all();
 	elck.unlock();
-}
-
-
-void Servlet(SSL* ssl) /* Serve the connection -- threadable */
-{
-	char buf[1024];
-	char reply[1024];
-	int sd, bytes;
-	const char* HTMLecho = "<html><body><pre>%s</pre></body></html>nn";
-	if (SSL_accept(ssl) != 1)     /* do SSL-protocol accept */
-		ERR_print_errors_fp(stderr);
-	else
-	{
-		//ShowCerts(ssl);        /* get any certificates */
-		bytes = SSL_read(ssl, buf, sizeof(buf)); /* get request */
-		if (bytes > 0)
-		{
-			buf[bytes] = 0;
-			printf("Client msg: %s\n", buf);
-			sprintf(reply, HTMLecho, buf);   /* construct reply */
-			SSL_write(ssl, reply, strlen(reply)); /* send reply */
-		}
-		else
-			ERR_print_errors_fp(stderr);
-	}
-	sd = SSL_get_fd(ssl);       /* get socket connection */
-	SSL_free(ssl);         /* release SSL state */
-	close(sd);          /* close connection */
 }
 
 
@@ -432,45 +364,38 @@ void Sloong::CEpollEx::OnNewAccept()
 		getpeername(conn_sock, (sockaddr*)&add, (socklen_t*)&nSize);
 
 		// start client check when acdept
-		if (m_bEnableClientCheck)
+		if (m_oConfig.m_bEnableClientCheck)
 		{
-			char* pCheckBuf = new char[m_nCheckKeyLength + 1];
-			memset(pCheckBuf, 0, m_nCheckKeyLength + 1);
+			char* pCheckBuf = new char[m_oConfig.m_nCheckKeyLength + 1];
+			memset(pCheckBuf, 0, m_oConfig.m_nCheckKeyLength + 1);
 			// In Check function, client need send the check key in 3 second. 
 			// 这里仍然使用Universal提供的ReceEx。这里不需要进行SSL接收
-			int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, m_nCheckKeyLength, m_nClientCheckTime);
-			if (nLen != m_nCheckKeyLength || 0 != strcmp(pCheckBuf, m_strClientCheckKey.c_str()))
+			int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, m_oConfig.m_nCheckKeyLength, m_oConfig.m_nClientCheckTime);
+			if (nLen != m_oConfig.m_nCheckKeyLength || 0 != strcmp(pCheckBuf, m_oConfig.m_strClientCheckKey.c_str()))
 			{
-				m_pLog->Warn(CUniversal::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nCheckKeyLength, nLen, m_strClientCheckKey.c_str(), pCheckBuf));
+				m_pLog->Warn(CUniversal::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_oConfig.m_nCheckKeyLength, nLen, m_oConfig.m_strClientCheckKey.c_str(), pCheckBuf));
 				close(conn_sock);
 				return;
 			}
 		}
 
-		CSockInfo* info = new CSockInfo(m_nPriorityLevel);
+		lConnect* conn = new lConnect(m_pLog);
+		conn->Initialize(conn_sock);
+
+		CSockInfo* info = new CSockInfo(m_oConfig.m_nPriorityLevel);
 		info->m_Address = string(inet_ntoa(add.sin_addr));
 		info->m_nPort = add.sin_port;
 		info->m_ActiveTime = time(NULL);
-		info->m_sock = conn_sock;
+		info->m_pCon = conn;
 		info->m_pUserInfo->SetData("ip", info->m_Address);
 		info->m_pUserInfo->SetData("port", CUniversal::ntos(info->m_nPort));
-		if (m_bEnableSSL)
-		{
-			SSL* ssl;
-			ssl = SSL_new(m_pCTX);
-			SSL_set_fd(ssl, conn_sock);
-
-			SSL_set_accept_state(ssl);
-			SSL_do_handshake(ssl);
-			info->m_ssl = ssl;
-		}
 
 		m_SockList[conn_sock] = info;
 		m_pLog->Info(CUniversal::Format("accept client:%s.", info->m_Address));
 		//将接受的连接添加到Epoll的事件中.
 		// Add the recv event to epoll;
 		SetSocketNonblocking(conn_sock);
-		CtlEpollEvent(EPOLL_CTL_ADD, conn_sock, EPOLLIN);
+		CtlEpollEvent(EPOLL_CTL_ADD, conn_sock, EPOLLIN | EPOLLOUT);
 	}
 	if (conn_sock == -1)
 	{
@@ -481,48 +406,13 @@ void Sloong::CEpollEx::OnNewAccept()
 	}
 }
 
-
-int Sloong::CEpollEx::RecvEx(int socket, char* buf, int size, int timeout, bool bagain)
-{
-	if (m_bEnableSSL)
-	{
-		auto ssl = m_SockList[socket]->m_ssl;
-		if (ssl)
-			return SSL_read(ssl, buf, size);
-		else
-			m_pLog->Error("Recv data with ssl error. the ssl is null ptr.");
-		return -1;
-	}
-	else
-	{
-		return CUniversal::RecvEx(socket, buf, size, timeout, bagain);
-	}
-}
-
-int Sloong::CEpollEx::SendEx(int sock, const char* data, int len, int index)
-{
-	if( m_bEnableSSL)
-	{
-		auto ssl = m_SockList[sock]->m_ssl;
-		if (ssl)
-			return SSL_write(ssl, data, len);
-		else
-			m_pLog->Error("Send data with ssl error. the ssl is null ptr.");
-		return -1;
-	}
-	else
-	{
-		return CUniversal::SendEx(sock, data, len, index);
-	}
-}
-
 void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 {
 	CSockInfo* info = m_SockList[nSocket];
 	// The app is used ET mode, so should wait the mutex. 
 	unique_lock<mutex> srlck(info->m_oSockReadMutex);
 
-	auto pid = this_thread::get_id();
+		auto pid = this_thread::get_id();
 	string spid = CUniversal::ntos(pid);
 
 	// 已经连接的用户,收到数据,可以开始读入
@@ -532,7 +422,7 @@ void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 	{
 		// 先读取消息长度
 		memset(pLongBuffer, 0, s_llLen + 1);
-		int nRecvSize = RecvEx(nSocket, pLongBuffer, s_llLen, m_nReceiveTimeout);
+		int nRecvSize = info->m_pCon->Read( pLongBuffer, s_llLen, m_oConfig.m_nReceiveTimeout);
 		if (nRecvSize < 0)
 		{
 			// 读取错误,将这个连接从监听中移除并关闭连接
@@ -557,7 +447,7 @@ void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 			char* data = new char[dtlen + 1];
 			memset(data, 0, dtlen + 1);
 
-			nRecvSize = RecvEx(nSocket, data, dtlen, m_nReceiveTimeout, true);//一次性接受所有消息
+			nRecvSize = info->m_pCon->Read(data, dtlen, m_oConfig.m_nReceiveTimeout, true);//一次性接受所有消息
 			if (nRecvSize < 0)
 			{
 				CloseConnect(nSocket);
@@ -569,15 +459,15 @@ void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 
 			const char* pMsg = NULL;
 			// check the priority level
-			if (m_nPriorityLevel != 0)
+			if (m_oConfig.m_nPriorityLevel != 0)
 			{
 				char pLevel[2] = { 0 };
 				pLevel[0] = data[0];
 				int level = pLevel[0];
-				if (level > m_nPriorityLevel || level < 0)
+				if (level > m_oConfig.m_nPriorityLevel || level < 0)
 				{
-					m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", level, m_nPriorityLevel));
-					pList = &info->m_pReadList[m_nPriorityLevel - 1];
+					m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", level, m_oConfig.m_nPriorityLevel));
+					pList = &info->m_pReadList[m_oConfig.m_nPriorityLevel - 1];
 				}
 				else
 				{
@@ -591,7 +481,7 @@ void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 				pMsg = data;
 			}
 
-			if (m_bSwiftNumberSupport)
+			if (m_oConfig.m_bSwiftNumberSupport)
 			{
 				memset(pLongBuffer, 0, s_llLen);
 				memcpy(pLongBuffer, pMsg, s_llLen);
@@ -599,7 +489,7 @@ void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 				pMsg += s_llLen;
 			}
 
-			if (m_bMD5Support)
+			if (m_oConfig.m_bMD5Support)
 			{
 				char tmd5[33] = { 0 };
 				memcpy(tmd5, pMsg, 32);
@@ -612,7 +502,7 @@ void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 
 			// Add the msg to the sock info list
 			delete[] data;
-			if (m_bShowReceiveMessage)
+			if (m_oConfig.m_bShowReceiveMessage)
 				m_pLog->Verbos(string("RECV<<<") + recvInfo.strMessage);
 
 			unique_lock<mutex> lrlck(info->m_oReadListMutex);
@@ -750,8 +640,8 @@ bool Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 			}
 			else
 			{
-				m_pLog->Verbos(CUniversal::Format("No message need send, remove socket[%d] from Epoll", pInfo->m_sock));
-				CtlEpollEvent(EPOLL_CTL_MOD, pInfo->m_sock, EPOLLIN);
+				m_pLog->Verbos(CUniversal::Format("No message need send, remove socket[%d] from Epoll", pInfo->m_pCon->GetSocket()));
+				CtlEpollEvent(EPOLL_CTL_MOD, pInfo->m_pCon->GetSocket(), EPOLLIN);
 				pInfo->m_bIsSendListEmpty = true;
 			}
 		}
@@ -760,16 +650,16 @@ bool Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 		if (si->nSent >= si->nSize)
 		{
 			// Send ex data
-			si->nSent = SendEx(pInfo->m_sock, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
+			si->nSent = pInfo->m_pCon->Write( si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
 		}
 		else
 		{
 			// send normal data.
-			si->nSent = CUniversal::SendEx(pInfo->m_sock, si->pSendBuffer, si->nSize, si->nSent);
+			si->nSent = pInfo->m_pCon->Write( si->pSendBuffer, si->nSize, si->nSent);
 			// when send nurmal data succeeded, try send exdata in one time.
 			if (si->nSent != -1 && si->nSent == si->nSize)
 			{
-				si->nSent = SendEx(pInfo->m_sock, si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
+				si->nSent = pInfo->m_pCon->Write(si->pExBuffer, si->nExSize, si->nSent - si->nSize) + si->nSize;
 			}
 		}
 		m_pLog->Verbos(CUniversal::Format("Send Info : AllSize[%d],ExSize[%d],Sent[%d]", si->nExSize + si->nSize, si->nExSize, si->nSent));
@@ -778,9 +668,9 @@ bool Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 		if (si->nSent == -1)
 		{
 			// socket closed
-			m_pLog->Warn(CUniversal::Format("Send failed, close socket:[%d]", pInfo->m_sock));
+			m_pLog->Warn(CUniversal::Format("Send failed, close socket:[%d]", pInfo->m_pCon->GetSocket()));
 			lck.unlock();
-			CloseConnect(pInfo->m_sock);
+			CloseConnect(pInfo->m_pCon->GetSocket());
 			break;
 		}
 		// check send result.
@@ -860,8 +750,8 @@ void Sloong::CEpollEx::Exit()
 
 void Sloong::CEpollEx::SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage)
 {
-	m_bShowSendMessage = bShowSendMessage;
-	m_bShowReceiveMessage = bShowReceiveMessage;
+	m_oConfig.m_bShowSendMessage = bShowSendMessage;
+	m_oConfig.m_bShowReceiveMessage = bShowReceiveMessage;
 }
 
 
