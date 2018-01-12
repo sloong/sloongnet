@@ -34,6 +34,7 @@ namespace Sloong
 		bool	ShowSQLResult;
 		int		LogLevel;
 		string	LogPath;
+		int		NetworkPort;
 	};
 
 	enum EventType

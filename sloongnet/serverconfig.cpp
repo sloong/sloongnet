@@ -33,6 +33,7 @@ CServerConfig::CServerConfig()
 	m_oLogInfo.LogWriteToOneFile = false;
 	m_oLogInfo.LogPath = "./sloongnet.log";
 	m_oLogInfo.LogLevel = 0;
+	m_oLogInfo.NetworkPort = 0;
 
 	// Server init
 	m_nPort = 9009;
@@ -227,6 +228,7 @@ void Sloong::CServerConfig::LoadConfig()
 	m_oLogInfo.ShowSQLCmd = GetBoolenConfig("Log", "ShowSQLCmd", m_oLogInfo.ShowSQLCmd);
 	m_oLogInfo.ShowSQLResult = GetBoolenConfig("Log", "ShowSQLResult", m_oLogInfo.ShowSQLResult);
 	m_oLogInfo.LogLevel = GetIntConfig("Log", "LogLevel", m_oLogInfo.LogLevel);
+	m_oLogInfo.NetworkPort = GetIntConfig("Log", "NetworkLogPort", m_oLogInfo.NetworkPort);
 
 	// Load server info
 	m_nPort = GetIntConfig("Server", "Port", m_nPort);

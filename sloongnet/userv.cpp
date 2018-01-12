@@ -51,9 +51,8 @@ void SloongWallUS::Initialize(CServerConfig* config)
     m_pLog->Initialize(config->m_oLogInfo.LogPath, config->m_oLogInfo.DebugMode, LOGLEVEL(config->m_oLogInfo.LogLevel), oType);
 
     m_pLog->SetWorkInterval(config->m_nSleepInterval);
-    m_pLog->EnableNetworkLog(10623);
-	//EpollExConfig conf;
-	//conf
+	if( config->m_oLogInfo.NetworkPort != 0 )
+		m_pLog->EnableNetworkLog(config->m_oLogInfo.NetworkPort);
 	
     m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel, 
 				config->m_bEnableSwiftNumberSup, config->m_bEnableMD5Check, config->m_nConnectTimeout, 
