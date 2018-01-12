@@ -338,7 +338,7 @@
 #define __FLT_MANT_DIG__ 24
 #endif
 #ifndef __VERSION__
-#define __VERSION__ "4.8.5 20150623 (Red Hat 4.8.5-11)"
+#define __VERSION__ "4.8.5 20150623 (Red Hat 4.8.5-16)"
 #endif
 #ifndef _STDC_PREDEF_H
 #define _STDC_PREDEF_H 1
@@ -395,7 +395,7 @@
 #define __LDBL_EPSILON__ 1.08420217248550443401e-19L
 #endif
 #ifndef __GNUC_RH_RELEASE__
-#define __GNUC_RH_RELEASE__ 11
+#define __GNUC_RH_RELEASE__ 16
 #endif
 #ifndef __k8
 #define __k8 1

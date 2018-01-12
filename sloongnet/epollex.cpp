@@ -333,10 +333,10 @@ void Sloong::CEpollEx::CloseConnect(int socket)
 {
 	CtlEpollEvent(EPOLL_CTL_DEL, socket, EPOLLIN | EPOLLOUT);
 	CSockInfo* info = m_SockList[socket];
-	SAFE_DELETE(info->m_pCon);
-
 	if (!info)
 		return;
+
+	info->m_pCon->Close();
 	m_pLog->Info(CUniversal::Format("close connect:%s:%d.", info->m_Address, info->m_nPort));
 
 	unique_lock<mutex> elck(m_oEventListMutex);
@@ -379,14 +379,13 @@ void Sloong::CEpollEx::OnNewAccept()
 			}
 		}
 
-		lConnect* conn = new lConnect(m_pLog);
-		conn->Initialize(conn_sock);
+		
 
 		CSockInfo* info = new CSockInfo(m_oConfig.m_nPriorityLevel);
 		info->m_Address = string(inet_ntoa(add.sin_addr));
 		info->m_nPort = add.sin_port;
 		info->m_ActiveTime = time(NULL);
-		info->m_pCon = conn;
+		info->m_pCon->Initialize(conn_sock);
 		info->m_pUserInfo->SetData("ip", info->m_Address);
 		info->m_pUserInfo->SetData("port", CUniversal::ntos(info->m_nPort));
 

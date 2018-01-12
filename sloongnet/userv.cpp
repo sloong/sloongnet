@@ -129,7 +129,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 
 					unique_lock<mutex> lock(info->m_pProcessMutexList[i], std::adopt_lock);
 
-					pThis->ProcessEventList(id, &info->m_pReadList[i], info->m_oReadListMutex, item.nSocket, i, info->m_pUserInfo, pThis->m_pEpoll, pThis->m_pMsgProc);
+					pThis->ProcessEventList(id, &info->m_pReadList[i], info->m_oReadListMutex, item.nSocket, i, info->m_pUserInfo.get(), pThis->m_pEpoll, pThis->m_pMsgProc);
 
 					// unlock current level.
 					lock.unlock();
@@ -139,7 +139,7 @@ void* SloongWallUS::HandleEventWorkLoop(void* pParam)
 			else if (item.emType == EventType::SocketClose)
 			{
 				// call close function.
-				pThis->m_pMsgProc->CloseSocket(id,info->m_pUserInfo);
+				pThis->m_pMsgProc->CloseSocket(id,info->m_pUserInfo.get());
 				pThis->m_pEpoll->CloseSocket(item.nSocket);
 			}
 			

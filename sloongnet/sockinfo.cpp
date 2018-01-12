@@ -14,15 +14,10 @@ Sloong::CSockInfo::CSockInfo(int nPriorityLevel)
 	m_pSendList = new queue<SENDINFO*>[nPriorityLevel]();
 	m_pProcessMutexList = new mutex[nPriorityLevel]();
     m_pPrepareSendList = new queue<PRESENDINFO>;
-	m_pUserInfo = new CLuaPacket();
-	m_nLastSentTags = -1;
-    m_bIsSendListEmpty = true;
-	m_pCon = NULL;
 }
 
 CSockInfo::~CSockInfo()
 {
-	SAFE_DELETE(m_pUserInfo);
 	SAFE_DELETE_ARR(m_pReadList);
 	for (int i = 0; i < m_nPriorityLevel;i++)
 	{

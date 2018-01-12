@@ -6,9 +6,9 @@
 
 bool support_ssl_reconnect = false;
 
-Sloong::lConnect::lConnect(CLog* log)
+Sloong::lConnect::lConnect()
 {
-	m_pLog = log;
+	m_stStatus = ConnectStatus::Disconnect;
 }
 
 
@@ -27,7 +27,7 @@ void Sloong::lConnect::Initialize(int sock, SSL_CTX* ctx /*= nullptr*/)
 		SSL_set_fd(m_pSSL, sock);
 
 		SSL_set_accept_state(m_pSSL);
-		int ret = SSL_do_handshake(m_pSSL);
+		/*int ret = SSL_do_handshake(m_pSSL);
 		if (ret == 1)
 		{
 			m_stStatus = ConnectStatus::Ready;
@@ -38,7 +38,7 @@ void Sloong::lConnect::Initialize(int sock, SSL_CTX* ctx /*= nullptr*/)
 			string str = ERR_error_string(err, NULL);
 			m_pLog->Error(str);
 			m_stStatus = ConnectStatus::Disconnect;
-		}
+		}*/
 	}
 	
 }

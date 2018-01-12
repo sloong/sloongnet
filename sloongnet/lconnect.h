@@ -28,7 +28,7 @@ namespace Sloong
 	class lConnect
 	{
 	public:
-		lConnect(CLog* log);
+		lConnect();
 		~lConnect();
 
 		// 初始化链接对象
@@ -64,7 +64,6 @@ namespace Sloong
 	private:
 		string m_strAddress;
 		int m_nPort;
-		CLog* m_pLog;
 		int m_nSocket;
 		SSL* m_pSSL = nullptr;
 

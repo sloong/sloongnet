@@ -4,6 +4,7 @@
 #include <queue>
 #include <string>
 #include <mutex>
+#include <memory>
 #include "lconnect.h"
 using std::string;
 using std::mutex;
@@ -53,9 +54,10 @@ namespace Sloong
 		string m_Address;
 		int m_nPort;
 		time_t m_ActiveTime;
-		lConnect* m_pCon;
+		shared_ptr<lConnect> m_pCon;
 
-		CLuaPacket* m_pUserInfo;
+		unique_ptr<CLuaPacket> m_pUserInfo;
+		//CLuaPacket* m_pUserInfo;
         mutex m_oSockReadMutex;
         mutex m_oSockSendMutex;
 		mutex m_oReadListMutex;
@@ -66,8 +68,8 @@ namespace Sloong
 		// this mutex number is base on Priority level numbers.
 		mutex* m_pProcessMutexList;
 		int m_nPriorityLevel;
-		int m_nLastSentTags;
-        bool m_bIsSendListEmpty;
+		int m_nLastSentTags = -1;
+        bool m_bIsSendListEmpty = true;
 	};
 
 }
