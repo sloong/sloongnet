@@ -11,11 +11,6 @@ CServerConfig::CServerConfig()
 {
 	g_pThis = this;
 
-	m_pErr = NULL;
-	m_pFile = NULL;
-	m_pExFile = NULL;
-	m_bExConfig = false;
-
 	// DB init
 	m_oConnectInfo.Enable = false;
 	m_oConnectInfo.Port = 3306;
@@ -34,25 +29,6 @@ CServerConfig::CServerConfig()
 	m_oLogInfo.LogPath = "./sloongnet.log";
 	m_oLogInfo.LogLevel = 0;
 	m_oLogInfo.NetworkPort = 0;
-
-	// Server init
-	m_nPort = 9009;
-    m_nPriorityLevel = 0;
-	m_bEnableMD5Check = false;
-	m_bEnableSwiftNumberSup = false;
-	m_nConnectTimeout = 2;
-	m_nReceiveTimeout = 20;
-	m_bEnableSSL = false;
-
-	// Security
-	m_strClientCheckKey = "";
-	m_nClientCheckTime = 0;
-
-	// Performance
-	m_nSleepInterval = 100;
-	m_nEPoolThreadQuantity = 1;
-	m_nProcessThreadQuantity = 1;
-	m_nTimeoutInterval = 5;
 }
 
 bool CServerConfig::Initialize(string path, string exConfig)
@@ -233,6 +209,12 @@ void Sloong::CServerConfig::LoadConfig()
 	// Load server info
 	m_nPort = GetIntConfig("Server", "Port", m_nPort);
 	m_bEnableSSL = GetBoolenConfig("Server", "EnableSSL", m_bEnableSSL);
+	if (m_bEnableSSL)
+	{
+		m_strCertFile = GetStringConfig("Server", "SSLCertFilePath", m_strCertFile);
+		m_strKeyFile = GetStringConfig("Server", "SSLKeyFilePath", m_strKeyFile);
+		m_strPasswd = GetStringConfig("Server", "SSLPassword", m_strPasswd);
+	}
 	m_nPriorityLevel = GetIntConfig("Server", "PriorityLevel", m_nPriorityLevel);
 	m_bEnableMD5Check = GetBoolenConfig("Server", "EnableMD5Check", m_bEnableMD5Check);
 	m_bEnableSwiftNumberSup = GetBoolenConfig("Server", "EnableSwiftNumberSupport", m_bEnableSwiftNumberSup);
@@ -242,6 +224,7 @@ void Sloong::CServerConfig::LoadConfig()
 	// Security
 	m_nClientCheckTime = GetIntConfig("Security", "ClientCkeckTime", m_nClientCheckTime);
 	m_strClientCheckKey = GetStringConfig("Security", "ClientCheckKey", m_strClientCheckKey);
+	
 
 	// Performance
 	m_nSleepInterval = GetIntConfig("Performance", "SleepInterval", m_nSleepInterval);

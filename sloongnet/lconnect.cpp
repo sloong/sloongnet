@@ -175,7 +175,9 @@ int Sloong::lConnect::G_InitializeSSL(SSL_CTX** ctx, string certFile, string key
 		return ERR_get_error();
 	}
 
-	SSL_CTX_set_default_passwd_cb_userdata(p_ctx, (void*)passwd.c_str());
+	if( !passwd.empty() )
+		SSL_CTX_set_default_passwd_cb_userdata(p_ctx, (void*)passwd.c_str());
+
 	//New lines
 	if (SSL_CTX_load_verify_locations(p_ctx, certFile.c_str(), keyFile.c_str()) != 1)
 		return ERR_get_error();

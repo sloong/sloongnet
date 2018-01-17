@@ -57,7 +57,11 @@ void SloongWallUS::Initialize(CServerConfig* config)
     m_pEpoll->Initialize(m_pLog,config->m_nPort,config->m_nEPoolThreadQuantity,config->m_nPriorityLevel, 
 				config->m_bEnableSwiftNumberSup, config->m_bEnableMD5Check, config->m_nConnectTimeout, 
 		config->m_nTimeoutInterval,config->m_nReceiveTimeout, config->m_nClientCheckTime, config->m_strClientCheckKey);
-	m_pEpoll->EnableSSL("/root/keys/walls-server/server.crt", "/root/keys/walls-server/server.key","sloong");
+	if (config->m_bEnableSSL)
+	{
+		m_pEpoll->EnableSSL(config->m_strCertFile,config->m_strKeyFile,config->m_strPasswd);
+	}
+	
 	m_pEpoll->SetLogConfiguration(m_pConfig->m_oLogInfo.ShowSendMessage, m_pConfig->m_oLogInfo.ShowReceiveMessage);
     m_pEpoll->SetEvent(&m_oEventCV);
     m_pMsgProc->Initialize(m_pLog,&config->m_oConnectInfo, &config->m_oLuaConfigInfo, config->m_oLogInfo.ShowSQLCmd, config->m_oLogInfo.ShowSQLResult);

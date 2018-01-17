@@ -24,12 +24,13 @@ namespace Sloong
 		static CServerConfig* g_pThis;
 
 	private:
-		GError* m_pErr;
-		GKeyFile* m_pFile;
-		GKeyFile* m_pExFile;
-		string m_strConfigPath;
-		string m_strExConfigPath;
-		bool m_bExConfig;
+		GError* m_pErr = nullptr;
+		GKeyFile* m_pFile = nullptr;
+		GKeyFile* m_pExFile = nullptr;
+		string m_strConfigPath = "";
+		string m_strExConfigPath = "";
+		bool m_bExConfig = false;
+
 	public:
 		// DB config
 		MySQLConnectInfo m_oConnectInfo;
@@ -39,24 +40,27 @@ namespace Sloong
 		LogConfigInfo m_oLogInfo;
 
 		// Server config
-		int m_nPort;
-		int m_nPriorityLevel;
-		bool m_bEnableSwiftNumberSup;
-		bool m_bEnableMD5Check;
-		int m_nConnectTimeout;
-		int m_nReceiveTimeout;
+		int m_nPort = 9009;		
+		bool m_bEnableSSL = false;
+		string m_strCertFile = "";
+		string m_strKeyFile = "";
+		string m_strPasswd = "";
+		int m_nPriorityLevel = 0;
+		bool m_bEnableSwiftNumberSup = false;
+		bool m_bEnableMD5Check = false;
+		int m_nConnectTimeout = 2;
+		int m_nReceiveTimeout = 20;
 
 		// Security
-		int m_nClientCheckTime;
-		string m_strClientCheckKey;
+		int m_nClientCheckTime = 0;
+		string m_strClientCheckKey = "";
+		
 
 		// Performance
-		int m_nSleepInterval;
-		int m_nProcessThreadQuantity;
-		int m_nEPoolThreadQuantity;
-		int m_nTimeoutInterval;
-
-		bool m_bEnableSSL;
+		int m_nSleepInterval = 100;
+		int m_nProcessThreadQuantity =1;
+		int m_nEPoolThreadQuantity = 1;
+		int m_nTimeoutInterval = 5;
 	};
 }
 
