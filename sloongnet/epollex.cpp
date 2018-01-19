@@ -109,7 +109,7 @@ void Sloong::CEpollEx::Run()
 
 void Sloong::CEpollEx::EnableSSL(string certFile, string keyFile, string passwd)
 {
-	int ret = lConnect::G_InitializeSSL(&m_pCTX,certFile, keyFile, passwd);
+	int ret = lConnect::G_InitializeSSL(m_pCTX,certFile, keyFile, passwd);
 	if (ret != S_OK)
 	{
 		m_pLog->Error("Initialize SSL environment error.");
@@ -385,7 +385,7 @@ void Sloong::CEpollEx::OnNewAccept()
 		info->m_Address = string(inet_ntoa(add.sin_addr));
 		info->m_nPort = add.sin_port;
 		info->m_ActiveTime = time(NULL);
-		info->m_pCon->Initialize(conn_sock);
+		info->m_pCon->Initialize(conn_sock,m_pCTX);
 		info->m_pUserInfo->SetData("ip", info->m_Address);
 		info->m_pUserInfo->SetData("port", CUniversal::ntos(info->m_nPort));
 

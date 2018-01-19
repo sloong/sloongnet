@@ -14,6 +14,8 @@ Sloong::CSockInfo::CSockInfo(int nPriorityLevel)
 	m_pSendList = new queue<SENDINFO*>[nPriorityLevel]();
 	m_pProcessMutexList = new mutex[nPriorityLevel]();
     m_pPrepareSendList = new queue<PRESENDINFO>;
+	m_pCon = make_shared<lConnect>();
+	m_pUserInfo = new CLuaPacket();// make_unique<CLuaPacket>();
 }
 
 CSockInfo::~CSockInfo()
@@ -42,5 +44,6 @@ CSockInfo::~CSockInfo()
         SAFE_DELETE(si);
     }
     SAFE_DELETE(m_pPrepareSendList);
+	SAFE_DELETE(m_pUserInfo);
 	SAFE_DELETE_ARR(m_pProcessMutexList);
 }

@@ -33,20 +33,20 @@ namespace Sloong
 
 		// 初始化链接对象
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
-		void Initialize( int sock, SSL_CTX* ctx = nullptr);
+		void Initialize( int sock, SSL_CTX* ctx);
 
-		// 读取对端发送的数据
-		// 在读取发生错误需要关闭连接时，将直接抛出异常而不是返回-1.
+		// 读取对端发送的数据，返回实际读取到的长度
+		// 函数并不保证数据会全部读取完成才返回。只会尝试尽可能多的读取，直到发生错误或者都去完成。所以需要检查期望读取的长度和实际读取的长度
 		// Return：
-		//    0 - 读取发生问题，但是没有错误，需要等待下次可读写状态进行再次重试。
-		//    >0 - 读取到的数据长度
+		//	  -1 - 读取发生错误。且无法恢复。需要关闭连接。
+		//    >= 0 - 读取到的数据长度
 		int Read(char* data, int len, int timeout, bool bagain = false);
 
-		// 向对端发送数据
-		// 在发送发生错误需要关闭连接时，将直接抛出异常而不是返回-1.
+		// 向对端发送数据，返回实际发送的长度
+		// 函数并不保证数据会全部发送完成才返回。只能尝试尽可能多的发送，直到发生错误或者全部发送完成。需要检查期望发送的长度和实际发送的长度
 		// Return：
-		//    0 - 发送数据时出现问题，但是没有错误，需要等待下次可读写状态进行再次重试。
-		//    >0 - 成功发送的数据长度
+		//    -1 - 读取发生错误。且无法恢复。需要关闭连接。
+		//    >=0 - 成功发送的数据长度
 		int Write(const char* data, int len, int index);
 
 		void Close();
@@ -54,12 +54,15 @@ namespace Sloong
 		int GetSocket();
 
 	public:
-		static int G_InitializeSSL(SSL_CTX** ctx, string certFile, string keyFile, string passwd);
+		static int G_InitializeSSL(SSL_CTX*& ctx, string certFile, string keyFile, string passwd);
 		static string G_FormatSSLErrorMsg(int code);
 
 	private:
 		bool CheckSSLStatus(bool bRead);
 		bool do_handshake();
+
+		int SSL_Read_Ex(SSL* ssl, char* buf, int nSize, int nTimeout, bool bAgagin);
+		int SSL_Write_Ex(SSL* ssl, char* buf, int len);
 
 	private:
 		string m_strAddress;

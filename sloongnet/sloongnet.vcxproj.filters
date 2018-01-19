@@ -9,10 +9,6 @@
       <UniqueIdentifier>{16351f91-863a-40a8-820c-8aff8ab0f86c}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource files">
-      <UniqueIdentifier>{7137043d-a57c-4146-86b2-47510e5e4d28}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
-    </Filter>
     <Filter Include="Make files">
       <UniqueIdentifier>{04dbcfc6-32c5-4c14-bccc-de143428ec5c}</UniqueIdentifier>
       <Extensions>*.mak</Extensions>

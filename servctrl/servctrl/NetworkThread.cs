@@ -189,6 +189,7 @@ namespace Sloong
 
                     // 开始准备数据
                     /// 长度
+                    //info.m_SSL.Write(Utility.LongToBytes(lLen));
                     sendList.AddRange(Utility.LongToBytes(lLen));
 
                     /// 优先级
