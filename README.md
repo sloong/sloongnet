@@ -19,7 +19,7 @@ A open source network engine form sloong.com group.
 ## Contact US
 If have any question, tell us.
 
-* [Email](wcb@sloong.com)
+* [Email](mailto:wcb@sloong.com)
 
 ## Reference
 use library in this project.
