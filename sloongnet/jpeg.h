@@ -1,7 +1,7 @@
 #ifndef JPEG_H
 #define JPEG_H
 
-typedef unsigned char byte;
+typedef unsigned char UCHAR;
 
 #include <string>
 using std::string;
@@ -25,7 +25,7 @@ namespace Sloong
 		int m_nWidth;
 		int m_nHeight;
 		int m_nBPP;
-		byte*	m_pData;
+		UCHAR*	m_pData;
 	};
 }
 

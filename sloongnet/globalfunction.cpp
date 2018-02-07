@@ -178,7 +178,7 @@ int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
 		CUniversal::CheckFileDirectory(thumbpath);	
 		if (access(thumbpath.c_str(), ACC_E) != 0)
 		{
-            CImg<byte> img(path.c_str());
+            CImg<UCHAR> img(path.c_str());
             double ratio = (double)img.width() / (double)img.height();
             if( ratio > 1.0f )
             {

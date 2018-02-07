@@ -56,8 +56,8 @@ namespace Sloong
 		time_t m_ActiveTime;
 		shared_ptr<lConnect> m_pCon;
 
-		//unique_ptr<CLuaPacket> m_pUserInfo;
-		CLuaPacket* m_pUserInfo;
+		unique_ptr<CLuaPacket> m_pUserInfo;
+		//CLuaPacket* m_pUserInfo;
         mutex m_oSockReadMutex;
         mutex m_oSockSendMutex;
 		mutex m_oReadListMutex;

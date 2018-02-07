@@ -15,13 +15,13 @@ OBJCOPY := objcopy
 PREPROCESSOR_MACROS := DEBUG
 INCLUDE_DIRS := /usr/include/ /usr/include/glib-2.0/ /usr/lib64/glib-2.0/include/
 LIBRARY_DIRS := /usr/local/lib/sloong /usr/lib64/mysql
-LIBRARY_NAMES := m dl lua.5.3.1 univ pthread glib-2.0 mysqlclient crypto jpeg uuid ssl crypto
+LIBRARY_NAMES := m dl lua univ pthread glib-2.0 mysqlclient crypto jpeg uuid ssl crypto
 ADDITIONAL_LINKER_INPUTS := 
 MACOS_FRAMEWORKS := 
 LINUX_PACKAGES := 
 
 CFLAGS := -ggdb -ffunction-sections -O0
-CXXFLAGS := -ggdb -ffunction-sections -O0 -std=c++11 -DLUA_USE_READLINE
+CXXFLAGS := -ggdb -ffunction-sections -O0 -std=c++17 -DLUA_USE_READLINE
 ASFLAGS := 
 LDFLAGS := -Wl,-gc-sections -Wl,-rpath=/usr/local/lib/sloong -Wl,-rpath=/usr/lib64/mysql
 COMMONFLAGS := 

@@ -296,6 +296,10 @@ void Sloong::CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, st
 	unique_lock<mutex> lck(pInfo->m_oSockSendMutex, std::adopt_lock);
 	// if code run here. the all list is empty. and no have exdata. try send message
 	int nMsgSend = pInfo->m_pCon->Write(pBuf, nSize, 0);
+	if (nMsgSend < 0)
+	{
+		m_pLog->Warn(CUniversal::Format("Send data failed.[%s][%s]", pInfo->m_Address, pInfo->m_pCon->G_FormatSSLErrorMsg(nMsgSend)));
+	}
 	if (nMsgSend != nSize)
 	{
 		m_pLog->Verbos(CUniversal::Format("Add to send list with Priority[%d],Size[%d/%d].", nPriority, nMsgSend,nSize));

@@ -49,7 +49,7 @@ bool CJPEG::Load(string path)
 	m_nHeight = cinfo_decompress.output_height;
 	m_nBPP = cinfo_decompress.output_components;
 
-	m_pData = new byte[cinfo_decompress.output_width * cinfo_decompress.output_height * cinfo_decompress.output_components];
+	m_pData = new UCHAR[cinfo_decompress.output_width * cinfo_decompress.output_height * cinfo_decompress.output_components];
 	long counter = 0;
 
 	while (cinfo_decompress.output_scanline < cinfo_decompress.output_height) {
