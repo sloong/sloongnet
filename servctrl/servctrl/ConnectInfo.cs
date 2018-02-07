@@ -21,5 +21,7 @@ namespace servctrl
         public string m_URL;
         public ProtocolType m_Type = ProtocolType.Tcp;
         public SslStream m_SSL;
+        public bool m_bSSL;
+        public Stream m_Conn;
     }
 }

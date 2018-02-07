@@ -147,15 +147,13 @@ namespace Sloong
 
             if (info.m_Client == null || !info.m_Client.Connected)
             {
-                var ipport = new IPEndPoint(IPAddress.Parse(ip), info.m_nPort);
-                info.m_Client = new TcpClient(info.m_URL, info.m_nPort);// ipport);
+                info.m_Client = new TcpClient(info.m_URL, info.m_nPort);
                 // send check key
                 var key = "clinecheckkeyforsloongnet";
                 var gbk = Encoding.GetEncoding("GB2312");
                 byte[] sendByte = gbk.GetBytes(key);
                 var stream = info.m_Client.GetStream();
-                //stream.Write(sendByte, 0, sendByte.Length);
-                //Utility.SendEx(info.m_Socket, sendByte);
+                stream.Write(sendByte, 0, sendByte.Length);
 
                 info.m_SSL = new SslStream(stream,
                     false, 
@@ -168,50 +166,11 @@ namespace Sloong
 
                 try
                 {
-                    
-                    try
-                    {
-                        //info.m_SSL.AuthenticateAsClient("Sloong.com", certs, SslProtocols.Tls, false);
-                        info.m_SSL.AuthenticateAsClient("Sloong");
-                    }
-                    catch (Exception e)
-                    {
-                     }
-
-
-                    var msg = "Test";
-                    string md5 = "";
-                    List<byte> sendList = new List<byte>();
-                    var gbk1 = Encoding.GetEncoding("GB2312");
-
-                    // 计算长度
-                    long lLen = gbk.GetByteCount(msg) + 32 + 8 + 1;
-
-                    // 开始准备数据
-                    /// 长度
-                    //info.m_SSL.Write(Utility.LongToBytes(lLen));
-                    sendList.AddRange(Utility.LongToBytes(lLen));
-
-                    /// 优先级
-                    sendList.Add(1);
-
-                    /// 流水号
-                    if (AppStatus.bEnableSwift)
-                    {
-                        sendList.AddRange(Utility.LongToBytes(1));
-                    }
-
-                    /// md5
-                    if (AppStatus.bEnableMD5)
-                    {
-                        md5 = Utility.MD5_Encoding(msg, gbk);
-                        sendList.AddRange(gbk.GetBytes(md5));
-                    }
-
-
-                    sendList.AddRange(gbk.GetBytes(msg));
-
-                    info.m_SSL.Write(sendList.ToArray());
+                    // 双向认证
+                    //info.m_SSL.AuthenticateAsClient("Sloong.com", certs, SslProtocols.Tls, false);
+                    // 单向认证
+                    info.m_SSL.AuthenticateAsClient("Sloong");
+                    info.m_Conn = info.m_SSL;
                 }
                 catch (AuthenticationException e)
                 {
@@ -226,27 +185,6 @@ namespace Sloong
                     Console.ReadLine();
                     return;
                 }
-
-                //开始读取消息
-//                 Task.Factory.StartNew(() =>
-//                 {
-//                     ReadMessage(_sslStream);
-//                 });
-// 
-//                 Console.WriteLine("按Q退出程序");
-//                 string message = "";
-//                 message = Console.ReadLine() + "<EOF>";
-//                 while (message != "Q")
-//                 {
-//                     byte[] bytes = Encoding.UTF8.GetBytes(message);
-//                     _sslStream.Write(bytes);
-//                     _sslStream.Flush();
-//                     Console.WriteLine("send:" + message);
-//                     message = Console.ReadLine() + "<EOF>";
-//                 }
-// 
-//                 client.Close();
-
 
                 //AppStatus.RecvBufferSize = s.ReceiveBufferSize;
                 /*_DC.Add(ShareItem.ConnectStatus, m_Socket.Connected);*/
@@ -313,7 +251,7 @@ namespace Sloong
 
 
                         sendList.AddRange(gbk.GetBytes(msg));
-                        var Sock = SocketMap[pack.SocketID].m_Client;
+                        var steam = SocketMap[pack.SocketID].m_Conn;
                         if( !m_RecvThreadList.ContainsKey(pack.SocketID))
                         {
                             var mainRecv = new Thread(() => RecvWorkLoop(pack.SocketID));
@@ -322,14 +260,15 @@ namespace Sloong
                             mainRecv.Start();
                         }
                         
-                        lock (Sock)
+                        lock (steam)
                         {
-                            throw new Exception("需要替换为支持SSL发送的函数。");
-                            /*Utility.SendEx(Sock, sendList);
+                            steam.Write(sendList.ToArray(),0, sendList.Count);
+                            
+                            //Utility.SendEx(Sock, sendList);
                             pack.IsSent = true;
                             // only add to list when enable swift.
                             if (AppStatus.bEnableSwift)
-                                MsgList.Add(pack.SwiftNumber, pack);*/
+                                MsgList.Add(pack.SwiftNumber, pack);
                         }
                     }
                     else
@@ -379,9 +318,8 @@ namespace Sloong
                     //                         continue;
                     //                     }
 
-                    // TODO : 需要替换为支持SSL的接收
-                    /*
-                    long nLength = Utility.RecvDataLength(info.m_Socket, 10000);
+                    // TODO : 需要替换为支持SSL的接收                    
+                    long nLength = Utility.RecvDataLength(info.m_Conn, 10000);
                     
 
                     long nSwift = -1;
@@ -389,17 +327,17 @@ namespace Sloong
                     int index = 0;
                     if (AppStatus.bEnableSwift)
                     {
-                        nSwift = Utility.BytesToLong(Utility.RecvEx(info.m_Socket, 8, 10000));
+                        nSwift = Utility.BytesToLong(Utility.RecvEx(info.m_Conn, 8, 10000));
                         index = 8;
                     }
                     
                     if (AppStatus.bEnableMD5)
                     {
-                        byte[] bMD5 = Utility.RecvEx(info.m_Socket, 32, 10000);
+                        byte[] bMD5 = Utility.RecvEx(info.m_Conn, 32, 10000);
                         md5 = Encoding.GetEncoding("GB2312").GetString(bMD5);
                         index += 32;
                     }
-                    byte[] data = Utility.RecvEx(info.m_Socket, nLength - index, 10000);
+                    byte[] data = Utility.RecvEx(info.m_Conn, nLength - index, 10000);
                     string strRecv = Encoding.GetEncoding("GB2312").GetString(data);
                     if (MsgList.ContainsKey(nSwift))
                     {
@@ -407,7 +345,7 @@ namespace Sloong
                         pack.ReceivedMessages = strRecv;
                         if (pack.NeedExData)
                         {
-                            byte[] exData = Utility.RecvEx(info.m_Socket, Utility.RecvDataLength(info.m_Socket, 0), 0);
+                            byte[] exData = Utility.RecvEx(info.m_Conn, Utility.RecvDataLength(info.m_Conn, 0), 0);
                             pack.ReceivedExData = exData;
                         }
                         pack.IsReceived = true;
@@ -420,7 +358,7 @@ namespace Sloong
                     {
                         // no the swift number, error.
                         throw new Exception("Received message but no checked the swift number. please check the message:" + strRecv);
-                    }*/
+                    }
                 }
                 catch (Exception ex)
                 {
