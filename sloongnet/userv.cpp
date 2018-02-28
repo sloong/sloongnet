@@ -62,6 +62,8 @@ void SloongWallUS::Initialize(CServerConfig* config)
 	m_pMC->RegisterEvent(ProgramExit);
 	m_pMC->RegisterEvent(ProgramStart);
 	m_pMC->RegisterEventHandler(MSG_TYPE::ProgramExit, this, EventHandler);
+
+	m_pCC->Initialize(m_pMC, m_pDC);
 }
 
 void SloongWallUS::Run()

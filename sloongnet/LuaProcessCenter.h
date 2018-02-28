@@ -3,7 +3,6 @@
 #define LUA_INT_TYPE LUA_INT_LONG
 
 #include <univ/lua.h>
-#include <univ/log.h>
 #include "IMessage.h"
 #include "IData.h"
 #include "SmartSync.h"
@@ -37,7 +36,7 @@ namespace Sloong
 		vector<CLua*>	m_pLuaList;
 		vector<bool>	m_oReloadList;
 		queue<int>		m_oFreeLuaContext;
-		static CLog*	m_pLog;
+		static CLog*	g_pLog;
 		lSmartSync      m_oSSync;
 		mutex			m_oLuaContextMutex;
 		IMessage*		m_iMsg;

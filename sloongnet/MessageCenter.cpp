@@ -107,6 +107,9 @@ void * CMessageCenter::MessageWorkLoop(void * param)
 				auto evt_type = p->GetEvent();
 				auto handler_list = pThis->m_oMsgHandlerList[evt_type];
 				int handler_num = handler_list.size();
+				if ( handler_num == 0 )
+					continue;
+
 				// 由于涉及到多处理函数，而且释放必须由最后一个使用者来释放
 				// 所以在这里，将其加入到处理队列前，自动调用AddRef函数来增加计数。
 				// 由于担心处理函数运行太快，导致下次尚未加入到队列中，前一次已经运行结束直接将Event对象删除。

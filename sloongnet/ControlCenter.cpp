@@ -38,24 +38,26 @@ void Sloong::CControlCenter::Initialize(IMessage* iM,IData* iData)
 {
 	m_iM = iM;
 	m_iData = iData;
-	iM->RegisterEventHandler(ProgramStart, this, EventHandler);
-	iM->RegisterEventHandler(ProgramExit, this, EventHandler);
-	iM->RegisterEventHandler(ReveivePackage, this, EventHandler);
-	iM->RegisterEventHandler(SocketClose, this, EventHandler);
-
+	
 	m_pConfig = (CServerConfig*)m_iData->Get(Configuation);
 	m_pLog = (CLog*)m_iData->Get(Logger);
 	m_pEpoll->Initialize(m_iM,m_iData);
-	m_pProcess->Initialize(m_iM, m_iData);
 	m_pGFunc->Initialize(m_iM, m_iData);
-
 	m_iData->Add(GlobalFunctions, m_pGFunc);
+
+	m_pProcess->Initialize(m_iM, m_iData);
 	if (m_pConfig->m_bEnableSSL)
 	{
 		m_pEpoll->EnableSSL(m_pConfig->m_strCertFile, m_pConfig->m_strKeyFile, m_pConfig->m_strPasswd);
 	}
 
 	m_pEpoll->SetLogConfiguration(m_pConfig->m_oLogInfo.ShowSendMessage, m_pConfig->m_oLogInfo.ShowReceiveMessage);
+
+	// 在所有的成员都初始化之后，在注册处理函数
+	iM->RegisterEventHandler(ProgramStart, this, EventHandler);
+	iM->RegisterEventHandler(ProgramExit, this, EventHandler);
+	iM->RegisterEventHandler(ReveivePackage, this, EventHandler);
+	iM->RegisterEventHandler(SocketClose, this, EventHandler);
 }
 
 
@@ -97,29 +99,13 @@ void Sloong::CControlCenter::OnReceivePackage(IEvent* evt)
 			send_msg->SetSendExData(exData,nExSize);
 		}
 		send_msg->SetMessage(strRes);
-		m_iM->SendMessage(send_msg);
 	}
 	else
 	{
 		m_pLog->Error("Error in process");
 		send_msg->SetMessage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
-		m_iM->SendMessage(send_msg);
 	}
-	// 这里处理模块也改为处理中心的模式。在这里发送处理请求，然后由处理中心调用回调函数。
-	/*CNormalEvent* proc_msg = new CNormalEvent();
-	proc_msg->SetHandler(this);
-	proc_msg->SetEvent(MSG_TYPE::ProcessMessage);
-	proc_msg->SetMessage(pack->strMessage);
-	proc_msg->SetParams(info,false);
-	proc_msg->SetCallbackFunc(net_evt->GetCallbackFunc());
-	m_iM->SendMessage(proc_msg);*/
-	/*int nSize = pMsgProc->MsgProcess(id, pUserInfo, info->strMessage, strRes, pBuf);
-	send_msg->SetSendMessage(strRes);
-	send_msg->SetSendExData(pBuf, nSize);
-	auto func = send_msg->GetCallbackFunc();
-	m_iM->SendMessage(evt);*/
-	
-
+	m_iM->SendMessage(send_msg);
 }
 
 void Sloong::CControlCenter::OnSocketClose(IEvent* evt)
@@ -148,7 +134,7 @@ LPVOID Sloong::CControlCenter::EventHandler(LPVOID t, LPVOID object)
 		g_pCC->Run();
 		break;
 	case ProgramExit:
-		
+		g_pCC->Exit();
 		break;
 	case ReveivePackage:
 		g_pCC->OnReceivePackage(ev);

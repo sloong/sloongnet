@@ -22,9 +22,6 @@ namespace Sloong
 
 			virtual bool AddTemp(string name, void* object) = 0;
 			virtual void* GetTemp(string name) = 0;
-
-			template<typename T>
-			T GetAs(DATA_ITEM item) { return nullptr; }
 		};
 	}
 }

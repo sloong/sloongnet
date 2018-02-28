@@ -6,6 +6,8 @@
 #include "globalfunction.h"
 using namespace Sloong;
 
+CLog* Sloong::CLuaProcessCenter::g_pLog = nullptr;
+
 CLuaProcessCenter::CLuaProcessCenter()
 {
 }
@@ -25,8 +27,8 @@ void Sloong::CLuaProcessCenter::Initialize(IMessage* iMsg, IData* iData)
 	m_iMsg = iMsg;
 	m_iData = iData;
 
-	m_pLog = (CLog*)iData->Get(DATA_ITEM::Logger);
-	m_pConfig = (CServerConfig*)iData->Get(DATA_ITEM::Configuation);
+	g_pLog = TYPE_TRANS<CLog*>(m_iData->Get(DATA_ITEM::Logger));
+	m_pConfig = TYPE_TRANS<CServerConfig*>(iData->Get(DATA_ITEM::Configuation));
 
 	m_iMsg->RegisterEvent(MSG_TYPE::ProcessMessage);
 	m_iMsg->RegisterEvent(MSG_TYPE::ReloadLuaContext);
@@ -46,7 +48,7 @@ void Sloong::CLuaProcessCenter::Initialize(IMessage* iMsg, IData* iData)
 
 void Sloong::CLuaProcessCenter::HandleError(string err)
 {
-	m_pLog->Error(CUniversal::Format("[Script]:[%s]", err));
+	g_pLog->Error(CUniversal::Format("[Script]:[%s]", err));
 }
 
 void* Sloong::CLuaProcessCenter::EventHandler(LPVOID evt, LPVOID obj)
@@ -85,7 +87,7 @@ int Sloong::CLuaProcessCenter::NewThreadInit()
 	CLua* pLua = new CLua();
 	pLua->SetErrorHandle(HandleError);
 	pLua->SetScriptFolder(m_pConfig->m_oLuaConfigInfo.ScriptFolder);
-	auto pGFunc = m_iData->GetAs<CGlobalFunction*>(GlobalFunctions);
+	auto pGFunc = TYPE_TRANS<CGlobalFunction*>(m_iData->Get(GlobalFunctions));
 	pGFunc->InitLua(pLua);
 	InitLua(pLua, m_pConfig->m_oLuaConfigInfo.ScriptFolder);
 	m_pLuaList.push_back(pLua);

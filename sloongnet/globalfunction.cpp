@@ -75,8 +75,8 @@ void Sloong::CGlobalFunction::Initialize(IMessage* iMsg, IData* iData)
 {
 	m_iMsg = iMsg;
 	m_iData = iData;
-    m_pLog = (CLog*)m_iData->Get(Logger);
-	CServerConfig* config = m_iData->GetAs<CServerConfig*>(Configuation);
+    m_pLog = TYPE_TRANS<CLog*>(m_iData->Get(Logger));
+	CServerConfig* config = TYPE_TRANS<CServerConfig*>(m_iData->Get(Configuation));
 	m_bShowSQLCmd = config->m_oLogInfo.ShowSQLCmd;
 	m_bShowSQLResult = config->m_oLogInfo.ShowSQLResult;
 	m_pSQLInfo = &config->m_oConnectInfo;
