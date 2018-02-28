@@ -1,8 +1,8 @@
 #ifndef SLOONGWALLUS_H
 #define SLOONGWALLUS_H
 
-#include<mutex>
-#include<condition_variable>
+#include <mutex>
+#include <condition_variable>
 
 namespace Sloong
 {
@@ -14,9 +14,9 @@ namespace Sloong
 	using namespace Universal;
 
 	class CServerConfig;
-	class CEpollEx;
-	class CMsgProc;
-	struct _stRecvInfo;
+	class CControlCenter;
+	class CDataCenter;
+	class CMessageCenter;
 	class SloongWallUS
 	{
 	public:
@@ -26,22 +26,20 @@ namespace Sloong
 		void Initialize(CServerConfig* config);
 		void Run();
 		void Exit();
-		void ProcessEvent(int id, _stRecvInfo* info, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc);
-		void ProcessEventList(int id, queue<_stRecvInfo>* pList, mutex& oLock, int sock, int nPriorityLevel, CLuaPacket* pUserInfo, CEpollEx* pEpoll, CMsgProc* pMsgProc);
+		
 
 	public:// static function
-		static void* HandleEventWorkLoop(void* pParam);
+		static void* EventHandler(void* pParam,void* object);
 		
 	protected:
 		int m_sockServ;
 		int* m_sockClient;
-		int m_nPriorityLevel;
-        CServerConfig* m_pConfig;
-		CEpollEx* m_pEpoll;
-		CMsgProc* m_pMsgProc;
+		CControlCenter* m_pCC;
+		CDataCenter* m_pDC;
+		CMessageCenter* m_pMC;
 		CLog* m_pLog;
-        mutex m_oEventMutex;
-        condition_variable m_oEventCV;
+        mutex m_oExitEventMutex;
+		condition_variable m_oExitEventCV;
 		bool	m_bIsRunning;
 	};
 

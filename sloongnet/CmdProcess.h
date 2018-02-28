@@ -2,13 +2,16 @@
 #define CMDPROCESS_H
 
 #include <string>
+#include "serverconfig.h"
 namespace Sloong
 {
 	using std::string;
 	class CCmdProcess
 	{
 	public:
-		static void Parser(string cmd);
+		static void PrintVersion();
+		static void PrintHelp();
+		static bool Parser(int argc, char** args, CServerConfig*);
 	};
 
 }

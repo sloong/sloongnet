@@ -63,83 +63,42 @@ int main( int argc, char** args )
 	set_terminate(sloong_terminator);
 	set_unexpected(sloong_terminator);
 
-	//SIGPIPE:在reader终止之后写pipe的时候发生
 	//SIG_IGN:忽略信号的处理程序
-	//SIGCHLD: 进程Terminate或Stop的时候,SIGPIPE会发送给进程的父进程,缺省情况下该Signal会被忽略
-	//SIGINT:由Interrupt Key产生,通常是Ctrl+c或者Delete,发送给所有的ForeGroundGroup进程.
+	//SIGPIPE:在reader终止之后写pipe的时候发生
 	signal(SIGPIPE, SIG_IGN); // this signal should call the socket check function. and remove the timeout socket.
+	//SIGCHLD: 进程Terminate或Stop的时候,SIGPIPE会发送给进程的父进程,缺省情况下该Signal会被忽略
 	signal(SIGCHLD, SIG_IGN);
+	//SIGINT:由Interrupt Key产生,通常是Ctrl+c或者Delete,发送给所有的ForeGroundGroup进程.
 	signal(SIGINT, &on_sigint);
 	signal(SIGSEGV, &on_sigint);
 
 	try
 	{
 		CServerConfig config;
-		if (argc >= 2)
+		// CmdProcess会根据参数来加载正确的配置信息。成功返回true。
+		if (CCmdProcess::Parser(argc, args, &config))
 		{
-			string strCmd(args[1]);
-			CUniversal::tolower(strCmd);
-
-			if ((strCmd == "-r" || strCmd == "--r" || strCmd == "run") && (argc >= 3))
-			{
-				if (access(args[2], ACC_R) == 0)
-				{
-					try
-					{
-						if ( argc > 3 )
-							config.Initialize(args[2],args[3]);
-						else
-							config.Initialize(args[2]);
-						config.LoadConfig();
-					}
-					catch (normal_except& e)
-					{
-						cout << "Error when load config. error meesage is: " << e.what() << endl;
-						cout << "if you want run continue with default config, input 'r'." << endl;
-						char key;
-						cin >> key;
-						if (key != 'r' && key != 'R')
-							return 0;
-					}
-				}
-				else
-				{
-					if (access(args[2], ACC_E) == 0)
-						cerr << "cannot read config file. file path is : " << args[2] << endl;
-					else
-						cerr << "config file not exist. file path is : " << args[2] << endl;
-					return -1;
-				}
-			}
-			else if (strCmd != "-rd")
-			{
-				CCmdProcess::Parser(strCmd);
-				return 0;
-			}
+			// 成功加载后即创建UServer对象，并开始运行。
+			SloongWallUS us;
+			us.Initialize(&config);
+			// Run函数会阻塞运行。
+			us.Run();
 		}
-
-
-		SloongWallUS us;
-		us.Initialize(&config);
-		us.Run();
-		SLEEP(1);
 	}
 	catch (exception& e)
 	{
 		cout << "exception happened, system will shutdown. message:" << e.what() << endl;
-		write_call_stack();
 	}
 	catch(normal_except& e)
     {
         cout << "exception happened, system will shutdown. message:" << e.what() << endl;
-        write_call_stack();
     }
 	catch (...)
 	{
 		cout << "Unhandle exception happened, system will shutdown. "<< endl;
 		write_call_stack();
 	}
-    
+	
 	return 0;
 }
 

@@ -7,14 +7,14 @@
       <PathStyle>RemoteUnix</PathStyle>
     </CustomSourceDirectories>
     <BuildHost>
-      <HostName>10.0.0.61</HostName>
+      <HostName>172.16.182.130</HostName>
       <Transport>SSH</Transport>
       <UserName>root</UserName>
     </BuildHost>
     <MainSourceTransferCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>10.0.0.61</HostName>
+        <HostName>172.16.182.130</HostName>
         <Transport>SSH</Transport>
         <UserName>root</UserName>
       </RemoteHost>
@@ -50,7 +50,8 @@
     <MakeConfigurationName>Debug</MakeConfigurationName>
     <AdditionalMakeArguments />
     <Toolchain>
-      <Name>Default GCC toolchain on www.sloong.com:8006</Name>
+      <Name>Default GCC toolchain on 10.0.0.61</Name>
+      <UniqueID>com.sysprogs.toolchain.default-gcc</UniqueID>
       <UnixSystem>true</UnixSystem>
       <GCC>gcc</GCC>
       <GXX>g++</GXX>
@@ -68,9 +69,17 @@
           <BinaryToCheck>g++</BinaryToCheck>
         </TestableLinuxPackage>
         <TestableLinuxPackage>
+          <ID>gdb</ID>
           <UserFriendlyName>GDB</UserFriendlyName>
           <DefaultPackageName>gdb</DefaultPackageName>
           <BinaryToCheck>gdb</BinaryToCheck>
+          <AlternativeBinaries>
+            <string>ggdb</string>
+            <string>gdb-apple</string>
+          </AlternativeBinaries>
+          <AlternativeDirectories>
+            <string>/opt/local/bin</string>
+          </AlternativeDirectories>
         </TestableLinuxPackage>
         <TestableLinuxPackage>
           <UserFriendlyName>GNU Make</UserFriendlyName>

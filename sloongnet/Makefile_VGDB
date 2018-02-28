@@ -35,7 +35,7 @@ error:
 	$(error Invalid configuration, please check your inputs)
 endif
 
-SOURCEFILES := CmdProcess.cpp lconnect.cpp dbproc.cpp epollex.cpp globalfunction.cpp jpeg.cpp main.cpp msgproc.cpp progressbar.cpp serverconfig.cpp sockinfo.cpp userv.cpp utility.cpp
+SOURCEFILES := ControlCenter.cpp DataCenter.cpp CmdProcess.cpp LuaProcessCenter.cpp NormalEvent.cpp lconnect.cpp dbproc.cpp epollex.cpp globalfunction.cpp jpeg.cpp main.cpp MessageCenter.cpp ProgramEvent.cpp progressbar.cpp NetworkEvent.cpp SendMessageEvent.cpp serverconfig.cpp SmartSync.cpp sockinfo.cpp userv.cpp utility.cpp
 EXTERNAL_LIBS := 
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 

@@ -1,74 +1,92 @@
-#define _WS2_32_WINSOCK_SWAP_LONG(l)                \
-            ( ( ((l) >> 24) & 0x000000FFL ) |       \
-              ( ((l) >>  8) & 0x0000FF00L ) |       \
-              ( ((l) <<  8) & 0x00FF0000L ) |       \
-              ( ((l) << 24) & 0xFF000000L ) )
+#pragma once
 
-#define _WS2_32_WINSOCK_SWAP_LONGLONG(l)            \
-            ( ( ((l) >> 56) & 0x00000000000000FFLL ) |       \
-              ( ((l) >> 40) & 0x000000000000FF00LL ) |       \
-              ( ((l) >> 24) & 0x0000000000FF0000LL ) |       \
-              ( ((l) >>  8) & 0x00000000FF000000LL ) |       \
-              ( ((l) <<  8) & 0x000000FF00000000LL ) |       \
-              ( ((l) << 24) & 0x0000FF0000000000LL ) |       \
-              ( ((l) << 40) & 0x00FF000000000000LL ) |       \
-              ( ((l) << 56) & 0xFF00000000000000LL ) )
+#include "main.h"
 
-
-#ifndef htonll
-__inline unsigned __int64 htonll ( unsigned __int64 Value ) 
-{ 
-	const unsigned __int64 Retval = _WS2_32_WINSOCK_SWAP_LONGLONG (Value);
-	return Retval;
+template<typename T> inline
+T TYPE_TRANS(LPVOID p)
+{
+	T tmp = static_cast<T>(p);
+	assert(tmp);
+	return tmp;
 }
-#endif /* htonll */
 
-#ifndef ntohll
-__inline unsigned __int64 ntohll ( unsigned __int64 Value ) 
-{ 
-	const unsigned __int64 Retval = _WS2_32_WINSOCK_SWAP_LONGLONG (Value);
-	return Retval;
-}
-#endif /* ntohll */
 
-#ifndef htonf
-__inline unsigned __int32 htonf ( float Value ) 
-{ 
-	unsigned __int32 Tempval;
-	unsigned __int32 Retval;
-	Tempval = *(unsigned __int32*)(&Value);
-	Retval = _WS2_32_WINSOCK_SWAP_LONG (Tempval);
-	return Retval;
-}
-#endif /* htonf */
 
-#ifndef ntohf
-__inline float ntohf ( unsigned __int32 Value ) 
-{ 
-	const unsigned __int32 Tempval = _WS2_32_WINSOCK_SWAP_LONG (Value);
-	float Retval;
-	*((unsigned __int32*)&Retval) = Tempval;
-	return Retval;
-}
-#endif /* ntohf */
+typedef enum g_DataCenter_MsgType
+{
+	ProgramStart,
+	ProgramExit,
 
-#ifndef htond
-__inline unsigned __int64 htond ( double Value ) 
-{ 
-	unsigned __int64 Tempval;
-	unsigned __int64 Retval;
-	Tempval = *(unsigned __int64*)(&Value);
-	Retval = _WS2_32_WINSOCK_SWAP_LONGLONG (Tempval);
-	return Retval;
-}
-#endif /* htond */
+	//////////////////////////////////////////////////////////////////////////
+	// 由 * EPollEx * 模块提供的消息
+	//////////////////////////////////////////////////////////////////////////
+	// 当接收到消息包之后，会发送该消息
+	ReveivePackage,
 
-#ifndef ntohd
-__inline double ntohd ( unsigned __int64 Value ) 
-{ 
-	const unsigned __int64 Tempval = _WS2_32_WINSOCK_SWAP_LONGLONG (Value);
-	double Retval;
-	*((unsigned __int64*)&Retval) = Tempval;
-	return Retval;
-}
-#endif /* ntohd */
+	// 当连接关闭时会发送该消息
+	// 需要在处理完成后调用回调函数以清除连接信息。
+	// 参数类型为CNetworkEvent
+	SocketClose,
+
+	// 需要发送数据给客户端时，使用该消息
+	SendMessage,
+
+	//////////////////////////////////////////////////////////////////////////
+	// 由 * LuaProcessCenter * 提供的消息
+	//////////////////////////////////////////////////////////////////////////
+	// 请求调用lua来处理消息。
+	// 在处理完毕将会调用回调函数，回调参数为
+	ProcessMessage,
+	
+	// 请求重新载入Lua环境
+	// 当需要重新载入Lua Context的时候发送该请求。
+	// 请求类型为CNormalEvent
+	ReloadLuaContext,
+	
+
+}MSG_TYPE;
+
+struct MySQLConnectInfo
+{
+	bool Enable;
+	string Address;
+	int Port;
+	string User;
+	string Password;
+	string Database;
+};
+
+struct LuaScriptConfigInfo
+{
+	string EntryFile;
+	string EntryFunction;
+	string ProcessFunction;
+	string SocketCloseFunction;
+	string ScriptFolder;
+};
+
+struct LogConfigInfo
+{
+	bool	DebugMode;
+	bool	ShowSendMessage;
+	bool	ShowReceiveMessage;
+	bool	LogWriteToOneFile;
+	bool	ShowSQLCmd;
+	bool	ShowSQLResult;
+	int		LogLevel;
+	string	LogPath;
+	int		NetworkPort;
+};
+
+struct HandlerItem
+{
+	void* object;
+	LPCALLBACK2FUNC handler;
+};
+
+typedef struct _stRecvInfo
+{
+	long long nSwiftNumber = -1;
+	string strMD5 = "";
+	string strMessage = "";
+}RECVINFO;

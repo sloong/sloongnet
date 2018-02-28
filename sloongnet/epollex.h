@@ -9,8 +9,11 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
-#include "sockinfo.h"
+#include <openssl/ssl.h>
 #include "structs.h"
+
+#include "IData.h"
+#include "IMessage.h"
 using namespace std; //std 命名空间
 typedef unsigned char byte;
 
@@ -21,57 +24,21 @@ namespace Sloong
 		class CLog;
 	}
 	using namespace Universal;
-
-	struct EpollExConfig
-	{
-		// 优先级分级数量，最高为255
-		int m_nPriorityLevel;
-		// 在日志记录中显示发送消息
-		bool m_bShowSendMessage;
-		// 在日志记录中显示接收消息
-		bool m_bShowReceiveMessage;
-		// 是否启用流水号支持
-		bool m_bSwiftNumberSupport;
-		// 是否启用MD5支持
-		bool m_bMD5Support;
-		// 是否启用客户端连接检查
-		bool m_bEnableClientCheck;
-		// 客户端检查密匙
-		string m_strClientCheckKey;
-		// 客户单密匙长度
-		int m_nCheckKeyLength;
-		// 客户端检查超时
-		int m_nClientCheckTime;
-		// 连接超时
-		int m_nConnectTimeout;
-		// 接收超时
-		int m_nReceiveTimeout;
-		// 主动进行超时检查的间隔。
-		int m_nTimeoutInterval;
-		// 是否启用SSL
-		bool m_bEnableSSL;
-		// 运行的线程数
-		int m_nWorkThreadNum;
-		EpollExConfig()
-		{
-			m_bEnableClientCheck = false;
-		}
-	};
-
+	using namespace Interface;
+	
+	class CSockInfo;
+	class CServerConfig;
 	class CEpollEx
 	{
 	public:
         CEpollEx();
 		virtual ~CEpollEx();
-        int Initialize(CLog* pLog,int listenPort, int nThreadNum, int nPriorityLevel, bool bSwiftNumSupprot, bool bMD5Support, 
-				int nTimeout, int nTimeoutInterval, int nRecvTimeout, int nCheckTimeout,string strCheckKey);
-		void SetConfig(EpollExConfig& conf);
+        int Initialize(IMessage* iM,IData* iData);
 		void Run();
 		void EnableSSL(string certFile, string keyFile, string passwd);
 		void SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage);
 		void Exit();
         void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
-        void SetEvent( condition_variable* pCV );
 		void ProcessPrepareSendList( CSockInfo* info );
 		/************************************************************************/
 		/* If need listen write event, return false, else return true
@@ -100,8 +67,10 @@ namespace Sloong
 		void OnCanWriteData( int nSocket );
 
 	public:
+		static void* CALLBACK_SocketClose(void* params, void* object);
 		static void* WorkLoop(void* params);
 		static void* CheckTimeoutConnect(void* params);
+		static void* EventHandler(void* params, void* object);
 	protected:
 		int     m_ListenSock;
 		int 	m_EpollHandle;
@@ -110,15 +79,16 @@ namespace Sloong
 		CLog*		m_pLog;
 	public:
 		map<int, CSockInfo*> m_SockList;
-		queue<EventListItem> m_EventSockList;
-        mutex m_oEventListMutex;
         mutex m_oSockListMutex;
 		mutex m_oExitMutex;
 		condition_variable m_oExitCV;
-        condition_variable* m_pEventCV;
 		SSL_CTX* m_pCTX;
 		bool m_bIsRunning;
-		EpollExConfig m_oConfig;
+		bool m_bEnableClientCheck;
+		int m_nClientCheckKeyLength;
+		CServerConfig* m_pConfig;
+		IData* m_iData;
+		IMessage* m_iMsg;
 	};
 }
 

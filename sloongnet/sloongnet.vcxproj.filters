@@ -16,6 +16,18 @@
     <Filter Include="scripts">
       <UniqueIdentifier>{d910d274-a871-4d10-bee2-edd0bd9aef9a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Center">
+      <UniqueIdentifier>{331172ee-63b3-48d2-953c-89f47bc1cfd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interface">
+      <UniqueIdentifier>{32c97474-9c6f-49ca-88aa-733d9965df16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Events">
+      <UniqueIdentifier>{63a5f03b-d230-415d-aeda-c3b2edc42160}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Module">
+      <UniqueIdentifier>{43b4bdf1-5537-4cdb-989b-21b490c9cc1e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="debug.mak">
@@ -47,22 +59,13 @@
     <None Include="ex.conf" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="epollex.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="main.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="msgproc.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="sockinfo.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="userv.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="serverconfig.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="utility.h">
@@ -74,9 +77,6 @@
     <ClInclude Include="dbproc.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="jpeg.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="version.h" />
     <ClInclude Include="progressbar.h">
       <Filter>Header files</Filter>
@@ -84,30 +84,66 @@
     <ClInclude Include="CmdProcess.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="structs.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="lconnect.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="defines.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="IEvent.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="IData.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="IMessage.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageCenter.h">
+      <Filter>Center</Filter>
+    </ClInclude>
+    <ClInclude Include="ControlCenter.h">
+      <Filter>Center</Filter>
+    </ClInclude>
+    <ClInclude Include="DataCenter.h">
+      <Filter>Center</Filter>
+    </ClInclude>
+    <ClInclude Include="epollex.h">
+      <Filter>Module</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgramEvent.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="NormalEvent.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkEvent.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="SendMessageEvent.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaProcessCenter.h">
+      <Filter>Center</Filter>
+    </ClInclude>
+    <ClInclude Include="jpeg.h">
+      <Filter>Module</Filter>
+    </ClInclude>
+    <ClInclude Include="serverconfig.h">
+      <Filter>Module</Filter>
+    </ClInclude>
+    <ClInclude Include="SmartSync.h">
+      <Filter>Module</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="epollex.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="msgproc.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="sockinfo.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="userv.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="serverconfig.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="utility.cpp">
@@ -119,9 +155,6 @@
     <ClCompile Include="dbproc.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="jpeg.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="progressbar.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
@@ -130,6 +163,42 @@
     </ClCompile>
     <ClCompile Include="lconnect.cpp">
       <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageCenter.cpp">
+      <Filter>Center</Filter>
+    </ClCompile>
+    <ClCompile Include="ControlCenter.cpp">
+      <Filter>Center</Filter>
+    </ClCompile>
+    <ClCompile Include="DataCenter.cpp">
+      <Filter>Center</Filter>
+    </ClCompile>
+    <ClCompile Include="epollex.cpp">
+      <Filter>Module</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgramEvent.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="NormalEvent.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkEvent.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="SendMessageEvent.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaProcessCenter.cpp">
+      <Filter>Center</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg.cpp">
+      <Filter>Module</Filter>
+    </ClCompile>
+    <ClCompile Include="serverconfig.cpp">
+      <Filter>Module</Filter>
+    </ClCompile>
+    <ClCompile Include="SmartSync.cpp">
+      <Filter>Module</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

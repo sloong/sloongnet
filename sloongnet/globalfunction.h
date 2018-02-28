@@ -2,6 +2,8 @@
 #define CGLOBALFUNCTION_H
 
 #include <univ/lua.h>
+#include "IData.h"
+#include "IMessage.h"
 namespace Sloong
 {
 	struct SendExDataInfo
@@ -19,19 +21,21 @@ namespace Sloong
 	class CUtility;
 	class CDBProc;
 	struct MySQLConnectInfo;
+	using namespace Interface;
 	class CGlobalFunction
 	{
 	public:
         CGlobalFunction();
 		~CGlobalFunction();
 
-		void Initialize(CLog* plog,MySQLConnectInfo* info,bool bShowCmd, bool bShowRes);
+		void Initialize(IMessage* iMsg,IData* iData);
 		void InitLua(CLua* pLua);
 	protected:
         CUtility * m_pUtility;
 		CDBProc* m_pDBProc;
 		CLog*	m_pLog;
-		
+		IMessage* m_iMsg;
+		IData*		m_iData;
 	public:
 
 
@@ -54,10 +58,6 @@ namespace Sloong
 		
 	public:
 		static CGlobalFunction* g_pThis;
-		map<int,SendExDataInfo> m_oSendExMapList;
-		mutex		m_oListMutex;
-		bool*		m_pReloadTagList;
-		int			m_nTagSize;
 		bool		m_bShowSQLCmd;
 		bool		m_bShowSQLResult;
 		MySQLConnectInfo* m_pSQLInfo;

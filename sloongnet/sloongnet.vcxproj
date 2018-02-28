@@ -35,7 +35,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\10.0.0.60\0000\include\glib-2.0;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\10.0.0.60\0002\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\10.0.0.60\0000\include\c++\4.8.5;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\10.0.0.60\0000\include\c++\4.8.5\x86_64-redhat-linux;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\10.0.0.60\0000\include\c++\4.8.5\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\10.0.0.60\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\10.0.0.60\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\10.0.0.60\0000\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.182.130\0000\include\glib-2.0;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.182.130\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.182.130\0002\include\c++\7.2.0;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.182.130\0002\include\c++\7.2.0\x86_64-pc-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.182.130\0002\include\c++\7.2.0\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.182.130\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.182.130\0002\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.182.130\0004\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.182.130\0000\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\172.16.182.130\0002\include\univ;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
@@ -76,33 +76,52 @@
     <None Include="scripts\sql.lua" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ControlCenter.h" />
+    <ClInclude Include="DataCenter.h" />
     <ClInclude Include="CmdProcess.h" />
+    <ClInclude Include="defines.h" />
+    <ClInclude Include="LuaProcessCenter.h" />
+    <ClInclude Include="NormalEvent.h" />
+    <ClInclude Include="IMessage.h" />
+    <ClInclude Include="IData.h" />
+    <ClInclude Include="IEvent.h" />
     <ClInclude Include="lconnect.h" />
     <ClInclude Include="dbproc.h" />
     <ClInclude Include="epollex.h" />
     <ClInclude Include="globalfunction.h" />
     <ClInclude Include="jpeg.h" />
     <ClInclude Include="main.h" />
-    <ClInclude Include="msgproc.h" />
+    <ClInclude Include="MessageCenter.h" />
+    <ClInclude Include="ProgramEvent.h" />
     <ClInclude Include="progressbar.h" />
+    <ClInclude Include="NetworkEvent.h" />
+    <ClInclude Include="SendMessageEvent.h" />
     <ClInclude Include="serverconfig.h" />
+    <ClInclude Include="SmartSync.h" />
     <ClInclude Include="sockinfo.h" />
-    <ClInclude Include="structs.h" />
     <ClInclude Include="userv.h" />
     <ClInclude Include="utility.h" />
     <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ControlCenter.cpp" />
+    <ClCompile Include="DataCenter.cpp" />
     <ClCompile Include="CmdProcess.cpp" />
+    <ClCompile Include="LuaProcessCenter.cpp" />
+    <ClCompile Include="NormalEvent.cpp" />
     <ClCompile Include="lconnect.cpp" />
     <ClCompile Include="dbproc.cpp" />
     <ClCompile Include="epollex.cpp" />
     <ClCompile Include="globalfunction.cpp" />
     <ClCompile Include="jpeg.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="msgproc.cpp" />
+    <ClCompile Include="MessageCenter.cpp" />
+    <ClCompile Include="ProgramEvent.cpp" />
     <ClCompile Include="progressbar.cpp" />
+    <ClCompile Include="NetworkEvent.cpp" />
+    <ClCompile Include="SendMessageEvent.cpp" />
     <ClCompile Include="serverconfig.cpp" />
+    <ClCompile Include="SmartSync.cpp" />
     <ClCompile Include="sockinfo.cpp" />
     <ClCompile Include="userv.cpp" />
     <ClCompile Include="utility.cpp" />

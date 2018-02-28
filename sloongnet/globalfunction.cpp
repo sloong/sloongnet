@@ -1,27 +1,36 @@
 #include "globalfunction.h"
+// sys 
 #include <stdlib.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <boost/foreach.hpp>
+#include <mutex>
+// univ
 #include <univ/log.h>
 #include <univ/univ.h>
-using namespace Sloong;
-using namespace Sloong::Universal;
-#include <boost/foreach.hpp>
-#include "dbproc.h"
-#include "utility.h"
-#include "jpeg.h"
-#define cimg_display 0
-#include "CImg.h"
 #include "univ/exception.h"
 #include <univ/Base64.h>
 #include <univ/MD5.h>
-#include <mutex>
+// cimag
+#define cimg_display 0
+#include "CImg.h"
+
+#include "dbproc.h"
+#include "utility.h"
+#include "jpeg.h"
 #include "version.h"
 #include "serverconfig.h"
 #include "epollex.h"
-#include<sys/socket.h>
-#include <netinet/in.h>
+#include "NormalEvent.h"
+
 using namespace std;
 using namespace cimg_library;
 #define ARRAYSIZE(a) (sizeof(a)/sizeof(a[0]))
+
+using namespace Sloong;
+using namespace Sloong::Universal;
+using namespace Sloong::Events;
+using namespace Sloong::Interface;
 
 CGlobalFunction* CGlobalFunction::g_pThis = NULL;
 mutex g_SQLMutex;
@@ -53,7 +62,6 @@ CGlobalFunction::CGlobalFunction()
     m_pUtility = new CUtility();
     m_pDBProc = new CDBProc();
 	g_pThis = this;
-	m_pReloadTagList = NULL;
 }
 
 
@@ -61,31 +69,23 @@ CGlobalFunction::~CGlobalFunction()
 {
 	SAFE_DELETE(m_pUtility);
 	SAFE_DELETE(m_pDBProc);
-
-	unique_lock<mutex> lck(m_oListMutex);
-	int nSize = m_oSendExMapList.size();
-	for (int i = 0; i < nSize; i++)
-	{
-		if (!m_oSendExMapList[i].m_bIsEmpty)
-			SAFE_DELETE_ARR(m_oSendExMapList[i].m_pData)
-			m_oSendExMapList[i].m_bIsEmpty = true;
-	}
-	lck.unlock();
-	SAFE_DELETE_ARR(m_pReloadTagList);
 }
 
-void Sloong::CGlobalFunction::Initialize(CLog* plog, MySQLConnectInfo* info, bool bShowCmd, bool bShowRes)
+void Sloong::CGlobalFunction::Initialize(IMessage* iMsg, IData* iData)
 {
-    m_pLog = plog;
-	m_bShowSQLCmd = bShowCmd;
-	m_bShowSQLResult = bShowRes;
-	m_pSQLInfo = info;
+	m_iMsg = iMsg;
+	m_iData = iData;
+    m_pLog = (CLog*)m_iData->Get(Logger);
+	CServerConfig* config = m_iData->GetAs<CServerConfig*>(Configuation);
+	m_bShowSQLCmd = config->m_oLogInfo.ShowSQLCmd;
+	m_bShowSQLResult = config->m_oLogInfo.ShowSQLResult;
+	m_pSQLInfo = &config->m_oConnectInfo;
     // connect to db
-	if (info->Enable)
+	if (m_pSQLInfo->Enable)
 	{
 		try
 		{
-			m_pDBProc->Connect(info);
+			m_pDBProc->Connect(m_pSQLInfo);
 		}
 		catch (normal_except& e)
 		{
@@ -262,39 +262,25 @@ int Sloong::CGlobalFunction::Lua_SendFile(lua_State* l)
 		return 2;
 	}
 
-	auto& rList = g_pThis->m_oSendExMapList;
-	unique_lock<mutex> lck(g_pThis->m_oListMutex);
-	int nListSize = rList.size();
-	for (int i = 0; i < nListSize; i++)
-	{
-		if (rList[i].m_bIsEmpty)
-		{
-			rList[i].m_nDataSize = nSize;
-			rList[i].m_pData = pBuf;
-			rList[i].m_bIsEmpty = false;
-			lck.unlock();
-			CLua::PushNumber(l, i);
-			CLua::PushString(l, "succeed");
-			return 2;
-		}
-	}
+	auto uuid = CUtility::GenUUID();
 
-	SendExDataInfo info;
-	info.m_nDataSize = nSize;
-	info.m_pData = pBuf;
-	info.m_bIsEmpty = false;
-	rList[rList.size()] = info;
-	CLua::PushNumber(l, rList.size() - 1);
+	SendExDataInfo* info=new SendExDataInfo();
+	info->m_nDataSize = nSize;
+	info->m_pData = pBuf;
+	info->m_bIsEmpty = false;
+	g_pThis->m_iData->AddTemp("SendList" + uuid, info);
+
+	
+	CLua::PushString(l, uuid);
 	CLua::PushString(l, "succeed");
 	return 2;
 }
 
 int Sloong::CGlobalFunction::Lua_ReloadScript(lua_State* l)
 {
-	for (int i = 0; i < g_pThis->m_nTagSize; i++)
-	{
-		g_pThis->m_pReloadTagList[i] = true;
-	}
+	CNormalEvent* evt = new CNormalEvent();
+	evt->SetEvent(MSG_TYPE::ReloadLuaContext);
+	g_pThis->m_iMsg->SendMessage(evt);
 	return 0;
 }
 
