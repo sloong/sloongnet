@@ -152,39 +152,43 @@ namespace Sloong
                 var key = "clinecheckkeyforsloongnet";
                 var gbk = Encoding.GetEncoding("GB2312");
                 byte[] sendByte = gbk.GetBytes(key);
-                var stream = info.m_Client.GetStream();
-                stream.Write(sendByte, 0, sendByte.Length);
+                info.m_Conn = info.m_Client.GetStream();
+                info.m_Conn.Write(sendByte, 0, sendByte.Length);
 
-                info.m_SSL = new SslStream(stream,
-                    false, 
+                if( info.m_bSSL )
+                {
+                    info.m_SSL = new SslStream(info.m_Conn,
+                    false,
                     new RemoteCertificateValidationCallback(ValidateServerCertificate),
                     null);
-                X509CertificateCollection certs = new X509CertificateCollection();
-                //X509Certificate cert = X509Certificate.CreateFromCertFile( Environment.CurrentDirectory + @"\" + "client.cer");
-                X509Certificate cert = X509Certificate.CreateFromCertFile("D:\\Temp\\client.crt");
-                certs.Add(cert);
+                    X509CertificateCollection certs = new X509CertificateCollection();
+                    //X509Certificate cert = X509Certificate.CreateFromCertFile( Environment.CurrentDirectory + @"\" + "client.cer");
+                    X509Certificate cert = X509Certificate.CreateFromCertFile("D:\\Temp\\client.crt");
+                    certs.Add(cert);
 
-                try
-                {
-                    // 双向认证
-                    //info.m_SSL.AuthenticateAsClient("Sloong.com", certs, SslProtocols.Tls, false);
-                    // 单向认证
-                    info.m_SSL.AuthenticateAsClient("Sloong");
-                    info.m_Conn = info.m_SSL;
-                }
-                catch (AuthenticationException e)
-                {
-                    Console.WriteLine("Exception: {0}", e.Message);
-                    if (e.InnerException != null)
+                    try
                     {
-                        Console.WriteLine("Inner exception: {0}", e.InnerException.Message);
+                        // 双向认证
+                        //info.m_SSL.AuthenticateAsClient("Sloong.com", certs, SslProtocols.Tls, false);
+                        // 单向认证
+                        info.m_SSL.AuthenticateAsClient("Sloong");
+                        info.m_Conn = info.m_SSL;
                     }
-                    Console.WriteLine("Authentication failed - closing the connection.");
-                    info.m_SSL.Close();
-                    info.m_Client.Close();
-                    Console.ReadLine();
-                    return;
+                    catch (AuthenticationException e)
+                    {
+                        Console.WriteLine("Exception: {0}", e.Message);
+                        if (e.InnerException != null)
+                        {
+                            Console.WriteLine("Inner exception: {0}", e.InnerException.Message);
+                        }
+                        Console.WriteLine("Authentication failed - closing the connection.");
+                        info.m_SSL.Close();
+                        info.m_Client.Close();
+                        Console.ReadLine();
+                        return;
+                    }
                 }
+                
 
                 //AppStatus.RecvBufferSize = s.ReceiveBufferSize;
                 /*_DC.Add(ShareItem.ConnectStatus, m_Socket.Connected);*/
