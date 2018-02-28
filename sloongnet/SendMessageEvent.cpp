@@ -8,3 +8,8 @@ Sloong::Events::CSendMessageEvent::CSendMessageEvent(int nSocket, int nPriority,
 	m_llSwift = swift; 
 	m_emType = SendMessage;
 }
+
+Sloong::Events::CSendMessageEvent::CSendMessageEvent()
+{
+	m_emType = SendMessage;
+}

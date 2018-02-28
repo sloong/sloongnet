@@ -8,7 +8,7 @@ namespace Sloong
 		class CSendMessageEvent : public CNetworkEvent
 		{
 		public:
-			CSendMessageEvent() {}
+			CSendMessageEvent();
 			CSendMessageEvent(int nSocket, int nPriority, long long swift);
 			virtual ~CSendMessageEvent() {}
 
@@ -21,8 +21,8 @@ namespace Sloong
 
 		protected:
 			long long m_llSwift;
-			const char* m_pExData;
-			int m_nExDataLength;
+			const char* m_pExData = nullptr;
+			int m_nExDataLength = 0;
 		};
 
 	}

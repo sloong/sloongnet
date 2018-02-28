@@ -27,9 +27,6 @@ namespace Sloong
 	public: 
 		static LPVOID EventHandler(LPVOID t,LPVOID object);
 
-	public:
-		static CControlCenter* g_pCC;
-
 	protected:
 		IMessage * m_iM;
 		IData* m_iData;

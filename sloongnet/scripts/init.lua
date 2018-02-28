@@ -23,14 +23,15 @@ SocketCloseProcess = function( u)
 	Info("socket closed")
 end
 
-ProgressMessage = function( uinfo, request )
-    local jreq = JSON:decode(request)
+ProgressMessage = function( uinfo, c_req, c_res )
+    local req = c_req:getdata('json_request_message')
+    local jreq = JSON:decode(req)
     local jres = JSON:decode('{}')
     local func = g_all_request_processer[jreq['funcid']];
     Info('Call process function : ' .. jreq['funcid'] );
    
     if type(func) == 'function' then
-      local code,msg,res = func( uinfo, jreq, jres );
+      local code,msg,res,len = func( uinfo, jreq, jres );
       jres['errno'] = tostring(code);
       jres['errmsg'] = msg or 'success';
     else
@@ -38,7 +39,15 @@ ProgressMessage = function( uinfo, request )
       jres['errmsg'] = 'not find the processer. the name is %s.' .. jreq['funcid'];
     end
     Info('code:' .. jres['errno'] .. ',msg:' .. jres['errmsg'], 'Global')
-    res = res or -1
-    return JSON:encode(jres),res;
+    local str_res = JSON:encode(jres);
+    c_res:setdata('json_response_message',str_res);
+    if res then
+	c_res:setdata('NeedExData',tostring(true))
+	c_res:setdata('ExDataUUID',tostring(res))
+	c_res:setdata('ExDataSize',tostring(len))
+    else
+	c_res:setdata('NeedExData',tostring(false))
+    end
+    return c_res;
 end
 

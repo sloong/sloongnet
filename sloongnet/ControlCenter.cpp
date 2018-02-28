@@ -11,16 +11,8 @@ using namespace Sloong;
 using namespace Sloong::Universal;
 using namespace Sloong::Events;
 
-CControlCenter* CControlCenter::g_pCC = nullptr;
-
 CControlCenter::CControlCenter()
 {
-	if ( g_pCC != nullptr )
-	{
-		throw normal_except("ControlCenter can only have one instance!");
-	}
-	
-	g_pCC = this;
 	m_pEpoll = new CEpollEx();
 	m_pProcess = new CLuaProcessCenter();
 	m_pGFunc = new CGlobalFunction();
@@ -112,15 +104,13 @@ void Sloong::CControlCenter::OnSocketClose(IEvent* evt)
 {
 	CNetworkEvent* net_evt = (CNetworkEvent*)evt;
 	CSockInfo* info = net_evt->GetSocketInfo();
-	CControlCenter* pThis = TYPE_TRANS<CControlCenter*>(evt->GetHandler());
-	//TRANS_TYPE(evt->GetHandler(),CControlCenter*,pThis)
 	if (!info)
 	{
-		pThis->m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
+		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
 		return;
 	}
 	// call close function.
-	pThis->m_pProcess->CloseSocket(info->m_pUserInfo.get());
+	m_pProcess->CloseSocket(info->m_pUserInfo.get());
 	net_evt->CallCallbackFunc(net_evt);
 }
 
@@ -128,19 +118,20 @@ LPVOID Sloong::CControlCenter::EventHandler(LPVOID t, LPVOID object)
 {
 	IEvent* ev = (IEvent*)t;
 	auto type = ev->GetEvent();
+	auto pThis = TYPE_TRANS<CControlCenter*>(object);
 	switch (type)
 	{
 	case ProgramStart:
-		g_pCC->Run();
+		pThis->Run();
 		break;
 	case ProgramExit:
-		g_pCC->Exit();
+		pThis->Exit();
 		break;
 	case ReveivePackage:
-		g_pCC->OnReceivePackage(ev);
+		pThis->OnReceivePackage(ev);
 		break;
 	case SocketClose:
-		g_pCC->OnSocketClose(ev);
+		pThis->OnSocketClose(ev);
 		break;
 	}
 	SAFE_RELEASE_EVENT(ev);
