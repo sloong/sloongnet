@@ -11,18 +11,8 @@ CServerConfig::CServerConfig()
 {
 	g_pThis = this;
 
-	// DB init
-	m_oConnectInfo.Enable = false;
-	m_oConnectInfo.Port = 3306;
-	m_oConnectInfo.Address = "localhost";
-	m_oConnectInfo.User = "root";
-	m_oConnectInfo.Password = "sloong";
-	m_oConnectInfo.Database = "sloong";
-
 	// Log config init
 	m_oLogInfo.DebugMode = true;
-	m_oLogInfo.ShowSQLCmd = false;
-	m_oLogInfo.ShowSQLResult = false;
 	m_oLogInfo.ShowSendMessage = false;
 	m_oLogInfo.ShowReceiveMessage = false;
 	m_oLogInfo.LogWriteToOneFile = false;
@@ -179,16 +169,7 @@ int Sloong::CServerConfig::GetIntConfig(string strSection, string strKey, int nD
 }
 
 void Sloong::CServerConfig::LoadConfig()
-{
-	// load connect info
-	m_oConnectInfo.Enable = GetBoolenConfig("MySQL", "Enable", m_oConnectInfo.Enable);
-	m_oConnectInfo.Port = GetIntConfig("MySQL", "Port", m_oConnectInfo.Port);
-	m_oConnectInfo.Address = GetStringConfig("MySQL", "Address", m_oConnectInfo.Address);
-	m_oConnectInfo.User = GetStringConfig("MySQL", "User", m_oConnectInfo.User);
-	m_oConnectInfo.Password = GetStringConfig("MySQL", "Password", m_oConnectInfo.Password);
-	m_oConnectInfo.Database = GetStringConfig("MySQL", "Database", m_oConnectInfo.Database);
-
-	// load lua config 
+{	// load lua config 
 	m_oLuaConfigInfo.ScriptFolder = GetStringConfig("Lua", "ScriptFolder", "./");
 	m_oLuaConfigInfo.EntryFile = GetStringConfig("Lua", "EntryFile", "init.lua");
 	m_oLuaConfigInfo.EntryFunction = GetStringConfig("Lua", "EntryFunction", "Init");
@@ -201,8 +182,6 @@ void Sloong::CServerConfig::LoadConfig()
 	m_oLogInfo.ShowReceiveMessage = GetBoolenConfig("Log", "ShowReceiveMessage", m_oLogInfo.ShowReceiveMessage);
 	m_oLogInfo.ShowSendMessage = GetBoolenConfig("Log", "ShowSendMessage", m_oLogInfo.ShowSendMessage);
 	m_oLogInfo.LogWriteToOneFile = GetBoolenConfig("Log", "WriteToOneFile", m_oLogInfo.LogWriteToOneFile);
-	m_oLogInfo.ShowSQLCmd = GetBoolenConfig("Log", "ShowSQLCmd", m_oLogInfo.ShowSQLCmd);
-	m_oLogInfo.ShowSQLResult = GetBoolenConfig("Log", "ShowSQLResult", m_oLogInfo.ShowSQLResult);
 	m_oLogInfo.LogLevel = GetIntConfig("Log", "LogLevel", m_oLogInfo.LogLevel);
 	m_oLogInfo.NetworkPort = GetIntConfig("Log", "NetworkLogPort", m_oLogInfo.NetworkPort);
 

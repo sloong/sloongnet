@@ -71,17 +71,8 @@
     <ClInclude Include="utility.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="globalfunction.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="dbproc.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="version.h" />
     <ClInclude Include="progressbar.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="CmdProcess.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="lconnect.h">
@@ -135,6 +126,12 @@
     <ClInclude Include="SmartSync.h">
       <Filter>Module</Filter>
     </ClInclude>
+    <ClInclude Include="CmdProcess.h">
+      <Filter>Module</Filter>
+    </ClInclude>
+    <ClInclude Include="globalfunction.h">
+      <Filter>Module</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -149,16 +146,7 @@
     <ClCompile Include="utility.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="globalfunction.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="dbproc.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="progressbar.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="CmdProcess.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="lconnect.cpp">
@@ -198,6 +186,12 @@
       <Filter>Module</Filter>
     </ClCompile>
     <ClCompile Include="SmartSync.cpp">
+      <Filter>Module</Filter>
+    </ClCompile>
+    <ClCompile Include="globalfunction.cpp">
+      <Filter>Module</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdProcess.cpp">
       <Filter>Module</Filter>
     </ClCompile>
   </ItemGroup>

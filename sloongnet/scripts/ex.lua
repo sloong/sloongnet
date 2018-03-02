@@ -41,3 +41,4 @@ g_ex_function =
 	['GetUInfo'] = Ex_Req.GetUInfo,
 }
 
+AddModule(g_ex_function);

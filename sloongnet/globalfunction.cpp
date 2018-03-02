@@ -15,7 +15,6 @@
 #define cimg_display 0
 #include "CImg.h"
 
-#include "dbproc.h"
 #include "utility.h"
 #include "jpeg.h"
 #include "version.h"
@@ -40,7 +39,6 @@ static string g_temp_file_path = "/tmp/sloong/receivefile/temp.tmp";
 LuaFunctionRegistr g_LuaFunc[] =
 {
 	{ "Sloongnet_ShowLog", CGlobalFunction::Lua_showLog },
-	{ "Sloongnet_QuerySQL", CGlobalFunction::Lua_querySql },
 	{ "Sloongnet_GetThumbImage", CGlobalFunction::Lua_getThumbImage },
 	{ "Sloongnet_GetEngineVer", CGlobalFunction::Lua_getEngineVer },
 	{ "Sloongnet_Base64_encode", CGlobalFunction::Lua_Base64_Encode },
@@ -51,16 +49,15 @@ LuaFunctionRegistr g_LuaFunc[] =
 	{ "Sloongnet_Get", CGlobalFunction::Lua_GetConfig },
 	{ "Sloongnet_MoveFile", CGlobalFunction::Lua_MoveFile },
 	{ "Sloongnet_GenUUID", CGlobalFunction::Lua_GenUUID },
-    { "Sloongnet_GetSQLError", CGlobalFunction::Lua_getSqlError},
 	{ "Sloongnet_ReceiveFile", CGlobalFunction::Lua_ReceiveFile},
 	{ "Sloongnet_SetCommData", CGlobalFunction::Lua_SetCommData},
 	{ "Sloongnet_GetCommData", CGlobalFunction::Lua_GetCommData },
+	{ "Sloongnet_GetLogObject", CGlobalFunction::Lua_GetLogObject },
 };
 
 CGlobalFunction::CGlobalFunction()
 {
     m_pUtility = new CUtility();
-    m_pDBProc = new CDBProc();
 	g_pThis = this;
 }
 
@@ -68,7 +65,6 @@ CGlobalFunction::CGlobalFunction()
 CGlobalFunction::~CGlobalFunction()
 {
 	SAFE_DELETE(m_pUtility);
-	SAFE_DELETE(m_pDBProc);
 }
 
 void Sloong::CGlobalFunction::Initialize(IMessage* iMsg, IData* iData)
@@ -77,94 +73,16 @@ void Sloong::CGlobalFunction::Initialize(IMessage* iMsg, IData* iData)
 	m_iData = iData;
     m_pLog = TYPE_TRANS<CLog*>(m_iData->Get(Logger));
 	CServerConfig* config = TYPE_TRANS<CServerConfig*>(m_iData->Get(Configuation));
-	m_bShowSQLCmd = config->m_oLogInfo.ShowSQLCmd;
-	m_bShowSQLResult = config->m_oLogInfo.ShowSQLResult;
-	m_pSQLInfo = &config->m_oConnectInfo;
-    // connect to db
-	if (m_pSQLInfo->Enable)
-	{
-		try
-		{
-			m_pDBProc->Connect(m_pSQLInfo);
-		}
-		catch (normal_except& e)
-		{
-			g_pThis->m_pLog->Fatal(e.what());
-			throw e;
-		}
-	}
-}
-
-
-
-int Sloong::CGlobalFunction::Lua_querySql(lua_State* l)
-{
-	if (!g_pThis->m_pSQLInfo->Enable)
-	{
-		CLua::PushInteger(l, -1);
-		CLua::PushString(l, "SQL Server is no enable in config file.");
-		return 2;
-	}
-
-	string cmd = CLua::GetStringArgument(l, 1);
-	if ( g_pThis->m_bShowSQLCmd )
-		g_pThis->m_pLog->Verbos(CUniversal::Format("[SQL]:[%s]",cmd));
-	vector<string> res;
-	unique_lock<mutex> lck(g_SQLMutex);
-	int nRes = 0;
-	try
-	{
-		nRes = g_pThis->m_pDBProc->Query(cmd, &res);
-	}
-	catch (normal_except& e)
-	{
-		lck.unlock();
-		string err = CUniversal::Format("SQL Query error:[%s]", e.what());
-		g_pThis->m_pLog->Warn(CUniversal::Format("[SQL]:[%s]", err));
-		CLua::PushInteger(l, -1);
-		CLua::PushString(l, err);
-		return 2;
-	}
-	
-	lck.unlock();
-	
-	string allLine;
-	char line = 0x0A;
-	BOOST_FOREACH(string item, res)
-	{
-        string add = item;
-		if ( allLine.empty())
-		{
-            allLine = add;
-		}
-		else
-            allLine = allLine + line + add;
-	}
-	if (g_pThis->m_bShowSQLResult)
-		g_pThis->m_pLog->Verbos(CUniversal::Format("[SQL]:[Rows:[%d],Res:[%s]]", nRes, allLine.c_str()));
-	
-	CLua::PushInteger(l, nRes);
-	CLua::PushString(l,allLine);
-	return 2;
-}
-
-int Sloong::CGlobalFunction::Lua_getSqlError(lua_State *l)
-{
-	if (!g_pThis->m_pSQLInfo->Enable)
-		CLua::PushString(l, "SQL Server is no enable in config file.");
-	else
-	   CLua::PushString(l,g_pThis->m_pDBProc->GetError());
-    return 1;
 }
 
 
 int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
 {
-	auto path = CLua::GetStringArgument(l,1);
-	auto width = CLua::GetNumberArgument(l,2);
-	auto height = CLua::GetNumberArgument(l,3);
-	auto quality = CLua::GetNumberArgument(l,4);
-	auto folder = CLua::GetStringArgument(l, 5, "");
+	auto path = CLua::GetString(l,1);
+	auto width = CLua::GetDouble(l,2);
+	auto height = CLua::GetDouble(l,3);
+	auto quality = CLua::GetDouble(l,4);
+	auto folder = CLua::GetString(l, 5, "");
 	
 	if ( access(path.c_str(),ACC_E) != -1 )
 	{
@@ -217,7 +135,7 @@ int Sloong::CGlobalFunction::Lua_getEngineVer(lua_State* l)
 
 int Sloong::CGlobalFunction::Lua_Base64_Encode(lua_State* l)
 {
-    string req = CLua::GetStringArgument(l, 1, "");
+    string req = CLua::GetString(l, 1, "");
     string res = CBase64::Encoding((const unsigned char*)req.c_str(),req.length());
 	CLua::PushString(l, res);
 	return 1;
@@ -225,7 +143,7 @@ int Sloong::CGlobalFunction::Lua_Base64_Encode(lua_State* l)
 
 int Sloong::CGlobalFunction::Lua_Base64_Decode(lua_State* l)
 {
-    string req = CLua::GetStringArgument(l, 1, "");
+    string req = CLua::GetString(l, 1, "");
     string res = CBase64::Decoding(req);
 	CLua::PushString(l, res);
 	return 1;
@@ -233,17 +151,17 @@ int Sloong::CGlobalFunction::Lua_Base64_Decode(lua_State* l)
 
 int Sloong::CGlobalFunction::Lua_MD5_Encode(lua_State* l)
 {
-    string res = CMD5::Encoding(CLua::GetStringArgument(l, 1, ""));
+    string res = CMD5::Encoding(CLua::GetString(l, 1, ""));
 	CLua::PushString(l, res);
 	return 1;
 }
 
 int Sloong::CGlobalFunction::Lua_SendFile(lua_State* l)
 {
-	auto filename = CLua::GetStringArgument(l, 1, "");
+	auto filename = CLua::GetString(l, 1, "");
 	if (filename == "")
 	{
-		CLua::PushNumber(l,-1);
+		CLua::PushDouble(l,-1);
 		CLua::PushString(l,"Param is empty.");
 		return 2;
 	}
@@ -257,7 +175,7 @@ int Sloong::CGlobalFunction::Lua_SendFile(lua_State* l)
 	catch (normal_except& e)
 	{
 		g_pThis->m_pLog->Error(e.what());
-		CLua::PushNumber(l, -1);
+		CLua::PushDouble(l, -1);
 		CLua::PushString(l, e.what());
 		return 2;
 	}
@@ -267,10 +185,8 @@ int Sloong::CGlobalFunction::Lua_SendFile(lua_State* l)
 	SendExDataInfo* info=new SendExDataInfo();
 	info->m_nDataSize = nSize;
 	info->m_pData = pBuf;
-	info->m_bIsEmpty = false;
 	g_pThis->m_iData->AddTemp("SendList" + uuid, info);
 
-	
 	CLua::PushString(l, uuid);
 	CLua::PushString(l, "succeed");
 	return 2;
@@ -286,9 +202,9 @@ int Sloong::CGlobalFunction::Lua_ReloadScript(lua_State* l)
 
 int Sloong::CGlobalFunction::Lua_GetConfig(lua_State* l)
 {
-	string section = CLua::GetStringArgument(l,1);
-	string key = CLua::GetStringArgument(l,2);
-	string def = CLua::GetStringArgument(l,3);
+	string section = CLua::GetString(l,1);
+	string key = CLua::GetString(l,2);
+	string def = CLua::GetString(l,3);
 	
 	string value("");
 	try
@@ -308,8 +224,8 @@ int Sloong::CGlobalFunction::Lua_GetConfig(lua_State* l)
 
 int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
 {
-	string orgName = CLua::GetStringArgument(l, 1, "");
-	string newName = CLua::GetStringArgument(l, 2, "");
+	string orgName = CLua::GetString(l, 1, "");
+	string newName = CLua::GetString(l, 2, "");
 	int nRes(0);
 	try
 	{
@@ -338,7 +254,7 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
 	{
 		g_pThis->m_pLog->Error(e.what());
 		CLua::PushString(l, e.what());
-		CLua::PushNumber(l, nRes);
+		CLua::PushDouble(l, nRes);
 		return 2;
 	}
 	
@@ -360,20 +276,20 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 	string succeed_md5_list("");
 	try
 	{
-		string uuid = CLua::GetStringArgument(l, 1);
+		string uuid = CLua::GetString(l, 1);
 		if (uuid.empty() || uuid == "")
 		{
 			throw normal_except("uuid is empty");
 		}
-		int port = CLua::GetNumberArgument(l, 2);
+		int port = CLua::GetDouble(l, 2);
 		if (port < 1024 || port > 65535)
 		{
 			throw normal_except("port is illegal");
 		}
-		int max_size = CLua::GetNumberArgument(l, 3);
+		int max_size = CLua::GetDouble(l, 3);
 		auto fileList = CLua::GetTableParam(l, 4);
-		int otime = CLua::GetNumberArgument(l, 5, 5);
-		string temp_file_path = CLua::GetStringArgument(l, 6, g_temp_file_path);
+		int otime = CLua::GetDouble(l, 5, 5);
+		string temp_file_path = CLua::GetString(l, 6, g_temp_file_path);
 		int rSocket = socket(AF_INET, SOCK_STREAM, 0);
 		struct sockaddr_in address;
 		memset(&address, 0, sizeof(address));
@@ -490,8 +406,8 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 
 int CGlobalFunction::Lua_showLog(lua_State* l)
 {
-	string luaTitle = CLua::GetStringArgument(l, 2, "Info");
-	string msg = CLua::GetStringArgument(l, 1);
+	string luaTitle = CLua::GetString(l, 2, "Info");
+	string msg = CLua::GetString(l, 1);
 	if (msg == "")
 		return 0;
 	else
@@ -526,4 +442,10 @@ int CGlobalFunction::Lua_SetCommData(lua_State* l)
 int CGlobalFunction::Lua_GetCommData(lua_State* l)
 {
 
+}
+
+int CGlobalFunction::Lua_GetLogObject(lua_State* l)
+{
+	CLua::PushPointer(l, g_pThis->m_pLog);
+	return 1;
 }

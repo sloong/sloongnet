@@ -6,7 +6,7 @@ function require_ex( _mname )
   return require( _mname )
 end
 
-
+g_all_request_processer = {};
 
 Init = function( path )
     package.path = path .. 'scripts/?.lua';
@@ -36,7 +36,7 @@ ProgressMessage = function( uinfo, c_req, c_res )
       jres['errmsg'] = msg or 'success';
     else
       jres['errno'] = "-999"
-      jres['errmsg'] = 'not find the processer. the name is %s.' .. jreq['funcid'];
+      jres['errmsg'] = string.format('not find the processer. the name is %s.' ,jreq['funcid']);
     end
     Info('code:' .. jres['errno'] .. ',msg:' .. jres['errmsg'], 'Global')
     local str_res = JSON:encode(jres);

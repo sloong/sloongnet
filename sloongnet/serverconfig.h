@@ -32,8 +32,6 @@ namespace Sloong
 		bool m_bExConfig = false;
 
 	public:
-		// DB config
-		MySQLConnectInfo m_oConnectInfo;
 		// Lua script config
 		LuaScriptConfigInfo m_oLuaConfigInfo;
 		// Log

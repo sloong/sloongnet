@@ -125,9 +125,7 @@ void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket* uinfo)
 
 
 bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, string & res, string& exData, int& exSize)
-//int Sloong::CLuaProcessCenter::MsgProcess(IEvent* evt)
 {
-	
 	// In process, need add the lua script runtime and call lua to process.
 	// In here, just show log to test.
 	exData.clear();
@@ -146,9 +144,9 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, st
 		InitLua(pLua, m_pConfig->m_oLuaConfigInfo.ScriptFolder);
 		m_oReloadList[id] = false;
 	}
-	//CNormalEvent* msg_event = EVENT_TRANS<CNormalEvent*>(evt);
+
 	CLuaPacket creq;
-	creq.SetData("json_request_message", msg);//msg_event->GetMessage());
+	creq.SetData("json_request_message", msg);
 	CLuaPacket cres;
 	bool bRes = pLua->RunFunction(m_pConfig->m_oLuaConfigInfo.ProcessFunction, pUInfo, &creq, &cres);
 	m_oFreeLuaContext.push(id);
@@ -158,8 +156,11 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, st
 		string need = cres.GetData("NeedExData");
 		if ( need == "true"	)
 		{
-			exData = cres.GetData("ExDataUUID");
-			exSize = atoi( cres.GetData("ExDataSize").c_str());
+			auto uuid = cres.GetData("ExDataUUID");
+			SendExDataInfo* info = TYPE_TRANS<SendExDataInfo*>(m_iData->GetTemp("SendList" + uuid));
+			exData = info->m_pData;
+			exSize = info->m_nDataSize;
+			SAFE_DELETE(info);
 		}
 		return true;
 	}
@@ -167,35 +168,6 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, st
 	{// 运行lua脚本失败
 		return false;
 	}
-	/*
-	int nRes = pLua->RunFunction(m_pLuaConfig->ProcessFunction, pUInfo, msg, res);
-	if (nRes >= 0)
-	{	
-		// 对于发送扩展数据，这里模式仍采用同模式，但是实现方式需要改掉
-		// 这里将不再直接访问GFunc，而是在lua中准备数据的时候，由GFunc直接将数据存储到iData中，
-		// 这里直接去iData中去取相应的数据。
-		if (nRes >= (int)m_pGFunc->m_oSendExMapList.size())
-		{
-			m_pLog->Warn(CUniversal::Format("Call function end, but the res is error: res [%d], SendMapList size[%d]", nRes, m_pGFunc->m_oSendExMapList.size()));
-			return 0;
-		}
-		pBuf = m_pGFunc->m_oSendExMapList[nRes].m_pData;
-		int nSize = m_pGFunc->m_oSendExMapList[nRes].m_nDataSize;
-		m_pLog->Verbos(CUniversal::Format("Send Ex Data, Size[%d], Message[%s]", nSize, msg.c_str()));
-		unique_lock<mutex> lck(m_pGFunc->m_oListMutex);
-		m_pGFunc->m_oSendExMapList[nRes].m_pData = NULL;
-		m_pGFunc ->m_oSendExMapList[nRes].m_nDataSize = 0;
-		m_pGFunc->m_oSendExMapList[nRes].m_bIsEmpty = true;
-		lck.unlock();
-		nRes = nSize;
-	}
-	else
-	{
-		m_pLog->Verbos(res);
-		nRes = 0;
-	}
-	m_oFreeLuaContext.push(id);
-	return nRes;*/
 }
 #define LUA_CONTEXT_WAIT_SECONDE  10
 int Sloong::CLuaProcessCenter::GetFreeLuaContext()

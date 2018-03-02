@@ -46,16 +46,6 @@ typedef enum g_DataCenter_MsgType
 
 }MSG_TYPE;
 
-struct MySQLConnectInfo
-{
-	bool Enable;
-	string Address;
-	int Port;
-	string User;
-	string Password;
-	string Database;
-};
-
 struct LuaScriptConfigInfo
 {
 	string EntryFile;
@@ -71,8 +61,6 @@ struct LogConfigInfo
 	bool	ShowSendMessage;
 	bool	ShowReceiveMessage;
 	bool	LogWriteToOneFile;
-	bool	ShowSQLCmd;
-	bool	ShowSQLResult;
 	int		LogLevel;
 	string	LogPath;
 	int		NetworkPort;
@@ -90,3 +78,10 @@ typedef struct _stRecvInfo
 	string strMD5 = "";
 	string strMessage = "";
 }RECVINFO;
+
+
+struct SendExDataInfo
+{
+	int m_nDataSize;
+	char* m_pData;
+};
