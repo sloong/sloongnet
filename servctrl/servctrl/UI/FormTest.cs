@@ -182,7 +182,8 @@ namespace servctrl
                 }
                 else
                 {
-                    AddLogItem(pack.SwiftNumber.ToString() + "|" + jres.ToString());
+                    var time = pack.recv - pack.send;
+                    AddLogItem(pack.SwiftNumber.ToString() + "|" + time.TotalMilliseconds + "|" + jres.ToString());
                 }
             }
             catch(Exception e)

@@ -270,6 +270,7 @@ namespace Sloong
                             
                             //Utility.SendEx(Sock, sendList);
                             pack.IsSent = true;
+                            pack.send = DateTime.Now;
                             // only add to list when enable swift.
                             if (AppStatus.bEnableSwift)
                                 MsgList.Add(pack.SwiftNumber, pack);
@@ -346,6 +347,7 @@ namespace Sloong
                     if (MsgList.ContainsKey(nSwift))
                     {
                         var pack = MsgList[nSwift];
+                        pack.recv = DateTime.Now;
                         pack.ReceivedMessages = strRecv;
                         if (pack.NeedExData)
                         {

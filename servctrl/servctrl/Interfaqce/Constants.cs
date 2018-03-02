@@ -169,5 +169,7 @@ namespace Sloong.Interface
         public object[] MessageExInfo = null;
         public int SocketID = 0;
         public byte level = 0;
+        public DateTime send;
+        public DateTime recv;
     }
 }
