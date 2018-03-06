@@ -10,7 +10,6 @@
 #include <mutex>
 #include <condition_variable>
 #include <openssl/ssl.h>
-#include "structs.h"
 
 #include "IData.h"
 #include "IMessage.h"

@@ -6,7 +6,6 @@
 #include <memory>
 #include <condition_variable>
 #include "IMessage.h"
-#include "structs.h"
 namespace Sloong
 {
 	using namespace Interface;

@@ -9,7 +9,6 @@ using namespace std;
 #include "serverconfig.h"
 #include "CmdProcess.h"
 #include "userv.h"
-#include "structs.h"
 
 #include "MessageCenter.h"
 #include "DataCenter.h"

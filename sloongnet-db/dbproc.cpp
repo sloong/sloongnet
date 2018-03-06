@@ -1,7 +1,6 @@
 #include <univ/univ.h>
 #include <univ/log.h>
 #include "dbproc.h"
-#include "structs.h"
 #include "sloongnet-db.h"
 #include <univ/exception.h>
 using namespace Sloong;

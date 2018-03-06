@@ -2,7 +2,7 @@
 #define SERVERCONFIG_H
 
 #include <string>
-#include "structs.h"
+#include "defines.h"
 using namespace std;
 #include <glib.h>
 namespace Sloong
