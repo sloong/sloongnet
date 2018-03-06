@@ -6,11 +6,8 @@
 #include <boost/foreach.hpp>
 #include <mutex>
 // univ
-#include <univ/log.h>
-#include <univ/univ.h>
-#include "univ/exception.h"
+#include "defines.h"
 #include <univ/Base64.h>
-#include <univ/MD5.h>
 // cimag
 #define cimg_display 0
 #include "CImg.h"
@@ -44,6 +41,8 @@ LuaFunctionRegistr g_LuaFunc[] =
 	{ "Sloongnet_Base64_encode", CGlobalFunction::Lua_Base64_Encode },
 	{ "Sloongnet_Base64_decode", CGlobalFunction::Lua_Base64_Decode },
 	{ "Sloongnet_MD5_encode", CGlobalFunction::Lua_MD5_Encode },
+	{ "Sloongnet_SHA256_encode", CGlobalFunction::Lua_SHA256_Encode },
+	{ "Sloongnet_SHA512_encode", CGlobalFunction::Lua_SHA512_Encode },
 	{ "Sloongnet_SendFile", CGlobalFunction::Lua_SendFile },
 	{ "Sloongnet_ReloadScript", CGlobalFunction::Lua_ReloadScript },
 	{ "Sloongnet_Get", CGlobalFunction::Lua_GetConfig },
@@ -136,7 +135,7 @@ int Sloong::CGlobalFunction::Lua_getEngineVer(lua_State* l)
 int Sloong::CGlobalFunction::Lua_Base64_Encode(lua_State* l)
 {
     string req = CLua::GetString(l, 1, "");
-    string res = CBase64::Encoding((const unsigned char*)req.c_str(),req.length());
+    string res = CBase64::Encode(req);
 	CLua::PushString(l, res);
 	return 1;
 }
@@ -144,14 +143,28 @@ int Sloong::CGlobalFunction::Lua_Base64_Encode(lua_State* l)
 int Sloong::CGlobalFunction::Lua_Base64_Decode(lua_State* l)
 {
     string req = CLua::GetString(l, 1, "");
-    string res = CBase64::Decoding(req);
+    string res = CBase64::Decode(req);
 	CLua::PushString(l, res);
 	return 1;
 }
 
 int Sloong::CGlobalFunction::Lua_MD5_Encode(lua_State* l)
 {
-    string res = CMD5::Encoding(CLua::GetString(l, 1, ""));
+    string res = CMD5::Encode(CLua::GetString(l, 1, ""));
+	CLua::PushString(l, res);
+	return 1;
+}
+
+int Sloong::CGlobalFunction::Lua_SHA256_Encode(lua_State* l)
+{
+	string res = CSHA256::Encode(CLua::GetString(l, 1, ""));
+	CLua::PushString(l, res);
+	return 1;
+}
+
+int Sloong::CGlobalFunction::Lua_SHA512_Encode(lua_State* l)
+{
+	string res = CSHA512::Encode(CLua::GetString(l, 1, ""));
 	CLua::PushString(l, res);
 	return 1;
 }
@@ -182,13 +195,9 @@ int Sloong::CGlobalFunction::Lua_SendFile(lua_State* l)
 
 	auto uuid = CUtility::GenUUID();
 
-	SendExDataInfo* info=new SendExDataInfo();
-	info->m_nDataSize = nSize;
-	info->m_pData = pBuf;
-	g_pThis->m_iData->AddTemp("SendList" + uuid, info);
-
+	g_pThis->m_iData->AddTemp("SendList" + uuid, pBuf);
+	CLua::PushDouble(l, nSize);
 	CLua::PushString(l, uuid);
-	CLua::PushString(l, "succeed");
 	return 2;
 }
 
@@ -366,7 +375,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			of.write(pBuf, nRecvLen);
 			of.close();
 			// check md5
-            string md5 = CMD5::Encoding(temp_file_path, true);
+            string md5 = CMD5::Encode(temp_file_path, true);
 		    CUniversal::tolower(md5);
 			if (fileList.count(md5) == 0 )
 			{

@@ -1,5 +1,5 @@
 #include "ControlCenter.h"
-#include <univ/MD5.h>
+#include "defines.h"
 #include "epollex.h"
 #include "LuaProcessCenter.h"
 #include "globalfunction.h"
@@ -66,7 +66,7 @@ void Sloong::CControlCenter::OnReceivePackage(IEvent* evt)
 	CSendMessageEvent* send_msg = new CSendMessageEvent(net_evt->GetSocketID(), net_evt->GetPriority(), pack->nSwiftNumber);
 	if (m_pConfig->m_bEnableMD5Check)
 	{
-		string rmd5 = CMD5::Encoding(pack->strMessage);
+		string rmd5 = CMD5::Encode(pack->strMessage);
 		CUniversal::touper(pack->strMD5);
 		CUniversal::touper(rmd5);
 		if (pack->strMD5 != rmd5)
@@ -81,14 +81,13 @@ void Sloong::CControlCenter::OnReceivePackage(IEvent* evt)
 	}
 
 	string strRes("");
-	string strExUUID;
+	char* pExData = nullptr;
 	int nExSize;
-	if (m_pProcess->MsgProcess(info->m_pUserInfo.get(), pack->strMessage, strRes, strExUUID, nExSize))
+	if (m_pProcess->MsgProcess(info->m_pUserInfo.get(), pack->strMessage, strRes, pExData, nExSize))
 	{
-		if ( !strExUUID.empty())
+		if (pExData && nExSize > 0 )
 		{
-			const char* exData = TYPE_TRANS<const char*>(m_iData->GetTemp(strExUUID));
-			send_msg->SetSendExData(exData,nExSize);
+			send_msg->SetSendExData(pExData,nExSize);
 		}
 		send_msg->SetMessage(strRes);
 	}

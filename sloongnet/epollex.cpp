@@ -7,18 +7,16 @@
 #include <pthread.h>
 #include <string.h>
 #include <unistd.h>
-#include <queue>
 #include <sys/types.h> 
 #include <sys/times.h> 
 #include <sys/select.h> 
 #include "epollex.h"
+#include "defines.h"
 // load open ssl file
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-// load univ file
-#include <univ/log.h>
-#include <univ/MD5.h>
 // load model file
+
 #include "utility.h"
 #include "lconnect.h"
 #include "sockinfo.h"
@@ -256,7 +254,7 @@ void Sloong::CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, st
 	}
 	if (m_pConfig->m_bEnableMD5Check)
 	{
-		md5 = CMD5::Encoding(msg);
+		md5 = CMD5::Encode(msg);
 		nBufLen += md5.length();
 	}
 	// in here, the exdata size no should include the buffer length,

@@ -78,10 +78,3 @@ typedef struct _stRecvInfo
 	string strMD5 = "";
 	string strMessage = "";
 }RECVINFO;
-
-
-struct SendExDataInfo
-{
-	int m_nDataSize;
-	char* m_pData;
-};

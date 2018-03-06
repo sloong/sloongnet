@@ -124,11 +124,11 @@ void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket* uinfo)
 
 
 
-bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, string & res, string& exData, int& exSize)
+bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, string & res, char* exData, int& exSize)
 {
 	// In process, need add the lua script runtime and call lua to process.
 	// In here, just show log to test.
-	exData.clear();
+	exData = nullptr;
 	exSize = 0;
 	// process msg, get the md5 code and the swift number.
 	int id = GetFreeLuaContext();
@@ -157,10 +157,10 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, st
 		if ( need == "true"	)
 		{
 			auto uuid = cres.GetData("ExDataUUID");
-			SendExDataInfo* info = TYPE_TRANS<SendExDataInfo*>(m_iData->GetTemp("SendList" + uuid));
-			exData = info->m_pData;
-			exSize = info->m_nDataSize;
-			SAFE_DELETE(info);
+			auto len = cres.GetData("ExDataSize");
+			char* pBuf = TYPE_TRANS<char*>(m_iData->GetTemp("SendList" + uuid));
+			exData = pBuf;
+			exSize = atoi(len.c_str());
 		}
 		return true;
 	}

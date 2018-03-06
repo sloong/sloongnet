@@ -5,13 +5,6 @@
 using namespace std;
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
-#include <univ/log.h>
-#include <univ/univ.h>
-#include <univ/MD5.h>
-#include <univ/threadpool.h>
-using namespace Sloong;
-using namespace Sloong::Universal;
-
 
 #include "serverconfig.h"
 #include "CmdProcess.h"

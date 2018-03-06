@@ -19,6 +19,8 @@ using namespace std;
 #include <univ/log.h>
 #include <univ/exception.h>
 #include <univ/threadpool.h>
+#include <univ/md5.h>
+#include <univ/sha.h>
 using namespace Sloong;
 using namespace Sloong::Universal;
 
