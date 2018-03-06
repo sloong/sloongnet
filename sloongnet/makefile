@@ -59,10 +59,10 @@
 MY_CFLAGS =
 
 # The linker options.
-MY_LIBS   = -lm -ldl -llua.5.3.1 -lglib-2.0 -lmysqlclient -ljpeg -luniv -luuid -lpthread
+MY_LIBS   = -lm -ldl -llua -lglib-2.0 -lmysqlclient -ljpeg -luniv -luuid -lpthread -lssl -lcrypto
 
 # The pre-processor options used by the cpp (man cpp for more).
-CPPFLAGS  = -Wall
+CPPFLAGS  = -Wall -Wno-switch -Wno-return-type -Wno-misleading-indentation
 
 # The options used in linking as well as in any direct use of ld.
 LDFLAGS   =
@@ -89,7 +89,7 @@ HDREXTS = .h .H .hh .hpp .HPP .h++ .hxx .hp
 # Users can override those variables from the command line.
 CFLAGS  = -g -pthread
 DFLAG = -g -pg 
-CXXFLAG= -std=c++11 -DLUA_USE_READLINE -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -L/usr/local/lib/sloong -Wl,-rpath=/usr/local/lib/sloong -L/usr/lib64/mysql -Wl,-rpath=/usr/lib64/mysql
+CXXFLAG= -std=c++17 -DLUA_USE_READLINE -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -L/usr/local/lib/sloong -Wl,-rpath=/usr/local/lib/sloong -L/usr/lib64/mysql -Wl,-rpath=/usr/lib64/mysql
 
 # The C program compiler.
 #CC	 = gcc
