@@ -5,22 +5,31 @@ VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sloongnet", "sloongnet\sloongnet.vcxproj", "{E89B0F2A-F74B-43CC-934F-3B8DB35F3E5B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sloongnet-db", "sloongnet-db\sloongnet-db.vcxproj", "{01A9047D-53CB-4D94-98AA-E5A8D3CE75E2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sloongnet_mysql", "sloongnet-db\sloongnet-db.vcxproj", "{01A9047D-53CB-4D94-98AA-E5A8D3CE75E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug_walls|Win32 = Debug_walls|Win32
+		Debug_walls|x64 = Debug_walls|x64
 		Debug|Win32 = Debug|Win32
 		Debug|x64 = Debug|x64
 		Release|Win32 = Release|Win32
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E89B0F2A-F74B-43CC-934F-3B8DB35F3E5B}.Debug_walls|Win32.ActiveCfg = Debug_walls|Win32
+		{E89B0F2A-F74B-43CC-934F-3B8DB35F3E5B}.Debug_walls|Win32.Build.0 = Debug_walls|Win32
+		{E89B0F2A-F74B-43CC-934F-3B8DB35F3E5B}.Debug_walls|x64.ActiveCfg = Debug_walls|Win32
+		{E89B0F2A-F74B-43CC-934F-3B8DB35F3E5B}.Debug_walls|x64.Build.0 = Debug_walls|Win32
 		{E89B0F2A-F74B-43CC-934F-3B8DB35F3E5B}.Debug|Win32.ActiveCfg = Debug|Win32
 		{E89B0F2A-F74B-43CC-934F-3B8DB35F3E5B}.Debug|Win32.Build.0 = Debug|Win32
 		{E89B0F2A-F74B-43CC-934F-3B8DB35F3E5B}.Debug|x64.ActiveCfg = Debug|Win32
 		{E89B0F2A-F74B-43CC-934F-3B8DB35F3E5B}.Release|Win32.ActiveCfg = Release|Win32
 		{E89B0F2A-F74B-43CC-934F-3B8DB35F3E5B}.Release|Win32.Build.0 = Release|Win32
 		{E89B0F2A-F74B-43CC-934F-3B8DB35F3E5B}.Release|x64.ActiveCfg = Release|Win32
+		{01A9047D-53CB-4D94-98AA-E5A8D3CE75E2}.Debug_walls|Win32.ActiveCfg = Debug|Win32
+		{01A9047D-53CB-4D94-98AA-E5A8D3CE75E2}.Debug_walls|Win32.Build.0 = Debug|Win32
+		{01A9047D-53CB-4D94-98AA-E5A8D3CE75E2}.Debug_walls|x64.ActiveCfg = Debug|Win32
 		{01A9047D-53CB-4D94-98AA-E5A8D3CE75E2}.Debug|Win32.ActiveCfg = Debug|Win32
 		{01A9047D-53CB-4D94-98AA-E5A8D3CE75E2}.Debug|Win32.Build.0 = Debug|Win32
 		{01A9047D-53CB-4D94-98AA-E5A8D3CE75E2}.Debug|x64.ActiveCfg = Debug|Win32

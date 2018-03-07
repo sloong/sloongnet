@@ -122,9 +122,12 @@ void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket* uinfo)
 }
 
 
+string FormatJSONErrorMessage(string message, string code)
+{
+	return CUniversal::Format("{\"errno\": \"%s\",\"errmsg\" : \"%s\"}", code, message);
+}
 
-
-bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, string & res, char* exData, int& exSize)
+bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, string & res, char*& exData, int& exSize)
 {
 	// In process, need add the lua script runtime and call lua to process.
 	// In here, just show log to test.
@@ -158,9 +161,18 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, st
 		{
 			auto uuid = cres.GetData("ExDataUUID");
 			auto len = cres.GetData("ExDataSize");
-			char* pBuf = TYPE_TRANS<char*>(m_iData->GetTemp("SendList" + uuid));
-			exData = pBuf;
-			exSize = atoi(len.c_str());
+			auto pData = m_iData->GetTemp("SendList" + uuid);
+			if (pData == nullptr)
+			{
+				res = FormatJSONErrorMessage("ExData no saved in DataCenter, The uuid is " + uuid,"-1");
+				return true;
+			}
+			else
+			{
+				char* pBuf = TYPE_TRANS<char*>(pData);
+				exData = pBuf;
+				exSize = atoi(len.c_str());
+			}
 		}
 		return true;
 	}
@@ -186,7 +198,6 @@ int Sloong::CLuaProcessCenter::GetFreeLuaContext()
 		return -1;
 	}	
 	int nID = m_oFreeLuaContext.front();
-	m_pLog->Debug("get free lua context:"+CUniversal::ntos(nID));
 	m_oFreeLuaContext.pop();
 	lck.unlock();
 	return nID;

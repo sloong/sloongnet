@@ -13,15 +13,15 @@ OBJCOPY := objcopy
 
 #Additional flags
 PREPROCESSOR_MACROS := NDEBUG=1 RELEASE=1
-INCLUDE_DIRS := 
-LIBRARY_DIRS := 
-LIBRARY_NAMES := 
+INCLUDE_DIRS := /usr/include /usr/include/mysql /usr/include/mysql/private
+LIBRARY_DIRS := /usr/local/lib/sloong /usr/lib64/mysql
+LIBRARY_NAMES := univ mysqlclient
 ADDITIONAL_LINKER_INPUTS := 
 MACOS_FRAMEWORKS := 
 LINUX_PACKAGES := 
 
 CFLAGS := -ggdb -ffunction-sections -O3
-CXXFLAGS := -std=c++14 -ggdb -ffunction-sections -O3
+CXXFLAGS := -std=c++17 -ggdb -ffunction-sections -O3
 ASFLAGS := 
 LDFLAGS := -Wl,-gc-sections
 COMMONFLAGS := 

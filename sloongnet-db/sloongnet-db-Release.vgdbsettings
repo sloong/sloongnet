@@ -34,6 +34,7 @@
       </FileMasks>
       <TransferNewFilesOnly>true</TransferNewFilesOnly>
       <IncludeSubdirectories>true</IncludeSubdirectories>
+      <SelectedDirectories />
       <DeleteDisappearedFiles>true</DeleteDisappearedFiles>
     </MainSourceTransferCommand>
     <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>
@@ -46,6 +47,7 @@
   <Build xsi:type="com.visualgdb.build.make">
     <MakeFilePathRelativeToSourceDir>Makefile</MakeFilePathRelativeToSourceDir>
     <MakeConfigurationName>Release</MakeConfigurationName>
+    <AdditionalMakeArguments />
     <Toolchain>
       <Name>Default GCC toolchain on 172.16.182.130</Name>
       <UniqueID>com.sysprogs.toolchain.default-gcc</UniqueID>
@@ -100,6 +102,7 @@
             <Value>en_US.UTF-8</Value>
           </Record>
         </Records>
+        <EnvironmentSetupFiles />
       </Environment>
       <BackgroundMode xsi:nil="true" />
     </MakeCommandTemplate>
@@ -143,6 +146,7 @@
             <Value>en_US.UTF-8</Value>
           </Record>
         </Records>
+        <EnvironmentSetupFiles />
       </GDBEnvironment>
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
       <GDBServerPort>2000</GDBServerPort>
@@ -174,6 +178,7 @@
     <ShowMessageAfterExecuting>true</ShowMessageAfterExecuting>
   </CustomShortcuts>
   <UserDefinedVariables />
+  <ImportedPropertySheets />
   <CodeSense>
     <Enabled>Unknown</Enabled>
     <ExtraSettings>

@@ -57,6 +57,9 @@
       <Filter>scripts</Filter>
     </None>
     <None Include="ex.conf" />
+    <None Include="debug_walls.mak">
+      <Filter>Make files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">

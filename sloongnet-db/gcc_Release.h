@@ -54,7 +54,7 @@
 #define __FLT32_MIN_EXP__ (-125)
 #endif
 #ifndef __cpp_static_assert
-#define __cpp_static_assert 200410
+#define __cpp_static_assert 201411
 #endif
 #ifndef __ORDER_LITTLE_ENDIAN__
 #define __ORDER_LITTLE_ENDIAN__ 1234
@@ -92,6 +92,9 @@
 #ifndef __FLT_EVAL_METHOD__
 #define __FLT_EVAL_METHOD__ 0
 #endif
+#ifndef __cpp_enumerator_attributes
+#define __cpp_enumerator_attributes 201411
+#endif
 #ifndef __unix__
 #define __unix__ 1
 #endif
@@ -100,6 +103,9 @@
 #endif
 #ifndef __FLT64_DECIMAL_DIG__
 #define __FLT64_DECIMAL_DIG__ 17
+#endif
+#ifndef __cpp_noexcept_function_type
+#define __cpp_noexcept_function_type 201510
 #endif
 #ifndef __GCC_ATOMIC_CHAR32_T_LOCK_FREE
 #define __GCC_ATOMIC_CHAR32_T_LOCK_FREE 2
@@ -134,14 +140,23 @@
 #ifndef __UINT_FAST8_MAX__
 #define __UINT_FAST8_MAX__ 0xff
 #endif
+#ifndef __FLT32_MAX_10_EXP__
+#define __FLT32_MAX_10_EXP__ 38
+#endif
 #ifndef __DEC64_MAX_EXP__
 #define __DEC64_MAX_EXP__ 385
 #endif
 #ifndef __INT_LEAST8_WIDTH__
 #define __INT_LEAST8_WIDTH__ 8
 #endif
+#ifndef __cpp_variadic_using
+#define __cpp_variadic_using 201611
+#endif
 #ifndef __UINT_LEAST64_MAX__
 #define __UINT_LEAST64_MAX__ 0xffffffffffffffffUL
+#endif
+#ifndef __cpp_capture_star_this
+#define __cpp_capture_star_this 201603
 #endif
 #ifndef __SHRT_MAX__
 #define __SHRT_MAX__ 0x7fff
@@ -151,6 +166,9 @@
 #endif
 #ifndef __FLT64X_MAX_10_EXP__
 #define __FLT64X_MAX_10_EXP__ 4932
+#endif
+#ifndef __cpp_if_constexpr
+#define __cpp_if_constexpr 201606
 #endif
 #ifndef __UINT_LEAST8_MAX__
 #define __UINT_LEAST8_MAX__ 0xff
@@ -172,6 +190,9 @@
 #endif
 #ifndef __FLT_EVAL_METHOD_TS_18661_3__
 #define __FLT_EVAL_METHOD_TS_18661_3__ 0
+#endif
+#ifndef __OPTIMIZE__
+#define __OPTIMIZE__ 1
 #endif
 #ifndef __unix
 #define __unix 1
@@ -224,8 +245,14 @@
 #ifndef __SIZEOF_POINTER__
 #define __SIZEOF_POINTER__ 8
 #endif
+#ifndef NDEBUG
+#define NDEBUG 1
+#endif
 #ifndef __GCC_ATOMIC_CHAR16_T_LOCK_FREE
 #define __GCC_ATOMIC_CHAR16_T_LOCK_FREE 2
+#endif
+#ifndef __cpp_aligned_new
+#define __cpp_aligned_new 201606
 #endif
 #ifndef __USER_LABEL_PREFIX__
 #define __USER_LABEL_PREFIX__ 
@@ -296,6 +323,9 @@
 #ifndef __FLT64_MIN_EXP__
 #define __FLT64_MIN_EXP__ (-1021)
 #endif
+#ifndef RELEASE
+#define RELEASE 1
+#endif
 #ifndef __FLT64X_MIN_10_EXP__
 #define __FLT64X_MIN_10_EXP__ (-4931)
 #endif
@@ -347,8 +377,14 @@
 #ifndef __DBL_HAS_INFINITY__
 #define __DBL_HAS_INFINITY__ 1
 #endif
+#ifndef __cpp_deduction_guides
+#define __cpp_deduction_guides 201606
+#endif
 #ifndef __INT64_MAX__
 #define __INT64_MAX__ 0x7fffffffffffffffL
+#endif
+#ifndef __cpp_fold_expressions
+#define __cpp_fold_expressions 201603
 #endif
 #ifndef __DEC32_MIN_EXP__
 #define __DEC32_MIN_EXP__ (-94)
@@ -371,7 +407,7 @@
 //VS2005-2012 treats all files as C++, while VS2013+ can treat C files correctly.
 #if defined(_MSC_VER) && (_MSC_VER < 1800 || defined(__cplusplus))
 #undef __cplusplus
-#define __cplusplus 201402L
+#define __cplusplus 201703L
 #endif
 #ifndef __cpp_ref_qualifiers
 #define __cpp_ref_qualifiers 200710
@@ -517,9 +553,6 @@
 #ifndef __UINT8_TYPE__
 #define __UINT8_TYPE__ unsigned char
 #endif
-#ifndef __NO_INLINE__
-#define __NO_INLINE__ 1
-#endif
 #ifndef __FLT_MANT_DIG__
 #define __FLT_MANT_DIG__ 24
 #endif
@@ -530,7 +563,7 @@
 #define __VERSION__ "7.2.0"
 #endif
 #ifndef __cpp_unicode_characters
-#define __cpp_unicode_characters 200704
+#define __cpp_unicode_characters 201411
 #endif
 #ifndef _STDC_PREDEF_H
 #define _STDC_PREDEF_H 1
@@ -549,6 +582,9 @@
 #endif
 #ifndef __FLOAT_WORD_ORDER__
 #define __FLOAT_WORD_ORDER__ __ORDER_LITTLE_ENDIAN__
+#endif
+#ifndef __cpp_aggregate_bases
+#define __cpp_aggregate_bases 201603
 #endif
 #ifndef __STDC_IEC_559_COMPLEX__
 #define __STDC_IEC_559_COMPLEX__ 1
@@ -571,8 +607,8 @@
 #ifndef __DEC128_MIN_EXP__
 #define __DEC128_MIN_EXP__ (-6142)
 #endif
-#ifndef __FLT32_MAX_10_EXP__
-#define __FLT32_MAX_10_EXP__ 38
+#ifndef __cpp_nested_namespace_definitions
+#define __cpp_nested_namespace_definitions 201411
 #endif
 #ifndef __INT_FAST32_TYPE__
 #define __INT_FAST32_TYPE__ long int
@@ -730,6 +766,9 @@
 #ifndef __INT_LEAST8_TYPE__
 #define __INT_LEAST8_TYPE__ signed char
 #endif
+#ifndef __cpp_structured_bindings
+#define __cpp_structured_bindings 201606
+#endif
 #ifndef __DEC32_MAX_EXP__
 #define __DEC32_MAX_EXP__ 97
 #endif
@@ -743,7 +782,7 @@
 #define __INTPTR_MAX__ 0x7fffffffffffffffL
 #endif
 #ifndef __cpp_range_based_for
-#define __cpp_range_based_for 200907
+#define __cpp_range_based_for 201603
 #endif
 #ifndef __FLT64_HAS_QUIET_NAN__
 #define __FLT64_HAS_QUIET_NAN__ 1
@@ -769,11 +808,17 @@
 #ifndef __FLT64X_MAX__
 #define __FLT64X_MAX__ 1.18973149535723176502126385303097021e+4932F64x
 #endif
+#ifndef __STDCPP_DEFAULT_NEW_ALIGNMENT__
+#define __STDCPP_DEFAULT_NEW_ALIGNMENT__ 16
+#endif
 #ifndef __SIG_ATOMIC_MIN__
 #define __SIG_ATOMIC_MIN__ (-__SIG_ATOMIC_MAX__ - 1)
 #endif
 #ifndef __code_model_small__
 #define __code_model_small__ 1
+#endif
+#ifndef __cpp_nontype_template_args
+#define __cpp_nontype_template_args 201411
 #endif
 #ifndef __cpp_return_type_deduction
 #define __cpp_return_type_deduction 201304
@@ -822,6 +867,9 @@
 #endif
 #ifndef __UINT_FAST64_TYPE__
 #define __UINT_FAST64_TYPE__ long unsigned int
+#endif
+#ifndef __cpp_inline_variables
+#define __cpp_inline_variables 201606
 #endif
 #ifndef __INT_MAX__
 #define __INT_MAX__ 0x7fffffff
@@ -873,6 +921,9 @@
 #endif
 #ifndef __WINT_WIDTH__
 #define __WINT_WIDTH__ 32
+#endif
+#ifndef __cpp_template_auto
+#define __cpp_template_auto 201606
 #endif
 #ifndef __INT_LEAST8_MAX__
 #define __INT_LEAST8_MAX__ 0x7f
@@ -949,6 +1000,9 @@
 #ifndef __UINT64_TYPE__
 #define __UINT64_TYPE__ long unsigned int
 #endif
+#ifndef __cpp_namespace_attributes
+#define __cpp_namespace_attributes 201411
+#endif
 #ifndef __INTMAX_MAX__
 #define __INTMAX_MAX__ 0x7fffffffffffffffL
 #endif
@@ -977,7 +1031,7 @@
 #define __FLT_MAX__ 3.40282346638528859811704183484516925e+38F
 #endif
 #ifndef __cpp_constexpr
-#define __cpp_constexpr 201304
+#define __cpp_constexpr 201603
 #endif
 #ifndef __INT32_TYPE__
 #define __INT32_TYPE__ int
@@ -1023,6 +1077,9 @@
 #endif
 #ifndef __FLT32X_DENORM_MIN__
 #define __FLT32X_DENORM_MIN__ 4.94065645841246544176568792868221372e-324F32x
+#endif
+#ifndef __cpp_template_template_args
+#define __cpp_template_template_args 201611
 #endif
 #ifndef __DBL_MAX_10_EXP__
 #define __DBL_MAX_10_EXP__ 308
@@ -1114,15 +1171,11 @@
 #ifndef __ATOMIC_RELEASE
 #define __ATOMIC_RELEASE 3
 #endif
-#ifndef NDEBUG
-#define NDEBUG 1
-#endif
-#ifndef RELEASE
-#define RELEASE 1
-#endif
 #endif
 
 // --- Include directories begin --- //
+///usr/include/mysql
+///usr/include/mysql/private
 ///usr/local/lib/gcc/x86_64-pc-linux-gnu/7.2.0/../../../../include/c++/7.2.0
 ///usr/local/lib/gcc/x86_64-pc-linux-gnu/7.2.0/../../../../include/c++/7.2.0/x86_64-pc-linux-gnu
 ///usr/local/lib/gcc/x86_64-pc-linux-gnu/7.2.0/../../../../include/c++/7.2.0/backward

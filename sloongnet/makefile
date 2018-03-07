@@ -58,11 +58,17 @@
 # The pre-processor and compiler options.
 MY_CFLAGS =
 
-# The linker options.
-MY_LIBS   = -lm -ldl -llua -lglib-2.0 -lmysqlclient -ljpeg -luniv -luuid -lpthread -lssl -lcrypto
+# Warning flag
+WARNINGS := -Wall  -Wno-switch -Wno-return-type -Wno-misleading-indentation
 
-# The pre-processor options used by the cpp (man cpp for more).
-CPPFLAGS  = -Wall -Wno-switch -Wno-return-type -Wno-misleading-indentation
+# debug flag
+DEBUGFLAGS = -DDEBUG -g -pg 
+
+# release flag
+RELEASEFLAGS = -DNODEBUG -DRELASE -O3
+
+# The linker options.
+LINK_LIBS   = -lm -ldl -llua -lglib-2.0 -lmysqlclient -ljpeg -luniv -luuid -lpthread -lssl -lcrypto
 
 # The options used in linking as well as in any direct use of ld.
 LDFLAGS   =
@@ -87,21 +93,20 @@ HDREXTS = .h .H .hh .hpp .HPP .h++ .hxx .hp
 
 # The pre-processor and compiler options.
 # Users can override those variables from the command line.
-CFLAGS  = -g -pthread
-DFLAG = -g -pg 
+CFLAGS = -g -pthread
 CXXFLAG= -std=c++17 -DLUA_USE_READLINE -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -L/usr/local/lib/sloong -Wl,-rpath=/usr/local/lib/sloong -L/usr/lib64/mysql -Wl,-rpath=/usr/lib64/mysql
 
 # The C program compiler.
-#CC	 = gcc
+CC	 = gcc
 
 # The C++ program compiler.
-#CXX	= g++
+CXX	= g++
 
 # Un-comment the following line to compile C programs as C++ ones.
-#CC	 = $(CXX)
+CC	 = $(CXX)
 
 # The command used to delete file.
-#RM	 = rm -f
+RM	 = rm -f
 
 ETAGS = etags
 ETAGSFLAGS =
@@ -131,12 +136,12 @@ OBJS	= $(addsuffix .o, $(basename $(SOURCES)))
 #DEPS	= $(OBJS:.o=.d)
 ## Define some useful variables.
 DEP_OPT = $(shell if `$(CC) --version | grep "GCC" >/dev/null`; then echo "-MM -MP"; else echo "-M"; fi )
-DEPEND = $(CC) $(DEP_OPT)  $(MY_CFLAGS) $(CFLAGS) $(CPPFLAGS)
+DEPEND = $(CC) $(DEP_OPT)  $(MY_CFLAGS) $(CFLAGS) 
 DEPEND.d = $(subst -g ,,$(DEPEND))
-COMPILE.c = $(CC)  $(MY_CFLAGS) $(CFLAGS)   $(CPPFLAGS) -c
-COMPILE.cxx = $(CXX) $(MY_CFLAGS) $(CXXFLAGS) $(CPPFLAGS) -c
-LINK.c = $(CC)  $(MY_CFLAGS) $(CFLAGS)   $(CPPFLAGS) $(LDFLAGS)
-LINK.cxx = $(CXX) $(MY_CFLAGS) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS)
+COMPILE.c = $(CC)  $(MY_CFLAGS) $(CFLAGS) $(WARNINGS) -c
+COMPILE.cxx = $(CXX) $(MY_CFLAGS) $(CXXFLAGS)  $(WARNINGS) -c
+LINK.c = $(CC)  $(MY_CFLAGS) $(CFLAGS) $(LDFLAGS)
+LINK.cxx = $(CXX) $(MY_CFLAGS) $(CXXFLAGS) $(LDFLAGS)
 
 .PHONY: all objs tags ctags clean distclean help show
 
@@ -145,12 +150,12 @@ LINK.cxx = $(CXX) $(MY_CFLAGS) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS)
 
 all: $(PROGRAM)
 
-Debug : CXXFLAGS = $(DFLAG) $(CXXFLAG)
+Debug : CXXFLAGS = $(DEBUGFLAGS) $(CXXFLAG)
 Debug :	$(PROGRAM)
 
 debug : Debug
 
-Release : CXXFLAGS = $(CXXFLAG)
+Release : CXXFLAGS = $(RELEASEFLAGS) $(CXXFLAG)
 Release: $(PROGRAM)
 
 release : Release
@@ -230,10 +235,10 @@ ctags: $(HEADERS) $(SOURCES)
 #-------------------------------------
 $(PROGRAM):$(OBJS)
 ifeq ($(SRC_CXX),)			  # C program
-	$(LINK.c)   $(OBJS) $(MY_LIBS) -o $@
+	$(LINK.c)   $(OBJS) $(LINK_LIBS) -o $@
 	@echo Type ./$@ to execute the program.
 else							# C++ program
-	$(LINK.cxx) $(OBJS) $(MY_LIBS) -o $@
+	$(LINK.cxx) $(OBJS) $(LINK_LIBS) -o $@
 	@echo Type ./$@ to execute the program.
 endif
 
