@@ -1,5 +1,5 @@
 #include "MessageCenter.h"
-
+#include "serverconfig.h"
 #include "NormalEvent.h"
 
 using namespace Sloong;
@@ -16,10 +16,12 @@ CMessageCenter::~CMessageCenter()
 {
 }
 
-void CMessageCenter::Initialize(int nWorkLoopNum, int ThreadPoolNum)
+void CMessageCenter::Initialize(IData* iData)
 {
-	CThreadPool::Initialize(ThreadPoolNum);
-	CThreadPool::AddWorkThread(MessageWorkLoop, this, nWorkLoopNum);
+	m_iData = iData;
+	CServerConfig* pConfig = TYPE_TRANS<CServerConfig*>(iData->Get(Configuation));
+	CThreadPool::Initialize(pConfig->m_nMessageCenterThreadQuantity);
+	CThreadPool::AddWorkThread(MessageWorkLoop, this, pConfig->m_nProcessThreadQuantity);
 }
 
 void CMessageCenter::SendMessage(MSG_TYPE msgType)

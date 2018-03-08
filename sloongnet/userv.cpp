@@ -43,14 +43,13 @@ void SloongWallUS::Initialize(CServerConfig* config)
 		oType = LOGTYPE::DAY;
 	}
 	m_pLog->Initialize(config->m_oLogInfo.LogPath, config->m_oLogInfo.DebugMode, LOGLEVEL(config->m_oLogInfo.LogLevel), oType);
-	m_pLog->SetWorkInterval(config->m_nSleepInterval);
 	if (config->m_oLogInfo.NetworkPort != 0)
 		m_pLog->EnableNetworkLog(config->m_oLogInfo.NetworkPort);
 
 	m_pDC->Add(Configuation, config);
 	m_pDC->Add(Logger, m_pLog);
 	
-	m_pMC->Initialize(1, 1);
+	m_pMC->Initialize(m_pDC);
 	m_pMC->RegisterEvent(ProgramExit);
 	m_pMC->RegisterEvent(ProgramStart);
 	m_pMC->RegisterEventHandler(MSG_TYPE::ProgramExit, this, EventHandler);

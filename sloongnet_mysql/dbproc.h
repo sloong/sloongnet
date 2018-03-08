@@ -2,7 +2,7 @@
 #define DBPORCESSER_H
 
 #include <mysql/mysql.h>
-#include "sloongnet-db.h"
+#include "sloongnet_mysql.h"
 namespace Sloong
 {
 	struct MySQLConnectInfo

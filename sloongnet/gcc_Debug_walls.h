@@ -200,6 +200,9 @@
 #if !defined(__GXX_EXPERIMENTAL_CXX0X__) && defined(__SYSPROGS_CODESENSE__)
 #define __GXX_EXPERIMENTAL_CXX0X__ 1
 #endif
+#ifndef LUA_USE_READLINE
+#define LUA_USE_READLINE 1
+#endif
 #ifndef __LDBL_MAX_EXP__
 #define __LDBL_MAX_EXP__ 16384
 #endif
@@ -1171,6 +1174,8 @@
 #endif
 
 // --- Include directories begin --- //
+///usr/include/glib-2.0/
+///usr/lib64/glib-2.0/include/
 ///usr/local/lib/gcc/x86_64-pc-linux-gnu/7.2.0/../../../../include/c++/7.2.0
 ///usr/local/lib/gcc/x86_64-pc-linux-gnu/7.2.0/../../../../include/c++/7.2.0/x86_64-pc-linux-gnu
 ///usr/local/lib/gcc/x86_64-pc-linux-gnu/7.2.0/../../../../include/c++/7.2.0/backward

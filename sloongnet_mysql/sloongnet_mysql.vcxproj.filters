@@ -23,7 +23,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="sloongnet-db.cpp">
+    <ClCompile Include="sloongnet_mysql.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="dbproc.cpp">
@@ -31,7 +31,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="sloongnet-db.h">
+    <ClInclude Include="sloongnet_mysql.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="dbproc.h">
@@ -39,18 +39,22 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Makefile" />
     <None Include="debug.mak">
       <Filter>Make files</Filter>
     </None>
-    <None Include="sloongnet-db-Debug.vgdbsettings">
+    <None Include="sloongnet_mysql-Debug.vgdbsettings">
       <Filter>VisualGDB settings</Filter>
     </None>
     <None Include="release.mak">
       <Filter>Make files</Filter>
     </None>
-    <None Include="sloongnet-db-Release.vgdbsettings">
-      <Filter>VisualGDB settings</Filter>
-    </None>
+    <None Include="Makefile_VGDB" />
+    <None Include="sloongnet_mysql-Release.vgdbsettings" />
+    <None Include="Makefile_VGDB" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt">
+      <Filter>Source files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

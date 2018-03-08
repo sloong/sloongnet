@@ -1,7 +1,7 @@
 #include <univ/univ.h>
 #include <univ/log.h>
 #include "dbproc.h"
-#include "sloongnet-db.h"
+#include "sloongnet_mysql.h"
 #include <univ/exception.h>
 using namespace Sloong;
 using namespace Sloong::Universal;

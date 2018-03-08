@@ -12,18 +12,18 @@ AR := ar
 OBJCOPY := objcopy
 
 #Additional flags
-PREPROCESSOR_MACROS := DEBUG=1
-INCLUDE_DIRS := /usr/include /usr/include/mysql /usr/include/mysql/private
-LIBRARY_DIRS := /usr/local/lib/sloong /usr/lib64/mysql
-LIBRARY_NAMES := univ mysqlclient
+PREPROCESSOR_MACROS := 
+INCLUDE_DIRS := 
+LIBRARY_DIRS := 
+LIBRARY_NAMES := 
 ADDITIONAL_LINKER_INPUTS := 
 MACOS_FRAMEWORKS := 
 LINUX_PACKAGES := 
 
-CFLAGS := -ggdb -ffunction-sections -O0
-CXXFLAGS := -std=c++17 -ggdb -ffunction-sections -O0
+CFLAGS := -ggdb -ffunction-sections
+CXXFLAGS := -ggdb -ffunction-sections
 ASFLAGS := 
-LDFLAGS := -Wl,-gc-sections
+LDFLAGS := -Wl,-gc-sections  -Wl,-rpath=/usr/local/lib/sloong -Wl,-rpath=/usr/lib64/mysql
 COMMONFLAGS := 
 LINKER_SCRIPT := 
 

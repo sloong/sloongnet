@@ -6,6 +6,7 @@
 #include <memory>
 #include <condition_variable>
 #include "IMessage.h"
+#include "IData.h"
 namespace Sloong
 {
 	using namespace Interface;
@@ -15,7 +16,7 @@ namespace Sloong
 		CMessageCenter();
 		~CMessageCenter();
 
-		void Initialize(int nWorkLoopNum, int ThreadPoolNum);
+		void Initialize(IData* iData);
 
 		void SendMessage(MSG_TYPE msgType);
 		void SendMessage(IEvent* evt);
@@ -37,6 +38,7 @@ namespace Sloong
 		condition_variable m_oWrokLoopCV;
 		mutex m_oMsgListMutex;
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;
+		IData* m_iData;
 	};
 }
 

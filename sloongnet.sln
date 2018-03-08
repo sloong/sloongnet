@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sloongnet", "sloongnet\sloongnet.vcxproj", "{E89B0F2A-F74B-43CC-934F-3B8DB35F3E5B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sloongnet_mysql", "sloongnet-db\sloongnet-db.vcxproj", "{01A9047D-53CB-4D94-98AA-E5A8D3CE75E2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sloongnet_mysql", "sloongnet_mysql\sloongnet_mysql.vcxproj", "{01A9047D-53CB-4D94-98AA-E5A8D3CE75E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,4 +1,4 @@
-#include "sloongnet-db.h"
+#include "sloongnet_mysql.h"
 #include <univ/lua.h>
 #include "dbproc.h"
 #include <boost/foreach.hpp>

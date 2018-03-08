@@ -28,7 +28,7 @@
         <string>*.cc</string>
         <string>*.cxx</string>
         <string>*.mak</string>
-        <string>Makefile</string>
+        <string>Makefile_VGDB</string>
         <string>*.txt</string>
         <string>*.cmake</string>
       </FileMasks>
@@ -45,8 +45,8 @@
     <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
   </Project>
   <Build xsi:type="com.visualgdb.build.make">
-    <MakeFilePathRelativeToSourceDir>Makefile</MakeFilePathRelativeToSourceDir>
-    <MakeConfigurationName>Debug</MakeConfigurationName>
+    <MakeFilePathRelativeToSourceDir>Makefile_VGDB</MakeFilePathRelativeToSourceDir>
+    <MakeConfigurationName>Release</MakeConfigurationName>
     <AdditionalMakeArguments />
     <Toolchain>
       <Name>Default GCC toolchain on 172.16.182.130</Name>
@@ -180,20 +180,9 @@
   <UserDefinedVariables />
   <ImportedPropertySheets />
   <CodeSense>
-    <Enabled>False</Enabled>
-    <CFLAGS />
-    <CXXFLAGS />
-    <ExternalSourceFileList />
+    <Enabled>Unknown</Enabled>
     <ExtraSettings>
       <HideErrorsInSystemHeaders>true</HideErrorsInSystemHeaders>
-      <DiscoverySettings>
-        <Mode>Enabled</Mode>
-        <SearchInProjectDir>true</SearchInProjectDir>
-        <SearchInSourceDirs>true</SearchInSourceDirs>
-        <SearchInIncludeSubdirs>true</SearchInIncludeSubdirs>
-        <IgnoredDirs />
-        <IgnoredHeaders />
-      </DiscoverySettings>
     </ExtraSettings>
   </CodeSense>
 </VisualGDBProjectSettings2>
