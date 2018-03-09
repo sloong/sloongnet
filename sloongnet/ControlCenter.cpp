@@ -132,8 +132,11 @@ LPVOID Sloong::CControlCenter::EventHandler(LPVOID t, LPVOID object)
 	case SocketClose:
 		pThis->OnSocketClose(ev);
 		break;
+	default:
+		break;
 	}
 	SAFE_RELEASE_EVENT(ev);
+	return nullptr;
 }
 
 

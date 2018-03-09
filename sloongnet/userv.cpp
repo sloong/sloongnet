@@ -88,6 +88,8 @@ void * Sloong::SloongWallUS::EventHandler(void * t, void* object)
 	case ProgramExit:
 		pThis->Exit();
 		break;
+	default:
+		break;
 	}
 	SAFE_RELEASE_EVENT(ev);
 	return nullptr;

@@ -67,8 +67,11 @@ void* Sloong::CLuaProcessCenter::EventHandler(LPVOID evt, LPVOID obj)
 	case ReloadLuaContext:
 		pThis->ReloadContext();
 		break;
+	default:
+		break;
 	}
 	SAFE_RELEASE_EVENT(ev);
+	return nullptr;
 }
 
 void Sloong::CLuaProcessCenter::ReloadContext()

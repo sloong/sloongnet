@@ -230,8 +230,7 @@ void * Sloong::CEpollEx::EventHandler(void * params, void * object)
 	case MSG_TYPE::SendMessage: {
 		auto send_evt = EVENT_TRANS<CSendMessageEvent*>(evt);
 		pThis->SendMessage(send_evt->GetSocketID(), send_evt->GetPriority(), send_evt->GetSwift(), send_evt->GetMessage(), send_evt->GetSendExData(), send_evt->GetSendExDataSize());
-		break;
-	}
+		break;}
 	default:
 		break;
 	}

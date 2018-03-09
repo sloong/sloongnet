@@ -57,5 +57,7 @@ void CProgressBar::Update( float bit )
                 m_szTitle, (int)(m_fOffset * val), m_szPro);
             fflush(stdout);
             break;
+		default:
+			break;
     }
 }

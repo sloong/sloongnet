@@ -71,7 +71,6 @@ int Sloong::lConnect::Read(char * data, int len, int timeout, bool bagain)
 	}
 
 	// SSL发送数据
-	int nIsRecv;
 	// 这里可能会有以下几种情况。
 	// 1.正常全部读取完成。
 	// 2.读取后发生错误，错误信息为SSL_ERROR_WANT_READ，需等待下次可读事件，并根据已读的部分进行组合。
