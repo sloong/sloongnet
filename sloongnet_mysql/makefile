@@ -11,7 +11,7 @@
 ##==========================================================================
 # The executable file name.
 # If not specified, current directory name or `a.out' will be used.
-PROGRAM   =  sloongnet_mysql
+PROGRAM   =  sloongnet_mysql.so
 
 #Type
 # so  -> share library
@@ -32,7 +32,7 @@ DEBUGFLAGS = -DDEBUG -g -pg
 RELEASEFLAGS = -DNODEBUG -DRELASE -O3
 
 # The linker options.
-LIBS   = -lm -ldl -llua -lmysqlclient -luniv -lpthread
+LIBS   = -lmysqlclient -luniv 
 
 # include directory
 INCLUDE_DIR = 
@@ -85,7 +85,8 @@ $(error Unexpected PROJECT_TYPE `$(PROJECT_TYPE)')
 endif
 
 ifeq ($(PROJECT_TYPE),so)
- CFLAGS  += -fpic -shared
+ CFLAGS  += -fPIC
+ CXXFLAG += -fPIC
  LDFLAGS += -shared
 endif
 
@@ -227,39 +228,6 @@ clean:
 distclean: clean
 	$(RM) $(DEPS) TAGS
 
-# Show help.
-help:
-	@echo 'Generic Makefile for C/C++ Programs (gcmakefile) version 0.5'
-	@echo 'Copyright (C) 2007, 2008 whyglinux '
-	@echo
-	@echo 'Usage: make [TARGET]'
-	@echo 'TARGETS:'
-	@echo '  all	   (=make) compile and link.'
-	@echo '  NODEP=yes make without generating dependencies.'
-	@echo '  objs	  compile only (no linking).'
-	@echo '  tags	  create tags for Emacs editor.'
-	@echo '  ctags	 create ctags for VI editor.'
-	@echo '  clean	 clean objects and the executable file.'
-	@echo '  distclean clean objects, the executable and dependencies.'
-	@echo '  show	  show variables (for debug use only).'
-	@echo '  help	  print this message.'
-	@echo
-	@echo 'Report bugs to .'
-
-# Show variables (for debug use only.)
-show:
-	@echo 'PROGRAM	 :' $(PROGRAM)
-	@echo 'SRCDIRS	 :' $(SRCDIRS)
-	@echo 'HEADERS	 :' $(HEADERS)
-	@echo 'SOURCES	 :' $(SOURCES)
-	@echo 'SRC_CXX	 :' $(SRC_CXX)
-	@echo 'OBJS		:' $(OBJS)
-	@echo 'DEPS		:' $(DEPS)
-	@echo 'DEPEND	  :' $(DEPEND)
-	@echo 'COMPILE.c   :' $(COMPILE.c)
-	@echo 'COMPILE.cxx :' $(COMPILE.cxx)
-	@echo 'link.c	  :' $(LINK.c)
-	@echo 'link.cxx	:' $(LINK.cxx)
 
 ## End of the Makefile ##  Suggestions are welcome  ## All rights reserved ##
 ##############################################################
