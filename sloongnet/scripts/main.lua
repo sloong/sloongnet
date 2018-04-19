@@ -1,5 +1,6 @@
 -- When message is recved, the fm will call this function.
 require_ex('ex');
+require_ex('sql');
 
 local main_Req = {};
 
@@ -8,14 +9,9 @@ main_Req.ReloadScript = function( u, req, res )
 	return 0;
 end
 
-main_Req.SqlTest = function( u, req, res )
-	local cmd = req['cmd'] or '';
-	local code,res = Sloongnet_QuerySQL(cmd);
-	return code,res
-end
 
 main_Req.TextTest = function( u, req, res )
-        res['TestText'] = Sloongnet_GetEngineVer()  .. ' -- Sloong Network Engine -- Copyright 2015 Sloong.com. All Rights Reserved';
+        res['TestText'] = Sloongnet_GetEngineVer()  .. ' -- Sloong Network Engine -- Copyright 2015-2018 Sloong.com. All Rights Reserved';
         return 0
 end
 
@@ -93,11 +89,10 @@ function main_Req.GetThumbImage(u,req, res)
     return 0,path
 end
 
-g_all_request_processer = 
+g_main_request_processer = 
 {
 	['Reload'] = main_Req.ReloadScript,
 	['GetText'] = main_Req.TextTest,
-	['RunSql'] = main_Req.SqlTest,
 	['UploadStart'] = main_Req.UploadStart,
 	['UploadEnd'] = main_Req.UploadEnd,
 	['UploadWithTCP'] = main_Req.UploadWithTCP,
@@ -105,4 +100,4 @@ g_all_request_processer =
 	['GetIP'] = main_Req.GetIP,
     ['GetThumbImage'] = main_Req.GetThumbImage,
 }
-AddModule(g_ex_function);
+AddModule(g_main_request_processer)

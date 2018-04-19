@@ -6,7 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,6 +63,7 @@ namespace Sloong
 
             m_SendWorkThread = new Thread(() => SendWorkLoop());
             m_SendWorkThread.Name = "Network Send Thread";
+            dc.PageMessage += Dc_PageMessage;
 
             m_RecvThreadList = new Dictionary<int, Thread>();
         }
@@ -97,28 +101,94 @@ namespace Sloong
             
             foreach (var item in SocketMap)
             {
-                if (item.m_Socket != null && item.m_Socket.Connected)
-                    item.m_Socket.Close();
+                if (item.m_Client != null && item.m_Client.Connected)
+                    item.m_Client.Close();
             }
+        }
+
+
+        private void Dc_PageMessage(object sender, PageMessage e)
+        {
+            var type = e.Type;
+            switch (type)
+            {
+                case MessageType.ConnectToNetwork:
+                    ConnectToServer((int)e.Params[0]);
+                    if (e.CallBackFunc != null)
+                        e.CallBackFunc.Invoke(null);
+                    break;
+            }
+        }
+
+
+        private static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
+        {
+            if (sslpolicyerrors == SslPolicyErrors.None)
+                return true;
+            Console.WriteLine("Certificate error: {0}", sslpolicyerrors);
+            return false;
         }
 
         public void ConnectToServer(int nIndex)
         {
             var info = SocketMap[nIndex];
+            if (info.m_Client != null && info.m_Client.Connected)
+                return;
+
+            // 检查ip是否有变化
+            var ip = Dns.GetHostAddresses(info.m_URL)[0].ToString();
+
+
             if (!Utility.TestNetwork(info.m_URL))
             {
                 log.Write(string.Format("Ping to {0} fialed.", AppStatus.ServerIP.ToString()));
                 return;
             }
-            if (info.m_Socket == null || !info.m_Socket.Connected)
+
+            if (info.m_Client == null || !info.m_Client.Connected)
             {
-                info.m_Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, info.m_Type);
-                info.m_Socket.Connect(info.m_IPInfo);
+                info.m_Client = new TcpClient(info.m_URL, info.m_nPort);
                 // send check key
                 var key = "clinecheckkeyforsloongnet";
                 var gbk = Encoding.GetEncoding("GB2312");
                 byte[] sendByte = gbk.GetBytes(key);
-                Utility.SendEx(info.m_Socket, sendByte);
+                info.m_Conn = info.m_Client.GetStream();
+                info.m_Conn.Write(sendByte, 0, sendByte.Length);
+
+                if( info.m_bSSL )
+                {
+                    info.m_SSL = new SslStream(info.m_Conn,
+                    false,
+                    new RemoteCertificateValidationCallback(ValidateServerCertificate),
+                    null);
+                    X509CertificateCollection certs = new X509CertificateCollection();
+                    //X509Certificate cert = X509Certificate.CreateFromCertFile( Environment.CurrentDirectory + @"\" + "client.cer");
+                    X509Certificate cert = X509Certificate.CreateFromCertFile("D:\\Temp\\client.crt");
+                    certs.Add(cert);
+
+                    try
+                    {
+                        // 双向认证
+                        //info.m_SSL.AuthenticateAsClient("Sloong.com", certs, SslProtocols.Tls, false);
+                        // 单向认证
+                        info.m_SSL.AuthenticateAsClient("Sloong");
+                        info.m_Conn = info.m_SSL;
+                    }
+                    catch (AuthenticationException e)
+                    {
+                        Console.WriteLine("Exception: {0}", e.Message);
+                        if (e.InnerException != null)
+                        {
+                            Console.WriteLine("Inner exception: {0}", e.InnerException.Message);
+                        }
+                        Console.WriteLine("Authentication failed - closing the connection.");
+                        info.m_SSL.Close();
+                        info.m_Client.Close();
+                        Console.ReadLine();
+                        return;
+                    }
+                }
+                
 
                 //AppStatus.RecvBufferSize = s.ReceiveBufferSize;
                 /*_DC.Add(ShareItem.ConnectStatus, m_Socket.Connected);*/
@@ -138,7 +208,7 @@ namespace Sloong
             {
                 try
                 {
-                    var CurSock = SocketMap[m_nCurrentSocket].m_Socket;
+                    var CurSock = SocketMap[m_nCurrentSocket].m_Client;
                     if (CurSock == null || !CurSock.Connected)
                         ConnectToServer(m_nCurrentSocket);
                     //_DC[ShareItem.ConnectStatus] = m_Socket.Connected;
@@ -185,7 +255,7 @@ namespace Sloong
 
 
                         sendList.AddRange(gbk.GetBytes(msg));
-                        var Sock = SocketMap[pack.SocketID].m_Socket;
+                        var steam = SocketMap[pack.SocketID].m_Conn;
                         if( !m_RecvThreadList.ContainsKey(pack.SocketID))
                         {
                             var mainRecv = new Thread(() => RecvWorkLoop(pack.SocketID));
@@ -194,10 +264,13 @@ namespace Sloong
                             mainRecv.Start();
                         }
                         
-                        lock (Sock)
+                        lock (steam)
                         {
-                            Utility.SendEx(Sock, sendList);
+                            steam.Write(sendList.ToArray(),0, sendList.Count);
+                            
+                            //Utility.SendEx(Sock, sendList);
                             pack.IsSent = true;
+                            pack.send = DateTime.Now;
                             // only add to list when enable swift.
                             if (AppStatus.bEnableSwift)
                                 MsgList.Add(pack.SwiftNumber, pack);
@@ -219,19 +292,6 @@ namespace Sloong
             }
         }
 
-        public static long RecvDataLength(Socket sock, int overTime)
-        {
-            byte[] leng = Utility.RecvEx(sock, 8, overTime);
-
-            var hostLen = Utility.BytesToLong(leng);
-            if (hostLen <= 0 || hostLen > 2147483648)
-            {
-                throw new Exception(string.Format("Recv length error. the length is:{0}. the data is:{1}", hostLen, leng.ToString()));
-            }
-
-            return hostLen;
-        }
-
         public void RecvWorkLoop( int id )
         {
             while (AppStatus != null && AppStatus.RunStatus != RunStatus.Exit)
@@ -239,7 +299,7 @@ namespace Sloong
                 var info = SocketMap[id];
                 try
                 {
-                    if (info.m_Socket == null || !info.m_Socket.Connected)
+                    if (info.m_Client == null || !info.m_Client.Connected)
                     {
                         System.Threading.Thread.Sleep(100);
                         continue;
@@ -263,7 +323,8 @@ namespace Sloong
                     //                         continue;
                     //                     }
 
-                    long nLength = RecvDataLength(info.m_Socket, 10000);
+                    // TODO : 需要替换为支持SSL的接收                    
+                    long nLength = Utility.RecvDataLength(info.m_Conn, 10000);
                     
 
                     long nSwift = -1;
@@ -271,25 +332,26 @@ namespace Sloong
                     int index = 0;
                     if (AppStatus.bEnableSwift)
                     {
-                        nSwift = Utility.BytesToLong(Utility.RecvEx(info.m_Socket, 8, 10000));
+                        nSwift = Utility.BytesToLong(Utility.RecvEx(info.m_Conn, 8, 10000));
                         index = 8;
                     }
                     
                     if (AppStatus.bEnableMD5)
                     {
-                        byte[] bMD5 = Utility.RecvEx(info.m_Socket, 32, 10000);
+                        byte[] bMD5 = Utility.RecvEx(info.m_Conn, 32, 10000);
                         md5 = Encoding.GetEncoding("GB2312").GetString(bMD5);
                         index += 32;
                     }
-                    byte[] data = Utility.RecvEx(info.m_Socket, nLength - index, 10000);
+                    byte[] data = Utility.RecvEx(info.m_Conn, nLength - index, 10000);
                     string strRecv = Encoding.GetEncoding("GB2312").GetString(data);
                     if (MsgList.ContainsKey(nSwift))
                     {
                         var pack = MsgList[nSwift];
+                        pack.recv = DateTime.Now;
                         pack.ReceivedMessages = strRecv;
                         if (pack.NeedExData)
                         {
-                            byte[] exData = Utility.RecvEx(info.m_Socket, RecvDataLength(info.m_Socket, 0), 0);
+                            byte[] exData = Utility.RecvEx(info.m_Conn, Utility.RecvDataLength(info.m_Conn, 0), 0);
                             pack.ReceivedExData = exData;
                         }
                         pack.IsReceived = true;

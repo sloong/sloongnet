@@ -629,6 +629,40 @@ namespace Sloong
             return IPAddress.NetworkToHostOrder(BitConverter.ToInt64(b, 0));
         }
 
+        public static byte[] RecvEx( Stream stream, long len, int overTime)
+        {
+            byte[] recvRes = new byte[len];
+            int nRecvSize = 0;
+            int nBufferSize = 4096;
+            stream.ReadTimeout = overTime;
+            try
+            {
+                while (nRecvSize < len)
+                {
+                    byte[] recv;
+                    int nNorecvSize = (int)len - nRecvSize;
+                    if (nNorecvSize > nBufferSize)
+                    {
+                        recv = new byte[nBufferSize];
+                    }
+                    else
+                    {
+                        recv = new byte[nNorecvSize];
+                    }
+
+                    int readsize = stream.Read(recv,  0, recv.Length);
+                    recv.CopyTo(recvRes, nRecvSize);
+                    nRecvSize += readsize;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
+            return recvRes;
+        }
+
         public static byte[] RecvEx(Socket sock, long len, int nOverTime)
         {
             byte[] recvRes = new byte[len];
@@ -828,6 +862,32 @@ namespace Sloong
             byte[] compressAfterByte = Decompress(compressBeforeByte);
             compressString = enc.GetString(compressAfterByte);
             return compressString;
+        }
+
+        public static long RecvDataLength(Stream st, int overTime)
+        {
+            byte[] leng = Utility.RecvEx(st, 8, overTime);
+
+            var hostLen = Utility.BytesToLong(leng);
+            if (hostLen <= 0 || hostLen > 2147483648)
+            {
+                throw new Exception(string.Format("Recv length error. the length is:{0}. the data is:{1}", hostLen, leng.ToString()));
+            }
+
+            return hostLen;
+        }
+
+        public static long RecvDataLength(Socket sock, int overTime)
+        {
+            byte[] leng = Utility.RecvEx(sock, 8, overTime);
+
+            var hostLen = Utility.BytesToLong(leng);
+            if (hostLen <= 0 || hostLen > 2147483648)
+            {
+                throw new Exception(string.Format("Recv length error. the length is:{0}. the data is:{1}", hostLen, leng.ToString()));
+            }
+
+            return hostLen;
         }
     }
 }

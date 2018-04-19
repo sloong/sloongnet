@@ -11,46 +11,14 @@ CServerConfig::CServerConfig()
 {
 	g_pThis = this;
 
-	m_pErr = NULL;
-	m_pFile = NULL;
-	m_pExFile = NULL;
-	m_bExConfig = false;
-
-	// DB init
-	m_oConnectInfo.Enable = false;
-	m_oConnectInfo.Port = 3306;
-	m_oConnectInfo.Address = "localhost";
-	m_oConnectInfo.User = "root";
-	m_oConnectInfo.Password = "sloong";
-	m_oConnectInfo.Database = "sloong";
-
 	// Log config init
 	m_oLogInfo.DebugMode = true;
-	m_oLogInfo.ShowSQLCmd = false;
-	m_oLogInfo.ShowSQLResult = false;
 	m_oLogInfo.ShowSendMessage = false;
 	m_oLogInfo.ShowReceiveMessage = false;
 	m_oLogInfo.LogWriteToOneFile = false;
 	m_oLogInfo.LogPath = "./sloongnet.log";
 	m_oLogInfo.LogLevel = 0;
-
-	// Server init
-	m_nPort = 9009;
-    m_nPriorityLevel = 0;
-	m_bEnableMD5Check = false;
-	m_bEnableSwiftNumberSup = false;
-	m_nConnectTimeout = 2;
-	m_nReceiveTimeout = 20;
-
-	// Security
-	m_strClientCheckKey = "";
-	m_nClientCheckTime = 0;
-
-	// Performance
-	m_nSleepInterval = 100;
-	m_nEPoolThreadQuantity = 1;
-	m_nProcessThreadQuantity = 1;
-	m_nTimeoutInterval = 5;
+	m_oLogInfo.NetworkPort = 0;
 }
 
 bool CServerConfig::Initialize(string path, string exConfig)
@@ -201,16 +169,7 @@ int Sloong::CServerConfig::GetIntConfig(string strSection, string strKey, int nD
 }
 
 void Sloong::CServerConfig::LoadConfig()
-{
-	// load connect info
-	m_oConnectInfo.Enable = GetBoolenConfig("MySQL", "Enable", m_oConnectInfo.Enable);
-	m_oConnectInfo.Port = GetIntConfig("MySQL", "Port", m_oConnectInfo.Port);
-	m_oConnectInfo.Address = GetStringConfig("MySQL", "Address", m_oConnectInfo.Address);
-	m_oConnectInfo.User = GetStringConfig("MySQL", "User", m_oConnectInfo.User);
-	m_oConnectInfo.Password = GetStringConfig("MySQL", "Password", m_oConnectInfo.Password);
-	m_oConnectInfo.Database = GetStringConfig("MySQL", "Database", m_oConnectInfo.Database);
-
-	// load lua config 
+{	// load lua config 
 	m_oLuaConfigInfo.ScriptFolder = GetStringConfig("Lua", "ScriptFolder", "./");
 	m_oLuaConfigInfo.EntryFile = GetStringConfig("Lua", "EntryFile", "init.lua");
 	m_oLuaConfigInfo.EntryFunction = GetStringConfig("Lua", "EntryFunction", "Init");
@@ -223,13 +182,18 @@ void Sloong::CServerConfig::LoadConfig()
 	m_oLogInfo.ShowReceiveMessage = GetBoolenConfig("Log", "ShowReceiveMessage", m_oLogInfo.ShowReceiveMessage);
 	m_oLogInfo.ShowSendMessage = GetBoolenConfig("Log", "ShowSendMessage", m_oLogInfo.ShowSendMessage);
 	m_oLogInfo.LogWriteToOneFile = GetBoolenConfig("Log", "WriteToOneFile", m_oLogInfo.LogWriteToOneFile);
-	m_oLogInfo.ShowSQLCmd = GetBoolenConfig("Log", "ShowSQLCmd", m_oLogInfo.ShowSQLCmd);
-	m_oLogInfo.ShowSQLResult = GetBoolenConfig("Log", "ShowSQLResult", m_oLogInfo.ShowSQLResult);
 	m_oLogInfo.LogLevel = GetIntConfig("Log", "LogLevel", m_oLogInfo.LogLevel);
+	m_oLogInfo.NetworkPort = GetIntConfig("Log", "NetworkLogPort", m_oLogInfo.NetworkPort);
 
 	// Load server info
 	m_nPort = GetIntConfig("Server", "Port", m_nPort);
-	
+	m_bEnableSSL = GetBoolenConfig("Server", "EnableSSL", m_bEnableSSL);
+	if (m_bEnableSSL)
+	{
+		m_strCertFile = GetStringConfig("Server", "SSLCertFilePath", m_strCertFile);
+		m_strKeyFile = GetStringConfig("Server", "SSLKeyFilePath", m_strKeyFile);
+		m_strPasswd = GetStringConfig("Server", "SSLPassword", m_strPasswd);
+	}
 	m_nPriorityLevel = GetIntConfig("Server", "PriorityLevel", m_nPriorityLevel);
 	m_bEnableMD5Check = GetBoolenConfig("Server", "EnableMD5Check", m_bEnableMD5Check);
 	m_bEnableSwiftNumberSup = GetBoolenConfig("Server", "EnableSwiftNumberSupport", m_bEnableSwiftNumberSup);
@@ -239,9 +203,10 @@ void Sloong::CServerConfig::LoadConfig()
 	// Security
 	m_nClientCheckTime = GetIntConfig("Security", "ClientCkeckTime", m_nClientCheckTime);
 	m_strClientCheckKey = GetStringConfig("Security", "ClientCheckKey", m_strClientCheckKey);
+	
 
 	// Performance
-	m_nSleepInterval = GetIntConfig("Performance", "SleepInterval", m_nSleepInterval);
+	m_nMessageCenterThreadQuantity = GetIntConfig("Performance", "MessageCenterThreadQuantity", m_nMessageCenterThreadQuantity);
 	m_nProcessThreadQuantity = GetIntConfig("Performance", "ProcessThreadQuantity", m_nProcessThreadQuantity);
 	m_nEPoolThreadQuantity = GetIntConfig("Performance", "EPoolThreadQuantity", m_nEPoolThreadQuantity);
 	m_nTimeoutInterval = GetIntConfig("Performance", "TimeoutInterval", m_nTimeoutInterval);	

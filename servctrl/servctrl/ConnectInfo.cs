@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,9 +16,12 @@ namespace servctrl
     public class ConnectInfo
     {
         [NonSerialized]
-        public Socket m_Socket;
-        public IPEndPoint m_IPInfo;
+        public TcpClient m_Client;
+        public int m_nPort;
         public string m_URL;
         public ProtocolType m_Type = ProtocolType.Tcp;
+        public SslStream m_SSL;
+        public bool m_bSSL;
+        public Stream m_Conn;
     }
 }
