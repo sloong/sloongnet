@@ -1,15 +1,10 @@
-#include <string.h>
 #include <stdarg.h>
 #include "main.h"
 #include "userv.h"
-#include "univ/log.h"
 #include "serverconfig.h"
 #include "version.h"
-#include "jpeg.h"
-#include "univ/exception.h"
 #include "CmdProcess.h"
 #include <execinfo.h>
-#include <stdio.h>
 #include <fcntl.h>
 using namespace std;
 using namespace Sloong;

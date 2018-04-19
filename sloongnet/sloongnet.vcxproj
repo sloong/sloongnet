@@ -105,7 +105,6 @@
     <ClInclude Include="lconnect.h" />
     <ClInclude Include="epollex.h" />
     <ClInclude Include="globalfunction.h" />
-    <ClInclude Include="jpeg.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="MessageCenter.h" />
     <ClInclude Include="ProgramEvent.h" />
@@ -128,7 +127,6 @@
     <ClCompile Include="lconnect.cpp" />
     <ClCompile Include="epollex.cpp" />
     <ClCompile Include="globalfunction.cpp" />
-    <ClCompile Include="jpeg.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MessageCenter.cpp" />
     <ClCompile Include="ProgramEvent.cpp" />

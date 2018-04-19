@@ -8,19 +8,15 @@
 // univ
 #include "defines.h"
 #include <univ/Base64.h>
-// cimag
-#define cimg_display 0
-#include "CImg.h"
 
 #include "utility.h"
-#include "jpeg.h"
 #include "version.h"
 #include "serverconfig.h"
 #include "epollex.h"
 #include "NormalEvent.h"
 
 using namespace std;
-using namespace cimg_library;
+
 #define ARRAYSIZE(a) (sizeof(a)/sizeof(a[0]))
 
 using namespace Sloong;
@@ -36,7 +32,6 @@ static string g_temp_file_path = "/tmp/sloong/receivefile/temp.tmp";
 LuaFunctionRegistr g_LuaFunc[] =
 {
 	{ "Sloongnet_ShowLog", CGlobalFunction::Lua_showLog },
-	{ "Sloongnet_GetThumbImage", CGlobalFunction::Lua_getThumbImage },
 	{ "Sloongnet_GetEngineVer", CGlobalFunction::Lua_getEngineVer },
 	{ "Sloongnet_Base64_encode", CGlobalFunction::Lua_Base64_Encode },
 	{ "Sloongnet_Base64_decode", CGlobalFunction::Lua_Base64_Decode },
@@ -71,52 +66,6 @@ void Sloong::CGlobalFunction::Initialize(IMessage* iMsg, IData* iData)
 	m_iMsg = iMsg;
 	m_iData = iData;
     m_pLog = TYPE_TRANS<CLog*>(m_iData->Get(Logger));
-}
-
-
-int Sloong::CGlobalFunction::Lua_getThumbImage(lua_State* l)
-{
-	auto path = CLua::GetString(l,1);
-	auto width = CLua::GetDouble(l,2);
-	auto height = CLua::GetDouble(l,3);
-	auto quality = CLua::GetDouble(l,4);
-	auto folder = CLua::GetString(l, 5, "");
-	
-	if ( access(path.c_str(),ACC_E) != -1 )
-	{
-		if (folder == "")
-			folder = path.substr(0, path.find_last_of('/'));
-
-		string fileName = path.substr(path.find_last_of('/') + 1);
-		string extension = fileName.substr(fileName.find_last_of('.')+1);
-		fileName = fileName.substr(0, fileName.length() - extension.length()-1);
-		string thumbpath = CUniversal::Format("%s/%s_%d_%d_%d.%s", folder, fileName, width, height, quality,extension);
-		CUniversal::CheckFileDirectory(thumbpath);	
-		if (access(thumbpath.c_str(), ACC_E) != 0)
-		{
-            CImg<UCHAR> img(path.c_str());
-            double ratio = (double)img.width() / (double)img.height();
-            if( ratio > 1.0f )
-            {
-                height = width / ratio;
-            }
-            else
-            {
-                width = height * ratio;
-            }
-            if( width == 0 || height == 0 )
-            {
-				CLua::PushString(l,path);
-                return 1;
-            }
-            img.resize(width,height);
-            img.save(thumbpath.c_str());
-		}
-		CLua::PushString(l,thumbpath);
-		return 1;
-	}
-	CLua::PushString(l, "");
-	return 1;
 }
 
 void Sloong::CGlobalFunction::InitLua(CLua* pLua)

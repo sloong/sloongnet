@@ -32,7 +32,7 @@ DEBUGFLAGS = -DDEBUG -g -pg
 RELEASEFLAGS = -DNODEBUG -DRELASE -O3
 
 # The linker options.
-LIBS   = -lm -ldl -llua -lglib-2.0 -lmysqlclient -ljpeg -luniv -luuid -lpthread -lssl -lcrypto
+LIBS   = -lm -ldl -llua -lglib-2.0 -lmysqlclient -luniv -luuid -lpthread -lssl -lcrypto
 
 # include directory
 INCLUDE_DIR = -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include

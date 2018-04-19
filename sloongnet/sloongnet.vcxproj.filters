@@ -120,9 +120,6 @@
     <ClInclude Include="LuaProcessCenter.h">
       <Filter>Center</Filter>
     </ClInclude>
-    <ClInclude Include="jpeg.h">
-      <Filter>Module</Filter>
-    </ClInclude>
     <ClInclude Include="serverconfig.h">
       <Filter>Module</Filter>
     </ClInclude>
@@ -181,9 +178,6 @@
     </ClCompile>
     <ClCompile Include="LuaProcessCenter.cpp">
       <Filter>Center</Filter>
-    </ClCompile>
-    <ClCompile Include="jpeg.cpp">
-      <Filter>Module</Filter>
     </ClCompile>
     <ClCompile Include="serverconfig.cpp">
       <Filter>Module</Filter>
