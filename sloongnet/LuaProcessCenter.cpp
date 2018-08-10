@@ -35,11 +35,11 @@ void Sloong::CLuaProcessCenter::Initialize(IMessage* iMsg, IData* iData)
 	m_iMsg->RegisterEventHandler(ProcessMessage, this, EventHandler);
 	m_iMsg->RegisterEventHandler(ReloadLuaContext, this, EventHandler);
 	m_iMsg->RegisterEventHandler(ReveivePackage, this, EventHandler);
-	// Ö÷ÒªµÄÑ­»··½Ê½Îª£¬¸ù¾ÝÊäÈëµÄ´¦ÀíÊýÀ´³õÊ¼»¯Ö¸¶¨ÊýÁ¿µÄlua»·¾³¡£
-	// È»ºó½«Æä¼ÓÈëµ½¿ÉÓÃ¶ÓÁÐ
-	// ÔÚ´¦Àí¿ªÊ¼Ö®Ç°¸ù¾Ý¶ÓÁÐÇé¿öÄÃµ½Ä³lua»·¾³µÄid²¢½«ÆäÒÆ³ý³ö¿ÉÓÃ¶ÓÁÐ
-	// ÔÚ´¦ÀíÍê±ÏÖ®ºóÖØÐÂ¼Ó»Øµ½¿ÉÓÃ¶ÓÁÐÖÐ¡£
-	// ÕâÀïÊ¹ÓÃ´¦ÀíÏß³Ì³ØµÄÊýÁ¿½øÐÐ³õÊ¼»¯£¬±£Ö¤ÔÚËùÓÐÏß³Ì¶¼ÔÚ´¦ÀíLuaÇëÇóÊ±²»»áÒòluacontext·¢Éú¶ÂÈû
+	// ä¸»è¦çš„å¾ªçŽ¯æ–¹å¼ä¸ºï¼Œæ ¹æ®è¾“å…¥çš„å¤„ç†æ•°æ¥åˆå§‹åŒ–æŒ‡å®šæ•°é‡çš„luaçŽ¯å¢ƒã€‚
+	// ç„¶åŽå°†å…¶åŠ å…¥åˆ°å¯ç”¨é˜Ÿåˆ—
+	// åœ¨å¤„ç†å¼€å§‹ä¹‹å‰æ ¹æ®é˜Ÿåˆ—æƒ…å†µæ‹¿åˆ°æŸluaçŽ¯å¢ƒçš„idå¹¶å°†å…¶ç§»é™¤å‡ºå¯ç”¨é˜Ÿåˆ—
+	// åœ¨å¤„ç†å®Œæ¯•ä¹‹åŽé‡æ–°åŠ å›žåˆ°å¯ç”¨é˜Ÿåˆ—ä¸­ã€‚
+	// è¿™é‡Œä½¿ç”¨å¤„ç†çº¿ç¨‹æ± çš„æ•°é‡è¿›è¡Œåˆå§‹åŒ–ï¼Œä¿è¯åœ¨æ‰€æœ‰çº¿ç¨‹éƒ½åœ¨å¤„ç†Luaè¯·æ±‚æ—¶ä¸ä¼šå› luacontextå‘ç”Ÿå µå¡ž
 	for (int i = 0; i < m_pConfig->m_nProcessThreadQuantity; i++)
 		NewThreadInit();
 
@@ -180,7 +180,7 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, st
 		return true;
 	}
 	else
-	{// ÔËÐÐlua½Å±¾Ê§°Ü
+	{// è¿è¡Œluaè„šæœ¬å¤±è´¥
 		return false;
 	}
 }
