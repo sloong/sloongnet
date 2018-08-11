@@ -68,7 +68,7 @@ void Sloong::CGlobalFunction::Initialize(IMessage* iMsg, IData* iData)
     m_pLog = TYPE_TRANS<CLog*>(m_iData->Get(Logger));
 }
 
-void Sloong::CGlobalFunction::InitLua(CLua* pLua)
+void Sloong::CGlobalFunction::RegistFuncToLua(CLua* pLua)
 {
 	vector<LuaFunctionRegistr> funcList(g_LuaFunc, g_LuaFunc + ARRAYSIZE(g_LuaFunc));
 	pLua->AddFunctions(&funcList);

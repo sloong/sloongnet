@@ -91,7 +91,7 @@ int Sloong::CLuaProcessCenter::NewThreadInit()
 	pLua->SetErrorHandle(HandleError);
 	pLua->SetScriptFolder(m_pConfig->m_oLuaConfigInfo.ScriptFolder);
 	auto pGFunc = TYPE_TRANS<CGlobalFunction*>(m_iData->Get(GlobalFunctions));
-	pGFunc->InitLua(pLua);
+	pGFunc->RegistFuncToLua(pLua);
 	InitLua(pLua, m_pConfig->m_oLuaConfigInfo.ScriptFolder);
 	m_pLuaList.push_back(pLua);
 	m_oReloadList.push_back(false);
@@ -106,13 +106,12 @@ void Sloong::CLuaProcessCenter::InitLua(CLua* pLua, string folder)
 	{
 		throw normal_except("Run Script Fialed.");
 	}
-	// get current path
-	char szDir[MAX_PATH] = { 0 };
-
-	getcwd(szDir, MAX_PATH);
-	string strDir(szDir);
-	strDir += "/" + folder;
-	pLua->RunFunction(m_pConfig->m_oLuaConfigInfo.EntryFunction, CUniversal::Format("'%s'", strDir));
+	char tag = folder[folder.length() - 1];
+    if (tag != '/' && tag != '\\')
+	{
+		folder += '/';
+	}
+	pLua->RunFunction(m_pConfig->m_oLuaConfigInfo.EntryFunction, CUniversal::Format("'%s'", folder));
 }
 
 void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket* uinfo)
@@ -125,7 +124,7 @@ void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket* uinfo)
 }
 
 
-string FormatJSONErrorMessage(string message, string code)
+string FormatJSONErrorMessage(string code,string message)
 {
 	return CUniversal::Format("{\"errno\": \"%s\",\"errmsg\" : \"%s\"}", code, message);
 }
@@ -140,7 +139,7 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, st
 	int id = GetFreeLuaContext();
 	if ( id < 0 )
 	{
-		res = "{\"errno\": \"-1\",\"errmsg\" : \"server is busy now. please try again.\"}";
+		res = FormatJSONErrorMessage("-1","server is busy now. please try again.");
 		return true;
 	}
 	CLua* pLua = m_pLuaList[id];
@@ -167,7 +166,7 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, st
 			auto pData = m_iData->GetTemp("SendList" + uuid);
 			if (pData == nullptr)
 			{
-				res = FormatJSONErrorMessage("ExData no saved in DataCenter, The uuid is " + uuid,"-1");
+				res = FormatJSONErrorMessage("-2","ExData no saved in DataCenter, The uuid is " + uuid);
 				return true;
 			}
 			else

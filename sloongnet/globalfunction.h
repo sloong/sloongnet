@@ -20,7 +20,7 @@ namespace Sloong
 		~CGlobalFunction();
 
 		void Initialize(IMessage* iMsg,IData* iData);
-		void InitLua(CLua* pLua);
+		void RegistFuncToLua(CLua* pLua);
 	protected:
         CUtility * m_pUtility;
 		CLog*	m_pLog;
