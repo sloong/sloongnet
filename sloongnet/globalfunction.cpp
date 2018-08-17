@@ -26,6 +26,7 @@ using namespace Sloong::Interface;
 
 CGlobalFunction* CGlobalFunction::g_pThis = NULL;
 mutex g_SQLMutex;
+map<int,string> g_RecvDataConnList;
 
 static string g_temp_file_path = "/tmp/sloong/receivefile/temp.tmp";
 
@@ -72,6 +73,49 @@ void Sloong::CGlobalFunction::RegistFuncToLua(CLua* pLua)
 {
 	vector<LuaFunctionRegistr> funcList(g_LuaFunc, g_LuaFunc + ARRAYSIZE(g_LuaFunc));
 	pLua->AddFunctions(&funcList);
+}
+
+
+void Sloong::CGlobalFunction::EnableDataReceive(int port)
+{
+	m_nDataRecvPort = port;
+	if ( m_nDataRecvPort > 0 )
+	{
+		int m_ListenSock = socket(AF_INET, SOCK_STREAM, 0);
+		int sock_op = 1;
+		// SOL_SOCKET:在socket层面设置
+		// SO_REUSEADDR:允许套接字和一个已在使用中的地址捆绑
+		setsockopt(m_ListenSock, SOL_SOCKET, SO_REUSEADDR, &sock_op, sizeof(sock_op));
+
+		struct sockaddr_in address;
+		memset(&address, 0, sizeof(address));
+		address.sin_addr.s_addr = htonl(INADDR_ANY);
+		address.sin_port = htons(port);
+
+		// 绑定端口
+		errno = bind(m_ListenSock, (struct sockaddr*)&address, sizeof(address));
+
+		if (errno == -1)
+			throw normal_except(CUniversal::Format("bind to %d field. errno = %d", m_pConfig->m_nPort, errno));
+
+		errno = listen(m_ListenSock, 1024);
+		SetSocketNonblocking(m_ListenSock);
+
+		CThreadPool::AddFunctions()
+	}
+}
+
+
+// 接受数据连接函数
+// 主要任务：在数据连接端口接受连接请求，并检查连接UUID，把相关连接信息保存起来以供后面使用。
+int Sloong::CGlobalFunction::RecvDataConnFunc()
+{
+	int conn_sock = -1;
+	if(( conn_sock = accept(m_ListenSock, NULL, NULL)) > 0 )
+	{
+
+	}
+
 }
 
 int Sloong::CGlobalFunction::Lua_getEngineVer(lua_State* l)
@@ -247,7 +291,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 		auto fileList = CLua::GetTableParam(l, 4);
 		int otime = CLua::GetDouble(l, 5, 5);
 		string temp_file_path = CLua::GetString(l, 6, g_temp_file_path);
-		int rSocket = socket(AF_INET, SOCK_STREAM, 0);
+		/*int rSocket = socket(AF_INET, SOCK_STREAM, 0);
 		struct sockaddr_in address;
 		memset(&address, 0, sizeof(address));
 		address.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -258,7 +302,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 			throw normal_except(CUniversal::Format("bind to %d field. errno = %d", port, errno));
 		}
 
-		errno = listen(rSocket, 1);
+		errno = listen(rSocket, 1);*/
 
 		fd_set rset;
 		FD_ZERO(&rset);

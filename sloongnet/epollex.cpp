@@ -202,22 +202,26 @@ void* Sloong::CEpollEx::WorkLoop(void* pParam)
 void* Sloong::CEpollEx::CheckTimeoutConnect(void* pParam)
 {
 	CEpollEx* pThis = (CEpollEx*)pParam;
+	CLog* pLog = pThis->m_pLog;
 	int tout = pThis->m_pConfig->m_nConnectTimeout * 60;
 	int tinterval = pThis->m_pConfig->m_nTimeoutInterval * 60;
 	unique_lock<mutex> lck(pThis->m_oExitMutex);
+	plog->Verbos("Check connect timeout thread is running.");
 	while (pThis->m_bIsRunning)
 	{
+		pLog->Verbos("Check connect timeout start.");
 		for (map<int, CSockInfo*>::iterator it = pThis->m_SockList.begin(); it != pThis->m_SockList.end(); ++it)
 		{
 			if (it->second != NULL && time(NULL) - it->second->m_ActiveTime > tout)
 			{
-				pThis->m_pLog->Info(CUniversal::Format("[Timeout]:[Close Timeout connect:%s]", it->second->m_Address));
+				pLog->Info(CUniversal::Format("[Timeout]:[Close connect:%s]", it->second->m_Address));
 				pThis->CloseConnect(it->first);
 			}
 		}
+		pLog->Verbos(CUniversal::Format("Check connect timeout done. wait [%d] seconds.", tinterval));
 		pThis->m_oExitCV.wait_for(lck, chrono::seconds(tinterval));
 	}
-	pThis->m_pLog->Info("check timeout connect thread is exit ");
+	pLog->Info("check timeout connect thread is exit ");
 	return 0;
 }
 
