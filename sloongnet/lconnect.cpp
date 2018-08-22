@@ -61,7 +61,7 @@ int Sloong::lConnect::SSL_Write_Ex(SSL * ssl, char * buf, int len)
 
 int Sloong::lConnect::Read(char * data, int len, int timeout, bool bagain)
 {
-	// Î´ÆôÓÃSSLÊ±Ö±½Ó·¢ËÍÊý¾Ý
+	// æœªå¯ç”¨SSLæ—¶ç›´æŽ¥å‘é€æ•°æ®
 	if (!m_pSSL)
 		return CUniversal::RecvEx(m_nSocket, data, len, timeout, bagain);
 
@@ -70,11 +70,11 @@ int Sloong::lConnect::Read(char * data, int len, int timeout, bool bagain)
 		return 0;
 	}
 
-	// SSL·¢ËÍÊý¾Ý
-	// ÕâÀï¿ÉÄÜ»áÓÐÒÔÏÂ¼¸ÖÖÇé¿ö¡£
-	// 1.Õý³£È«²¿¶ÁÈ¡Íê³É¡£
-	// 2.¶ÁÈ¡ºó·¢Éú´íÎó£¬´íÎóÐÅÏ¢ÎªSSL_ERROR_WANT_READ£¬ÐèµÈ´ýÏÂ´Î¿É¶ÁÊÂ¼þ£¬²¢¸ù¾ÝÒÑ¶ÁµÄ²¿·Ö½øÐÐ×éºÏ¡£
-	// 3.¶ÁÈ¡ºó·¢Éú´íÎó£¬´íÎóÐÅÏ¢ÎªÆäËû£¬ÈÏÎªÁ¬½Ó·¢ÉúÎÊÌâÐèÒªÖØÁ¬¡£
+	// SSLå‘é€æ•°æ®
+	// è¿™é‡Œå¯èƒ½ä¼šæœ‰ä»¥ä¸‹å‡ ç§æƒ…å†µã€‚
+	// 1.æ­£å¸¸å…¨éƒ¨è¯»å–å®Œæˆã€‚
+	// 2.è¯»å–åŽå‘ç”Ÿé”™è¯¯ï¼Œé”™è¯¯ä¿¡æ¯ä¸ºSSL_ERROR_WANT_READï¼Œéœ€ç­‰å¾…ä¸‹æ¬¡å¯è¯»äº‹ä»¶ï¼Œå¹¶æ ¹æ®å·²è¯»çš„éƒ¨åˆ†è¿›è¡Œç»„åˆã€‚
+	// 3.è¯»å–åŽå‘ç”Ÿé”™è¯¯ï¼Œé”™è¯¯ä¿¡æ¯ä¸ºå…¶ä»–ï¼Œè®¤ä¸ºè¿žæŽ¥å‘ç”Ÿé—®é¢˜éœ€è¦é‡è¿žã€‚
 	int ret = SSL_Read_Ex(m_pSSL, data, len, 0, true);
 	if (ret != len)
 	{
@@ -107,7 +107,7 @@ int Sloong::lConnect::Read(char * data, int len, int timeout, bool bagain)
 
 int Sloong::lConnect::Write(const char* data, int len, int index)
 {
-	// Î´ÆôÓÃSSLÊ±Ö±½Ó·¢ËÍÊý¾Ý
+	// æœªå¯ç”¨SSLæ—¶ç›´æŽ¥å‘é€æ•°æ®
 	if (!m_pSSL)	
 		return CUniversal::SendEx(m_nSocket, data, len, index);
 
@@ -117,7 +117,7 @@ int Sloong::lConnect::Write(const char* data, int len, int index)
 		return 0;
 	}
 
-	// SSL·¢ËÍÊý¾Ý
+	// SSLå‘é€æ•°æ®
 	int ret = SSL_write(m_pSSL, data, len);
 	if (ret > 0)
 	{

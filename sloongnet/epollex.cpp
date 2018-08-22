@@ -206,7 +206,7 @@ void* Sloong::CEpollEx::CheckTimeoutConnect(void* pParam)
 	int tout = pThis->m_pConfig->m_nConnectTimeout * 60;
 	int tinterval = pThis->m_pConfig->m_nTimeoutInterval * 60;
 	unique_lock<mutex> lck(pThis->m_oExitMutex);
-	plog->Verbos("Check connect timeout thread is running.");
+	pLog->Verbos("Check connect timeout thread is running.");
 	while (pThis->m_bIsRunning)
 	{
 		pLog->Verbos("Check connect timeout start.");
@@ -438,7 +438,7 @@ void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 	// The app is used ET mode, so should wait the mutex. 
 	unique_lock<mutex> srlck(info->m_oSockReadMutex);
 
-		auto pid = this_thread::get_id();
+	auto pid = this_thread::get_id();
 	string spid = CUniversal::ntos(pid);
 
 	// 已经连接的用户,收到数据,可以开始读入

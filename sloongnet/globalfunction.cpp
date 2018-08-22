@@ -28,6 +28,9 @@ CGlobalFunction* CGlobalFunction::g_pThis = NULL;
 mutex g_SQLMutex;
 map<int,string> g_RecvDataConnList;
 
+map<int,string> g_RecvDataConnList;
+map<string,map<string,RecvDataPackage>> g_RecvDataInfoList;
+
 static string g_temp_file_path = "/tmp/sloong/receivefile/temp.tmp";
 
 LuaFunctionRegistr g_LuaFunc[] =
@@ -67,6 +70,12 @@ void Sloong::CGlobalFunction::Initialize(IMessage* iMsg, IData* iData)
 	m_iMsg = iMsg;
 	m_iData = iData;
     m_pLog = TYPE_TRANS<CLog*>(m_iData->Get(Logger));
+
+	CServerConfig* pConfig = TYPE_TRANS<CServerConfig*>(m_iData->Get(DATA_ITEM::Configuation));
+	if( pConfig->m_bEnableDataReceive)
+	{
+		EnableDataReceive( pConfig->m_nDataReceivePort);
+	}
 }
 
 void Sloong::CGlobalFunction::RegistFuncToLua(CLua* pLua)
@@ -74,7 +83,6 @@ void Sloong::CGlobalFunction::RegistFuncToLua(CLua* pLua)
 	vector<LuaFunctionRegistr> funcList(g_LuaFunc, g_LuaFunc + ARRAYSIZE(g_LuaFunc));
 	pLua->AddFunctions(&funcList);
 }
-
 
 void Sloong::CGlobalFunction::EnableDataReceive(int port)
 {
@@ -92,7 +100,6 @@ void Sloong::CGlobalFunction::EnableDataReceive(int port)
 		address.sin_addr.s_addr = htonl(INADDR_ANY);
 		address.sin_port = htons(port);
 
-		// 绑定端口
 		errno = bind(m_ListenSock, (struct sockaddr*)&address, sizeof(address));
 
 		if (errno == -1)
@@ -101,19 +108,164 @@ void Sloong::CGlobalFunction::EnableDataReceive(int port)
 		errno = listen(m_ListenSock, 1024);
 		SetSocketNonblocking(m_ListenSock);
 
-		CThreadPool::AddFunctions()
+		CThreadPool::AddWorkThread(RecvDataConnFunc, pThis, 1);
 	}
 }
 
 
-// 接受数据连接函数
-// 主要任务：在数据连接端口接受连接请求，并检查连接UUID，把相关连接信息保存起来以供后面使用。
-int Sloong::CGlobalFunction::RecvDataConnFunc()
+// 
+void* Sloong::CGlobalFunction::RecvDataConnFunc(void* pParam)
 {
-	int conn_sock = -1;
-	if(( conn_sock = accept(m_ListenSock, NULL, NULL)) > 0 )
+	CGlobalFunction* pThis = (CGlobalFunction*)pParam;
+	CLog* pLog = pThis->m_pLog;
+	
+	while( m_bIsRunning)
 	{
+		int conn_sock = -1;
+		if(( conn_sock = accept(pThis->m_ListenSock, NULL, NULL)) > 0 )
+		{
+			static int uuid_length = 32;
+			// When accept the connect , receive the uuid data. and 
+			char* pCheckBuf = new char[uuid_length + 1];
+			memset(pCheckBuf, 0, uuid_length + 1);
+			// In Check function, client need send the check key in 3 second. 
+			// 这里仍然使用Universal提供的ReceEx。这里不需要进行SSL接收
+			int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, uuid_length, m_pConfig->m_nClientCheckTime);
+			// Check uuid length
+			if (nLen != m_nClientCheckKeyLength)
+			{
+				pLog->Warn(CUniversal::Format("The uuid length error:[%d]. Close connect.",nLen))
+				close(conn_sock);
+				continue;
+			}
+			// Check uuid validity
+			if( g_RecvDataInfoList.find(pCheckBuf) == g_RecvDataInfoList.end())
+			{
+				pLog->Warn(CUniversal::Format("The uuid is not find in list:[%s]. Close connect.",pCheckBuf))
+				close(conn_sock);
+				continue;
+			}
+			// Add to connect list
+			g_RecvDataConnList[conn_sock] = pCheckBuf;
+			// Start new thread to recv data for this connect.
+			int* pSock = new int();
+			*pSock = conn_sock;
+			LPVOID* params = new LPVOID[2]();
+			params[0] = pThis;
+			params[1] = pSock;
+			CThreadPool::AddWorkThread(RecvFileFunc,params);
+		}
+	}
+}
 
+void* Sloong::CGlobalFunction::RecvFileFunc(void* pParam)
+{
+	LPVOID* pParams = (LPVOID*)pParam;
+	CGlobalFunction* pThis = (CGlobalFunction*)pParams[0];
+	CLog* pLog = pThis->m_pLog;
+	int* pSock = (int*)pParams[1];
+	int conn_sock = *pSock;
+	SAFE_DELETE(pSock);
+	SAFE_DELETE_ARR(pParams);
+	// Find the recv uuid.
+	auto conn_item = g_RecvDataConnList.find(conn_sock);
+	if(conn_item == g_RecvDataConnList.end())
+	{
+		p_Log->Error("The socket id is not find in conn list.");
+		return nullptr;
+	}
+	string uuid = conn_item.second;
+	// Find the recv info list.
+	auto info_item = g_RecvDataInfoList.find(uuid);
+	if(info_item == g_RecvDataInfoList.end() )
+	{
+		p_Log->Error("The uuid is not find in info list.");
+		return nullptr;
+	}
+	map<string,RecvDataPackage> recv_file_list = info_item.second;
+	bool bLoop = true;
+	while (bLoop)
+	{
+		// 先读取消息长度
+		static int data_package_len = 8;
+		char* pLongBuffer = new char[data_package_len + 1]();//dataLeng;
+		memset(pLongBuffer, 0, data_package_len + 1);
+		int nRecvSize = CUniversal::RecvEx( conn_sock, pLongBuffer, data_package_len, m_pConfig->m_nReceiveTimeout);
+		if (nRecvSize <= 0)
+		{
+			// 读取错误,将这个连接从监听中移除并关闭连接
+			CloseConnect(nSocket);
+			SAFE_DELETE_ARR(pLongBuffer);
+			pLog->Warn("Recv data package length error.");
+			return nullptr;
+		}
+		else
+		{
+			long long dtlen = CUniversal::BytesToLong(pLongBuffer);
+			SAFE_DELETE_ARR(pLongBuffer);
+			// package length cannot big than 2147483648. this is max value for int.
+			if (dtlen <= 0 || dtlen > 2147483648 || nRecvSize != data_package_len)
+			{
+				m_pLog->Error("Receive data length error.");
+				CloseConnect(nSocket);
+				return nullptr;
+			}
+
+			char szMD5 = new char[33];
+			memset(szMD5, 0 ,33);
+			nRecvSize = CUniversal::RecvEx( conn_sock, szMD5, 32, m_pConfig->m_nReceiveTimeout, true);
+			if (nRecvSize <= 0)
+			{
+				m_pLog->Error("Receive data package md5 error.");
+				CloseConnect(nSocket);
+				SAFE_DELETE_ARR(szMD5);
+				return nullptr;
+			}
+			auto recv_file_item = recv_file_list.find(tmd5);
+			if( recv_file_item == recv_file_list.end())
+			{
+				m_pLog->Error("the file md5 is not find in recv list.");
+				CloseConnect(nSocket);
+				return nullptr;
+			}
+			RecvDataPackage pack = recv_file_item.second;
+			pack.emStatus = RecvStatus::Receiving;
+
+			char* data = new char[dtlen + 1];
+			memset(data, 0, dtlen + 1);
+
+			nRecvSize = CUniversal::RecvEx(conn_sock,data, dtlen, m_pConfig->m_nReceiveTimeout, true);//一次性接受所有消息
+			if (nRecvSize <= 0)
+			{
+				m_pLog->Error("Receive data error.");
+				CloseConnect(nSocket);
+				SAFE_DELETE_ARR(data);
+				return nullptr;
+			}
+			pack.emStatus = RecvStatus::Saveing;			
+			
+			// check target file path is not exist
+			CUniversal::CheckFileDirectory(pack.strPath);
+
+			// save to file
+			ofstream of;
+			of.open(pack.strPath + pack.strName, ios::out | ios::trunc | ios::binary);
+			of.write(pMsg,dtlen);
+			of.close();
+			SAFE_DELETE_ARR(data);
+
+			// check md5
+			if(0 != stricmp(tmd5,CMD5::Encode(pack.strPath+pack.strName,true)))
+			{
+				m_pLog->Error("the file data is different with md5 code.");
+				pack.emStatus = RecvStatus::Error;
+			}
+			else
+			{
+				pack.emStatus = RecvStatus::Done;
+			}
+			bLoop = true;
+		}
 	}
 
 }
@@ -271,137 +423,46 @@ int CGlobalFunction::Lua_GenUUID(lua_State* l)
 	return 1;
 }
 
+
+// Receive File funcs
+// Client requeset with file list info 
+// and here add the info to list and Build one uuid and return this uuid.
 int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 {
-	int succeed_num = 0;
-	string succeed_md5_list("");
 	try
 	{
-		string uuid = CLua::GetString(l, 1);
-		if (uuid.empty() || uuid == "")
+		string save_folder = CLua::GetString(l, 1);
+		if (save_folder.empty() || save_folder == "")
 		{
-			throw normal_except("uuid is empty");
-		}
-		int port = CLua::GetDouble(l, 2);
-		if (port < 1024 || port > 65535)
-		{
-			throw normal_except("port is illegal");
-		}
-		int max_size = CLua::GetDouble(l, 3);
-		auto fileList = CLua::GetTableParam(l, 4);
-		int otime = CLua::GetDouble(l, 5, 5);
-		string temp_file_path = CLua::GetString(l, 6, g_temp_file_path);
-		/*int rSocket = socket(AF_INET, SOCK_STREAM, 0);
-		struct sockaddr_in address;
-		memset(&address, 0, sizeof(address));
-		address.sin_addr.s_addr = htonl(INADDR_ANY);
-		address.sin_port = htons(port);
-		errno = bind(rSocket, (struct sockaddr*)&address, sizeof(address));
-		if (errno == -1)
-		{
-			throw normal_except(CUniversal::Format("bind to %d field. errno = %d", port, errno));
+			throw normal_except("save folder is empty");
 		}
 
-		errno = listen(rSocket, 1);*/
-
-		fd_set rset;
-		FD_ZERO(&rset);
-		FD_SET(rSocket, &rset);
-		struct timeval tv;
-		tv.tv_sec = otime;
-		tv.tv_usec = 0;
-		int res = select(rSocket + 1, &rset, NULL, NULL, &tv);
-		int cSocket = -1;
-		if (res == 0)
-		{
-			close(rSocket);
-			throw normal_except("client no connect in set time.");
-		}
-		else if (res > 0)
-		{
-			cSocket = accept(rSocket, NULL, NULL);
-			close(rSocket);
-		}
-		else
-		{
-			// unknown error
-			close(rSocket);
-			throw normal_except("unknown error happened when wait client connect.");
-		}
-
-		char* pBuf = NULL;
-		// receive the uuid
-		char strUuid[37] = { 0 };
-		pBuf = strUuid;
-        res = CUniversal::RecvEx(cSocket, pBuf, 36, otime);
-		if (string(strUuid) != uuid)
-		{
-			close(cSocket);
-			throw normal_except("uuid check error.");
-		}
+		// The file list, key is md5 ,value is file name
+		auto fileList = CLua::GetTableParam(l,2);
+		string uuid = CUtility::GenUUID();
 		
-		for (map<string, string>::iterator i = fileList.begin(); i != fileList.end(); i++)
+		map<string,RecvDataPackage> recv_list;
+		for (auto i = fileList.begin(); i != fileList.end(); i++)
 		{
-			// receive the length
-			char strLen[9] = { 0 };
-			pBuf = strLen;
-            res = CUniversal::RecvEx(cSocket, pBuf, 8, otime);
-			long long nRecvLen = atoi(strLen);
-			// check the length
-			if (max_size < nRecvLen)
-			{
-				close(cSocket);
-				throw normal_except("receive file size is big than" + CUniversal::ntos(max_size));
-			}
-			// receive the data
-			pBuf = new char[nRecvLen];
-			memset(pBuf, 0, nRecvLen);
-            res = CUniversal::RecvEx(cSocket, pBuf, nRecvLen, otime);
-
-			// check target file path is not exist
-			CUniversal::CheckFileDirectory(temp_file_path);
-
-			// save to file
-			ofstream of;
-			of.open(temp_file_path.c_str(), ios::out | ios::trunc | ios::binary);
-			of.write(pBuf, nRecvLen);
-			of.close();
-			// check md5
-            string md5 = CMD5::Encode(temp_file_path, true);
-		    CUniversal::tolower(md5);
-			if (fileList.count(md5) == 0 )
-			{
-				CUniversal::touper(md5);
-				if (fileList.count(md5) == 0)
-				{
-					// 没有目标md5，表示文件有问题
-					// Close the socket
-					close(cSocket);
-					throw normal_except(CUniversal::Format("no find target md5[%s] in list.",md5.c_str()));
-				}
-			}
-			
-			string netpath = fileList[md5];
-			CUniversal::CheckFileDirectory(netpath);
-			system(CUniversal::Format("mv -f %s %s", temp_file_path.c_str(), netpath.c_str()).c_str());
-			succeed_md5_list = succeed_md5_list + md5 + ";";
-			succeed_num++;
+			RecvDataPackage pack;
+			pack.strName = i.second;
+			pack.strPath = save_folder;
+			pack.strMD5 = i.first;
+			pack.emStatus = RecvStatus::Wait;
+			recv_list[i.first] = pack;
 		}
-		
-		// Close the socket
-		close(cSocket);
 
-		CLua::PushInteger(l, succeed_num);
-		CLua::PushString(l, succeed_md5_list);
-		CLua::PushString(l, "succeed");
-		return 3;
+		g_RecvDataInfoList[uuid] = recv_list;
+
+		CLua::PushBoolen(l, true);
+		CLua::PushString(l, uuid);
+		return 2;
 	}
 	catch (normal_except& ex)
 	{
-		CLua::PushInteger(l, succeed_num);
-		CLua::PushString(l, succeed_md5_list);
+		CLua::PushBoolen(l, false);
 		CLua::PushString(l, ex.what());
-		return 3;
+		return 2;
 	}
 }
 

@@ -45,7 +45,7 @@ void Sloong::CControlCenter::Initialize(IMessage* iM,IData* iData)
 
 	m_pEpoll->SetLogConfiguration(m_pConfig->m_oLogInfo.ShowSendMessage, m_pConfig->m_oLogInfo.ShowReceiveMessage);
 
-	// 在所有的成员都初始化之后，在注册处理函数
+	// 鍦ㄦ墍鏈夌殑鎴愬憳閮藉垵濮嬪寲涔嬪悗锛屽湪娉ㄥ唽澶勭悊鍑芥暟
 	iM->RegisterEventHandler(ProgramStart, this, EventHandler);
 	iM->RegisterEventHandler(ProgramExit, this, EventHandler);
 	iM->RegisterEventHandler(ReveivePackage, this, EventHandler);
