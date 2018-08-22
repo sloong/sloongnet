@@ -37,3 +37,9 @@ Debug
 *.user
 *.ipch
 .vs
+/sloongnet/gcc_Debug.h
+/sloongnet/gcc_Debug_walls.h
+/sloongnet/gcc_Release.h
+/sloongnet/*.old
+/sloongnet/Release/*.cache
+/sloongnet/*.aps

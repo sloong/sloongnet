@@ -3,6 +3,14 @@
     "files.encoding": "utf8",
     "files.associations": {
         "cmath": "cpp",
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "deque": "cpp",
+        "initializer_list": "cpp",
+        "list": "cpp",
+        "vector": "cpp",
+        "xhash": "cpp",
+        "xstring": "cpp",
+        "xtree": "cpp",
+        "xutility": "cpp"
     }
 }

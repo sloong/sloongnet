@@ -59,6 +59,10 @@ namespace Sloong
 		int m_nMessageCenterThreadQuantity = 5;
 		int m_nEPoolThreadQuantity = 3;
 		int m_nTimeoutInterval = 5;
+
+		// Data receive defines
+		bool m_bEnableDataReceive = false;
+		int m_nDataReceivePort = 0;
 	};
 }
 

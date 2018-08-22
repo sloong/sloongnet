@@ -22,12 +22,17 @@ namespace Sloong
 		void Initialize(IMessage* iMsg,IData* iData);
 		void RegistFuncToLua(CLua* pLua);
 		void EnableDataReceive(int port);
+
+	private:
+		static void* RecvDataConnFunc(void* pParam);
+		static void* RecvFileFunc(void* pParam);
+		
 	protected:
         CUtility * m_pUtility;
 		CLog*	m_pLog;
 		IMessage* m_iMsg;
 		IData*		m_iData;
-		int 		m_m_ListenSock;
+		int 		m_ListenSock;
 		bool		m_bIsRunning;
 	public:
 

@@ -178,7 +178,7 @@ int Sloong::lConnect::G_InitializeSSL(SSL_CTX*& ctx, string certFile, string key
 	SSL_library_init();
 	OpenSSL_add_all_algorithms();/* load & register all cryptos, etc. */
 	SSL_load_error_strings();/* load all error messages */
-	ctx = SSL_CTX_new(TLSv1_server_method());/* create new server-method instance */
+	ctx = SSL_CTX_new(SSLv23_server_method());/* create new server-method instance */
 	if (ctx == NULL)
 	{
 		return ERR_get_error();

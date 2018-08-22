@@ -10,6 +10,17 @@
 #include <mutex>
 #include <condition_variable>
 #include <openssl/ssl.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <pthread.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h> 
+#include <sys/times.h> 
+#include <sys/select.h> 
 
 #include "IData.h"
 #include "IMessage.h"
