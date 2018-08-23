@@ -202,7 +202,8 @@ void Sloong::CServerConfig::LoadConfig()
 	m_bEnableDataReceive = GetBoolenConfig("Server", "EnableDataReceive", m_bEnableDataReceive);
 	if (m_bEnableDataReceive)
 	{
-		m_nDataReceivePort = GetIntConfig("Server", "DataReceivePort", 0);
+		m_nDataReceivePort = GetIntConfig("Server", "DataReceivePort", m_nDataReceivePort);
+		m_nWaitRecvTimeout = GetIntConfig("Server", "WaitRecvTimeout", m_nWaitRecvTimeout);
 	}
 
 
