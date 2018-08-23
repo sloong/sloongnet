@@ -199,6 +199,12 @@ void Sloong::CServerConfig::LoadConfig()
 	m_bEnableSwiftNumberSup = GetBoolenConfig("Server", "EnableSwiftNumberSupport", m_bEnableSwiftNumberSup);
 	m_nConnectTimeout = GetIntConfig("Server", "ConnectTimeout", m_nConnectTimeout);
 	m_nReceiveTimeout = GetIntConfig("Server", "ReceiveTimeout", m_nReceiveTimeout);
+	m_bEnableDataReceive = GetBoolenConfig("Server", "EnableDataReceive", m_bEnableDataReceive);
+	if (m_bEnableDataReceive)
+	{
+		m_nDataReceivePort = GetIntConfig("Server", "DataReceivePort", 0);
+	}
+
 
 	// Security
 	m_nClientCheckTime = GetIntConfig("Security", "ClientCkeckTime", m_nClientCheckTime);

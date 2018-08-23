@@ -29,6 +29,7 @@ mutex g_SQLMutex;
 map<int,string> g_RecvDataConnList;
 map<string,map<string,RecvDataPackage>> g_RecvDataInfoList;
 
+static int g_data_pack_len = 8;
 static int g_uuid_len = 36;
 static int g_md5_len = 32;
 
@@ -49,6 +50,7 @@ LuaFunctionRegistr g_LuaFunc[] =
 	{ "Sloongnet_MoveFile", CGlobalFunction::Lua_MoveFile },
 	{ "Sloongnet_GenUUID", CGlobalFunction::Lua_GenUUID },
 	{ "Sloongnet_ReceiveFile", CGlobalFunction::Lua_ReceiveFile},
+	{ "Sloongnet_CheckRecvStatus", CGlobalFunction::Lua_CheckRecvStatus},
 	{ "Sloongnet_SetCommData", CGlobalFunction::Lua_SetCommData},
 	{ "Sloongnet_GetCommData", CGlobalFunction::Lua_GetCommData },
 	{ "Sloongnet_GetLogObject", CGlobalFunction::Lua_GetLogObject },
@@ -78,6 +80,12 @@ void Sloong::CGlobalFunction::Initialize(IMessage* iMsg, IData* iData)
 		EnableDataReceive( pConfig->m_nDataReceivePort);
 	}
 }
+
+void Sloong::CGlobalFunction::Exit()
+{
+	m_bIsRunning = false;
+}
+
 
 void Sloong::CGlobalFunction::RegistFuncToLua(CLua* pLua)
 {
@@ -185,10 +193,10 @@ void* Sloong::CGlobalFunction::RecvFileFunc(void* pParam)
 	while (bLoop)
 	{
 		// 先读取消息长度
-		static int data_package_len = 8;
-		char* pLongBuffer = new char[data_package_len + 1]();//dataLeng;
-		memset(pLongBuffer, 0, data_package_len + 1);
-		int nRecvSize = CUniversal::RecvEx( conn_sock, pLongBuffer, data_package_len, pConfig->m_nReceiveTimeout);
+
+		char* pLongBuffer = new char[g_data_pack_len + 1]();//dataLeng;
+		memset(pLongBuffer, 0, g_data_pack_len + 1);
+		int nRecvSize = CUniversal::RecvEx( conn_sock, pLongBuffer, g_data_pack_len, pConfig->m_nReceiveTimeout);
 		if (nRecvSize <= 0)
 		{
 			// 读取错误,将这个连接从监听中移除并关闭连接
@@ -202,7 +210,7 @@ void* Sloong::CGlobalFunction::RecvFileFunc(void* pParam)
 			long long dtlen = CUniversal::BytesToLong(pLongBuffer);
 			SAFE_DELETE_ARR(pLongBuffer);
 			// package length cannot big than 2147483648. this is max value for int.
-			if (dtlen <= 0 || dtlen > 2147483648 || nRecvSize != data_package_len)
+			if (dtlen <= 0 || dtlen > 2147483648 || nRecvSize != g_data_pack_len)
 			{
 				pLog->Error("Receive data length error.");
 				close(conn_sock);
@@ -433,42 +441,59 @@ int CGlobalFunction::Lua_GenUUID(lua_State* l)
 // and here add the info to list and Build one uuid and return this uuid.
 int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 {
-	try
+	string save_folder = CLua::GetString(l, 2);
+
+	// The file list, key is md5 ,value is file name
+	auto fileList = CLua::GetTableParam(l, 1);
+	string uuid = CUtility::GenUUID();
+
+	map<string, RecvDataPackage> recv_list;
+	for (auto i = fileList.begin(); i != fileList.end(); i++)
 	{
-		string save_folder = CLua::GetString(l, 1);
-		if (save_folder.empty() || save_folder == "")
-		{
-			throw normal_except("save folder is empty");
-		}
-
-		// The file list, key is md5 ,value is file name
-		auto fileList = CLua::GetTableParam(l,2);
-		string uuid = CUtility::GenUUID();
-		
-		map<string,RecvDataPackage> recv_list;
-		for (auto i = fileList.begin(); i != fileList.end(); i++)
-		{
-			RecvDataPackage pack;
-			string md5 = i->first;
-			CUniversal::tolower(md5);
-			pack.strName = i->second;
-			pack.strPath = save_folder;
-			pack.strMD5 = md5;
-			pack.emStatus = RecvStatus::Wait;
-			recv_list[md5] = pack;
-		}
-
-		g_RecvDataInfoList[uuid] = recv_list;
-
-		CLua::PushBoolen(l, true);
-		CLua::PushString(l, uuid);
-		return 2;
+		RecvDataPackage pack;
+		string md5 = i->first;
+		CUniversal::tolower(md5);
+		pack.strName = i->second;
+		pack.strPath = save_folder;
+		pack.strMD5 = md5;
+		pack.emStatus = RecvStatus::Wait;
+		recv_list[md5] = pack;
 	}
-	catch (normal_except& ex)
+
+	g_RecvDataInfoList[uuid] = recv_list;
+
+	CLua::PushString(l, uuid);
+	return 1;
+}
+
+int CGlobalFunction::Lua_CheckRecvStatus(lua_State* l)
+{
+	string uuid = CLua::GetString(l, 1);
+	string md5 = CLua::GetString(l, 2);
+	CUniversal::tolower(md5);
+	auto recv_list = g_RecvDataInfoList[uuid];
+	auto recv_item = recv_list.find(md5);
+	if ( recv_item  == recv_list.end())
 	{
 		CLua::PushBoolen(l, false);
-		CLua::PushString(l, ex.what());
+		CLua::PushString(l, "Can not find the md5 in list");
 		return 2;
+	}
+	else
+	{
+		auto pack = recv_item->second;
+		if (pack.emStatus == RecvStatus::Done)
+		{
+			CLua::PushBoolen(l, true);
+			CLua::PushString(l, pack.strPath + pack.strName);
+			return 2;
+		}
+		else
+		{
+			CLua::PushBoolen(l, false);
+			CLua::PushString(l, CUniversal::ntos(pack.emStatus));
+			return 2;
+		}
 	}
 }
 

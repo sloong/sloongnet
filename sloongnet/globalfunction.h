@@ -20,6 +20,7 @@ namespace Sloong
 		~CGlobalFunction();
 
 		void Initialize(IMessage* iMsg,IData* iData);
+		void Exit();
 		void RegistFuncToLua(CLua* pLua);
 		void EnableDataReceive(int port);
 
@@ -33,7 +34,7 @@ namespace Sloong
 		IMessage* m_iMsg;
 		IData*		m_iData;
 		int 		m_ListenSock;
-		bool		m_bIsRunning;
+		bool		m_bIsRunning=true;
 	public:
 
 
@@ -51,6 +52,7 @@ namespace Sloong
 		static int Lua_MoveFile(lua_State* l);
 		static int Lua_GenUUID(lua_State* l);
 		static int Lua_ReceiveFile(lua_State* l);
+		static int Lua_CheckRecvStatus(lua_State* l);
 		static int Lua_SetCommData(lua_State* l);
 		static int Lua_GetCommData(lua_State* l);
 		static int Lua_GetLogObject(lua_State* l);

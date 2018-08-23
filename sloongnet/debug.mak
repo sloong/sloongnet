@@ -13,9 +13,9 @@ OBJCOPY := objcopy
 
 #Additional flags
 PREPROCESSOR_MACROS := DEBUG
-INCLUDE_DIRS := /usr/include/ /usr/include/glib-2.0/ /usr/lib64/glib-2.0/include/
-LIBRARY_DIRS := /usr/local/lib/sloong /usr/lib64/mysql
-LIBRARY_NAMES := m dl lua univ pthread glib-2.0 crypto uuid ssl crypto
+INCLUDE_DIRS := /usr/include/ /usr/include/glib-2.0/ /usr/lib/x86_64-linux-gnu/glib-2.0/include
+LIBRARY_DIRS := /usr/local/lib/sloong
+LIBRARY_NAMES := m dl lua5.3 univ pthread glib-2.0 crypto uuid ssl crypto
 ADDITIONAL_LINKER_INPUTS := 
 MACOS_FRAMEWORKS := 
 LINUX_PACKAGES := 

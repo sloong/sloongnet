@@ -1,6 +1,6 @@
 -- When message is recved, the fm will call this function.
 require_ex('ex');
-require_ex('sql');
+-- require_ex('sql');
 
 local main_Req = {};
 
@@ -16,14 +16,14 @@ main_Req.TextTest = function( u, req, res )
 end
 
 -- 上传文件流程
--- 客户端准备要上传的文件信�?,包括style �? 文件的md5,以及扩展�?
--- 服务端检查md5信息,并根据检查结�?,返回是否需要上�?.如无需上传则直接秒传并保存文件记录
--- 如需要上�?,则构建一个uuid, 将路径改为uploadurl/user/uuid+扩展名的格式返回.
--- 客户端根据返�?,将需要上传的文件传至指定目录.
+-- 客户端准备要上传的文件信息,包括style 和 文件的md5,以及扩展名
+-- 服务端检查md5信息,并根据检查结果,返回是否需要上传.如无需上传则直接秒传并保存文件记录
+-- 如需要上传,则构建一个uuid, 将路径改为uploadurl/user/uuid+扩展名的格式返回.
+-- 客户端根据返回,将需要上传的文件传至指定目录.
 -- 客户端发送UploadEnd消息,并附带参数为目标路径
 -- 
 -- 
--- 服务端按照年/�?/�?/uuid的结构来存储文件
+-- 服务端按照年/月/日/uuid的结构来存储文件
 -- get the total for the file need upload
 -- then check the all file md5, if file is have one server, 
 -- then gen the new guid and create the folder with the guid name.
@@ -62,26 +62,27 @@ function main_Req.GetIP( u, req, res )
 end
 
 function main_Req.UploadWithTCP( u, req, res )
-	res['uuid'] = Sloongnet_GenUUID();
-	res['port'] = '17001';
+	local list = {};
+	for k,v in pairs(req['file_list']) do
+		for sk,sv in pairs(v) do 
+			list[sk]=sv;
+		end
+	end
+	local uuid = Sloongnet_ReceiveFile(list,'/tmp/sloong/');
+	u:setdata('upload_tcp_uuid',uuid)
+	res['uuid'] = uuid;
 	return 0;
 end
 
 function main_Req.UploadWithTCPStart(u, req, res)
-	local total = tonumber(req['total']) or 0
-	local fielList = {};
-	for i=1,total do
-		local md5 = req['md5' .. tostring(i)]
-		local filename = req['filename' .. tostring(i)]
-		local path = '/tmp/sloong/'  .. filename;
-		fielList[md5] = path;
-	end
-	local suc_num,suc_list,errmsg = Sloongnet_ReceiveFile(req['uuid'],17001,100*1024*1024,fielList,10,'/tmp/temp.tmp');
-	if res == 0 then
-		return -1,errmsg;
+	local uuid = u:getdata('upload_tcp_uuid');
+	local res, path = Sloongnet_CheckRecvStatus(uuid,req['md5']);
+	if res then
+		Debug('file saved in:' .. path)
 	else
-		return 0;
+		Debug('CheckRecvStatusError:' .. path)
 	end
+	return 0;
 end
 
 function main_Req.GetThumbImage(u,req, res)

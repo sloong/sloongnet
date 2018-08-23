@@ -9,10 +9,10 @@ end
 g_all_request_processer = {};
 
 Init = function( path )
-    package.path = path .. 'scripts/?.lua';
+    package.path = path .. '?.lua';
     assert(require_ex('comm'),'load comm lua file failed.')
     assert(require_ex('main'),'load main lua file failed.')
-    JSON = (assert(loadfile(path .. 'scripts/json.lua')))()
+    JSON = (assert(loadfile(path .. 'json.lua')))()
 end
 
 OnError = function( msg )
