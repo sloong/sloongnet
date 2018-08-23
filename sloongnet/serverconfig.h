@@ -63,6 +63,8 @@ namespace Sloong
 		// Data receive defines
 		bool m_bEnableDataReceive = false;
 		int m_nDataReceivePort = 0;
+		int m_nRecvDataTimeout = 180;
+		int m_nWaitRecvTimeout = 20;
 	};
 }
 

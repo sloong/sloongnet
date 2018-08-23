@@ -79,10 +79,11 @@ function main_Req.UploadWithTCPStart(u, req, res)
 	local res, path = Sloongnet_CheckRecvStatus(uuid,req['md5']);
 	if res then
 		Debug('file saved in:' .. path)
+		return 0,path;
 	else
 		Debug('CheckRecvStatusError:' .. path)
+		return 1,path;
 	end
-	return 0;
 end
 
 function main_Req.GetThumbImage(u,req, res)

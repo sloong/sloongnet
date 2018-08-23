@@ -109,6 +109,25 @@ int CUtility::GetCpuUsed(double nWaitTime)
 	return cpu;
 }
 
+string Sloong::CUtility::GetSocketIP(int socket)
+{
+	struct sockaddr_in add;
+	int nSize = sizeof(add);
+	memset(&add, 0, sizeof(add));
+	getpeername(socket, (sockaddr*)&add, (socklen_t*)&nSize);
+	return string(inet_ntoa(add.sin_addr));
+}
+
+int Sloong::CUtility::GetSocketPort(int socket)
+{
+	struct sockaddr_in add;
+	int nSize = sizeof(add);
+	memset(&add, 0, sizeof(add));
+	getpeername(socket, (sockaddr*)&add, (socklen_t*)&nSize);
+	return add.sin_port;
+
+}
+
 int Sloong::CUtility::ReadFile(string filepath, char*& pBuffer)
 {
     if( -1 == access(filepath.c_str(),R_OK))

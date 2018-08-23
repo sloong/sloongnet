@@ -24,6 +24,9 @@ namespace Sloong
 		void RegistFuncToLua(CLua* pLua);
 		void EnableDataReceive(int port);
 
+	protected:
+		void ClearReceiveInfoByUUID(string uuid);
+
 	private:
 		static void* RecvDataConnFunc(void* pParam);
 		static void* RecvFileFunc(void* pParam);

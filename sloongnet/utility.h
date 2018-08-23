@@ -20,6 +20,9 @@ namespace Sloong
 		int GetCpuUsed(double nWaitTime = 0.1);
 		int GetMemory(int& total, int& free);
 
+		static string GetSocketIP(int socket);
+		static int GetSocketPort(int socket);
+
 		static int ReadFile(string filepath, char*& bBuffer);
 		static string GenUUID();
 	};

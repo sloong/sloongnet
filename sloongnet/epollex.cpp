@@ -375,11 +375,6 @@ void Sloong::CEpollEx::OnNewAccept()
 	int conn_sock = -1;
 	while ((conn_sock = accept(m_ListenSock, NULL, NULL)) > 0)
 	{
-		struct sockaddr_in add;
-		int nSize = sizeof(add);
-		memset(&add, 0, sizeof(add));
-		getpeername(conn_sock, (sockaddr*)&add, (socklen_t*)&nSize);
-
 		// start client check when acdept
 		if (m_bEnableClientCheck)
 		{
@@ -396,11 +391,9 @@ void Sloong::CEpollEx::OnNewAccept()
 			}
 		}
 
-		
-
 		CSockInfo* info = new CSockInfo(m_pConfig->m_nPriorityLevel);
-		info->m_Address = string(inet_ntoa(add.sin_addr));
-		info->m_nPort = add.sin_port;
+		info->m_Address = CUtility::GetSocketIP(conn_sock);
+		info->m_nPort = CUtility::GetSocketPort(conn_sock);
 		info->m_ActiveTime = time(NULL);
 		info->m_pCon->Initialize(conn_sock,m_pCTX);
 		info->m_pUserInfo->SetData("ip", info->m_Address);
@@ -722,18 +715,10 @@ void Sloong::CEpollEx::CloseSocket(int socket)
 
 	// in here no need delete the send list and read list
 	// when delete the SocketInfo object , it will delete the list .
-
-	for (map<int, CSockInfo*>::iterator i = m_SockList.begin(); i != m_SockList.end();)
+	auto item = m_SockList.find(socket);
+	if (item != m_SockList.end())
 	{
-		if (i->first == socket)
-		{
-			m_SockList.erase(i);
-			break;
-		}
-		else
-		{
-			i++;
-		}
+		m_SockList.erase(item);
 	}
 
 	lsck.unlock();

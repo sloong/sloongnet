@@ -398,7 +398,7 @@ namespace servctrl
                         Utility.SendEx(sock, Utility.LongToBytes(fs.Length));
                         string md5 = Utility.GetMD5HashFromFile(item.ToString());
                         Utility.SendEx(sock, Encoding.ASCII.GetBytes(md5));
-                        int buffLength = 2048;
+                        int buffLength = 10240;
                         byte[] buff = new byte[buffLength];
                         int contentLen;
                         contentLen = fs.Read(buff, 0, buffLength);
