@@ -527,14 +527,10 @@ namespace Sloong
         {
             try
             {
-                if (File.Exists("target.tmp"))
-                    File.Delete("target.tmp");
-                File.Copy(fileName, "target.tmp");
-                FileStream file = new FileStream("target.tmp", FileMode.Open);
+                FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
                 byte[] retVal = md5.ComputeHash(file);
                 file.Close();
-                File.Delete("target.tmp");
 
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < retVal.Length; i++)

@@ -334,6 +334,14 @@ namespace servctrl
                 
                 JObject pam = JObject.Parse("{}");
                 pam["funcid"] = "UploadWithTCP";
+                JArray list = new JArray();
+                foreach (var item in uploadlist)
+                {
+                    string md5 = Utility.GetMD5HashFromFile(item.ToString());
+                    FileInfo fi = new FileInfo(item);
+                    list.Add(new JObject( new JProperty( md5, fi.Name)));
+                }
+                pam["file_list"] = list;
                 _DC.SendMessage(MessageType.SendRequest, pam, UploadTCPResult);
     
             }
@@ -356,34 +364,22 @@ namespace servctrl
             }
             else
             {
-                JObject pam = JObject.Parse("{}");
-                pam["funcid"] = "UploadWithTCPStart";
-                pam["uuid"] = jres["uuid"].ToString();
-                pam["total"] = uploadlist.Count;
-                int i = 1;
-                foreach (var item in uploadlist)
-                {
-                    pam["md5" + i.ToString()] = Utility.GetMD5HashFromFile(item.ToString());
-                    FileInfo fi = new FileInfo(item);
-                    pam["filename" + i.ToString()] = fi.Name;
-                    i++;
-                }
-                _DC.SendMessage(MessageType.SendRequest, pam, UploadTCPStart);
 
                 FileStream fs = null;
-                // 发送之后不需要等待直接准备连接
+// 发送之后不需要等待直接准备连接
                 try
                 {
-                    string servIp = SocketMap[0].m_URL;// m_IPInfo.Address.ToString();
+                    string servIp = "10.0.0.60";// SocketMap[0].m_URL;// m_IPInfo.Address.ToString();
+                    int port = 8008;//Convert.ToInt32(jres["port"].ToString())
                     Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    if (jres["ip"] != null)
-                    {
-                        servIp = jres["ip"].ToString();
-                    }
+//                     if (jres["ip"] != null)
+//                     {
+//                         servIp = jres["ip"].ToString();
+//                     }
 
                     try
                     {
-                        sock.Connect(servIp, Convert.ToInt32(jres["port"].ToString()));
+                        sock.Connect(servIp,port );
                     }
                     catch(Exception e)
                     {
@@ -397,11 +393,11 @@ namespace servctrl
 
                     foreach(var item in uploadlist)
                     {
-                        fs = File.Open(item, FileMode.Open);
-
-                        string len = string.Format("{0:D8}", fs.Length);
-                        Utility.SendEx(sock, Encoding.ASCII.GetBytes(len));
-
+                        fs = File.Open(item, FileMode.Open,FileAccess.Read, FileShare.Read);
+                        
+                        Utility.SendEx(sock, Utility.LongToBytes(fs.Length));
+                        string md5 = Utility.GetMD5HashFromFile(item.ToString());
+                        Utility.SendEx(sock, Encoding.ASCII.GetBytes(md5));
                         int buffLength = 2048;
                         byte[] buff = new byte[buffLength];
                         int contentLen;
@@ -413,6 +409,11 @@ namespace servctrl
                             contentLen = fs.Read(buff, 0, buffLength);
                         }
                         fs.Close();
+
+                         JObject pam = JObject.Parse("{}");
+                         pam["funcid"] = "UploadWithTCPStart";
+                        pam["md5"] = md5;
+                        _DC.SendMessage(MessageType.SendRequest, pam, UploadTCPStart);
                     }
                 }
                 catch (Exception ex)
