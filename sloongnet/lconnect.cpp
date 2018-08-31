@@ -118,7 +118,7 @@ int Sloong::lConnect::Write(const char* data, int len, int index)
 	}
 
 	// SSL发送数据
-	int ret = SSL_write(m_pSSL, data, len);
+	int ret = SSL_write(m_pSSL, data+index, len);
 	if (ret > 0)
 	{
 		if( ret != len )
@@ -134,19 +134,23 @@ int Sloong::lConnect::Write(const char* data, int len, int index)
 		{
 		case SSL_ERROR_WANT_WRITE:
 			m_stStatus = ConnectStatus::WaitWrite;
+			return 0;
 			break;
 		case SSL_ERROR_WANT_READ:
 			if (support_ssl_reconnect)
 			{
 				m_stStatus = ConnectStatus::WaitRead;
+				return 0;
 			}
 			else
 			{
 				m_stStatus = ConnectStatus::Error;
+				return -1;
 			}
 			break;
 		default:
 			m_stStatus = ConnectStatus::Error;
+			return -1;
 			break;
 		}
 		
@@ -154,6 +158,7 @@ int Sloong::lConnect::Write(const char* data, int len, int index)
 	else
 	{
 		m_stStatus = ConnectStatus::Error;
+		return -1;
 	}
 	
 }

@@ -24,6 +24,7 @@
 
 #include "IData.h"
 #include "IMessage.h"
+#include "sockinfo.h"
 using namespace std; //std 命名空间
 typedef unsigned char byte;
 
@@ -48,13 +49,13 @@ namespace Sloong
 		void EnableSSL(string certFile, string keyFile, string passwd);
 		void SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage);
 		void Exit();
-        void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nSize = 0 );
+        void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nExSize = 0 );
 		void ProcessPrepareSendList( CSockInfo* info );
 		/************************************************************************/
 		/* If need listen write event, return false, else return true
 		*/
 		/************************************************************************/
-		bool ProcessSendList(CSockInfo* pInfo);
+		void ProcessSendList(CSockInfo* pInfo);
 		//////////////////////////////////////////////////////////////////////////
 		// Add for #20 [https://git.sloong.com/public/sloongnet/issues/20] 
 		// 在下面的CloseConnect函数中，将只关闭socket连接和发送event，并不删除相对应的信息
@@ -70,7 +71,9 @@ namespace Sloong
 		void CloseConnect(int socket);
 		/// 将响应消息加入到epoll发送列表中
 		void AddToSendList(int socket, int nPriority, const char* pBuf, int nSize, int nStart, const char* pExBuf, int nExSize);
-		
+		int GetSendInfoList(CSockInfo* pInfo, queue<SENDINFO*>** list );
+		SENDINFO* GetSendInfo(CSockInfo* pInfo,queue<SENDINFO*>* list);
+		int SendPackage(CSockInfo* pInfo, SENDINFO* si);
 		// event function
 		void OnNewAccept();
 		void OnDataCanReceive( int nSocket );
