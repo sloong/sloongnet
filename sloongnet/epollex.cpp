@@ -679,34 +679,28 @@ int Sloong::CEpollEx::SendPackage(CSockInfo* pInfo, SENDINFO* si)
 		// 先检查普通数据发送状态
 		if( si->nSent < si->nSize)
 		{
-			int nSendSize = si->nSize - si->nSent;
-			int nSentSize = pInfo->m_pCon->Write(si->pSendBuffer, nSendSize, si->nSent);
+			int nSentSize = pInfo->m_pCon->Write(si->pSendBuffer, si->nSize, si->nSent);
 			if( nSentSize < 0 )
 			{
 				return -1;
 			}
 			else
 			{
-				si->nSent = si->nSent + nSentSize;
+				si->nSent = nSentSize;
 			}
 
 		}
 		// 已经发送完普通数据了，需要继续发送扩展数据
 		if ( si->nSent >= si->nSize && si->nExSize > 0 )
 		{
-			int nSendSize = si->nPackSize - si->nSent;
-			int nSentSize = pInfo->m_pCon->Write(si->pExBuffer, nSendSize, si->nSent - si->nSize);
+			int nSentSize = pInfo->m_pCon->Write(si->pExBuffer, si->nExSize, si->nSent - si->nSize);
 			if( nSentSize < 0 )
 			{
 				return -1;
 			}
-			else if( nSentSize == nSendSize)
-			{
-				si->nSent = si->nPackSize;
-			}
 			else
 			{
-				si->nSent = si->nSent + nSentSize;
+				si->nSent = si->nSize + nSentSize;
 			}
 		}
 	}
@@ -724,11 +718,11 @@ int Sloong::CEpollEx::SendPackage(CSockInfo* pInfo, SENDINFO* si)
 			}
 			else
 			{
-				si->nSent = si->nSent + nSentSize;
+				si->nSent = si->nSize + nSentSize;
 			}
 		}
 	}
-	m_pLog->Verbos(CUniversal::Format("Send Info : AllSize[%d],ExSize[%d],Sent[%d]", si->nExSize + si->nSize, si->nExSize, si->nSent));
+	m_pLog->Verbos(CUniversal::Format("Send Info : AllSize[%d],ExSize[%d],Sent[%d]", si->nPackSize, si->nExSize, si->nSent));
 
 	// check send result.
 	// send done, remove the is sent data and try send next package.
