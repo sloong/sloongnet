@@ -337,7 +337,6 @@ void* Sloong::CGlobalFunction::RecvFileFunc(void* pParam)
 
 		pLog->Verbos(CUniversal::Format("Receive connect done. close:[%s:%d]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
 		close(conn_sock);
-		pThis->ClearReceiveInfoByUUID(uuid);
 		return nullptr;
 	}
 	catch (const std::exception&)

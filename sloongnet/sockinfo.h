@@ -23,6 +23,7 @@ namespace Sloong
 		const char* pExBuffer;
 		int nExSize;
         int nSent;  // is send
+		int nPackSize;
     }SENDINFO;
 
     typedef struct _PrepareSendInfo
