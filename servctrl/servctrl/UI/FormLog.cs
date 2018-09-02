@@ -38,11 +38,18 @@ namespace servctrl.UI
 
         private void buttonConnect_Click(object sender, EventArgs e)
         {
-            logSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Parse(textBoxIp.Text), Convert.ToInt32( textBoxPort.Text));
-            logSocket.Connect(ipEndPoint);
-            var thread = new Thread(() => ReceiveLogWorkLoop());
-            thread.Start();
+            try
+            {
+                logSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Parse(textBoxIp.Text), Convert.ToInt32(textBoxPort.Text));
+                logSocket.Connect(ipEndPoint);
+                var thread = new Thread(() => ReceiveLogWorkLoop());
+                thread.Start();
+            }
+            catch(Exception)
+            {
+
+            }
         }
 
         void ReceiveLogWorkLoop()
