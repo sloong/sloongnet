@@ -111,10 +111,9 @@ void Sloong::CEpollEx::CtlEpollEvent(int opt, int sock, int events)
 	struct epoll_event ent;
 	memset(&ent, 0, sizeof(ent));
 	ent.data.fd = sock;
-	// LT模式时，事件就绪时，假设对事件没做处理，内核会反复通知事件就绪
-	// ET模式时，事件就绪时，假设对事件没做处理，内核不会反复通知事件就绪
-	// ent.events = events | EPOLLET;
-	ent.events = events;// | EPOLLLT;
+	// LT模式时，事件就绪时，假设对事件没做处理，内核会反复通知事件就绪	  	EPOLLLT
+	// ET模式时，事件就绪时，假设对事件没做处理，内核不会反复通知事件就绪  	EPOLLET
+	ent.events = events | EPOLLERR | EPOLLHUP | EPOLLET;
 
 	// 设置事件到epoll对象
 	epoll_ctl(m_EpollHandle, opt, sock, &ent);
@@ -130,12 +129,6 @@ int Sloong::CEpollEx::SetSocketNonblocking(int socket)
 	fcntl(socket, F_SETFL, op | O_NONBLOCK);
 
 	return op;
-}
-
-void* Sloong::CEpollEx::CALLBACK_SocketClose(void* params, void* object)
-{
-	CNetworkEvent* evt = TYPE_TRANS<CNetworkEvent*>(params);
-	(TYPE_TRANS<CEpollEx*>(object))->CloseSocket(evt->GetSocketID());
 }
 
 /*************************************************
@@ -362,25 +355,6 @@ void Sloong::CEpollEx::AddToSendList(int socket, int nPriority, const char *pBuf
 }
 
 
-void Sloong::CEpollEx::CloseConnect(int socket)
-{
-	CtlEpollEvent(EPOLL_CTL_DEL, socket, EPOLLIN | EPOLLOUT);
-	CSockInfo* info = m_SockList[socket];
-	if (!info)
-		return;
-
-	info->m_pCon->Close();
-	m_pLog->Info(CUniversal::Format("close connect:%s:%d.", info->m_Address, info->m_nPort));
-
-	CNetworkEvent* event = new CNetworkEvent(SocketClose);
-	event->SetSocketID(socket);
-	event->SetSocketInfo(info);
-	event->SetHandler(this);
-	event->SetCallbackFunc(CALLBACK_SocketClose);
-	m_iMsg->SendMessage(event);
-}
-
-
 /// 有新链接到达。
 /// 接收链接之后，需要客户端首先发送客户端校验信息。只有校验成功之后才会进行SSL处理
 void Sloong::CEpollEx::OnNewAccept()
@@ -415,6 +389,7 @@ void Sloong::CEpollEx::OnNewAccept()
 			if (nLen != m_nClientCheckKeyLength || 0 != strcmp(pCheckBuf, m_pConfig->m_strClientCheckKey.c_str()))
 			{
 				m_pLog->Warn(CUniversal::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nClientCheckKeyLength, nLen, m_pConfig->m_strClientCheckKey.c_str(), pCheckBuf));
+				shutdown(conn_sock,SHUT_RDWR);
 				close(conn_sock);
 				return;
 			}
@@ -441,6 +416,12 @@ void Sloong::CEpollEx::OnNewAccept()
 void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 {
 	CSockInfo* info = m_SockList[nSocket];
+	if( info == nullptr )
+	{
+		m_pLog->Error("Error in DataCanReceive functions. the socketlist is null");
+		CloseConnect(nSocket);
+		return;
+	}
 	// The app is used ET mode, so should wait the mutex. 
 	unique_lock<mutex> srlck(info->m_oSockReadMutex);
 
@@ -454,7 +435,7 @@ void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 	{
 		// 先读取消息长度
 		memset(pLongBuffer, 0, s_llLen + 1);
-		int nRecvSize = info->m_pCon->Read( pLongBuffer, s_llLen, m_pConfig->m_nReceiveTimeout);
+		int nRecvSize = info->m_pCon->Read( pLongBuffer, s_llLen, 2);
 		if (nRecvSize < 0)
 		{
 			// 读取错误,将这个连接从监听中移除并关闭连接
@@ -559,15 +540,15 @@ void Sloong::CEpollEx::OnCanWriteData(int nSocket)
 	// 可以写入事件
 	CSockInfo* info = m_SockList[nSocket];
 
+	if (info == NULL)
+		return;
+
 	ProcessPrepareSendList(info);
 	ProcessSendList(info);
 }
 
 void Sloong::CEpollEx::ProcessPrepareSendList(CSockInfo* info)
 {
-	if (info == NULL)
-		return;
-
 	// progress the prepare send list first
 	if (!info->m_pPrepareSendList->empty())
 	{
@@ -795,26 +776,28 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 	CtlEpollEvent(EPOLL_CTL_MOD, pInfo->m_pCon->GetSocket(), EPOLLIN);
 }
 
-void Sloong::CEpollEx::CloseSocket(int socket)
+void Sloong::CEpollEx::CloseConnect(int socket)
 {
-	CSockInfo* info = m_SockList[socket];
-	if (!info)
+	CtlEpollEvent(EPOLL_CTL_DEL, socket, EPOLLIN | EPOLLOUT);
+	auto item = m_SockList.find(socket);
+	if (item == m_SockList.end())
 		return;
 
-	unique_lock<mutex> lsck(info->m_oSendListMutex);
-	auto key = m_SockList.find(socket);
-	if (key == m_SockList.end())
+	CSockInfo* info = m_SockList[socket];
+	m_SockList.erase(item);
+	if (!info)
 		return;
 
 	// in here no need delete the send list and read list
 	// when delete the SocketInfo object , it will delete the list .
-	auto item = m_SockList.find(socket);
-	if (item != m_SockList.end())
-	{
-		m_SockList.erase(item);
-	}
+	info->m_pCon->Close();
+	m_pLog->Info(CUniversal::Format("close connect:%s:%d.", info->m_Address, info->m_nPort));
 
-	lsck.unlock();
+	CNetworkEvent* event = new CNetworkEvent(SocketClose);
+	event->SetSocketID(socket);
+	event->SetSocketInfo(info);
+	event->SetHandler(this);
+	m_iMsg->SendMessage(event);
 	SAFE_DELETE(info);
 }
 

@@ -3,6 +3,7 @@
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <sys/socket.h>
 
 bool support_ssl_reconnect = false;
 
@@ -170,6 +171,7 @@ void Sloong::lConnect::Close()
 		SSL_shutdown(m_pSSL);
 		SSL_free(m_pSSL);
 	}
+	shutdown(m_nSocket, SHUT_RDWR);
 	close(m_nSocket);
 }
 

@@ -56,12 +56,6 @@ namespace Sloong
 		*/
 		/************************************************************************/
 		void ProcessSendList(CSockInfo* pInfo);
-		//////////////////////////////////////////////////////////////////////////
-		// Add for #20 [https://git.sloong.com/public/sloongnet/issues/20] 
-		// 在下面的CloseConnect函数中，将只关闭socket连接和发送event，并不删除相对应的信息
-		// 直到外层监听该事件的处理者处理之后调用该函数才移除对应的信息
-		//////////////////////////////////////////////////////////////////////////
-		void CloseSocket(int socket);
 	protected:
 		/// 设置socket到非阻塞模式
 		int SetSocketNonblocking(int socket);
@@ -80,7 +74,6 @@ namespace Sloong
 		void OnCanWriteData( int nSocket );
 
 	public:
-		static void* CALLBACK_SocketClose(void* params, void* object);
 		static void* WorkLoop(void* params);
 		static void* CheckTimeoutConnect(void* params);
 		static void* EventHandler(void* params, void* object);
