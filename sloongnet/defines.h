@@ -81,11 +81,11 @@ typedef struct _stRecvInfo
 
 enum RecvStatus
 {
-	Wait,
-	Receiving,
-	Saveing,
-	Done,
-	Error,
+	Wait=0,
+	Receiving=1,
+	Saveing=2,
+	Done=3,
+	Error=4,
 };
 
 // Receive file struce for GFunc

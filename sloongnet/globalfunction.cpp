@@ -463,35 +463,39 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
 		if (orgName == "" || newName == "")
 		{
 			nRes = -2;
-			throw normal_except("Move File error. File name cannot empty. orgName:" + orgName + ";newName:" + newName);
+			throw normal_except(CUniversal::Format("Move File error. File name cannot empty. orgName:%s;newName:%s", orgName ,newName));
 		}
 
 		if (access(orgName.c_str(), ACC_W) != 0)
 		{
 			nRes = -1;
-			throw normal_except("Move File error. Origin file not exist or can not write" + orgName);
+			throw normal_except(CUniversal::Format("Move File error. Origin file not exist or can not write:[%s]", orgName));
 		}
 
-		string dir = CUniversal::CheckFileDirectory(newName);
-		if (access(dir.c_str(), ACC_RW) != 0)
+		int res = CUniversal::CheckFileDirectory(newName);
+		if (res < 0)
 		{
 			nRes = -1;
-			throw normal_except("Move File error.folder can not read / write" + dir);
+			throw normal_except(CUniversal::Format("Move File error.CheckFileDirectory error:[%s][%d]" ,newName,res));
 		}
 
-		system(CUniversal::Format("mv -f %s %s", orgName.c_str(), newName.c_str()).c_str());
+	 	if(!CUniversal::MoveFile(orgName,newName))
+		 {
+			nRes = -3;
+			throw normal_except("Move File error.");
+		 }
 	}
 	catch (normal_except& e)
 	{
 		g_pThis->m_pLog->Error(e.what());
+		CLua::PushInteger(l, nRes);
 		CLua::PushString(l, e.what());
-		CLua::PushDouble(l, nRes);
 		return 2;
 	}
 	
 	// if succeed return 0, else return nozero
-	CLua::PushString(l, "mv file succeed");
 	CLua::PushInteger(l, 0);
+	CLua::PushString(l, "mv file succeed");
 	return 2;
 }
 
