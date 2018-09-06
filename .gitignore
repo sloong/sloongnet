@@ -43,3 +43,6 @@ Debug
 /sloongnet/*.old
 /sloongnet/Release/*.cache
 /sloongnet/*.aps
+sloongnet_v*
+sloongnet_debug*
+sloongnet/sloongnet

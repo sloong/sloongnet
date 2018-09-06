@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/usr/include",
+                "/usr/include/c++/7",
+                "/usr/include/linux",
+                "/usr/include/x86_64-linux-gnu/",
+                "/usr/include/x86_64-linux-gnu/c++/7",
+                "/usr/local/include",
+                "/usr/lib/gcc/x86_64-linux-gnu/7/include/",
+                "/usr/include/lua5.3/",
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/cpp",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
