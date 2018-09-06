@@ -153,7 +153,17 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, st
 	CLuaPacket creq;
 	creq.SetData("json_request_message", msg);
 	CLuaPacket cres;
-	bool bRes = pLua->RunFunction(m_pConfig->m_oLuaConfigInfo.ProcessFunction, pUInfo, &creq, &cres);
+	bool bRes;
+	try
+	{
+		bRes = pLua->RunFunction(m_pConfig->m_oLuaConfigInfo.ProcessFunction, pUInfo, &creq, &cres);
+	}
+	catch(...)
+	{
+		m_oFreeLuaContext.push(id);
+		res = FormatJSONErrorMessage("-2","server process error.");
+		return false;
+	}
 	m_oFreeLuaContext.push(id);
 	if (bRes)
 	{

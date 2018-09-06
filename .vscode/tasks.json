@@ -6,7 +6,8 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "bash build.sh -d"
+            "command": "bash build.sh -d",
+            "problemMatcher": []
         }
     ]
 }
