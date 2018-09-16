@@ -6,6 +6,7 @@
 #include <mutex>
 #include <memory>
 #include "lconnect.h"
+#include "defines.h"
 using std::string;
 using std::mutex;
 using std::vector;
@@ -16,19 +17,25 @@ namespace Sloong
 	{
 		class CLuaPacket;
 	}
-    typedef struct _SendInfo
+    class CSendInfo
     {
-        const char* pSendBuffer;
-        int nSize;
-		const char* pExBuffer;
-		int nExSize;
-        int nSent;  // is send
-		int nPackSize;
-    }SENDINFO;
+		public:
+		CSendInfo(){};
+		~CSendInfo(){
+			SAFE_DELETE_ARR(pSendBuffer);
+			SAFE_DELETE_ARR(pExBuffer);
+		}
+        const char* pSendBuffer=nullptr;
+        int nSize=0;
+		const char* pExBuffer=nullptr;
+		int nExSize=0;
+        int nSent=0;  // is send
+		int nPackSize=0;
+    };
 
     typedef struct _PrepareSendInfo
     {
-        SENDINFO* pSendInfo;
+        CSendInfo* pSendInfo;
         int nPriorityLevel;
     }PRESENDINFO;
 
@@ -42,7 +49,7 @@ namespace Sloong
 		CSockInfo( int nPriorityLevel );
 		~CSockInfo();
 
-        queue<SENDINFO*>* m_pSendList; // the send list of the bytes.
+        queue<CSendInfo*>* m_pSendList; // the send list of the bytes.
         queue<PRESENDINFO>* m_pPrepareSendList;
 
 		string m_Address;

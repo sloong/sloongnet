@@ -65,9 +65,9 @@ namespace Sloong
 		void CloseConnect(int socket);
 		/// 将响应消息加入到epoll发送列表中
 		void AddToSendList(int socket, int nPriority, const char* pBuf, int nSize, int nStart, const char* pExBuf, int nExSize);
-		int GetSendInfoList(CSockInfo* pInfo, queue<SENDINFO*>** list );
-		SENDINFO* GetSendInfo(CSockInfo* pInfo,queue<SENDINFO*>* list);
-		int SendPackage(CSockInfo* pInfo, SENDINFO* si);
+		int GetSendInfoList(CSockInfo* pInfo, queue<CSendInfo*>** list );
+		CSendInfo* GetSendInfo(CSockInfo* pInfo,queue<CSendInfo*>* list);
+		int SendPackage(CSockInfo* pInfo, CSendInfo* si);
 		// event function
 		void OnNewAccept();
 		void OnDataCanReceive( int nSocket );

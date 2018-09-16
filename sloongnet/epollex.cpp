@@ -336,7 +336,7 @@ void Sloong::CEpollEx::AddToSendList(int socket, int nPriority, const char *pBuf
 
 	CSockInfo* info = m_SockList[socket];
 	unique_lock<mutex> lck(info->m_oPreSendMutex);
-	SENDINFO *si = new SENDINFO();
+	CSendInfo *si = new CSendInfo();
 	si->nSent = nStart;
 	si->nSize = nSize;
 	si->pSendBuffer = pBuf;
@@ -467,6 +467,12 @@ void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 				CloseConnect(nSocket);
 				break;
 			}
+			else if(nRecvSize != dtlen )
+			{
+				m_pLog->Warn(CUniversal::Format("Receive all data is timeout. recved lenght %d, data length %d",nRecvSize, dtlen));
+				CloseConnect(nSocket);
+				break;
+			}
 
 			int nPriority = 0;
 			RECVINFO recvInfo;
@@ -577,7 +583,7 @@ void Sloong::CEpollEx::ProcessPrepareSendList(CSockInfo* info)
 /// 获取发送信息列表
 // 首先判断上次发送标志，如果不为-1，表示上次的发送列表没有发送完成。直接返回指定的列表
 // 如果为-1，表示需要发送新的列表。按照优先级逐级的进行寻找。
-int Sloong::CEpollEx::GetSendInfoList(CSockInfo* pInfo, queue<SENDINFO*>** list )
+int Sloong::CEpollEx::GetSendInfoList(CSockInfo* pInfo, queue<CSendInfo*>** list )
 {
 	*list = nullptr;
 	// prev package no send end. find and try send it again.
@@ -606,9 +612,9 @@ int Sloong::CEpollEx::GetSendInfoList(CSockInfo* pInfo, queue<SENDINFO*>** list 
 }
 
 
-SENDINFO* Sloong::CEpollEx::GetSendInfo(CSockInfo* pInfo,queue<SENDINFO*>* list)
+CSendInfo* Sloong::CEpollEx::GetSendInfo(CSockInfo* pInfo,queue<CSendInfo*>* list)
 {
-	SENDINFO* si = NULL;
+	CSendInfo* si = NULL;
 	while (si == NULL)
 	{
 		if (!list->empty())
@@ -650,7 +656,7 @@ SENDINFO* Sloong::CEpollEx::GetSendInfo(CSockInfo* pInfo,queue<SENDINFO*>* list)
 // 发送失败返回-1；需要关闭连接
 // 需要再次发送返回0；需要监听可写信息
 // 发送完成返回1；需要监听可读信息
-int Sloong::CEpollEx::SendPackage(CSockInfo* pInfo, SENDINFO* si)
+int Sloong::CEpollEx::SendPackage(CSockInfo* pInfo, CSendInfo* si)
 {
 	unique_lock<mutex> lck(pInfo->m_oSockSendMutex);
 
@@ -730,7 +736,7 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 	{
 		unique_lock<mutex> lck(pInfo->m_oSendListMutex);
 
-		queue<SENDINFO*>* list = nullptr;
+		queue<CSendInfo*>* list = nullptr;
 		int sendTags = GetSendInfoList(pInfo,&list);
 		if (list == NULL)
 		{
@@ -739,7 +745,7 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 		}
 
 		// if no find send info, is no need send anything , remove this sock from epoll.'
-		SENDINFO* si = NULL;
+		CSendInfo* si = NULL;
 		
 		si = GetSendInfo(pInfo,list);
 		if ( si != NULL )
@@ -766,8 +772,6 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 			{
 				list->pop();
 				pInfo->m_nLastSentTags = -1;
-				SAFE_DELETE_ARR(si->pSendBuffer);
-				SAFE_DELETE_ARR(si->pExBuffer);
 				SAFE_DELETE(si);
 				bTrySend = true;
 			}		

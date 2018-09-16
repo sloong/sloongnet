@@ -10,7 +10,7 @@ Sloong::CSockInfo::CSockInfo(int nPriorityLevel)
 		nPriorityLevel = 1;
 	}
 	m_nPriorityLevel = nPriorityLevel;
-	m_pSendList = new queue<SENDINFO*>[nPriorityLevel]();
+	m_pSendList = new queue<CSendInfo*>[nPriorityLevel]();
     m_pPrepareSendList = new queue<PRESENDINFO>;
 	m_pCon = make_shared<lConnect>();
 	m_pUserInfo = make_unique<CLuaPacket>();
@@ -22,10 +22,8 @@ CSockInfo::~CSockInfo()
 	{
 		while (!m_pSendList[i].empty())
 		{
-			SENDINFO* si = m_pSendList[i].front();
+			CSendInfo* si = m_pSendList[i].front();
 			m_pSendList[i].pop();
-			SAFE_DELETE_ARR(si->pSendBuffer);
-            SAFE_DELETE_ARR(si->pExBuffer);
 			SAFE_DELETE(si);
         }
 	}
@@ -34,10 +32,8 @@ CSockInfo::~CSockInfo()
     while (!m_pPrepareSendList->empty())
     {
         PRESENDINFO* psi = &m_pPrepareSendList->front();
-        SENDINFO* si = psi->pSendInfo;
+        CSendInfo* si = psi->pSendInfo;
         m_pPrepareSendList->pop();
-        SAFE_DELETE_ARR(si->pSendBuffer);
-        SAFE_DELETE_ARR(si->pExBuffer);
         SAFE_DELETE(si);
     }
     SAFE_DELETE(m_pPrepareSendList);
