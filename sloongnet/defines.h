@@ -85,7 +85,8 @@ enum RecvStatus
 	Receiving=1,
 	Saveing=2,
 	Done=3,
-	Error=4,
+	VerificationError=4,
+	OtherError=5,
 };
 
 // Receive file struce for GFunc

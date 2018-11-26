@@ -42,8 +42,7 @@ LuaFunctionRegistr g_LuaFunc[] =
 	{ "Sloongnet_Base64_encode", CGlobalFunction::Lua_Base64_Encode },
 	{ "Sloongnet_Base64_decode", CGlobalFunction::Lua_Base64_Decode },
 	{ "Sloongnet_MD5_encode", CGlobalFunction::Lua_MD5_Encode },
-	{ "Sloongnet_SHA256_encode", CGlobalFunction::Lua_SHA256_Encode },
-	{ "Sloongnet_SHA512_encode", CGlobalFunction::Lua_SHA512_Encode },
+	{ "Sloongnet_HASH_Encode", CGlobalFunction::Lua_SHA_Encode },
 	{ "Sloongnet_SendFile", CGlobalFunction::Lua_SendFile },
 	{ "Sloongnet_ReloadScript", CGlobalFunction::Lua_ReloadScript },
 	{ "Sloongnet_Get", CGlobalFunction::Lua_GetConfig },
@@ -311,7 +310,7 @@ void* Sloong::CGlobalFunction::RecvFileFunc(void* pParam)
 				if (trans_md5.compare(file_md5))
 				{
 					pLog->Error("the file data is different with md5 code.");
-					pack->emStatus = RecvStatus::Error;
+					pack->emStatus = RecvStatus::VerificationError;
 				}
 				else
 				{
@@ -370,24 +369,37 @@ int Sloong::CGlobalFunction::Lua_Base64_Decode(lua_State* l)
 	return 1;
 }
 
-int Sloong::CGlobalFunction::Lua_MD5_Encode(lua_State* l)
+/**
+ * @Remarks: 
+ * @Params: 1 string > string data. if file mode, is the file path
+ * 			2 string > hash type. support : MD5, SHA-1 SHA-256, SHA-512. default by SHA-1
+ * 			3 boolen > file mode. default by false
+ * @Return: Hash result
+ */
+int Sloong::CGlobalFunction::Lua_HASH_Encode(lua_State* l)
 {
-    string res = CMD5::Encode(CLua::GetString(l, 1, ""));
-	CLua::PushString(l, res);
-	return 1;
-}
-
-int Sloong::CGlobalFunction::Lua_SHA256_Encode(lua_State* l)
-{
-	string res = CSHA256::Encode(CLua::GetString(l, 1, ""));
-	CLua::PushString(l, res);
-	return 1;
-}
-
-int Sloong::CGlobalFunction::Lua_SHA512_Encode(lua_State* l)
-{
-	string res = CSHA512::Encode(CLua::GetString(l, 1, ""));
-	CLua::PushString(l, res);
+	string data = CLua::GetString(l, 1, "");
+	string hash_type = CLua::GetString(l, 2, "SHA-1");
+	bool file_mode = CLua::GetBoolen(l, 3, false);
+	string result("");
+	switch(hash_type){
+		case "MD5":
+		result = CMD5::Encode(data,file_mode);
+		break;
+		case "SHA-1":
+		result = CSHA1::Encode(data,file_mode);
+		break;
+		case "SHA-256":
+		result = CSHA256::Encode(data,file_mode);
+		break;
+		case "SHA-512":
+		result = CSHA512::Encode(data,file_mode);
+		break;
+		default:
+		result = "Hash type error. support : MD5, SHA-1 SHA-256, SHA-512."
+		break;
+	}
+	CLua::PushString(l, result);
 	return 1;
 }
 
@@ -545,8 +557,8 @@ int CGlobalFunction::Lua_CheckRecvStatus(lua_State* l)
 	auto recv_item = recv_list.find(md5);
 	if ( recv_item  == recv_list.end())
 	{
-		CLua::PushBoolen(l, false);
-		CLua::PushString(l, "Can not find the md5 in list");
+		CLua::PushInteger(l, RecvStatus::OtherError);
+		CLua::PushString(l, "Cannot find the hash receive info.");
 		return 2;
 	}
 	else
@@ -555,14 +567,14 @@ int CGlobalFunction::Lua_CheckRecvStatus(lua_State* l)
 		if (pack->emStatus == RecvStatus::Done)
 		{
 			recv_list.erase(recv_item);
-			CLua::PushBoolen(l, true);
+			CLua::PushInteger(l, RecvStatus::Done);
 			CLua::PushString(l, pack->strPath + pack->strName);
 			return 2;
 		}
 		else
 		{
-			CLua::PushBoolen(l, false);
-			CLua::PushString(l, CUniversal::ntos(pack->emStatus));
+			CLua::PushInteger(l, pack->emStatus);
+			CLua::PushString(l, "");
 			return 2;
 		}
 	}
