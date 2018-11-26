@@ -1,5 +1,5 @@
 #include "globalfunction.h"
-// sys 
+// sys
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -17,7 +17,7 @@
 
 using namespace std;
 
-#define ARRAYSIZE(a) (sizeof(a)/sizeof(a[0]))
+#define ARRAYSIZE(a) (sizeof(a) / sizeof(a[0]))
 
 using namespace Sloong;
 using namespace Sloong::Universal;
@@ -26,8 +26,8 @@ using namespace Sloong::Interface;
 
 CGlobalFunction* CGlobalFunction::g_pThis = NULL;
 mutex g_SQLMutex;
-map<int,string> g_RecvDataConnList;
-map<string,map<string,RecvDataPackage*>> g_RecvDataInfoList;
+map<int, string> g_RecvDataConnList;
+map<string, map<string, RecvDataPackage *>> g_RecvDataInfoList;
 
 static int g_data_pack_len = 8;
 static int g_uuid_len = 36;
@@ -36,41 +36,38 @@ static int g_md5_len = 32;
 static string g_temp_file_path = "/tmp/sloong/receivefile/temp.tmp";
 
 LuaFunctionRegistr g_LuaFunc[] =
-{
-	{ "Sloongnet_ShowLog", CGlobalFunction::Lua_showLog },
-	{ "Sloongnet_GetEngineVer", CGlobalFunction::Lua_getEngineVer },
-	{ "Sloongnet_Base64_encode", CGlobalFunction::Lua_Base64_Encode },
-	{ "Sloongnet_Base64_decode", CGlobalFunction::Lua_Base64_Decode },
-	{ "Sloongnet_MD5_encode", CGlobalFunction::Lua_MD5_Encode },
-	{ "Sloongnet_HASH_Encode", CGlobalFunction::Lua_SHA_Encode },
-	{ "Sloongnet_SendFile", CGlobalFunction::Lua_SendFile },
-	{ "Sloongnet_ReloadScript", CGlobalFunction::Lua_ReloadScript },
-	{ "Sloongnet_Get", CGlobalFunction::Lua_GetConfig },
-	{ "Sloongnet_MoveFile", CGlobalFunction::Lua_MoveFile },
-	{ "Sloongnet_GenUUID", CGlobalFunction::Lua_GenUUID },
-	{ "Sloongnet_ReceiveFile", CGlobalFunction::Lua_ReceiveFile},
-	{ "Sloongnet_CheckRecvStatus", CGlobalFunction::Lua_CheckRecvStatus},
-	{ "Sloongnet_SetCommData", CGlobalFunction::Lua_SetCommData},
-	{ "Sloongnet_GetCommData", CGlobalFunction::Lua_GetCommData },
-	{ "Sloongnet_GetLogObject", CGlobalFunction::Lua_GetLogObject },
+	{
+		{"Sloongnet_ShowLog", CGlobalFunction::Lua_ShowLog},
+		{"Sloongnet_GetEngineVer", CGlobalFunction::Lua_GetEngineVer},
+		{"Sloongnet_Base64_encode", CGlobalFunction::Lua_Base64_Encode},
+		{"Sloongnet_Base64_decode", CGlobalFunction::Lua_Base64_Decode},
+		{"Sloongnet_Hash_Encode", CGlobalFunction::Lua_Hash_Encode},
+		{"Sloongnet_SendFile", CGlobalFunction::Lua_SendFile},
+		{"Sloongnet_ReloadScript", CGlobalFunction::Lua_ReloadScript},
+		{"Sloongnet_Get", CGlobalFunction::Lua_GetConfig},
+		{"Sloongnet_MoveFile", CGlobalFunction::Lua_MoveFile},
+		{"Sloongnet_GenUUID", CGlobalFunction::Lua_GenUUID},
+		{"Sloongnet_ReceiveFile", CGlobalFunction::Lua_ReceiveFile},
+		{"Sloongnet_CheckRecvStatus", CGlobalFunction::Lua_CheckRecvStatus},
+		{"Sloongnet_SetCommData", CGlobalFunction::Lua_SetCommData},
+		{"Sloongnet_GetCommData", CGlobalFunction::Lua_GetCommData},
+		{"Sloongnet_GetLogObject", CGlobalFunction::Lua_GetLogObject},
 };
 
 CGlobalFunction::CGlobalFunction()
 {
-    m_pUtility = new CUtility();
+	m_pUtility = new CUtility();
 	g_pThis = this;
 }
-
 
 CGlobalFunction::~CGlobalFunction()
 {
 	SAFE_DELETE(m_pUtility);
-	for ( auto item=g_RecvDataInfoList.begin(); item != g_RecvDataInfoList.end(); item++)
+	for (auto item = g_RecvDataInfoList.begin(); item != g_RecvDataInfoList.end(); item++)
 	{
 		ClearReceiveInfoByUUID(item->first);
 	}
 }
-
 
 void CGlobalFunction::ClearReceiveInfoByUUID(string uuid)
 {
@@ -83,23 +80,22 @@ void CGlobalFunction::ClearReceiveInfoByUUID(string uuid)
 	auto item_list = p_item_list->second;
 	for (auto item = item_list.begin(); item != item_list.end(); item++)
 	{
-		RecvDataPackage* pack = item->second;
+		RecvDataPackage *pack = item->second;
 		SAFE_DELETE(pack);
 		item_list.erase(item);
 	}
 }
 
-
-void Sloong::CGlobalFunction::Initialize(IMessage* iMsg, IData* iData)
+void Sloong::CGlobalFunction::Initialize(IMessage *iMsg, IData *iData)
 {
 	m_iMsg = iMsg;
 	m_iData = iData;
-    m_pLog = TYPE_TRANS<CLog*>(m_iData->Get(Logger));
+	m_pLog = TYPE_TRANS<CLog *>(m_iData->Get(Logger));
 
-	CServerConfig* pConfig = TYPE_TRANS<CServerConfig*>(m_iData->Get(DATA_ITEM::Configuation));
-	if( pConfig->m_bEnableDataReceive)
+	CServerConfig *pConfig = TYPE_TRANS<CServerConfig *>(m_iData->Get(DATA_ITEM::Configuation));
+	if (pConfig->m_bEnableDataReceive)
 	{
-		EnableDataReceive( pConfig->m_nDataReceivePort);
+		EnableDataReceive(pConfig->m_nDataReceivePort);
 	}
 }
 
@@ -108,8 +104,7 @@ void Sloong::CGlobalFunction::Exit()
 	m_bIsRunning = false;
 }
 
-
-void Sloong::CGlobalFunction::RegistFuncToLua(CLua* pLua)
+void Sloong::CGlobalFunction::RegistFuncToLua(CLua *pLua)
 {
 	vector<LuaFunctionRegistr> funcList(g_LuaFunc, g_LuaFunc + ARRAYSIZE(g_LuaFunc));
 	pLua->AddFunctions(&funcList);
@@ -117,7 +112,7 @@ void Sloong::CGlobalFunction::RegistFuncToLua(CLua* pLua)
 
 void Sloong::CGlobalFunction::EnableDataReceive(int port)
 {
-	if (port > 0 )
+	if (port > 0)
 	{
 		m_ListenSock = socket(AF_INET, SOCK_STREAM, 0);
 		int sock_op = 1;
@@ -130,7 +125,7 @@ void Sloong::CGlobalFunction::EnableDataReceive(int port)
 		address.sin_addr.s_addr = htonl(INADDR_ANY);
 		address.sin_port = htons(port);
 
-		errno = bind(m_ListenSock, (struct sockaddr*)&address, sizeof(address));
+		errno = bind(m_ListenSock, (struct sockaddr *)&address, sizeof(address));
 
 		if (errno == -1)
 			throw normal_except(CUniversal::Format("bind to %d field. errno = %d", port, errno));
@@ -141,23 +136,22 @@ void Sloong::CGlobalFunction::EnableDataReceive(int port)
 	}
 }
 
-
-// 
-void* Sloong::CGlobalFunction::RecvDataConnFunc(void* pParam)
+//
+void *Sloong::CGlobalFunction::RecvDataConnFunc(void *pParam)
 {
-	CGlobalFunction* pThis = (CGlobalFunction*)pParam;
-	CLog* pLog = pThis->m_pLog;
-	CServerConfig* pConfig = TYPE_TRANS<CServerConfig*>(pThis->m_iData->Get(DATA_ITEM::Configuation));
-	while( pThis->m_bIsRunning)
+	CGlobalFunction *pThis = (CGlobalFunction *)pParam;
+	CLog *pLog = pThis->m_pLog;
+	CServerConfig *pConfig = TYPE_TRANS<CServerConfig *>(pThis->m_iData->Get(DATA_ITEM::Configuation));
+	while (pThis->m_bIsRunning)
 	{
 		int conn_sock = -1;
-		if(( conn_sock = accept(pThis->m_ListenSock, NULL, NULL)) > 0 )
+		if ((conn_sock = accept(pThis->m_ListenSock, NULL, NULL)) > 0)
 		{
 			pLog->Verbos(CUniversal::Format("Accept data connect :[%s][%d]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
-			// When accept the connect , receive the uuid data. and 
-			char* pCheckBuf = new char[g_uuid_len + 1];
+			// When accept the connect , receive the uuid data. and
+			char *pCheckBuf = new char[g_uuid_len + 1];
 			memset(pCheckBuf, 0, g_uuid_len + 1);
-			// In Check function, client need send the check key in 3 second. 
+			// In Check function, client need send the check key in 3 second.
 			// 这里仍然使用Universal提供的ReceEx。这里不需要进行SSL接收
 			int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, g_uuid_len, pConfig->m_nClientCheckTime);
 			// Check uuid length
@@ -168,7 +162,7 @@ void* Sloong::CGlobalFunction::RecvDataConnFunc(void* pParam)
 				continue;
 			}
 			// Check uuid validity
-			if( g_RecvDataInfoList.find(pCheckBuf) == g_RecvDataInfoList.end())
+			if (g_RecvDataInfoList.find(pCheckBuf) == g_RecvDataInfoList.end())
 			{
 				pLog->Warn(CUniversal::Format("The uuid is not find in list:[%s]. Close connect.", pCheckBuf));
 				close(conn_sock);
@@ -177,25 +171,25 @@ void* Sloong::CGlobalFunction::RecvDataConnFunc(void* pParam)
 			// Add to connect list
 			g_RecvDataConnList[conn_sock] = pCheckBuf;
 			// Start new thread to recv data for this connect.
-			int* pSock = new int();
+			int *pSock = new int();
 			*pSock = conn_sock;
 			CThreadPool::AddWorkThread(RecvFileFunc, pSock);
 		}
 	}
 }
 
-void* Sloong::CGlobalFunction::RecvFileFunc(void* pParam)
+void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
 {
-	CGlobalFunction* pThis = CGlobalFunction::g_pThis;
-	CLog* pLog = pThis->m_pLog;
-	int* pSock = (int*)pParam;
+	CGlobalFunction *pThis = CGlobalFunction::g_pThis;
+	CLog *pLog = pThis->m_pLog;
+	int *pSock = (int *)pParam;
 	int conn_sock = *pSock;
-	CServerConfig* pConfig = TYPE_TRANS<CServerConfig*>(pThis->m_iData->Get(DATA_ITEM::Configuation));
+	CServerConfig *pConfig = TYPE_TRANS<CServerConfig *>(pThis->m_iData->Get(DATA_ITEM::Configuation));
 	SAFE_DELETE(pSock);
 	// Find the recv uuid.
-	
+
 	auto conn_item = g_RecvDataConnList.find(conn_sock);
-	if(conn_item == g_RecvDataConnList.end())
+	if (conn_item == g_RecvDataConnList.end())
 	{
 		pLog->Error("The socket id is not find in conn list.");
 		return nullptr;
@@ -204,18 +198,18 @@ void* Sloong::CGlobalFunction::RecvFileFunc(void* pParam)
 	pLog->Info(CUniversal::Format("Start thread to receive file data for :[%s]", uuid));
 	// Find the recv info list.
 	auto info_item = g_RecvDataInfoList.find(uuid);
-	if(info_item == g_RecvDataInfoList.end() )
+	if (info_item == g_RecvDataInfoList.end())
 	{
 		pLog->Error("The uuid is not find in info list.");
 		return nullptr;
 	}
 	try
 	{
-		map<string, RecvDataPackage*> recv_file_list = info_item->second;
+		map<string, RecvDataPackage *> recv_file_list = info_item->second;
 		bool bLoop = false;
-		do 
+		do
 		{
-			char* pLongBuffer = new char[g_data_pack_len + 1]();//dataLeng;
+			char *pLongBuffer = new char[g_data_pack_len + 1](); //dataLeng;
 			memset(pLongBuffer, 0, g_data_pack_len + 1);
 			int nRecvSize = CUniversal::RecvEx(conn_sock, pLongBuffer, g_data_pack_len, pConfig->m_nWaitRecvTimeout);
 			if (nRecvSize <= 0)
@@ -236,7 +230,7 @@ void* Sloong::CGlobalFunction::RecvFileFunc(void* pParam)
 					throw normal_except();
 				}
 
-				char* szMD5 = new char[g_md5_len + 1];
+				char *szMD5 = new char[g_md5_len + 1];
 				memset(szMD5, 0, g_md5_len + 1);
 				nRecvSize = CUniversal::RecvEx(conn_sock, szMD5, g_md5_len, pConfig->m_nReceiveTimeout, true);
 				if (nRecvSize <= 0)
@@ -254,16 +248,16 @@ void* Sloong::CGlobalFunction::RecvFileFunc(void* pParam)
 					pLog->Error("the file md5 is not find in recv list.");
 					throw normal_except();
 				}
-				RecvDataPackage* pack = recv_file_item->second;
+				RecvDataPackage *pack = recv_file_item->second;
 				pack->emStatus = RecvStatus::Receiving;
 
-				char* data = new char[dtlen];
+				char *data = new char[dtlen];
 				memset(data, 0, dtlen);
 
-				// In here receive 10240 length data in one time. 
-				// because the file length is different, if the file is too big, and user network speed not to fast, 
+				// In here receive 10240 length data in one time.
+				// because the file length is different, if the file is too big, and user network speed not to fast,
 				// it will be fialed.
-				char* pData = data;
+				char *pData = data;
 				int nRecvdLen = 0;
 				while (nRecvdLen < dtlen)
 				{
@@ -289,7 +283,6 @@ void* Sloong::CGlobalFunction::RecvFileFunc(void* pParam)
 						nRecvdLen += nRecvSize;
 					}
 				}
-
 
 				pack->emStatus = RecvStatus::Saveing;
 
@@ -338,7 +331,7 @@ void* Sloong::CGlobalFunction::RecvFileFunc(void* pParam)
 		close(conn_sock);
 		return nullptr;
 	}
-	catch (const std::exception&)
+	catch (const std::exception &)
 	{
 		close(conn_sock);
 		pThis->ClearReceiveInfoByUUID(uuid);
@@ -346,25 +339,24 @@ void* Sloong::CGlobalFunction::RecvFileFunc(void* pParam)
 	}
 }
 
-
-int Sloong::CGlobalFunction::Lua_getEngineVer(lua_State* l)
+int Sloong::CGlobalFunction::Lua_GetEngineVer(lua_State *l)
 {
 	CLua::PushString(l, VERSION_TEXT);
 	return 1;
 }
 
-int Sloong::CGlobalFunction::Lua_Base64_Encode(lua_State* l)
+int Sloong::CGlobalFunction::Lua_Base64_Encode(lua_State *l)
 {
-    string req = CLua::GetString(l, 1, "");
-    string res = CBase64::Encode(req);
+	string req = CLua::GetString(l, 1, "");
+	string res = CBase64::Encode(req);
 	CLua::PushString(l, res);
 	return 1;
 }
 
-int Sloong::CGlobalFunction::Lua_Base64_Decode(lua_State* l)
+int Sloong::CGlobalFunction::Lua_Base64_Decode(lua_State *l)
 {
-    string req = CLua::GetString(l, 1, "");
-    string res = CBase64::Decode(req);
+	string req = CLua::GetString(l, 1, "");
+	string res = CBase64::Decode(req);
 	CLua::PushString(l, res);
 	return 1;
 }
@@ -372,54 +364,56 @@ int Sloong::CGlobalFunction::Lua_Base64_Decode(lua_State* l)
 /**
  * @Remarks: 
  * @Params: 1 string > string data. if file mode, is the file path
- * 			2 string > hash type. support : MD5, SHA-1 SHA-256, SHA-512. default by SHA-1
+ * 			2 string > hash type. support : 0(MD5), 1(SHA-1),2(SHA-256), 3(SHA-512). default by SHA-1
  * 			3 boolen > file mode. default by false
  * @Return: Hash result
  */
-int Sloong::CGlobalFunction::Lua_HASH_Encode(lua_State* l)
+int Sloong::CGlobalFunction::Lua_Hash_Encode(lua_State *l)
 {
 	string data = CLua::GetString(l, 1, "");
-	string hash_type = CLua::GetString(l, 2, "SHA-1");
-	bool file_mode = CLua::GetBoolen(l, 3, false);
+	int hash_type = CLua::GetInteger(l, 2, 1);
+	bool file_mode = CLua::GetBoolen(l, 3);
 	string result("");
-	switch(hash_type){
-		case "MD5":
-		result = CMD5::Encode(data,file_mode);
+
+	switch (  hash_type)
+	{
+	case HashType::MD5:
+		result = CMD5::Encode(data, file_mode);
 		break;
-		case "SHA-1":
-		result = CSHA1::Encode(data,file_mode);
+	case HashType::SHA_1:
+		result = CSHA1::Encode(data, file_mode);
 		break;
-		case "SHA-256":
-		result = CSHA256::Encode(data,file_mode);
+	case HashType::SHA_256:
+		result = CSHA256::Encode(data, file_mode);
 		break;
-		case "SHA-512":
-		result = CSHA512::Encode(data,file_mode);
+	case HashType::SHA_512:
+		result = CSHA512::Encode(data, file_mode);
 		break;
-		default:
-		result = "Hash type error. support : MD5, SHA-1 SHA-256, SHA-512."
+	default:
+		result = "Hash type error. support : 0(MD5), 1(SHA-1),2(SHA-256), 3(SHA-512).";
 		break;
 	}
 	CLua::PushString(l, result);
 	return 1;
 }
 
-int Sloong::CGlobalFunction::Lua_SendFile(lua_State* l)
+int Sloong::CGlobalFunction::Lua_SendFile(lua_State *l)
 {
 	auto filename = CLua::GetString(l, 1, "");
 	if (filename == "")
 	{
-		CLua::PushDouble(l,-1);
-		CLua::PushString(l,"Param is empty.");
+		CLua::PushDouble(l, -1);
+		CLua::PushString(l, "Param is empty.");
 		return 2;
 	}
-		
-	char* pBuf = NULL;
+
+	char *pBuf = NULL;
 	int nSize = 0;
 	try
 	{
 		nSize = CUtility::ReadFile(filename, pBuf);
 	}
-	catch (normal_except& e)
+	catch (normal_except &e)
 	{
 		g_pThis->m_pLog->Error(e.what());
 		CLua::PushDouble(l, -1);
@@ -435,37 +429,37 @@ int Sloong::CGlobalFunction::Lua_SendFile(lua_State* l)
 	return 2;
 }
 
-int Sloong::CGlobalFunction::Lua_ReloadScript(lua_State* l)
+int Sloong::CGlobalFunction::Lua_ReloadScript(lua_State *l)
 {
-	CNormalEvent* evt = new CNormalEvent();
+	CNormalEvent *evt = new CNormalEvent();
 	evt->SetEvent(MSG_TYPE::ReloadLuaContext);
 	g_pThis->m_iMsg->SendMessage(evt);
 	return 0;
 }
 
-int Sloong::CGlobalFunction::Lua_GetConfig(lua_State* l)
+int Sloong::CGlobalFunction::Lua_GetConfig(lua_State *l)
 {
-	string section = CLua::GetString(l,1);
-	string key = CLua::GetString(l,2);
-	string def = CLua::GetString(l,3);
-	
+	string section = CLua::GetString(l, 1);
+	string key = CLua::GetString(l, 2);
+	string def = CLua::GetString(l, 3);
+
 	string value("");
 	try
 	{
 		value = CServerConfig::GetStringConfig(section, key, def);
 	}
-	catch (normal_except& e)
+	catch (normal_except &e)
 	{
 		CLua::PushString(l, "");
 		CLua::PushString(l, e.what());
 		return 2;
 	}
-	
+
 	CLua::PushString(l, value);
 	return 1;
 }
 
-int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
+int Sloong::CGlobalFunction::Lua_MoveFile(lua_State *l)
 {
 	string orgName = CLua::GetString(l, 1, "");
 	string newName = CLua::GetString(l, 2, "");
@@ -475,7 +469,7 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
 		if (orgName == "" || newName == "")
 		{
 			nRes = -2;
-			throw normal_except(CUniversal::Format("Move File error. File name cannot empty. orgName:%s;newName:%s", orgName ,newName));
+			throw normal_except(CUniversal::Format("Move File error. File name cannot empty. orgName:%s;newName:%s", orgName, newName));
 		}
 
 		if (access(orgName.c_str(), ACC_W) != 0)
@@ -488,40 +482,39 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State* l)
 		if (res < 0)
 		{
 			nRes = -1;
-			throw normal_except(CUniversal::Format("Move File error.CheckFileDirectory error:[%s][%d]" ,newName,res));
+			throw normal_except(CUniversal::Format("Move File error.CheckFileDirectory error:[%s][%d]", newName, res));
 		}
 
-	 	if(!CUniversal::MoveFile(orgName,newName))
-		 {
+		if (!CUniversal::MoveFile(orgName, newName))
+		{
 			nRes = -3;
 			throw normal_except("Move File error.");
-		 }
+		}
 	}
-	catch (normal_except& e)
+	catch (normal_except &e)
 	{
 		g_pThis->m_pLog->Error(e.what());
 		CLua::PushInteger(l, nRes);
 		CLua::PushString(l, e.what());
 		return 2;
 	}
-	
+
 	// if succeed return 0, else return nozero
 	CLua::PushInteger(l, 0);
 	CLua::PushString(l, "mv file succeed");
 	return 2;
 }
 
-int CGlobalFunction::Lua_GenUUID(lua_State* l)
+int CGlobalFunction::Lua_GenUUID(lua_State *l)
 {
 	CLua::PushString(l, CUtility::GenUUID());
 	return 1;
 }
 
-
 // Receive File funcs
-// Client requeset with file list info 
+// Client requeset with file list info
 // and here add the info to list and Build one uuid and return this uuid.
-int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
+int CGlobalFunction::Lua_ReceiveFile(lua_State *l)
 {
 	string save_folder = CLua::GetString(l, 2);
 
@@ -529,10 +522,10 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 	auto fileList = CLua::GetTableParam(l, 1);
 	string uuid = CUtility::GenUUID();
 
-	map<string, RecvDataPackage*> recv_list;
+	map<string, RecvDataPackage *> recv_list;
 	for (auto i = fileList.begin(); i != fileList.end(); i++)
 	{
-		RecvDataPackage* pack = new RecvDataPackage();
+		RecvDataPackage *pack = new RecvDataPackage();
 		string md5 = i->first;
 		CUniversal::tolower(md5);
 		pack->strName = i->second;
@@ -548,14 +541,14 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State * l)
 	return 1;
 }
 
-int CGlobalFunction::Lua_CheckRecvStatus(lua_State* l)
+int CGlobalFunction::Lua_CheckRecvStatus(lua_State *l)
 {
 	string uuid = CLua::GetString(l, 1);
 	string md5 = CLua::GetString(l, 2);
 	CUniversal::tolower(md5);
 	auto recv_list = g_RecvDataInfoList[uuid];
 	auto recv_item = recv_list.find(md5);
-	if ( recv_item  == recv_list.end())
+	if (recv_item == recv_list.end())
 	{
 		CLua::PushInteger(l, RecvStatus::OtherError);
 		CLua::PushString(l, "Cannot find the hash receive info.");
@@ -563,7 +556,7 @@ int CGlobalFunction::Lua_CheckRecvStatus(lua_State* l)
 	}
 	else
 	{
-		RecvDataPackage* pack = recv_item->second;
+		RecvDataPackage *pack = recv_item->second;
 		if (pack->emStatus == RecvStatus::Done)
 		{
 			recv_list.erase(recv_item);
@@ -580,7 +573,7 @@ int CGlobalFunction::Lua_CheckRecvStatus(lua_State* l)
 	}
 }
 
-int CGlobalFunction::Lua_showLog(lua_State* l)
+int CGlobalFunction::Lua_ShowLog(lua_State *l)
 {
 	string luaTitle = CLua::GetString(l, 2, "Info");
 	string msg = CLua::GetString(l, 1);
@@ -594,7 +587,7 @@ int CGlobalFunction::Lua_showLog(lua_State* l)
 		log->Info(msg);
 	else if (luaTitle == "Warn")
 		log->Warn(msg);
-	else if (luaTitle=="Debug")
+	else if (luaTitle == "Debug")
 		log->Debug(msg);
 	else if (luaTitle == "Error")
 		log->Error(msg);
@@ -605,22 +598,19 @@ int CGlobalFunction::Lua_showLog(lua_State* l)
 	else if (luaTitle == "Fatal")
 		log->Fatal(msg);
 	else
-		log->Log(msg,luaTitle);
+		log->Log(msg, luaTitle);
 	return 0;
 }
 
-
-int CGlobalFunction::Lua_SetCommData(lua_State* l)
+int CGlobalFunction::Lua_SetCommData(lua_State *l)
 {
-	
 }
 
-int CGlobalFunction::Lua_GetCommData(lua_State* l)
+int CGlobalFunction::Lua_GetCommData(lua_State *l)
 {
-
 }
 
-int CGlobalFunction::Lua_GetLogObject(lua_State* l)
+int CGlobalFunction::Lua_GetLogObject(lua_State *l)
 {
 	CLua::PushPointer(l, g_pThis->m_pLog);
 	return 1;
