@@ -97,3 +97,11 @@ struct RecvDataPackage
 	string strName = "";
 	string strPath = "";
 };
+
+enum HashType
+{
+	MD5 = 0,
+	SHA_1 = 1,
+	SHA_256 = 2,
+	SHA_512 = 3,
+};
