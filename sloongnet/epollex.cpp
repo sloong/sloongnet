@@ -200,12 +200,16 @@ void* Sloong::CEpollEx::CheckTimeoutConnect(void* pParam)
 	while (pThis->m_bIsRunning)
 	{
 		pLog->Verbos("Check connect timeout start.");
+		RecheckTimeout:
+		unique_lock<mutex> sockLck(pThis->m_oSockListMutex);
 		for (map<int, CSockInfo*>::iterator it = pThis->m_SockList.begin(); it != pThis->m_SockList.end(); ++it)
 		{
 			if (it->second != NULL && time(NULL) - it->second->m_ActiveTime > tout)
 			{
+				sockLck.unlock();
 				pLog->Info(CUniversal::Format("[Timeout]:[Close connect:%s]", it->second->m_Address));
 				pThis->CloseConnect(it->first);
+				goto RecheckTimeout;
 			}
 		}
 		pLog->Verbos(CUniversal::Format("Check connect timeout done. wait [%d] seconds.", tinterval));
@@ -403,7 +407,10 @@ void Sloong::CEpollEx::OnNewAccept()
 		info->m_pUserInfo->SetData("ip", info->m_Address);
 		info->m_pUserInfo->SetData("port", CUniversal::ntos(info->m_nPort));
 
+		unique_lock<mutex> sockLck(m_oSockListMutex);
 		m_SockList[conn_sock] = info;
+		sockLck.unlock();
+
 		m_pLog->Info(CUniversal::Format("Accept client:[%s:%d].", info->m_Address, info->m_nPort));
 		//将接受的连接添加到Epoll的事件中.
 		// Add the recv event to epoll;
@@ -788,7 +795,9 @@ void Sloong::CEpollEx::CloseConnect(int socket)
 		return;
 
 	CSockInfo* info = m_SockList[socket];
+	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList.erase(item);
+	sockLck.unlock();
 	if (!info)
 		return;
 
