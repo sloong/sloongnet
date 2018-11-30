@@ -212,6 +212,7 @@ void* Sloong::CEpollEx::CheckTimeoutConnect(void* pParam)
 				goto RecheckTimeout;
 			}
 		}
+		sockLck.unlock();
 		pLog->Verbos(CUniversal::Format("Check connect timeout done. wait [%d] seconds.", tinterval));
 		pThis->m_oExitCV.wait_for(lck, chrono::seconds(tinterval));
 	}
