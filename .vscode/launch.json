@@ -12,8 +12,8 @@
             "program": "${workspaceFolder}/sloongnet/sloongnet",
             "args": [
                     "-r",
-                    "/home/dev/projects/walls-service/walls.conf",
-                    "ex-walls.conf"
+                    "default.conf",
+                    "/home/dev/projects/walls-service/ex-develop.conf"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/sloongnet",
