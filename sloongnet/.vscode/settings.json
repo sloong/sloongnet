@@ -13,6 +13,8 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "ostream": "cpp",
-        "xlocale": "cpp"
+        "xlocale": "cpp",
+        "memory": "cpp",
+        "condition_variable": "cpp"
     }
 }

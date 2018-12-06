@@ -10,6 +10,7 @@
 namespace Sloong
 {
 	using namespace Interface;
+	
 	class CMessageCenter : public IMessage
 	{
 	public:
@@ -19,21 +20,22 @@ namespace Sloong
 		void Initialize(IData* iData);
 
 		void SendMessage(MSG_TYPE msgType);
-		void SendMessage(IEvent* evt);
+		void SendMessage(SmartEvent evt);
 		void CallMessage(MSG_TYPE msgType, void* msgParams);
 
 		void RegisterEvent(MSG_TYPE t);
-		void RegisterEventHandler(MSG_TYPE t, void* object, LPCALLBACK2FUNC func);
+		void RegisterEventHandler(MSG_TYPE t, MsgHandlerFunc func);
 
 		void Run();
 		void Exit();
 
+		void MessageWorkLoop(SMARTER param);
 	protected:
-		static void* MessageWorkLoop(void* param);
+		
 
 	protected:
-		map<MSG_TYPE, vector<HandlerItem>> m_oMsgHandlerList;
-		queue<IEvent*> m_oMsgList;
+		map<MSG_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;
+		queue<shared_ptr<IEvent>> m_oMsgList;
 		mutex m_oWorkLoopMutex;
 		condition_variable m_oWrokLoopCV;
 		mutex m_oMsgListMutex;

@@ -16,26 +16,21 @@ namespace Sloong
 			void SetEvent(MSG_TYPE t);
 			MSG_TYPE GetEvent();
 
-			void SetParams(LPVOID p, bool bRelase  = true);
-			LPVOID GetParams();
+			void SetParams(SMARTER p);
+			SMARTER GetParams();
 
 			void SetMessage(string str);
 			string GetMessage();
 
-			void SetCallbackFunc(LPCALLBACK2FUNC func);
-			LPCALLBACK2FUNC GetCallbackFunc();
-			void CallCallbackFunc(LPVOID pParams);
-
-			void SetProcessingFunc(LPCALLBACK2FUNC func);
-			LPCALLBACK2FUNC GetProcessingFunc();
+			void SetCallbackFunc(LPSMARTFUNC func);
+			LPSMARTFUNC GetCallbackFunc();
+			void CallCallbackFunc(SMARTER pParams);
 
 			LPVOID GetHandler();
 			void SetHandler(LPVOID obj);
 		protected:
-			LPCALLBACK2FUNC m_pCallbackFunc = nullptr;
-			LPCALLBACK2FUNC m_pProcessingFunc = nullptr;
-			LPVOID m_pParams = nullptr;
-			bool m_bReleaseWhenShutdown = true;
+			LPSMARTFUNC m_pCallbackFunc = nullptr;
+			SMARTER m_pParams = nullptr;
 			MSG_TYPE m_emType;
 			LPVOID m_pObj;
 			string m_strMessage;

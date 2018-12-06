@@ -32,9 +32,9 @@ void Sloong::CLuaProcessCenter::Initialize(IMessage* iMsg, IData* iData)
 
 	m_iMsg->RegisterEvent(MSG_TYPE::ProcessMessage);
 	m_iMsg->RegisterEvent(MSG_TYPE::ReloadLuaContext);
-	m_iMsg->RegisterEventHandler(ProcessMessage, this, EventHandler);
-	m_iMsg->RegisterEventHandler(ReloadLuaContext, this, EventHandler);
-	m_iMsg->RegisterEventHandler(ReveivePackage, this, EventHandler);
+	//m_iMsg->RegisterEventHandler(ProcessMessage, this, EventHandler);
+	m_iMsg->RegisterEventHandler(ReloadLuaContext, std::bind(&CLuaProcessCenter::ReloadContext,this,std::placeholders::_1));
+	//m_iMsg->RegisterEventHandler(ReveivePackage, this, EventHandler);
 	// 主要的循环方式为，根据输入的处理数来初始化指定数量的lua环境。
 	// 然后将其加入到可用队列
 	// 在处理开始之前根据队列情况拿到某lua环境的id并将其移除出可用队列
@@ -51,30 +51,7 @@ void Sloong::CLuaProcessCenter::HandleError(string err)
 	m_pLog->Error(CUniversal::Format("[Script]:[%s]", err));
 }
 
-void* Sloong::CLuaProcessCenter::EventHandler(LPVOID evt, LPVOID obj)
-{
-	IEvent* ev = TYPE_TRANS<IEvent*>(evt);
-	auto type = ev->GetEvent();
-	CLuaProcessCenter * pThis = TYPE_TRANS<CLuaProcessCenter*>(obj);
-	switch (type)
-	{
-	case ProcessMessage:
-		//pThis->MsgProcess(ev);
-		break;
-	case ReveivePackage:
-
-		break;
-	case ReloadLuaContext:
-		pThis->ReloadContext();
-		break;
-	default:
-		break;
-	}
-	SAFE_RELEASE_EVENT(ev);
-	return nullptr;
-}
-
-void Sloong::CLuaProcessCenter::ReloadContext()
+void Sloong::CLuaProcessCenter::ReloadContext(SmartEvent event)
 {
 	int n = m_pLuaList.size();
 	for (int i=0;i<n;i++)

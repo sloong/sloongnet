@@ -72,11 +72,12 @@ namespace Sloong
 		void OnNewAccept();
 		void OnDataCanReceive( int nSocket );
 		void OnCanWriteData( int nSocket );
+		void SendMessageEventHandler(SmartEvent event);
 
-	public:
-		static void* WorkLoop(void* params);
-		static void* CheckTimeoutConnect(void* params);
-		static void* EventHandler(void* params, void* object);
+		void CheckTimeoutWorkLoop(SMARTER params);
+		void MainWorkLoop(SMARTER params);
+
+		
 	protected:
 		int     m_ListenSock;
 		int 	m_EpollHandle;

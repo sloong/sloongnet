@@ -18,15 +18,10 @@ namespace Sloong
 		~CControlCenter();
 
 		void Initialize(IMessage* iM,IData* iData);
-		void Run();
-		void Exit();
-
-		void OnReceivePackage(IEvent* evt);
-		void OnSocketClose(IEvent* evt);
-
-	public: 
-		static LPVOID EventHandler(LPVOID t,LPVOID object);
-
+		void Run(SmartEvent event);
+		void Exit(SmartEvent event);
+		void OnReceivePackage(SmartEvent event);
+		void OnSocketClose(SmartEvent event);
 	protected:
 		IMessage * m_iM;
 		IData* m_iData;

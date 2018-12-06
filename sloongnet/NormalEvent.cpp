@@ -4,13 +4,12 @@ using namespace Sloong::Events;
 
 CNormalEvent::CNormalEvent()
 {
-
+	cout << "NormalEvent()" <<endl;
 }
 
 CNormalEvent::~CNormalEvent()
 {
-	if( m_bReleaseWhenShutdown )
-		SAFE_DELETE_ARR(m_pParams);
+	cout <<"~CNormalEvent()"<<endl;
 }
 
 void CNormalEvent::SetEvent(MSG_TYPE t)
@@ -23,35 +22,24 @@ MSG_TYPE CNormalEvent::GetEvent()
 	return m_emType;
 }
 
-void CNormalEvent::SetParams(LPVOID p, bool bRelase)
+void CNormalEvent::SetParams(SMARTER p)
 {
 	m_pParams = p;
-	m_bReleaseWhenShutdown = bRelase;
 }
 
-LPVOID CNormalEvent::GetParams()
+SMARTER CNormalEvent::GetParams()
 {
 	return m_pParams;
 }
 
-void CNormalEvent::SetCallbackFunc(LPCALLBACK2FUNC func)
+void CNormalEvent::SetCallbackFunc(LPSMARTFUNC func)
 {
 	m_pCallbackFunc = func;
 }
 
-LPCALLBACK2FUNC CNormalEvent::GetCallbackFunc()
+LPSMARTFUNC CNormalEvent::GetCallbackFunc()
 {
 	return m_pCallbackFunc;
-}
-
-void CNormalEvent::SetProcessingFunc(LPCALLBACK2FUNC func)
-{
-	m_pProcessingFunc = func;
-}
-
-LPCALLBACK2FUNC CNormalEvent::GetProcessingFunc()
-{
-	return m_pProcessingFunc;
 }
 
 
@@ -65,10 +53,10 @@ string Sloong::Events::CNormalEvent::GetMessage()
 	return m_strMessage;
 }
 
-void Sloong::Events::CNormalEvent::CallCallbackFunc(LPVOID pParams)
+void Sloong::Events::CNormalEvent::CallCallbackFunc(SMARTER pParams)
 {
 	if( m_pCallbackFunc )
-		(*m_pCallbackFunc)(pParams, m_pObj);
+		(*m_pCallbackFunc)(pParams);
 }
 
 LPVOID Sloong::Events::CNormalEvent::GetHandler()

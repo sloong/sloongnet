@@ -46,16 +46,16 @@ void Sloong::CControlCenter::Initialize(IMessage* iM,IData* iData)
 	m_pEpoll->SetLogConfiguration(m_pConfig->m_oLogInfo.ShowSendMessage, m_pConfig->m_oLogInfo.ShowReceiveMessage);
 
 	// 在所有的成员都初始化之后，在注册处理函数
-	iM->RegisterEventHandler(ProgramStart, this, EventHandler);
-	iM->RegisterEventHandler(ProgramExit, this, EventHandler);
-	iM->RegisterEventHandler(ReveivePackage, this, EventHandler);
-	iM->RegisterEventHandler(SocketClose, this, EventHandler);
+	iM->RegisterEventHandler(ProgramStart, std::bind(&CControlCenter::Run, this, std::placeholders::_1));
+	iM->RegisterEventHandler(ProgramExit, std::bind(&CControlCenter::Exit, this, std::placeholders::_1));
+	iM->RegisterEventHandler(ReveivePackage, std::bind(&CControlCenter::OnReceivePackage, this, std::placeholders::_1));
+	iM->RegisterEventHandler(SocketClose, std::bind(&CControlCenter::OnSocketClose, this, std::placeholders::_1));
 }
 
 
-void Sloong::CControlCenter::OnReceivePackage(IEvent* evt)
+void Sloong::CControlCenter::OnReceivePackage(SmartEvent evt)
 {	
-	CNetworkEvent* net_evt = (CNetworkEvent*)evt;
+	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(evt);
 	CSockInfo* info = net_evt->GetSocketInfo();
 	if (!info)
 	{
@@ -63,7 +63,7 @@ void Sloong::CControlCenter::OnReceivePackage(IEvent* evt)
 		return;
 	}
 	RECVINFO* pack = net_evt->GetRecvPackage();
-	CSendMessageEvent* send_msg = new CSendMessageEvent(net_evt->GetSocketID(), net_evt->GetPriority(), pack->nSwiftNumber);
+	auto send_evt = make_shared<CSendMessageEvent>(net_evt->GetSocketID(), net_evt->GetPriority(), pack->nSwiftNumber);
 	if (m_pConfig->m_bEnableMD5Check)
 	{
 		string rmd5 = CMD5::Encode(pack->strMessage);
@@ -74,8 +74,8 @@ void Sloong::CControlCenter::OnReceivePackage(IEvent* evt)
 			// handle error.
 			string strSend = CUniversal::Format("{\"errno\": \"-1\",\"errmsg\" : \"package check error\",\"server_md5\":\"%s\",\"client_md5\":\"%s\",\"check_string\":\"%s\"}", rmd5, pack->strMD5, pack->strMessage);
 
-			send_msg->SetMessage(strSend);
-			m_iM->SendMessage(send_msg);
+			send_evt->SetMessage(strSend);
+			m_iM->SendMessage(send_evt);
 			return;
 		}
 	}
@@ -87,21 +87,21 @@ void Sloong::CControlCenter::OnReceivePackage(IEvent* evt)
 	{
 		if (pExData && nExSize > 0 )
 		{
-			send_msg->SetSendExData(pExData,nExSize);
+			send_evt->SetSendExData(pExData,nExSize);
 		}
-		send_msg->SetMessage(strRes);
+		send_evt->SetMessage(strRes);
 	}
 	else
 	{
 		m_pLog->Error("Error in process");
-		send_msg->SetMessage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
+		send_evt->SetMessage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
 	}
-	m_iM->SendMessage(send_msg);
+	m_iM->SendMessage(send_evt);
 }
 
-void Sloong::CControlCenter::OnSocketClose(IEvent* evt)
+void Sloong::CControlCenter::OnSocketClose(SmartEvent event)
 {
-	CNetworkEvent* net_evt = (CNetworkEvent*)evt;
+	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
 	CSockInfo* info = net_evt->GetSocketInfo();
 	if (!info)
 	{
@@ -113,39 +113,12 @@ void Sloong::CControlCenter::OnSocketClose(IEvent* evt)
 	net_evt->CallCallbackFunc(net_evt);
 }
 
-LPVOID Sloong::CControlCenter::EventHandler(LPVOID t, LPVOID object)
-{
-	IEvent* ev = (IEvent*)t;
-	auto type = ev->GetEvent();
-	auto pThis = TYPE_TRANS<CControlCenter*>(object);
-	switch (type)
-	{
-	case ProgramStart:
-		pThis->Run();
-		break;
-	case ProgramExit:
-		pThis->Exit();
-		break;
-	case ReveivePackage:
-		pThis->OnReceivePackage(ev);
-		break;
-	case SocketClose:
-		pThis->OnSocketClose(ev);
-		break;
-	default:
-		break;
-	}
-	SAFE_RELEASE_EVENT(ev);
-	return nullptr;
-}
-
-
-void Sloong::CControlCenter::Run()
+void Sloong::CControlCenter::Run(SmartEvent event)
 {
 	m_pEpoll->Run();
 }
 
-void Sloong::CControlCenter::Exit()
+void Sloong::CControlCenter::Exit(SmartEvent event)
 {
 	m_pEpoll->Exit();
 }

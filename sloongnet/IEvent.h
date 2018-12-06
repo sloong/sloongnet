@@ -1,14 +1,10 @@
 #pragma once
 #include "defines.h"
 
-// ÊÂ¼şµÄ½Ó¿Ú
-// ÓÉÓÚÉæ¼°µ½¶à´¦Àíº¯Êı£¬¶øÇÒÊÍ·Å±ØĞëÓÉ×îºóÒ»¸öÊ¹ÓÃÕßÀ´ÊÍ·Å
-// ËùÒÔ½«ÓÉ¿ò¼ÜÔÚ·¢ËÍÖ®Ç°£¬¸ù¾İ´¦Àíº¯ÊıµÄ¸öÊıÀ´×Ô¶¯µ÷ÓÃAddRefº¯ÊıÀ´Ôö¼Ó¼ÆÊı¡£
-// ÒªÇó´¦Àíº¯ÊıÔÚ´¦ÀíÖ®ºó£¬ÊÖ¶¯µ÷ÓÃSAFE_RELEASE_EVENTºêÀ´½øĞĞÊÍ·Å¡£
-
-#ifndef SAFE_RELEASE_EVENT
-#define SAFE_RELEASE_EVENT(p)		{if(NULL != (p)){if(0>=(p)->Release()){delete p;};p = NULL;}}
-#endif // !SAFE_RELEASE_EVENT
+// äº‹ä»¶çš„æ¥å£
+// ç”±äºæ¶‰åŠåˆ°å¤šå¤„ç†å‡½æ•°ï¼Œè€Œä¸”é‡Šæ”¾å¿…é¡»ç”±æœ€åä¸€ä¸ªä½¿ç”¨è€…æ¥é‡Šæ”¾
+// æ‰€ä»¥å°†ç”±æ¡†æ¶åœ¨å‘é€ä¹‹å‰ï¼Œæ ¹æ®å¤„ç†å‡½æ•°çš„ä¸ªæ•°æ¥è‡ªåŠ¨è°ƒç”¨AddRefå‡½æ•°æ¥å¢åŠ è®¡æ•°ã€‚
+// è¦æ±‚å¤„ç†å‡½æ•°åœ¨å¤„ç†ä¹‹åï¼Œæ‰‹åŠ¨è°ƒç”¨SAFE_RELEASE_EVENTå®æ¥è¿›è¡Œé‡Šæ”¾ã€‚
 
 
 namespace Sloong
@@ -18,26 +14,16 @@ namespace Sloong
 		class IEvent
 		{
 		public:
-			IEvent() {}
-			virtual ~IEvent() {}
-			virtual void AddRef(int nNum = 1) {
-				m_nRefCount = m_nRefCount + nNum;
-			}
-			virtual int Release() {
-				m_nRefCount--;
-				return m_nRefCount;
-			}
-			virtual LPVOID GetParams() = 0;
+			IEvent() { cout << "IEvent() called" <<endl;}
+			virtual ~IEvent() {cout << "~IEvent() called" <<endl;}
 			virtual MSG_TYPE GetEvent() = 0;
 			// Get the handler object.
 			// it is pointer to the event register.
 			virtual LPVOID GetHandler() = 0;
-			virtual LPCALLBACK2FUNC GetCallbackFunc() = 0;
-			virtual LPCALLBACK2FUNC GetProcessingFunc() = 0;
 		protected:
 			int m_nRefCount = 0;
 		};
-
+		typedef shared_ptr<IEvent> SmartEvent;
 
 		template<typename T> inline
 		T EVENT_TRANS(IEvent* p)

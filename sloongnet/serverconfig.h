@@ -55,7 +55,6 @@ namespace Sloong
 		
 
 		// Performance
-		int m_nProcessThreadQuantity =10;
 		int m_nMessageCenterThreadQuantity = 5;
 		int m_nEPoolThreadQuantity = 3;
 		int m_nTimeoutInterval = 5;

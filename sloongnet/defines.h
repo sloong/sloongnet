@@ -66,12 +66,6 @@ struct LogConfigInfo
 	int		NetworkPort;
 };
 
-struct HandlerItem
-{
-	void* object;
-	LPCALLBACK2FUNC handler;
-};
-
 typedef struct _stRecvInfo
 {
 	long long nSwiftNumber = -1;

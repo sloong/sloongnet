@@ -47,7 +47,7 @@ int Sloong::CEpollEx::Initialize(IMessage* iM,IData* iData)
 	m_iMsg->RegisterEvent(ReveivePackage);
 	m_iMsg->RegisterEvent(SocketClose);
 	m_iMsg->RegisterEvent(MSG_TYPE::SendMessage);
-	m_iMsg->RegisterEventHandler(MSG_TYPE::SendMessage, this, EventHandler);
+	m_iMsg->RegisterEventHandler(MSG_TYPE::SendMessage, std::bind(&CEpollEx::SendMessageEventHandler,this,std::placeholders::_1));
 
 	m_pConfig = (CServerConfig*)m_iData->Get(Configuation);
 	m_pLog = (CLog*)m_iData->Get(Logger);
@@ -91,8 +91,8 @@ void Sloong::CEpollEx::Run()
 	CtlEpollEvent(EPOLL_CTL_ADD, m_ListenSock, EPOLLIN | EPOLLOUT);
 	m_bIsRunning = true;
 	// Init the thread pool
-	CThreadPool::AddWorkThread(WorkLoop, this, m_pConfig->m_nEPoolThreadQuantity);
-	CThreadPool::AddWorkThread(CheckTimeoutConnect, this);
+	CThreadPool::AddWorkThread( std::bind(&CEpollEx::MainWorkLoop, this, std::placeholders::_1), nullptr, m_pConfig->m_nEPoolThreadQuantity);
+	CThreadPool::AddWorkThread( std::bind(&CEpollEx::CheckTimeoutWorkLoop, this, std::placeholders::_1), nullptr);
 }
 
 void Sloong::CEpollEx::EnableSSL(string certFile, string keyFile, string passwd)
@@ -138,49 +138,46 @@ int Sloong::CEpollEx::SetSocketNonblocking(int socket)
 * Output: *
 * Others: *
 *************************************************/
-void* Sloong::CEpollEx::WorkLoop(void* pParam)
+void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 {
-	CEpollEx* pThis = (CEpollEx*)pParam;
 	auto pid = this_thread::get_id();
 	string spid = CUniversal::ntos(pid);
-	pThis->m_pLog->Info("epoll work thread is running." + spid);
-	int sockListen = pThis->m_ListenSock;
+	m_pLog->Info("epoll work thread is running." + spid);
 	int n, i;
-	while (pThis->m_bIsRunning)
+	while (m_bIsRunning)
 	{
 		// 返回需要处理的事件数
-		n = epoll_wait(pThis->m_EpollHandle, pThis->m_Events, 1024, 500);
+		n = epoll_wait(m_EpollHandle, m_Events, 1024, 500);
 
 		if (n <= 0)
 			continue;
 
 		for (i = 0; i < n; ++i)
 		{
-			int fd = pThis->m_Events[i].data.fd;
-			if (fd == sockListen)
+			int fd = m_Events[i].data.fd;
+			if (fd == m_ListenSock)
 			{
-				pThis->m_pLog->Verbos("EPoll Accept event happened.");
-				pThis->OnNewAccept();
+				m_pLog->Verbos("EPoll Accept event happened.");
+				OnNewAccept();
 			}
-			else if (pThis->m_Events[i].events&EPOLLIN)
+			else if (m_Events[i].events&EPOLLIN)
 			{
-				pThis->m_pLog->Verbos("EPoll EPOLLIN event happened.Data Can Receive.");
-				pThis->OnDataCanReceive(fd);
+				m_pLog->Verbos("EPoll EPOLLIN event happened.Data Can Receive.");
+				OnDataCanReceive(fd);
 			}
-			else if (pThis->m_Events[i].events&EPOLLOUT)
+			else if (m_Events[i].events&EPOLLOUT)
 			{
-				pThis->m_pLog->Verbos("EPoll EPOLLOUT event happened.Can Write Data.");
-				pThis->OnCanWriteData(fd);
+				m_pLog->Verbos("EPoll EPOLLOUT event happened.Can Write Data.");
+				OnCanWriteData(fd);
 			}
 			else
 			{
-				pThis->m_pLog->Verbos("EPoll unkuown event happened.close this connnect.");
-				pThis->CloseConnect(fd);
+				m_pLog->Verbos("EPoll unkuown event happened.close this connnect.");
+				CloseConnect(fd);
 			}
 		}
 	}
-	pThis->m_pLog->Info("epoll work thread is exit " + spid);
-	return 0;
+	m_pLog->Info("epoll work thread is exit " + spid);
 }
 /*************************************************
 * Function: * check_connect_timeout
@@ -189,52 +186,37 @@ void* Sloong::CEpollEx::WorkLoop(void* pParam)
 * Output: *
 * Others: *
 *************************************************/
-void* Sloong::CEpollEx::CheckTimeoutConnect(void* pParam)
+void Sloong::CEpollEx::CheckTimeoutWorkLoop(SMARTER param)
 {
-	CEpollEx* pThis = (CEpollEx*)pParam;
-	CLog* pLog = pThis->m_pLog;
-	int tout = pThis->m_pConfig->m_nConnectTimeout * 60;
-	int tinterval = pThis->m_pConfig->m_nTimeoutInterval * 60;
-	unique_lock<mutex> lck(pThis->m_oExitMutex);
-	pLog->Verbos("Check connect timeout thread is running.");
-	while (pThis->m_bIsRunning)
+	int tout = m_pConfig->m_nConnectTimeout * 60;
+	int tinterval = m_pConfig->m_nTimeoutInterval * 60;
+	unique_lock<mutex> lck(m_oExitMutex);
+	m_pLog->Verbos("Check connect timeout thread is running.");
+	while (m_bIsRunning)
 	{
-		pLog->Verbos("Check connect timeout start.");
+		m_pLog->Verbos("Check connect timeout start.");
 		RecheckTimeout:
-		unique_lock<mutex> sockLck(pThis->m_oSockListMutex);
-		for (map<int, CSockInfo*>::iterator it = pThis->m_SockList.begin(); it != pThis->m_SockList.end(); ++it)
+		unique_lock<mutex> sockLck(m_oSockListMutex);
+		for (map<int, CSockInfo*>::iterator it = m_SockList.begin(); it != m_SockList.end(); ++it)
 		{
 			if (it->second != NULL && time(NULL) - it->second->m_ActiveTime > tout)
 			{
 				sockLck.unlock();
-				pLog->Info(CUniversal::Format("[Timeout]:[Close connect:%s]", it->second->m_Address));
-				pThis->CloseConnect(it->first);
+				m_pLog->Info(CUniversal::Format("[Timeout]:[Close connect:%s]", it->second->m_Address));
+				CloseConnect(it->first);
 				goto RecheckTimeout;
 			}
 		}
-		sockLck.unlock();
-		pLog->Verbos(CUniversal::Format("Check connect timeout done. wait [%d] seconds.", tinterval));
-		pThis->m_oExitCV.wait_for(lck, chrono::seconds(tinterval));
+		m_pLog->Verbos(CUniversal::Format("Check connect timeout done. wait [%d] seconds.", tinterval));
+		m_oExitCV.wait_for(lck, chrono::seconds(tinterval));
 	}
-	pLog->Info("check timeout connect thread is exit ");
-	return 0;
+	m_pLog->Info("check timeout connect thread is exit ");
 }
 
-void * Sloong::CEpollEx::EventHandler(void * params, void * object)
+void Sloong::CEpollEx::SendMessageEventHandler(SmartEvent event)
 {
-	IEvent* evt = TYPE_TRANS<IEvent*>(params);
-	CEpollEx * pThis = TYPE_TRANS<CEpollEx*>(object);
-	switch (evt->GetEvent())
-	{
-	case MSG_TYPE::SendMessage: {
-		auto send_evt = EVENT_TRANS<CSendMessageEvent*>(evt);
-		pThis->SendMessage(send_evt->GetSocketID(), send_evt->GetPriority(), send_evt->GetSwift(), send_evt->GetMessage(), send_evt->GetSendExData(), send_evt->GetSendExDataSize());
-		break;}
-	default:
-		break;
-	}
-	SAFE_RELEASE_EVENT(evt);
-	return nullptr;
+	auto send_evt = dynamic_pointer_cast<CSendMessageEvent>(event);
+	SendMessage(send_evt->GetSocketID(), send_evt->GetPriority(), send_evt->GetSwift(), send_evt->GetMessage(), send_evt->GetSendExData(), send_evt->GetSendExDataSize());
 }
 
 void Sloong::CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData, int nExSize)
@@ -536,7 +518,9 @@ void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 			// update the socket time
 			info->m_ActiveTime = time(NULL);
 			// Add the sock event to list
-			CNetworkEvent* event = new CNetworkEvent(ReveivePackage);
+
+			auto event = make_shared<CNetworkEvent>(MSG_TYPE::ReveivePackage);
+			
 			event->SetSocketID(nSocket);
 			event->SetSocketInfo(info);
 			event->SetPriority(nPriority);
@@ -807,7 +791,7 @@ void Sloong::CEpollEx::CloseConnect(int socket)
 	info->m_pCon->Close();
 	m_pLog->Info(CUniversal::Format("close connect:%s:%d.", info->m_Address, info->m_nPort));
 
-	CNetworkEvent* event = new CNetworkEvent(SocketClose);
+	auto event = make_shared<CNetworkEvent>(MSG_TYPE::SocketClose);
 	event->SetSocketID(socket);
 	event->SetSocketInfo(info);
 	event->SetHandler(this);

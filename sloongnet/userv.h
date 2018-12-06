@@ -3,6 +3,7 @@
 
 #include <mutex>
 #include <condition_variable>
+#include "IEvent.h"
 
 namespace Sloong
 {
@@ -12,6 +13,7 @@ namespace Sloong
 		class CLuaPacket;
 	}
 	using namespace Universal;
+	using namespace Interface;
 
 	class CServerConfig;
 	class CControlCenter;
@@ -27,9 +29,7 @@ namespace Sloong
 		void Run();
 		void Exit();
 		
-
-	public:// static function
-		static void* EventHandler(void* pParam,void* object);
+		void EventHandler(SmartEvent event);
 		
 	protected:
 		int m_sockServ;

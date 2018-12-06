@@ -52,7 +52,7 @@ void SloongWallUS::Initialize(CServerConfig* config)
 	m_pMC->Initialize(m_pDC);
 	m_pMC->RegisterEvent(ProgramExit);
 	m_pMC->RegisterEvent(ProgramStart);
-	m_pMC->RegisterEventHandler(MSG_TYPE::ProgramExit, this, EventHandler);
+	m_pMC->RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&SloongWallUS::EventHandler, this, std::placeholders::_1));
 
 	m_pCC->Initialize(m_pMC, m_pDC);
 }
@@ -78,20 +78,16 @@ void Sloong::SloongWallUS::Exit()
 	m_oExitEventCV.notify_all();
 }
 
-void * Sloong::SloongWallUS::EventHandler(void * t, void* object)
+void Sloong::SloongWallUS::EventHandler(SmartEvent ev)
 {
-	IEvent* ev = (IEvent*)t;
 	auto type = ev->GetEvent();
-	auto pThis = TYPE_TRANS<SloongWallUS*>(object);
 	switch (type)
 	{
 	case ProgramExit:
-		pThis->Exit();
+		Exit();
 		break;
 	default:
 		break;
 	}
-	SAFE_RELEASE_EVENT(ev);
-	return nullptr;
 }
 

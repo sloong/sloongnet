@@ -28,10 +28,10 @@ namespace Sloong
 		void CloseSocket(CLuaPacket* uinfo);
 		bool MsgProcess( CLuaPacket * pUInfo, string & msg, string & res, char*& exData, int& exSize);
 		int GetFreeLuaContext();
-		void ReloadContext();
+		
+		void ReloadContext(SmartEvent event);
 	public:
 		static void HandleError(string err);
-		static LPVOID EventHandler(LPVOID evt, LPVOID obj);
 	protected:
 		vector<CLua*>	m_pLuaList;
 		vector<bool>	m_oReloadList;
