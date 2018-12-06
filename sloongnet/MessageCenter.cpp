@@ -19,7 +19,7 @@ void CMessageCenter::Initialize(IData* iData)
 {
 	m_iData = iData;
 	CServerConfig* pConfig = TYPE_TRANS<CServerConfig*>(iData->Get(Configuation));
-	CThreadPool::AddWorkThread(std::bind(&CMessageCenter::MessageWorkLoop, this, std::placeholders::_1), nullptr, pConfig->m_nProcessThreadQuantity);
+	CThreadPool::AddWorkThread(std::bind(&CMessageCenter::MessageWorkLoop, this, std::placeholders::_1), nullptr, pConfig->m_nMessageCenterThreadQuantity);
 }
 
 void CMessageCenter::SendMessage(MSG_TYPE msgType)

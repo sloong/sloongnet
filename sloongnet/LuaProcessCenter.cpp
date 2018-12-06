@@ -40,7 +40,7 @@ void Sloong::CLuaProcessCenter::Initialize(IMessage* iMsg, IData* iData)
 	// 在处理开始之前根据队列情况拿到某lua环境的id并将其移除出可用队列
 	// 在处理完毕之后重新加回到可用队列中。
 	// 这里使用处理线程池的数量进行初始化，保证在所有线程都在处理Lua请求时不会因luacontext发生堵塞
-	for (int i = 0; i < m_pConfig->m_nProcessThreadQuantity; i++)
+	for (int i = 0; i < m_pConfig->m_nLuaProcessThreadQuantity; i++)
 		NewThreadInit();
 
 }

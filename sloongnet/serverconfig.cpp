@@ -214,6 +214,7 @@ void Sloong::CServerConfig::LoadConfig()
 
 	// Performance
 	m_nMessageCenterThreadQuantity = GetIntConfig("Performance", "MessageCenterThreadQuantity", m_nMessageCenterThreadQuantity);
+	m_nLuaProcessThreadQuantity = GetIntConfig("Performance", "LuaProcessThreadQuantity", m_nLuaProcessThreadQuantity);
 	m_nEPoolThreadQuantity = GetIntConfig("Performance", "EPoolThreadQuantity", m_nEPoolThreadQuantity);
 	m_nTimeoutInterval = GetIntConfig("Performance", "TimeoutInterval", m_nTimeoutInterval);	
 }

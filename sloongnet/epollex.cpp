@@ -11,7 +11,6 @@
 #include "lconnect.h"
 #include "sockinfo.h"
 #include "serverconfig.h"
-#include "progressbar.h"
 #include "NetworkEvent.h"
 #include "SendMessageEvent.h"
 
