@@ -4,12 +4,10 @@ using namespace Sloong::Events;
 
 CNormalEvent::CNormalEvent()
 {
-	cout << "NormalEvent()" <<endl;
 }
 
 CNormalEvent::~CNormalEvent()
 {
-	cout <<"~CNormalEvent()"<<endl;
 }
 
 void CNormalEvent::SetEvent(MSG_TYPE t)

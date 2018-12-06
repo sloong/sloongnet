@@ -14,8 +14,8 @@ namespace Sloong
 		class IEvent
 		{
 		public:
-			IEvent() { cout << "IEvent() called" <<endl;}
-			virtual ~IEvent() {cout << "~IEvent() called" <<endl;}
+			IEvent() {}
+			virtual ~IEvent() {}
 			virtual MSG_TYPE GetEvent() = 0;
 			// Get the handler object.
 			// it is pointer to the event register.
