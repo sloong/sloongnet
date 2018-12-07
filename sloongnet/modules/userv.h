@@ -34,10 +34,10 @@ namespace Sloong
 	protected:
 		int m_sockServ;
 		int* m_sockClient;
-		CControlCenter* m_pCC;
-		CDataCenter* m_pDC;
-		CMessageCenter* m_pMC;
-		CLog* m_pLog;
+		unique_ptr<CControlCenter> m_pCC;
+		unique_ptr<CDataCenter> m_pDC;
+		unique_ptr<CMessageCenter> m_pMC;
+		unique_ptr<CLog> m_pLog;
         mutex m_oExitEventMutex;
 		condition_variable m_oExitEventCV;
 		bool	m_bIsRunning;

@@ -6,7 +6,6 @@ typedef enum g_em_DataItem
 {
 	Configuation,
 	Logger,
-	GlobalFunctions,
 }DATA_ITEM;
 
 namespace Sloong

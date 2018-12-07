@@ -35,7 +35,7 @@ namespace Sloong
 
     typedef struct _PrepareSendInfo
     {
-        CSendInfo* pSendInfo;
+        shared_ptr<CSendInfo> pSendInfo;
         int nPriorityLevel;
     }PRESENDINFO;
 
@@ -49,8 +49,8 @@ namespace Sloong
 		CSockInfo( int nPriorityLevel );
 		~CSockInfo();
 
-        queue<CSendInfo*>* m_pSendList; // the send list of the bytes.
-        queue<PRESENDINFO>* m_pPrepareSendList;
+        queue<shared_ptr<CSendInfo>>* m_pSendList; // the send list of the bytes.
+        queue<PRESENDINFO> m_oPrepareSendList;
 
 		string m_Address;
 		int m_nPort;
@@ -58,7 +58,6 @@ namespace Sloong
 		shared_ptr<lConnect> m_pCon;
 
 		unique_ptr<CLuaPacket> m_pUserInfo;
-		//CLuaPacket* m_pUserInfo;
         mutex m_oSockReadMutex;
         mutex m_oSockSendMutex;
 		mutex m_oSendListMutex;

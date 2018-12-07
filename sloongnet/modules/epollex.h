@@ -50,12 +50,12 @@ namespace Sloong
 		void SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage);
 		void Exit();
         void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nExSize = 0 );
-		void ProcessPrepareSendList( CSockInfo* info );
+		void ProcessPrepareSendList( shared_ptr<CSockInfo> info );
 		/************************************************************************/
 		/* If need listen write event, return false, else return true
 		*/
 		/************************************************************************/
-		void ProcessSendList(CSockInfo* pInfo);
+		void ProcessSendList(shared_ptr<CSockInfo> pInfo);
 	protected:
 		/// 设置socket到非阻塞模式
 		int SetSocketNonblocking(int socket);
@@ -65,9 +65,9 @@ namespace Sloong
 		void CloseConnect(int socket);
 		/// 将响应消息加入到epoll发送列表中
 		void AddToSendList(int socket, int nPriority, const char* pBuf, int nSize, int nStart, const char* pExBuf, int nExSize);
-		int GetSendInfoList(CSockInfo* pInfo, queue<CSendInfo*>** list );
-		CSendInfo* GetSendInfo(CSockInfo* pInfo,queue<CSendInfo*>* list);
-		int SendPackage(CSockInfo* pInfo, CSendInfo* si);
+		int GetSendInfoList(shared_ptr<CSockInfo> pInfo, queue<shared_ptr<CSendInfo>>*& list );
+		shared_ptr<CSendInfo> GetSendInfo(shared_ptr<CSockInfo> pInfo,queue<shared_ptr<CSendInfo>>* list);
+		int SendPackage(shared_ptr<CSockInfo> pInfo, shared_ptr<CSendInfo> si);
 		// event function
 		void OnNewAccept();
 		void OnDataCanReceive( int nSocket );
@@ -85,7 +85,7 @@ namespace Sloong
 		epoll_event m_Events[1024];
 		CLog*		m_pLog;
 	public:
-		map<int, CSockInfo*> m_SockList;
+		map<int, shared_ptr<CSockInfo>> m_SockList;
         mutex m_oSockListMutex;
 		mutex m_oExitMutex;
 		condition_variable m_oExitCV;

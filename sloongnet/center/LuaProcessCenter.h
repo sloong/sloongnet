@@ -10,12 +10,13 @@ namespace Sloong
 {
 	using namespace Universal;
 	using namespace Interface;
-	class CServerConfig;
 	namespace Events
 	{
 		class CNetworkEvent;
 	}
 	using namespace Events;
+	class CServerConfig;
+	class CGlobalFunction;
 	class CLuaProcessCenter
 	{
 	public:
@@ -42,6 +43,7 @@ namespace Sloong
 		IMessage*		m_iMsg;
 		IData*			m_iData;
 		CServerConfig*	m_pConfig;
+		unique_ptr<CGlobalFunction> m_pGFunc;
 	};
 
 }

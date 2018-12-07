@@ -16,10 +16,10 @@ using namespace std;
 
 SloongWallUS::SloongWallUS()
 {
-	m_pLog = new CLog();
-    m_pCC = new CControlCenter();
-	m_pDC = new CDataCenter();
-	m_pMC = new CMessageCenter();
+	m_pLog = make_unique<CLog>();
+    m_pCC = make_unique<CControlCenter>();
+	m_pDC = make_unique<CDataCenter>();
+	m_pMC = make_unique<CMessageCenter>();
 	m_bIsRunning = false;
 }
 
@@ -27,11 +27,7 @@ SloongWallUS::~SloongWallUS()
 {
 	Exit();
 	CThreadPool::Exit();
-	SAFE_DELETE(m_pCC);
-	SAFE_DELETE(m_pDC);
-	SAFE_DELETE(m_pMC);
     m_pLog->End();
-	SAFE_DELETE(m_pLog);
 }
 
 
@@ -47,14 +43,14 @@ void SloongWallUS::Initialize(CServerConfig* config)
 		m_pLog->EnableNetworkLog(config->m_oLogInfo.NetworkPort);
 
 	m_pDC->Add(Configuation, config);
-	m_pDC->Add(Logger, m_pLog);
+	m_pDC->Add(Logger, m_pLog.get());
 	
-	m_pMC->Initialize(m_pDC);
+	m_pMC->Initialize(m_pDC.get());
 	m_pMC->RegisterEvent(ProgramExit);
 	m_pMC->RegisterEvent(ProgramStart);
 	m_pMC->RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&SloongWallUS::EventHandler, this, std::placeholders::_1));
 
-	m_pCC->Initialize(m_pMC, m_pDC);
+	m_pCC->Initialize(m_pMC.get(), m_pDC.get());
 }
 
 void SloongWallUS::Run()

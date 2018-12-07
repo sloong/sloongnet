@@ -9,7 +9,6 @@ namespace Sloong
 	using namespace Interface;
 	class CEpollEx;
 	class CLuaProcessCenter;
-	class CGlobalFunction;
 	class CServerConfig;
 	class CControlCenter
 	{
@@ -26,9 +25,8 @@ namespace Sloong
 		IMessage * m_iM;
 		IData* m_iData;
 		CLog*	m_pLog;
-		CEpollEx* m_pEpoll;
-		CLuaProcessCenter* m_pProcess;
-		CGlobalFunction* m_pGFunc;
+		unique_ptr<CEpollEx> m_pEpoll;
+		unique_ptr<CLuaProcessCenter> m_pProcess;
 		CServerConfig* m_pConfig;
 	};
 }

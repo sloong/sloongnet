@@ -10,6 +10,7 @@ CLog* Sloong::CLuaProcessCenter::m_pLog = nullptr;
 
 CLuaProcessCenter::CLuaProcessCenter()
 {
+	m_pGFunc = make_unique<CGlobalFunction>();
 }
 
 
@@ -27,6 +28,7 @@ void Sloong::CLuaProcessCenter::Initialize(IMessage* iMsg, IData* iData)
 	m_iMsg = iMsg;
 	m_iData = iData;
 
+	m_pGFunc->Initialize(m_iMsg, m_iData);
 	m_pLog = TYPE_TRANS<CLog*>(m_iData->Get(DATA_ITEM::Logger));
 	m_pConfig = TYPE_TRANS<CServerConfig*>(iData->Get(DATA_ITEM::Configuation));
 
@@ -67,8 +69,7 @@ int Sloong::CLuaProcessCenter::NewThreadInit()
 	CLua* pLua = new CLua();
 	pLua->SetErrorHandle(HandleError);
 	pLua->SetScriptFolder(m_pConfig->m_oLuaConfigInfo.ScriptFolder);
-	auto pGFunc = TYPE_TRANS<CGlobalFunction*>(m_iData->Get(GlobalFunctions));
-	pGFunc->RegistFuncToLua(pLua);
+	m_pGFunc->RegistFuncToLua(pLua);
 	InitLua(pLua, m_pConfig->m_oLuaConfigInfo.ScriptFolder);
 	m_pLuaList.push_back(pLua);
 	m_oReloadList.push_back(false);

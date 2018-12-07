@@ -196,7 +196,7 @@ void Sloong::CEpollEx::CheckTimeoutWorkLoop(SMARTER param)
 		m_pLog->Verbos("Check connect timeout start.");
 		RecheckTimeout:
 		unique_lock<mutex> sockLck(m_oSockListMutex);
-		for (map<int, CSockInfo*>::iterator it = m_SockList.begin(); it != m_SockList.end(); ++it)
+		for (map<int, shared_ptr<CSockInfo>>::iterator it = m_SockList.begin(); it != m_SockList.end(); ++it)
 		{
 			if (it->second != NULL && time(NULL) - it->second->m_ActiveTime > tout)
 			{
@@ -267,7 +267,7 @@ void Sloong::CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, st
 		pCpyPoint += 8;
 	}
 
-	CSockInfo* pInfo = NULL;
+	shared_ptr<CSockInfo> pInfo = nullptr;
 	
 	if (m_pConfig->m_oLogInfo.ShowSendMessage)
 	{
@@ -292,7 +292,7 @@ void Sloong::CEpollEx::SendMessage(int sock, int nPriority, long long nSwift, st
 			return;
 		}
 		// check the send list size. if all empty, try send message directly.
-		if ((pInfo->m_bIsSendListEmpty == false && !pInfo->m_pPrepareSendList->empty()) || pInfo->m_oSockSendMutex.try_lock() == false)
+		if ((pInfo->m_bIsSendListEmpty == false && !pInfo->m_oPrepareSendList.empty()) || pInfo->m_oSockSendMutex.try_lock() == false)
 		{
 			AddToSendList(sock, nPriority, pBuf, nBufLen, 0, pExData, nExSize);
 			return;
@@ -321,9 +321,9 @@ void Sloong::CEpollEx::AddToSendList(int socket, int nPriority, const char *pBuf
 	if (pBuf == NULL || nSize <= 0)
 		return;
 
-	CSockInfo* info = m_SockList[socket];
+	auto info = m_SockList[socket];
 	unique_lock<mutex> lck(info->m_oPreSendMutex);
-	CSendInfo *si = new CSendInfo();
+	auto si = make_shared<CSendInfo>();
 	si->nSent = nStart;
 	si->nSize = nSize;
 	si->pSendBuffer = pBuf;
@@ -333,8 +333,8 @@ void Sloong::CEpollEx::AddToSendList(int socket, int nPriority, const char *pBuf
 	PRESENDINFO psi;
 	psi.pSendInfo = si;
 	psi.nPriorityLevel = nPriority;
-	info->m_pPrepareSendList->push(psi);
-	m_pLog->Debug(CUniversal::Format("Add send package to prepare send list. list size:[%d]",info->m_pPrepareSendList->size()));
+	info->m_oPrepareSendList.push(psi);
+	m_pLog->Debug(CUniversal::Format("Add send package to prepare send list. list size:[%d]",info->m_oPrepareSendList.size()));
 	info->m_bIsSendListEmpty = false;
 	SetSocketNonblocking(socket);
 	// 只有在需要使用EPoll来发送数据的时候才去添加EPOLLOUT标志
@@ -382,7 +382,7 @@ void Sloong::CEpollEx::OnNewAccept()
 			}
 		}
 
-		CSockInfo* info = new CSockInfo(m_pConfig->m_nPriorityLevel);
+		auto info = make_shared<CSockInfo>(m_pConfig->m_nPriorityLevel);
 		info->m_Address = CUtility::GetSocketIP(conn_sock);
 		info->m_nPort = CUtility::GetSocketPort(conn_sock);
 		info->m_ActiveTime = time(NULL);
@@ -405,7 +405,7 @@ void Sloong::CEpollEx::OnNewAccept()
 
 void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 {
-	CSockInfo* info = m_SockList[nSocket];
+	shared_ptr<CSockInfo> info = m_SockList[nSocket];
 	if( info == nullptr )
 	{
 		m_pLog->Error("Error in DataCanReceive functions. the socketlist is null");
@@ -536,7 +536,7 @@ void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 void Sloong::CEpollEx::OnCanWriteData(int nSocket)
 {
 	// 可以写入事件
-	CSockInfo* info = m_SockList[nSocket];
+	shared_ptr<CSockInfo> info = m_SockList[nSocket];
 
 	if (info == NULL)
 		return;
@@ -545,25 +545,25 @@ void Sloong::CEpollEx::OnCanWriteData(int nSocket)
 	ProcessSendList(info);
 }
 
-void Sloong::CEpollEx::ProcessPrepareSendList(CSockInfo* info)
+void Sloong::CEpollEx::ProcessPrepareSendList(shared_ptr<CSockInfo> info)
 {
 	// progress the prepare send list first
-	if (!info->m_pPrepareSendList->empty())
+	if (!info->m_oPrepareSendList.empty())
 	{
 		unique_lock<mutex> prelck(info->m_oPreSendMutex);
-		if (info->m_pPrepareSendList->empty())
+		if (info->m_oPrepareSendList.empty())
 		{
 			return;
 		}
 		unique_lock<mutex> sendListlck(info->m_oSendListMutex);
 		
-		while (!info->m_pPrepareSendList->empty())
+		while (!info->m_oPrepareSendList.empty())
 		{
-			PRESENDINFO* psi = &info->m_pPrepareSendList->front();
-			info->m_pPrepareSendList->pop();
+			PRESENDINFO* psi = &info->m_oPrepareSendList.front();
+			info->m_oPrepareSendList.pop();
 			info->m_pSendList[psi->nPriorityLevel].push(psi->pSendInfo);
 			m_pLog->Debug(CUniversal::Format("Add send package to send list[%d]. send list size[%d], prepare send list size[%d]",
-								psi->nPriorityLevel,info->m_pSendList[psi->nPriorityLevel].size(),info->m_pPrepareSendList->size()));
+								psi->nPriorityLevel,info->m_pSendList[psi->nPriorityLevel].size(),info->m_oPrepareSendList.size()));
 		}
 		prelck.unlock();
 		sendListlck.unlock();
@@ -575,15 +575,15 @@ void Sloong::CEpollEx::ProcessPrepareSendList(CSockInfo* info)
 /// 获取发送信息列表
 // 首先判断上次发送标志，如果不为-1，表示上次的发送列表没有发送完成。直接返回指定的列表
 // 如果为-1，表示需要发送新的列表。按照优先级逐级的进行寻找。
-int Sloong::CEpollEx::GetSendInfoList(CSockInfo* pInfo, queue<CSendInfo*>** list )
+int Sloong::CEpollEx::GetSendInfoList(shared_ptr<CSockInfo> pInfo, queue<shared_ptr<CSendInfo>>*& list )
 {
-	*list = nullptr;
+	list = nullptr;
 	// prev package no send end. find and try send it again.
 	if (-1 != pInfo->m_nLastSentTags)
 	{
 		m_pLog->Verbos(CUniversal::Format("Send prev time list, Priority level:%d", pInfo->m_nLastSentTags));
-		*list = &pInfo->m_pSendList[pInfo->m_nLastSentTags];
-		if( (*list)->empty() )
+		list = &pInfo->m_pSendList[pInfo->m_nLastSentTags];
+		if( list->empty() )
 			pInfo->m_nLastSentTags = -1;
 		else
 			return pInfo->m_nLastSentTags;
@@ -595,7 +595,7 @@ int Sloong::CEpollEx::GetSendInfoList(CSockInfo* pInfo, queue<CSendInfo*>** list
 			continue;
 		else
 		{
-			*list = &pInfo->m_pSendList[i];
+			list = &pInfo->m_pSendList[i];
 			m_pLog->Verbos(CUniversal::Format("Send list, Priority level:%d", i));
 			return i;
 		}
@@ -604,16 +604,16 @@ int Sloong::CEpollEx::GetSendInfoList(CSockInfo* pInfo, queue<CSendInfo*>** list
 }
 
 
-CSendInfo* Sloong::CEpollEx::GetSendInfo(CSockInfo* pInfo,queue<CSendInfo*>* list)
+shared_ptr<CSendInfo> Sloong::CEpollEx::GetSendInfo(shared_ptr<CSockInfo> pInfo,queue<shared_ptr<CSendInfo>>* list)
 {
-	CSendInfo* si = NULL;
-	while (si == NULL)
+	shared_ptr<CSendInfo> si = nullptr;
+	while (si == nullptr)
 	{
 		if (!list->empty())
 		{
 			m_pLog->Verbos(CUniversal::Format("Get send info from list, list size[%d].", list->size()));
 			si = list->front();
-			if (si == NULL)
+			if (si == nullptr)
 			{
 				m_pLog->Verbos("The list front is NULL, pop it and get next.");
 				list->pop();
@@ -626,7 +626,7 @@ CSendInfo* Sloong::CEpollEx::GetSendInfo(CSockInfo* pInfo,queue<CSendInfo*>* lis
 			break;
 		}
 	}
-	if (si == NULL)
+	if (si == nullptr)
 	{
 		if (pInfo->m_nLastSentTags != -1)
 		{
@@ -648,7 +648,7 @@ CSendInfo* Sloong::CEpollEx::GetSendInfo(CSockInfo* pInfo,queue<CSendInfo*>* lis
 // 发送失败返回-1；需要关闭连接
 // 需要再次发送返回0；需要监听可写信息
 // 发送完成返回1；需要监听可读信息
-int Sloong::CEpollEx::SendPackage(CSockInfo* pInfo, CSendInfo* si)
+int Sloong::CEpollEx::SendPackage(shared_ptr<CSockInfo> pInfo, shared_ptr<CSendInfo> si)
 {
 	unique_lock<mutex> lck(pInfo->m_oSockSendMutex);
 
@@ -717,7 +717,7 @@ int Sloong::CEpollEx::SendPackage(CSockInfo* pInfo, CSendInfo* si)
 }
 
 
-void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
+void Sloong::CEpollEx::ProcessSendList(shared_ptr<CSockInfo> pInfo)
 {
 	// when prepare list process done, do send operation.
 	
@@ -728,19 +728,17 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 	{
 		unique_lock<mutex> lck(pInfo->m_oSendListMutex);
 
-		queue<CSendInfo*>* list = nullptr;
-		int sendTags = GetSendInfoList(pInfo,&list);
-		if (list == NULL)
+		queue<shared_ptr<CSendInfo>>* list = nullptr;
+		int sendTags = GetSendInfoList(pInfo,list);
+		if (list == nullptr)
 		{
 			m_pLog->Error("Send info list empty, no need send.");
 			break;
 		}
 
 		// if no find send info, is no need send anything , remove this sock from epoll.'
-		CSendInfo* si = NULL;
-		
-		si = GetSendInfo(pInfo,list);
-		if ( si != NULL )
+		auto si = GetSendInfo(pInfo,list);
+		if ( si != nullptr )
 		{
 			lck.unlock();
 			int res = SendPackage(pInfo, si);
@@ -764,7 +762,6 @@ void Sloong::CEpollEx::ProcessSendList(CSockInfo* pInfo)
 			{
 				list->pop();
 				pInfo->m_nLastSentTags = -1;
-				SAFE_DELETE(si);
 				bTrySend = true;
 			}		
 		}
@@ -779,7 +776,7 @@ void Sloong::CEpollEx::CloseConnect(int socket)
 	if (item == m_SockList.end())
 		return;
 
-	CSockInfo* info = m_SockList[socket];
+	shared_ptr<CSockInfo> info = m_SockList[socket];
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList.erase(item);
 	sockLck.unlock();
@@ -796,7 +793,6 @@ void Sloong::CEpollEx::CloseConnect(int socket)
 	event->SetSocketInfo(info);
 	event->SetHandler(this);
 	m_iMsg->SendMessage(event);
-	SAFE_DELETE(info);
 }
 
 

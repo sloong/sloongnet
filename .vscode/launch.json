@@ -9,14 +9,14 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/sloongnet/sloongnet",
+            "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
                     "-r",
                     "default.conf",
                     "/home/dev/projects/walls-service/ex-develop.conf"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/sloongnet",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

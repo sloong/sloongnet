@@ -38,7 +38,7 @@ LIBS   = -lm -ldl -llua5.3 -lglib-2.0 -luniv -luuid -lpthread -lssl -lcrypto
 INCLUDE_DIR = -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
 
 # The options used in linking as well as in any direct use of ld.
-LDFLAGS   = -L/usr/local/lib/sloong -Wl,-rpath=/usr/local/lib/sloong -L/usr/lib64/mysql -Wl,-rpath=/usr/lib64/mysql
+LDFLAGS   = -L/usr/local/lib/sloong -Wl,-rpath=/usr/local/lib/sloong
 
 # The directories in which source files reside.
 # If not specified, only the current directory will be serached.

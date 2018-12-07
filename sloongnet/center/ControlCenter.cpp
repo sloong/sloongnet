@@ -13,17 +13,13 @@ using namespace Sloong::Events;
 
 CControlCenter::CControlCenter()
 {
-	m_pEpoll = new CEpollEx();
-	m_pProcess = new CLuaProcessCenter();
-	m_pGFunc = new CGlobalFunction();
+	m_pEpoll = make_unique<CEpollEx>();
+	m_pProcess = make_unique<CLuaProcessCenter>();
 }
 
 
 CControlCenter::~CControlCenter()
 {
-	SAFE_DELETE(m_pEpoll);
-	SAFE_DELETE(m_pProcess);
-	SAFE_DELETE(m_pGFunc);
 }
 
 void Sloong::CControlCenter::Initialize(IMessage* iM,IData* iData)
@@ -34,8 +30,6 @@ void Sloong::CControlCenter::Initialize(IMessage* iM,IData* iData)
 	m_pConfig = (CServerConfig*)m_iData->Get(Configuation);
 	m_pLog = (CLog*)m_iData->Get(Logger);
 	m_pEpoll->Initialize(m_iM,m_iData);
-	m_pGFunc->Initialize(m_iM, m_iData);
-	m_iData->Add(GlobalFunctions, m_pGFunc);
 
 	m_pProcess->Initialize(m_iM, m_iData);
 	if (m_pConfig->m_bEnableSSL)
@@ -56,7 +50,7 @@ void Sloong::CControlCenter::Initialize(IMessage* iM,IData* iData)
 void Sloong::CControlCenter::OnReceivePackage(SmartEvent evt)
 {	
 	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(evt);
-	CSockInfo* info = net_evt->GetSocketInfo();
+	auto info = net_evt->GetSocketInfo();
 	if (!info)
 	{
 		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
@@ -102,7 +96,7 @@ void Sloong::CControlCenter::OnReceivePackage(SmartEvent evt)
 void Sloong::CControlCenter::OnSocketClose(SmartEvent event)
 {
 	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
-	CSockInfo* info = net_evt->GetSocketInfo();
+	auto info = net_evt->GetSocketInfo();
 	if (!info)
 	{
 		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
