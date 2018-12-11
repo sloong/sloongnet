@@ -4,45 +4,55 @@ show_help(){
 	echo -e "param error! \n-r: to build release version \n-d: to build debug version \n-rz: build release to tar.gz\n-dz: build debug to tar.gz"
 }
 
-# default value is release
-VERSION_STR=$(cat version)
-OUTPATH=sloongnet_v$VERSION_STR
-TARGPATH=sloongnet
-MAKEFLAG=release
+# default value is debug
+VERSION_STR=$(cat ../version)
+PROJECT=sloongnet
+MAKEFLAG=debug
+CMAKE_FILE_PATH=../$PROJECT
+
+clean(){
+	rm -rdf $MAKEFLAG
+}
 
 build(){
-	cd $TARGPATH
-	make clean
-	make $MAKEFLAG
-	cd ..
-	rm -rdf $OUTPATH
-	mkdir -p $OUTPATH
-	cp -f $TARGPATH/sloongnet $OUTPATH/sloongnet
-	cp -rf $TARGPATH/scripts $OUTPATH/scripts
-	cp -f $TARGPATH/default.conf $OUTPATH/default.conf
-	cp -f install.sh $OUTPATH/install.sh
+	mkdir $MAKEFLAG
+	cd $MAKEFLAG
+	cmake -DCMAKE_BUILD_TYPE=$MAKEFLAG ../$CMAKE_FILE_PATH
+	make
+	cd ../
 }
 
 build_debug(){
-	OUTPATH=sloongnet_debug_v$VERSION_STR
+	OUTPATH=$PROJECT-debug-v$VERSION_STR
 	MAKEFLAG=debug
+	clean
+	build
+}
+
+build_release(){
+	OUTPATH=$PROJECT-v$VERSION_STR
+	MAKEFLAG=release
+	clean
 	build
 }
 
 zip(){
-	tar -czf sloongnet_v$VERSION_STR.tar.gz $OUTPATH/*
+	tar -cf $OUTPATH.tar -C $MAKEFLAG/ $PROJECT
+	tar -rf $OUTPATH.tar -C $CMAKE_FILE_PATH/ scripts
+	tar -rf $OUTPATH.tar -C $CMAKE_FILE_PATH/../ default.conf
+	tar -rf $OUTPATH.tar install.sh
 }
 
 
 if [ $# -lt 1 ]
 then
-	show_help
+	build
 else
 	case $1 in 
-		-r) build;;
+		-r) build_release;;
 		-d) build_debug;;
 		-rz) 
-			build
+			build_release
 			zip;;
 		-dz) 
 			build_debug

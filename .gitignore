@@ -25,11 +25,8 @@
 *.exe
 *.out
 *.app
-Debug
 *.log
 *.sdf
-/CodeDB/
-/sloongnet/VisualGDBCache/
 *.suo
 *.opensdf
 *.db
@@ -37,8 +34,5 @@ Debug
 *.ipch
 .vs
 
-/sloongnet/*.old
-sloongnet_v*
-sloongnet_debug*
-sloongnet/sloongnet
 build/debug
+build/release/
