@@ -14,9 +14,9 @@ namespace Sloong
 		~lSmartSync() {}
 
 		void wait();
-		// ·µ»ØÖµ£º
-		//  true £ºÊ±¼ä´¥·¢·µ»Ø 
-		//  false £º³¬Ê±·µ»Ø 
+		// è¿”å›žå€¼ï¼š
+		//  true ï¼šæ—¶é—´è§¦å‘è¿”å›ž 
+		//  false ï¼šè¶…æ—¶è¿”å›ž 
 		bool wait_for(int nSecond);
 		void notify_one();
 		void notify_all();
