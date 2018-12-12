@@ -20,6 +20,8 @@ using namespace std;
 #include <univ/exception.h>
 #include <univ/threadpool.h>
 #include <univ/hash.h>
+#include <univ/lua.h>
+#include <univ/luapacket.h>
 using namespace Sloong;
 using namespace Sloong::Universal;
 

@@ -1,8 +1,9 @@
 #pragma once
 #include "NormalEvent.h"
+#include "main.h"
 namespace Sloong
 {
-	class CSockInfo;
+	class CDataTransPackage;
 	namespace Events
 	{
 		class CNetworkEvent : public CNormalEvent
@@ -15,19 +16,19 @@ namespace Sloong
 			int GetSocketID() { return m_nSocketID; }
 			void SetSocketID(int id) { m_nSocketID = id; }
 
-			shared_ptr<CSockInfo> GetSocketInfo();
-			void SetSocketInfo(shared_ptr<CSockInfo> info);
+			CLuaPacket* GetUserInfo();
+			void SetUserInfo(CLuaPacket* info);
 
 			int GetPriority() { return m_nPriority; }
 			void SetPriority(int n) { m_nPriority = n; }
 
-			RECVINFO* GetRecvPackage() { return &m_oInfo; };
-			void SetRecvPackage(RECVINFO info) { m_oInfo = info; };
+			shared_ptr<CDataTransPackage> GetRecvPackage() { return m_pData; };
+			void SetRecvPackage(shared_ptr<CDataTransPackage> data) { m_pData = data; };
 		protected:
 			int m_nSocketID;
-			shared_ptr<CSockInfo> m_pInfo;
+			CLuaPacket* m_pInfo;
 			int m_nPriority;
-			RECVINFO m_oInfo;
+			shared_ptr<CDataTransPackage> m_pData;
 		};
 
 	}

@@ -11,12 +11,12 @@ CNetworkEvent::~CNetworkEvent()
 {
 }
 
-shared_ptr<CSockInfo> Sloong::Events::CNetworkEvent::GetSocketInfo()
+CLuaPacket* Sloong::Events::CNetworkEvent::GetUserInfo()
 {
 	return m_pInfo;
 }
 
-void Sloong::Events::CNetworkEvent::SetSocketInfo(shared_ptr<CSockInfo> info)
+void Sloong::Events::CNetworkEvent::SetUserInfo(CLuaPacket* info)
 {
 	m_pInfo = info;
 }

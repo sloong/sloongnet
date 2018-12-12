@@ -36,7 +36,6 @@ void Sloong::CLuaProcessCenter::Initialize(IMessage* iMsg, IData* iData)
 	m_iMsg->RegisterEvent(MSG_TYPE::ReloadLuaContext);
 	//m_iMsg->RegisterEventHandler(ProcessMessage, this, EventHandler);
 	m_iMsg->RegisterEventHandler(ReloadLuaContext, std::bind(&CLuaProcessCenter::ReloadContext,this,std::placeholders::_1));
-	//m_iMsg->RegisterEventHandler(ReveivePackage, this, EventHandler);
 	// 主要的循环方式为，根据输入的处理数来初始化指定数量的lua环境。
 	// 然后将其加入到可用队列
 	// 在处理开始之前根据队列情况拿到某lua环境的id并将其移除出可用队列

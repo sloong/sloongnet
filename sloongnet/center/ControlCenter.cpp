@@ -7,6 +7,7 @@
 #include "NetworkEvent.h"
 #include "SendMessageEvent.h"
 #include "sockinfo.h"
+#include "DataTransPackage.h"
 using namespace Sloong;
 using namespace Sloong::Universal;
 using namespace Sloong::Events;
@@ -50,13 +51,13 @@ void Sloong::CControlCenter::Initialize(IMessage* iM,IData* iData)
 void Sloong::CControlCenter::OnReceivePackage(SmartEvent evt)
 {	
 	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(evt);
-	auto info = net_evt->GetSocketInfo();
+	auto info = net_evt->GetUserInfo();
 	if (!info)
 	{
 		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
 		return;
 	}
-	RECVINFO* pack = net_evt->GetRecvPackage();
+	SmartPackage pack = net_evt->GetRecvPackage();
 	auto send_evt = make_shared<CSendMessageEvent>(net_evt->GetSocketID(), net_evt->GetPriority(), pack->nSwiftNumber);
 	if (m_pConfig->m_bEnableMD5Check)
 	{
@@ -77,7 +78,7 @@ void Sloong::CControlCenter::OnReceivePackage(SmartEvent evt)
 	string strRes("");
 	char* pExData = nullptr;
 	int nExSize;
-	if (m_pProcess->MsgProcess(info->m_pUserInfo.get(), pack->strMessage, strRes, pExData, nExSize))
+	if (m_pProcess->MsgProcess(info, pack->strMessage, strRes, pExData, nExSize))
 	{
 		if (pExData && nExSize > 0 )
 		{
@@ -96,14 +97,14 @@ void Sloong::CControlCenter::OnReceivePackage(SmartEvent evt)
 void Sloong::CControlCenter::OnSocketClose(SmartEvent event)
 {
 	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
-	auto info = net_evt->GetSocketInfo();
+	auto info = net_evt->GetUserInfo();
 	if (!info)
 	{
 		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
 		return;
 	}
 	// call close function.
-	m_pProcess->CloseSocket(info->m_pUserInfo.get());
+	m_pProcess->CloseSocket(info);
 	net_evt->CallCallbackFunc(net_evt);
 }
 

@@ -36,3 +36,4 @@
 
 build/debug
 build/release/
+build/*.tar

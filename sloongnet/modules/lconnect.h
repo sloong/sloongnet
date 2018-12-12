@@ -6,6 +6,7 @@
 // include the openssl file before inclue this file
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <memory>
 
 using namespace std;
 namespace Sloong
@@ -31,22 +32,22 @@ namespace Sloong
 		lConnect();
 		~lConnect();
 
-		// ��ʼ�����Ӷ���
-		// �����Ҫ����SSL֧�֣���ô��Ҫ����ָ����ctx���������򱣳��Ϳռ��ɡ�
+		// 初始化链接对象
+		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
 		void Initialize( int sock, SSL_CTX* ctx);
 
-		// ��ȡ�Զ˷��͵����ݣ�����ʵ�ʶ�ȡ���ĳ���
-		// ����������֤���ݻ�ȫ����ȡ��ɲŷ��ء�ֻ�᳢�Ծ����ܶ�Ķ�ȡ��ֱ������������߶�ȥ��ɡ�������Ҫ���������ȡ�ĳ��Ⱥ�ʵ�ʶ�ȡ�ĳ���
-		// Return��
-		//	  -1 - ��ȡ�����������޷��ָ�����Ҫ�ر����ӡ�
-		//    >= 0 - ��ȡ�������ݳ���
+		// 读取对端发送的数据，返回实际读取到的长度
+		// 函数并不保证数据会全部读取完成才返回。只会尝试尽可能多的读取，直到发生错误或者都去完成。所以需要检查期望读取的长度和实际读取的长度
+		// Return：
+		//	  -1 - 读取发生错误。且无法恢复。需要关闭连接。
+		//    >= 0 - 读取到的数据长度
 		int Read(char* data, int len, int timeout, bool bagain = false);
 
-		// ��Զ˷������ݣ�����ʵ�ʷ��͵ĳ���
-		// ����������֤���ݻ�ȫ��������ɲŷ��ء�ֻ�ܳ��Ծ����ܶ�ķ��ͣ�ֱ�������������ȫ��������ɡ���Ҫ����������͵ĳ��Ⱥ�ʵ�ʷ��͵ĳ���
-		// Return��
-		//    -1 - ��ȡ�����������޷��ָ�����Ҫ�ر����ӡ�
-		//    >=0 - �ɹ����͵����ݳ���
+		// 向对端发送数据，返回实际发送的长度
+		// 函数并不保证数据会全部发送完成才返回。只能尝试尽可能多的发送，直到发生错误或者全部发送完成。需要检查期望发送的长度和实际发送的长度
+		// Return：
+		//    -1 - 读取发生错误。且无法恢复。需要关闭连接。
+		//    >=0 - 成功发送的数据长度
 		int Write(const char* data, int len, int index);
 
 		void Close();
@@ -75,6 +76,8 @@ namespace Sloong
 
 		ConnectStatus m_stStatus;
 	};
+
+	typedef shared_ptr<lConnect> SmartConnect;
 
 }
 

@@ -11,6 +11,7 @@ T TYPE_TRANS(LPVOID p)
 }
 
 
+const int s_llLen = 8;
 
 typedef enum g_DataCenter_MsgType
 {
@@ -65,13 +66,6 @@ struct LogConfigInfo
 	string	LogPath;
 	int		NetworkPort;
 };
-
-typedef struct _stRecvInfo
-{
-	long long nSwiftNumber = -1;
-	string strMD5 = "";
-	string strMessage = "";
-}RECVINFO;
 
 enum RecvStatus
 {

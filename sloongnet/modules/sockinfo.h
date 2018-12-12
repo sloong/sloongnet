@@ -7,35 +7,23 @@
 #include <memory>
 #include "lconnect.h"
 #include "defines.h"
+#include "DataTransPackage.h"
 using std::string;
 using std::mutex;
 using std::vector;
 using std::queue;
+#include "IMessage.h"
+using namespace Sloong::Interface;
+
 namespace Sloong
 {
 	namespace Universal
 	{
 		class CLuaPacket;
 	}
-    class CSendInfo
-    {
-		public:
-		CSendInfo(){};
-		~CSendInfo(){
-			SAFE_DELETE_ARR(pSendBuffer);
-			SAFE_DELETE_ARR(pExBuffer);
-		}
-        const char* pSendBuffer=nullptr;
-        int nSize=0;
-		const char* pExBuffer=nullptr;
-		int nExSize=0;
-        int nSent=0;  // is send
-		int nPackSize=0;
-    };
-
     typedef struct _PrepareSendInfo
     {
-        shared_ptr<CSendInfo> pSendInfo;
+        shared_ptr<CDataTransPackage> pSendInfo;
         int nPriorityLevel;
     }PRESENDINFO;
 
@@ -46,10 +34,21 @@ namespace Sloong
 	private:
 		CSockInfo(){}
 	public:
-		CSockInfo( int nPriorityLevel );
+		CSockInfo( int nPriorityLevel,CLog* log, IMessage* msg );
 		~CSockInfo();
 
-        queue<shared_ptr<CSendInfo>>* m_pSendList; // the send list of the bytes.
+		/**
+		 * @Remarks: When data can receive, should call this function to receive the package.
+		 * @Params: 
+		 * @Return: if receive done, return ture.
+		 * 		if happened errors, return false.
+		 */
+		bool OnDataCanReceive();
+
+
+
+
+        queue<shared_ptr<CDataTransPackage>>* m_pSendList; // the send list of the bytes.
         queue<PRESENDINFO> m_oPrepareSendList;
 
 		string m_Address;
@@ -65,6 +64,10 @@ namespace Sloong
 		int m_nPriorityLevel;
 		int m_nLastSentTags = -1;
         bool m_bIsSendListEmpty = true;
+
+		protected:
+		CLog*	m_pLog;
+		IMessage* m_iMsg;
 	};
 
 }

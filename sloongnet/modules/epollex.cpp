@@ -21,7 +21,6 @@ using namespace Sloong;
 using namespace Sloong::Universal;
 using namespace Sloong::Events;
 
-const int s_llLen = 8;
 
 Sloong::CEpollEx::CEpollEx()
 {
@@ -323,7 +322,7 @@ void Sloong::CEpollEx::AddToSendList(int socket, int nPriority, const char *pBuf
 
 	auto info = m_SockList[socket];
 	unique_lock<mutex> lck(info->m_oPreSendMutex);
-	auto si = make_shared<CSendInfo>();
+	auto si = make_shared<CDataTransPackage>(info->m_pCon);
 	si->nSent = nStart;
 	si->nSize = nSize;
 	si->pSendBuffer = pBuf;
@@ -382,7 +381,7 @@ void Sloong::CEpollEx::OnNewAccept()
 			}
 		}
 
-		auto info = make_shared<CSockInfo>(m_pConfig->m_nPriorityLevel);
+		auto info = make_shared<CSockInfo>(m_pConfig->m_nPriorityLevel,m_pLog,m_iMsg);
 		info->m_Address = CUtility::GetSocketIP(conn_sock);
 		info->m_nPort = CUtility::GetSocketPort(conn_sock);
 		info->m_ActiveTime = time(NULL);
@@ -406,131 +405,14 @@ void Sloong::CEpollEx::OnNewAccept()
 void Sloong::CEpollEx::OnDataCanReceive(int nSocket)
 {
 	shared_ptr<CSockInfo> info = m_SockList[nSocket];
-	if( info == nullptr )
-	{
-		m_pLog->Error("Error in DataCanReceive functions. the socketlist is null");
-		CloseConnect(nSocket);
+
+	if (info == NULL)
 		return;
-	}
-	// The app is used ET mode, so should wait the mutex. 
-	unique_lock<mutex> srlck(info->m_oSockReadMutex);
-
-	auto pid = this_thread::get_id();
-	string spid = CUniversal::ntos(pid);
-
-	// 已经连接的用户,收到数据,可以开始读入
-	char* pLongBuffer = new char[s_llLen + 1]();//dataLeng;
-	bool bLoop = false;
-	do 
+ 
+	if( !info->OnDataCanReceive())
 	{
-		// 先读取消息长度
-		memset(pLongBuffer, 0, s_llLen + 1);
-		int nRecvSize = info->m_pCon->Read( pLongBuffer, s_llLen, 2);
-		if (nRecvSize < 0)
-		{
-			// 读取错误,将这个连接从监听中移除并关闭连接
-			CloseConnect(nSocket);
-			break;
-		}
-		else if (nRecvSize == 0)
-		{
-			//由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
-			break;
-		}
-		else
-		{
-			bLoop = true;
-			long long dtlen = CUniversal::BytesToLong(pLongBuffer);
-			// package length cannot big than 2147483648. this is max value for int.
-			if (dtlen <= 0 || dtlen > 2147483648 || nRecvSize != s_llLen)
-			{
-				m_pLog->Error("Receive data length error.");
-				CloseConnect(nSocket);
-				break;
-			}
-			char* data = new char[dtlen + 1];
-			memset(data, 0, dtlen + 1);
-
-			nRecvSize = info->m_pCon->Read(data, dtlen, m_pConfig->m_nReceiveTimeout, true);//一次性接受所有消息
-			if (nRecvSize < 0)
-			{
-				CloseConnect(nSocket);
-				break;
-			}
-			else if(nRecvSize != dtlen )
-			{
-				m_pLog->Warn(CUniversal::Format("Receive all data is timeout. recved lenght %d, data length %d",nRecvSize, dtlen));
-				CloseConnect(nSocket);
-				break;
-			}
-
-			int nPriority = 0;
-			RECVINFO recvInfo;
-
-			const char* pMsg = NULL;
-			// check the priority level
-			if (m_pConfig->m_nPriorityLevel != 0)
-			{
-				char pLevel[2] = { 0 };
-				pLevel[0] = data[0];
-				int level = pLevel[0];
-				if (level > m_pConfig->m_nPriorityLevel || level < 0)
-				{
-					m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", level, m_pConfig->m_nPriorityLevel));
-					nPriority = m_pConfig->m_nPriorityLevel - 1;
-				}
-				else
-				{
-					nPriority = level;
-				}
-				pMsg = &data[1];
-			}
-			else
-			{
-				nPriority = 0;
-				pMsg = data;
-			}
-
-			if (m_pConfig->m_bEnableSwiftNumberSup)
-			{
-				memset(pLongBuffer, 0, s_llLen);
-				memcpy(pLongBuffer, pMsg, s_llLen);
-				recvInfo.nSwiftNumber = CUniversal::BytesToLong(pLongBuffer);
-				pMsg += s_llLen;
-			}
-
-			if (m_pConfig->m_bEnableMD5Check)
-			{
-				char tmd5[33] = { 0 };
-				memcpy(tmd5, pMsg, 32);
-				recvInfo.strMD5 = tmd5;
-				pMsg += 32;
-			}
-
-			recvInfo.strMessage.clear();
-			recvInfo.strMessage = string(pMsg);
-
-			// Add the msg to the sock info list
-			SAFE_DELETE_ARR(data);
-			if (m_pConfig->m_oLogInfo.ShowReceiveMessage)
-				m_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%s]<<<%s",recvInfo.nSwiftNumber,recvInfo.strMD5, recvInfo.strMessage));
-
-			// update the socket time
-			info->m_ActiveTime = time(NULL);
-			// Add the sock event to list
-
-			auto event = make_shared<CNetworkEvent>(MSG_TYPE::ReveivePackage);
-			
-			event->SetSocketID(nSocket);
-			event->SetSocketInfo(info);
-			event->SetPriority(nPriority);
-			event->SetRecvPackage(recvInfo);
-			m_iMsg->SendMessage(event);
-		}
-	}while (bLoop);
-
-	srlck.unlock();
-	SAFE_DELETE_ARR(pLongBuffer);
+		CloseConnect(nSocket);
+	}
 }
 
 void Sloong::CEpollEx::OnCanWriteData(int nSocket)
@@ -575,7 +457,7 @@ void Sloong::CEpollEx::ProcessPrepareSendList(shared_ptr<CSockInfo> info)
 /// 获取发送信息列表
 // 首先判断上次发送标志，如果不为-1，表示上次的发送列表没有发送完成。直接返回指定的列表
 // 如果为-1，表示需要发送新的列表。按照优先级逐级的进行寻找。
-int Sloong::CEpollEx::GetSendInfoList(shared_ptr<CSockInfo> pInfo, queue<shared_ptr<CSendInfo>>*& list )
+int Sloong::CEpollEx::GetSendInfoList(shared_ptr<CSockInfo> pInfo, queue<shared_ptr<CDataTransPackage>>*& list )
 {
 	list = nullptr;
 	// prev package no send end. find and try send it again.
@@ -604,9 +486,9 @@ int Sloong::CEpollEx::GetSendInfoList(shared_ptr<CSockInfo> pInfo, queue<shared_
 }
 
 
-shared_ptr<CSendInfo> Sloong::CEpollEx::GetSendInfo(shared_ptr<CSockInfo> pInfo,queue<shared_ptr<CSendInfo>>* list)
+shared_ptr<CDataTransPackage> Sloong::CEpollEx::GetSendInfo(shared_ptr<CSockInfo> pInfo,queue<shared_ptr<CDataTransPackage>>* list)
 {
-	shared_ptr<CSendInfo> si = nullptr;
+	shared_ptr<CDataTransPackage> si = nullptr;
 	while (si == nullptr)
 	{
 		if (!list->empty())
@@ -648,7 +530,7 @@ shared_ptr<CSendInfo> Sloong::CEpollEx::GetSendInfo(shared_ptr<CSockInfo> pInfo,
 // 发送失败返回-1；需要关闭连接
 // 需要再次发送返回0；需要监听可写信息
 // 发送完成返回1；需要监听可读信息
-int Sloong::CEpollEx::SendPackage(shared_ptr<CSockInfo> pInfo, shared_ptr<CSendInfo> si)
+int Sloong::CEpollEx::SendPackage(shared_ptr<CSockInfo> pInfo, shared_ptr<CDataTransPackage> si)
 {
 	unique_lock<mutex> lck(pInfo->m_oSockSendMutex);
 
@@ -728,7 +610,7 @@ void Sloong::CEpollEx::ProcessSendList(shared_ptr<CSockInfo> pInfo)
 	{
 		unique_lock<mutex> lck(pInfo->m_oSendListMutex);
 
-		queue<shared_ptr<CSendInfo>>* list = nullptr;
+		queue<shared_ptr<CDataTransPackage>>* list = nullptr;
 		int sendTags = GetSendInfoList(pInfo,list);
 		if (list == nullptr)
 		{
@@ -790,7 +672,7 @@ void Sloong::CEpollEx::CloseConnect(int socket)
 
 	auto event = make_shared<CNetworkEvent>(MSG_TYPE::SocketClose);
 	event->SetSocketID(socket);
-	event->SetSocketInfo(info);
+	event->SetUserInfo(info->m_pUserInfo.get());
 	event->SetHandler(this);
 	m_iMsg->SendMessage(event);
 }
