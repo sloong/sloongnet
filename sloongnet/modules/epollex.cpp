@@ -423,107 +423,21 @@ void Sloong::CEpollEx::OnCanWriteData(int nSocket)
 	if (info == NULL)
 		return;
 
-	ProcessPrepareSendList(info);
-	ProcessSendList(info);
-}
-
-void Sloong::CEpollEx::ProcessPrepareSendList(shared_ptr<CSockInfo> info)
-{
-	// progress the prepare send list first
-	if (!info->m_oPrepareSendList.empty())
+	NetworkResult res = info->OnDataCanSend();
+	if( res  == NetworkResult::Error)
 	{
-		unique_lock<mutex> prelck(info->m_oPreSendMutex);
-		if (info->m_oPrepareSendList.empty())
-		{
-			return;
-		}
-		unique_lock<mutex> sendListlck(info->m_oSendListMutex);
-		
-		while (!info->m_oPrepareSendList.empty())
-		{
-			PRESENDINFO* psi = &info->m_oPrepareSendList.front();
-			info->m_oPrepareSendList.pop();
-			info->m_pSendList[psi->nPriorityLevel].push(psi->pSendInfo);
-			m_pLog->Debug(CUniversal::Format("Add send package to send list[%d]. send list size[%d], prepare send list size[%d]",
-								psi->nPriorityLevel,info->m_pSendList[psi->nPriorityLevel].size(),info->m_oPrepareSendList.size()));
-		}
-		prelck.unlock();
-		sendListlck.unlock();
+		CloseConnect(nSocket);
 	}
+	else if( res == NetworkResult::Retry )
+		CtlEpollEvent(EPOLL_CTL_MOD, nSocket, EPOLLIN | EPOLLOUT );
+	else 
+		CtlEpollEvent(EPOLL_CTL_MOD, nSocket, EPOLLIN);
 }
 
 
 
-/// 获取发送信息列表
-// 首先判断上次发送标志，如果不为-1，表示上次的发送列表没有发送完成。直接返回指定的列表
-// 如果为-1，表示需要发送新的列表。按照优先级逐级的进行寻找。
-int Sloong::CEpollEx::GetSendInfoList(shared_ptr<CSockInfo> pInfo, queue<shared_ptr<CDataTransPackage>>*& list )
-{
-	list = nullptr;
-	// prev package no send end. find and try send it again.
-	if (-1 != pInfo->m_nLastSentTags)
-	{
-		m_pLog->Verbos(CUniversal::Format("Send prev time list, Priority level:%d", pInfo->m_nLastSentTags));
-		list = &pInfo->m_pSendList[pInfo->m_nLastSentTags];
-		if( list->empty() )
-			pInfo->m_nLastSentTags = -1;
-		else
-			return pInfo->m_nLastSentTags;
-	}
-	
-	for (int i = 0; i < pInfo->m_nPriorityLevel; i++)
-	{
-		if (pInfo->m_pSendList[i].empty())
-			continue;
-		else
-		{
-			list = &pInfo->m_pSendList[i];
-			m_pLog->Verbos(CUniversal::Format("Send list, Priority level:%d", i));
-			return i;
-		}
-	}
-	return -1;
-}
 
 
-shared_ptr<CDataTransPackage> Sloong::CEpollEx::GetSendInfo(shared_ptr<CSockInfo> pInfo,queue<shared_ptr<CDataTransPackage>>* list)
-{
-	shared_ptr<CDataTransPackage> si = nullptr;
-	while (si == nullptr)
-	{
-		if (!list->empty())
-		{
-			m_pLog->Verbos(CUniversal::Format("Get send info from list, list size[%d].", list->size()));
-			si = list->front();
-			if (si == nullptr)
-			{
-				m_pLog->Verbos("The list front is NULL, pop it and get next.");
-				list->pop();
-			}
-		}
-		else
-		{
-			// the send list is empty, so no need loop.
-			m_pLog->Verbos("Send list is empty list. no need send message");
-			break;
-		}
-	}
-	if (si == nullptr)
-	{
-		if (pInfo->m_nLastSentTags != -1)
-		{
-			m_pLog->Verbos("Current list no send message, clear the LastSentTags flag.");
-			pInfo->m_nLastSentTags = -1;
-		}
-		else
-		{
-			m_pLog->Verbos(CUniversal::Format("No message need send, remove socket[%d] from Epoll", pInfo->m_pCon->GetSocket()));
-			CtlEpollEvent(EPOLL_CTL_MOD, pInfo->m_pCon->GetSocket(), EPOLLIN);
-			pInfo->m_bIsSendListEmpty = true;
-		}
-	}
-	return si;
-}
 
 
 /// 发送数据包
@@ -599,57 +513,6 @@ int Sloong::CEpollEx::SendPackage(shared_ptr<CSockInfo> pInfo, shared_ptr<CDataT
 }
 
 
-void Sloong::CEpollEx::ProcessSendList(shared_ptr<CSockInfo> pInfo)
-{
-	// when prepare list process done, do send operation.
-	
-	bool bTrySend = true;
-
-	// 这里始终从list开始循环，保证高优先级的信息先被处理
-	while (bTrySend)
-	{
-		unique_lock<mutex> lck(pInfo->m_oSendListMutex);
-
-		queue<shared_ptr<CDataTransPackage>>* list = nullptr;
-		int sendTags = GetSendInfoList(pInfo,list);
-		if (list == nullptr)
-		{
-			m_pLog->Error("Send info list empty, no need send.");
-			break;
-		}
-
-		// if no find send info, is no need send anything , remove this sock from epoll.'
-		auto si = GetSendInfo(pInfo,list);
-		if ( si != nullptr )
-		{
-			lck.unlock();
-			int res = SendPackage(pInfo, si);
-		
-			if( res < 0)
-			{
-				m_pLog->Error(CUniversal::Format("Send data package error. close connect:[%s:%d]",pInfo->m_Address,pInfo->m_nPort));
-				lck.unlock();
-				CloseConnect(pInfo->m_pCon->GetSocket());
-				return;
-			}
-			else if( res == 0)
-			{
-				m_pLog->Verbos("Send data package done. wait next write sign.");
-				//CtlEpollEvent(EPOLL_CTL_MOD, pInfo->m_pCon->GetSocket(), EPOLLIN | EPOLLOUT);
-				bTrySend = false;
-				pInfo->m_nLastSentTags = sendTags;
-				return;
-			}
-			else
-			{
-				list->pop();
-				pInfo->m_nLastSentTags = -1;
-				bTrySend = true;
-			}		
-		}
-	}
-	CtlEpollEvent(EPOLL_CTL_MOD, pInfo->m_pCon->GetSocket(), EPOLLIN);
-}
 
 void Sloong::CEpollEx::CloseConnect(int socket)
 {

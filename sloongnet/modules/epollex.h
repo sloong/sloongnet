@@ -50,12 +50,6 @@ namespace Sloong
 		void SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage);
 		void Exit();
         void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nExSize = 0 );
-		void ProcessPrepareSendList( shared_ptr<CSockInfo> info );
-		/************************************************************************/
-		/* If need listen write event, return false, else return true
-		*/
-		/************************************************************************/
-		void ProcessSendList(shared_ptr<CSockInfo> pInfo);
 	protected:
 		/// 设置socket到非阻塞模式
 		int SetSocketNonblocking(int socket);
@@ -65,8 +59,7 @@ namespace Sloong
 		void CloseConnect(int socket);
 		/// 将响应消息加入到epoll发送列表中
 		void AddToSendList(int socket, int nPriority, const char* pBuf, int nSize, int nStart, const char* pExBuf, int nExSize);
-		int GetSendInfoList(shared_ptr<CSockInfo> pInfo, queue<shared_ptr<CDataTransPackage>>*& list );
-		shared_ptr<CDataTransPackage> GetSendInfo(shared_ptr<CSockInfo> pInfo,queue<shared_ptr<CDataTransPackage>>* list);
+		
 		int SendPackage(shared_ptr<CSockInfo> pInfo, shared_ptr<CDataTransPackage> si);
 		// event function
 		void OnNewAccept();

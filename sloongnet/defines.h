@@ -93,3 +93,10 @@ enum HashType
 	SHA_256 = 2,
 	SHA_512 = 3,
 };
+
+enum NetworkResult
+{
+	Succeed = 1,
+	Retry = 0,
+	Error = -1,
+};

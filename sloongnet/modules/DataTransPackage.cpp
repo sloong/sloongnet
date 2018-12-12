@@ -14,72 +14,72 @@ Sloong::CDataTransPackage::CDataTransPackage(SmartConnect conn)
  * @Return: if send succeed, return true. need listen read message. 
  *          else return false, need listen write message.
  */
-// bool Sloong::CDataTransPackage::SendPackage(SmartConnect pCon){
-//     unique_lock<mutex> lck(pInfo->m_oSockSendMutex);
+bool Sloong::CDataTransPackage::SendPackage()
+{
+    
+	// 首先检查是不是已经发送过部分的数据了
+	if( nSent > 0 )
+	{
+		// 先检查普通数据发送状态
+		if( nSent < nSize)
+		{
+			int nSentSize = m_pConn->Write(pSendBuffer, nSize, nSent);
+			if( nSentSize < 0 )
+			{
+				return -1;
+			}
+			else
+			{
+				nSent = nSentSize;
+			}
 
-// 	// 首先检查是不是已经发送过部分的数据了
-// 	if( nSent > 0 )
-// 	{
-// 		// 先检查普通数据发送状态
-// 		if( nSent < nSize)
-// 		{
-// 			int nSentSize = pCon->Write(pSendBuffer, nSize, nSent);
-// 			if( nSentSize < 0 )
-// 			{
-// 				return -1;
-// 			}
-// 			else
-// 			{
-// 				nSent = nSentSize;
-// 			}
+		}
+		// 已经发送完普通数据了，需要继续发送扩展数据
+		if ( nSent >= nSize && nExSize > 0 )
+		{
+			int nSentSize =m_pConn->Write(pExBuffer, nExSize, nSent - nSize);
+			if( nSentSize < 0 )
+			{
+				return -1;
+			}
+			else
+			{
+				nSent = nSize + nSentSize;
+			}
+		}
+	}
+	else
+	{
+		// send normal data.
+		nSent = m_pConn->Write( pSendBuffer, nSize, nSent);
+		// when send nurmal data succeeded, try send exdata in one time.
+		if (nSent != -1 && nSent == nSize && nExSize > 0)
+		{
+			int nSentSize = m_pConn->Write(pExBuffer, nExSize, 0);
+			if( nSentSize < 0 )
+			{
+				return -1;
+			}
+			else
+			{
+				nSent = nSize + nSentSize;
+			}
+		}
+	}
+	//m_pLog->Verbos(CUniversal::Format("Send Info : AllSize[%d],ExSize[%d],Sent[%d]", nPackSize, nExSize, nSent));
 
-// 		}
-// 		// 已经发送完普通数据了，需要继续发送扩展数据
-// 		if ( nSent >= nSize && nExSize > 0 )
-// 		{
-// 			int nSentSize = pCon->Write(pExBuffer, nExSize, nSent - nSize);
-// 			if( nSentSize < 0 )
-// 			{
-// 				return -1;
-// 			}
-// 			else
-// 			{
-// 				nSent = nSize + nSentSize;
-// 			}
-// 		}
-// 	}
-// 	else
-// 	{
-// 		// send normal data.
-// 		nSent = m_pCon->Write( pSendBuffer, nSize, nSent);
-// 		// when send nurmal data succeeded, try send exdata in one time.
-// 		if (nSent != -1 && nSent == nSize && nExSize > 0)
-// 		{
-// 			int nSentSize = m_pCon->Write(pExBuffer, nExSize, 0);
-// 			if( nSentSize < 0 )
-// 			{
-// 				return -1;
-// 			}
-// 			else
-// 			{
-// 				nSent = nSize + nSentSize;
-// 			}
-// 		}
-// 	}
-// 	m_pLog->Verbos(CUniversal::Format("Send Info : AllSize[%d],ExSize[%d],Sent[%d]", nPackSize, nExSize, nSent));
-
-// 	// check send result.
-// 	// send done, remove the is sent data and try send next package.
-// 	if (nSent < nPackSize)
-// 	{
-// 		return 0;
-// 	}
-// 	else
-// 	{
-// 		m_pLog->Verbos(CUniversal::Format("Message package send succeed, remove from send list. All size[%d]", nSent));
-// 		return 1;
-// 	}
-// }
+	// check send result.
+	// send done, remove the is sent data and try send next package.
+	if (nSent < nPackSize)
+	{
+		return 0;
+	}
+	else
+	{
+		//m_pLog->Verbos(CUniversal::Format("Message package send succeed, remove from send list. All size[%d]", nSent));
+		return 1;
+	}
+}
 
 
 bool Sloong::CDataTransPackage::RecvPackage(ULONG dtlen )

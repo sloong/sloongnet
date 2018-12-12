@@ -98,3 +98,158 @@ bool Sloong::CSockInfo::OnDataCanReceive()
 	srlck.unlock();
 }
 
+
+NetworkResult Sloong::CSockInfo::OnDataCanSend()
+{
+	ProcessPrepareSendList();
+	return ProcessSendList();
+}
+
+
+
+void Sloong::CSockInfo::ProcessPrepareSendList()
+{
+	// progress the prepare send list first
+	if (!m_oPrepareSendList.empty())
+	{
+		unique_lock<mutex> prelck(m_oPreSendMutex);
+		if (m_oPrepareSendList.empty())
+		{
+			return;
+		}
+		unique_lock<mutex> sendListlck(m_oSendListMutex);
+		
+		while (!m_oPrepareSendList.empty())
+		{
+			PRESENDINFO* psi = &m_oPrepareSendList.front();
+			m_oPrepareSendList.pop();
+			m_pSendList[psi->nPriorityLevel].push(psi->pSendInfo);
+			m_pLog->Debug(CUniversal::Format("Add send package to send list[%d]. send list size[%d], prepare send list size[%d]",
+								psi->nPriorityLevel,m_pSendList[psi->nPriorityLevel].size(),m_oPrepareSendList.size()));
+		}
+		prelck.unlock();
+		sendListlck.unlock();
+	}
+}
+
+
+
+NetworkResult Sloong::CSockInfo::ProcessSendList()
+{
+	// when prepare list process done, do send operation.
+	bool bTrySend = true;
+
+	// 这里始终从list开始循环，保证高优先级的信息先被处理
+	while (bTrySend)
+	{
+		unique_lock<mutex> lck(m_oSendListMutex);
+
+		queue<shared_ptr<CDataTransPackage>>* list = nullptr;
+		int sendTags = GetSendInfoList(list);
+		if (list == nullptr)
+		{
+			m_pLog->Error("Send info list empty, no need send.");
+			break;
+		}
+
+		// if no find send info, is no need send anything , remove this sock from epoll.'
+		auto si = GetSendInfo(list);
+		if ( si != nullptr )
+		{
+			lck.unlock();
+			unique_lock<mutex> ssend_lck(m_oSockSendMutex);
+			int res =si->SendPackage();
+			ssend_lck.unlock();
+			if( res < 0)
+			{
+				m_pLog->Error(CUniversal::Format("Send data package error. close connect:[%s:%d]",m_Address,m_nPort));
+				return NetworkResult::Error;
+			}
+			else if( res == 0)
+			{
+				m_pLog->Verbos("Send data package done. wait next write sign.");
+				bTrySend = false;
+				m_nLastSentTags = sendTags;
+				return NetworkResult::Retry;
+			}
+			else
+			{
+				list->pop();
+				m_nLastSentTags = -1;
+				bTrySend = true;
+			}
+		}
+	}
+	return NetworkResult::Succeed;
+}
+
+
+/// 获取发送信息列表
+// 首先判断上次发送标志，如果不为-1，表示上次的发送列表没有发送完成。直接返回指定的列表
+// 如果为-1，表示需要发送新的列表。按照优先级逐级的进行寻找。
+int Sloong::CSockInfo::GetSendInfoList( queue<shared_ptr<CDataTransPackage>>*& list )
+{
+	list = nullptr;
+	// prev package no send end. find and try send it again.
+	if (-1 != m_nLastSentTags)
+	{
+		m_pLog->Verbos(CUniversal::Format("Send prev time list, Priority level:%d", m_nLastSentTags));
+		list = &m_pSendList[m_nLastSentTags];
+		if( list->empty() )
+			m_nLastSentTags = -1;
+		else
+			return m_nLastSentTags;
+	}
+	
+	for (int i = 0; i < m_nPriorityLevel; i++)
+	{
+		if (m_pSendList[i].empty())
+			continue;
+		else
+		{
+			list = &m_pSendList[i];
+			m_pLog->Verbos(CUniversal::Format("Send list, Priority level:%d", i));
+			return i;
+		}
+	}
+	return -1;
+}
+
+
+shared_ptr<CDataTransPackage> Sloong::CSockInfo::GetSendInfo(queue<shared_ptr<CDataTransPackage>>* list)
+{
+	shared_ptr<CDataTransPackage> si = nullptr;
+	while (si == nullptr)
+	{
+		if (!list->empty())
+		{
+			m_pLog->Verbos(CUniversal::Format("Get send info from list, list size[%d].", list->size()));
+			si = list->front();
+			if (si == nullptr)
+			{
+				m_pLog->Verbos("The list front is NULL, pop it and get next.");
+				list->pop();
+			}
+		}
+		else
+		{
+			// the send list is empty, so no need loop.
+			m_pLog->Verbos("Send list is empty list. no need send message");
+			break;
+		}
+	}
+	if (si == nullptr)
+	{
+		if (m_nLastSentTags != -1)
+		{
+			m_pLog->Verbos("Current list no send message, clear the LastSentTags flag.");
+			m_nLastSentTags = -1;
+		}
+		else
+		{
+			m_pLog->Verbos(CUniversal::Format("No message need send, remove socket[%d] from Epoll", m_pCon->GetSocket()));
+			m_bIsSendListEmpty = true;
+		}
+	}
+	return si;
+}

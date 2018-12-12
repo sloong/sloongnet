@@ -35,6 +35,8 @@ namespace Sloong
          */
         bool RecvPackage(ULONG);
 
+        bool SendPackage();
+
         string GetRecvMessage();
         void SetSendMessage(const string& msg, const char* exData, int exSize );
 

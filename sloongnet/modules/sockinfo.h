@@ -46,11 +46,22 @@ namespace Sloong
 		bool OnDataCanReceive();
 
 
+		NetworkResult OnDataCanSend();
+
+	protected:
+		void ProcessPrepareSendList();
+		NetworkResult ProcessSendList();
+
+		int GetSendInfoList(queue<shared_ptr<CDataTransPackage>>*& list );
+		shared_ptr<CDataTransPackage> GetSendInfo(queue<shared_ptr<CDataTransPackage>>* list);
 
 
+
+	public:
         queue<shared_ptr<CDataTransPackage>>* m_pSendList; // the send list of the bytes.
         queue<PRESENDINFO> m_oPrepareSendList;
 
+	
 		string m_Address;
 		int m_nPort;
 		time_t m_ActiveTime;
