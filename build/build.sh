@@ -15,7 +15,9 @@ clean(){
 }
 
 build(){
-	mkdir $MAKEFLAG
+	if [ ! -d $MAKEFLAG  ];then
+		mkdir $MAKEFLAG
+	fi
 	cd $MAKEFLAG
 	cmake -DCMAKE_BUILD_TYPE=$MAKEFLAG ../$CMAKE_FILE_PATH
 	make

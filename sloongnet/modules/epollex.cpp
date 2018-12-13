@@ -5,7 +5,16 @@
 #include "sockinfo.h"
 #include "serverconfig.h"
 #include "NetworkEvent.h"
-#include "SendMessageEvent.h"
+
+
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <fcntl.h>
+#include <sys/select.h> 
+
 
 #define MAXRECVBUF 4096
 #define MAXBUF MAXRECVBUF+10
@@ -31,37 +40,33 @@ void Sloong::CEpollEx::Initialize(IMessage* iMsg,IData* iData)
 {
 	IObject::Initialize(iMsg,iData);
 
-	m_pConfig = (CServerConfig*)m_iData->Get(Configuation);
-
-	
-	m_pLog->Info(CUniversal::Format("epollex is initialize.license port is %d", m_pConfig->m_nPort ));
-
 	// 初始化socket
 	m_ListenSock = socket(AF_INET, SOCK_STREAM, 0);
 	int sock_op = 1;
 	// SOL_SOCKET:在socket层面设置
 	// SO_REUSEADDR:允许套接字和一个已在使用中的地址捆绑
 	setsockopt(m_ListenSock, SOL_SOCKET, SO_REUSEADDR, &sock_op, sizeof(sock_op));
+}
 
+void Sloong::CEpollEx::Run(int nPort, int nWorkThreadNum)
+{
+	m_pLog->Info(CUniversal::Format("epollex is initialize.license port is %d", nPort ));
 	// 初始化地址结构
 	struct sockaddr_in address;
 	memset(&address, 0, sizeof(address));
 	address.sin_addr.s_addr = htonl(INADDR_ANY);
-	address.sin_port = htons(m_pConfig->m_nPort);
+	address.sin_port = htons(nPort);
 
 	// 绑定端口
 	errno = bind(m_ListenSock, (struct sockaddr*)&address, sizeof(address));
 	if (errno == -1)
-		throw normal_except(CUniversal::Format("bind to %d field. errno = %d", m_pConfig->m_nPort, errno));
+		throw normal_except(CUniversal::Format("bind to %d field. errno = %d", nPort, errno));
 
 	// 监听端口,监听队列大小为1024.可修改为SOMAXCONN
 	errno = listen(m_ListenSock, 1024);
 	if (errno == -1)
-		throw normal_except(CUniversal::Format("listen to %d field. errno = %d", m_pConfig->m_nPort, errno));
-}
+		throw normal_except(CUniversal::Format("listen to %d field. errno = %d", nPort, errno));
 
-void Sloong::CEpollEx::Run()
-{
 	// 设置socket为非阻塞模式
 	SetSocketNonblocking(m_ListenSock);
 	// 创建epoll
@@ -70,7 +75,7 @@ void Sloong::CEpollEx::Run()
 	CtlEpollEvent(EPOLL_CTL_ADD, m_ListenSock, EPOLLIN | EPOLLOUT);
 	m_bIsRunning = true;
 	// Init the thread pool
-	CThreadPool::AddWorkThread( std::bind(&CEpollEx::MainWorkLoop, this, std::placeholders::_1), nullptr, m_pConfig->m_nEPoolThreadQuantity);
+	CThreadPool::AddWorkThread( std::bind(&CEpollEx::MainWorkLoop, this, std::placeholders::_1), nullptr, nWorkThreadNum);
 }
 
 
@@ -203,11 +208,4 @@ void Sloong::CEpollEx::Exit()
 {
 	m_bIsRunning = false;
 }
-
-void Sloong::CEpollEx::SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage)
-{
-	m_pConfig->m_oLogInfo.ShowSendMessage = bShowSendMessage;
-	m_pConfig->m_oLogInfo.ShowReceiveMessage= bShowReceiveMessage;
-}
-
 

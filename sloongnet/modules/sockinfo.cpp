@@ -5,10 +5,8 @@
 using namespace Sloong;
 using namespace Sloong::Universal;
 using namespace Sloong::Events;
-Sloong::CSockInfo::CSockInfo(int nPriorityLevel, CLog* log, IMessage* msg)
+Sloong::CSockInfo::CSockInfo(int nPriorityLevel)
 {
-	m_pLog = log;
-	m_iMsg = msg;
 	if ( nPriorityLevel < 1 )
 	{
 		nPriorityLevel = 1;
@@ -36,6 +34,15 @@ CSockInfo::~CSockInfo()
     }
 }
 
+
+void Sloong::CSockInfo::Initialize(IMessage* iMsg, IData* iData,int sock, SSL_CTX* ctx)
+{
+	IObject::Initialize(iMsg,iData);
+	m_ActiveTime = time(NULL);
+	m_pCon->Initialize(sock,ctx);
+	m_pUserInfo->SetData("ip", m_pCon->m_strAddress);
+	m_pUserInfo->SetData("port", CUniversal::ntos(m_pCon->m_nPort));
+}
 
 NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 {
@@ -161,7 +168,7 @@ NetworkResult Sloong::CSockInfo::ProcessSendList()
 			ssend_lck.unlock();
 			if( res < 0)
 			{
-				m_pLog->Error(CUniversal::Format("Send data package error. close connect:[%s:%d]",m_Address,m_nPort));
+				m_pLog->Error(CUniversal::Format("Send data package error. close connect:[%s:%d]",m_pCon->m_strAddress,m_pCon->m_nPort));
 				return NetworkResult::Error;
 			}
 			else if( res == 0)

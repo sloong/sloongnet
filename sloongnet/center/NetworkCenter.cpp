@@ -1,7 +1,6 @@
 #include "NetworkCenter.h"
 #include "serverconfig.h"
 #include "epollex.h"
-#include "utility.h"
 #include "SendMessageEvent.h"
 #include "sockinfo.h"
 
@@ -40,7 +39,6 @@ void Sloong::CNetworkCenter::Initialize(IMessage* iMsg, IData* iData)
 		m_nClientCheckKeyLength = m_pConfig->m_strClientCheckKey.length();
 	}
 
-	m_pEpoll->SetLogConfiguration(m_pConfig->m_oLogInfo.ShowSendMessage, m_pConfig->m_oLogInfo.ShowReceiveMessage);
 	m_pEpoll->SetEventHandler(std::bind(&CNetworkCenter::OnNewAccept, this, std::placeholders::_1),
 		std::bind(&CNetworkCenter::OnDataCanReceive, this, std::placeholders::_1),
 		std::bind(&CNetworkCenter::OnCanWriteData, this, std::placeholders::_1),
@@ -58,7 +56,7 @@ void Sloong::CNetworkCenter::Initialize(IMessage* iMsg, IData* iData)
 void Sloong::CNetworkCenter::Run(SmartEvent event)
 {
     m_bIsRunning = true;
-	m_pEpoll->Run();
+	m_pEpoll->Run(m_pConfig->m_nPort,m_pConfig->m_nEPoolThreadQuantity);
     CThreadPool::AddWorkThread( std::bind(&CNetworkCenter::CheckTimeoutWorkLoop, this, std::placeholders::_1), nullptr);
 }
 
@@ -96,7 +94,7 @@ void Sloong::CNetworkCenter::CloseConnectEventHandler(SmartEvent event)
 	// in here no need delete the send list and read list
 	// when delete the SocketInfo object , it will delete the list .
 	info->m_pCon->Close();
-	m_pLog->Info(CUniversal::Format("close connect:%s:%d.", info->m_Address, info->m_nPort));
+	m_pLog->Info(CUniversal::Format("close connect:%s:%d.", info->m_pCon->m_strAddress, info->m_pCon->m_nPort));
 }
 
 
@@ -196,7 +194,7 @@ void Sloong::CNetworkCenter::SendMessage(int sock, int nPriority, long long nSwi
 	int nMsgSend = pInfo->m_pCon->Write(pBuf, nBufLen, 0);
 	if (nMsgSend < 0)
 	{
-		m_pLog->Warn(CUniversal::Format("Send data failed.[%s][%s]", pInfo->m_Address, pInfo->m_pCon->G_FormatSSLErrorMsg(nMsgSend)));
+		m_pLog->Warn(CUniversal::Format("Send data failed.[%s][%s]", pInfo->m_pCon->m_strAddress, pInfo->m_pCon->G_FormatSSLErrorMsg(nMsgSend)));
 	}
 	if (nMsgSend != nBufLen)
 	{
@@ -267,7 +265,7 @@ void Sloong::CNetworkCenter::CheckTimeoutWorkLoop(SMARTER param)
 			if (it->second != NULL && time(NULL) - it->second->m_ActiveTime > tout)
 			{
 				sockLck.unlock();
-				m_pLog->Info(CUniversal::Format("[Timeout]:[Close connect:%s]", it->second->m_Address));
+				m_pLog->Info(CUniversal::Format("[Timeout]:[Close connect:%s]", it->second->m_pCon->m_strAddress));
 				SendCloseConnectEvent(it->first);
 				goto RecheckTimeout;
 			}
@@ -302,19 +300,14 @@ NetworkResult Sloong::CNetworkCenter::OnNewAccept( int conn_sock )
 			}
 		}
 
-		auto info = make_shared<CSockInfo>(m_pConfig->m_nPriorityLevel,m_pLog,m_iMsg);
-		info->m_Address = CUtility::GetSocketIP(conn_sock);
-		info->m_nPort = CUtility::GetSocketPort(conn_sock);
-		info->m_ActiveTime = time(NULL);
-		info->m_pCon->Initialize(conn_sock,m_pCTX);
-		info->m_pUserInfo->SetData("ip", info->m_Address);
-		info->m_pUserInfo->SetData("port", CUniversal::ntos(info->m_nPort));
-
+		auto info = make_shared<CSockInfo>(m_pConfig->m_nPriorityLevel);
+		info->Initialize(m_iMsg,m_iData,conn_sock,m_pCTX);
+	
 		unique_lock<mutex> sockLck(m_oSockListMutex);
 		m_SockList[conn_sock] = info;
 		sockLck.unlock();
 
-		m_pLog->Info(CUniversal::Format("Accept client:[%s:%d].", info->m_Address, info->m_nPort));
+		m_pLog->Info(CUniversal::Format("Accept client:[%s:%d].", info->m_pCon->m_strAddress, info->m_pCon->m_nPort));
 		
 		return NetworkResult::Succeed;
 }
