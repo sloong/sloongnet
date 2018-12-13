@@ -10,11 +10,16 @@ include_directories(
     "$(PROJECT_BINARY_DIR)/modules"
     "$(PROJECT_BINARY_DIR)/reference"
     "/usr/include/glib-2.0"
+	# ubuntu path
     "/usr/lib/x86_64-linux-gnu/glib-2.0/include"
+	# centos path
+	"/usr/lib64/glib-2.0/include"
 )
 
 link_directories(
     "/usr/local/lib/sloong"
+	#centos path
+	"/usr/lib64/mysql"
 )
 
 #允许gdb调试
