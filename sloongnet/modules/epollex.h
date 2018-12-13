@@ -2,43 +2,22 @@
 #define CEPOLLEX_H
 
 #include <sys/epoll.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <openssl/ssl.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <signal.h>
-#include <fcntl.h>
-#include <pthread.h>
-#include <sys/select.h> 
 
 #include "IObject.h"
 typedef unsigned char byte;
 
 namespace Sloong
 {
-	namespace Universal
-	{
-		class CLog;
-	}
-	using namespace Universal;
 	using namespace Interface;
-
 	
 	typedef std::function<NetworkResult(int)> EpollEventHandlerFunc;
-	
-	class CSockInfo;
-	class CServerConfig;
 	class CEpollEx : IObject
 	{
 	public:
         CEpollEx();
 		virtual ~CEpollEx();
         void Initialize(IMessage* iM,IData* iData);
-		void Run();
-		
-		void SetLogConfiguration(bool bShowSendMessage, bool bShowReceiveMessage);
+		void Run(int nPort, int nWorkThreadNum);
 		void Exit();
 
 		void SetEventHandler(EpollEventHandlerFunc,EpollEventHandlerFunc,EpollEventHandlerFunc,EpollEventHandlerFunc);
@@ -69,7 +48,6 @@ namespace Sloong
 	public:
 		
 		bool m_bIsRunning;
-		CServerConfig* m_pConfig;
 	};
 }
 

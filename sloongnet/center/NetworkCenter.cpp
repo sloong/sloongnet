@@ -40,7 +40,6 @@ void Sloong::CNetworkCenter::Initialize(IMessage* iMsg, IData* iData)
 		m_nClientCheckKeyLength = m_pConfig->m_strClientCheckKey.length();
 	}
 
-	m_pEpoll->SetLogConfiguration(m_pConfig->m_oLogInfo.ShowSendMessage, m_pConfig->m_oLogInfo.ShowReceiveMessage);
 	m_pEpoll->SetEventHandler(std::bind(&CNetworkCenter::OnNewAccept, this, std::placeholders::_1),
 		std::bind(&CNetworkCenter::OnDataCanReceive, this, std::placeholders::_1),
 		std::bind(&CNetworkCenter::OnCanWriteData, this, std::placeholders::_1),
@@ -58,7 +57,7 @@ void Sloong::CNetworkCenter::Initialize(IMessage* iMsg, IData* iData)
 void Sloong::CNetworkCenter::Run(SmartEvent event)
 {
     m_bIsRunning = true;
-	m_pEpoll->Run();
+	m_pEpoll->Run(m_pConfig->m_nPort,m_pConfig->m_nEPoolThreadQuantity);
     CThreadPool::AddWorkThread( std::bind(&CNetworkCenter::CheckTimeoutWorkLoop, this, std::placeholders::_1), nullptr);
 }
 
