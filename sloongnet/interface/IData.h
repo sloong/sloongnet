@@ -1,13 +1,6 @@
 #pragma once
-#include <string>
-using namespace std;
 
-typedef enum g_em_DataItem
-{
-	Configuation,
-	Logger,
-}DATA_ITEM;
-
+#include "main.h"
 namespace Sloong
 {
 	namespace Interface

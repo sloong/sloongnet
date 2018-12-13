@@ -7,11 +7,11 @@ using namespace std;
 namespace Sloong
 {
 
-	class lSmartSync
+	class CSmartSync
 	{
 	public:
-		lSmartSync();
-		~lSmartSync() {}
+		CSmartSync();
+		~CSmartSync() {}
 
 		void wait();
 		// 返回值：

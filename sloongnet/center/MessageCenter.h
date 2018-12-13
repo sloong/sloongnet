@@ -1,10 +1,5 @@
 #pragma once
-#include "defines.h"
-#include <queue>
-#include <mutex>
-#include <map>
-#include <memory>
-#include <condition_variable>
+
 #include "IMessage.h"
 #include "IData.h"
 namespace Sloong
@@ -17,7 +12,7 @@ namespace Sloong
 		CMessageCenter();
 		~CMessageCenter();
 
-		void Initialize(IData* iData);
+		void Initialize(IData* iData, int nWorkThreadNum);
 
 		void SendMessage(MSG_TYPE msgType);
 		void SendMessage(SmartEvent evt);
@@ -36,8 +31,7 @@ namespace Sloong
 	protected:
 		map<MSG_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;
 		queue<shared_ptr<IEvent>> m_oMsgList;
-		mutex m_oWorkLoopMutex;
-		condition_variable m_oWrokLoopCV;
+		CSmartSync m_oSync;
 		mutex m_oMsgListMutex;
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;
 		IData* m_iData;

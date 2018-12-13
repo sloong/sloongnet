@@ -100,3 +100,10 @@ enum NetworkResult
 	Retry = 0,
 	Error = -1,
 };
+
+
+typedef enum g_em_DataItem
+{
+	Configuation,
+	Logger,
+}DATA_ITEM;

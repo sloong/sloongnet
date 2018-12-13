@@ -95,7 +95,7 @@ bool Sloong::CDataTransPackage::RecvPackage(ULONG dtlen )
 			{
 				return false;
 			}
-			else if(nRecvSize != dtlen )
+			else if(nRecvSize != (int)dtlen )
 			{
 				//m_pLog->Warn(CUniversal::Format("Receive all data is timeout. recved lenght %d, data length %d",nRecvSize, dtlen));
 				return false;

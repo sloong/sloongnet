@@ -1,6 +1,6 @@
 #include "MessageCenter.h"
-#include "serverconfig.h"
 #include "NormalEvent.h"
+#include "serverconfig.h"
 
 using namespace Sloong;
 using namespace Sloong::Universal;
@@ -15,11 +15,10 @@ CMessageCenter::~CMessageCenter()
 {
 }
 
-void CMessageCenter::Initialize(IData* iData)
+void CMessageCenter::Initialize(IData* iData, int nWorkThreadNum)
 {
 	m_iData = iData;
-	CServerConfig* pConfig = TYPE_TRANS<CServerConfig*>(iData->Get(Configuation));
-	CThreadPool::AddWorkThread(std::bind(&CMessageCenter::MessageWorkLoop, this, std::placeholders::_1), nullptr, pConfig->m_nMessageCenterThreadQuantity);
+	CThreadPool::AddWorkThread(std::bind(&CMessageCenter::MessageWorkLoop, this, std::placeholders::_1), nullptr, nWorkThreadNum);
 }
 
 void CMessageCenter::SendMessage(MSG_TYPE msgType)
@@ -28,14 +27,14 @@ void CMessageCenter::SendMessage(MSG_TYPE msgType)
 	evt->SetEvent(msgType);
 	unique_lock<mutex> lck(m_oMsgListMutex);
 	m_oMsgList.push(evt);
-	m_oWrokLoopCV.notify_one();
+	m_oSync.notify_one();
 }
 
 void CMessageCenter::SendMessage(SmartEvent evt)
 {
 	unique_lock<mutex> lck(m_oMsgListMutex);
 	m_oMsgList.push(evt);
-	m_oWrokLoopCV.notify_one();
+	m_oSync.notify_one();
 }
 
 void CMessageCenter::CallMessage(MSG_TYPE msgType, void * msgParams)
@@ -75,7 +74,6 @@ void CMessageCenter::Exit()
 
 void CMessageCenter::MessageWorkLoop(SMARTER param)
 {
-	unique_lock<mutex> work_lck(m_oWorkLoopMutex);
 	while (m_emStatus != RUN_STATUS::Exit)
 	{
 		try
@@ -87,7 +85,7 @@ void CMessageCenter::MessageWorkLoop(SMARTER param)
 			}
 			if (m_oMsgList.empty())
 			{
-				m_oWrokLoopCV.wait(work_lck);
+				m_oSync.wait_for(1);
 				continue;
 			}
 			if (!m_oMsgList.empty())
@@ -124,3 +122,5 @@ void CMessageCenter::MessageWorkLoop(SMARTER param)
 		
 	}
 }
+
+

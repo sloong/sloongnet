@@ -1,6 +1,6 @@
 #include "ControlCenter.h"
 #include "defines.h"
-#include "epollex.h"
+#include "NetworkCenter.h"
 #include "LuaProcessCenter.h"
 #include "globalfunction.h"
 #include "serverconfig.h"
@@ -14,7 +14,7 @@ using namespace Sloong::Events;
 
 CControlCenter::CControlCenter()
 {
-	m_pEpoll = make_unique<CEpollEx>();
+	m_pNetwork = make_unique<CNetworkCenter>();
 	m_pProcess = make_unique<CLuaProcessCenter>();
 }
 
@@ -23,28 +23,20 @@ CControlCenter::~CControlCenter()
 {
 }
 
-void Sloong::CControlCenter::Initialize(IMessage* iM,IData* iData)
+void Sloong::CControlCenter::Initialize(IMessage* iMsg,IData* iData)
 {
-	m_iM = iM;
-	m_iData = iData;
-	
+	IObject::Initialize(iMsg,iData);
+
 	m_pConfig = (CServerConfig*)m_iData->Get(Configuation);
-	m_pLog = (CLog*)m_iData->Get(Logger);
-	m_pEpoll->Initialize(m_iM,m_iData);
-
-	m_pProcess->Initialize(m_iM, m_iData);
-	if (m_pConfig->m_bEnableSSL)
-	{
-		m_pEpoll->EnableSSL(m_pConfig->m_strCertFile, m_pConfig->m_strKeyFile, m_pConfig->m_strPasswd);
-	}
-
-	m_pEpoll->SetLogConfiguration(m_pConfig->m_oLogInfo.ShowSendMessage, m_pConfig->m_oLogInfo.ShowReceiveMessage);
-
+	
+	m_pNetwork->Initialize(m_iMsg,m_iData);
+	m_pProcess->Initialize(m_iMsg, m_iData);
+	
 	// 在所有的成员都初始化之后，在注册处理函数
-	iM->RegisterEventHandler(ProgramStart, std::bind(&CControlCenter::Run, this, std::placeholders::_1));
-	iM->RegisterEventHandler(ProgramExit, std::bind(&CControlCenter::Exit, this, std::placeholders::_1));
-	iM->RegisterEventHandler(ReveivePackage, std::bind(&CControlCenter::OnReceivePackage, this, std::placeholders::_1));
-	iM->RegisterEventHandler(SocketClose, std::bind(&CControlCenter::OnSocketClose, this, std::placeholders::_1));
+	m_iMsg->RegisterEventHandler(ProgramStart, std::bind(&CControlCenter::Run, this, std::placeholders::_1));
+	m_iMsg->RegisterEventHandler(ProgramExit, std::bind(&CControlCenter::Exit, this, std::placeholders::_1));
+	m_iMsg->RegisterEventHandler(ReveivePackage, std::bind(&CControlCenter::OnReceivePackage, this, std::placeholders::_1));
+	m_iMsg->RegisterEventHandler(SocketClose, std::bind(&CControlCenter::OnSocketClose, this, std::placeholders::_1));
 }
 
 
@@ -70,7 +62,7 @@ void Sloong::CControlCenter::OnReceivePackage(SmartEvent evt)
 			string strSend = CUniversal::Format("{\"errno\": \"-1\",\"errmsg\" : \"package check error\",\"server_md5\":\"%s\",\"client_md5\":\"%s\",\"check_string\":\"%s\"}", rmd5, pack->strMD5, pack->strMessage);
 
 			send_evt->SetMessage(strSend);
-			m_iM->SendMessage(send_evt);
+			m_iMsg->SendMessage(send_evt);
 			return;
 		}
 	}
@@ -91,7 +83,7 @@ void Sloong::CControlCenter::OnReceivePackage(SmartEvent evt)
 		m_pLog->Error("Error in process");
 		send_evt->SetMessage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
 	}
-	m_iM->SendMessage(send_evt);
+	m_iMsg->SendMessage(send_evt);
 }
 
 void Sloong::CControlCenter::OnSocketClose(SmartEvent event)
@@ -110,10 +102,10 @@ void Sloong::CControlCenter::OnSocketClose(SmartEvent event)
 
 void Sloong::CControlCenter::Run(SmartEvent event)
 {
-	m_pEpoll->Run();
+	m_pLog->Info("Application begin running.");
 }
 
 void Sloong::CControlCenter::Exit(SmartEvent event)
 {
-	m_pEpoll->Exit();
+	m_pLog->Info("Application will exit.");
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IData.h"
-#include <map>
+
 namespace Sloong
 {
 	using Interface::IData;

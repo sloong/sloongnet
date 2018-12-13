@@ -45,7 +45,7 @@ void SloongWallUS::Initialize(CServerConfig* config)
 	m_pDC->Add(Configuation, config);
 	m_pDC->Add(Logger, m_pLog.get());
 	
-	m_pMC->Initialize(m_pDC.get());
+	m_pMC->Initialize(m_pDC.get(),config->m_nMessageCenterThreadQuantity);
 	m_pMC->RegisterEvent(ProgramExit);
 	m_pMC->RegisterEvent(ProgramStart);
 	m_pMC->RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&SloongWallUS::EventHandler, this, std::placeholders::_1));

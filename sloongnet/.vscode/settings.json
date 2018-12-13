@@ -15,6 +15,14 @@
         "ostream": "cpp",
         "xlocale": "cpp",
         "memory": "cpp",
-        "condition_variable": "cpp"
+        "condition_variable": "cpp",
+        "functional": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "streambuf": "cpp",
+        "iostream": "cpp",
+        "xiosbase": "cpp",
+        "thread": "cpp",
+        "xlocnum": "cpp"
     }
 }

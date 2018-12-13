@@ -38,7 +38,7 @@ namespace Sloong
 		vector<bool>	m_oReloadList;
 		queue<int>		m_oFreeLuaContext;
 		static CLog*	m_pLog;
-		lSmartSync      m_oSSync;
+		CSmartSync      m_oSSync;
 		mutex			m_oLuaContextMutex;
 		IMessage*		m_iMsg;
 		IData*			m_iData;

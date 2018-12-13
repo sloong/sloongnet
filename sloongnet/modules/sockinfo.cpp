@@ -37,7 +37,7 @@ CSockInfo::~CSockInfo()
 }
 
 
-bool Sloong::CSockInfo::OnDataCanReceive()
+NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 {
 	// The app is used ET mode, so should wait the mutex. 
 	unique_lock<mutex> srlck(m_oSockReadMutex);
@@ -52,12 +52,12 @@ bool Sloong::CSockInfo::OnDataCanReceive()
 		if (nRecvSize < 0)
 		{
 			// 读取错误,将这个连接从监听中移除并关闭连接
-			return false;
+			return NetworkResult::Error;
 		}
 		else if (nRecvSize == 0)
 		{
 			//由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
-			return true;
+			return NetworkResult::Succeed;
 		}
 		else
 		{
@@ -67,20 +67,19 @@ bool Sloong::CSockInfo::OnDataCanReceive()
 			if (dtlen <= 0 || dtlen > 2147483648 || nRecvSize != s_llLen)
 			{
 				m_pLog->Error("Receive data length error.");
-				return false;
+				return NetworkResult::Error;
 			}
 
 			auto package = make_shared<CDataTransPackage>(m_pCon);
 			bool res = package->RecvPackage(dtlen);
 			if ( !res )
 			{
-				return false;
+				return NetworkResult::Error;
 			}
 
 			//if (m_pConfig->m_oLogInfo.ShowReceiveMessage)
-				m_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%s]<<<%s",package->nSwiftNumber,package->strMD5, package->strMessage));
+			m_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%s]<<<%s",package->nSwiftNumber,package->strMD5, package->strMessage));
 
-			
 			// update the socket time
 			m_ActiveTime = time(NULL);
 			
