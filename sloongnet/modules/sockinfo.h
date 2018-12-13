@@ -1,18 +1,12 @@
 #ifndef SOCKINFO_H
 #define SOCKINFO_H
 
-#include <queue>
-#include <string>
-#include <mutex>
-#include <memory>
+
 #include "lconnect.h"
-#include "defines.h"
+
 #include "DataTransPackage.h"
-using std::string;
-using std::mutex;
-using std::vector;
-using std::queue;
-#include "IMessage.h"
+
+#include "IObject.h"
 using namespace Sloong::Interface;
 
 namespace Sloong
@@ -29,13 +23,15 @@ namespace Sloong
 
 
 	using namespace Universal;
-	class CSockInfo
+	class CSockInfo : IObject
 	{
 	private:
 		CSockInfo(){}
 	public:
-		CSockInfo( int nPriorityLevel,CLog* log, IMessage* msg );
+		CSockInfo( int nPriorityLevel );
 		~CSockInfo();
+
+		void Initialize(IMessage* iMsg, IData* iData,int sock, SSL_CTX* ctx);
 
 		/**
 		 * @Remarks: When data can receive, should call this function to receive the package.
@@ -65,8 +61,6 @@ namespace Sloong
         queue<shared_ptr<CDataTransPackage>>* m_pSendList; // the send list of the bytes.
         queue<PRESENDINFO> m_oPrepareSendList;
 
-		string m_Address;
-		int m_nPort;
 		time_t m_ActiveTime;
 		shared_ptr<lConnect> m_pCon;
 
@@ -78,10 +72,6 @@ namespace Sloong
 		int m_nPriorityLevel;
 		int m_nLastSentTags = -1;
         bool m_bIsSendListEmpty = true;
-
-		protected:
-		CLog*	m_pLog;
-		IMessage* m_iMsg;
 	};
 
 }

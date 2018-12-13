@@ -65,9 +65,11 @@ namespace Sloong
 		int SSL_Read_Ex(SSL* ssl, char* buf, int nSize, int nTimeout, bool bAgagin);
 		int SSL_Write_Ex(SSL* ssl, char* buf, int len);
 
-	private:
+	public:
 		string m_strAddress;
 		int m_nPort;
+		
+	private:
 		int m_nSocket;
 		SSL* m_pSSL = nullptr;
 

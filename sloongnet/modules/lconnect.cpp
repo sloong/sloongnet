@@ -1,9 +1,6 @@
 #include "lconnect.h"
-#include <univ/log.h>
-
-#include <openssl/ssl.h>
-#include <openssl/err.h>
 #include <sys/socket.h>
+#include "utility.h"
 
 bool support_ssl_reconnect = false;
 
@@ -21,6 +18,8 @@ Sloong::lConnect::~lConnect()
 void Sloong::lConnect::Initialize(int sock, SSL_CTX* ctx )
 {
 	m_nSocket = sock;
+	m_strAddress = CUtility::GetSocketIP(m_nSocket);
+	m_nPort = CUtility::GetSocketPort(m_nSocket);
 
 	if (ctx)
 	{
