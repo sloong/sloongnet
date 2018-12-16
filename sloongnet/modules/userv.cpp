@@ -50,7 +50,13 @@ void SloongWallUS::Initialize(CServerConfig* config)
 	m_pMC->RegisterEvent(ProgramStart);
 	m_pMC->RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&SloongWallUS::EventHandler, this, std::placeholders::_1));
 
-	m_pCC->Initialize(m_pMC.get(), m_pDC.get());
+	try{
+		m_pCC->Initialize(m_pMC.get(), m_pDC.get());
+	}
+	catch(exception e)
+	{
+		m_pLog->Error("Excepiton happened in initialize for ControlCenter. Message:"+  e.what());
+	}
 }
 
 void SloongWallUS::Run()

@@ -37,6 +37,12 @@ cd library/
 ./install.sh
 ```
 
+```
+for ubuntu
+
+yum insatll -y glib2.0 uuid libmariadbclient18 ssl imagemagick graphicsmagick libboost 
+```
+
 * 开始编译
 
 ```

@@ -1,5 +1,6 @@
 {
     "C_Cpp.intelliSenseEngineFallback": "Enabled",
+    "files.encoding": "utf8",
     "files.associations": {
         "condition_variable": "cpp",
         "iostream": "cpp",
