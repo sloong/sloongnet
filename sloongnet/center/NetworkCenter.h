@@ -8,7 +8,7 @@ using namespace Sloong::Interface;
 
 namespace Sloong
 {
-    class CSmartSync;
+    class CEasySync;
     class CSockInfo;
     class CEpollEx;
     class CServerConfig;
@@ -50,7 +50,7 @@ namespace Sloong
         bool                    m_bIsRunning;
         unique_ptr<CEpollEx>    m_pEpoll;
         CServerConfig*          m_pConfig;
-        CSmartSync              m_oSync;
+        CEasySync              m_oSync;
         SSL_CTX*                m_pCTX = nullptr;
 		bool m_bEnableClientCheck;
 		int m_nClientCheckKeyLength;

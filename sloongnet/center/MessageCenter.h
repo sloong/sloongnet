@@ -31,7 +31,7 @@ namespace Sloong
 	protected:
 		map<MSG_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;
 		queue<shared_ptr<IEvent>> m_oMsgList;
-		CSmartSync m_oSync;
+		CEasySync m_oSync;
 		mutex m_oMsgListMutex;
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;
 		IData* m_iData;

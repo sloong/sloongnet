@@ -27,6 +27,36 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+            //按照上面的说明配置好后，先在在远程机器上运行 gdbserver：
+            //gdbserver :3333 /path/to/build-debug/program
+            //然后在 vscode 调试界面单击“开始调试”按钮，即可开始调试，如果遇到报错可以修改配置中的 engineLogging 为 true 后再次尝试启动调试，这时可以在调试控制台看到更详细的日志输出，以便定位及解决问题。
+            "name": "(gdb) Remote Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            //miDebuggerServerAddress 是远程机器的地址及 gdbserver 监听的端口
+            "miDebuggerServerAddress": "127.0.0.1:3333",
+            "miDebuggerPath": "C:\\MinGW\\bin\\gdb.exe",
+            //program 是本地的可执行文件路径
+            "program": "${workspaceFolder}\\build\\debug\\sloongnet",
+            "args": [
+                "-r",
+                "/mnt/d/Projects/sloongnet/default.conf",
+                "/mnt/d/Projects/walls/service/ex-develop.conf"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            //sourceFileMap 是本地路径与远程路径的映射关系
+            "sourceFileMap": {
+                "/": "/mnt/d/Projects/sloongnet"
+            },
+            "logging": {
+                "engineLogging": false
+            },
+            "MIMode": "gdb",
         }
     ]
 }
