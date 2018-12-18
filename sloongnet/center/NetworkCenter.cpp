@@ -44,8 +44,8 @@ void Sloong::CNetworkCenter::Initialize(IMessage* iMsg, IData* iData)
 		std::bind(&CNetworkCenter::OnCanWriteData, this, std::placeholders::_1),
 		std::bind(&CNetworkCenter::OnOtherEventHappened, this, std::placeholders::_1));
 
-    m_iMsg->RegisterEvent(ReveivePackage);
-	m_iMsg->RegisterEvent(SocketClose);
+	m_iMsg->RegisterEvent(MSG_TYPE::ReveivePackage);
+	m_iMsg->RegisterEvent(MSG_TYPE::SocketClose);
     m_iMsg->RegisterEvent(MSG_TYPE::SendMessage);
 	m_iMsg->RegisterEventHandler(MSG_TYPE::ProgramStart, std::bind(&CNetworkCenter::Run, this, std::placeholders::_1));
 	m_iMsg->RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&CNetworkCenter::Exit, this, std::placeholders::_1));

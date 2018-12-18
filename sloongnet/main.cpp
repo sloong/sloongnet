@@ -53,6 +53,14 @@ void on_sigint(int signal)
 	exit(0);
 }
 
+// 成功加载后即创建UServer对象，并开始运行。
+SloongWallUS g_AppService;
+
+void on_SIGINT_Event(int signal)
+{
+	g_AppService.Exit();
+}
+
 int main( int argc, char** args )
 {
 	set_terminate(sloong_terminator);
@@ -64,7 +72,8 @@ int main( int argc, char** args )
 	//SIGCHLD: 进程Terminate或Stop的时候,SIGPIPE会发送给进程的父进程,缺省情况下该Signal会被忽略
 	signal(SIGCHLD, SIG_IGN);
 	//SIGINT:由Interrupt Key产生,通常是Ctrl+c或者Delete,发送给所有的ForeGroundGroup进程.
-	signal(SIGINT, &on_sigint);
+	signal(SIGINT, &on_SIGINT_Event);
+	// SIGSEGV:当一个进程执行了一个无效的内存引用，或发生段错误时发送给它的信号
 	signal(SIGSEGV, &on_sigint);
 
 	try
@@ -73,11 +82,9 @@ int main( int argc, char** args )
 		// CmdProcess会根据参数来加载正确的配置信息。成功返回true。
 		if (CCmdProcess::Parser(argc, args, &config))
 		{
-			// 成功加载后即创建UServer对象，并开始运行。
-			SloongWallUS us;
-			us.Initialize(&config);
+			g_AppService.Initialize(&config);
 			// Run函数会阻塞运行。
-			us.Run();
+			g_AppService.Run();
 		}
 	}
 	catch (exception& e)
