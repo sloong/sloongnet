@@ -55,7 +55,7 @@ void SloongWallUS::Initialize(CServerConfig* config)
 	}
 	catch(exception e)
 	{
-		m_pLog->Error("Excepiton happened in initialize for ControlCenter. Message:"+  e.what());
+		m_pLog->Error(string("Excepiton happened in initialize for ControlCenter. Message:")+  string(e.what()));
 	}
 }
 

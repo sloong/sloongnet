@@ -39,6 +39,6 @@ using namespace Sloong;
 using namespace Sloong::Universal;
 
 #include "defines.h"
-#include "SmartSync.h"
+#include "EasySync.h"
 
 #endif //MAIN_H

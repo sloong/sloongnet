@@ -1,12 +1,9 @@
 #include "LuaProcessCenter.h"
-#include "main.h"
-#include <univ/luapacket.h>
-#include <univ/lua.h>
 #include "serverconfig.h"
 #include "globalfunction.h"
 using namespace Sloong;
 
-CLog* Sloong::CLuaProcessCenter::m_pLog = nullptr;
+CLog* g_pLog = nullptr;
 
 CLuaProcessCenter::CLuaProcessCenter()
 {
@@ -25,11 +22,10 @@ CLuaProcessCenter::~CLuaProcessCenter()
 
 void Sloong::CLuaProcessCenter::Initialize(IMessage* iMsg, IData* iData)
 {
-	m_iMsg = iMsg;
-	m_iData = iData;
+	IObject::Initialize(iMsg,iData);
+	g_pLog = m_pLog;
 
 	m_pGFunc->Initialize(m_iMsg, m_iData);
-	m_pLog = TYPE_TRANS<CLog*>(m_iData->Get(DATA_ITEM::Logger));
 	m_pConfig = TYPE_TRANS<CServerConfig*>(iData->Get(DATA_ITEM::Configuation));
 
 	m_iMsg->RegisterEvent(MSG_TYPE::ProcessMessage);
@@ -49,7 +45,7 @@ void Sloong::CLuaProcessCenter::Initialize(IMessage* iMsg, IData* iData)
 
 void Sloong::CLuaProcessCenter::HandleError(string err)
 {
-	m_pLog->Error(CUniversal::Format("[Script]:[%s]", err));
+	g_pLog->Error(CUniversal::Format("[Script]:[%s]", err));
 }
 
 void Sloong::CLuaProcessCenter::ReloadContext(SmartEvent event)

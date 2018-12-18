@@ -11,7 +11,9 @@
                 "/usr/local/include",
                 "/usr/lib/gcc/x86_64-linux-gnu/7/include/",
                 "/usr/include/lua5.3/",
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/sloongnet/interface/",
+                "${workspaceFolder}/sloongnet/**"
+                
             ],
             "defines": [],
             "compilerPath": "/usr/bin/cpp",
