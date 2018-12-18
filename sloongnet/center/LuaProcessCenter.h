@@ -2,13 +2,9 @@
 
 #define LUA_INT_TYPE LUA_INT_LONG
 
-#include <univ/lua.h>
-#include "IMessage.h"
-#include "IData.h"
-#include "SmartSync.h"
+#include "IObject.h"
 namespace Sloong
 {
-	using namespace Universal;
 	using namespace Interface;
 	namespace Events
 	{
@@ -17,7 +13,7 @@ namespace Sloong
 	using namespace Events;
 	class CServerConfig;
 	class CGlobalFunction;
-	class CLuaProcessCenter
+	class CLuaProcessCenter : IObject
 	{
 	public:
 		CLuaProcessCenter();
@@ -37,11 +33,8 @@ namespace Sloong
 		vector<CLua*>	m_pLuaList;
 		vector<bool>	m_oReloadList;
 		queue<int>		m_oFreeLuaContext;
-		static CLog*	m_pLog;
 		CEasySync      m_oSSync;
 		mutex			m_oLuaContextMutex;
-		IMessage*		m_iMsg;
-		IData*			m_iData;
 		CServerConfig*	m_pConfig;
 		unique_ptr<CGlobalFunction> m_pGFunc;
 	};
