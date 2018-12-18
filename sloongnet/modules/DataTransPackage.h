@@ -13,7 +13,7 @@ namespace Sloong
     private:
         CDataTransPackage(){}
 	public:
-		CDataTransPackage(SmartConnect);
+		CDataTransPackage(SmartConnect,int,bool,bool);
 		~CDataTransPackage(){
 			SAFE_DELETE_ARR(pSendBuffer);
 			SAFE_DELETE_ARR(pExBuffer);

@@ -2,9 +2,12 @@
 
 #include "main.h"
 
-Sloong::CDataTransPackage::CDataTransPackage(SmartConnect conn)
+Sloong::CDataTransPackage::CDataTransPackage(SmartConnect conn,int nLevel, bool md5, bool swift)
 {
     m_pConn = conn;
+	m_nPriorityLevel = nLevel;
+	m_bEnableSwiftNumberSup = swift;
+	m_bEnableMD5Check = md5;
 }
 
 
@@ -149,7 +152,7 @@ bool Sloong::CDataTransPackage::RecvPackage(ULONG dtlen )
 			// Add the msg to the sock info list
 			SAFE_DELETE_ARR(data);
 
-
+return true;
 			
 			
 

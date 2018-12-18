@@ -28,7 +28,7 @@ namespace Sloong
 	private:
 		CSockInfo(){}
 	public:
-		CSockInfo( int nPriorityLevel );
+		CSockInfo( int nPriorityLevel , bool ,bool );
 		~CSockInfo();
 
 		void Initialize(IMessage* iMsg, IData* iData,int sock, SSL_CTX* ctx);
@@ -66,10 +66,12 @@ namespace Sloong
 
 		unique_ptr<CLuaPacket> m_pUserInfo;
         mutex m_oSockReadMutex;
-        mutex m_oSockSendMutex;
+        mutex m_oSockSendMutex; 
 		mutex m_oSendListMutex;
         mutex m_oPreSendMutex;
 		int m_nPriorityLevel;
+		bool m_bEnableMD5Check;
+		bool m_bEnableSwiftNumber;
 		int m_nLastSentTags = -1;
         bool m_bIsSendListEmpty = true;
 	};

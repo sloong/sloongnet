@@ -5,13 +5,15 @@
 using namespace Sloong;
 using namespace Sloong::Universal;
 using namespace Sloong::Events;
-Sloong::CSockInfo::CSockInfo(int nPriorityLevel)
+Sloong::CSockInfo::CSockInfo(int nPriorityLevel,bool md5, bool swift)
 {
 	if ( nPriorityLevel < 1 )
 	{
 		nPriorityLevel = 1;
 	}
 	m_nPriorityLevel = nPriorityLevel;
+	m_bEnableMD5Check = md5;
+	m_bEnableSwiftNumber = swift;
 	m_pSendList = new queue<shared_ptr<CDataTransPackage>>[nPriorityLevel]();
 	m_pCon = make_shared<lConnect>();
 	m_pUserInfo = make_unique<CLuaPacket>();
@@ -77,7 +79,7 @@ NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 				return NetworkResult::Error;
 			}
 
-			auto package = make_shared<CDataTransPackage>(m_pCon);
+			auto package = make_shared<CDataTransPackage>(m_pCon,m_nPriorityLevel,m_bEnableMD5Check,m_bEnableSwiftNumber);
 			bool res = package->RecvPackage(dtlen);
 			if ( !res )
 			{

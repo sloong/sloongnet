@@ -100,9 +100,12 @@ void Sloong::CNetworkCenter::CloseConnectEventHandler(SmartEvent event)
 
 void Sloong::CNetworkCenter::SendCloseConnectEvent(int socket)
 {
+	shared_ptr<CSockInfo> info = m_SockList[socket];
+	if(info==nullptr)
+		return;
+
 	auto event = make_shared<CNetworkEvent>(MSG_TYPE::SocketClose);
 	event->SetSocketID(socket);
-	shared_ptr<CSockInfo> info = m_SockList[socket];
 	event->SetUserInfo(info->m_pUserInfo.get());
 	event->SetHandler(this);
 	m_iMsg->SendMessage(event);
@@ -213,7 +216,7 @@ void Sloong::CNetworkCenter::AddToSendList(int socket, int nPriority, const char
 
 	auto info = m_SockList[socket];
 	unique_lock<mutex> lck(info->m_oPreSendMutex);
-	auto si = make_shared<CDataTransPackage>(info->m_pCon);
+	auto si = make_shared<CDataTransPackage>(info->m_pCon,info->m_nPriorityLevel,info->m_bEnableMD5Check,info->m_bEnableSwiftNumber);
 	si->nSent = nStart;
 	si->nSize = nSize;
 	si->pSendBuffer = pBuf;
@@ -300,7 +303,7 @@ NetworkResult Sloong::CNetworkCenter::OnNewAccept( int conn_sock )
 			}
 		}
 
-		auto info = make_shared<CSockInfo>(m_pConfig->m_nPriorityLevel);
+		auto info = make_shared<CSockInfo>(m_pConfig->m_nPriorityLevel,m_pConfig->m_bEnableMD5Check,m_pConfig->m_bEnableSwiftNumberSup);
 		info->Initialize(m_iMsg,m_iData,conn_sock,m_pCTX);
 	
 		unique_lock<mutex> sockLck(m_oSockListMutex);
