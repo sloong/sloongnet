@@ -7,9 +7,7 @@
 typedef unsigned char byte;
 
 namespace Sloong
-{
-	using namespace Interface;
-	
+{	
 	typedef std::function<NetworkResult(int)> EpollEventHandlerFunc;
 	class CEpollEx : IObject
 	{
@@ -22,12 +20,15 @@ namespace Sloong
 
 		void SetEventHandler(EpollEventHandlerFunc,EpollEventHandlerFunc,EpollEventHandlerFunc,EpollEventHandlerFunc);
         
-		/// 修改socket的epoll监听事件
-		void CtlEpollEvent(int opt, int sock, int events);
+		void MonitorSendStatus(int socket);
+		void UnmonitorSendStatus(int socket);
 
 	protected:
 		/// 设置socket到非阻塞模式
 		int SetSocketNonblocking(int socket);
+
+		/// 修改socket的epoll监听事件
+		void CtlEpollEvent(int opt, int sock, int events);
 		
 		// event function
 		void CloseConnectEventHandler(SmartEvent event);

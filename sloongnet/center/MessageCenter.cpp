@@ -1,9 +1,7 @@
 #include "MessageCenter.h"
 #include "NormalEvent.h"
-#include "serverconfig.h"
 
 using namespace Sloong;
-using namespace Sloong::Universal;
 using namespace Sloong::Events;
 
 CMessageCenter::CMessageCenter()
@@ -37,9 +35,6 @@ void CMessageCenter::SendMessage(SmartEvent evt)
 	m_oSync.notify_one();
 }
 
-void CMessageCenter::CallMessage(MSG_TYPE msgType, void * msgParams)
-{
-}
 
 void CMessageCenter::RegisterEvent(MSG_TYPE t)
 {

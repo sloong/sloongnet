@@ -1,10 +1,8 @@
 #pragma once
 #include "IEvent.h"
-#include "defines.h"
 
 namespace Sloong
 {
-	using namespace Interface;
 	namespace Events
 	{
 		class CNormalEvent : public IEvent

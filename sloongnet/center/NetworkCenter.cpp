@@ -1,8 +1,8 @@
 #include "NetworkCenter.h"
 #include "serverconfig.h"
 #include "epollex.h"
-#include "SendMessageEvent.h"
 #include "sockinfo.h"
+#include "NetworkEvent.h"
 
 using namespace Sloong::Events;
 
@@ -25,8 +25,12 @@ void Sloong::CNetworkCenter::Initialize(IMessage* iMsg, IData* iData)
     IObject::Initialize(iMsg, iData);
 
     m_pConfig = (CServerConfig*)m_iData->Get(Configuation);
-
     m_pEpoll->Initialize(m_iMsg,m_iData);
+
+	if( m_pConfig->m_nPriorityLevel < 0 || m_pConfig->m_nPriorityLevel > 5 )
+	{
+		throw new normal_except("PriorityLevel only can 0-5. please check.");
+	}
 
     if (m_pConfig->m_bEnableSSL)
 	{
@@ -47,10 +51,12 @@ void Sloong::CNetworkCenter::Initialize(IMessage* iMsg, IData* iData)
 	m_iMsg->RegisterEvent(MSG_TYPE::ReveivePackage);
 	m_iMsg->RegisterEvent(MSG_TYPE::SocketClose);
     m_iMsg->RegisterEvent(MSG_TYPE::SendMessage);
+	m_iMsg->RegisterEvent(MSG_TYPE::MonitorSendStatus);
 	m_iMsg->RegisterEventHandler(MSG_TYPE::ProgramStart, std::bind(&CNetworkCenter::Run, this, std::placeholders::_1));
 	m_iMsg->RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&CNetworkCenter::Exit, this, std::placeholders::_1));
 	m_iMsg->RegisterEventHandler(MSG_TYPE::SendMessage, std::bind(&CNetworkCenter::SendMessageEventHandler,this,std::placeholders::_1));
 	m_iMsg->RegisterEventHandler(MSG_TYPE::SocketClose, std::bind(&CNetworkCenter::CloseConnectEventHandler, this, std::placeholders::_1));
+	m_iMsg->RegisterEventHandler(MSG_TYPE::MonitorSendStatus, std::bind(&CNetworkCenter::MonitorSendStatusEventHandler, this, std::placeholders::_1));
 }
 
 void Sloong::CNetworkCenter::Run(SmartEvent event)
@@ -71,8 +77,20 @@ void Sloong::CNetworkCenter::Exit(SmartEvent event)
 
 void Sloong::CNetworkCenter::SendMessageEventHandler(SmartEvent event)
 {
-	auto send_evt = dynamic_pointer_cast<CSendMessageEvent>(event);
-	SendMessage(send_evt->GetSocketID(), send_evt->GetPriority(), send_evt->GetSwift(), send_evt->GetMessage(), send_evt->GetSendExData(), send_evt->GetSendExDataSize());
+	auto send_evt = dynamic_pointer_cast<CNetworkEvent>(event);
+	SmartPackage pack = send_evt->GetDataPackage();
+	int socket = pack->GetSocketID();
+	shared_ptr<CSockInfo> info = m_SockList[socket];
+	
+	auto res = info->ResponseDataPackage(pack);
+	if (res == NetworkResult::Retry )
+	{
+		m_pEpoll->MonitorSendStatus(socket);
+	}
+	if (res == NetworkResult::Error)
+	{
+		SendCloseConnectEvent(socket);
+	}
 }
 
 
@@ -98,6 +116,13 @@ void Sloong::CNetworkCenter::CloseConnectEventHandler(SmartEvent event)
 }
 
 
+void Sloong::CNetworkCenter::MonitorSendStatusEventHandler(SmartEvent event)
+{
+	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
+	m_pEpoll->MonitorSendStatus(net_evt->GetSocketID());
+}
+
+
 void Sloong::CNetworkCenter::SendCloseConnectEvent(int socket)
 {
 	shared_ptr<CSockInfo> info = m_SockList[socket];
@@ -110,129 +135,6 @@ void Sloong::CNetworkCenter::SendCloseConnectEvent(int socket)
 	event->SetHandler(this);
 	m_iMsg->SendMessage(event);
 }
-
-
-void Sloong::CNetworkCenter::SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData, int nExSize)
-{
-	// process msg
-	char* pBuf = NULL;
-	long long nBufLen = s_llLen + msg.size();
-	string md5("");
-	if (m_pConfig->m_bEnableSwiftNumberSup)
-	{
-		nBufLen += s_llLen;
-	}
-	if (m_pConfig->m_bEnableMD5Check)
-	{
-		md5 = CMD5::Encode(msg);
-		nBufLen += md5.length();
-	}
-	// in here, the exdata size no should include the buffer length,
-	// nBufLen不应该包含exdata的长度,所以如果有附加数据,那么这里应该只增加Buff空间,但是前8位的长度中不包含buff长度的8位指示符.
-	long long nMsgLen = nBufLen - s_llLen;
-	if (pExData != NULL && nExSize > 0)
-	{
-		nBufLen += s_llLen;
-	}
-
-	pBuf = new char[nBufLen];
-	memset(pBuf, 0, nBufLen);
-	char* pCpyPoint = pBuf;
-
-	CUniversal::LongToBytes(nMsgLen, pCpyPoint);
-	pCpyPoint += 8;
-	if (m_pConfig->m_bEnableSwiftNumberSup)
-	{
-		CUniversal::LongToBytes(nSwift, pCpyPoint);
-		pCpyPoint += s_llLen;
-	}
-	if (m_pConfig->m_bEnableMD5Check)
-	{
-		memcpy(pCpyPoint, md5.c_str(), md5.length());
-		pCpyPoint += md5.length();
-	}
-	memcpy(pCpyPoint, msg.c_str(), msg.length());
-	pCpyPoint += msg.length();
-	if (pExData != NULL && nExSize > 0)
-	{
-		long long Exlen = nExSize;
-		CUniversal::LongToBytes(Exlen, pCpyPoint);
-		pCpyPoint += 8;
-	}
-
-	shared_ptr<CSockInfo> pInfo = nullptr;
-	
-	if (m_pConfig->m_oLogInfo.ShowSendMessage)
-	{
-		m_pLog->Verbos(CUniversal::Format("SEND<<<[%d][%s]<<<%s",nSwift,md5,msg));
-		if( pExData != nullptr )
-			m_pLog->Verbos(CUniversal::Format("SEND_EXDATA<<<[%d][%s]<<<DATALEN[%d]",nSwift,md5,nExSize));
-	}
-
-	// if have exdata, directly add to epoll list.
-	if (pExData != NULL && nExSize > 0)
-	{
-		AddToSendList(sock, nPriority, pBuf, nBufLen, 0, pExData, nExSize);
-		return;
-	}
-	else
-	{
-		pInfo = m_SockList[sock];
-		if (!pInfo)
-		{
-			m_pLog->Warn(CUniversal::Format("Get socket[%d] info from socket list failed. Close the socket.", sock));
-			SendCloseConnectEvent(sock);
-			return;
-		}
-		// check the send list size. if all empty, try send message directly.
-		if ((pInfo->m_bIsSendListEmpty == false && !pInfo->m_oPrepareSendList.empty()) || pInfo->m_oSockSendMutex.try_lock() == false)
-		{
-			AddToSendList(sock, nPriority, pBuf, nBufLen, 0, pExData, nExSize);
-			return;
-		}
-	}
-
-	unique_lock<mutex> lck(pInfo->m_oSockSendMutex, std::adopt_lock);
-	// if code run here. the all list is empty. and no have exdata. try send message
-	int nMsgSend = pInfo->m_pCon->Write(pBuf, nBufLen, 0);
-	if (nMsgSend < 0)
-	{
-		m_pLog->Warn(CUniversal::Format("Send data failed.[%s][%s]", pInfo->m_pCon->m_strAddress, pInfo->m_pCon->G_FormatSSLErrorMsg(nMsgSend)));
-	}
-	if (nMsgSend != nBufLen)
-	{
-		m_pLog->Verbos(CUniversal::Format("Add to send list with Priority[%d],Size[%d/%d].", nPriority, nMsgSend, nBufLen));
-		AddToSendList(sock, nPriority, pBuf, nBufLen, nMsgSend, NULL, 0);
-	}
-	SAFE_DELETE_ARR(pBuf);
-	lck.unlock();
-}
-
-
-void Sloong::CNetworkCenter::AddToSendList(int socket, int nPriority, const char *pBuf, int nSize, int nStart, const char* pExBuf, int nExSize)
-{
-	if (pBuf == NULL || nSize <= 0)
-		return;
-
-	auto info = m_SockList[socket];
-	unique_lock<mutex> lck(info->m_oPreSendMutex);
-	auto si = make_shared<CDataTransPackage>(info->m_pCon,info->m_nPriorityLevel,info->m_bEnableMD5Check,info->m_bEnableSwiftNumber);
-	si->nSent = nStart;
-	si->nSize = nSize;
-	si->pSendBuffer = pBuf;
-	si->pExBuffer = pExBuf;
-	si->nExSize = nExSize;
-	si->nPackSize = nSize + nExSize;
-	PRESENDINFO psi;
-	psi.pSendInfo = si;
-	psi.nPriorityLevel = nPriority;
-	info->m_oPrepareSendList.push(psi);
-	m_pLog->Debug(CUniversal::Format("Add send package to prepare send list. list size:[%d]",info->m_oPrepareSendList.size()));
-	info->m_bIsSendListEmpty = false;
-	// 只有在需要使用EPoll来发送数据的时候才去添加EPOLLOUT标志
-	m_pEpoll->CtlEpollEvent(EPOLL_CTL_MOD, socket, EPOLLOUT | EPOLLIN);
-}
-
 
 void Sloong::CNetworkCenter::EnableSSL(string certFile, string keyFile, string passwd)
 {
@@ -303,7 +205,7 @@ NetworkResult Sloong::CNetworkCenter::OnNewAccept( int conn_sock )
 			}
 		}
 
-		auto info = make_shared<CSockInfo>(m_pConfig->m_nPriorityLevel,m_pConfig->m_bEnableMD5Check,m_pConfig->m_bEnableSwiftNumberSup);
+		auto info = make_shared<CSockInfo>();
 		info->Initialize(m_iMsg,m_iData,conn_sock,m_pCTX);
 	
 		unique_lock<mutex> sockLck(m_oSockListMutex);

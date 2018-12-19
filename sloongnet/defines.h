@@ -1,6 +1,17 @@
 #pragma once
 
-#include "main.h"
+// univ head file
+#include <univ/defines.h>
+#include <univ/univ.h>
+#include <univ/log.h>
+#include <univ/exception.h>
+#include <univ/threadpool.h>
+#include <univ/hash.h>
+#include <univ/lua.h>
+#include <univ/luapacket.h>
+using namespace Sloong;
+using namespace Sloong::Universal;
+
 
 template<typename T> inline
 T TYPE_TRANS(LPVOID p)
@@ -19,7 +30,7 @@ typedef enum g_DataCenter_MsgType
 	ProgramExit,
 
 	//////////////////////////////////////////////////////////////////////////
-	// 由 * EPollEx * 模块提供的消息
+	// 由 * NetworkCenter * 模块提供的消息
 	//////////////////////////////////////////////////////////////////////////
 	// 当接收到消息包之后，会发送该消息
 	ReveivePackage,
@@ -32,6 +43,10 @@ typedef enum g_DataCenter_MsgType
 	// 需要发送数据给客户端时，使用该消息
 	SendMessage,
 
+	// 需要监听socket的可写状态时，使用该消息
+	// 类型为CNetworkEvent.
+	MonitorSendStatus,
+
 	//////////////////////////////////////////////////////////////////////////
 	// 由 * LuaProcessCenter * 提供的消息
 	//////////////////////////////////////////////////////////////////////////
@@ -43,6 +58,7 @@ typedef enum g_DataCenter_MsgType
 	// 当需要重新载入Lua Context的时候发送该请求。
 	// 请求类型为CNormalEvent
 	ReloadLuaContext,
+	
 	
 
 }MSG_TYPE;
@@ -99,6 +115,7 @@ enum NetworkResult
 	Succeed = 1,
 	Retry = 0,
 	Error = -1,
+	Invalid = -2,
 };
 
 

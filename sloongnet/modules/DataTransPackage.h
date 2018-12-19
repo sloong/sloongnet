@@ -1,66 +1,81 @@
 #ifndef DATA_TRANS_PACKAGE_H
 #define DATA_TRANS_PACKAGE_H
 
-#include <string> 
-using std::string;
 
-#include "defines.h"
+#include "IObject.h"
+
 #include "lconnect.h"
 namespace Sloong
 {
-    class CDataTransPackage
+    class CDataTransPackage : IObject
     {
-    private:
-        CDataTransPackage(){}
 	public:
-		CDataTransPackage(SmartConnect,int,bool,bool);
 		~CDataTransPackage(){
-			SAFE_DELETE_ARR(pSendBuffer);
-			SAFE_DELETE_ARR(pExBuffer);
+			SAFE_DELETE_ARR(m_pMsgBuffer);
+			SAFE_DELETE_ARR(m_pExBuffer);
 		}
+
+        void Initialize(IMessage*,IData*,SmartConnect);
 
         /**
          * @Remarks: When process done, should call this function to response this package.
          * @Params: 
          * @Return: 
          */
-        bool ResponsePackage(const string& msg, const char* exData, int exSize);
+        void ResponsePackage(const string& msg, const char* exData = nullptr, int exSize = 0);
 
     public:
         /**
          * @Remarks: Receive and create data package. 
          * @Params: 
-         * @Return: if package receive succeed, return true.
-         *          else return false if other error happened.
+         * @Return: if package receive succeed, return Succed.
+         *          if other error happened else return Error 
+         *          if md5 check failed, return Invalied.
          */
-        bool RecvPackage(ULONG);
+        NetworkResult RecvPackage(ULONG);
 
-        bool SendPackage();
+        /**
+         * @Remarks: send this package
+         * @Params: 
+         * @Return: if send fialed, return Error.
+         */
+        NetworkResult SendPackage();
 
-        string GetRecvMessage();
-        void SetSendMessage(const string& msg, const char* exData, int exSize );
+        inline string GetRecvMessage(){ return strMessage; }
+
+        inline int GetSocketID(){return m_pCon->GetSocketID(); }
+
+        /**
+         * @Remarks: If have ex data send, this package is big package. need add to send list.
+         * @Params: 
+         * @Return: 
+         */
+        inline bool IsBigPackage(){ return m_nExSize > 0 ? true : false; }
 
     public:
-        // Send data info
-        const char* pSendBuffer=nullptr;
-        int nSize=0;
-		const char* pExBuffer=nullptr;
-		int nExSize=0;
-        int nSent=0;  // is send
-		int nPackSize=0;
-        // Recv data info
-        long long nSwiftNumber = -1;
-        string strMD5 = "";
-        string strMessage = "";
-
+        // priority of this package
         int nPriority = 0;
 
     protected:
-        SmartConnect    m_pConn;
+        // Send data info
+        char* m_pMsgBuffer=nullptr;
+        int m_nMsgSize=0;
+		const char* m_pExBuffer=nullptr;
+		int m_nExSize=0;
+        int m_nSent=0;
+		int m_nPackSize=0;
 
-        bool        m_bEnableSwiftNumberSup;
-        bool        m_bEnableMD5Check;
-        int         m_nPriorityLevel;        
+        // serial number of this package
+        long long m_nSerialNumber = -1;
+        
+        // received MD5, used to check the validity of message 
+        string strMD5 = "";
+        
+        // request message of this package.
+        string strMessage = "";
+
+    protected:
+        SmartConnect    m_pCon;
     };
 
     typedef shared_ptr<CDataTransPackage> SmartPackage;

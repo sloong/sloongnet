@@ -1,5 +1,5 @@
 #pragma once
-#include "defines.h"
+#include "main.h"
 
 // 事件的接口
 // 由于涉及到多处理函数，而且释放必须由最后一个使用者来释放
@@ -9,30 +9,24 @@
 
 namespace Sloong
 {
-	namespace Interface
+	class IEvent
 	{
-		class IEvent
-		{
-		public:
-			IEvent() {}
-			virtual ~IEvent() {}
-			virtual MSG_TYPE GetEvent() = 0;
-			// Get the handler object.
-			// it is pointer to the event register.
-			virtual LPVOID GetHandler() = 0;
-		protected:
-			int m_nRefCount = 0;
-		};
-		typedef shared_ptr<IEvent> SmartEvent;
-
-		template<typename T> inline
-		T EVENT_TRANS(IEvent* p)
-		{
-			T tmp = dynamic_cast<T>(p);
-			assert(tmp);
-			return tmp;
-		}
+	public:
+		IEvent() {}
+		virtual ~IEvent() {}
+		virtual MSG_TYPE GetEvent() = 0;
+		// Get the handler object.
+		// it is pointer to the event register.
+		virtual LPVOID GetHandler() = 0;
+	protected:
+		int m_nRefCount = 0;
+	};
+	typedef shared_ptr<IEvent> SmartEvent;
+	template<typename T> inline
+	T EVENT_TRANS(IEvent* p)
+	{
+		T tmp = dynamic_cast<T>(p);
+		assert(tmp);
+		return tmp;
 	}
-
-
 }

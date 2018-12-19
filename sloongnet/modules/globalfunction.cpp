@@ -6,7 +6,6 @@
 #include <boost/foreach.hpp>
 #include <mutex>
 // univ
-#include "defines.h"
 #include <univ/Base64.h>
 
 #include "utility.h"
@@ -22,7 +21,6 @@ using namespace std;
 using namespace Sloong;
 using namespace Sloong::Universal;
 using namespace Sloong::Events;
-using namespace Sloong::Interface;
 
 CGlobalFunction* CGlobalFunction::g_pThis = NULL;
 mutex g_SQLMutex;
@@ -88,9 +86,7 @@ void CGlobalFunction::ClearReceiveInfoByUUID(string uuid)
 
 void Sloong::CGlobalFunction::Initialize(IMessage *iMsg, IData *iData)
 {
-	m_iMsg = iMsg;
-	m_iData = iData;
-	m_pLog = TYPE_TRANS<CLog *>(m_iData->Get(Logger));
+	IObject::Initialize(iMsg,iData);
 
 	CServerConfig *pConfig = TYPE_TRANS<CServerConfig *>(m_iData->Get(DATA_ITEM::Configuation));
 	if (pConfig->m_bEnableDataReceive)

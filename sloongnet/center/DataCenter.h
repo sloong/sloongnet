@@ -4,7 +4,6 @@
 
 namespace Sloong
 {
-	using Interface::IData;
 	class CDataCenter : public IData
 	{
 	public:

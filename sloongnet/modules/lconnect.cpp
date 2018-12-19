@@ -174,7 +174,7 @@ void Sloong::lConnect::Close()
 	close(m_nSocket);
 }
 
-int Sloong::lConnect::GetSocket()
+int Sloong::lConnect::GetSocketID()
 {
 	return m_nSocket;
 }

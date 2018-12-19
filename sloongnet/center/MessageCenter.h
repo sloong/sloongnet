@@ -4,8 +4,6 @@
 #include "IData.h"
 namespace Sloong
 {
-	using namespace Interface;
-	
 	class CMessageCenter : public IMessage
 	{
 	public:
@@ -16,7 +14,6 @@ namespace Sloong
 
 		void SendMessage(MSG_TYPE msgType);
 		void SendMessage(SmartEvent evt);
-		void CallMessage(MSG_TYPE msgType, void* msgParams);
 
 		void RegisterEvent(MSG_TYPE t);
 		void RegisterEventHandler(MSG_TYPE t, MsgHandlerFunc func);

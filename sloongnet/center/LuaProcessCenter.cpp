@@ -102,7 +102,7 @@ string FormatJSONErrorMessage(string code,string message)
 	return CUniversal::Format("{\"errno\": \"%s\",\"errmsg\" : \"%s\"}", code, message);
 }
 
-bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo, string & msg, string & res, char*& exData, int& exSize)
+bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo,const string & msg, string & res, char*& exData, int& exSize)
 {
 	// In process, need add the lua script runtime and call lua to process.
 	// In here, just show log to test.

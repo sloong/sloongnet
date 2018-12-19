@@ -1,10 +1,6 @@
 #pragma once
 
-#include <memory>
-using namespace std;
-
 #include "IObject.h"
-using namespace Sloong::Interface;
 
 namespace Sloong
 {
@@ -25,6 +21,7 @@ namespace Sloong
 		void Exit(SmartEvent event);
         void SendMessageEventHandler(SmartEvent event);
         void CloseConnectEventHandler(SmartEvent event);
+		void MonitorSendStatusEventHandler(SmartEvent evt);
 
         // Work thread.
 		void CheckTimeoutWorkLoop(SMARTER params);

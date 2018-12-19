@@ -52,7 +52,7 @@ namespace Sloong
 
 		void Close();
 
-		int GetSocket();
+		int GetSocketID();
 
 	public:
 		static int G_InitializeSSL(SSL_CTX*& ctx, string certFile, string keyFile, string passwd);

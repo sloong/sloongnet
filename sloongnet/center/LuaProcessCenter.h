@@ -5,7 +5,6 @@
 #include "IObject.h"
 namespace Sloong
 {
-	using namespace Interface;
 	namespace Events
 	{
 		class CNetworkEvent;
@@ -23,7 +22,7 @@ namespace Sloong
 		int NewThreadInit();
 		void InitLua(CLua* pLua, string folder);
 		void CloseSocket(CLuaPacket* uinfo);
-		bool MsgProcess( CLuaPacket * pUInfo, string & msg, string & res, char*& exData, int& exSize);
+		bool MsgProcess( CLuaPacket * pUInfo, const string& msg, string& res, char*& exData, int& exSize);
 		int GetFreeLuaContext();
 		
 		void ReloadContext(SmartEvent event);

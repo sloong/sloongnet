@@ -1,7 +1,6 @@
 #include "DataCenter.h"
 
 using namespace Sloong;
-using namespace Sloong::Interface;
 
 CDataCenter::CDataCenter()
 {

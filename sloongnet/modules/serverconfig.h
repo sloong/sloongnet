@@ -2,9 +2,12 @@
 #define SERVERCONFIG_H
 
 #include <string>
-#include "defines.h"
 using namespace std;
+
 #include <glib.h>
+
+#include "defines.h"
+
 namespace Sloong
 {
 	class CServerConfig

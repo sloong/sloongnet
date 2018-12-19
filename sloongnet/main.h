@@ -26,19 +26,12 @@ using namespace std;
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-// univ head file
-#include <univ/defines.h>
-#include <univ/univ.h>
-#include <univ/log.h>
-#include <univ/exception.h>
-#include <univ/threadpool.h>
-#include <univ/hash.h>
-#include <univ/lua.h>
-#include <univ/luapacket.h>
-using namespace Sloong;
-using namespace Sloong::Universal;
-
 #include "defines.h"
 #include "EasySync.h"
+
+#include "serverconfig.h"
+
+// define global variables
+extern CServerConfig* g_pConfig;
 
 #endif //MAIN_H

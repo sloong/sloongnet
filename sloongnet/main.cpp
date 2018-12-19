@@ -1,6 +1,6 @@
 #include <stdarg.h>
 #include "main.h"
-#include "userv.h"
+#include "service.h"
 #include "serverconfig.h"
 #include "version.h"
 #include "CmdProcess.h"
@@ -10,6 +10,8 @@ using namespace std;
 using namespace Sloong;
 
 #define MAX_STACK_LAYERS 256
+
+CServerConfig* g_pConfig = nullptr;
 
 void write_call_stack()
 {
@@ -54,7 +56,7 @@ void on_sigint(int signal)
 }
 
 // 成功加载后即创建UServer对象，并开始运行。
-SloongWallUS g_AppService;
+SloongNetService g_AppService;
 
 void on_SIGINT_Event(int signal)
 {
@@ -82,6 +84,7 @@ int main( int argc, char** args )
 		// CmdProcess会根据参数来加载正确的配置信息。成功返回true。
 		if (CCmdProcess::Parser(argc, args, &config))
 		{
+			g_pConfig = &config;
 			g_AppService.Initialize(&config);
 			// Run函数会阻塞运行。
 			g_AppService.Run();

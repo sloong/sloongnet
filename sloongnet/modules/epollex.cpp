@@ -88,6 +88,16 @@ void Sloong::CEpollEx::SetEventHandler(EpollEventHandlerFunc accept,EpollEventHa
 }
 
 
+void Sloong::CEpollEx::MonitorSendStatus(int socket)
+{
+	CtlEpollEvent(EPOLL_CTL_MOD, socket, EPOLLIN | EPOLLOUT);
+}
+
+void Sloong::CEpollEx::UnmonitorSendStatus(int socket)
+{
+	CtlEpollEvent(EPOLL_CTL_MOD, socket, EPOLLIN );
+}
+
 void Sloong::CEpollEx::CtlEpollEvent(int opt, int sock, int events)
 {
 	struct epoll_event ent;
@@ -173,7 +183,7 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 				m_pLog->Verbos("EPoll EPOLLIN event happened.Data Can Receive.");
 				auto res = OnDataCanReceive(fd);
 				if( res  != NetworkResult::Error)
-					CtlEpollEvent(EPOLL_CTL_MOD, fd, EPOLLIN | EPOLLOUT );
+					MonitorSendStatus(fd);
 			}
 			// EPOLLOUT 可写消息
 			else if (m_Events[i].events&EPOLLOUT)
@@ -182,9 +192,9 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 				auto res = OnCanWriteData(fd);
 				// 所有消息全部发送完毕后只需要监听可读消息就可以了。
 				if( res == NetworkResult::Succeed)
-					CtlEpollEvent(EPOLL_CTL_MOD, fd, EPOLLIN);
+					UnmonitorSendStatus(fd);			
 				else if( res == NetworkResult::Retry )
-					CtlEpollEvent(EPOLL_CTL_MOD, fd, EPOLLIN | EPOLLOUT );					
+					MonitorSendStatus(fd);			
 			}
 			else
 			{

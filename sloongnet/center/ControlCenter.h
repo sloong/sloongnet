@@ -5,7 +5,6 @@
 
 namespace Sloong
 {
-	using namespace Interface;
 	class CNetworkCenter;
 	class CLuaProcessCenter;
 	class CServerConfig;

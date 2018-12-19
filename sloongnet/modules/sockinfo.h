@@ -7,28 +7,13 @@
 #include "DataTransPackage.h"
 
 #include "IObject.h"
-using namespace Sloong::Interface;
 
 namespace Sloong
 {
-	namespace Universal
-	{
-		class CLuaPacket;
-	}
-    typedef struct _PrepareSendInfo
-    {
-        shared_ptr<CDataTransPackage> pSendInfo;
-        int nPriorityLevel;
-    }PRESENDINFO;
-
-
-	using namespace Universal;
 	class CSockInfo : IObject
 	{
-	private:
-		CSockInfo(){}
 	public:
-		CSockInfo( int nPriorityLevel , bool ,bool );
+		CSockInfo();
 		~CSockInfo();
 
 		void Initialize(IMessage* iMsg, IData* iData,int sock, SSL_CTX* ctx);
@@ -51,15 +36,25 @@ namespace Sloong
 		 */
 		NetworkResult OnDataCanSend();
 
+		/**
+		 * @Remarks: When need response data package,call this function. 
+		 * @Params: 
+		 * @Return: if send data succeed, return Succeed.
+		 * 			if happened erros, return Error.
+		 * 			if have extend data or all data is no send and have EAGAIN sinal , return Retry.
+		 */
+		NetworkResult ResponseDataPackage(SmartPackage pack);
+
 	protected:
 		void ProcessPrepareSendList();
 		NetworkResult ProcessSendList();
 		int GetSendInfoList(queue<shared_ptr<CDataTransPackage>>*& list );
 		shared_ptr<CDataTransPackage> GetSendInfo(queue<shared_ptr<CDataTransPackage>>* list);
+		void AddToSendList(SmartPackage pack);
 
 	public:
         queue<shared_ptr<CDataTransPackage>>* m_pSendList; // the send list of the bytes.
-        queue<PRESENDINFO> m_oPrepareSendList;
+        queue<shared_ptr<CDataTransPackage>> m_oPrepareSendList;
 
 		time_t m_ActiveTime;
 		shared_ptr<lConnect> m_pCon;
@@ -69,9 +64,6 @@ namespace Sloong
         mutex m_oSockSendMutex; 
 		mutex m_oSendListMutex;
         mutex m_oPreSendMutex;
-		int m_nPriorityLevel;
-		bool m_bEnableMD5Check;
-		bool m_bEnableSwiftNumber;
 		int m_nLastSentTags = -1;
         bool m_bIsSendListEmpty = true;
 	};

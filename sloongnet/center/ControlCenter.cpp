@@ -1,11 +1,9 @@
 #include "ControlCenter.h"
-#include "defines.h"
 #include "NetworkCenter.h"
 #include "LuaProcessCenter.h"
 #include "globalfunction.h"
 #include "serverconfig.h"
 #include "NetworkEvent.h"
-#include "SendMessageEvent.h"
 #include "sockinfo.h"
 #include "DataTransPackage.h"
 using namespace Sloong;
@@ -49,41 +47,23 @@ void Sloong::CControlCenter::OnReceivePackage(SmartEvent evt)
 		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
 		return;
 	}
-	SmartPackage pack = net_evt->GetRecvPackage();
-	auto send_evt = make_shared<CSendMessageEvent>(net_evt->GetSocketID(), net_evt->GetPriority(), pack->nSwiftNumber);
-	if (m_pConfig->m_bEnableMD5Check)
-	{
-		string rmd5 = CMD5::Encode(pack->strMessage);
-		CUniversal::touper(pack->strMD5);
-		CUniversal::touper(rmd5);
-		if (pack->strMD5 != rmd5)
-		{
-			// handle error.
-			string strSend = CUniversal::Format("{\"errno\": \"-1\",\"errmsg\" : \"package check error\",\"server_md5\":\"%s\",\"client_md5\":\"%s\",\"check_string\":\"%s\"}", rmd5, pack->strMD5, pack->strMessage);
+	SmartPackage pack = net_evt->GetDataPackage();
 
-			send_evt->SetMessage(strSend);
-			m_iMsg->SendMessage(send_evt);
-			return;
-		}
-	}
-
+	net_evt->SetEvent(MSG_TYPE::SendMessage);
+	
 	string strRes("");
 	char* pExData = nullptr;
 	int nExSize;
-	if (m_pProcess->MsgProcess(info, pack->strMessage, strRes, pExData, nExSize))
-	{
-		if (pExData && nExSize > 0 )
-		{
-			send_evt->SetSendExData(pExData,nExSize);
-		}
-		send_evt->SetMessage(strRes);
-	}
-	else
-	{
+	string strMsg = pack->GetRecvMessage();
+	if (m_pProcess->MsgProcess(info, strMsg , strRes, pExData, nExSize)){
+		pack->ResponsePackage(strRes,pExData,nExSize);
+	}else{
 		m_pLog->Error("Error in process");
-		send_evt->SetMessage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
+		pack->ResponsePackage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
 	}
-	m_iMsg->SendMessage(send_evt);
+	
+	net_evt->SetDataPackage(pack);
+	m_iMsg->SendMessage(net_evt);
 }
 
 void Sloong::CControlCenter::OnSocketClose(SmartEvent event)

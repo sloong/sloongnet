@@ -1,19 +1,11 @@
 #ifndef CGLOBALFUNCTION_H
 #define CGLOBALFUNCTION_H
 
-#include <univ/lua.h>
-#include "IData.h"
-#include "IMessage.h"
+#include "IObject.h"
 namespace Sloong
 {
-	namespace Universal
-	{
-		class CLog;
-	}
-	using namespace Universal;
 	class CUtility;
-	using namespace Interface;
-	class CGlobalFunction
+	class CGlobalFunction : IObject
 	{
 	public:
         CGlobalFunction();
@@ -33,9 +25,6 @@ namespace Sloong
 		
 	protected:
         CUtility * m_pUtility;
-		CLog*	m_pLog;
-		IMessage* m_iMsg;
-		IData*		m_iData;
 		int 		m_ListenSock;
 		bool		m_bIsRunning=true;
 	public:

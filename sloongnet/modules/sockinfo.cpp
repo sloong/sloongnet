@@ -5,23 +5,16 @@
 using namespace Sloong;
 using namespace Sloong::Universal;
 using namespace Sloong::Events;
-Sloong::CSockInfo::CSockInfo(int nPriorityLevel,bool md5, bool swift)
+Sloong::CSockInfo::CSockInfo()
 {
-	if ( nPriorityLevel < 1 )
-	{
-		nPriorityLevel = 1;
-	}
-	m_nPriorityLevel = nPriorityLevel;
-	m_bEnableMD5Check = md5;
-	m_bEnableSwiftNumber = swift;
-	m_pSendList = new queue<shared_ptr<CDataTransPackage>>[nPriorityLevel]();
+	m_pSendList = new queue<shared_ptr<CDataTransPackage>>[g_pConfig->m_nPriorityLevel]();
 	m_pCon = make_shared<lConnect>();
 	m_pUserInfo = make_unique<CLuaPacket>();
 }
 
 CSockInfo::~CSockInfo()
 {
-	for (int i = 0; i < m_nPriorityLevel;i++)
+	for (int i = 0; i < g_pConfig->m_nPriorityLevel;i++)
 	{
 		while (!m_pSendList[i].empty())
 		{
@@ -45,6 +38,53 @@ void Sloong::CSockInfo::Initialize(IMessage* iMsg, IData* iData,int sock, SSL_CT
 	m_pUserInfo->SetData("ip", m_pCon->m_strAddress);
 	m_pUserInfo->SetData("port", CUniversal::ntos(m_pCon->m_nPort));
 }
+
+NetworkResult Sloong::CSockInfo::ResponseDataPackage(SmartPackage pack)
+{	
+	// if have exdata, directly add to epoll list.
+	int sock = pack->GetSocketID();
+	if (pack->IsBigPackage())
+	{
+		AddToSendList(pack);
+		return NetworkResult::Retry;
+	}
+	else
+	{
+		// check the send list size. if all empty, try send message directly.
+		if ((m_bIsSendListEmpty == false && !m_oPrepareSendList.empty()) || m_oSockSendMutex.try_lock() == false)
+		{
+			AddToSendList(pack);
+			return NetworkResult::Retry;
+		}
+	}
+
+	unique_lock<mutex> lck(m_oSockSendMutex, std::adopt_lock);
+	// if code run here. the all list is empty. and no have exdata. try send message
+	auto res = pack->SendPackage();
+	if ( res == NetworkResult::Error )
+	{
+		// TODO: 这里应该对错误进行区分处理
+		m_pLog->Warn(CUniversal::Format("Send data failed.[%s]", m_pCon->m_strAddress));//, m_pCon->G_FormatSSLErrorMsg(nMsgSend)));
+		return NetworkResult::Error;
+	}
+	if (res == NetworkResult::Retry )
+	{
+		AddToSendList(pack);
+		return NetworkResult::Retry;
+	}
+	lck.unlock();
+	return NetworkResult::Succeed;
+}
+
+
+void Sloong::CSockInfo::AddToSendList(SmartPackage pack)
+{
+	unique_lock<mutex> lck(m_oPreSendMutex);
+	m_oPrepareSendList.push(pack);
+	m_pLog->Debug(CUniversal::Format("Add send package to prepare send list. list size:[%d]",m_oPrepareSendList.size()));
+	m_bIsSendListEmpty = false;
+}
+
 
 NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 {
@@ -79,15 +119,14 @@ NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 				return NetworkResult::Error;
 			}
 
-			auto package = make_shared<CDataTransPackage>(m_pCon,m_nPriorityLevel,m_bEnableMD5Check,m_bEnableSwiftNumber);
-			bool res = package->RecvPackage(dtlen);
-			if ( !res )
-			{
+			auto package = make_shared<CDataTransPackage>();
+			package->Initialize(m_iMsg,m_iData,m_pCon);
+			auto res = package->RecvPackage(dtlen);
+			if ( res == NetworkResult::Invalid ){
+				AddToSendList(package);
+			}else if( res == NetworkResult::Error ){
 				return NetworkResult::Error;
 			}
-
-			//if (m_pConfig->m_oLogInfo.ShowReceiveMessage)
-			m_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%s]<<<%s",package->nSwiftNumber,package->strMD5, package->strMessage));
 
 			// update the socket time
 			m_ActiveTime = time(NULL);
@@ -95,10 +134,9 @@ NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 			// Add the sock event to list
 			auto event = make_shared<CNetworkEvent>(MSG_TYPE::ReveivePackage);
 			
-			event->SetSocketID(m_pCon->GetSocket());
+			event->SetSocketID(m_pCon->GetSocketID());
 			event->SetUserInfo(m_pUserInfo.get());
-			event->SetPriority(package->nPriority);
-			event->SetRecvPackage(package);
+			event->SetDataPackage(package);
 			m_iMsg->SendMessage(event);
 		}
 	}while (bLoop);
@@ -129,11 +167,11 @@ void Sloong::CSockInfo::ProcessPrepareSendList()
 		
 		while (!m_oPrepareSendList.empty())
 		{
-			PRESENDINFO* psi = &m_oPrepareSendList.front();
+			auto pack = m_oPrepareSendList.front();
 			m_oPrepareSendList.pop();
-			m_pSendList[psi->nPriorityLevel].push(psi->pSendInfo);
+			m_pSendList[pack->nPriority].push(pack);
 			m_pLog->Debug(CUniversal::Format("Add send package to send list[%d]. send list size[%d], prepare send list size[%d]",
-								psi->nPriorityLevel,m_pSendList[psi->nPriorityLevel].size(),m_oPrepareSendList.size()));
+								pack->nPriority,m_pSendList[pack->nPriority].size(),m_oPrepareSendList.size()));
 		}
 		prelck.unlock();
 		sendListlck.unlock();
@@ -154,8 +192,7 @@ NetworkResult Sloong::CSockInfo::ProcessSendList()
 
 		queue<shared_ptr<CDataTransPackage>>* list = nullptr;
 		int sendTags = GetSendInfoList(list);
-		if (list == nullptr)
-		{
+		if (list == nullptr){
 			m_pLog->Error("Send info list empty, no need send.");
 			break;
 		}
@@ -168,20 +205,15 @@ NetworkResult Sloong::CSockInfo::ProcessSendList()
 			unique_lock<mutex> ssend_lck(m_oSockSendMutex);
 			int res =si->SendPackage();
 			ssend_lck.unlock();
-			if( res < 0)
-			{
+			if( res < 0){
 				m_pLog->Error(CUniversal::Format("Send data package error. close connect:[%s:%d]",m_pCon->m_strAddress,m_pCon->m_nPort));
 				return NetworkResult::Error;
-			}
-			else if( res == 0)
-			{
+			}else if( res == 0){
 				m_pLog->Verbos("Send data package done. wait next write sign.");
 				bTrySend = false;
 				m_nLastSentTags = sendTags;
 				return NetworkResult::Retry;
-			}
-			else
-			{
+			}else{
 				list->pop();
 				m_nLastSentTags = -1;
 				bTrySend = true;
@@ -209,7 +241,7 @@ int Sloong::CSockInfo::GetSendInfoList( queue<shared_ptr<CDataTransPackage>>*& l
 			return m_nLastSentTags;
 	}
 	
-	for (int i = 0; i < m_nPriorityLevel; i++)
+	for (int i = 0; i < g_pConfig->m_nPriorityLevel; i++)
 	{
 		if (m_pSendList[i].empty())
 			continue;
@@ -255,7 +287,7 @@ shared_ptr<CDataTransPackage> Sloong::CSockInfo::GetSendInfo(queue<shared_ptr<CD
 		}
 		else
 		{
-			m_pLog->Verbos(CUniversal::Format("No message need send, remove socket[%d] from Epoll", m_pCon->GetSocket()));
+			m_pLog->Verbos(CUniversal::Format("No message need send, remove socket[%d] from Epoll", m_pCon->GetSocketID()));
 			m_bIsSendListEmpty = true;
 		}
 	}
