@@ -42,7 +42,6 @@ void Sloong::CSockInfo::Initialize(IControl* iMsg, int sock, SSL_CTX* ctx)
 NetworkResult Sloong::CSockInfo::ResponseDataPackage(SmartPackage pack)
 {	
 	// if have exdata, directly add to epoll list.
-	int sock = pack->GetSocketID();
 	if (pack->IsBigPackage())
 	{
 		AddToSendList(pack);
