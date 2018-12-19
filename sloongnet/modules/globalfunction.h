@@ -11,7 +11,7 @@ namespace Sloong
         CGlobalFunction();
 		~CGlobalFunction();
 
-		void Initialize(IMessage* iMsg,IData* iData);
+		void Initialize(IMessage* iMsg);
 		void Exit();
 		void RegistFuncToLua(CLua* pLua);
 		void EnableDataReceive(int port);

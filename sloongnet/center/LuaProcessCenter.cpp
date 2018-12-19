@@ -20,13 +20,13 @@ CLuaProcessCenter::~CLuaProcessCenter()
 	}
 }
 
-void Sloong::CLuaProcessCenter::Initialize(IMessage* iMsg, IData* iData)
+void Sloong::CLuaProcessCenter::Initialize(IMessage* iMsg)
 {
-	IObject::Initialize(iMsg,iData);
+	IObject::Initialize(iMsg);
 	g_pLog = m_pLog;
 
-	m_pGFunc->Initialize(m_iMsg, m_iData);
-	m_pConfig = TYPE_TRANS<CServerConfig*>(iData->Get(DATA_ITEM::Configuation));
+	m_pGFunc->Initialize(m_iMsg);
+	m_pConfig = TYPE_TRANS<CServerConfig*>(iMsg->Get(DATA_ITEM::Configuation));
 
 	m_iMsg->RegisterEvent(MSG_TYPE::ProcessMessage);
 	m_iMsg->RegisterEvent(MSG_TYPE::ReloadLuaContext);
@@ -146,7 +146,7 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo,const string & ms
 		{
 			auto uuid = cres.GetData("ExDataUUID");
 			auto len = cres.GetData("ExDataSize");
-			auto pData = m_iData->GetTemp("SendList" + uuid);
+			auto pData = m_iMsg->GetTemp("SendList" + uuid);
 			if (pData == nullptr)
 			{
 				res = FormatJSONErrorMessage("-2","ExData no saved in DataCenter, The uuid is " + uuid);

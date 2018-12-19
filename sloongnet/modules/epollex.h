@@ -14,7 +14,7 @@ namespace Sloong
 	public:
         CEpollEx();
 		virtual ~CEpollEx();
-        void Initialize(IMessage* iM,IData* iData);
+        void Initialize(IMessage* iM);
 		void Run(int nPort, int nWorkThreadNum);
 		void Exit();
 

@@ -36,9 +36,9 @@ Sloong::CEpollEx::~CEpollEx()
 
 
 // Initialize the epoll and the thread pool.
-void Sloong::CEpollEx::Initialize(IMessage* iMsg,IData* iData)
+void Sloong::CEpollEx::Initialize(IMessage* iMsg)
 {
-	IObject::Initialize(iMsg,iData);
+	IObject::Initialize(iMsg);
 
 	// 初始化socket
 	m_ListenSock = socket(AF_INET, SOCK_STREAM, 0);

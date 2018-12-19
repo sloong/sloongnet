@@ -21,14 +21,14 @@ CControlCenter::~CControlCenter()
 {
 }
 
-void Sloong::CControlCenter::Initialize(IMessage* iMsg,IData* iData)
+void Sloong::CControlCenter::Initialize(IMessage* iMsg)
 {
-	IObject::Initialize(iMsg,iData);
+	IObject::Initialize(iMsg);
 
-	m_pConfig = (CServerConfig*)m_iData->Get(Configuation);
+	m_pConfig = (CServerConfig*)iMsg->Get(Configuation);
 	
-	m_pNetwork->Initialize(m_iMsg,m_iData);
-	m_pProcess->Initialize(m_iMsg, m_iData);
+	m_pNetwork->Initialize(m_iMsg);
+	m_pProcess->Initialize(m_iMsg);
 	
 	// 在所有的成员都初始化之后，在注册处理函数
 	m_iMsg->RegisterEventHandler(ProgramStart, std::bind(&CControlCenter::Run, this, std::placeholders::_1));

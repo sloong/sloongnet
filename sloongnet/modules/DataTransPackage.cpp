@@ -4,9 +4,9 @@
 #include "NetworkEvent.h"
 using namespace Sloong::Events;
 
-void Sloong::CDataTransPackage::Initialize(IMessage* iMsg,IData* iData,SmartConnect conn)
+void Sloong::CDataTransPackage::Initialize(IMessage* iMsg,SmartConnect conn)
 {
-	IObject::Initialize(iMsg,iData);
+	IObject::Initialize(iMsg);
 	m_pCon = conn;	
 }
 

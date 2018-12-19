@@ -20,12 +20,12 @@ Sloong::CNetworkCenter::~CNetworkCenter()
 }
 
 
-void Sloong::CNetworkCenter::Initialize(IMessage* iMsg, IData* iData)
+void Sloong::CNetworkCenter::Initialize(IMessage* iMsg)
 {
-    IObject::Initialize(iMsg, iData);
+    IObject::Initialize(iMsg);
 
-    m_pConfig = (CServerConfig*)m_iData->Get(Configuation);
-    m_pEpoll->Initialize(m_iMsg,m_iData);
+    m_pConfig = (CServerConfig*)iMsg->Get(Configuation);
+    m_pEpoll->Initialize(m_iMsg);
 
 	if( m_pConfig->m_nPriorityLevel < 0 || m_pConfig->m_nPriorityLevel > 5 )
 	{
@@ -206,7 +206,7 @@ NetworkResult Sloong::CNetworkCenter::OnNewAccept( int conn_sock )
 		}
 
 		auto info = make_shared<CSockInfo>();
-		info->Initialize(m_iMsg,m_iData,conn_sock,m_pCTX);
+		info->Initialize(m_iMsg,conn_sock,m_pCTX);
 	
 		unique_lock<mutex> sockLck(m_oSockListMutex);
 		m_SockList[conn_sock] = info;

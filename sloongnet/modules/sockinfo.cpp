@@ -30,9 +30,9 @@ CSockInfo::~CSockInfo()
 }
 
 
-void Sloong::CSockInfo::Initialize(IMessage* iMsg, IData* iData,int sock, SSL_CTX* ctx)
+void Sloong::CSockInfo::Initialize(IMessage* iMsg, int sock, SSL_CTX* ctx)
 {
-	IObject::Initialize(iMsg,iData);
+	IObject::Initialize(iMsg);
 	m_ActiveTime = time(NULL);
 	m_pCon->Initialize(sock,ctx);
 	m_pUserInfo->SetData("ip", m_pCon->m_strAddress);
@@ -120,7 +120,7 @@ NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 			}
 
 			auto package = make_shared<CDataTransPackage>();
-			package->Initialize(m_iMsg,m_iData,m_pCon);
+			package->Initialize(m_iMsg,m_pCon);
 			auto res = package->RecvPackage(dtlen);
 			if ( res == NetworkResult::Invalid ){
 				AddToSendList(package);

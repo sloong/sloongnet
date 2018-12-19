@@ -14,7 +14,7 @@ namespace Sloong
 		CControlCenter();
 		~CControlCenter();
 
-		void Initialize(IMessage* iMsg,IData* iData);
+		void Initialize(IMessage* iMsg);
 		void Run(SmartEvent event);
 		void Exit(SmartEvent event);
 		void OnReceivePackage(SmartEvent event);

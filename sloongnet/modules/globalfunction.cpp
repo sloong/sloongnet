@@ -84,11 +84,11 @@ void CGlobalFunction::ClearReceiveInfoByUUID(string uuid)
 	}
 }
 
-void Sloong::CGlobalFunction::Initialize(IMessage *iMsg, IData *iData)
+void Sloong::CGlobalFunction::Initialize(IMessage *iMsg)
 {
-	IObject::Initialize(iMsg,iData);
+	IObject::Initialize(iMsg);
 
-	CServerConfig *pConfig = TYPE_TRANS<CServerConfig *>(m_iData->Get(DATA_ITEM::Configuation));
+	CServerConfig *pConfig = TYPE_TRANS<CServerConfig *>(iMsg->Get(DATA_ITEM::Configuation));
 	if (pConfig->m_bEnableDataReceive)
 	{
 		EnableDataReceive(pConfig->m_nDataReceivePort);
@@ -137,7 +137,7 @@ void *Sloong::CGlobalFunction::RecvDataConnFunc(void *pParam)
 {
 	CGlobalFunction *pThis = (CGlobalFunction *)pParam;
 	CLog *pLog = pThis->m_pLog;
-	CServerConfig *pConfig = TYPE_TRANS<CServerConfig *>(pThis->m_iData->Get(DATA_ITEM::Configuation));
+	CServerConfig *pConfig = TYPE_TRANS<CServerConfig *>(pThis->m_iMsg->Get(DATA_ITEM::Configuation));
 	while (pThis->m_bIsRunning)
 	{
 		int conn_sock = -1;
@@ -180,7 +180,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
 	CLog *pLog = pThis->m_pLog;
 	int *pSock = (int *)pParam;
 	int conn_sock = *pSock;
-	CServerConfig *pConfig = TYPE_TRANS<CServerConfig *>(pThis->m_iData->Get(DATA_ITEM::Configuation));
+	CServerConfig *pConfig = TYPE_TRANS<CServerConfig *>(pThis->m_iMsg->Get(DATA_ITEM::Configuation));
 	SAFE_DELETE(pSock);
 	// Find the recv uuid.
 
@@ -419,7 +419,7 @@ int Sloong::CGlobalFunction::Lua_SendFile(lua_State *l)
 
 	auto uuid = CUtility::GenUUID();
 
-	g_pThis->m_iData->AddTemp("SendList" + uuid, pBuf);
+	g_pThis->m_iMsg->AddTemp("SendList" + uuid, pBuf);
 	CLua::PushDouble(l, nSize);
 	CLua::PushString(l, uuid);
 	return 2;

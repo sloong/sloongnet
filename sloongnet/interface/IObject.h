@@ -3,23 +3,20 @@
 #include "main.h"
 
 #include "IMessage.h"
-#include "IData.h"
 
 namespace Sloong
 {
 	class IObject
 	{
     public:
-        void Initialize(IMessage* iMsg, IData* iData)
+        void Initialize(IMessage* iMsg)
         {
-             m_iData = iData;
              m_iMsg = iMsg;
-             m_pLog = (CLog*)m_iData->Get(Logger);
+             m_pLog = (CLog*)m_iMsg->Get(Logger);
         }
 
     protected:
         IMessage*   m_iMsg;
-        IData*      m_iData;
         CLog*       m_pLog;
     };
 }
