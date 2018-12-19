@@ -36,7 +36,7 @@ Sloong::CEpollEx::~CEpollEx()
 
 
 // Initialize the epoll and the thread pool.
-void Sloong::CEpollEx::Initialize(IMessage* iMsg)
+void Sloong::CEpollEx::Initialize(IControl* iMsg)
 {
 	IObject::Initialize(iMsg);
 

@@ -2,14 +2,14 @@
 #define SloongNetService_H
 
 #include "IEvent.h"
-#include "IMessage.h"
+#include "IControl.h"
 namespace Sloong
 {
 	class CServerConfig;
 	class CControlCenter;
 	class CDataCenter;
 	class CMessageCenter;
-	class SloongNetService : IMessage
+	class SloongNetService : IControl
 	{
 	public:
 		SloongNetService();

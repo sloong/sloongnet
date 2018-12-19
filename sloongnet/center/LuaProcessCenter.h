@@ -18,7 +18,7 @@ namespace Sloong
 		CLuaProcessCenter();
 		~CLuaProcessCenter();
 
-		void Initialize(IMessage* iMsg);
+		void Initialize(IControl* iMsg);
 		int NewThreadInit();
 		void InitLua(CLua* pLua, string folder);
 		void CloseSocket(CLuaPacket* uinfo);

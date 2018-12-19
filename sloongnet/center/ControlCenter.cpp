@@ -21,7 +21,7 @@ CControlCenter::~CControlCenter()
 {
 }
 
-void Sloong::CControlCenter::Initialize(IMessage* iMsg)
+void Sloong::CControlCenter::Initialize(IControl* iMsg)
 {
 	IObject::Initialize(iMsg);
 

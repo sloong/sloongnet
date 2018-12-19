@@ -15,7 +15,7 @@ namespace Sloong
 			SAFE_DELETE_ARR(m_pExBuffer);
 		}
 
-        void Initialize(IMessage*,SmartConnect);
+        void Initialize(IControl*,SmartConnect);
 
         /**
          * @Remarks: When process done, should call this function to response this package.

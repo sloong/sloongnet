@@ -20,7 +20,7 @@ Sloong::CNetworkCenter::~CNetworkCenter()
 }
 
 
-void Sloong::CNetworkCenter::Initialize(IMessage* iMsg)
+void Sloong::CNetworkCenter::Initialize(IControl* iMsg)
 {
     IObject::Initialize(iMsg);
 

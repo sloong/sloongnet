@@ -14,7 +14,7 @@ namespace Sloong
         CNetworkCenter();
         ~CNetworkCenter();
 
-        void Initialize(IMessage* iMsg);
+        void Initialize(IControl* iMsg);
 
         // event handler
         void Run(SmartEvent event);

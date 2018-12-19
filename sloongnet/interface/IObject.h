@@ -2,21 +2,21 @@
 
 #include "main.h"
 
-#include "IMessage.h"
+#include "IControl.h"
 
 namespace Sloong
 {
 	class IObject
 	{
     public:
-        void Initialize(IMessage* iMsg)
+        void Initialize(IControl* iMsg)
         {
              m_iMsg = iMsg;
              m_pLog = (CLog*)m_iMsg->Get(Logger);
         }
 
     protected:
-        IMessage*   m_iMsg;
+        IControl*   m_iMsg;
         CLog*       m_pLog;
     };
 }

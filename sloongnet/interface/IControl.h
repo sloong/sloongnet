@@ -6,7 +6,7 @@ namespace Sloong
 {
 	typedef std::function<void(shared_ptr<IEvent>)> MsgHandlerFunc;
 	
-	class IMessage
+	class IControl
 	{
 	public:
 		// Data 

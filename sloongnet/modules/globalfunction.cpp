@@ -84,7 +84,7 @@ void CGlobalFunction::ClearReceiveInfoByUUID(string uuid)
 	}
 }
 
-void Sloong::CGlobalFunction::Initialize(IMessage *iMsg)
+void Sloong::CGlobalFunction::Initialize(IControl *iMsg)
 {
 	IObject::Initialize(iMsg);
 

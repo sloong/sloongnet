@@ -20,7 +20,7 @@ CLuaProcessCenter::~CLuaProcessCenter()
 	}
 }
 
-void Sloong::CLuaProcessCenter::Initialize(IMessage* iMsg)
+void Sloong::CLuaProcessCenter::Initialize(IControl* iMsg)
 {
 	IObject::Initialize(iMsg);
 	g_pLog = m_pLog;

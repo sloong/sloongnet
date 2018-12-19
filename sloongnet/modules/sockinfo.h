@@ -16,7 +16,7 @@ namespace Sloong
 		CSockInfo();
 		~CSockInfo();
 
-		void Initialize(IMessage* iMsg, int sock, SSL_CTX* ctx);
+		void Initialize(IControl* iMsg, int sock, SSL_CTX* ctx);
 
 		/**
 		 * @Remarks: When data can receive, should call this function to receive the package.
