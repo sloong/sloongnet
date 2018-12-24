@@ -6,6 +6,7 @@
 #include "NetworkEvent.h"
 #include "sockinfo.h"
 #include "DataTransPackage.h"
+#include "IData.h"
 using namespace Sloong;
 using namespace Sloong::Universal;
 using namespace Sloong::Events;
@@ -25,16 +26,16 @@ void Sloong::CControlCenter::Initialize(IControl* iMsg)
 {
 	IObject::Initialize(iMsg);
 
-	m_pConfig = (CServerConfig*)iMsg->Get(Configuation);
+	m_pConfig = IData::GetServerConfig();
 	
-	m_pNetwork->Initialize(m_iMsg);
-	m_pProcess->Initialize(m_iMsg);
+	m_pNetwork->Initialize(m_iC);
+	m_pProcess->Initialize(m_iC);
 	
 	// 在所有的成员都初始化之后，在注册处理函数
-	m_iMsg->RegisterEventHandler(ProgramStart, std::bind(&CControlCenter::Run, this, std::placeholders::_1));
-	m_iMsg->RegisterEventHandler(ProgramExit, std::bind(&CControlCenter::Exit, this, std::placeholders::_1));
-	m_iMsg->RegisterEventHandler(ReveivePackage, std::bind(&CControlCenter::OnReceivePackage, this, std::placeholders::_1));
-	m_iMsg->RegisterEventHandler(SocketClose, std::bind(&CControlCenter::OnSocketClose, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(ProgramStart, std::bind(&CControlCenter::Run, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(ProgramExit, std::bind(&CControlCenter::Exit, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(ReveivePackage, std::bind(&CControlCenter::OnReceivePackage, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(SocketClose, std::bind(&CControlCenter::OnSocketClose, this, std::placeholders::_1));
 }
 
 
@@ -63,7 +64,7 @@ void Sloong::CControlCenter::OnReceivePackage(SmartEvent evt)
 	}
 	
 	net_evt->SetDataPackage(pack);
-	m_iMsg->SendMessage(net_evt);
+	m_iC->SendMessage(net_evt);
 }
 
 void Sloong::CControlCenter::OnSocketClose(SmartEvent event)

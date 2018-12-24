@@ -3,6 +3,7 @@
 #include "epollex.h"
 #include "sockinfo.h"
 #include "NetworkEvent.h"
+#include "IData.h"
 
 using namespace Sloong::Events;
 
@@ -24,8 +25,8 @@ void Sloong::CNetworkCenter::Initialize(IControl* iMsg)
 {
     IObject::Initialize(iMsg);
 
-    m_pConfig = (CServerConfig*)iMsg->Get(Configuation);
-    m_pEpoll->Initialize(m_iMsg);
+    m_pConfig = IData::GetServerConfig();
+    m_pEpoll->Initialize(m_iC);
 
 	if( m_pConfig->m_nPriorityLevel < 0 || m_pConfig->m_nPriorityLevel > 5 )
 	{
@@ -48,15 +49,15 @@ void Sloong::CNetworkCenter::Initialize(IControl* iMsg)
 		std::bind(&CNetworkCenter::OnCanWriteData, this, std::placeholders::_1),
 		std::bind(&CNetworkCenter::OnOtherEventHappened, this, std::placeholders::_1));
 
-	m_iMsg->RegisterEvent(MSG_TYPE::ReveivePackage);
-	m_iMsg->RegisterEvent(MSG_TYPE::SocketClose);
-    m_iMsg->RegisterEvent(MSG_TYPE::SendMessage);
-	m_iMsg->RegisterEvent(MSG_TYPE::MonitorSendStatus);
-	m_iMsg->RegisterEventHandler(MSG_TYPE::ProgramStart, std::bind(&CNetworkCenter::Run, this, std::placeholders::_1));
-	m_iMsg->RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&CNetworkCenter::Exit, this, std::placeholders::_1));
-	m_iMsg->RegisterEventHandler(MSG_TYPE::SendMessage, std::bind(&CNetworkCenter::SendMessageEventHandler,this,std::placeholders::_1));
-	m_iMsg->RegisterEventHandler(MSG_TYPE::SocketClose, std::bind(&CNetworkCenter::CloseConnectEventHandler, this, std::placeholders::_1));
-	m_iMsg->RegisterEventHandler(MSG_TYPE::MonitorSendStatus, std::bind(&CNetworkCenter::MonitorSendStatusEventHandler, this, std::placeholders::_1));
+	m_iC->RegisterEvent(MSG_TYPE::ReveivePackage);
+	m_iC->RegisterEvent(MSG_TYPE::SocketClose);
+    m_iC->RegisterEvent(MSG_TYPE::SendMessage);
+	m_iC->RegisterEvent(MSG_TYPE::MonitorSendStatus);
+	m_iC->RegisterEventHandler(MSG_TYPE::ProgramStart, std::bind(&CNetworkCenter::Run, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&CNetworkCenter::Exit, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(MSG_TYPE::SendMessage, std::bind(&CNetworkCenter::SendMessageEventHandler,this,std::placeholders::_1));
+	m_iC->RegisterEventHandler(MSG_TYPE::SocketClose, std::bind(&CNetworkCenter::CloseConnectEventHandler, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(MSG_TYPE::MonitorSendStatus, std::bind(&CNetworkCenter::MonitorSendStatusEventHandler, this, std::placeholders::_1));
 }
 
 void Sloong::CNetworkCenter::Run(SmartEvent event)
@@ -133,7 +134,7 @@ void Sloong::CNetworkCenter::SendCloseConnectEvent(int socket)
 	event->SetSocketID(socket);
 	event->SetUserInfo(info->m_pUserInfo.get());
 	event->SetHandler(this);
-	m_iMsg->SendMessage(event);
+	m_iC->SendMessage(event);
 }
 
 void Sloong::CNetworkCenter::EnableSSL(string certFile, string keyFile, string passwd)
@@ -206,7 +207,7 @@ NetworkResult Sloong::CNetworkCenter::OnNewAccept( int conn_sock )
 		}
 
 		auto info = make_shared<CSockInfo>();
-		info->Initialize(m_iMsg,conn_sock,m_pCTX);
+		info->Initialize(m_iC,conn_sock,m_pCTX);
 	
 		unique_lock<mutex> sockLck(m_oSockListMutex);
 		m_SockList[conn_sock] = info;

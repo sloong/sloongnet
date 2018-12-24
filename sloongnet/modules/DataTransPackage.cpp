@@ -215,7 +215,7 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage(ULONG dtlen)
 			ResponsePackage(strSend);
 			auto event = make_shared<CNetworkEvent>(MSG_TYPE::MonitorSendStatus);
 			event->SetSocketID(m_pCon->GetSocketID());
-			m_iMsg->SendMessage(event);
+			m_iC->SendMessage(event);
 			return NetworkResult::Invalid;
 		}
 	}

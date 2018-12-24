@@ -11,8 +11,11 @@ using namespace std;
 #include "service.h"
 #include "ControlCenter.h"
 #include "NormalEvent.h"
+#include "IData.h"
 
 using namespace Sloong::Events;
+
+IControl* Sloong::IData::m_iC = nullptr;
 
 SloongNetService::SloongNetService()
 {
@@ -49,6 +52,7 @@ void SloongNetService::Initialize(CServerConfig* config)
 	RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&SloongNetService::ExitEventHandler, this, std::placeholders::_1));
 
 	try{
+		IData::Initialize(this);
 		m_pCC->Initialize(this);
 	}
 	catch(exception e)

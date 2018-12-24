@@ -1,6 +1,7 @@
 #include "LuaProcessCenter.h"
 #include "serverconfig.h"
 #include "globalfunction.h"
+#include "IData.h"
 using namespace Sloong;
 
 CLog* g_pLog = nullptr;
@@ -25,13 +26,13 @@ void Sloong::CLuaProcessCenter::Initialize(IControl* iMsg)
 	IObject::Initialize(iMsg);
 	g_pLog = m_pLog;
 
-	m_pGFunc->Initialize(m_iMsg);
-	m_pConfig = TYPE_TRANS<CServerConfig*>(iMsg->Get(DATA_ITEM::Configuation));
+	m_pGFunc->Initialize(m_iC);
+	m_pConfig = IData::GetServerConfig();
 
-	m_iMsg->RegisterEvent(MSG_TYPE::ProcessMessage);
-	m_iMsg->RegisterEvent(MSG_TYPE::ReloadLuaContext);
-	//m_iMsg->RegisterEventHandler(ProcessMessage, this, EventHandler);
-	m_iMsg->RegisterEventHandler(ReloadLuaContext, std::bind(&CLuaProcessCenter::ReloadContext,this,std::placeholders::_1));
+	m_iC->RegisterEvent(MSG_TYPE::ProcessMessage);
+	m_iC->RegisterEvent(MSG_TYPE::ReloadLuaContext);
+	//m_iC->RegisterEventHandler(ProcessMessage, this, EventHandler);
+	m_iC->RegisterEventHandler(ReloadLuaContext, std::bind(&CLuaProcessCenter::ReloadContext,this,std::placeholders::_1));
 	// 主要的循环方式为，根据输入的处理数来初始化指定数量的lua环境。
 	// 然后将其加入到可用队列
 	// 在处理开始之前根据队列情况拿到某lua环境的id并将其移除出可用队列
@@ -146,7 +147,7 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo,const string & ms
 		{
 			auto uuid = cres.GetData("ExDataUUID");
 			auto len = cres.GetData("ExDataSize");
-			auto pData = m_iMsg->GetTemp("SendList" + uuid);
+			auto pData = m_iC->GetTemp("SendList" + uuid);
 			if (pData == nullptr)
 			{
 				res = FormatJSONErrorMessage("-2","ExData no saved in DataCenter, The uuid is " + uuid);

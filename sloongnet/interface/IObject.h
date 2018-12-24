@@ -11,12 +11,12 @@ namespace Sloong
     public:
         void Initialize(IControl* iMsg)
         {
-             m_iMsg = iMsg;
-             m_pLog = (CLog*)m_iMsg->Get(Logger);
+             m_iC = iMsg;
+             m_pLog = TYPE_TRANS<CLog*>(m_iC->Get(DATA_ITEM::Logger));
         }
 
     protected:
-        IControl*   m_iMsg;
+        IControl*   m_iC;
         CLog*       m_pLog;
     };
 }

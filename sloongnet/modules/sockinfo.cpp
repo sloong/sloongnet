@@ -119,7 +119,7 @@ NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 			}
 
 			auto package = make_shared<CDataTransPackage>();
-			package->Initialize(m_iMsg,m_pCon);
+			package->Initialize(m_iC,m_pCon);
 			auto res = package->RecvPackage(dtlen);
 			if ( res == NetworkResult::Invalid ){
 				AddToSendList(package);
@@ -136,7 +136,7 @@ NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 			event->SetSocketID(m_pCon->GetSocketID());
 			event->SetUserInfo(m_pUserInfo.get());
 			event->SetDataPackage(package);
-			m_iMsg->SendMessage(event);
+			m_iC->SendMessage(event);
 		}
 	}while (bLoop);
 
