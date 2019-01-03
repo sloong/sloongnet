@@ -1,21 +1,84 @@
 /* File Name: server.c */
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
-using namespace std;
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-
 #include "serverconfig.h"
 #include "CmdProcess.h"
 #include "service.h"
 #include "ControlCenter.h"
 #include "NormalEvent.h"
 #include "IData.h"
-
 using namespace Sloong::Events;
 
 IControl* Sloong::IData::m_iC = nullptr;
+
+
+CServerConfig* g_pConfig = nullptr;
+
+
+void sloong_terminator() 
+{
+	cout << "Unkonw error happened, system will shutdown. " << endl;
+	write_call_stack();
+	exit(0);
+}
+
+void on_sigint(int signal)
+{
+	cout << "Unhandle signal happened, system will shutdown. signal:" << signal<< endl;
+	write_call_stack();
+	exit(0);
+}
+
+// 成功加载后即创建UServer对象，并开始运行。
+SloongNetService g_AppService;
+
+void on_SIGINT_Event(int signal)
+{
+	g_AppService.Exit();
+}
+
+int main( int argc, char** args )
+{
+	set_terminate(sloong_terminator);
+	set_unexpected(sloong_terminator);
+
+	//SIG_IGN:忽略信号的处理程序
+	//SIGPIPE:在reader终止之后写pipe的时候发生
+	signal(SIGPIPE, SIG_IGN); // this signal should call the socket check function. and remove the timeout socket.
+	//SIGCHLD: 进程Terminate或Stop的时候,SIGPIPE会发送给进程的父进程,缺省情况下该Signal会被忽略
+	signal(SIGCHLD, SIG_IGN);
+	//SIGINT:由Interrupt Key产生,通常是Ctrl+c或者Delete,发送给所有的ForeGroundGroup进程.
+	signal(SIGINT, &on_SIGINT_Event);
+	// SIGSEGV:当一个进程执行了一个无效的内存引用，或发生段错误时发送给它的信号
+	signal(SIGSEGV, &on_sigint);
+
+	try
+	{
+		CServerConfig config;
+		// CmdProcess会根据参数来加载正确的配置信息。成功返回true。
+		if (CCmdProcess::Parser(argc, args, &config))
+		{
+			g_pConfig = &config;
+			g_AppService.Initialize(&config);
+			// Run函数会阻塞运行。
+			g_AppService.Run();
+		}
+	}
+	catch (exception& e)
+	{
+		cout << "exception happened, system will shutdown. message:" << e.what() << endl;
+	}
+	catch(normal_except& e)
+    {
+        cout << "exception happened, system will shutdown. message:" << e.what() << endl;
+    }
+	catch (...)
+	{
+		cout << "Unhandle exception happened, system will shutdown. "<< endl;
+		write_call_stack();
+	}
+	
+	return 0;
+}
+
 
 SloongNetService::SloongNetService()
 {

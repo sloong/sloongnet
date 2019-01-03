@@ -152,3 +152,33 @@ string Sloong::CUtility::GenUUID()
 	return uuid;
 }
 
+
+
+#define MAX_STACK_LAYERS 256
+
+void write_call_stack()
+{
+	/*int fd = open("/usr/local/info.dat", O_RDWR | O_CREAT | O_APPEND);
+	void *array[MAX_STACK_LAYERS];
+	size_t size;
+	char **strings;*/
+	/*//string strRet("");
+	size = backtrace(array, MAX_STACK_LAYERS);
+	strings = backtrace_symbols(array, size);
+	for (int i = 0; i < size; i++)
+	{
+	if (fd > 0)
+	{
+	write(fd, strings[i], strlen(strings[i]));
+	write(fd, "\n", 1);
+	}
+	//strRet.append(strings[i]);
+	//if (i < size - 1)
+	//strRet.append(1, '\n');
+	}
+	if (fd > 0)
+	write(fd, "\n", 1);
+
+	free(strings);*/
+	//backtrace_symbols_fd(array, size, fd);
+}

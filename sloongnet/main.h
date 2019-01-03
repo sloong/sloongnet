@@ -8,9 +8,19 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 // linux head file
 #include <sys/times.h> 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <execinfo.h>
+#include <fcntl.h>
+
+// Boost
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 // std c++ file
 #include <iostream>
