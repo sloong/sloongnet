@@ -68,6 +68,14 @@ namespace Sloong
 		int m_nDataReceivePort = 0;
 		int m_nRecvDataTimeout = 180;
 		int m_nWaitRecvTimeout = 20;
+
+		// Network
+		NetworkConfig m_oProxyConfig;
+		NetworkConfig m_oProcessConfig;
+		NetworkConfig m_oFirewallConfig;
+		NetworkConfig m_oContorlConfig;
+		NetworkConfig m_oDataConfig;
+
 	};
 }
 

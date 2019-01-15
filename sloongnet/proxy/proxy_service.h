@@ -1,5 +1,4 @@
-#ifndef SloongNetService_H
-#define SloongNetService_H
+#pragma once
 
 #include "IEvent.h"
 #include "IControl.h"
@@ -9,13 +8,13 @@ namespace Sloong
 	class CControlCenter;
 	class CDataCenter;
 	class CMessageCenter;
-	class SloongNetService : IControl
+	class SloongNetProxy : IControl
 	{
 	public:
-		SloongNetService();
-		~SloongNetService();
+		SloongNetProxy();
+		~SloongNetProxy();
 
-		void Initialize(CServerConfig* config);
+		bool Initialize(int argc, char** args);
 
 		void SendMessage(MSG_TYPE msgType);
 		void SendMessage(SmartEvent evt);
@@ -47,7 +46,8 @@ namespace Sloong
 		void ExitEventHandler(SmartEvent event);
 		
 	protected:
-		unique_ptr<CControlCenter> m_pCC;
+		unique_ptr<CNetworkCenter> m_pNetwork;
+		unique_ptr<CLuaProcessCenter> m_pProcess;
 
 		// Data
 		map<DATA_ITEM, void*> m_oDataList;
@@ -65,6 +65,3 @@ namespace Sloong
 
 }
 
-
-
-#endif //SloongNetService_H

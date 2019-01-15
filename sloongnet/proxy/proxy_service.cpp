@@ -28,14 +28,37 @@ void on_sigint(int signal)
 }
 
 // 成功加载后即创建UServer对象，并开始运行。
-SloongNetService g_AppService;
+SloongNetProxy g_AppService;
 
 void on_SIGINT_Event(int signal)
 {
 	g_AppService.Exit();
 }
 
+
 int main( int argc, char** args )
+{
+	if(g_AppService.Initialize(argc,args))
+		g_AppService.Run();
+}
+
+
+SloongNetProxy::SloongNetProxy()
+{
+	m_pLog = make_unique<CLog>();
+	m_pNetwork = make_unique<CNetworkCenter>();
+	m_pProcess = make_unique<CLuaProcessCenter>();
+}
+
+SloongNetProxy::~SloongNetProxy()
+{
+	Exit();
+	CThreadPool::Exit();
+    m_pLog->End();
+}
+
+
+bool SloongNetProxy::Initialize(int argc, char** args)
 {
 	set_terminate(sloong_terminator);
 	set_unexpected(sloong_terminator);
@@ -57,75 +80,63 @@ int main( int argc, char** args )
 		if (CCmdProcess::Parser(argc, args, &config))
 		{
 			g_pConfig = &config;
-			g_AppService.Initialize(&config);
-			// Run函数会阻塞运行。
-			g_AppService.Run();
+			LOGTYPE oType = LOGTYPE::ONEFILE;
+			if (!config->m_oLogInfo.LogWriteToOneFile)
+			{
+				oType = LOGTYPE::DAY;
+			}
+			m_pLog->Initialize(config->m_oLogInfo.LogPath, config->m_oLogInfo.DebugMode, LOGLEVEL(config->m_oLogInfo.LogLevel), oType);
+			if (config->m_oLogInfo.NetworkPort != 0)
+				m_pLog->EnableNetworkLog(config->m_oLogInfo.NetworkPort);
+				
+			Add(Configuation, config);
+			Add(Logger, m_pLog.get());
+			
+			CThreadPool::AddWorkThread(std::bind(&SloongNetProxy::MessageWorkLoop, this, std::placeholders::_1), nullptr, config->m_nMessageCenterThreadQuantity);
+			
+			RegisterEvent(ProgramExit);
+			RegisterEvent(ProgramStart);
+			RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&SloongNetProxy::ExitEventHandler, this, std::placeholders::_1));
+			m_pNetwork->Initialize(m_iC);
+			m_pProcess->Initialize(m_iC);
+			
+			// 在所有的成员都初始化之后，在注册处理函数
+			m_iC->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetProxy::OnReceivePackage, this, std::placeholders::_1));
+			m_iC->RegisterEventHandler(SocketClose, std::bind(&SloongNetProxy::OnSocketClose, this, std::placeholders::_1));
+
+			try{
+				IData::Initialize(this);
+				m_pCC->Initialize(this);
+			}
+			catch(exception e){
+				m_pLog->Error(string("Excepiton happened in initialize for ControlCenter. Message:")+  string(e.what()));
+				return false;
+			}
 		}
 	}
 	catch (exception& e)
 	{
 		cout << "exception happened, system will shutdown. message:" << e.what() << endl;
+		return false;
 	}
 	catch(normal_except& e)
     {
         cout << "exception happened, system will shutdown. message:" << e.what() << endl;
+		return false;
     }
 	catch (...)
 	{
 		cout << "Unhandle exception happened, system will shutdown. "<< endl;
 		write_call_stack();
+		return false;
 	}
 	
-	return 0;
+	return true;
 }
 
-
-SloongNetService::SloongNetService()
+void SloongNetProxy::Run()
 {
-	m_pLog = make_unique<CLog>();
-    m_pCC = make_unique<CControlCenter>();
-}
-
-SloongNetService::~SloongNetService()
-{
-	Exit();
-	CThreadPool::Exit();
-    m_pLog->End();
-}
-
-
-void SloongNetService::Initialize(CServerConfig* config)
-{
-	LOGTYPE oType = LOGTYPE::ONEFILE;
-	if (!config->m_oLogInfo.LogWriteToOneFile)
-	{
-		oType = LOGTYPE::DAY;
-	}
-	m_pLog->Initialize(config->m_oLogInfo.LogPath, config->m_oLogInfo.DebugMode, LOGLEVEL(config->m_oLogInfo.LogLevel), oType);
-	if (config->m_oLogInfo.NetworkPort != 0)
-		m_pLog->EnableNetworkLog(config->m_oLogInfo.NetworkPort);
-		
-	Add(Configuation, config);
-	Add(Logger, m_pLog.get());
-	
-	CThreadPool::AddWorkThread(std::bind(&SloongNetService::MessageWorkLoop, this, std::placeholders::_1), nullptr, config->m_nMessageCenterThreadQuantity);
-	
-	RegisterEvent(ProgramExit);
-	RegisterEvent(ProgramStart);
-	RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&SloongNetService::ExitEventHandler, this, std::placeholders::_1));
-
-	try{
-		IData::Initialize(this);
-		m_pCC->Initialize(this);
-	}
-	catch(exception e)
-	{
-		m_pLog->Error(string("Excepiton happened in initialize for ControlCenter. Message:")+  string(e.what()));
-	}
-}
-
-void SloongNetService::Run()
-{
+	m_pLog->Info("Application begin running.");
 	m_emStatus = RUN_STATUS::Running;
 	CThreadPool::Run();
 	SendMessage(MSG_TYPE::ProgramStart);
@@ -135,18 +146,62 @@ void SloongNetService::Run()
 	}
 }
 
-void Sloong::SloongNetService::Exit()
+
+void Sloong::CControlCenter::OnReceivePackage(SmartEvent evt)
+{	
+	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(evt);
+	auto info = net_evt->GetUserInfo();
+	if (!info)
+	{
+		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
+		return;
+	}
+	SmartPackage pack = net_evt->GetDataPackage();
+
+	net_evt->SetEvent(MSG_TYPE::SendMessage);
+	
+	string strRes("");
+	char* pExData = nullptr;
+	int nExSize;
+	string strMsg = pack->GetRecvMessage();
+	if (m_pProcess->MsgProcess(info, strMsg , strRes, pExData, nExSize)){
+		pack->ResponsePackage(strRes,pExData,nExSize);
+	}else{
+		m_pLog->Error("Error in process");
+		pack->ResponsePackage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
+	}
+	
+	net_evt->SetDataPackage(pack);
+	m_iC->SendMessage(net_evt);
+}
+
+void Sloong::CControlCenter::OnSocketClose(SmartEvent event)
 {
+	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
+	auto info = net_evt->GetUserInfo();
+	if (!info)
+	{
+		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
+		return;
+	}
+	// call close function.
+	m_pProcess->CloseSocket(info);
+	net_evt->CallCallbackFunc(net_evt);
+}
+
+void Sloong::SloongNetProxy::Exit()
+{
+	m_pLog->Info("Application will exit.");
 	SendMessage(MSG_TYPE::ProgramExit);
 }
 
-void Sloong::SloongNetService::ExitEventHandler(SmartEvent ev)
+void Sloong::SloongNetProxy::ExitEventHandler(SmartEvent ev)
 {
 	m_emStatus = RUN_STATUS::Exit;
 	m_oSync.notify_all();
 }
 
-bool Sloong::SloongNetService::Add(DATA_ITEM item, void * object)
+bool Sloong::SloongNetProxy::Add(DATA_ITEM item, void * object)
 {
 	auto it = m_oDataList.find(item);
 	if (it != m_oDataList.end())
@@ -157,7 +212,7 @@ bool Sloong::SloongNetService::Add(DATA_ITEM item, void * object)
 	return false;
 }
 
-void * Sloong::SloongNetService::Get(DATA_ITEM item)
+void * Sloong::SloongNetProxy::Get(DATA_ITEM item)
 {
 	auto data = m_oDataList.find(item);
 	if (data == m_oDataList.end())
@@ -167,18 +222,18 @@ void * Sloong::SloongNetService::Get(DATA_ITEM item)
 	return (*data).second;
 }
 
-bool Sloong::SloongNetService::Remove(DATA_ITEM item)
+bool Sloong::SloongNetProxy::Remove(DATA_ITEM item)
 {
 	m_oDataList.erase(item);
 }
 
-bool Sloong::SloongNetService::AddTemp(string name, void * object)
+bool Sloong::SloongNetProxy::AddTemp(string name, void * object)
 {
 	m_oTempDataList[name] = object;
 	return true;
 }
 
-void * Sloong::SloongNetService::GetTemp(string name)
+void * Sloong::SloongNetProxy::GetTemp(string name)
 {
 	auto item = m_oTempDataList.find(name);
 	if (item == m_oTempDataList.end())
@@ -191,7 +246,7 @@ void * Sloong::SloongNetService::GetTemp(string name)
 
 
 
-void Sloong::SloongNetService::SendMessage(MSG_TYPE msgType)
+void Sloong::SloongNetProxy::SendMessage(MSG_TYPE msgType)
 {
 	auto evt = make_shared<CNormalEvent>();
 	evt->SetEvent(msgType);
@@ -200,7 +255,7 @@ void Sloong::SloongNetService::SendMessage(MSG_TYPE msgType)
 	m_oSync.notify_one();
 }
 
-void Sloong::SloongNetService::SendMessage(SmartEvent evt)
+void Sloong::SloongNetProxy::SendMessage(SmartEvent evt)
 {
 	unique_lock<mutex> lck(m_oMsgListMutex);
 	m_oMsgList.push(evt);
@@ -208,7 +263,7 @@ void Sloong::SloongNetService::SendMessage(SmartEvent evt)
 }
 
 
-void Sloong::SloongNetService::RegisterEvent(MSG_TYPE t)
+void Sloong::SloongNetProxy::RegisterEvent(MSG_TYPE t)
 {
 	m_oMsgHandlerList[t] = vector<MsgHandlerFunc>();
 }
@@ -218,7 +273,7 @@ void Sloong::SloongNetService::RegisterEvent(MSG_TYPE t)
  * @Params: 
  * @Return: 
  */
-void Sloong::SloongNetService::RegisterEventHandler(MSG_TYPE t, MsgHandlerFunc func)
+void Sloong::SloongNetProxy::RegisterEventHandler(MSG_TYPE t, MsgHandlerFunc func)
 {
 	if (m_oMsgHandlerList.find(t) == m_oMsgHandlerList.end())
 	{
@@ -230,7 +285,7 @@ void Sloong::SloongNetService::RegisterEventHandler(MSG_TYPE t, MsgHandlerFunc f
 }
 
 
-void Sloong::SloongNetService::MessageWorkLoop(SMARTER param)
+void Sloong::SloongNetProxy::MessageWorkLoop(SMARTER param)
 {
 	while (m_emStatus != RUN_STATUS::Exit)
 	{

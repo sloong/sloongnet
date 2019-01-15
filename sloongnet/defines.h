@@ -30,7 +30,7 @@ typedef enum g_DataCenter_MsgType
 	ProgramExit,
 
 	//////////////////////////////////////////////////////////////////////////
-	// 由 * NetworkCenter * 模块提供的消息
+	// 由 * NetworkHub * 模块提供的消息
 	//////////////////////////////////////////////////////////////////////////
 	// 当接收到消息包之后，会发送该消息
 	ReveivePackage,
@@ -82,6 +82,13 @@ struct LogConfigInfo
 	string	LogPath;
 	int		NetworkPort;
 };
+
+struct NetworkConfig
+{
+	string 	Addres;
+	int 	Port;
+	bool 	UsePipe;
+}
 
 enum RecvStatus
 {
