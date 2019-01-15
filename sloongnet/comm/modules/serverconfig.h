@@ -46,9 +46,6 @@ namespace Sloong
 		string m_strCertFile = "";
 		string m_strKeyFile = "";
 		string m_strPasswd = "";
-		int m_nPriorityLevel = 0;
-		bool m_bEnableSwiftNumberSup = false;
-		bool m_bEnableMD5Check = false;
 		int m_nConnectTimeout = 2;
 		int m_nReceiveTimeout = 20;
 

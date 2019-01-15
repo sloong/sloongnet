@@ -194,9 +194,6 @@ void Sloong::CServerConfig::LoadConfig()
 		m_strKeyFile = GetStringConfig("Server", "SSLKeyFilePath", m_strKeyFile);
 		m_strPasswd = GetStringConfig("Server", "SSLPassword", m_strPasswd);
 	}
-	m_nPriorityLevel = GetIntConfig("Server", "PriorityLevel", m_nPriorityLevel);
-	m_bEnableMD5Check = GetBoolenConfig("Server", "EnableMD5Check", m_bEnableMD5Check);
-	m_bEnableSwiftNumberSup = GetBoolenConfig("Server", "EnableSwiftNumberSupport", m_bEnableSwiftNumberSup);
 	m_nConnectTimeout = GetIntConfig("Server", "ConnectTimeout", m_nConnectTimeout);
 	m_nReceiveTimeout = GetIntConfig("Server", "ReceiveTimeout", m_nReceiveTimeout);
 	m_bEnableDataReceive = GetBoolenConfig("Server", "EnableDataReceive", m_bEnableDataReceive);

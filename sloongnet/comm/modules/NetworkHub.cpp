@@ -7,12 +7,12 @@
 
 using namespace Sloong::Events;
 
-Sloong::CNetworkCenter::CNetworkCenter()
+Sloong::CNetworkHub::CNetworkHub()
 {
     m_pEpoll = make_unique<CEpollEx>();
 }
 
-Sloong::CNetworkCenter::~CNetworkCenter()
+Sloong::CNetworkHub::~CNetworkHub()
 {
 	if (m_pCTX)
 	{
@@ -21,17 +21,12 @@ Sloong::CNetworkCenter::~CNetworkCenter()
 }
 
 
-void Sloong::CNetworkCenter::Initialize(IControl* iMsg)
+void Sloong::CNetworkHub::Initialize(IControl* iMsg)
 {
     IObject::Initialize(iMsg);
 
     m_pConfig = IData::GetServerConfig();
     m_pEpoll->Initialize(m_iC);
-
-	if( m_pConfig->m_nPriorityLevel < 0 || m_pConfig->m_nPriorityLevel > 5 )
-	{
-		throw new normal_except("PriorityLevel only can 0-5. please check.");
-	}
 
     if (m_pConfig->m_bEnableSSL)
 	{
@@ -44,30 +39,30 @@ void Sloong::CNetworkCenter::Initialize(IControl* iMsg)
 		m_nClientCheckKeyLength = m_pConfig->m_strClientCheckKey.length();
 	}
 
-	m_pEpoll->SetEventHandler(std::bind(&CNetworkCenter::OnNewAccept, this, std::placeholders::_1),
-		std::bind(&CNetworkCenter::OnDataCanReceive, this, std::placeholders::_1),
-		std::bind(&CNetworkCenter::OnCanWriteData, this, std::placeholders::_1),
-		std::bind(&CNetworkCenter::OnOtherEventHappened, this, std::placeholders::_1));
+	m_pEpoll->SetEventHandler(std::bind(&CNetworkHub::OnNewAccept, this, std::placeholders::_1),
+		std::bind(&CNetworkHub::OnDataCanReceive, this, std::placeholders::_1),
+		std::bind(&CNetworkHub::OnCanWriteData, this, std::placeholders::_1),
+		std::bind(&CNetworkHub::OnOtherEventHappened, this, std::placeholders::_1));
 
 	m_iC->RegisterEvent(MSG_TYPE::ReveivePackage);
 	m_iC->RegisterEvent(MSG_TYPE::SocketClose);
     m_iC->RegisterEvent(MSG_TYPE::SendMessage);
 	m_iC->RegisterEvent(MSG_TYPE::MonitorSendStatus);
-	m_iC->RegisterEventHandler(MSG_TYPE::ProgramStart, std::bind(&CNetworkCenter::Run, this, std::placeholders::_1));
-	m_iC->RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&CNetworkCenter::Exit, this, std::placeholders::_1));
-	m_iC->RegisterEventHandler(MSG_TYPE::SendMessage, std::bind(&CNetworkCenter::SendMessageEventHandler,this,std::placeholders::_1));
-	m_iC->RegisterEventHandler(MSG_TYPE::SocketClose, std::bind(&CNetworkCenter::CloseConnectEventHandler, this, std::placeholders::_1));
-	m_iC->RegisterEventHandler(MSG_TYPE::MonitorSendStatus, std::bind(&CNetworkCenter::MonitorSendStatusEventHandler, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(MSG_TYPE::ProgramStart, std::bind(&CNetworkHub::Run, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&CNetworkHub::Exit, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(MSG_TYPE::SendMessage, std::bind(&CNetworkHub::SendMessageEventHandler,this,std::placeholders::_1));
+	m_iC->RegisterEventHandler(MSG_TYPE::SocketClose, std::bind(&CNetworkHub::CloseConnectEventHandler, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(MSG_TYPE::MonitorSendStatus, std::bind(&CNetworkHub::MonitorSendStatusEventHandler, this, std::placeholders::_1));
 }
 
-void Sloong::CNetworkCenter::Run(SmartEvent event)
+void Sloong::CNetworkHub::Run(SmartEvent event)
 {
     m_bIsRunning = true;
 	m_pEpoll->Run(m_pConfig->m_nPort,m_pConfig->m_nEPoolThreadQuantity);
-    CThreadPool::AddWorkThread( std::bind(&CNetworkCenter::CheckTimeoutWorkLoop, this, std::placeholders::_1), nullptr);
+    CThreadPool::AddWorkThread( std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this, std::placeholders::_1), nullptr);
 }
 
-void Sloong::CNetworkCenter::Exit(SmartEvent event)
+void Sloong::CNetworkHub::Exit(SmartEvent event)
 {
     m_bIsRunning = false;
     m_oSync.notify_all();
@@ -76,7 +71,7 @@ void Sloong::CNetworkCenter::Exit(SmartEvent event)
 
 
 
-void Sloong::CNetworkCenter::SendMessageEventHandler(SmartEvent event)
+void Sloong::CNetworkHub::SendMessageEventHandler(SmartEvent event)
 {
 	auto send_evt = dynamic_pointer_cast<CNetworkEvent>(event);
 	SmartPackage pack = send_evt->GetDataPackage();
@@ -95,7 +90,7 @@ void Sloong::CNetworkCenter::SendMessageEventHandler(SmartEvent event)
 }
 
 
-void Sloong::CNetworkCenter::CloseConnectEventHandler(SmartEvent event)
+void Sloong::CNetworkHub::CloseConnectEventHandler(SmartEvent event)
 {
 	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
 	auto id = net_evt->GetSocketID();
@@ -117,14 +112,14 @@ void Sloong::CNetworkCenter::CloseConnectEventHandler(SmartEvent event)
 }
 
 
-void Sloong::CNetworkCenter::MonitorSendStatusEventHandler(SmartEvent event)
+void Sloong::CNetworkHub::MonitorSendStatusEventHandler(SmartEvent event)
 {
 	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
 	m_pEpoll->MonitorSendStatus(net_evt->GetSocketID());
 }
 
 
-void Sloong::CNetworkCenter::SendCloseConnectEvent(int socket)
+void Sloong::CNetworkHub::SendCloseConnectEvent(int socket)
 {
 	shared_ptr<CSockInfo> info = m_SockList[socket];
 	if(info==nullptr)
@@ -137,7 +132,7 @@ void Sloong::CNetworkCenter::SendCloseConnectEvent(int socket)
 	m_iC->SendMessage(event);
 }
 
-void Sloong::CNetworkCenter::EnableSSL(string certFile, string keyFile, string passwd)
+void Sloong::CNetworkHub::EnableSSL(string certFile, string keyFile, string passwd)
 {
 	int ret = lConnect::G_InitializeSSL(m_pCTX,certFile, keyFile, passwd);
 	if (ret != S_OK)
@@ -155,7 +150,7 @@ void Sloong::CNetworkCenter::EnableSSL(string certFile, string keyFile, string p
 * Output: *
 * Others: *
 *************************************************/
-void Sloong::CNetworkCenter::CheckTimeoutWorkLoop(SMARTER param)
+void Sloong::CNetworkHub::CheckTimeoutWorkLoop(SMARTER param)
 {
 	int tout = m_pConfig->m_nConnectTimeout * 60;
 	int tinterval = m_pConfig->m_nTimeoutInterval * 60;
@@ -187,7 +182,7 @@ void Sloong::CNetworkCenter::CheckTimeoutWorkLoop(SMARTER param)
 
 /// 有新链接到达。
 /// 接收链接之后，需要客户端首先发送客户端校验信息。只有校验成功之后才会进行SSL处理
-NetworkResult Sloong::CNetworkCenter::OnNewAccept( int conn_sock )
+NetworkResult Sloong::CNetworkHub::OnNewAccept( int conn_sock )
 {
 	m_pLog->Verbos("Accept function is called.");
 
@@ -218,7 +213,7 @@ NetworkResult Sloong::CNetworkCenter::OnNewAccept( int conn_sock )
 		return NetworkResult::Succeed;
 }
 
-NetworkResult Sloong::CNetworkCenter::OnDataCanReceive( int nSocket )
+NetworkResult Sloong::CNetworkHub::OnDataCanReceive( int nSocket )
 {
     shared_ptr<CSockInfo> info = m_SockList[nSocket];
 
@@ -235,7 +230,7 @@ NetworkResult Sloong::CNetworkCenter::OnDataCanReceive( int nSocket )
 	return res;
 }
 
-NetworkResult Sloong::CNetworkCenter::OnCanWriteData( int nSocket )
+NetworkResult Sloong::CNetworkHub::OnCanWriteData( int nSocket )
 {
     // 可以写入事件
 	shared_ptr<CSockInfo> info = m_SockList[nSocket];
@@ -253,7 +248,7 @@ NetworkResult Sloong::CNetworkCenter::OnCanWriteData( int nSocket )
 }
 
 
-NetworkResult Sloong::CNetworkCenter::OnOtherEventHappened( int nSocket )
+NetworkResult Sloong::CNetworkHub::OnOtherEventHappened( int nSocket )
 {
 	SendCloseConnectEvent(nSocket);
 	return NetworkResult::Succeed;

@@ -25,6 +25,8 @@ namespace Sloong
 
 		static int ReadFile(string filepath, char*& bBuffer);
 		static string GenUUID();
+
+		static void write_call_stack();
 	};
 
 

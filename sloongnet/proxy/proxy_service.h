@@ -46,7 +46,7 @@ namespace Sloong
 		void ExitEventHandler(SmartEvent event);
 		
 	protected:
-		unique_ptr<CNetworkCenter> m_pNetwork;
+		unique_ptr<CNetworkHub> m_pNetwork;
 		unique_ptr<CLuaProcessCenter> m_pProcess;
 
 		// Data

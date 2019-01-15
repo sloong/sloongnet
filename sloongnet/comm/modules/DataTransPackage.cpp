@@ -14,17 +14,14 @@ void Sloong::CDataTransPackage::ResponsePackage(const string &msg, const char *p
 {
 	long long nBufLen = s_llLen + msg.size();
 	string md5("");
-	if (g_pConfig->m_bEnableSwiftNumberSup)
-	{
+	
 		nBufLen += s_llLen;
-	}
-	if (g_pConfig->m_bEnableMD5Check)
-	{
+	
 		md5 = CMD5::Encode(msg);
 		nBufLen += md5.length();
-	}
+	
 
-	if (g_pConfig->m_oLogInfo.ShowSendMessage)
+	if (true)
 	{
 		m_pLog->Verbos(CUniversal::Format("SEND<<<[%d][%s]<<<%s",m_nSerialNumber,md5,msg));
 		if( pExData != nullptr )
@@ -46,16 +43,14 @@ void Sloong::CDataTransPackage::ResponsePackage(const string &msg, const char *p
 
 	CUniversal::LongToBytes(nMsgLen, pCpyPoint);
 	pCpyPoint += 8;
-	if (g_pConfig->m_bEnableSwiftNumberSup)
-	{
+	
 		CUniversal::LongToBytes(m_nSerialNumber, pCpyPoint);
 		pCpyPoint += s_llLen;
-	}
-	if (g_pConfig->m_bEnableMD5Check)
-	{
+	
+	
 		memcpy(pCpyPoint, md5.c_str(), md5.length());
 		pCpyPoint += md5.length();
-	}
+	
 	memcpy(pCpyPoint, msg.c_str(), msg.length());
 	pCpyPoint += msg.length();
 	if (pExData != NULL && nExSize > 0)
@@ -162,14 +157,13 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage(ULONG dtlen)
 	// TODO: 这里对于优先级的设置以及使用还是有一些问题的。目前优先级只是用在了发送，处理并未使用到优先级
 	const char *pMsg = NULL;
 	// check the priority level
-	if (g_pConfig->m_nPriorityLevel != 0)
-	{
+	
 		char pLevel[2] = {0};
 		pLevel[0] = data[0];
 		int level = pLevel[0];
-		if (level > g_pConfig->m_nPriorityLevel || level < 0)
+		if (level > s_PriorityLevel || level < 0)
 		{
-			m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", level, g_pConfig->m_nPriorityLevel));
+			m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", level, s_PriorityLevel));
 			return NetworkResult::Error;
 		}
 		else
@@ -177,34 +171,26 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage(ULONG dtlen)
 			nPriority = level;
 		}
 		pMsg = &data[1];
-	}
-	else
-	{
-		nPriority = 0;
-		pMsg = data;
-	}
+	
 
 	// TODO: 这里对于优先级，以及流水号和MD5这些的配置项有些不太合理，这里先暂时直接在构造函数中传进来，后面考虑怎么优化处理
-	if (g_pConfig->m_bEnableSwiftNumberSup)
-	{
+	
 		// TODO: 接收长度信息这个可以直接在lConnect这个类里直接集成
 		char pLongBuffer[s_llLen + 1] = {0};
 		memcpy(pLongBuffer, pMsg, s_llLen);
 		m_nSerialNumber = CUniversal::BytesToLong(pLongBuffer);
 		pMsg += s_llLen;
-	}
+	
 
-	if (g_pConfig->m_bEnableMD5Check)
-	{
+	
 		strMD5 = string(pMsg,32);
 		pMsg += 32;
-	}
+	
 
 	strMessage = string(pMsg);
 	SAFE_DELETE_ARR(data);
 
-	if (g_pConfig->m_bEnableMD5Check)
-	{
+	
 		string rmd5 = CMD5::Encode(strMessage);
 		CUniversal::touper(strMD5);
 		CUniversal::touper(rmd5);
@@ -218,9 +204,9 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage(ULONG dtlen)
 			m_iC->SendMessage(event);
 			return NetworkResult::Invalid;
 		}
-	}
+	
 
-	if (g_pConfig->m_oLogInfo.ShowReceiveMessage)
+	if (true)
 		m_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%s]<<<%s",m_nSerialNumber,strMD5, strMessage));
 
 	return NetworkResult::Succeed;

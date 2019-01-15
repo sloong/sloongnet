@@ -1,29 +1,26 @@
 /* File Name: server.c */
 #include "serverconfig.h"
 #include "CmdProcess.h"
-#include "service.h"
-#include "ControlCenter.h"
+#include "control_service.h"
+#include "NetworkHub.h"
 #include "NormalEvent.h"
 #include "IData.h"
+#include "utility.h"
 using namespace Sloong::Events;
 
 IControl* Sloong::IData::m_iC = nullptr;
 
-
-CServerConfig* g_pConfig = nullptr;
-
-
 void sloong_terminator() 
 {
 	cout << "Unkonw error happened, system will shutdown. " << endl;
-	write_call_stack();
+	CUtility::write_call_stack();
 	exit(0);
 }
 
 void on_sigint(int signal)
 {
 	cout << "Unhandle signal happened, system will shutdown. signal:" << signal<< endl;
-	write_call_stack();
+	CUtility::write_call_stack();
 	exit(0);
 }
 
@@ -46,7 +43,7 @@ int main( int argc, char** args )
 SloongNetService::SloongNetService()
 {
 	m_pLog = make_unique<CLog>();
-    m_pCC = make_unique<CControlCenter>();
+    m_pNetwork = make_unique<CNetworkHub>();
 }
 
 SloongNetService::~SloongNetService()
@@ -74,24 +71,23 @@ bool SloongNetService::Initialize(int argc, char** args)
 
 	try
 	{
-		CServerConfig config;
+		
 		// CmdProcess会根据参数来加载正确的配置信息。成功返回true。
 		if (CCmdProcess::Parser(argc, args, &config))
 		{
-			g_pConfig = &config;
 			LOGTYPE oType = LOGTYPE::ONEFILE;
-			if (!config->m_oLogInfo.LogWriteToOneFile)
+			if (!config.m_oLogInfo.LogWriteToOneFile)
 			{
 				oType = LOGTYPE::DAY;
 			}
-			m_pLog->Initialize(config->m_oLogInfo.LogPath, config->m_oLogInfo.DebugMode, LOGLEVEL(config->m_oLogInfo.LogLevel), oType);
-			if (config->m_oLogInfo.NetworkPort != 0)
-				m_pLog->EnableNetworkLog(config->m_oLogInfo.NetworkPort);
+			m_pLog->Initialize(config.m_oLogInfo.LogPath, "",config.m_oLogInfo.DebugMode, LOGLEVEL(config.m_oLogInfo.LogLevel), oType);
+			if (config.m_oLogInfo.NetworkPort != 0)
+				m_pLog->EnableNetworkLog(config.m_oLogInfo.NetworkPort);
 				
-			Add(Configuation, config);
+			Add(Configuation, &config);
 			Add(Logger, m_pLog.get());
 			
-			CThreadPool::AddWorkThread(std::bind(&SloongNetService::MessageWorkLoop, this, std::placeholders::_1), nullptr, config->m_nMessageCenterThreadQuantity);
+			CThreadPool::AddWorkThread(std::bind(&SloongNetService::MessageWorkLoop, this, std::placeholders::_1), nullptr, config.m_nMessageCenterThreadQuantity);
 			
 			RegisterEvent(ProgramExit);
 			RegisterEvent(ProgramStart);
@@ -99,7 +95,7 @@ bool SloongNetService::Initialize(int argc, char** args)
 
 			try{
 				IData::Initialize(this);
-				m_pCC->Initialize(this);
+				m_pNetwork->Initialize(this);
 			}
 			catch(exception e)
 			{
@@ -121,7 +117,7 @@ bool SloongNetService::Initialize(int argc, char** args)
 	catch (...)
 	{
 		cout << "Unhandle exception happened, system will shutdown. "<< endl;
-		write_call_stack();
+		CUtility::write_call_stack();
 		return false;
 	}
 	

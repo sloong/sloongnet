@@ -8,11 +8,11 @@ namespace Sloong
     class CSockInfo;
     class CEpollEx;
     class CServerConfig;
-    class CNetworkCenter : IObject
+    class CNetworkHub : IObject
     {
     public:
-        CNetworkCenter();
-        ~CNetworkCenter();
+        CNetworkHub();
+        ~CNetworkHub();
 
         void Initialize(IControl* iMsg);
 

@@ -156,7 +156,7 @@ string Sloong::CUtility::GenUUID()
 
 #define MAX_STACK_LAYERS 256
 
-void write_call_stack()
+void Sloong::CUtility::write_call_stack()
 {
 	/*int fd = open("/usr/local/info.dat", O_RDWR | O_CREAT | O_APPEND);
 	void *array[MAX_STACK_LAYERS];

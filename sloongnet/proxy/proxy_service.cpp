@@ -46,7 +46,7 @@ int main( int argc, char** args )
 SloongNetProxy::SloongNetProxy()
 {
 	m_pLog = make_unique<CLog>();
-	m_pNetwork = make_unique<CNetworkCenter>();
+	m_pNetwork = make_unique<CNetworkHub>();
 	m_pProcess = make_unique<CLuaProcessCenter>();
 }
 

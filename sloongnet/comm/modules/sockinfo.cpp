@@ -7,14 +7,14 @@ using namespace Sloong::Universal;
 using namespace Sloong::Events;
 Sloong::CSockInfo::CSockInfo()
 {
-	m_pSendList = new queue<shared_ptr<CDataTransPackage>>[g_pConfig->m_nPriorityLevel]();
+	m_pSendList = new queue<shared_ptr<CDataTransPackage>>[s_PriorityLevel]();
 	m_pCon = make_shared<lConnect>();
 	m_pUserInfo = make_unique<CLuaPacket>();
 }
 
 CSockInfo::~CSockInfo()
 {
-	for (int i = 0; i < g_pConfig->m_nPriorityLevel;i++)
+	for (int i = 0; i < s_PriorityLevel;i++)
 	{
 		while (!m_pSendList[i].empty())
 		{
@@ -240,7 +240,7 @@ int Sloong::CSockInfo::GetSendInfoList( queue<shared_ptr<CDataTransPackage>>*& l
 			return m_nLastSentTags;
 	}
 	
-	for (int i = 0; i < g_pConfig->m_nPriorityLevel; i++)
+	for (int i = 0; i < s_PriorityLevel; i++)
 	{
 		if (m_pSendList[i].empty())
 			continue;

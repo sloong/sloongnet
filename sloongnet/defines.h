@@ -23,6 +23,7 @@ T TYPE_TRANS(LPVOID p)
 
 
 const int s_llLen = 8;
+const int s_PriorityLevel = 5;
 
 typedef enum g_DataCenter_MsgType
 {
@@ -88,7 +89,7 @@ struct NetworkConfig
 	string 	Addres;
 	int 	Port;
 	bool 	UsePipe;
-}
+};
 
 enum RecvStatus
 {

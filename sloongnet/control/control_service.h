@@ -6,7 +6,7 @@
 namespace Sloong
 {
 	class CServerConfig;
-	class CControlCenter;
+	class CNetworkHub;
 	class CDataCenter;
 	class CMessageCenter;
 	class SloongNetService : IControl
@@ -47,8 +47,9 @@ namespace Sloong
 		void ExitEventHandler(SmartEvent event);
 		
 	protected:
-		unique_ptr<CControlCenter> m_pCC;
-
+		unique_ptr<CNetworkHub> m_pNetwork;
+		CServerConfig config;
+		
 		// Data
 		map<DATA_ITEM, void*> m_oDataList;
 		map<string, void*> m_oTempDataList;
