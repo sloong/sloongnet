@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.2)
 
-project(sloongnet)
+project(sloongnet_process)
 
 include_directories(
     "$(PROJECT_BINARY_DIR)"
-    "$(PROJECT_BINARY_DIR)/interface"
-    "$(PROJECT_BINARY_DIR)/center"
-    "$(PROJECT_BINARY_DIR)/events"
-    "$(PROJECT_BINARY_DIR)/modules"
-    "$(PROJECT_BINARY_DIR)/reference"
+    "$(PROJECT_BINARY_DIR)../"
+    "$(PROJECT_BINARY_DIR)../comm/interface"
+    "$(PROJECT_BINARY_DIR)../comm/events"
+    "$(PROJECT_BINARY_DIR)../comm/modules"
+    "$(PROJECT_BINARY_DIR)../reference"
     "/usr/include/glib-2.0"
 	# ubuntu path
     "/usr/lib/x86_64-linux-gnu/glib-2.0/include"
@@ -41,9 +41,12 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-switch -Wno-return-type -Wno-
 # C++ 版本
 set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 
+
 #当前目录下所有源文件赋给SRC_LIST
 #AUX_SOURCE_DIRECTORY(. SRC_LIST) 
+file(GLOB_RECURSE COMM_SRC_LIST "../comm/*.cpp")
 file(GLOB_RECURSE SRC_LIST "*.cpp")
+list(APPEND SRC_LIST ${COMM_SRC_LIST})
 
 #生成可执行文件
 add_executable(${PROJECT_NAME} ${SRC_LIST}) 
