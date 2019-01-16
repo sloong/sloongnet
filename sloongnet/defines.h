@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SLOONGNET_DEFINES_H
+#define SLOONGNET_DEFINES_H
 
 // univ head file
 #include <univ/defines.h>
@@ -132,3 +133,5 @@ typedef enum g_em_DataItem
 	Configuation,
 	Logger,
 }DATA_ITEM;
+
+#endif

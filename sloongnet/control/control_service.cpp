@@ -3,9 +3,11 @@
 #include "CmdProcess.h"
 #include "control_service.h"
 #include "NetworkHub.h"
-#include "NormalEvent.h"
+#include "ControlHub.h"
 #include "IData.h"
 #include "utility.h"
+#include "NetworkEvent.h"
+#include "DataTransPackage.h"
 using namespace Sloong::Events;
 
 IControl* Sloong::IData::m_iC = nullptr;
@@ -44,6 +46,7 @@ SloongNetService::SloongNetService()
 {
 	m_pLog = make_unique<CLog>();
     m_pNetwork = make_unique<CNetworkHub>();
+	m_pControl = make_unique<CControlHub>();
 }
 
 SloongNetService::~SloongNetService()
@@ -84,201 +87,94 @@ bool SloongNetService::Initialize(int argc, char** args)
 			if (config.m_oLogInfo.NetworkPort != 0)
 				m_pLog->EnableNetworkLog(config.m_oLogInfo.NetworkPort);
 				
-			Add(Configuation, &config);
-			Add(Logger, m_pLog.get());
+			m_pControl->Initialize(config.m_nMessageCenterThreadQuantity);
+			m_pControl->Add(Configuation, &config);
+			m_pControl->Add(Logger, m_pLog.get());
 			
-			CThreadPool::AddWorkThread(std::bind(&SloongNetService::MessageWorkLoop, this, std::placeholders::_1), nullptr, config.m_nMessageCenterThreadQuantity);
-			
-			RegisterEvent(ProgramExit);
-			RegisterEvent(ProgramStart);
-			RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&SloongNetService::ExitEventHandler, this, std::placeholders::_1));
+			m_pControl->RegisterEvent(ProgramExit);
+			m_pControl->RegisterEvent(ProgramStart);
+			m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetService::OnReceivePackage, this, std::placeholders::_1));
+			m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetService::OnSocketClose, this, std::placeholders::_1));
 
 			try{
-				IData::Initialize(this);
-				m_pNetwork->Initialize(this);
+				IData::Initialize(m_pControl.get());
+				m_pNetwork->Initialize(m_pControl.get());
 			}
-			catch(exception e)
-			{
+			catch(exception e){
 				m_pLog->Error(string("Excepiton happened in initialize for ControlCenter. Message:")+  string(e.what()));
 				return false;
 			}
+			return true;
 		}
 	}
 	catch (exception& e)
 	{
 		cout << "exception happened, system will shutdown. message:" << e.what() << endl;
-		return false;
 	}
 	catch(normal_except& e)
     {
         cout << "exception happened, system will shutdown. message:" << e.what() << endl;
-		return false;
     }
 	catch (...)
 	{
 		cout << "Unhandle exception happened, system will shutdown. "<< endl;
 		CUtility::write_call_stack();
-		return false;
 	}
 	
-	return true;
+	return false;
 }
 
 void SloongNetService::Run()
 {
-	m_emStatus = RUN_STATUS::Running;
-	CThreadPool::Run();
-	SendMessage(MSG_TYPE::ProgramStart);
-	while (m_emStatus != RUN_STATUS::Exit)
+	m_pLog->Info("Application begin running.");
+	m_pControl->SendMessage(MSG_TYPE::ProgramStart);
+}
+
+
+void Sloong::SloongNetService::OnReceivePackage(SmartEvent evt)
+{	
+	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(evt);
+	auto info = net_evt->GetUserInfo();
+	if (!info)
 	{
-		m_oSync.wait();
+		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
+		return;
 	}
+	SmartPackage pack = net_evt->GetDataPackage();
+
+	net_evt->SetEvent(MSG_TYPE::SendMessage);
+	
+	string strRes("");
+	// char* pExData = nullptr;
+	// int nExSize;
+	string strMsg = pack->GetRecvMessage();
+	// if (m_pProcess->MsgProcess(info, strMsg , strRes, pExData, nExSize)){
+	// 	pack->ResponsePackage(strRes,pExData,nExSize);
+	// }else{
+	// 	m_pLog->Error("Error in process");
+		pack->ResponsePackage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
+	// }
+	
+	net_evt->SetDataPackage(pack);
+	m_pControl->SendMessage(net_evt);
+}
+
+void Sloong::SloongNetService::OnSocketClose(SmartEvent event)
+{
+	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
+	auto info = net_evt->GetUserInfo();
+	if (!info)
+	{
+		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
+		return;
+	}
+	// call close function.
+	net_evt->CallCallbackFunc(net_evt);
 }
 
 void Sloong::SloongNetService::Exit()
 {
-	SendMessage(MSG_TYPE::ProgramExit);
+	m_pLog->Info("Application will exit.");
+	m_pControl->SendMessage(MSG_TYPE::ProgramExit);
+	m_pControl->Exit();
 }
-
-void Sloong::SloongNetService::ExitEventHandler(SmartEvent ev)
-{
-	m_emStatus = RUN_STATUS::Exit;
-	m_oSync.notify_all();
-}
-
-bool Sloong::SloongNetService::Add(DATA_ITEM item, void * object)
-{
-	auto it = m_oDataList.find(item);
-	if (it != m_oDataList.end())
-	{
-		return false;
-	}
-	m_oDataList.insert(make_pair(item, object));
-	return false;
-}
-
-void * Sloong::SloongNetService::Get(DATA_ITEM item)
-{
-	auto data = m_oDataList.find(item);
-	if (data == m_oDataList.end())
-	{
-		return nullptr;
-	}
-	return (*data).second;
-}
-
-bool Sloong::SloongNetService::Remove(DATA_ITEM item)
-{
-	m_oDataList.erase(item);
-}
-
-bool Sloong::SloongNetService::AddTemp(string name, void * object)
-{
-	m_oTempDataList[name] = object;
-	return true;
-}
-
-void * Sloong::SloongNetService::GetTemp(string name)
-{
-	auto item = m_oTempDataList.find(name);
-	if (item == m_oTempDataList.end())
-	{
-		return nullptr;
-	}
-	m_oTempDataList.erase(name);
-	return (*item).second;
-}
-
-
-
-void Sloong::SloongNetService::SendMessage(MSG_TYPE msgType)
-{
-	auto evt = make_shared<CNormalEvent>();
-	evt->SetEvent(msgType);
-	unique_lock<mutex> lck(m_oMsgListMutex);
-	m_oMsgList.push(evt);
-	m_oSync.notify_one();
-}
-
-void Sloong::SloongNetService::SendMessage(SmartEvent evt)
-{
-	unique_lock<mutex> lck(m_oMsgListMutex);
-	m_oMsgList.push(evt);
-	m_oSync.notify_one();
-}
-
-
-void Sloong::SloongNetService::RegisterEvent(MSG_TYPE t)
-{
-	m_oMsgHandlerList[t] = vector<MsgHandlerFunc>();
-}
-
-/**
- * @Remarks: One message only have one handler. so cannot register handled message again.
- * @Params: 
- * @Return: 
- */
-void Sloong::SloongNetService::RegisterEventHandler(MSG_TYPE t, MsgHandlerFunc func)
-{
-	if (m_oMsgHandlerList.find(t) == m_oMsgHandlerList.end())
-	{
-		throw normal_except("Target event is not regist.");
-	}
-	else{
-		m_oMsgHandlerList[t].push_back(func);
-	}
-}
-
-
-void Sloong::SloongNetService::MessageWorkLoop(SMARTER param)
-{
-	while (m_emStatus != RUN_STATUS::Exit)
-	{
-		try
-		{
-			if (m_emStatus == RUN_STATUS::Created)
-			{
-				SLEEP(100);
-				continue;
-			}
-			if (m_oMsgList.empty())
-			{
-				m_oSync.wait_for(1);
-				continue;
-			}
-			if (!m_oMsgList.empty())
-			{
-				unique_lock<mutex> lck(m_oMsgListMutex);
-				if (m_oMsgList.empty())
-				{
-					lck.unlock();
-					continue;
-				}
-
-				auto p = m_oMsgList.front();
-				m_oMsgList.pop();
-				lck.unlock();
-
-				// Get the message handler list.
-				auto evt_type = p->GetEvent();
-				auto handler_list = m_oMsgHandlerList[evt_type];
-				int handler_num = handler_list.size();
-				if ( handler_num == 0 )
-					continue;
-
-				for (int i = 0; i < handler_num; i++)
-				{
-					auto func = handler_list[i];
-					func(p);
-				}
-			}
-		}
-		catch (...)
-		{
-			cerr << "Unhandle exception in MessageCenter work loop." << endl;
-		}
-		
-	}
-}
-
-

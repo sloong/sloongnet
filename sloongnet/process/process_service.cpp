@@ -147,7 +147,7 @@ void SloongNetProcess::Run()
 }
 
 
-void Sloong::CControlCenter::OnReceivePackage(SmartEvent evt)
+void Sloong::CControlHub::OnReceivePackage(SmartEvent evt)
 {	
 	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(evt);
 	auto info = net_evt->GetUserInfo();
@@ -175,7 +175,7 @@ void Sloong::CControlCenter::OnReceivePackage(SmartEvent evt)
 	m_iC->SendMessage(net_evt);
 }
 
-void Sloong::CControlCenter::OnSocketClose(SmartEvent event)
+void Sloong::CControlHub::OnSocketClose(SmartEvent event)
 {
 	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
 	auto info = net_evt->GetUserInfo();

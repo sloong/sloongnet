@@ -40,3 +40,4 @@ build/*.tar
 servctrl/servctrl/bin/
 servctrl/servctrl/obj
 build/sloongnet_control
+build/debug-sloongnet_proxy

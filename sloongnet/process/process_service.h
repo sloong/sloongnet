@@ -5,7 +5,7 @@
 namespace Sloong
 {
 	class CServerConfig;
-	class CControlCenter;
+	class CControlHub;
 	class CDataCenter;
 	class CMessageCenter;
 	class SloongNetProcess : IControl
