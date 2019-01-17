@@ -1,5 +1,4 @@
 /* File Name: server.c */
-#include "serverconfig.h"
 #include "CmdProcess.h"
 #include "process_service.h"
 #include "NetworkHub.h"

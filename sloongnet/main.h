@@ -1,6 +1,6 @@
 // mian.h files
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef SLOONGNET_MAIN_H
+#define SLOONGNET_MAIN_H
 
 // std c head file
 #include <errno.h> // for errno
@@ -39,9 +39,4 @@ using namespace std;
 #include "defines.h"
 #include "EasySync.h"
 
-#include "serverconfig.h"
-
-// define global variables
-extern CServerConfig* g_pConfig;
-
-#endif //MAIN_H
+#endif //SLOONGNET_MAIN_H

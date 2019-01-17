@@ -6,7 +6,6 @@
 #include "IControl.h"
 namespace Sloong
 {
-	class CServerConfig;
 	class CControlHub;
 	class CNetworkHub;
 	class CLuaProcessCenter;
@@ -27,7 +26,6 @@ namespace Sloong
 		unique_ptr<CNetworkHub> m_pNetwork;
 		unique_ptr<CControlHub> m_pControl;
 		unique_ptr<CLuaProcessCenter> m_pProcess;
-		CServerConfig config;
 
 		unique_ptr<CLog>	m_pLog;
 	};

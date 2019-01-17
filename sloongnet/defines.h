@@ -65,33 +65,6 @@ typedef enum g_DataCenter_MsgType
 
 }MSG_TYPE;
 
-struct LuaScriptConfigInfo
-{
-	string EntryFile;
-	string EntryFunction;
-	string ProcessFunction;
-	string SocketCloseFunction;
-	string ScriptFolder;
-};
-
-struct LogConfigInfo
-{
-	bool	DebugMode;
-	bool	ShowSendMessage;
-	bool	ShowReceiveMessage;
-	bool	LogWriteToOneFile;
-	int		LogLevel;
-	string	LogPath;
-	int		NetworkPort;
-};
-
-struct NetworkConfig
-{
-	string 	Addres;
-	int 	Port;
-	bool 	UsePipe;
-};
-
 enum RecvStatus
 {
 	Wait=0,

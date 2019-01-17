@@ -1,6 +1,4 @@
 /* File Name: server.c */
-#include "serverconfig.h"
-#include "CmdProcess.h"
 #include "control_service.h"
 #include "NetworkHub.h"
 #include "ControlHub.h"
@@ -8,11 +6,13 @@
 #include "utility.h"
 #include "NetworkEvent.h"
 #include "DataTransPackage.h"
+
+#include "SQLiteEx.h"
 using namespace Sloong::Events;
 
-IControl* Sloong::IData::m_iC = nullptr;
+IControl *Sloong::IData::m_iC = nullptr;
 
-void sloong_terminator() 
+void sloong_terminator()
 {
 	cout << "Unkonw error happened, system will shutdown. " << endl;
 	CUtility::write_call_stack();
@@ -21,7 +21,7 @@ void sloong_terminator()
 
 void on_sigint(int signal)
 {
-	cout << "Unhandle signal happened, system will shutdown. signal:" << signal<< endl;
+	cout << "Unhandle signal happened, system will shutdown. signal:" << signal << endl;
 	CUtility::write_call_stack();
 	exit(0);
 }
@@ -34,18 +34,18 @@ void on_SIGINT_Event(int signal)
 	g_AppService.Exit();
 }
 
-
-int main( int argc, char** args )
+int main(int argc, char **args)
 {
-	if(g_AppService.Initialize(argc,args))
+	if (g_AppService.Initialize(argc, args))
 		g_AppService.Run();
-}
 
+	return 0;
+}
 
 SloongNetService::SloongNetService()
 {
 	m_pLog = make_unique<CLog>();
-    m_pNetwork = make_unique<CNetworkHub>();
+	m_pNetwork = make_unique<CNetworkHub>();
 	m_pControl = make_unique<CControlHub>();
 }
 
@@ -53,11 +53,22 @@ SloongNetService::~SloongNetService()
 {
 	Exit();
 	CThreadPool::Exit();
-    m_pLog->End();
+	m_pLog->End();
 }
 
+void PrintVersion()
+{
+	cout << PRODUCT_TEXT << endl;
+	cout << VERSION_TEXT << endl;
+	cout << COPYRIGHT_TEXT << endl;
+}
 
-bool SloongNetService::Initialize(int argc, char** args)
+void PrientHelp()
+{
+	cout << "param: listen port" << endl;
+}
+
+bool SloongNetService::Initialize(int argc, char **args)
 {
 	set_terminate(sloong_terminator);
 	set_unexpected(sloong_terminator);
@@ -74,53 +85,66 @@ bool SloongNetService::Initialize(int argc, char** args)
 
 	try
 	{
-		
-		// CmdProcess会根据参数来加载正确的配置信息。成功返回true。
-		if (CCmdProcess::Parser(argc, args, &config))
+		if (argc != 2)
 		{
-			LOGTYPE oType = LOGTYPE::ONEFILE;
-			if (!config.m_oLogInfo.LogWriteToOneFile)
-			{
-				oType = LOGTYPE::DAY;
-			}
-			m_pLog->Initialize(config.m_oLogInfo.LogPath, "",config.m_oLogInfo.DebugMode, LOGLEVEL(config.m_oLogInfo.LogLevel), oType);
-			if (config.m_oLogInfo.NetworkPort != 0)
-				m_pLog->EnableNetworkLog(config.m_oLogInfo.NetworkPort);
-				
-			m_pControl->Initialize(config.m_nMessageCenterThreadQuantity);
-			m_pControl->Add(Configuation, &config);
-			m_pControl->Add(Logger, m_pLog.get());
-			
-			m_pControl->RegisterEvent(ProgramExit);
-			m_pControl->RegisterEvent(ProgramStart);
-			m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetService::OnReceivePackage, this, std::placeholders::_1));
-			m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetService::OnSocketClose, this, std::placeholders::_1));
-
-			try{
-				IData::Initialize(m_pControl.get());
-				m_pNetwork->Initialize(m_pControl.get());
-			}
-			catch(exception e){
-				m_pLog->Error(string("Excepiton happened in initialize for ControlCenter. Message:")+  string(e.what()));
-				return false;
-			}
-			return true;
+			PrientHelp();
+			return false;
 		}
+		int port = atoi(args[1]);
+		if (port == 0)
+		{
+			cout << "Convert [" << args[1] << "] to int port fialed." << endl;
+			return false;
+		}
+
+		
+	
+		
+
+			LOGTYPE oType = LOGTYPE::ONEFILE;
+		if (!config.m_oLogInfo.LogWriteToOneFile)
+		{
+			oType = LOGTYPE::DAY;
+		}
+		m_pLog->Initialize(config.m_oLogInfo.LogPath, "", config.m_oLogInfo.DebugMode, LOGLEVEL(config.m_oLogInfo.LogLevel), oType);
+		if (config.m_oLogInfo.NetworkPort != 0)
+			m_pLog->EnableNetworkLog(config.m_oLogInfo.NetworkPort);
+
+		m_pControl->Initialize(config.m_nMessageCenterThreadQuantity);
+		m_pControl->Add(Configuation, &config);
+		m_pControl->Add(Logger, m_pLog.get());
+
+		m_pControl->RegisterEvent(ProgramExit);
+		m_pControl->RegisterEvent(ProgramStart);
+		m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetService::OnReceivePackage, this, std::placeholders::_1));
+		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetService::OnSocketClose, this, std::placeholders::_1));
+
+		try
+		{
+			IData::Initialize(m_pControl.get());
+			m_pNetwork->Initialize(m_pControl.get());
+		}
+		catch (exception e)
+		{
+			m_pLog->Error(string("Excepiton happened in initialize for ControlCenter. Message:") + string(e.what()));
+			return false;
+		}
+		return true;
 	}
-	catch (exception& e)
+	catch (exception &e)
 	{
 		cout << "exception happened, system will shutdown. message:" << e.what() << endl;
 	}
-	catch(normal_except& e)
-    {
-        cout << "exception happened, system will shutdown. message:" << e.what() << endl;
-    }
+	catch (normal_except &e)
+	{
+		cout << "exception happened, system will shutdown. message:" << e.what() << endl;
+	}
 	catch (...)
 	{
-		cout << "Unhandle exception happened, system will shutdown. "<< endl;
+		cout << "Unhandle exception happened, system will shutdown. " << endl;
 		CUtility::write_call_stack();
 	}
-	
+
 	return false;
 }
 
@@ -130,9 +154,8 @@ void SloongNetService::Run()
 	m_pControl->SendMessage(MSG_TYPE::ProgramStart);
 }
 
-
 void Sloong::SloongNetService::OnReceivePackage(SmartEvent evt)
-{	
+{
 	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(evt);
 	auto info = net_evt->GetUserInfo();
 	if (!info)
@@ -143,7 +166,7 @@ void Sloong::SloongNetService::OnReceivePackage(SmartEvent evt)
 	SmartPackage pack = net_evt->GetDataPackage();
 
 	net_evt->SetEvent(MSG_TYPE::SendMessage);
-	
+
 	string strRes("");
 	// char* pExData = nullptr;
 	// int nExSize;
@@ -152,9 +175,9 @@ void Sloong::SloongNetService::OnReceivePackage(SmartEvent evt)
 	// 	pack->ResponsePackage(strRes,pExData,nExSize);
 	// }else{
 	// 	m_pLog->Error("Error in process");
-		pack->ResponsePackage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
+	pack->ResponsePackage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
 	// }
-	
+
 	net_evt->SetDataPackage(pack);
 	m_pControl->SendMessage(net_evt);
 }
