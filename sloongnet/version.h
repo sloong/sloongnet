@@ -1,4 +1,5 @@
 #ifndef VERSION_H
+#define VERSION_H
 
 #define VERSION_TEXT		"0.10.2.363"
 #define PRODUCT_TEXT		"Sloong Network Engine"

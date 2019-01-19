@@ -18,22 +18,27 @@ cd `dirname $0`
 
 # default value is debug
 VERSION_STR=$(cat $WORKFOLDER/version)
-PROJECT=sloongnet_proxy
+MODULE=proxy
+PROJECT=sloongnet_$MODULE
 MAKEFLAG=debug
-CMAKE_FILE_PATH=$WORKFOLDER/../sloongnet/proxy
+CMAKE_FILE_PATH=$WORKFOLDER/../sloongnet/$MODULE
 
 clean(){
-	rm -rdf $MAKEFLAG-$PROJECT
+	rm -rdf $MAKEFLAG/$PROJECT
 }
 
 build(){
-	if [ ! -d $MAKEFLAG-$PROJECT  ];then
-		mkdir $MAKEFLAG-$PROJECT
+	if [ ! -d $MAKEFLAG  ];then
+		mkdir $MAKEFLAG
 	fi
-	cd $MAKEFLAG-$PROJECT
+	cd $MAKEFLAG
+	if [ ! -d $PROJECT  ];then
+		mkdir $PROJECT
+	fi
+	cd $PROJECT
 	cmake -DCMAKE_BUILD_TYPE=$MAKEFLAG $CMAKE_FILE_PATH
 	make
-	cd ../
+	cd ../../
 }
 
 build_debug(){

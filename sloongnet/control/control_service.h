@@ -6,6 +6,7 @@
 #include "IControl.h"
 namespace Sloong
 {
+	class CConfiguation;
 	class CNetworkHub;
 	class CControlHub;
 	class SloongNetService
@@ -24,6 +25,7 @@ namespace Sloong
 	protected:
 		unique_ptr<CNetworkHub> m_pNetwork;
 		unique_ptr<CControlHub> m_pControl;
+		unique_ptr<CConfiguation>	m_pConfig;
 		
 		unique_ptr<CLog>	m_pLog;
 	};

@@ -18,12 +18,13 @@ cd `dirname $0`
 
 # default value is debug
 VERSION_STR=$(cat $WORKFOLDER/version)
-PROJECT=sloongnet_control
+MODULE=control
+PROJECT=sloongnet_$MODULE
 MAKEFLAG=debug
-CMAKE_FILE_PATH=$WORKFOLDER/../sloongnet/control
+CMAKE_FILE_PATH=$WORKFOLDER/../sloongnet/$MODULE
 
 clean(){
-	rm -rdf $MAKEFLAG
+	rm -rdf $MAKEFLAG/$PROJECT
 }
 
 build(){
@@ -31,9 +32,13 @@ build(){
 		mkdir $MAKEFLAG
 	fi
 	cd $MAKEFLAG
+	if [ ! -d $PROJECT  ];then
+		mkdir $PROJECT
+	fi
+	cd $PROJECT
 	cmake -DCMAKE_BUILD_TYPE=$MAKEFLAG $CMAKE_FILE_PATH
 	make
-	cd ../
+	cd ../../
 }
 
 build_debug(){

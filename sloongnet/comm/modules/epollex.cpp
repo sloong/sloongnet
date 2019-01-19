@@ -3,7 +3,6 @@
 #include "epollex.h"
 #include "lconnect.h"
 #include "sockinfo.h"
-#include "serverconfig.h"
 #include "NetworkEvent.h"
 
 

@@ -10,7 +10,6 @@ namespace Sloong
 		class CNetworkEvent;
 	}
 	using namespace Events;
-	class CServerConfig;
 	class CGlobalFunction;
 	class CLuaProcessCenter : IObject
 	{
@@ -34,7 +33,6 @@ namespace Sloong
 		queue<int>		m_oFreeLuaContext;
 		CEasySync      m_oSSync;
 		mutex			m_oLuaContextMutex;
-		CServerConfig*	m_pConfig;
 		unique_ptr<CGlobalFunction> m_pGFunc;
 	};
 

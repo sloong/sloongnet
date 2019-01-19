@@ -6,8 +6,10 @@
 #include "utility.h"
 #include "NetworkEvent.h"
 #include "DataTransPackage.h"
-
+#include "configuation.h"
 #include "SQLiteEx.h"
+
+#include "version.h"
 using namespace Sloong::Events;
 
 IControl *Sloong::IData::m_iC = nullptr;
@@ -47,6 +49,7 @@ SloongNetService::SloongNetService()
 	m_pLog = make_unique<CLog>();
 	m_pNetwork = make_unique<CNetworkHub>();
 	m_pControl = make_unique<CControlHub>();
+	m_pConfig = make_unique<CConfiguation>();
 }
 
 SloongNetService::~SloongNetService()
@@ -97,21 +100,12 @@ bool SloongNetService::Initialize(int argc, char **args)
 			return false;
 		}
 
-		
-	
-		
+		m_pLog->Initialize(m_pConfig->m_oControlConfig.logpath(), "", m_pConfig->m_oControlConfig.debugmode(), LOGLEVEL(m_pConfig->m_oControlConfig.loglevel()), LOGTYPE::DAY);
+		// if (config.m_oLogInfo.NetworkPort != 0)
+		// 	m_pLog->EnableNetworkLog(config.m_oLogInfo.NetworkPort);
 
-			LOGTYPE oType = LOGTYPE::ONEFILE;
-		if (!config.m_oLogInfo.LogWriteToOneFile)
-		{
-			oType = LOGTYPE::DAY;
-		}
-		m_pLog->Initialize(config.m_oLogInfo.LogPath, "", config.m_oLogInfo.DebugMode, LOGLEVEL(config.m_oLogInfo.LogLevel), oType);
-		if (config.m_oLogInfo.NetworkPort != 0)
-			m_pLog->EnableNetworkLog(config.m_oLogInfo.NetworkPort);
-
-		m_pControl->Initialize(config.m_nMessageCenterThreadQuantity);
-		m_pControl->Add(Configuation, &config);
+		m_pControl->Initialize(m_pConfig->m_oControlConfig.mqthreadquantity());
+		m_pControl->Add(Configuation, m_pConfig.get());
 		m_pControl->Add(Logger, m_pLog.get());
 
 		m_pControl->RegisterEvent(ProgramExit);
@@ -122,7 +116,7 @@ bool SloongNetService::Initialize(int argc, char **args)
 		try
 		{
 			IData::Initialize(m_pControl.get());
-			m_pNetwork->Initialize(m_pControl.get());
+			m_pNetwork->Initialize(m_pControl.get(),&m_pConfig->m_oControlConfig);
 		}
 		catch (exception e)
 		{

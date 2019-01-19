@@ -2,7 +2,7 @@
 #define SLOONGNET_SQLITE_EX_H
 
 #include <sqlite3.h>
-
+#include "main.h"
 namespace Sloong
 {
     class CSQLiteEx
@@ -13,7 +13,7 @@ namespace Sloong
         bool Initialize( string dbPath );
         string GetErrorMessage();
 
-        bool Query(string strSQL, string& strResult, string& strError);
+        bool Query(const string& strSQL, string& strResult, string& strError);
 
         string QueryEx( string table_name, string domain, string key );
         
@@ -23,7 +23,7 @@ namespace Sloong
 
     protected:
         sqlite3* m_pDB;
-        EasySync m_oSync;
+        CEasySync m_oSync;
     };
 }
 

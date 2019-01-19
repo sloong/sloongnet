@@ -8,6 +8,7 @@ include_directories(
     "$(PROJECT_BINARY_DIR)../comm/interface"
     "$(PROJECT_BINARY_DIR)../comm/events"
     "$(PROJECT_BINARY_DIR)../comm/modules"
+    "$(PROJECT_BINARY_DIR)../comm/Message"
     "$(PROJECT_BINARY_DIR)../reference"
     "/usr/include/glib-2.0"
 	# ubuntu path
@@ -65,3 +66,4 @@ target_link_libraries(${PROJECT_NAME} crypto)
 target_link_libraries(${PROJECT_NAME} lua5.3)
 target_link_libraries(${PROJECT_NAME} glib-2.0)
 target_link_libraries(${PROJECT_NAME} univ)
+target_link_libraries(${PROJECT_NAME} sqlite3)

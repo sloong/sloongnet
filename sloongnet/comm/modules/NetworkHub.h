@@ -1,20 +1,26 @@
 #pragma once
 
 #include "IObject.h"
+#include "config.pb.h"
 
 namespace Sloong
 {
     class CEasySync;
     class CSockInfo;
     class CEpollEx;
-    class CServerConfig;
+    class CConfiguation;
+    
     class CNetworkHub : IObject
     {
     public:
         CNetworkHub();
         ~CNetworkHub();
 
-        void Initialize(IControl* iMsg);
+        void Initialize(IControl* iMsg, MessageConfig::GLOBAL_CONFIG* config);
+
+        void EnableClientCheck(const string& clientCheckKey, int clientCheckTime);
+        void EnableTimeoutCheck(int timeoutTime, int checkInterval);
+        void EnableSSL(string certFile, string keyFile, string passwd);
 
         // event handler
         void Run(SmartEvent event);
@@ -34,8 +40,6 @@ namespace Sloong
 
     protected:
         void SendCloseConnectEvent(int socket);
-        void EnableSSL(string certFile, string keyFile, string passwd);
-
         void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nExSize = 0 );
 
         /// 将响应消息加入到epoll发送列表中
@@ -46,11 +50,16 @@ namespace Sloong
         mutex                   m_oSockListMutex;
         bool                    m_bIsRunning;
         unique_ptr<CEpollEx>    m_pEpoll;
-        CServerConfig*          m_pConfig;
         CEasySync              m_oSync;
         SSL_CTX*                m_pCTX = nullptr;
-		bool m_bEnableClientCheck;
+        MessageConfig::GLOBAL_CONFIG*          m_pConfig = nullptr;
+        // Timeout check
+		int m_nConnectTimeoutTime;
+        int m_nCheckTimeoutInterval;
+        // Client check 
+        string  m_strClientCheckKey;
 		int m_nClientCheckKeyLength;
+        int m_nClientCheckTime;
     };
 }
 

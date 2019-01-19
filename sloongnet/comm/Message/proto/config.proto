@@ -1,0 +1,53 @@
+syntax = "proto3";
+package MessageConfig;
+
+
+message GLOBAL_CONFIG
+{
+    int32     ListenPort = 1;
+    string  LogPath = 2;
+    int32 LogLevel =3 ;
+    bool    DebugMode = 4;
+    int32     MQThreadQuantity =5;
+    bool    EnableSSL=6;
+    string  CertFilePath=7;
+    string  KeyFilePath=8;
+    string  CertPasswd=9;
+    int32     ConnectTime=10;
+    int32     ReceiveTime=11;
+    int32     EPollThreadQuantity=12;
+};
+
+message DB_CONFIG
+{
+    string  ServerAddress=1;
+    int32   ServerPort=2;
+    string  User=3;
+    string  Passwd=4;
+    string  Database=5;
+    GLOBAL_CONFIG   ServerConfig=6;
+}
+
+message DATA_CONFIG
+{
+    int32     DataReceivePort=1;
+    int32     DataRecvTime=2;
+    GLOBAL_CONFIG   ServerConfig=3;
+} 
+
+message PROXY_CONFIG{
+    int32     ClientCheckTime=1;
+    string  ClientCheckKey=2;
+    int32     TimeoutCheckInterval=3;
+    GLOBAL_CONFIG   ServerConfig=4;
+};
+
+message PROCESS_CONFIG{
+    string  LuaContextQuantity=1;
+    string  LuaScriptFolder=2;
+    string  LuaEntryFile=3;
+    string  LuaEntryFunction=4;
+    string  LuaProcessFunction=5;
+    string  LuaSocketCloseFunction=6;
+    GLOBAL_CONFIG   ServerConfig=7;
+};

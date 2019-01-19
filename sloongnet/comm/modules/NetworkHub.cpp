@@ -1,5 +1,5 @@
 #include "NetworkHub.h"
-#include "serverconfig.h"
+#include "configuation.h"
 #include "epollex.h"
 #include "sockinfo.h"
 #include "NetworkEvent.h"
@@ -21,23 +21,23 @@ Sloong::CNetworkHub::~CNetworkHub()
 }
 
 
-void Sloong::CNetworkHub::Initialize(IControl* iMsg)
+void Sloong::CNetworkHub::Initialize(IControl* iMsg, MessageConfig::GLOBAL_CONFIG* config)
 {
     IObject::Initialize(iMsg);
 
-    m_pConfig = IData::GetServerConfig();
+    m_pConfig = config;
     m_pEpoll->Initialize(m_iC);
 
-    if (m_pConfig->m_bEnableSSL)
+    if (m_pConfig->enablessl())
 	{
-		EnableSSL(m_pConfig->m_strCertFile, m_pConfig->m_strKeyFile, m_pConfig->m_strPasswd);
+		EnableSSL(m_pConfig->certfilepath(), m_pConfig->keyfilepath(), m_pConfig->certpasswd());
 	}
 
-	if (m_pConfig->m_nClientCheckTime > 0 && m_pConfig->m_strClientCheckKey.length() > 0)
-	{
-		m_bEnableClientCheck = true;
-		m_nClientCheckKeyLength = m_pConfig->m_strClientCheckKey.length();
-	}
+	// if (m_pConfig->m_nClientCheckTime > 0 && m_pConfig->m_strClientCheckKey.length() > 0)
+	// {
+	// 	m_bEnableClientCheck = true;
+	// 	m_nClientCheckKeyLength = m_pConfig->m_strClientCheckKey.length();
+	// }
 
 	m_pEpoll->SetEventHandler(std::bind(&CNetworkHub::OnNewAccept, this, std::placeholders::_1),
 		std::bind(&CNetworkHub::OnDataCanReceive, this, std::placeholders::_1),
@@ -58,8 +58,7 @@ void Sloong::CNetworkHub::Initialize(IControl* iMsg)
 void Sloong::CNetworkHub::Run(SmartEvent event)
 {
     m_bIsRunning = true;
-	m_pEpoll->Run(m_pConfig->m_nPort,m_pConfig->m_nEPoolThreadQuantity);
-    CThreadPool::AddWorkThread( std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this, std::placeholders::_1), nullptr);
+	m_pEpoll->Run(m_pConfig->listenport(),m_pConfig->epollthreadquantity());
 }
 
 void Sloong::CNetworkHub::Exit(SmartEvent event)
@@ -132,6 +131,21 @@ void Sloong::CNetworkHub::SendCloseConnectEvent(int socket)
 	m_iC->SendMessage(event);
 }
 
+void Sloong::CNetworkHub::EnableClientCheck(const string& clientCheckKey, int clientCheckTime)
+{
+	m_strClientCheckKey = clientCheckKey;
+	m_nClientCheckTime = clientCheckTime;
+	m_nClientCheckKeyLength = m_strClientCheckKey.length();
+}
+
+
+void Sloong::CNetworkHub::EnableTimeoutCheck(int timeoutTime, int checkInterval)
+{
+	m_nConnectTimeoutTime = timeoutTime;
+	m_nCheckTimeoutInterval = checkInterval;
+	CThreadPool::AddWorkThread( std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this, std::placeholders::_1), nullptr);
+}
+
 void Sloong::CNetworkHub::EnableSSL(string certFile, string keyFile, string passwd)
 {
 	int ret = lConnect::G_InitializeSSL(m_pCTX,certFile, keyFile, passwd);
@@ -152,8 +166,8 @@ void Sloong::CNetworkHub::EnableSSL(string certFile, string keyFile, string pass
 *************************************************/
 void Sloong::CNetworkHub::CheckTimeoutWorkLoop(SMARTER param)
 {
-	int tout = m_pConfig->m_nConnectTimeout * 60;
-	int tinterval = m_pConfig->m_nTimeoutInterval * 60;
+	int tout = m_nConnectTimeoutTime * 60;
+	int tinterval = m_nCheckTimeoutInterval * 60;
 
 	m_pLog->Verbos("Check connect timeout thread is running.");
 	while (m_bIsRunning)
@@ -187,16 +201,16 @@ NetworkResult Sloong::CNetworkHub::OnNewAccept( int conn_sock )
 	m_pLog->Verbos("Accept function is called.");
 
 		// start client check when acdept
-		if (m_bEnableClientCheck)
+		if (m_nClientCheckKeyLength > 0)
 		{
 			char* pCheckBuf = new char[m_nClientCheckKeyLength + 1];
 			memset(pCheckBuf, 0, m_nClientCheckKeyLength + 1);
 			// In Check function, client need send the check key in 3 second. 
 			// 这里仍然使用Universal提供的ReceEx。这里不需要进行SSL接收
-			int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, m_nClientCheckKeyLength, m_pConfig->m_nClientCheckTime);
-			if (nLen != m_nClientCheckKeyLength || 0 != strcmp(pCheckBuf, m_pConfig->m_strClientCheckKey.c_str()))
+			int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, m_nClientCheckKeyLength, m_nClientCheckTime);
+			if (nLen != m_nClientCheckKeyLength || 0 != strcmp(pCheckBuf, m_strClientCheckKey.c_str()))
 			{
-				m_pLog->Warn(CUniversal::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nClientCheckKeyLength, nLen, m_pConfig->m_strClientCheckKey.c_str(), pCheckBuf));
+				m_pLog->Warn(CUniversal::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nClientCheckKeyLength, nLen, m_strClientCheckKey.c_str(), pCheckBuf));
 				return NetworkResult::Error;
 			}
 		}
