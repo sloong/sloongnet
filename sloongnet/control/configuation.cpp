@@ -9,10 +9,10 @@ bool Sloong::CConfiguation::Initialize(string tableName)
 
 bool Sloong::CConfiguation::LoadAll()
 {
-    LoadControlConfig();
-    LoadDataConfig();
-    LoadDBConfig();
-    LoadProcessConfig();
+    LoadControlConfig("",m_oControlConfig);
+    LoadDataConfig("",m_oDataConfig);
+    LoadDBConfig("",m_oDBConfig);
+    LoadProcessConfig("",m_oProcessConfig);
     LoadProxyConfig("", m_oProxyConfig);
 }
 
@@ -41,12 +41,35 @@ void Sloong::CConfiguation::LoadGlobalConfig(string domain, string ip, GLOBAL_CO
     config->set_receivetime(GetInt(domain, ip, "ReceiveTime", 5));
 }
 
+
+void Sloong::CConfiguation::LoadControlConfig( string serverIp, MessageConfig::GLOBAL_CONFIG& config )
+{
+    LoadGlobalConfig("control", serverIp, &config);
+}
+
 void Sloong::CConfiguation::LoadProxyConfig(string serverIp, PROXY_CONFIG &config)
 {
     config.set_clientcheckkey( GetString("proxy", serverIp, "ClientCheckKey", "sloong.com"));
     config.set_clientchecktime( GetInt("proxy", serverIp, "ClientCheckTime", 2));
     config.set_timeoutcheckinterval( GetInt("proxy", serverIp, "TimeoutCheckInterval", 5));
     LoadGlobalConfig("proxy", serverIp, config.mutable_serverconfig());
+}
+
+
+void Sloong::CConfiguation::LoadProcessConfig( string serverIp, MessageConfig::PROCESS_CONFIG& config )
+{
+    //config.set_luaentryfile()
+}
+
+
+void Sloong::CConfiguation::LoadDataConfig( string serverIp, MessageConfig::DATA_CONFIG& config )
+{
+
+}
+
+void Sloong::CConfiguation::LoadDBConfig( string serverIp, MessageConfig::DB_CONFIG& config )
+{
+
 }
 
 bool Sloong::CConfiguation::GetBoolen(string domain, string ip, string key, bool def)
@@ -58,6 +81,11 @@ bool Sloong::CConfiguation::GetBoolen(string domain, string ip, string key, bool
         return false;
     else
         throw normal_except(CUniversal::Format("The config value in DB cannot convert to bool. doamin[%s],key[%s],value[%s]", domain, key, res));
+}
+
+string Sloong::CConfiguation::GetStringConfig(string domain, string key, string def)
+{
+    
 }
 
 string Sloong::CConfiguation::GetString(string domain, string ip, string key, string def)

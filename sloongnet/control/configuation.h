@@ -18,17 +18,17 @@ namespace Sloong
         bool LoadAll();
         bool SaveAll();
 
-        void LoadControlConfig();
+        void LoadControlConfig( string serverIp, MessageConfig::GLOBAL_CONFIG& config );
         void LoadProxyConfig( string serverIp, MessageConfig::PROXY_CONFIG& config );
-        void LoadProcessConfig();
-        void LoadDataConfig();
-        void LoadDBConfig();
+        void LoadProcessConfig( string serverIp, MessageConfig::PROCESS_CONFIG& config );
+        void LoadDataConfig( string serverIp, MessageConfig::DATA_CONFIG& config );
+        void LoadDBConfig( string serverIp, MessageConfig::DB_CONFIG& config );
 
-        void SaveControlConfig();
-        void SaveProxyConfig();
-        void SaveProcessConfig();
-        void SaveDataConfig();
-        void SaveDBConfig();
+        void SaveControlConfig(){}
+        void SaveProxyConfig(){}
+        void SaveProcessConfig(){}
+        void SaveDataConfig(){}
+        void SaveDBConfig(){}
 
         string GetStringConfig(string domain, string key, string def);
 

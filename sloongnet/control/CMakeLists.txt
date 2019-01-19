@@ -45,8 +45,8 @@ set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 
 #当前目录下所有源文件赋给SRC_LIST
 #AUX_SOURCE_DIRECTORY(. SRC_LIST) 
-file(GLOB_RECURSE COMM_SRC_LIST "../comm/*.cpp")
-file(GLOB_RECURSE SRC_LIST "*.cpp")
+file(GLOB_RECURSE COMM_SRC_LIST "../comm/*.c*")
+file(GLOB_RECURSE SRC_LIST "*.c*")
 list(APPEND SRC_LIST ${COMM_SRC_LIST})
 
 #生成可执行文件
@@ -67,3 +67,4 @@ target_link_libraries(${PROJECT_NAME} lua5.3)
 target_link_libraries(${PROJECT_NAME} glib-2.0)
 target_link_libraries(${PROJECT_NAME} univ)
 target_link_libraries(${PROJECT_NAME} sqlite3)
+target_link_libraries(${PROJECT_NAME} protobuf)
