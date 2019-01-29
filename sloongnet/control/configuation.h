@@ -12,7 +12,10 @@ namespace Sloong
 {
     class CConfiguation
     {
-        public:
+    public:
+        CConfiguation();
+
+
         bool Initialize( string tableName );
 
         bool LoadAll();
@@ -30,7 +33,7 @@ namespace Sloong
         void SaveDataConfig(){}
         void SaveDBConfig(){}
 
-        string GetStringConfig(string domain, string key, string def);
+        string GetStringConfig(string table_name, string domain, string key, string def);
 
     protected:
         void LoadGlobalConfig(string domain,string ip,  MessageConfig::GLOBAL_CONFIG* config);

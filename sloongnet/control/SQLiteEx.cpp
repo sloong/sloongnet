@@ -2,8 +2,6 @@
 #include "main.h"
 #include "SQLiteEx.h"
 
-string Sloong::CSQLiteEx::g_strResult = "";
-
 Sloong::CSQLiteEx::~CSQLiteEx()
 {
     sqlite3_close(m_pDB);
@@ -11,7 +9,8 @@ Sloong::CSQLiteEx::~CSQLiteEx()
 
 bool Sloong::CSQLiteEx::Initialize(string dbPath)
 {
-    auto rc = sqlite3_open(dbPath.c_str(), &m_pDB);
+    auto rc = sqlite3_open_v2(dbPath.c_str(), &m_pDB, 
+            SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE, NULL);
     if (rc == SQLITE_OK)
     {
         return true;
@@ -22,51 +21,36 @@ bool Sloong::CSQLiteEx::Initialize(string dbPath)
     }
 }
 
-bool Sloong::CSQLiteEx::Query(const string &strSQL, string &strResult, string &strError)
+bool Sloong::CSQLiteEx::Query(const string &strSQL, EasyResult dbResult, string &strError)
 {
-    char *zErrMsg = 0;
-    auto res = sqlite3_exec(m_pDB, strSQL.c_str(), &QueryCallBack, (void *)&m_oSync, &zErrMsg);
+    sqlite3_stmt *stmt = NULL;
+    auto res = sqlite3_prepare_v2(m_pDB, strSQL.c_str(), -1, &stmt, NULL);
     if (res != SQLITE_OK)
     {
-        strError = string(zErrMsg);
-        sqlite3_free(zErrMsg);
+        strError = string(sqlite3_errmsg(m_pDB));
         return false;
     }
 
-    m_oSync.wait();
-    strResult = g_strResult;
+    int nColumn = sqlite3_column_count(stmt);
+
+    for ( int i=0 ; i< nColumn; i++ )
+        dbResult->AppendColumn( sqlite3_column_name(stmt,i));
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        int index = dbResult->AppendLine();
+        for( int i = 0; i< nColumn; i++)
+        {
+            const char* data = (const char*)sqlite3_column_text(stmt, i);
+            auto name = sqlite3_column_name(stmt,i);
+            data = data == NULL ? "" : data;
+            dbResult->SetItemData( index, name, data);
+        }
+    }
+
+    sqlite3_finalize(stmt);
     return true;
 }
 
-int Sloong::CSQLiteEx::QueryCallBack(void *param, int argc, char **argv, char **azColName)
-{
-    CEasySync *pSync = static_cast<CEasySync *>(param);
-    int i;
-    for (i = 0; i < argc; i++)
-    {
-        printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-    }
-    printf("\n");
-    pSync->notify_one();
-    return 0;
-}
-
-string Sloong::CSQLiteEx::QueryEx(string table_name, string domain, string key)
-{
-    string res;
-    string error;
-    string sql = CUniversal::Format("select value from %s where domain=`%s` and key=`%s`",
-                                    table_name.c_str(), domain.c_str(), key.c_str());
-
-    if (Query(sql, res, error))
-    {
-        return res;
-    }
-    else
-    {
-        throw normal_except(error);
-    }
-}
 
 string Sloong::CSQLiteEx::GetErrorMessage()
 {

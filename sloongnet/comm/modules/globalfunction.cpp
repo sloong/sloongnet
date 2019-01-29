@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <boost/foreach.hpp>
 #include <mutex>
 // univ
 #include <univ/Base64.h>
@@ -442,7 +441,7 @@ int Sloong::CGlobalFunction::Lua_GetConfig(lua_State *l)
     string value("");
     try
     {
-        value = pConfig->GetStringConfig(section, key, def);
+        value = pConfig->GetStringConfig("config",section, key, def);
     }
     catch (normal_except &e)
     {

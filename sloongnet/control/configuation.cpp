@@ -1,5 +1,10 @@
 #include "configuation.h"
 
+Sloong::CConfiguation::CConfiguation()
+{
+    m_pDB = make_unique<CSQLiteEx>();
+}
+
 
 bool Sloong::CConfiguation::Initialize(string tableName)
 {
@@ -83,16 +88,35 @@ bool Sloong::CConfiguation::GetBoolen(string domain, string ip, string key, bool
         throw normal_except(CUniversal::Format("The config value in DB cannot convert to bool. doamin[%s],key[%s],value[%s]", domain, key, res));
 }
 
-string Sloong::CConfiguation::GetStringConfig(string domain, string key, string def)
+string Sloong::CConfiguation::GetStringConfig(string table_name, string domain, string key, string def)
 {
-    
+    EasyResult dbRes = make_shared<CDBResult>();
+    string error;
+    string sql = CUniversal::Format("SELECT `ip`,`value` FROM `%s` WHERE `domain`=\"%s\" and `key`=\"%s\"",
+                                    table_name.c_str(), domain.c_str(), key.c_str());
+
+    if (!m_pDB->Query(sql, dbRes, error))
+    {
+        // m_pLog->Error(error);
+        return def;
+    }
+    if( dbRes->GetLinesNum() == 1) 
+    {
+        return dbRes->GetData(0,"value");
+    }
+    // TODO: need support the ip config.
+    else
+    {
+        throw normal_except("No support function.");
+    }
+  
 }
 
 string Sloong::CConfiguation::GetString(string domain, string ip, string key, string def)
 {
     try
     {
-        string value = m_pDB->QueryEx(m_strTableName, domain, key);
+        string value = GetStringConfig(m_strTableName, domain, key,def);
         return value;
     }
     catch (normal_except e)

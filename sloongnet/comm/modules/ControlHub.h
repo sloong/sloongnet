@@ -11,6 +11,8 @@ namespace Sloong
 	public:
 		// Always return true
 		bool Initialize(int);
+
+		void Run();
 		void Exit();
 
         // Message

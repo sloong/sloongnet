@@ -3,6 +3,7 @@
 
 #include <sqlite3.h>
 #include "main.h"
+#include "DBResult.h"
 namespace Sloong
 {
     class CSQLiteEx
@@ -13,17 +14,10 @@ namespace Sloong
         bool Initialize( string dbPath );
         string GetErrorMessage();
 
-        bool Query(const string& strSQL, string& strResult, string& strError);
-
-        string QueryEx( string table_name, string domain, string key );
-        
+        bool Query(const string& strSQL, EasyResult strResult, string& strError);
+ 
     protected:
-        static int QueryCallBack(void *NotUsed, int argc, char **argv, char **azColName); 
-        static string g_strResult;  
-
-    protected:
-        sqlite3* m_pDB;
-        CEasySync m_oSync;
+        sqlite3* m_pDB = nullptr;
     };
 }
 

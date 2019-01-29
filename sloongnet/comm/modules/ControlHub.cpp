@@ -8,12 +8,18 @@ bool Sloong::CControlHub::Initialize(int quantity)
 {
 	CThreadPool::AddWorkThread(std::bind(&CControlHub::MessageWorkLoop, this, std::placeholders::_1), nullptr, quantity);
 	CThreadPool::Run();
+	Run();
     return true;
+}
+
+void Sloong::CControlHub::Run()
+{
+	m_emStatus = RUN_STATUS::Running;
 }
 
 void Sloong::CControlHub::Exit()
 {
-
+	m_emStatus = RUN_STATUS::Exit;
 }
 
 bool Sloong::CControlHub::Add(DATA_ITEM item, void * object)

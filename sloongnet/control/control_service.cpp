@@ -100,6 +100,9 @@ bool SloongNetService::Initialize(int argc, char **args)
 			return false;
 		}
 
+		m_pConfig->Initialize("system");
+		m_pConfig->LoadAll();
+
 		m_pLog->Initialize(m_pConfig->m_oControlConfig.logpath(), "", m_pConfig->m_oControlConfig.debugmode(), LOGLEVEL(m_pConfig->m_oControlConfig.loglevel()), LOGTYPE::DAY);
 		// if (config.m_oLogInfo.NetworkPort != 0)
 		// 	m_pLog->EnableNetworkLog(config.m_oLogInfo.NetworkPort);
@@ -110,9 +113,6 @@ bool SloongNetService::Initialize(int argc, char **args)
 
 		m_pControl->RegisterEvent(ProgramExit);
 		m_pControl->RegisterEvent(ProgramStart);
-		m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetService::OnReceivePackage, this, std::placeholders::_1));
-		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetService::OnSocketClose, this, std::placeholders::_1));
-
 		try
 		{
 			IData::Initialize(m_pControl.get());
@@ -123,6 +123,9 @@ bool SloongNetService::Initialize(int argc, char **args)
 			m_pLog->Error(string("Excepiton happened in initialize for ControlCenter. Message:") + string(e.what()));
 			return false;
 		}
+		m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetService::OnReceivePackage, this, std::placeholders::_1));
+		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetService::OnSocketClose, this, std::placeholders::_1));
+
 		return true;
 	}
 	catch (exception &e)
@@ -146,6 +149,7 @@ void SloongNetService::Run()
 {
 	m_pLog->Info("Application begin running.");
 	m_pControl->SendMessage(MSG_TYPE::ProgramStart);
+	m_oSync.wait();
 }
 
 void Sloong::SloongNetService::OnReceivePackage(SmartEvent evt)
@@ -194,4 +198,5 @@ void Sloong::SloongNetService::Exit()
 	m_pLog->Info("Application will exit.");
 	m_pControl->SendMessage(MSG_TYPE::ProgramExit);
 	m_pControl->Exit();
+	m_oSync.notify_one();
 }

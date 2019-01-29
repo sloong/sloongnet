@@ -5,14 +5,12 @@
     "version": "0.2.0", 
     "configurations": [        
         {
-            "name": "(gdb) Launch",
+            "name": "Control Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/debug/sloongnet",
+            "program": "${workspaceFolder}/build/debug/sloongnet_control/sloongnet_control",
             "args": [
-                    "-r",
-                    "default.conf",
-                    "/home/dev/projects/walls-service/ex-develop.conf"
+                    "8002"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -21,7 +19,7 @@
             "MIMode": "gdb",
         },
        {
-            "name": "Launch Control",
+            "name": "Proxy Launch",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/debug/sloongnet_control",

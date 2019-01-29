@@ -28,6 +28,7 @@ namespace Sloong
 		unique_ptr<CConfiguation>	m_pConfig;
 		
 		unique_ptr<CLog>	m_pLog;
+		CEasySync			m_oSync;
 	};
 
 }
