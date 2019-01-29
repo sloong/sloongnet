@@ -5,7 +5,6 @@
 namespace Sloong
 {
     class CUtility;
-    class CSQLiteEx;
     class CGlobalFunction : IObject
     {
     public:
@@ -26,7 +25,6 @@ namespace Sloong
         
     protected:
         CUtility * m_pUtility;
-        unique_ptr<CSQLiteEx>	m_pDB;
         int 		m_ListenSock;
         bool		m_bIsRunning=true;
     public:

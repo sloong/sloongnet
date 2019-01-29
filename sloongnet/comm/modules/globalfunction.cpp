@@ -9,10 +9,9 @@
 
 #include "utility.h"
 #include "version.h"
-#include "configuation.h"
 #include "epollex.h"
 #include "NormalEvent.h"
-#include "configuation.h"
+#include "config.pb.h"
 #include "IData.h"
 
 using namespace std;
@@ -89,10 +88,10 @@ void Sloong::CGlobalFunction::Initialize(IControl *iMsg)
 {
     IObject::Initialize(iMsg);
 
-    CConfiguation *pConfig = IData::GetServerConfig();
-    if (pConfig->m_oDataConfig.datareceiveport()>0)
+    MessageConfig::DATA_CONFIG *pConfig = IData::GetDataConfig();
+    if (pConfig->datareceiveport()>0)
     {
-        EnableDataReceive(pConfig->m_oDataConfig.datareceiveport());
+        EnableDataReceive(pConfig->datareceiveport());
     }
 }
 
@@ -138,7 +137,7 @@ void *Sloong::CGlobalFunction::RecvDataConnFunc(void *pParam)
 {
     CGlobalFunction *pThis = (CGlobalFunction *)pParam;
     CLog *pLog = pThis->m_pLog;
-    CConfiguation *pConfig = TYPE_TRANS<CConfiguation *>(pThis->m_iC->Get(DATA_ITEM::Configuation));
+    auto *pConfig = IData::GetDataConfig();
     while (pThis->m_bIsRunning)
     {
         int conn_sock = -1;
@@ -150,7 +149,7 @@ void *Sloong::CGlobalFunction::RecvDataConnFunc(void *pParam)
             memset(pCheckBuf, 0, g_uuid_len + 1);
             // In Check function, client need send the check key in 3 second.
             // 这里仍然使用Universal提供的ReceEx。这里不需要进行SSL接收
-            int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, g_uuid_len, pConfig->m_oDataConfig.datarecvtime());
+            int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, g_uuid_len, pConfig->datarecvtime());
             // Check uuid length
             if (nLen != g_uuid_len)
             {
@@ -181,7 +180,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
     CLog *pLog = pThis->m_pLog;
     int *pSock = (int *)pParam;
     int conn_sock = *pSock;
-    CConfiguation *pConfig = TYPE_TRANS<CConfiguation *>(pThis->m_iC->Get(DATA_ITEM::Configuation));
+    auto *pConfig = IData::GetDataConfig();
     SAFE_DELETE(pSock);
     // Find the recv uuid.
 
@@ -208,7 +207,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
         {
             char *pLongBuffer = new char[g_data_pack_len + 1](); //dataLeng;
             memset(pLongBuffer, 0, g_data_pack_len + 1);
-            int nRecvSize = CUniversal::RecvEx(conn_sock, pLongBuffer, g_data_pack_len, pConfig->m_oDataConfig.datarecvtime());
+            int nRecvSize = CUniversal::RecvEx(conn_sock, pLongBuffer, g_data_pack_len, pConfig->datarecvtime());
             if (nRecvSize <= 0)
             {
                 // 读取错误,将这个连接从监听中移除并关闭连接
@@ -229,7 +228,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
 
                 char *szMD5 = new char[g_md5_len + 1];
                 memset(szMD5, 0, g_md5_len + 1);
-                nRecvSize = CUniversal::RecvEx(conn_sock, szMD5, g_md5_len, pConfig->m_oDataConfig.serverconfig().receivetime(), true);
+                nRecvSize = CUniversal::RecvEx(conn_sock, szMD5, g_md5_len, pConfig->serverconfig().receivetime(), true);
                 if (nRecvSize <= 0)
                 {
                     pLog->Error("Receive data package md5 error.");
@@ -261,7 +260,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
                     int nOnceRecvLen = 10240;
                     if (dtlen - nRecvdLen < 10240)
                         nOnceRecvLen = dtlen - nRecvdLen;
-                    nRecvSize = CUniversal::RecvEx(conn_sock, pData, nOnceRecvLen, pConfig->m_oDataConfig.serverconfig().receivetime(), true);
+                    nRecvSize = CUniversal::RecvEx(conn_sock, pData, nOnceRecvLen, pConfig->serverconfig().receivetime(), true);
                     if (nRecvSize < 0)
                     {
                         pLog->Error("Receive data error.");
@@ -441,7 +440,8 @@ int Sloong::CGlobalFunction::Lua_GetConfig(lua_State *l)
     string value("");
     try
     {
-        value = pConfig->GetStringConfig("config",section, key, def);
+        value = "NO SUPPORT";
+        //value = pConfig->GetStringConfig("config",section, key, def);
     }
     catch (normal_except &e)
     {
