@@ -15,7 +15,7 @@ namespace Sloong
 		~SloongNetProxy();
 
 		bool Initialize(int argc, char** args);
-
+		bool ConnectToControl(string controlAddress);
 		void Run();
 		void Exit();
 
@@ -24,7 +24,7 @@ namespace Sloong
 	protected:
 		unique_ptr<CNetworkHub> m_pNetwork;
 		unique_ptr<CControlHub> m_pControl;
-		
+		unique_ptr<CSocketEx>	m_pSocket;
 		unique_ptr<CLog>	m_pLog;
 	};
 

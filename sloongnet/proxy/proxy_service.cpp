@@ -6,6 +6,9 @@
 #include "utility.h"
 #include "NetworkEvent.h"
 #include "DataTransPackage.h"
+#include "SocketEx.h"
+#include "MessageTypeDef.h"
+using namespace Sloong;
 using namespace Sloong::Events;
 
 IControl *Sloong::IData::m_iC = nullptr;
@@ -80,32 +83,25 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 			return false;
 		}
 
-		auto params = CUniversal::split(string(args[1]), ":");
-
-		int client_sockfd;
-		int len;
-		struct sockaddr_in remote_addr;
-		memset(&remote_addr, 0, sizeof(remote_addr));
-		remote_addr.sin_family = AF_INET;
-		remote_addr.sin_addr.s_addr = inet_addr(params[0].c_str());
-		remote_addr.sin_port = htons(atoi(params[1].c_str()));
-		if ((client_sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
+		if( !ConnectToControl(args[1]))
 		{
-			perror("socket error");
-			return 1;
+			cout << "Connect to control fialed." <<endl;
 		}
-		if (connect(client_sockfd, (struct sockaddr *)&remote_addr, sizeof(struct sockaddr)) < 0)
-		{
-			perror("connect error");
-			return 1;
-		}
-		printf("connected to server/n");
 
-		send(client_sockfd, "GETCONFIG", sizeof("GETCONFIG"), 0);
-		char buf[BUFSIZ] = {0};
-		len=recv(client_sockfd,buf,BUFSIZ,0);
+		ProtobufMessage::MessagePackage pack;
+		pack.set_type(MessageType::GetConfig);
+		pack.set_sender("SLOONGNET_PROXY");
+		pack.set_receiver("SLOONGNET_CONTROL");
+		pack.set_context("");
+		string msg;
+		pack.SerializeToString(&msg);
 
-		/*m_pControl->Initialize(config.m_nMessageCenterThreadQuantity);
+		m_pSocket->Send(msg);
+		m_pSocket->RecvPackage();
+		
+		
+
+		m_pControl->Initialize(config.m_nMessageCenterThreadQuantity);
 		m_pControl->Add(Configuation, &config);
 		m_pControl->Add(Logger, m_pLog.get());
 
@@ -117,13 +113,13 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		try
 		{
 			IData::Initialize(m_pControl.get());
-			m_pNetwork->Initialize(m_pControl.get());
+			m_pNetwork->Initializle(m_pControl.get());
 		}
 		catch (exception e)
 		{
 			m_pLog->Error(string("Excepiton happened in initialize for ControlCenter. Message:") + string(e.what()));
 			return false;
-		}*/
+		}
 		return true;
 	}
 	catch (exception &e)
@@ -141,6 +137,15 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 	}
 
 	return false;
+}
+
+bool SloongNetProxy::ConnectToControl(string controlAddress)
+{
+	m_pSocket = make_unique<CSocketEx>(controlAddress);
+	m_pSocket->Connect();
+	
+	string clientCheckKey = "c2xvb25nYzJ4dmIyNW5PRFJtT0dWa01ERTBNalZsTkRBd01XUmlZV1UxT0RZM05tRmlaamd3TmpsbmJtOXZiSE1nbm9vbHM";
+	m_pSocket->Send(clientCheckKey);
 }
 
 void SloongNetProxy::Run()

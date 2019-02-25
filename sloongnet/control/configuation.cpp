@@ -47,7 +47,7 @@ void Sloong::CConfiguation::LoadGlobalConfig(string domain, string ip, GLOBAL_CO
 }
 
 
-void Sloong::CConfiguation::LoadControlConfig( string serverIp, MessageConfig::GLOBAL_CONFIG& config )
+void Sloong::CConfiguation::LoadControlConfig( string serverIp, ProtobufMessage::GLOBAL_CONFIG& config )
 {
     LoadGlobalConfig("control", serverIp, &config);
 }
@@ -61,18 +61,18 @@ void Sloong::CConfiguation::LoadProxyConfig(string serverIp, PROXY_CONFIG &confi
 }
 
 
-void Sloong::CConfiguation::LoadProcessConfig( string serverIp, MessageConfig::PROCESS_CONFIG& config )
+void Sloong::CConfiguation::LoadProcessConfig( string serverIp, ProtobufMessage::PROCESS_CONFIG& config )
 {
     //config.set_luaentryfile()
 }
 
 
-void Sloong::CConfiguation::LoadDataConfig( string serverIp, MessageConfig::DATA_CONFIG& config )
+void Sloong::CConfiguation::LoadDataConfig( string serverIp, ProtobufMessage::DATA_CONFIG& config )
 {
 
 }
 
-void Sloong::CConfiguation::LoadDBConfig( string serverIp, MessageConfig::DB_CONFIG& config )
+void Sloong::CConfiguation::LoadDBConfig( string serverIp, ProtobufMessage::DB_CONFIG& config )
 {
 
 }

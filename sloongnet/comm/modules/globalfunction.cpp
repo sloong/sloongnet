@@ -11,7 +11,7 @@
 #include "version.h"
 #include "epollex.h"
 #include "NormalEvent.h"
-#include "config.pb.h"
+#include "MessageTypeDef.h"
 #include "IData.h"
 
 using namespace std;
@@ -88,7 +88,7 @@ void Sloong::CGlobalFunction::Initialize(IControl *iMsg)
 {
     IObject::Initialize(iMsg);
 
-    MessageConfig::DATA_CONFIG *pConfig = IData::GetDataConfig();
+    ProtobufMessage::DATA_CONFIG *pConfig = IData::GetDataConfig();
     if (pConfig->datareceiveport()>0)
     {
         EnableDataReceive(pConfig->datareceiveport());
@@ -436,7 +436,8 @@ int Sloong::CGlobalFunction::Lua_GetConfig(lua_State *l)
     string section = CLua::GetString(l, 1);
     string key = CLua::GetString(l, 2);
     string def = CLua::GetString(l, 3);
-    CConfiguation *pConfig = TYPE_TRANS<CConfiguation *>(g_pThis->m_iC->Get(DATA_ITEM::Configuation));
+    // TODO: change to send message mode.
+    //CConfiguation *pConfig = TYPE_TRANS<CConfiguation *>(g_pThis->m_iC->Get(DATA_ITEM::Configuation));
     string value("");
     try
     {

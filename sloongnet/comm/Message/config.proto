@@ -1,6 +1,16 @@
 syntax = "proto3";
-package MessageConfig;
+package ProtobufMessage;
 
+message MessagePackage
+{
+    int32 Function = 1;
+    int32 SerailNumber = 2;
+    string CheckString = 3;
+    string Sender = 4;
+    string Receiver = 5;
+    string Context = 6;
+    bytes ExtendData = 7;
+}
 
 message GLOBAL_CONFIG
 {

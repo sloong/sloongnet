@@ -38,14 +38,14 @@ namespace protobuf_config_2eproto {
 struct TableStruct {
   static const ::google::protobuf::internal::ParseTableField entries[];
   static const ::google::protobuf::internal::AuxillaryParseTableField aux[];
-  static const ::google::protobuf::internal::ParseTable schema[5];
+  static const ::google::protobuf::internal::ParseTable schema[6];
   static const ::google::protobuf::internal::FieldMetadata field_metadata[];
   static const ::google::protobuf::internal::SerializationTable serialization_table[];
   static const ::google::protobuf::uint32 offsets[];
 };
 void AddDescriptors();
 }  // namespace protobuf_config_2eproto
-namespace MessageConfig {
+namespace ProtobufMessage {
 class DATA_CONFIG;
 class DATA_CONFIGDefaultTypeInternal;
 extern DATA_CONFIGDefaultTypeInternal _DATA_CONFIG_default_instance_;
@@ -55,27 +55,179 @@ extern DB_CONFIGDefaultTypeInternal _DB_CONFIG_default_instance_;
 class GLOBAL_CONFIG;
 class GLOBAL_CONFIGDefaultTypeInternal;
 extern GLOBAL_CONFIGDefaultTypeInternal _GLOBAL_CONFIG_default_instance_;
+class MessagePackage;
+class MessagePackageDefaultTypeInternal;
+extern MessagePackageDefaultTypeInternal _MessagePackage_default_instance_;
 class PROCESS_CONFIG;
 class PROCESS_CONFIGDefaultTypeInternal;
 extern PROCESS_CONFIGDefaultTypeInternal _PROCESS_CONFIG_default_instance_;
 class PROXY_CONFIG;
 class PROXY_CONFIGDefaultTypeInternal;
 extern PROXY_CONFIGDefaultTypeInternal _PROXY_CONFIG_default_instance_;
-}  // namespace MessageConfig
+}  // namespace ProtobufMessage
 namespace google {
 namespace protobuf {
-template<> ::MessageConfig::DATA_CONFIG* Arena::CreateMaybeMessage<::MessageConfig::DATA_CONFIG>(Arena*);
-template<> ::MessageConfig::DB_CONFIG* Arena::CreateMaybeMessage<::MessageConfig::DB_CONFIG>(Arena*);
-template<> ::MessageConfig::GLOBAL_CONFIG* Arena::CreateMaybeMessage<::MessageConfig::GLOBAL_CONFIG>(Arena*);
-template<> ::MessageConfig::PROCESS_CONFIG* Arena::CreateMaybeMessage<::MessageConfig::PROCESS_CONFIG>(Arena*);
-template<> ::MessageConfig::PROXY_CONFIG* Arena::CreateMaybeMessage<::MessageConfig::PROXY_CONFIG>(Arena*);
+template<> ::ProtobufMessage::DATA_CONFIG* Arena::CreateMaybeMessage<::ProtobufMessage::DATA_CONFIG>(Arena*);
+template<> ::ProtobufMessage::DB_CONFIG* Arena::CreateMaybeMessage<::ProtobufMessage::DB_CONFIG>(Arena*);
+template<> ::ProtobufMessage::GLOBAL_CONFIG* Arena::CreateMaybeMessage<::ProtobufMessage::GLOBAL_CONFIG>(Arena*);
+template<> ::ProtobufMessage::MessagePackage* Arena::CreateMaybeMessage<::ProtobufMessage::MessagePackage>(Arena*);
+template<> ::ProtobufMessage::PROCESS_CONFIG* Arena::CreateMaybeMessage<::ProtobufMessage::PROCESS_CONFIG>(Arena*);
+template<> ::ProtobufMessage::PROXY_CONFIG* Arena::CreateMaybeMessage<::ProtobufMessage::PROXY_CONFIG>(Arena*);
 }  // namespace protobuf
 }  // namespace google
-namespace MessageConfig {
+namespace ProtobufMessage {
 
 // ===================================================================
 
-class GLOBAL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:MessageConfig.GLOBAL_CONFIG) */ {
+class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:ProtobufMessage.MessagePackage) */ {
+ public:
+  MessagePackage();
+  virtual ~MessagePackage();
+
+  MessagePackage(const MessagePackage& from);
+
+  inline MessagePackage& operator=(const MessagePackage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  #if LANG_CXX11
+  MessagePackage(MessagePackage&& from) noexcept
+    : MessagePackage() {
+    *this = ::std::move(from);
+  }
+
+  inline MessagePackage& operator=(MessagePackage&& from) noexcept {
+    if (GetArenaNoVirtual() == from.GetArenaNoVirtual()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+  #endif
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MessagePackage& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const MessagePackage* internal_default_instance() {
+    return reinterpret_cast<const MessagePackage*>(
+               &_MessagePackage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    0;
+
+  void Swap(MessagePackage* other);
+  friend void swap(MessagePackage& a, MessagePackage& b) {
+    a.Swap(&b);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline MessagePackage* New() const final {
+    return CreateMaybeMessage<MessagePackage>(NULL);
+  }
+
+  MessagePackage* New(::google::protobuf::Arena* arena) const final {
+    return CreateMaybeMessage<MessagePackage>(arena);
+  }
+  void CopyFrom(const ::google::protobuf::Message& from) final;
+  void MergeFrom(const ::google::protobuf::Message& from) final;
+  void CopyFrom(const MessagePackage& from);
+  void MergeFrom(const MessagePackage& from);
+  void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input) final;
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const final;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* target) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(MessagePackage* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return NULL;
+  }
+  inline void* MaybeArenaPtr() const {
+    return NULL;
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // string Sender = 2;
+  void clear_sender();
+  static const int kSenderFieldNumber = 2;
+  const ::std::string& sender() const;
+  void set_sender(const ::std::string& value);
+  #if LANG_CXX11
+  void set_sender(::std::string&& value);
+  #endif
+  void set_sender(const char* value);
+  void set_sender(const char* value, size_t size);
+  ::std::string* mutable_sender();
+  ::std::string* release_sender();
+  void set_allocated_sender(::std::string* sender);
+
+  // string Receiver = 3;
+  void clear_receiver();
+  static const int kReceiverFieldNumber = 3;
+  const ::std::string& receiver() const;
+  void set_receiver(const ::std::string& value);
+  #if LANG_CXX11
+  void set_receiver(::std::string&& value);
+  #endif
+  void set_receiver(const char* value);
+  void set_receiver(const char* value, size_t size);
+  ::std::string* mutable_receiver();
+  ::std::string* release_receiver();
+  void set_allocated_receiver(::std::string* receiver);
+
+  // string Context = 4;
+  void clear_context();
+  static const int kContextFieldNumber = 4;
+  const ::std::string& context() const;
+  void set_context(const ::std::string& value);
+  #if LANG_CXX11
+  void set_context(::std::string&& value);
+  #endif
+  void set_context(const char* value);
+  void set_context(const char* value, size_t size);
+  ::std::string* mutable_context();
+  ::std::string* release_context();
+  void set_allocated_context(::std::string* context);
+
+  // int32 Type = 1;
+  void clear_type();
+  static const int kTypeFieldNumber = 1;
+  ::google::protobuf::int32 type() const;
+  void set_type(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:ProtobufMessage.MessagePackage)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  ::google::protobuf::internal::ArenaStringPtr sender_;
+  ::google::protobuf::internal::ArenaStringPtr receiver_;
+  ::google::protobuf::internal::ArenaStringPtr context_;
+  ::google::protobuf::int32 type_;
+  mutable ::google::protobuf::internal::CachedSize _cached_size_;
+  friend struct ::protobuf_config_2eproto::TableStruct;
+};
+// -------------------------------------------------------------------
+
+class GLOBAL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:ProtobufMessage.GLOBAL_CONFIG) */ {
  public:
   GLOBAL_CONFIG();
   virtual ~GLOBAL_CONFIG();
@@ -110,7 +262,7 @@ class GLOBAL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_p
                &_GLOBAL_CONFIG_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    0;
+    1;
 
   void Swap(GLOBAL_CONFIG* other);
   friend void swap(GLOBAL_CONFIG& a, GLOBAL_CONFIG& b) {
@@ -266,7 +418,7 @@ class GLOBAL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_p
   ::google::protobuf::int32 epollthreadquantity() const;
   void set_epollthreadquantity(::google::protobuf::int32 value);
 
-  // @@protoc_insertion_point(class_scope:MessageConfig.GLOBAL_CONFIG)
+  // @@protoc_insertion_point(class_scope:ProtobufMessage.GLOBAL_CONFIG)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -287,7 +439,7 @@ class GLOBAL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_p
 };
 // -------------------------------------------------------------------
 
-class DB_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:MessageConfig.DB_CONFIG) */ {
+class DB_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:ProtobufMessage.DB_CONFIG) */ {
  public:
   DB_CONFIG();
   virtual ~DB_CONFIG();
@@ -322,7 +474,7 @@ class DB_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point
                &_DB_CONFIG_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    1;
+    2;
 
   void Swap(DB_CONFIG* other);
   friend void swap(DB_CONFIG& a, DB_CONFIG& b) {
@@ -430,17 +582,17 @@ class DB_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point
   ::std::string* release_database();
   void set_allocated_database(::std::string* database);
 
-  // .MessageConfig.GLOBAL_CONFIG ServerConfig = 6;
+  // .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 6;
   bool has_serverconfig() const;
   void clear_serverconfig();
   static const int kServerConfigFieldNumber = 6;
   private:
-  const ::MessageConfig::GLOBAL_CONFIG& _internal_serverconfig() const;
+  const ::ProtobufMessage::GLOBAL_CONFIG& _internal_serverconfig() const;
   public:
-  const ::MessageConfig::GLOBAL_CONFIG& serverconfig() const;
-  ::MessageConfig::GLOBAL_CONFIG* release_serverconfig();
-  ::MessageConfig::GLOBAL_CONFIG* mutable_serverconfig();
-  void set_allocated_serverconfig(::MessageConfig::GLOBAL_CONFIG* serverconfig);
+  const ::ProtobufMessage::GLOBAL_CONFIG& serverconfig() const;
+  ::ProtobufMessage::GLOBAL_CONFIG* release_serverconfig();
+  ::ProtobufMessage::GLOBAL_CONFIG* mutable_serverconfig();
+  void set_allocated_serverconfig(::ProtobufMessage::GLOBAL_CONFIG* serverconfig);
 
   // int32 ServerPort = 2;
   void clear_serverport();
@@ -448,7 +600,7 @@ class DB_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point
   ::google::protobuf::int32 serverport() const;
   void set_serverport(::google::protobuf::int32 value);
 
-  // @@protoc_insertion_point(class_scope:MessageConfig.DB_CONFIG)
+  // @@protoc_insertion_point(class_scope:ProtobufMessage.DB_CONFIG)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -456,14 +608,14 @@ class DB_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point
   ::google::protobuf::internal::ArenaStringPtr user_;
   ::google::protobuf::internal::ArenaStringPtr passwd_;
   ::google::protobuf::internal::ArenaStringPtr database_;
-  ::MessageConfig::GLOBAL_CONFIG* serverconfig_;
+  ::ProtobufMessage::GLOBAL_CONFIG* serverconfig_;
   ::google::protobuf::int32 serverport_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
   friend struct ::protobuf_config_2eproto::TableStruct;
 };
 // -------------------------------------------------------------------
 
-class DATA_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:MessageConfig.DATA_CONFIG) */ {
+class DATA_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:ProtobufMessage.DATA_CONFIG) */ {
  public:
   DATA_CONFIG();
   virtual ~DATA_CONFIG();
@@ -498,7 +650,7 @@ class DATA_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_poi
                &_DATA_CONFIG_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    3;
 
   void Swap(DATA_CONFIG* other);
   friend void swap(DATA_CONFIG& a, DATA_CONFIG& b) {
@@ -550,17 +702,17 @@ class DATA_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_poi
 
   // accessors -------------------------------------------------------
 
-  // .MessageConfig.GLOBAL_CONFIG ServerConfig = 3;
+  // .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 3;
   bool has_serverconfig() const;
   void clear_serverconfig();
   static const int kServerConfigFieldNumber = 3;
   private:
-  const ::MessageConfig::GLOBAL_CONFIG& _internal_serverconfig() const;
+  const ::ProtobufMessage::GLOBAL_CONFIG& _internal_serverconfig() const;
   public:
-  const ::MessageConfig::GLOBAL_CONFIG& serverconfig() const;
-  ::MessageConfig::GLOBAL_CONFIG* release_serverconfig();
-  ::MessageConfig::GLOBAL_CONFIG* mutable_serverconfig();
-  void set_allocated_serverconfig(::MessageConfig::GLOBAL_CONFIG* serverconfig);
+  const ::ProtobufMessage::GLOBAL_CONFIG& serverconfig() const;
+  ::ProtobufMessage::GLOBAL_CONFIG* release_serverconfig();
+  ::ProtobufMessage::GLOBAL_CONFIG* mutable_serverconfig();
+  void set_allocated_serverconfig(::ProtobufMessage::GLOBAL_CONFIG* serverconfig);
 
   // int32 DataReceivePort = 1;
   void clear_datareceiveport();
@@ -574,11 +726,11 @@ class DATA_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_poi
   ::google::protobuf::int32 datarecvtime() const;
   void set_datarecvtime(::google::protobuf::int32 value);
 
-  // @@protoc_insertion_point(class_scope:MessageConfig.DATA_CONFIG)
+  // @@protoc_insertion_point(class_scope:ProtobufMessage.DATA_CONFIG)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
-  ::MessageConfig::GLOBAL_CONFIG* serverconfig_;
+  ::ProtobufMessage::GLOBAL_CONFIG* serverconfig_;
   ::google::protobuf::int32 datareceiveport_;
   ::google::protobuf::int32 datarecvtime_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
@@ -586,7 +738,7 @@ class DATA_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_poi
 };
 // -------------------------------------------------------------------
 
-class PROXY_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:MessageConfig.PROXY_CONFIG) */ {
+class PROXY_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:ProtobufMessage.PROXY_CONFIG) */ {
  public:
   PROXY_CONFIG();
   virtual ~PROXY_CONFIG();
@@ -621,7 +773,7 @@ class PROXY_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_po
                &_PROXY_CONFIG_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    4;
 
   void Swap(PROXY_CONFIG* other);
   friend void swap(PROXY_CONFIG& a, PROXY_CONFIG& b) {
@@ -687,17 +839,17 @@ class PROXY_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_po
   ::std::string* release_clientcheckkey();
   void set_allocated_clientcheckkey(::std::string* clientcheckkey);
 
-  // .MessageConfig.GLOBAL_CONFIG ServerConfig = 4;
+  // .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 4;
   bool has_serverconfig() const;
   void clear_serverconfig();
   static const int kServerConfigFieldNumber = 4;
   private:
-  const ::MessageConfig::GLOBAL_CONFIG& _internal_serverconfig() const;
+  const ::ProtobufMessage::GLOBAL_CONFIG& _internal_serverconfig() const;
   public:
-  const ::MessageConfig::GLOBAL_CONFIG& serverconfig() const;
-  ::MessageConfig::GLOBAL_CONFIG* release_serverconfig();
-  ::MessageConfig::GLOBAL_CONFIG* mutable_serverconfig();
-  void set_allocated_serverconfig(::MessageConfig::GLOBAL_CONFIG* serverconfig);
+  const ::ProtobufMessage::GLOBAL_CONFIG& serverconfig() const;
+  ::ProtobufMessage::GLOBAL_CONFIG* release_serverconfig();
+  ::ProtobufMessage::GLOBAL_CONFIG* mutable_serverconfig();
+  void set_allocated_serverconfig(::ProtobufMessage::GLOBAL_CONFIG* serverconfig);
 
   // int32 ClientCheckTime = 1;
   void clear_clientchecktime();
@@ -711,12 +863,12 @@ class PROXY_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_po
   ::google::protobuf::int32 timeoutcheckinterval() const;
   void set_timeoutcheckinterval(::google::protobuf::int32 value);
 
-  // @@protoc_insertion_point(class_scope:MessageConfig.PROXY_CONFIG)
+  // @@protoc_insertion_point(class_scope:ProtobufMessage.PROXY_CONFIG)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::internal::ArenaStringPtr clientcheckkey_;
-  ::MessageConfig::GLOBAL_CONFIG* serverconfig_;
+  ::ProtobufMessage::GLOBAL_CONFIG* serverconfig_;
   ::google::protobuf::int32 clientchecktime_;
   ::google::protobuf::int32 timeoutcheckinterval_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
@@ -724,7 +876,7 @@ class PROXY_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_po
 };
 // -------------------------------------------------------------------
 
-class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:MessageConfig.PROCESS_CONFIG) */ {
+class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:ProtobufMessage.PROCESS_CONFIG) */ {
  public:
   PROCESS_CONFIG();
   virtual ~PROCESS_CONFIG();
@@ -759,7 +911,7 @@ class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
                &_PROCESS_CONFIG_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    5;
 
   void Swap(PROCESS_CONFIG* other);
   friend void swap(PROCESS_CONFIG& a, PROCESS_CONFIG& b) {
@@ -895,19 +1047,19 @@ class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
   ::std::string* release_luasocketclosefunction();
   void set_allocated_luasocketclosefunction(::std::string* luasocketclosefunction);
 
-  // .MessageConfig.GLOBAL_CONFIG ServerConfig = 7;
+  // .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 7;
   bool has_serverconfig() const;
   void clear_serverconfig();
   static const int kServerConfigFieldNumber = 7;
   private:
-  const ::MessageConfig::GLOBAL_CONFIG& _internal_serverconfig() const;
+  const ::ProtobufMessage::GLOBAL_CONFIG& _internal_serverconfig() const;
   public:
-  const ::MessageConfig::GLOBAL_CONFIG& serverconfig() const;
-  ::MessageConfig::GLOBAL_CONFIG* release_serverconfig();
-  ::MessageConfig::GLOBAL_CONFIG* mutable_serverconfig();
-  void set_allocated_serverconfig(::MessageConfig::GLOBAL_CONFIG* serverconfig);
+  const ::ProtobufMessage::GLOBAL_CONFIG& serverconfig() const;
+  ::ProtobufMessage::GLOBAL_CONFIG* release_serverconfig();
+  ::ProtobufMessage::GLOBAL_CONFIG* mutable_serverconfig();
+  void set_allocated_serverconfig(::ProtobufMessage::GLOBAL_CONFIG* serverconfig);
 
-  // @@protoc_insertion_point(class_scope:MessageConfig.PROCESS_CONFIG)
+  // @@protoc_insertion_point(class_scope:ProtobufMessage.PROCESS_CONFIG)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -917,7 +1069,7 @@ class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::internal::ArenaStringPtr luaentryfunction_;
   ::google::protobuf::internal::ArenaStringPtr luaprocessfunction_;
   ::google::protobuf::internal::ArenaStringPtr luasocketclosefunction_;
-  ::MessageConfig::GLOBAL_CONFIG* serverconfig_;
+  ::ProtobufMessage::GLOBAL_CONFIG* serverconfig_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
   friend struct ::protobuf_config_2eproto::TableStruct;
 };
@@ -930,6 +1082,183 @@ class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
+// MessagePackage
+
+// int32 Type = 1;
+inline void MessagePackage::clear_type() {
+  type_ = 0;
+}
+inline ::google::protobuf::int32 MessagePackage::type() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.MessagePackage.Type)
+  return type_;
+}
+inline void MessagePackage::set_type(::google::protobuf::int32 value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.Type)
+}
+
+// string Sender = 2;
+inline void MessagePackage::clear_sender() {
+  sender_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& MessagePackage::sender() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.MessagePackage.Sender)
+  return sender_.GetNoArena();
+}
+inline void MessagePackage::set_sender(const ::std::string& value) {
+  
+  sender_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.Sender)
+}
+#if LANG_CXX11
+inline void MessagePackage::set_sender(::std::string&& value) {
+  
+  sender_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.MessagePackage.Sender)
+}
+#endif
+inline void MessagePackage::set_sender(const char* value) {
+  GOOGLE_DCHECK(value != NULL);
+  
+  sender_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.MessagePackage.Sender)
+}
+inline void MessagePackage::set_sender(const char* value, size_t size) {
+  
+  sender_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.MessagePackage.Sender)
+}
+inline ::std::string* MessagePackage::mutable_sender() {
+  
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.MessagePackage.Sender)
+  return sender_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* MessagePackage::release_sender() {
+  // @@protoc_insertion_point(field_release:ProtobufMessage.MessagePackage.Sender)
+  
+  return sender_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void MessagePackage::set_allocated_sender(::std::string* sender) {
+  if (sender != NULL) {
+    
+  } else {
+    
+  }
+  sender_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), sender);
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.MessagePackage.Sender)
+}
+
+// string Receiver = 3;
+inline void MessagePackage::clear_receiver() {
+  receiver_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& MessagePackage::receiver() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.MessagePackage.Receiver)
+  return receiver_.GetNoArena();
+}
+inline void MessagePackage::set_receiver(const ::std::string& value) {
+  
+  receiver_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.Receiver)
+}
+#if LANG_CXX11
+inline void MessagePackage::set_receiver(::std::string&& value) {
+  
+  receiver_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.MessagePackage.Receiver)
+}
+#endif
+inline void MessagePackage::set_receiver(const char* value) {
+  GOOGLE_DCHECK(value != NULL);
+  
+  receiver_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.MessagePackage.Receiver)
+}
+inline void MessagePackage::set_receiver(const char* value, size_t size) {
+  
+  receiver_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.MessagePackage.Receiver)
+}
+inline ::std::string* MessagePackage::mutable_receiver() {
+  
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.MessagePackage.Receiver)
+  return receiver_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* MessagePackage::release_receiver() {
+  // @@protoc_insertion_point(field_release:ProtobufMessage.MessagePackage.Receiver)
+  
+  return receiver_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void MessagePackage::set_allocated_receiver(::std::string* receiver) {
+  if (receiver != NULL) {
+    
+  } else {
+    
+  }
+  receiver_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), receiver);
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.MessagePackage.Receiver)
+}
+
+// string Context = 4;
+inline void MessagePackage::clear_context() {
+  context_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& MessagePackage::context() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.MessagePackage.Context)
+  return context_.GetNoArena();
+}
+inline void MessagePackage::set_context(const ::std::string& value) {
+  
+  context_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.Context)
+}
+#if LANG_CXX11
+inline void MessagePackage::set_context(::std::string&& value) {
+  
+  context_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.MessagePackage.Context)
+}
+#endif
+inline void MessagePackage::set_context(const char* value) {
+  GOOGLE_DCHECK(value != NULL);
+  
+  context_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.MessagePackage.Context)
+}
+inline void MessagePackage::set_context(const char* value, size_t size) {
+  
+  context_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.MessagePackage.Context)
+}
+inline ::std::string* MessagePackage::mutable_context() {
+  
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.MessagePackage.Context)
+  return context_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* MessagePackage::release_context() {
+  // @@protoc_insertion_point(field_release:ProtobufMessage.MessagePackage.Context)
+  
+  return context_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void MessagePackage::set_allocated_context(::std::string* context) {
+  if (context != NULL) {
+    
+  } else {
+    
+  }
+  context_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), context);
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.MessagePackage.Context)
+}
+
+// -------------------------------------------------------------------
+
 // GLOBAL_CONFIG
 
 // int32 ListenPort = 1;
@@ -937,13 +1266,13 @@ inline void GLOBAL_CONFIG::clear_listenport() {
   listenport_ = 0;
 }
 inline ::google::protobuf::int32 GLOBAL_CONFIG::listenport() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.GLOBAL_CONFIG.ListenPort)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.ListenPort)
   return listenport_;
 }
 inline void GLOBAL_CONFIG::set_listenport(::google::protobuf::int32 value) {
   
   listenport_ = value;
-  // @@protoc_insertion_point(field_set:MessageConfig.GLOBAL_CONFIG.ListenPort)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.ListenPort)
 }
 
 // string LogPath = 2;
@@ -951,41 +1280,41 @@ inline void GLOBAL_CONFIG::clear_logpath() {
   logpath_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& GLOBAL_CONFIG::logpath() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.GLOBAL_CONFIG.LogPath)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.LogPath)
   return logpath_.GetNoArena();
 }
 inline void GLOBAL_CONFIG::set_logpath(const ::std::string& value) {
   
   logpath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.GLOBAL_CONFIG.LogPath)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.LogPath)
 }
 #if LANG_CXX11
 inline void GLOBAL_CONFIG::set_logpath(::std::string&& value) {
   
   logpath_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.GLOBAL_CONFIG.LogPath)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.GLOBAL_CONFIG.LogPath)
 }
 #endif
 inline void GLOBAL_CONFIG::set_logpath(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   logpath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.GLOBAL_CONFIG.LogPath)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.GLOBAL_CONFIG.LogPath)
 }
 inline void GLOBAL_CONFIG::set_logpath(const char* value, size_t size) {
   
   logpath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.GLOBAL_CONFIG.LogPath)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.GLOBAL_CONFIG.LogPath)
 }
 inline ::std::string* GLOBAL_CONFIG::mutable_logpath() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.GLOBAL_CONFIG.LogPath)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.GLOBAL_CONFIG.LogPath)
   return logpath_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* GLOBAL_CONFIG::release_logpath() {
-  // @@protoc_insertion_point(field_release:MessageConfig.GLOBAL_CONFIG.LogPath)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.GLOBAL_CONFIG.LogPath)
   
   return logpath_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -996,7 +1325,7 @@ inline void GLOBAL_CONFIG::set_allocated_logpath(::std::string* logpath) {
     
   }
   logpath_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), logpath);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.GLOBAL_CONFIG.LogPath)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.GLOBAL_CONFIG.LogPath)
 }
 
 // int32 LogLevel = 3;
@@ -1004,13 +1333,13 @@ inline void GLOBAL_CONFIG::clear_loglevel() {
   loglevel_ = 0;
 }
 inline ::google::protobuf::int32 GLOBAL_CONFIG::loglevel() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.GLOBAL_CONFIG.LogLevel)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.LogLevel)
   return loglevel_;
 }
 inline void GLOBAL_CONFIG::set_loglevel(::google::protobuf::int32 value) {
   
   loglevel_ = value;
-  // @@protoc_insertion_point(field_set:MessageConfig.GLOBAL_CONFIG.LogLevel)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.LogLevel)
 }
 
 // bool DebugMode = 4;
@@ -1018,13 +1347,13 @@ inline void GLOBAL_CONFIG::clear_debugmode() {
   debugmode_ = false;
 }
 inline bool GLOBAL_CONFIG::debugmode() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.GLOBAL_CONFIG.DebugMode)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.DebugMode)
   return debugmode_;
 }
 inline void GLOBAL_CONFIG::set_debugmode(bool value) {
   
   debugmode_ = value;
-  // @@protoc_insertion_point(field_set:MessageConfig.GLOBAL_CONFIG.DebugMode)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.DebugMode)
 }
 
 // int32 MQThreadQuantity = 5;
@@ -1032,13 +1361,13 @@ inline void GLOBAL_CONFIG::clear_mqthreadquantity() {
   mqthreadquantity_ = 0;
 }
 inline ::google::protobuf::int32 GLOBAL_CONFIG::mqthreadquantity() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.GLOBAL_CONFIG.MQThreadQuantity)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.MQThreadQuantity)
   return mqthreadquantity_;
 }
 inline void GLOBAL_CONFIG::set_mqthreadquantity(::google::protobuf::int32 value) {
   
   mqthreadquantity_ = value;
-  // @@protoc_insertion_point(field_set:MessageConfig.GLOBAL_CONFIG.MQThreadQuantity)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.MQThreadQuantity)
 }
 
 // bool EnableSSL = 6;
@@ -1046,13 +1375,13 @@ inline void GLOBAL_CONFIG::clear_enablessl() {
   enablessl_ = false;
 }
 inline bool GLOBAL_CONFIG::enablessl() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.GLOBAL_CONFIG.EnableSSL)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.EnableSSL)
   return enablessl_;
 }
 inline void GLOBAL_CONFIG::set_enablessl(bool value) {
   
   enablessl_ = value;
-  // @@protoc_insertion_point(field_set:MessageConfig.GLOBAL_CONFIG.EnableSSL)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.EnableSSL)
 }
 
 // string CertFilePath = 7;
@@ -1060,41 +1389,41 @@ inline void GLOBAL_CONFIG::clear_certfilepath() {
   certfilepath_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& GLOBAL_CONFIG::certfilepath() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.GLOBAL_CONFIG.CertFilePath)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.CertFilePath)
   return certfilepath_.GetNoArena();
 }
 inline void GLOBAL_CONFIG::set_certfilepath(const ::std::string& value) {
   
   certfilepath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.GLOBAL_CONFIG.CertFilePath)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.CertFilePath)
 }
 #if LANG_CXX11
 inline void GLOBAL_CONFIG::set_certfilepath(::std::string&& value) {
   
   certfilepath_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.GLOBAL_CONFIG.CertFilePath)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.GLOBAL_CONFIG.CertFilePath)
 }
 #endif
 inline void GLOBAL_CONFIG::set_certfilepath(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   certfilepath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.GLOBAL_CONFIG.CertFilePath)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.GLOBAL_CONFIG.CertFilePath)
 }
 inline void GLOBAL_CONFIG::set_certfilepath(const char* value, size_t size) {
   
   certfilepath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.GLOBAL_CONFIG.CertFilePath)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.GLOBAL_CONFIG.CertFilePath)
 }
 inline ::std::string* GLOBAL_CONFIG::mutable_certfilepath() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.GLOBAL_CONFIG.CertFilePath)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.GLOBAL_CONFIG.CertFilePath)
   return certfilepath_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* GLOBAL_CONFIG::release_certfilepath() {
-  // @@protoc_insertion_point(field_release:MessageConfig.GLOBAL_CONFIG.CertFilePath)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.GLOBAL_CONFIG.CertFilePath)
   
   return certfilepath_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1105,7 +1434,7 @@ inline void GLOBAL_CONFIG::set_allocated_certfilepath(::std::string* certfilepat
     
   }
   certfilepath_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), certfilepath);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.GLOBAL_CONFIG.CertFilePath)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.GLOBAL_CONFIG.CertFilePath)
 }
 
 // string KeyFilePath = 8;
@@ -1113,41 +1442,41 @@ inline void GLOBAL_CONFIG::clear_keyfilepath() {
   keyfilepath_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& GLOBAL_CONFIG::keyfilepath() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.GLOBAL_CONFIG.KeyFilePath)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.KeyFilePath)
   return keyfilepath_.GetNoArena();
 }
 inline void GLOBAL_CONFIG::set_keyfilepath(const ::std::string& value) {
   
   keyfilepath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.GLOBAL_CONFIG.KeyFilePath)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.KeyFilePath)
 }
 #if LANG_CXX11
 inline void GLOBAL_CONFIG::set_keyfilepath(::std::string&& value) {
   
   keyfilepath_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.GLOBAL_CONFIG.KeyFilePath)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.GLOBAL_CONFIG.KeyFilePath)
 }
 #endif
 inline void GLOBAL_CONFIG::set_keyfilepath(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   keyfilepath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.GLOBAL_CONFIG.KeyFilePath)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.GLOBAL_CONFIG.KeyFilePath)
 }
 inline void GLOBAL_CONFIG::set_keyfilepath(const char* value, size_t size) {
   
   keyfilepath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.GLOBAL_CONFIG.KeyFilePath)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.GLOBAL_CONFIG.KeyFilePath)
 }
 inline ::std::string* GLOBAL_CONFIG::mutable_keyfilepath() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.GLOBAL_CONFIG.KeyFilePath)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.GLOBAL_CONFIG.KeyFilePath)
   return keyfilepath_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* GLOBAL_CONFIG::release_keyfilepath() {
-  // @@protoc_insertion_point(field_release:MessageConfig.GLOBAL_CONFIG.KeyFilePath)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.GLOBAL_CONFIG.KeyFilePath)
   
   return keyfilepath_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1158,7 +1487,7 @@ inline void GLOBAL_CONFIG::set_allocated_keyfilepath(::std::string* keyfilepath)
     
   }
   keyfilepath_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), keyfilepath);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.GLOBAL_CONFIG.KeyFilePath)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.GLOBAL_CONFIG.KeyFilePath)
 }
 
 // string CertPasswd = 9;
@@ -1166,41 +1495,41 @@ inline void GLOBAL_CONFIG::clear_certpasswd() {
   certpasswd_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& GLOBAL_CONFIG::certpasswd() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.GLOBAL_CONFIG.CertPasswd)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.CertPasswd)
   return certpasswd_.GetNoArena();
 }
 inline void GLOBAL_CONFIG::set_certpasswd(const ::std::string& value) {
   
   certpasswd_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.GLOBAL_CONFIG.CertPasswd)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.CertPasswd)
 }
 #if LANG_CXX11
 inline void GLOBAL_CONFIG::set_certpasswd(::std::string&& value) {
   
   certpasswd_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.GLOBAL_CONFIG.CertPasswd)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.GLOBAL_CONFIG.CertPasswd)
 }
 #endif
 inline void GLOBAL_CONFIG::set_certpasswd(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   certpasswd_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.GLOBAL_CONFIG.CertPasswd)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.GLOBAL_CONFIG.CertPasswd)
 }
 inline void GLOBAL_CONFIG::set_certpasswd(const char* value, size_t size) {
   
   certpasswd_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.GLOBAL_CONFIG.CertPasswd)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.GLOBAL_CONFIG.CertPasswd)
 }
 inline ::std::string* GLOBAL_CONFIG::mutable_certpasswd() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.GLOBAL_CONFIG.CertPasswd)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.GLOBAL_CONFIG.CertPasswd)
   return certpasswd_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* GLOBAL_CONFIG::release_certpasswd() {
-  // @@protoc_insertion_point(field_release:MessageConfig.GLOBAL_CONFIG.CertPasswd)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.GLOBAL_CONFIG.CertPasswd)
   
   return certpasswd_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1211,7 +1540,7 @@ inline void GLOBAL_CONFIG::set_allocated_certpasswd(::std::string* certpasswd) {
     
   }
   certpasswd_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), certpasswd);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.GLOBAL_CONFIG.CertPasswd)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.GLOBAL_CONFIG.CertPasswd)
 }
 
 // int32 ConnectTime = 10;
@@ -1219,13 +1548,13 @@ inline void GLOBAL_CONFIG::clear_connecttime() {
   connecttime_ = 0;
 }
 inline ::google::protobuf::int32 GLOBAL_CONFIG::connecttime() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.GLOBAL_CONFIG.ConnectTime)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.ConnectTime)
   return connecttime_;
 }
 inline void GLOBAL_CONFIG::set_connecttime(::google::protobuf::int32 value) {
   
   connecttime_ = value;
-  // @@protoc_insertion_point(field_set:MessageConfig.GLOBAL_CONFIG.ConnectTime)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.ConnectTime)
 }
 
 // int32 ReceiveTime = 11;
@@ -1233,13 +1562,13 @@ inline void GLOBAL_CONFIG::clear_receivetime() {
   receivetime_ = 0;
 }
 inline ::google::protobuf::int32 GLOBAL_CONFIG::receivetime() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.GLOBAL_CONFIG.ReceiveTime)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.ReceiveTime)
   return receivetime_;
 }
 inline void GLOBAL_CONFIG::set_receivetime(::google::protobuf::int32 value) {
   
   receivetime_ = value;
-  // @@protoc_insertion_point(field_set:MessageConfig.GLOBAL_CONFIG.ReceiveTime)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.ReceiveTime)
 }
 
 // int32 EPollThreadQuantity = 12;
@@ -1247,13 +1576,13 @@ inline void GLOBAL_CONFIG::clear_epollthreadquantity() {
   epollthreadquantity_ = 0;
 }
 inline ::google::protobuf::int32 GLOBAL_CONFIG::epollthreadquantity() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.GLOBAL_CONFIG.EPollThreadQuantity)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.EPollThreadQuantity)
   return epollthreadquantity_;
 }
 inline void GLOBAL_CONFIG::set_epollthreadquantity(::google::protobuf::int32 value) {
   
   epollthreadquantity_ = value;
-  // @@protoc_insertion_point(field_set:MessageConfig.GLOBAL_CONFIG.EPollThreadQuantity)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.EPollThreadQuantity)
 }
 
 // -------------------------------------------------------------------
@@ -1265,41 +1594,41 @@ inline void DB_CONFIG::clear_serveraddress() {
   serveraddress_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& DB_CONFIG::serveraddress() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.DB_CONFIG.ServerAddress)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.DB_CONFIG.ServerAddress)
   return serveraddress_.GetNoArena();
 }
 inline void DB_CONFIG::set_serveraddress(const ::std::string& value) {
   
   serveraddress_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.DB_CONFIG.ServerAddress)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.DB_CONFIG.ServerAddress)
 }
 #if LANG_CXX11
 inline void DB_CONFIG::set_serveraddress(::std::string&& value) {
   
   serveraddress_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.DB_CONFIG.ServerAddress)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.DB_CONFIG.ServerAddress)
 }
 #endif
 inline void DB_CONFIG::set_serveraddress(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   serveraddress_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.DB_CONFIG.ServerAddress)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.DB_CONFIG.ServerAddress)
 }
 inline void DB_CONFIG::set_serveraddress(const char* value, size_t size) {
   
   serveraddress_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.DB_CONFIG.ServerAddress)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.DB_CONFIG.ServerAddress)
 }
 inline ::std::string* DB_CONFIG::mutable_serveraddress() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.DB_CONFIG.ServerAddress)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.DB_CONFIG.ServerAddress)
   return serveraddress_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* DB_CONFIG::release_serveraddress() {
-  // @@protoc_insertion_point(field_release:MessageConfig.DB_CONFIG.ServerAddress)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.DB_CONFIG.ServerAddress)
   
   return serveraddress_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1310,7 +1639,7 @@ inline void DB_CONFIG::set_allocated_serveraddress(::std::string* serveraddress)
     
   }
   serveraddress_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), serveraddress);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.DB_CONFIG.ServerAddress)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.DB_CONFIG.ServerAddress)
 }
 
 // int32 ServerPort = 2;
@@ -1318,13 +1647,13 @@ inline void DB_CONFIG::clear_serverport() {
   serverport_ = 0;
 }
 inline ::google::protobuf::int32 DB_CONFIG::serverport() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.DB_CONFIG.ServerPort)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.DB_CONFIG.ServerPort)
   return serverport_;
 }
 inline void DB_CONFIG::set_serverport(::google::protobuf::int32 value) {
   
   serverport_ = value;
-  // @@protoc_insertion_point(field_set:MessageConfig.DB_CONFIG.ServerPort)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.DB_CONFIG.ServerPort)
 }
 
 // string User = 3;
@@ -1332,41 +1661,41 @@ inline void DB_CONFIG::clear_user() {
   user_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& DB_CONFIG::user() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.DB_CONFIG.User)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.DB_CONFIG.User)
   return user_.GetNoArena();
 }
 inline void DB_CONFIG::set_user(const ::std::string& value) {
   
   user_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.DB_CONFIG.User)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.DB_CONFIG.User)
 }
 #if LANG_CXX11
 inline void DB_CONFIG::set_user(::std::string&& value) {
   
   user_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.DB_CONFIG.User)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.DB_CONFIG.User)
 }
 #endif
 inline void DB_CONFIG::set_user(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   user_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.DB_CONFIG.User)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.DB_CONFIG.User)
 }
 inline void DB_CONFIG::set_user(const char* value, size_t size) {
   
   user_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.DB_CONFIG.User)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.DB_CONFIG.User)
 }
 inline ::std::string* DB_CONFIG::mutable_user() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.DB_CONFIG.User)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.DB_CONFIG.User)
   return user_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* DB_CONFIG::release_user() {
-  // @@protoc_insertion_point(field_release:MessageConfig.DB_CONFIG.User)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.DB_CONFIG.User)
   
   return user_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1377,7 +1706,7 @@ inline void DB_CONFIG::set_allocated_user(::std::string* user) {
     
   }
   user_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), user);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.DB_CONFIG.User)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.DB_CONFIG.User)
 }
 
 // string Passwd = 4;
@@ -1385,41 +1714,41 @@ inline void DB_CONFIG::clear_passwd() {
   passwd_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& DB_CONFIG::passwd() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.DB_CONFIG.Passwd)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.DB_CONFIG.Passwd)
   return passwd_.GetNoArena();
 }
 inline void DB_CONFIG::set_passwd(const ::std::string& value) {
   
   passwd_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.DB_CONFIG.Passwd)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.DB_CONFIG.Passwd)
 }
 #if LANG_CXX11
 inline void DB_CONFIG::set_passwd(::std::string&& value) {
   
   passwd_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.DB_CONFIG.Passwd)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.DB_CONFIG.Passwd)
 }
 #endif
 inline void DB_CONFIG::set_passwd(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   passwd_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.DB_CONFIG.Passwd)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.DB_CONFIG.Passwd)
 }
 inline void DB_CONFIG::set_passwd(const char* value, size_t size) {
   
   passwd_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.DB_CONFIG.Passwd)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.DB_CONFIG.Passwd)
 }
 inline ::std::string* DB_CONFIG::mutable_passwd() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.DB_CONFIG.Passwd)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.DB_CONFIG.Passwd)
   return passwd_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* DB_CONFIG::release_passwd() {
-  // @@protoc_insertion_point(field_release:MessageConfig.DB_CONFIG.Passwd)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.DB_CONFIG.Passwd)
   
   return passwd_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1430,7 +1759,7 @@ inline void DB_CONFIG::set_allocated_passwd(::std::string* passwd) {
     
   }
   passwd_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), passwd);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.DB_CONFIG.Passwd)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.DB_CONFIG.Passwd)
 }
 
 // string Database = 5;
@@ -1438,41 +1767,41 @@ inline void DB_CONFIG::clear_database() {
   database_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& DB_CONFIG::database() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.DB_CONFIG.Database)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.DB_CONFIG.Database)
   return database_.GetNoArena();
 }
 inline void DB_CONFIG::set_database(const ::std::string& value) {
   
   database_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.DB_CONFIG.Database)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.DB_CONFIG.Database)
 }
 #if LANG_CXX11
 inline void DB_CONFIG::set_database(::std::string&& value) {
   
   database_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.DB_CONFIG.Database)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.DB_CONFIG.Database)
 }
 #endif
 inline void DB_CONFIG::set_database(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   database_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.DB_CONFIG.Database)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.DB_CONFIG.Database)
 }
 inline void DB_CONFIG::set_database(const char* value, size_t size) {
   
   database_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.DB_CONFIG.Database)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.DB_CONFIG.Database)
 }
 inline ::std::string* DB_CONFIG::mutable_database() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.DB_CONFIG.Database)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.DB_CONFIG.Database)
   return database_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* DB_CONFIG::release_database() {
-  // @@protoc_insertion_point(field_release:MessageConfig.DB_CONFIG.Database)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.DB_CONFIG.Database)
   
   return database_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1483,10 +1812,10 @@ inline void DB_CONFIG::set_allocated_database(::std::string* database) {
     
   }
   database_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), database);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.DB_CONFIG.Database)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.DB_CONFIG.Database)
 }
 
-// .MessageConfig.GLOBAL_CONFIG ServerConfig = 6;
+// .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 6;
 inline bool DB_CONFIG::has_serverconfig() const {
   return this != internal_default_instance() && serverconfig_ != NULL;
 }
@@ -1496,32 +1825,32 @@ inline void DB_CONFIG::clear_serverconfig() {
   }
   serverconfig_ = NULL;
 }
-inline const ::MessageConfig::GLOBAL_CONFIG& DB_CONFIG::_internal_serverconfig() const {
+inline const ::ProtobufMessage::GLOBAL_CONFIG& DB_CONFIG::_internal_serverconfig() const {
   return *serverconfig_;
 }
-inline const ::MessageConfig::GLOBAL_CONFIG& DB_CONFIG::serverconfig() const {
-  const ::MessageConfig::GLOBAL_CONFIG* p = serverconfig_;
-  // @@protoc_insertion_point(field_get:MessageConfig.DB_CONFIG.ServerConfig)
-  return p != NULL ? *p : *reinterpret_cast<const ::MessageConfig::GLOBAL_CONFIG*>(
-      &::MessageConfig::_GLOBAL_CONFIG_default_instance_);
+inline const ::ProtobufMessage::GLOBAL_CONFIG& DB_CONFIG::serverconfig() const {
+  const ::ProtobufMessage::GLOBAL_CONFIG* p = serverconfig_;
+  // @@protoc_insertion_point(field_get:ProtobufMessage.DB_CONFIG.ServerConfig)
+  return p != NULL ? *p : *reinterpret_cast<const ::ProtobufMessage::GLOBAL_CONFIG*>(
+      &::ProtobufMessage::_GLOBAL_CONFIG_default_instance_);
 }
-inline ::MessageConfig::GLOBAL_CONFIG* DB_CONFIG::release_serverconfig() {
-  // @@protoc_insertion_point(field_release:MessageConfig.DB_CONFIG.ServerConfig)
+inline ::ProtobufMessage::GLOBAL_CONFIG* DB_CONFIG::release_serverconfig() {
+  // @@protoc_insertion_point(field_release:ProtobufMessage.DB_CONFIG.ServerConfig)
   
-  ::MessageConfig::GLOBAL_CONFIG* temp = serverconfig_;
+  ::ProtobufMessage::GLOBAL_CONFIG* temp = serverconfig_;
   serverconfig_ = NULL;
   return temp;
 }
-inline ::MessageConfig::GLOBAL_CONFIG* DB_CONFIG::mutable_serverconfig() {
+inline ::ProtobufMessage::GLOBAL_CONFIG* DB_CONFIG::mutable_serverconfig() {
   
   if (serverconfig_ == NULL) {
-    auto* p = CreateMaybeMessage<::MessageConfig::GLOBAL_CONFIG>(GetArenaNoVirtual());
+    auto* p = CreateMaybeMessage<::ProtobufMessage::GLOBAL_CONFIG>(GetArenaNoVirtual());
     serverconfig_ = p;
   }
-  // @@protoc_insertion_point(field_mutable:MessageConfig.DB_CONFIG.ServerConfig)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.DB_CONFIG.ServerConfig)
   return serverconfig_;
 }
-inline void DB_CONFIG::set_allocated_serverconfig(::MessageConfig::GLOBAL_CONFIG* serverconfig) {
+inline void DB_CONFIG::set_allocated_serverconfig(::ProtobufMessage::GLOBAL_CONFIG* serverconfig) {
   ::google::protobuf::Arena* message_arena = GetArenaNoVirtual();
   if (message_arena == NULL) {
     delete serverconfig_;
@@ -1537,7 +1866,7 @@ inline void DB_CONFIG::set_allocated_serverconfig(::MessageConfig::GLOBAL_CONFIG
     
   }
   serverconfig_ = serverconfig;
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.DB_CONFIG.ServerConfig)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.DB_CONFIG.ServerConfig)
 }
 
 // -------------------------------------------------------------------
@@ -1549,13 +1878,13 @@ inline void DATA_CONFIG::clear_datareceiveport() {
   datareceiveport_ = 0;
 }
 inline ::google::protobuf::int32 DATA_CONFIG::datareceiveport() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.DATA_CONFIG.DataReceivePort)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.DATA_CONFIG.DataReceivePort)
   return datareceiveport_;
 }
 inline void DATA_CONFIG::set_datareceiveport(::google::protobuf::int32 value) {
   
   datareceiveport_ = value;
-  // @@protoc_insertion_point(field_set:MessageConfig.DATA_CONFIG.DataReceivePort)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.DATA_CONFIG.DataReceivePort)
 }
 
 // int32 DataRecvTime = 2;
@@ -1563,16 +1892,16 @@ inline void DATA_CONFIG::clear_datarecvtime() {
   datarecvtime_ = 0;
 }
 inline ::google::protobuf::int32 DATA_CONFIG::datarecvtime() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.DATA_CONFIG.DataRecvTime)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.DATA_CONFIG.DataRecvTime)
   return datarecvtime_;
 }
 inline void DATA_CONFIG::set_datarecvtime(::google::protobuf::int32 value) {
   
   datarecvtime_ = value;
-  // @@protoc_insertion_point(field_set:MessageConfig.DATA_CONFIG.DataRecvTime)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.DATA_CONFIG.DataRecvTime)
 }
 
-// .MessageConfig.GLOBAL_CONFIG ServerConfig = 3;
+// .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 3;
 inline bool DATA_CONFIG::has_serverconfig() const {
   return this != internal_default_instance() && serverconfig_ != NULL;
 }
@@ -1582,32 +1911,32 @@ inline void DATA_CONFIG::clear_serverconfig() {
   }
   serverconfig_ = NULL;
 }
-inline const ::MessageConfig::GLOBAL_CONFIG& DATA_CONFIG::_internal_serverconfig() const {
+inline const ::ProtobufMessage::GLOBAL_CONFIG& DATA_CONFIG::_internal_serverconfig() const {
   return *serverconfig_;
 }
-inline const ::MessageConfig::GLOBAL_CONFIG& DATA_CONFIG::serverconfig() const {
-  const ::MessageConfig::GLOBAL_CONFIG* p = serverconfig_;
-  // @@protoc_insertion_point(field_get:MessageConfig.DATA_CONFIG.ServerConfig)
-  return p != NULL ? *p : *reinterpret_cast<const ::MessageConfig::GLOBAL_CONFIG*>(
-      &::MessageConfig::_GLOBAL_CONFIG_default_instance_);
+inline const ::ProtobufMessage::GLOBAL_CONFIG& DATA_CONFIG::serverconfig() const {
+  const ::ProtobufMessage::GLOBAL_CONFIG* p = serverconfig_;
+  // @@protoc_insertion_point(field_get:ProtobufMessage.DATA_CONFIG.ServerConfig)
+  return p != NULL ? *p : *reinterpret_cast<const ::ProtobufMessage::GLOBAL_CONFIG*>(
+      &::ProtobufMessage::_GLOBAL_CONFIG_default_instance_);
 }
-inline ::MessageConfig::GLOBAL_CONFIG* DATA_CONFIG::release_serverconfig() {
-  // @@protoc_insertion_point(field_release:MessageConfig.DATA_CONFIG.ServerConfig)
+inline ::ProtobufMessage::GLOBAL_CONFIG* DATA_CONFIG::release_serverconfig() {
+  // @@protoc_insertion_point(field_release:ProtobufMessage.DATA_CONFIG.ServerConfig)
   
-  ::MessageConfig::GLOBAL_CONFIG* temp = serverconfig_;
+  ::ProtobufMessage::GLOBAL_CONFIG* temp = serverconfig_;
   serverconfig_ = NULL;
   return temp;
 }
-inline ::MessageConfig::GLOBAL_CONFIG* DATA_CONFIG::mutable_serverconfig() {
+inline ::ProtobufMessage::GLOBAL_CONFIG* DATA_CONFIG::mutable_serverconfig() {
   
   if (serverconfig_ == NULL) {
-    auto* p = CreateMaybeMessage<::MessageConfig::GLOBAL_CONFIG>(GetArenaNoVirtual());
+    auto* p = CreateMaybeMessage<::ProtobufMessage::GLOBAL_CONFIG>(GetArenaNoVirtual());
     serverconfig_ = p;
   }
-  // @@protoc_insertion_point(field_mutable:MessageConfig.DATA_CONFIG.ServerConfig)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.DATA_CONFIG.ServerConfig)
   return serverconfig_;
 }
-inline void DATA_CONFIG::set_allocated_serverconfig(::MessageConfig::GLOBAL_CONFIG* serverconfig) {
+inline void DATA_CONFIG::set_allocated_serverconfig(::ProtobufMessage::GLOBAL_CONFIG* serverconfig) {
   ::google::protobuf::Arena* message_arena = GetArenaNoVirtual();
   if (message_arena == NULL) {
     delete serverconfig_;
@@ -1623,7 +1952,7 @@ inline void DATA_CONFIG::set_allocated_serverconfig(::MessageConfig::GLOBAL_CONF
     
   }
   serverconfig_ = serverconfig;
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.DATA_CONFIG.ServerConfig)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.DATA_CONFIG.ServerConfig)
 }
 
 // -------------------------------------------------------------------
@@ -1635,13 +1964,13 @@ inline void PROXY_CONFIG::clear_clientchecktime() {
   clientchecktime_ = 0;
 }
 inline ::google::protobuf::int32 PROXY_CONFIG::clientchecktime() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.PROXY_CONFIG.ClientCheckTime)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.PROXY_CONFIG.ClientCheckTime)
   return clientchecktime_;
 }
 inline void PROXY_CONFIG::set_clientchecktime(::google::protobuf::int32 value) {
   
   clientchecktime_ = value;
-  // @@protoc_insertion_point(field_set:MessageConfig.PROXY_CONFIG.ClientCheckTime)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.PROXY_CONFIG.ClientCheckTime)
 }
 
 // string ClientCheckKey = 2;
@@ -1649,41 +1978,41 @@ inline void PROXY_CONFIG::clear_clientcheckkey() {
   clientcheckkey_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& PROXY_CONFIG::clientcheckkey() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.PROXY_CONFIG.ClientCheckKey)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.PROXY_CONFIG.ClientCheckKey)
   return clientcheckkey_.GetNoArena();
 }
 inline void PROXY_CONFIG::set_clientcheckkey(const ::std::string& value) {
   
   clientcheckkey_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.PROXY_CONFIG.ClientCheckKey)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.PROXY_CONFIG.ClientCheckKey)
 }
 #if LANG_CXX11
 inline void PROXY_CONFIG::set_clientcheckkey(::std::string&& value) {
   
   clientcheckkey_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.PROXY_CONFIG.ClientCheckKey)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.PROXY_CONFIG.ClientCheckKey)
 }
 #endif
 inline void PROXY_CONFIG::set_clientcheckkey(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   clientcheckkey_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.PROXY_CONFIG.ClientCheckKey)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.PROXY_CONFIG.ClientCheckKey)
 }
 inline void PROXY_CONFIG::set_clientcheckkey(const char* value, size_t size) {
   
   clientcheckkey_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.PROXY_CONFIG.ClientCheckKey)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.PROXY_CONFIG.ClientCheckKey)
 }
 inline ::std::string* PROXY_CONFIG::mutable_clientcheckkey() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.PROXY_CONFIG.ClientCheckKey)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.PROXY_CONFIG.ClientCheckKey)
   return clientcheckkey_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* PROXY_CONFIG::release_clientcheckkey() {
-  // @@protoc_insertion_point(field_release:MessageConfig.PROXY_CONFIG.ClientCheckKey)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.PROXY_CONFIG.ClientCheckKey)
   
   return clientcheckkey_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1694,7 +2023,7 @@ inline void PROXY_CONFIG::set_allocated_clientcheckkey(::std::string* clientchec
     
   }
   clientcheckkey_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), clientcheckkey);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.PROXY_CONFIG.ClientCheckKey)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.PROXY_CONFIG.ClientCheckKey)
 }
 
 // int32 TimeoutCheckInterval = 3;
@@ -1702,16 +2031,16 @@ inline void PROXY_CONFIG::clear_timeoutcheckinterval() {
   timeoutcheckinterval_ = 0;
 }
 inline ::google::protobuf::int32 PROXY_CONFIG::timeoutcheckinterval() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.PROXY_CONFIG.TimeoutCheckInterval)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.PROXY_CONFIG.TimeoutCheckInterval)
   return timeoutcheckinterval_;
 }
 inline void PROXY_CONFIG::set_timeoutcheckinterval(::google::protobuf::int32 value) {
   
   timeoutcheckinterval_ = value;
-  // @@protoc_insertion_point(field_set:MessageConfig.PROXY_CONFIG.TimeoutCheckInterval)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.PROXY_CONFIG.TimeoutCheckInterval)
 }
 
-// .MessageConfig.GLOBAL_CONFIG ServerConfig = 4;
+// .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 4;
 inline bool PROXY_CONFIG::has_serverconfig() const {
   return this != internal_default_instance() && serverconfig_ != NULL;
 }
@@ -1721,32 +2050,32 @@ inline void PROXY_CONFIG::clear_serverconfig() {
   }
   serverconfig_ = NULL;
 }
-inline const ::MessageConfig::GLOBAL_CONFIG& PROXY_CONFIG::_internal_serverconfig() const {
+inline const ::ProtobufMessage::GLOBAL_CONFIG& PROXY_CONFIG::_internal_serverconfig() const {
   return *serverconfig_;
 }
-inline const ::MessageConfig::GLOBAL_CONFIG& PROXY_CONFIG::serverconfig() const {
-  const ::MessageConfig::GLOBAL_CONFIG* p = serverconfig_;
-  // @@protoc_insertion_point(field_get:MessageConfig.PROXY_CONFIG.ServerConfig)
-  return p != NULL ? *p : *reinterpret_cast<const ::MessageConfig::GLOBAL_CONFIG*>(
-      &::MessageConfig::_GLOBAL_CONFIG_default_instance_);
+inline const ::ProtobufMessage::GLOBAL_CONFIG& PROXY_CONFIG::serverconfig() const {
+  const ::ProtobufMessage::GLOBAL_CONFIG* p = serverconfig_;
+  // @@protoc_insertion_point(field_get:ProtobufMessage.PROXY_CONFIG.ServerConfig)
+  return p != NULL ? *p : *reinterpret_cast<const ::ProtobufMessage::GLOBAL_CONFIG*>(
+      &::ProtobufMessage::_GLOBAL_CONFIG_default_instance_);
 }
-inline ::MessageConfig::GLOBAL_CONFIG* PROXY_CONFIG::release_serverconfig() {
-  // @@protoc_insertion_point(field_release:MessageConfig.PROXY_CONFIG.ServerConfig)
+inline ::ProtobufMessage::GLOBAL_CONFIG* PROXY_CONFIG::release_serverconfig() {
+  // @@protoc_insertion_point(field_release:ProtobufMessage.PROXY_CONFIG.ServerConfig)
   
-  ::MessageConfig::GLOBAL_CONFIG* temp = serverconfig_;
+  ::ProtobufMessage::GLOBAL_CONFIG* temp = serverconfig_;
   serverconfig_ = NULL;
   return temp;
 }
-inline ::MessageConfig::GLOBAL_CONFIG* PROXY_CONFIG::mutable_serverconfig() {
+inline ::ProtobufMessage::GLOBAL_CONFIG* PROXY_CONFIG::mutable_serverconfig() {
   
   if (serverconfig_ == NULL) {
-    auto* p = CreateMaybeMessage<::MessageConfig::GLOBAL_CONFIG>(GetArenaNoVirtual());
+    auto* p = CreateMaybeMessage<::ProtobufMessage::GLOBAL_CONFIG>(GetArenaNoVirtual());
     serverconfig_ = p;
   }
-  // @@protoc_insertion_point(field_mutable:MessageConfig.PROXY_CONFIG.ServerConfig)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.PROXY_CONFIG.ServerConfig)
   return serverconfig_;
 }
-inline void PROXY_CONFIG::set_allocated_serverconfig(::MessageConfig::GLOBAL_CONFIG* serverconfig) {
+inline void PROXY_CONFIG::set_allocated_serverconfig(::ProtobufMessage::GLOBAL_CONFIG* serverconfig) {
   ::google::protobuf::Arena* message_arena = GetArenaNoVirtual();
   if (message_arena == NULL) {
     delete serverconfig_;
@@ -1762,7 +2091,7 @@ inline void PROXY_CONFIG::set_allocated_serverconfig(::MessageConfig::GLOBAL_CON
     
   }
   serverconfig_ = serverconfig;
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.PROXY_CONFIG.ServerConfig)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.PROXY_CONFIG.ServerConfig)
 }
 
 // -------------------------------------------------------------------
@@ -1774,41 +2103,41 @@ inline void PROCESS_CONFIG::clear_luacontextquantity() {
   luacontextquantity_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& PROCESS_CONFIG::luacontextquantity() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.PROCESS_CONFIG.LuaContextQuantity)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
   return luacontextquantity_.GetNoArena();
 }
 inline void PROCESS_CONFIG::set_luacontextquantity(const ::std::string& value) {
   
   luacontextquantity_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.PROCESS_CONFIG.LuaContextQuantity)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
 }
 #if LANG_CXX11
 inline void PROCESS_CONFIG::set_luacontextquantity(::std::string&& value) {
   
   luacontextquantity_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.PROCESS_CONFIG.LuaContextQuantity)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
 }
 #endif
 inline void PROCESS_CONFIG::set_luacontextquantity(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   luacontextquantity_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.PROCESS_CONFIG.LuaContextQuantity)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
 }
 inline void PROCESS_CONFIG::set_luacontextquantity(const char* value, size_t size) {
   
   luacontextquantity_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.PROCESS_CONFIG.LuaContextQuantity)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
 }
 inline ::std::string* PROCESS_CONFIG::mutable_luacontextquantity() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.PROCESS_CONFIG.LuaContextQuantity)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
   return luacontextquantity_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* PROCESS_CONFIG::release_luacontextquantity() {
-  // @@protoc_insertion_point(field_release:MessageConfig.PROCESS_CONFIG.LuaContextQuantity)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
   
   return luacontextquantity_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1819,7 +2148,7 @@ inline void PROCESS_CONFIG::set_allocated_luacontextquantity(::std::string* luac
     
   }
   luacontextquantity_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), luacontextquantity);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.PROCESS_CONFIG.LuaContextQuantity)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
 }
 
 // string LuaScriptFolder = 2;
@@ -1827,41 +2156,41 @@ inline void PROCESS_CONFIG::clear_luascriptfolder() {
   luascriptfolder_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& PROCESS_CONFIG::luascriptfolder() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.PROCESS_CONFIG.LuaScriptFolder)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.PROCESS_CONFIG.LuaScriptFolder)
   return luascriptfolder_.GetNoArena();
 }
 inline void PROCESS_CONFIG::set_luascriptfolder(const ::std::string& value) {
   
   luascriptfolder_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.PROCESS_CONFIG.LuaScriptFolder)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.PROCESS_CONFIG.LuaScriptFolder)
 }
 #if LANG_CXX11
 inline void PROCESS_CONFIG::set_luascriptfolder(::std::string&& value) {
   
   luascriptfolder_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.PROCESS_CONFIG.LuaScriptFolder)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.PROCESS_CONFIG.LuaScriptFolder)
 }
 #endif
 inline void PROCESS_CONFIG::set_luascriptfolder(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   luascriptfolder_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.PROCESS_CONFIG.LuaScriptFolder)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.PROCESS_CONFIG.LuaScriptFolder)
 }
 inline void PROCESS_CONFIG::set_luascriptfolder(const char* value, size_t size) {
   
   luascriptfolder_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.PROCESS_CONFIG.LuaScriptFolder)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.PROCESS_CONFIG.LuaScriptFolder)
 }
 inline ::std::string* PROCESS_CONFIG::mutable_luascriptfolder() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.PROCESS_CONFIG.LuaScriptFolder)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.PROCESS_CONFIG.LuaScriptFolder)
   return luascriptfolder_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* PROCESS_CONFIG::release_luascriptfolder() {
-  // @@protoc_insertion_point(field_release:MessageConfig.PROCESS_CONFIG.LuaScriptFolder)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.PROCESS_CONFIG.LuaScriptFolder)
   
   return luascriptfolder_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1872,7 +2201,7 @@ inline void PROCESS_CONFIG::set_allocated_luascriptfolder(::std::string* luascri
     
   }
   luascriptfolder_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), luascriptfolder);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.PROCESS_CONFIG.LuaScriptFolder)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.PROCESS_CONFIG.LuaScriptFolder)
 }
 
 // string LuaEntryFile = 3;
@@ -1880,41 +2209,41 @@ inline void PROCESS_CONFIG::clear_luaentryfile() {
   luaentryfile_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& PROCESS_CONFIG::luaentryfile() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.PROCESS_CONFIG.LuaEntryFile)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.PROCESS_CONFIG.LuaEntryFile)
   return luaentryfile_.GetNoArena();
 }
 inline void PROCESS_CONFIG::set_luaentryfile(const ::std::string& value) {
   
   luaentryfile_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.PROCESS_CONFIG.LuaEntryFile)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.PROCESS_CONFIG.LuaEntryFile)
 }
 #if LANG_CXX11
 inline void PROCESS_CONFIG::set_luaentryfile(::std::string&& value) {
   
   luaentryfile_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.PROCESS_CONFIG.LuaEntryFile)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.PROCESS_CONFIG.LuaEntryFile)
 }
 #endif
 inline void PROCESS_CONFIG::set_luaentryfile(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   luaentryfile_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.PROCESS_CONFIG.LuaEntryFile)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.PROCESS_CONFIG.LuaEntryFile)
 }
 inline void PROCESS_CONFIG::set_luaentryfile(const char* value, size_t size) {
   
   luaentryfile_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.PROCESS_CONFIG.LuaEntryFile)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.PROCESS_CONFIG.LuaEntryFile)
 }
 inline ::std::string* PROCESS_CONFIG::mutable_luaentryfile() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.PROCESS_CONFIG.LuaEntryFile)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.PROCESS_CONFIG.LuaEntryFile)
   return luaentryfile_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* PROCESS_CONFIG::release_luaentryfile() {
-  // @@protoc_insertion_point(field_release:MessageConfig.PROCESS_CONFIG.LuaEntryFile)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.PROCESS_CONFIG.LuaEntryFile)
   
   return luaentryfile_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1925,7 +2254,7 @@ inline void PROCESS_CONFIG::set_allocated_luaentryfile(::std::string* luaentryfi
     
   }
   luaentryfile_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), luaentryfile);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.PROCESS_CONFIG.LuaEntryFile)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.PROCESS_CONFIG.LuaEntryFile)
 }
 
 // string LuaEntryFunction = 4;
@@ -1933,41 +2262,41 @@ inline void PROCESS_CONFIG::clear_luaentryfunction() {
   luaentryfunction_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& PROCESS_CONFIG::luaentryfunction() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.PROCESS_CONFIG.LuaEntryFunction)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.PROCESS_CONFIG.LuaEntryFunction)
   return luaentryfunction_.GetNoArena();
 }
 inline void PROCESS_CONFIG::set_luaentryfunction(const ::std::string& value) {
   
   luaentryfunction_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.PROCESS_CONFIG.LuaEntryFunction)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.PROCESS_CONFIG.LuaEntryFunction)
 }
 #if LANG_CXX11
 inline void PROCESS_CONFIG::set_luaentryfunction(::std::string&& value) {
   
   luaentryfunction_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.PROCESS_CONFIG.LuaEntryFunction)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.PROCESS_CONFIG.LuaEntryFunction)
 }
 #endif
 inline void PROCESS_CONFIG::set_luaentryfunction(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   luaentryfunction_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.PROCESS_CONFIG.LuaEntryFunction)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.PROCESS_CONFIG.LuaEntryFunction)
 }
 inline void PROCESS_CONFIG::set_luaentryfunction(const char* value, size_t size) {
   
   luaentryfunction_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.PROCESS_CONFIG.LuaEntryFunction)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.PROCESS_CONFIG.LuaEntryFunction)
 }
 inline ::std::string* PROCESS_CONFIG::mutable_luaentryfunction() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.PROCESS_CONFIG.LuaEntryFunction)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.PROCESS_CONFIG.LuaEntryFunction)
   return luaentryfunction_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* PROCESS_CONFIG::release_luaentryfunction() {
-  // @@protoc_insertion_point(field_release:MessageConfig.PROCESS_CONFIG.LuaEntryFunction)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.PROCESS_CONFIG.LuaEntryFunction)
   
   return luaentryfunction_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1978,7 +2307,7 @@ inline void PROCESS_CONFIG::set_allocated_luaentryfunction(::std::string* luaent
     
   }
   luaentryfunction_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), luaentryfunction);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.PROCESS_CONFIG.LuaEntryFunction)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.PROCESS_CONFIG.LuaEntryFunction)
 }
 
 // string LuaProcessFunction = 5;
@@ -1986,41 +2315,41 @@ inline void PROCESS_CONFIG::clear_luaprocessfunction() {
   luaprocessfunction_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& PROCESS_CONFIG::luaprocessfunction() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.PROCESS_CONFIG.LuaProcessFunction)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.PROCESS_CONFIG.LuaProcessFunction)
   return luaprocessfunction_.GetNoArena();
 }
 inline void PROCESS_CONFIG::set_luaprocessfunction(const ::std::string& value) {
   
   luaprocessfunction_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.PROCESS_CONFIG.LuaProcessFunction)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.PROCESS_CONFIG.LuaProcessFunction)
 }
 #if LANG_CXX11
 inline void PROCESS_CONFIG::set_luaprocessfunction(::std::string&& value) {
   
   luaprocessfunction_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.PROCESS_CONFIG.LuaProcessFunction)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.PROCESS_CONFIG.LuaProcessFunction)
 }
 #endif
 inline void PROCESS_CONFIG::set_luaprocessfunction(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   luaprocessfunction_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.PROCESS_CONFIG.LuaProcessFunction)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.PROCESS_CONFIG.LuaProcessFunction)
 }
 inline void PROCESS_CONFIG::set_luaprocessfunction(const char* value, size_t size) {
   
   luaprocessfunction_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.PROCESS_CONFIG.LuaProcessFunction)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.PROCESS_CONFIG.LuaProcessFunction)
 }
 inline ::std::string* PROCESS_CONFIG::mutable_luaprocessfunction() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.PROCESS_CONFIG.LuaProcessFunction)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.PROCESS_CONFIG.LuaProcessFunction)
   return luaprocessfunction_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* PROCESS_CONFIG::release_luaprocessfunction() {
-  // @@protoc_insertion_point(field_release:MessageConfig.PROCESS_CONFIG.LuaProcessFunction)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.PROCESS_CONFIG.LuaProcessFunction)
   
   return luaprocessfunction_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -2031,7 +2360,7 @@ inline void PROCESS_CONFIG::set_allocated_luaprocessfunction(::std::string* luap
     
   }
   luaprocessfunction_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), luaprocessfunction);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.PROCESS_CONFIG.LuaProcessFunction)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.PROCESS_CONFIG.LuaProcessFunction)
 }
 
 // string LuaSocketCloseFunction = 6;
@@ -2039,41 +2368,41 @@ inline void PROCESS_CONFIG::clear_luasocketclosefunction() {
   luasocketclosefunction_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline const ::std::string& PROCESS_CONFIG::luasocketclosefunction() const {
-  // @@protoc_insertion_point(field_get:MessageConfig.PROCESS_CONFIG.LuaSocketCloseFunction)
+  // @@protoc_insertion_point(field_get:ProtobufMessage.PROCESS_CONFIG.LuaSocketCloseFunction)
   return luasocketclosefunction_.GetNoArena();
 }
 inline void PROCESS_CONFIG::set_luasocketclosefunction(const ::std::string& value) {
   
   luasocketclosefunction_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:MessageConfig.PROCESS_CONFIG.LuaSocketCloseFunction)
+  // @@protoc_insertion_point(field_set:ProtobufMessage.PROCESS_CONFIG.LuaSocketCloseFunction)
 }
 #if LANG_CXX11
 inline void PROCESS_CONFIG::set_luasocketclosefunction(::std::string&& value) {
   
   luasocketclosefunction_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:MessageConfig.PROCESS_CONFIG.LuaSocketCloseFunction)
+  // @@protoc_insertion_point(field_set_rvalue:ProtobufMessage.PROCESS_CONFIG.LuaSocketCloseFunction)
 }
 #endif
 inline void PROCESS_CONFIG::set_luasocketclosefunction(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   
   luasocketclosefunction_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:MessageConfig.PROCESS_CONFIG.LuaSocketCloseFunction)
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.PROCESS_CONFIG.LuaSocketCloseFunction)
 }
 inline void PROCESS_CONFIG::set_luasocketclosefunction(const char* value, size_t size) {
   
   luasocketclosefunction_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:MessageConfig.PROCESS_CONFIG.LuaSocketCloseFunction)
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.PROCESS_CONFIG.LuaSocketCloseFunction)
 }
 inline ::std::string* PROCESS_CONFIG::mutable_luasocketclosefunction() {
   
-  // @@protoc_insertion_point(field_mutable:MessageConfig.PROCESS_CONFIG.LuaSocketCloseFunction)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.PROCESS_CONFIG.LuaSocketCloseFunction)
   return luasocketclosefunction_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* PROCESS_CONFIG::release_luasocketclosefunction() {
-  // @@protoc_insertion_point(field_release:MessageConfig.PROCESS_CONFIG.LuaSocketCloseFunction)
+  // @@protoc_insertion_point(field_release:ProtobufMessage.PROCESS_CONFIG.LuaSocketCloseFunction)
   
   return luasocketclosefunction_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -2084,10 +2413,10 @@ inline void PROCESS_CONFIG::set_allocated_luasocketclosefunction(::std::string* 
     
   }
   luasocketclosefunction_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), luasocketclosefunction);
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.PROCESS_CONFIG.LuaSocketCloseFunction)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.PROCESS_CONFIG.LuaSocketCloseFunction)
 }
 
-// .MessageConfig.GLOBAL_CONFIG ServerConfig = 7;
+// .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 7;
 inline bool PROCESS_CONFIG::has_serverconfig() const {
   return this != internal_default_instance() && serverconfig_ != NULL;
 }
@@ -2097,32 +2426,32 @@ inline void PROCESS_CONFIG::clear_serverconfig() {
   }
   serverconfig_ = NULL;
 }
-inline const ::MessageConfig::GLOBAL_CONFIG& PROCESS_CONFIG::_internal_serverconfig() const {
+inline const ::ProtobufMessage::GLOBAL_CONFIG& PROCESS_CONFIG::_internal_serverconfig() const {
   return *serverconfig_;
 }
-inline const ::MessageConfig::GLOBAL_CONFIG& PROCESS_CONFIG::serverconfig() const {
-  const ::MessageConfig::GLOBAL_CONFIG* p = serverconfig_;
-  // @@protoc_insertion_point(field_get:MessageConfig.PROCESS_CONFIG.ServerConfig)
-  return p != NULL ? *p : *reinterpret_cast<const ::MessageConfig::GLOBAL_CONFIG*>(
-      &::MessageConfig::_GLOBAL_CONFIG_default_instance_);
+inline const ::ProtobufMessage::GLOBAL_CONFIG& PROCESS_CONFIG::serverconfig() const {
+  const ::ProtobufMessage::GLOBAL_CONFIG* p = serverconfig_;
+  // @@protoc_insertion_point(field_get:ProtobufMessage.PROCESS_CONFIG.ServerConfig)
+  return p != NULL ? *p : *reinterpret_cast<const ::ProtobufMessage::GLOBAL_CONFIG*>(
+      &::ProtobufMessage::_GLOBAL_CONFIG_default_instance_);
 }
-inline ::MessageConfig::GLOBAL_CONFIG* PROCESS_CONFIG::release_serverconfig() {
-  // @@protoc_insertion_point(field_release:MessageConfig.PROCESS_CONFIG.ServerConfig)
+inline ::ProtobufMessage::GLOBAL_CONFIG* PROCESS_CONFIG::release_serverconfig() {
+  // @@protoc_insertion_point(field_release:ProtobufMessage.PROCESS_CONFIG.ServerConfig)
   
-  ::MessageConfig::GLOBAL_CONFIG* temp = serverconfig_;
+  ::ProtobufMessage::GLOBAL_CONFIG* temp = serverconfig_;
   serverconfig_ = NULL;
   return temp;
 }
-inline ::MessageConfig::GLOBAL_CONFIG* PROCESS_CONFIG::mutable_serverconfig() {
+inline ::ProtobufMessage::GLOBAL_CONFIG* PROCESS_CONFIG::mutable_serverconfig() {
   
   if (serverconfig_ == NULL) {
-    auto* p = CreateMaybeMessage<::MessageConfig::GLOBAL_CONFIG>(GetArenaNoVirtual());
+    auto* p = CreateMaybeMessage<::ProtobufMessage::GLOBAL_CONFIG>(GetArenaNoVirtual());
     serverconfig_ = p;
   }
-  // @@protoc_insertion_point(field_mutable:MessageConfig.PROCESS_CONFIG.ServerConfig)
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.PROCESS_CONFIG.ServerConfig)
   return serverconfig_;
 }
-inline void PROCESS_CONFIG::set_allocated_serverconfig(::MessageConfig::GLOBAL_CONFIG* serverconfig) {
+inline void PROCESS_CONFIG::set_allocated_serverconfig(::ProtobufMessage::GLOBAL_CONFIG* serverconfig) {
   ::google::protobuf::Arena* message_arena = GetArenaNoVirtual();
   if (message_arena == NULL) {
     delete serverconfig_;
@@ -2138,7 +2467,7 @@ inline void PROCESS_CONFIG::set_allocated_serverconfig(::MessageConfig::GLOBAL_C
     
   }
   serverconfig_ = serverconfig;
-  // @@protoc_insertion_point(field_set_allocated:MessageConfig.PROCESS_CONFIG.ServerConfig)
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.PROCESS_CONFIG.ServerConfig)
 }
 
 #ifdef __GNUC__
@@ -2152,10 +2481,12 @@ inline void PROCESS_CONFIG::set_allocated_serverconfig(::MessageConfig::GLOBAL_C
 
 // -------------------------------------------------------------------
 
+// -------------------------------------------------------------------
+
 
 // @@protoc_insertion_point(namespace_scope)
 
-}  // namespace MessageConfig
+}  // namespace ProtobufMessage
 
 // @@protoc_insertion_point(global_scope)
 

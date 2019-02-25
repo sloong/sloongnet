@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IObject.h"
-#include "config.pb.h"
+#include "MessageTypeDef.h"
 
 namespace Sloong
 {
@@ -16,7 +16,7 @@ namespace Sloong
         CNetworkHub();
         ~CNetworkHub();
 
-        void Initialize(IControl* iMsg, MessageConfig::GLOBAL_CONFIG* config);
+        void Initialize(IControl* iMsg, ProtobufMessage::GLOBAL_CONFIG* config);
 
         void EnableClientCheck(const string& clientCheckKey, int clientCheckTime);
         void EnableTimeoutCheck(int timeoutTime, int checkInterval);
@@ -52,7 +52,7 @@ namespace Sloong
         unique_ptr<CEpollEx>    m_pEpoll;
         CEasySync              m_oSync;
         SSL_CTX*                m_pCTX = nullptr;
-        MessageConfig::GLOBAL_CONFIG*          m_pConfig = nullptr;
+        ProtobufMessage::GLOBAL_CONFIG*          m_pConfig = nullptr;
         // Timeout check
 		int m_nConnectTimeoutTime;
         int m_nCheckTimeoutInterval;
