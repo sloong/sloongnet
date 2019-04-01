@@ -10,12 +10,12 @@ CNormalEvent::~CNormalEvent()
 {
 }
 
-void CNormalEvent::SetEvent(MSG_TYPE t)
+void CNormalEvent::SetEvent(EVENT_TYPE t)
 {
 	m_emType = t;
 }
 
-MSG_TYPE CNormalEvent::GetEvent()
+EVENT_TYPE CNormalEvent::GetEvent()
 {
 	return m_emType;
 }

@@ -11,8 +11,8 @@ namespace Sloong
 			CNormalEvent();
 			~CNormalEvent();
 
-			void SetEvent(MSG_TYPE t);
-			MSG_TYPE GetEvent();
+			void SetEvent(EVENT_TYPE t);
+			EVENT_TYPE GetEvent();
 
 			void SetParams(SMARTER p);
 			SMARTER GetParams();
@@ -29,7 +29,7 @@ namespace Sloong
 		protected:
 			LPSMARTFUNC m_pCallbackFunc = nullptr;
 			SMARTER m_pParams = nullptr;
-			MSG_TYPE m_emType;
+			EVENT_TYPE m_emType;
 			LPVOID m_pObj;
 			string m_strMessage;
 		};

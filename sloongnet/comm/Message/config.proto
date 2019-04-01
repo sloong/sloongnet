@@ -6,8 +6,8 @@ message MessagePackage
     int32 Function = 1;
     int32 SerailNumber = 2;
     string CheckString = 3;
-    string Sender = 4;
-    string Receiver = 5;
+    int32 Sender = 4;
+    int32 Receiver = 5;
     string Context = 6;
     bytes ExtendData = 7;
 }

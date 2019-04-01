@@ -199,7 +199,7 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage(ULONG dtlen)
 			// handle error.
 			string strSend = CUniversal::Format("{\"errno\": \"-1\",\"errmsg\" : \"package check error\",\"server_md5\":\"%s\",\"client_md5\":\"%s\",\"check_string\":\"%s\"}", rmd5, strMD5, strMessage);
 			ResponsePackage(strSend);
-			auto event = make_shared<CNetworkEvent>(MSG_TYPE::MonitorSendStatus);
+			auto event = make_shared<CNetworkEvent>(EVENT_TYPE::MonitorSendStatus);
 			event->SetSocketID(m_pCon->GetSocketID());
 			m_iC->SendMessage(event);
 			return NetworkResult::Invalid;

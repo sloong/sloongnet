@@ -2,9 +2,15 @@
 
 Sloong::CSocketEx::CSocketEx(string addr)
 {
+    CSocketEx(addr, false);
+}
+
+Sloong::CSocketEx::CSocketEx( string addr, bool useLongLongSize )
+{
     auto params = CUniversal::split(m_strAddress, ":");
     m_strAddress = params[0];
     m_nPort = atoi(params[1].c_str());
+    m_bLongLongSize = useLongLongSize;
 }
 
 Sloong::CSocketEx::~CSocketEx()
@@ -33,20 +39,10 @@ bool Sloong::CSocketEx::Connect()
 
 bool Sloong::CSocketEx::Send(string sendData, bool appednLength)
 {
-    
-    if( appednLength )
-    {
-        long long nMsgLen = sendData.size();
-        
-        char m_pMsgBuffer[s_llLen] = {0};
-        char *pCpyPoint = m_pMsgBuffer;
-
-        CUniversal::LongToBytes(nMsgLen, pCpyPoint);
-        send( m_nSocket, pCpyPoint, s_llLen, 0);
-    }
-    send(m_nSocket, sendData.c_str(), sendData.length(), 0);
+    CUniversal::SendEx(m_nSocket, sendData.c_str(), sendData.length());
     return true;
 }
+
 
 string Sloong::CSocketEx::Recv(int length)
 {
@@ -56,19 +52,57 @@ string Sloong::CSocketEx::Recv(int length)
     return buf;
 }
 
+
+
+long long RecvLengthData()
+{
+    if( m_bLongLongSize ) {
+        char nLen[s_llLen] = {0};
+        CUniversal::RecvEx(m_nSocket, nLen, s_llLen, m_nTimeout);
+        auto len = CUniversal::BytesToInt64(nLen);
+        return len;
+    }else{
+        char nLen[s_lLen] = {0};
+        CUniversal::RecvEx(m_nSocket, nLen, s_lLen, m_nTimeout);
+        auto len = CUniversal::BytesToInt32(nLen);
+        return len;
+    }
+}
+
+string SendLengthData(long long lengthData)
+{
+    if( m_bLongLongSize ) {
+        char m_pMsgBuffer[s_llLen] = {0};
+        char *pCpyPoint = m_pMsgBuffer;
+        CUniversal::Int64ToBytes(lengthData, pCpyPoint);
+        return string(m_pMsgBuffer,s_llLen);
+    }else{
+        char m_pMsgBuffer[s_lLen] = {0};
+        char *pCpyPoint = m_pMsgBuffer;
+        CUniversal::Int32ToBytes(lengthData, pCpyPoint);
+        return string(m_pMsgBuffer,s_lLen);
+    }
+}
+
+
+
+bool Sloong::CSocketEx::SendPackage(string sendData)
+{
+    auto length = LengthConvertToBytes(sendData.size());
+    
+    Send(length);
+    return Send(sendData);
+}
+
+
+
+
 string Sloong::CSocketEx::RecvPackage()
 {
-    char nLen[4] = {0};
-    CUniversal::RecvEx(m_nSocket, nLen, 4, 5);
-    auto len = CUniversal::BytesToLong(nLen);
+    auto len = RecvLengthData();
 
     string buf;
     buf.resize(len);
-    CUniversal::RecvEx(m_nSocket, buf.data(), len, 5);
+    CUniversal::RecvEx(m_nSocket, buf.data(), len, m_nTimeout);
 
-}
-
-int Sloong::CSocketEx::GetSocket()
-{
-    return m_nSocket;
 }

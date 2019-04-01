@@ -39,3 +39,4 @@ build/release/
 build/*.tar
 servctrl/servctrl/bin/
 servctrl/servctrl/obj
+.vscode/

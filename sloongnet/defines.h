@@ -24,9 +24,20 @@ T TYPE_TRANS(LPVOID p)
 
 
 const int s_llLen = 8;
+const int s_lLen = 4;
 const int s_PriorityLevel = 5;
 
-typedef enum g_DataCenter_MsgType
+enum ModuleType
+{
+	Proxy,
+	ControlCenter,
+	Process,
+	Firewall,
+	DataCenter,
+}
+
+
+typedef enum g_DataCenter_Event_Type
 {
 	ProgramStart,
 	ProgramExit,
@@ -63,7 +74,8 @@ typedef enum g_DataCenter_MsgType
 	
 	
 
-}MSG_TYPE;
+}EVENT_TYPE;
+
 
 enum RecvStatus
 {

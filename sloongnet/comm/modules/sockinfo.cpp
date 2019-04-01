@@ -131,7 +131,7 @@ NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 			m_ActiveTime = time(NULL);
 			
 			// Add the sock event to list
-			auto event = make_shared<CNetworkEvent>(MSG_TYPE::ReveivePackage);
+			auto event = make_shared<CNetworkEvent>(EVENT_TYPE::ReveivePackage);
 			
 			event->SetSocketID(m_pCon->GetSocketID());
 			event->SetUserInfo(m_pUserInfo.get());

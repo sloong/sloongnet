@@ -42,15 +42,15 @@ void Sloong::CNetworkHub::Initialize(IControl *iMsg, ProtobufMessage::GLOBAL_CON
 							  std::bind(&CNetworkHub::OnCanWriteData, this, std::placeholders::_1),
 							  std::bind(&CNetworkHub::OnOtherEventHappened, this, std::placeholders::_1));
 
-	m_iC->RegisterEvent(MSG_TYPE::ReveivePackage);
-	m_iC->RegisterEvent(MSG_TYPE::SocketClose);
-	m_iC->RegisterEvent(MSG_TYPE::SendMessage);
-	m_iC->RegisterEvent(MSG_TYPE::MonitorSendStatus);
-	m_iC->RegisterEventHandler(MSG_TYPE::ProgramStart, std::bind(&CNetworkHub::Run, this, std::placeholders::_1));
-	m_iC->RegisterEventHandler(MSG_TYPE::ProgramExit, std::bind(&CNetworkHub::Exit, this, std::placeholders::_1));
-	m_iC->RegisterEventHandler(MSG_TYPE::SendMessage, std::bind(&CNetworkHub::SendMessageEventHandler, this, std::placeholders::_1));
-	m_iC->RegisterEventHandler(MSG_TYPE::SocketClose, std::bind(&CNetworkHub::CloseConnectEventHandler, this, std::placeholders::_1));
-	m_iC->RegisterEventHandler(MSG_TYPE::MonitorSendStatus, std::bind(&CNetworkHub::MonitorSendStatusEventHandler, this, std::placeholders::_1));
+	m_iC->RegisterEvent(EVENT_TYPE::ReveivePackage);
+	m_iC->RegisterEvent(EVENT_TYPE::SocketClose);
+	m_iC->RegisterEvent(EVENT_TYPE::SendMessage);
+	m_iC->RegisterEvent(EVENT_TYPE::MonitorSendStatus);
+	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&CNetworkHub::Run, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramExit, std::bind(&CNetworkHub::Exit, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::SendMessage, std::bind(&CNetworkHub::SendMessageEventHandler, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::SocketClose, std::bind(&CNetworkHub::CloseConnectEventHandler, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::MonitorSendStatus, std::bind(&CNetworkHub::MonitorSendStatusEventHandler, this, std::placeholders::_1));
 }
 
 void Sloong::CNetworkHub::Run(SmartEvent event)
@@ -117,7 +117,7 @@ void Sloong::CNetworkHub::SendCloseConnectEvent(int socket)
 	if (info == nullptr)
 		return;
 
-	auto event = make_shared<CNetworkEvent>(MSG_TYPE::SocketClose);
+	auto event = make_shared<CNetworkEvent>(EVENT_TYPE::SocketClose);
 	event->SetSocketID(socket);
 	event->SetUserInfo(info->m_pUserInfo.get());
 	event->SetHandler(this);

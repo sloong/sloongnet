@@ -148,7 +148,7 @@ bool SloongNetService::Initialize(int argc, char **args)
 void SloongNetService::Run()
 {
 	m_pLog->Info("Application begin running.");
-	m_pControl->SendMessage(MSG_TYPE::ProgramStart);
+	m_pControl->SendMessage(EVENT_TYPE::ProgramStart);
 	m_oSync.wait();
 }
 
@@ -163,7 +163,7 @@ void Sloong::SloongNetService::OnReceivePackage(SmartEvent evt)
 	}
 	SmartPackage pack = net_evt->GetDataPackage();
 
-	net_evt->SetEvent(MSG_TYPE::SendMessage);
+	net_evt->SetEvent(EVENT_TYPE::SendMessage);
 
 	string strRes("");
 	// char* pExData = nullptr;
@@ -196,7 +196,7 @@ void Sloong::SloongNetService::OnSocketClose(SmartEvent event)
 void Sloong::SloongNetService::Exit()
 {
 	m_pLog->Info("Application will exit.");
-	m_pControl->SendMessage(MSG_TYPE::ProgramExit);
+	m_pControl->SendMessage(EVENT_TYPE::ProgramExit);
 	m_pControl->Exit();
 	m_oSync.notify_one();
 }

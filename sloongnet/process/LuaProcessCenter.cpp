@@ -29,8 +29,8 @@ void Sloong::CLuaProcessCenter::Initialize(IControl* iMsg)
 	m_pGFunc->Initialize(m_iC);
 	m_pConfig = IData::GetServerConfig();
 
-	m_iC->RegisterEvent(MSG_TYPE::ProcessMessage);
-	m_iC->RegisterEvent(MSG_TYPE::ReloadLuaContext);
+	m_iC->RegisterEvent(EVENT_TYPE::ProcessMessage);
+	m_iC->RegisterEvent(EVENT_TYPE::ReloadLuaContext);
 	//m_iC->RegisterEventHandler(ProcessMessage, this, EventHandler);
 	m_iC->RegisterEventHandler(ReloadLuaContext, std::bind(&CLuaProcessCenter::ReloadContext,this,std::placeholders::_1));
 	// 主要的循环方式为，根据输入的处理数来初始化指定数量的lua环境。

@@ -90,15 +90,16 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 
 		ProtobufMessage::MessagePackage pack;
 		pack.set_type(MessageType::GetConfig);
-		pack.set_sender("SLOONGNET_PROXY");
-		pack.set_receiver("SLOONGNET_CONTROL");
-		pack.set_context("");
+		pack.set_sender(ModuleType::Proxy);
+		pack.set_receiver(ModuleType::ControlCenter);
 		string msg;
 		pack.SerializeToString(&msg);
 
-		m_pSocket->Send(msg);
-		m_pSocket->RecvPackage();
-		
+		m_pSocket->SendPackage(msg);
+		string result = m_pSocket->RecvPackage();
+
+		ProtobufMessage::PROXY_CONFIG config;
+		config.
 		
 
 		m_pControl->Initialize(config.m_nMessageCenterThreadQuantity);
@@ -151,7 +152,7 @@ bool SloongNetProxy::ConnectToControl(string controlAddress)
 void SloongNetProxy::Run()
 {
 	m_pLog->Info("Application begin running.");
-	m_pControl->SendMessage(MSG_TYPE::ProgramStart);
+	m_pControl->SendMessage(EVENT_TYPE::ProgramStart);
 }
 
 void Sloong::SloongNetProxy::OnReceivePackage(SmartEvent evt)
@@ -165,7 +166,7 @@ void Sloong::SloongNetProxy::OnReceivePackage(SmartEvent evt)
 	}
 	SmartPackage pack = net_evt->GetDataPackage();
 
-	net_evt->SetEvent(MSG_TYPE::SendMessage);
+	net_evt->SetEvent(EVENT_TYPE::SendMessage);
 
 	string strRes("");
 	// char* pExData = nullptr;
@@ -199,6 +200,6 @@ void Sloong::SloongNetProxy::OnSocketClose(SmartEvent event)
 void Sloong::SloongNetProxy::Exit()
 {
 	m_pLog->Info("Application will exit.");
-	m_pControl->SendMessage(MSG_TYPE::ProgramExit);
+	m_pControl->SendMessage(EVENT_TYPE::ProgramExit);
 	m_pControl->Exit();
 }

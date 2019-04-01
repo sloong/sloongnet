@@ -14,7 +14,7 @@ namespace Sloong
 	public:
 		IEvent() {}
 		virtual ~IEvent() {}
-		virtual MSG_TYPE GetEvent() = 0;
+		virtual EVENT_TYPE GetEvent() = 0;
 		// Get the handler object.
 		// it is pointer to the event register.
 		virtual LPVOID GetHandler() = 0;

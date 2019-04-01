@@ -16,11 +16,11 @@ namespace Sloong
 		void Exit();
 
         // Message
-        void SendMessage(MSG_TYPE msgType);
+        void SendMessage(EVENT_TYPE msgType);
 		void SendMessage(SmartEvent evt);
 
-		void RegisterEvent(MSG_TYPE t);
-		void RegisterEventHandler(MSG_TYPE t, MsgHandlerFunc func);
+		void RegisterEvent(EVENT_TYPE t);
+		void RegisterEventHandler(EVENT_TYPE t, MsgHandlerFunc func);
 
         void MessageWorkLoop(SMARTER param);
 
@@ -46,7 +46,7 @@ namespace Sloong
 		map<DATA_ITEM, void*> m_oDataList;
 		map<string, void*> m_oTempDataList;
         // Message
-        map<MSG_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;
+        map<EVENT_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;
 		queue<shared_ptr<IEvent>> m_oMsgList;
 		mutex m_oMsgListMutex;
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;

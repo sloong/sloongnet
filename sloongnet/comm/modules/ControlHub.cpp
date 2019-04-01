@@ -67,7 +67,7 @@ void * Sloong::CControlHub::GetTemp(string name)
 
 
 
-void Sloong::CControlHub::SendMessage(MSG_TYPE msgType)
+void Sloong::CControlHub::SendMessage(EVENT_TYPE msgType)
 {
 	auto evt = make_shared<CNormalEvent>();
 	evt->SetEvent(msgType);
@@ -84,7 +84,7 @@ void Sloong::CControlHub::SendMessage(SmartEvent evt)
 }
 
 
-void Sloong::CControlHub::RegisterEvent(MSG_TYPE t)
+void Sloong::CControlHub::RegisterEvent(EVENT_TYPE t)
 {
 	m_oMsgHandlerList[t] = vector<MsgHandlerFunc>();
 }
@@ -94,7 +94,7 @@ void Sloong::CControlHub::RegisterEvent(MSG_TYPE t)
  * @Params: 
  * @Return: 
  */
-void Sloong::CControlHub::RegisterEventHandler(MSG_TYPE t, MsgHandlerFunc func)
+void Sloong::CControlHub::RegisterEventHandler(EVENT_TYPE t, MsgHandlerFunc func)
 {
 	if (m_oMsgHandlerList.find(t) == m_oMsgHandlerList.end())
 	{

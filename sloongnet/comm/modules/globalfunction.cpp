@@ -427,7 +427,7 @@ int Sloong::CGlobalFunction::Lua_SendFile(lua_State *l)
 
 int Sloong::CGlobalFunction::Lua_ReloadScript(lua_State *l)
 {
-    g_pThis->m_iC->SendMessage(MSG_TYPE::ReloadLuaContext);
+    g_pThis->m_iC->SendMessage(EVENT_TYPE::ReloadLuaContext);
     return 0;
 }
 

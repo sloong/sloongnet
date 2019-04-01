@@ -9,7 +9,7 @@ namespace Sloong
 		class CNetworkEvent : public CNormalEvent
 		{
 		public:
-			CNetworkEvent(MSG_TYPE t){ m_emType = t; }
+			CNetworkEvent(EVENT_TYPE t){ m_emType = t; }
 			virtual	~CNetworkEvent();
 
 			inline int GetSocketID() { return m_nSocketID; }
