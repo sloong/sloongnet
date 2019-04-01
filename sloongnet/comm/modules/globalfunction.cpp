@@ -11,7 +11,6 @@
 #include "version.h"
 #include "epollex.h"
 #include "NormalEvent.h"
-#include "MessageTypeDef.h"
 #include "IData.h"
 
 using namespace std;
@@ -87,13 +86,9 @@ void CGlobalFunction::ClearReceiveInfoByUUID(string uuid)
 void Sloong::CGlobalFunction::Initialize(IControl *iMsg)
 {
     IObject::Initialize(iMsg);
-
-    ProtobufMessage::DATA_CONFIG *pConfig = IData::GetDataConfig();
-    if (pConfig->datareceiveport()>0)
-    {
-        EnableDataReceive(pConfig->datareceiveport());
-    }
 }
+
+
 
 void Sloong::CGlobalFunction::Exit()
 {
@@ -137,7 +132,6 @@ void *Sloong::CGlobalFunction::RecvDataConnFunc(void *pParam)
 {
     CGlobalFunction *pThis = (CGlobalFunction *)pParam;
     CLog *pLog = pThis->m_pLog;
-    auto *pConfig = IData::GetDataConfig();
     while (pThis->m_bIsRunning)
     {
         int conn_sock = -1;
@@ -149,7 +143,7 @@ void *Sloong::CGlobalFunction::RecvDataConnFunc(void *pParam)
             memset(pCheckBuf, 0, g_uuid_len + 1);
             // In Check function, client need send the check key in 3 second.
             // 这里仍然使用Universal提供的ReceEx。这里不需要进行SSL接收
-            int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, g_uuid_len, pConfig->datarecvtime());
+            int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, g_uuid_len, pThis->m_nRecvDataTimeoutTime);
             // Check uuid length
             if (nLen != g_uuid_len)
             {
@@ -180,7 +174,6 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
     CLog *pLog = pThis->m_pLog;
     int *pSock = (int *)pParam;
     int conn_sock = *pSock;
-    auto *pConfig = IData::GetDataConfig();
     SAFE_DELETE(pSock);
     // Find the recv uuid.
 
@@ -207,7 +200,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
         {
             char *pLongBuffer = new char[g_data_pack_len + 1](); //dataLeng;
             memset(pLongBuffer, 0, g_data_pack_len + 1);
-            int nRecvSize = CUniversal::RecvEx(conn_sock, pLongBuffer, g_data_pack_len, pConfig->datarecvtime());
+            int nRecvSize = CUniversal::RecvEx(conn_sock, pLongBuffer, g_data_pack_len, pThis->m_nRecvDataTimeoutTime);
             if (nRecvSize <= 0)
             {
                 // 读取错误,将这个连接从监听中移除并关闭连接
@@ -217,7 +210,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
             }
             else
             {
-                long long dtlen = CUniversal::BytesToLong(pLongBuffer);
+                long long dtlen = CUniversal::BytesToInt64(pLongBuffer);
                 SAFE_DELETE_ARR(pLongBuffer);
                 // package length cannot big than 2147483648. this is max value for int.
                 if (dtlen <= 0 || dtlen > 2147483648 || nRecvSize != g_data_pack_len)
@@ -228,7 +221,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
 
                 char *szMD5 = new char[g_md5_len + 1];
                 memset(szMD5, 0, g_md5_len + 1);
-                nRecvSize = CUniversal::RecvEx(conn_sock, szMD5, g_md5_len, pConfig->serverconfig().receivetime(), true);
+                nRecvSize = CUniversal::RecvEx(conn_sock, szMD5, g_md5_len, pThis->m_nRecvDataTimeoutTime, true);
                 if (nRecvSize <= 0)
                 {
                     pLog->Error("Receive data package md5 error.");
@@ -260,7 +253,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
                     int nOnceRecvLen = 10240;
                     if (dtlen - nRecvdLen < 10240)
                         nOnceRecvLen = dtlen - nRecvdLen;
-                    nRecvSize = CUniversal::RecvEx(conn_sock, pData, nOnceRecvLen, pConfig->serverconfig().receivetime(), true);
+                    nRecvSize = CUniversal::RecvEx(conn_sock, pData, nOnceRecvLen, pThis->m_nRecvDataTimeoutTime, true);
                     if (nRecvSize < 0)
                     {
                         pLog->Error("Receive data error.");

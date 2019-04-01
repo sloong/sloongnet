@@ -110,7 +110,7 @@ NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 		else
 		{
 			bLoop = true;
-			long long dtlen = CUniversal::BytesToLong(pLongBuffer);
+			long long dtlen = CUniversal::BytesToInt64(pLongBuffer);
 			// package length cannot big than 2147483648. this is max value for int.
 			if (dtlen <= 0 || dtlen > 2147483648 || nRecvSize != s_llLen)
 			{

@@ -41,22 +41,22 @@ void Sloong::CDataTransPackage::ResponsePackage(const string &msg, const char *p
 	memset(m_pMsgBuffer, 0, nBufLen);
 	char *pCpyPoint = m_pMsgBuffer;
 
-	CUniversal::LongToBytes(nMsgLen, pCpyPoint);
+	CUniversal::Int64ToBytes(nMsgLen, pCpyPoint);
 	pCpyPoint += 8;
 	
-		CUniversal::LongToBytes(m_nSerialNumber, pCpyPoint);
-		pCpyPoint += s_llLen;
+	CUniversal::Int64ToBytes(m_nSerialNumber, pCpyPoint);
+	pCpyPoint += s_llLen;
 	
 	
-		memcpy(pCpyPoint, md5.c_str(), md5.length());
-		pCpyPoint += md5.length();
+	memcpy(pCpyPoint, md5.c_str(), md5.length());
+	pCpyPoint += md5.length();
 	
 	memcpy(pCpyPoint, msg.c_str(), msg.length());
 	pCpyPoint += msg.length();
 	if (pExData != NULL && nExSize > 0)
 	{
 		long long Exlen = nExSize;
-		CUniversal::LongToBytes(Exlen, pCpyPoint);
+		CUniversal::Int64ToBytes(Exlen, pCpyPoint);
 		pCpyPoint += 8;
 	}
 
@@ -178,7 +178,7 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage(ULONG dtlen)
 		// TODO: 接收长度信息这个可以直接在lConnect这个类里直接集成
 		char pLongBuffer[s_llLen + 1] = {0};
 		memcpy(pLongBuffer, pMsg, s_llLen);
-		m_nSerialNumber = CUniversal::BytesToLong(pLongBuffer);
+		m_nSerialNumber = CUniversal::BytesToInt64(pLongBuffer);
 		pMsg += s_llLen;
 	
 

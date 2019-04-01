@@ -27,6 +27,8 @@ namespace Sloong
         CUtility * m_pUtility;
         int 		m_ListenSock;
         bool		m_bIsRunning=true;
+
+        int         m_nRecvDataTimeoutTime;
     public:
 
 
