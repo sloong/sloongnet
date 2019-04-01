@@ -8,6 +8,7 @@ namespace Sloong
 {
 	class CControlHub;
 	class CNetworkHub;
+	class CSocketEx;
 	class SloongNetProxy
 	{
 	public:
@@ -26,6 +27,7 @@ namespace Sloong
 		unique_ptr<CControlHub> m_pControl;
 		unique_ptr<CSocketEx>	m_pSocket;
 		unique_ptr<CLog>	m_pLog;
+		ProtobufMessage::PROXY_CONFIG m_oConfig;
 	};
 
 }

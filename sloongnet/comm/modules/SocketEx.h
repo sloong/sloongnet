@@ -24,6 +24,11 @@ namespace Sloong
         int GetSocket(){
             return m_nSocket;
         }
+
+    protected:
+        long long RecvLengthData();
+        string GetSendLengthData(long long lengthData);
+
     protected:
         string m_strAddress;
         int m_nPort;

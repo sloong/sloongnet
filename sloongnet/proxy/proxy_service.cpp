@@ -7,7 +7,6 @@
 #include "NetworkEvent.h"
 #include "DataTransPackage.h"
 #include "SocketEx.h"
-#include "MessageTypeDef.h"
 using namespace Sloong;
 using namespace Sloong::Events;
 
@@ -89,7 +88,7 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		}
 
 		ProtobufMessage::MessagePackage pack;
-		pack.set_type(MessageType::GetConfig);
+		pack.set_function(MessageType::GetConfig);
 		pack.set_sender(ModuleType::Proxy);
 		pack.set_receiver(ModuleType::ControlCenter);
 		string msg;
@@ -98,12 +97,11 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		m_pSocket->SendPackage(msg);
 		string result = m_pSocket->RecvPackage();
 
-		ProtobufMessage::PROXY_CONFIG config;
-		config.
+		m_oConfig.ParseFromString(result);
 		
-
-		m_pControl->Initialize(config.m_nMessageCenterThreadQuantity);
-		m_pControl->Add(Configuation, &config);
+		auto serv_config = m_oConfig.serverconfig();
+		m_pControl->Initialize(serv_config.mqthreadquantity());
+		m_pControl->Add(Configuation, m_oConfig.mutable_serverconfig());
 		m_pControl->Add(Logger, m_pLog.get());
 
 		m_pControl->RegisterEvent(ProgramExit);
@@ -114,7 +112,9 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		try
 		{
 			IData::Initialize(m_pControl.get());
-			m_pNetwork->Initializle(m_pControl.get());
+			m_pNetwork->Initialize(m_pControl.get());
+			m_pNetwork->EnableClientCheck(m_oConfig.clientcheckkey(),m_oConfig.clientchecktime());
+			m_pNetwork->EnableTimeoutCheck(m_oConfig.timeouttime(), m_oConfig.timeoutcheckinterval());
 		}
 		catch (exception e)
 		{

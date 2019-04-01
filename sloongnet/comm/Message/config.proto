@@ -49,7 +49,8 @@ message PROXY_CONFIG{
     int32     ClientCheckTime=1;
     string  ClientCheckKey=2;
     int32     TimeoutCheckInterval=3;
-    GLOBAL_CONFIG   ServerConfig=4;
+    int32       TimeoutTime=4;
+    GLOBAL_CONFIG   ServerConfig=5;
 };
 
 message PROCESS_CONFIG{

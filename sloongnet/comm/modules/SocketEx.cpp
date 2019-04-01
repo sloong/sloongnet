@@ -37,7 +37,7 @@ bool Sloong::CSocketEx::Connect()
     return true;
 }
 
-bool Sloong::CSocketEx::Send(string sendData, bool appednLength)
+bool Sloong::CSocketEx::Send(string sendData)
 {
     CUniversal::SendEx(m_nSocket, sendData.c_str(), sendData.length());
     return true;
@@ -54,7 +54,7 @@ string Sloong::CSocketEx::Recv(int length)
 
 
 
-long long RecvLengthData()
+long long Sloong::CSocketEx::RecvLengthData()
 {
     if( m_bLongLongSize ) {
         char nLen[s_llLen] = {0};
@@ -69,7 +69,7 @@ long long RecvLengthData()
     }
 }
 
-string SendLengthData(long long lengthData)
+string Sloong::CSocketEx::GetSendLengthData(long long lengthData)
 {
     if( m_bLongLongSize ) {
         char m_pMsgBuffer[s_llLen] = {0};
@@ -88,7 +88,7 @@ string SendLengthData(long long lengthData)
 
 bool Sloong::CSocketEx::SendPackage(string sendData)
 {
-    auto length = LengthConvertToBytes(sendData.size());
+    auto length = GetSendLengthData(sendData.size());
     
     Send(length);
     return Send(sendData);

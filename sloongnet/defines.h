@@ -27,6 +27,11 @@ const int s_llLen = 8;
 const int s_lLen = 4;
 const int s_PriorityLevel = 5;
 
+enum MessageType
+{
+	GetConfig,
+};
+
 enum ModuleType
 {
 	Proxy,
@@ -34,7 +39,7 @@ enum ModuleType
 	Process,
 	Firewall,
 	DataCenter,
-}
+};
 
 
 typedef enum g_DataCenter_Event_Type

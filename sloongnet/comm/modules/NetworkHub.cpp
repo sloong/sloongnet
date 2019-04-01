@@ -19,23 +19,17 @@ Sloong::CNetworkHub::~CNetworkHub()
 	}
 }
 
-void Sloong::CNetworkHub::Initialize(IControl *iMsg, ProtobufMessage::GLOBAL_CONFIG *config)
+void Sloong::CNetworkHub::Initialize(IControl *iMsg)
 {
 	IObject::Initialize(iMsg);
 
-	m_pConfig = config;
+	m_pConfig = IData::GetGlobalConfig();
 	m_pEpoll->Initialize(m_iC);
 
 	if (m_pConfig->enablessl())
 	{
 		EnableSSL(m_pConfig->certfilepath(), m_pConfig->keyfilepath(), m_pConfig->certpasswd());
 	}
-
-	// if (m_pConfig->m_nClientCheckTime > 0 && m_pConfig->m_strClientCheckKey.length() > 0)
-	// {
-	// 	m_bEnableClientCheck = true;
-	// 	m_nClientCheckKeyLength = m_pConfig->m_strClientCheckKey.length();
-	// }
 
 	m_pEpoll->SetEventHandler(std::bind(&CNetworkHub::OnNewAccept, this, std::placeholders::_1),
 							  std::bind(&CNetworkHub::OnDataCanReceive, this, std::placeholders::_1),

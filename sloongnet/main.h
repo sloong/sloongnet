@@ -36,6 +36,7 @@ using namespace std;
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+#include "config.pb.h"
 #include "defines.h"
 #include "EasySync.h"
 

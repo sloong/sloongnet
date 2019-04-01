@@ -1,7 +1,6 @@
 #pragma once
 
 #include "IObject.h"
-#include "MessageTypeDef.h"
 
 namespace Sloong
 {
@@ -9,14 +8,13 @@ namespace Sloong
     class CSockInfo;
     class CEpollEx;
     class CConfiguation;
-    
     class CNetworkHub : IObject
     {
     public:
         CNetworkHub();
         ~CNetworkHub();
 
-        void Initialize(IControl* iMsg, ProtobufMessage::GLOBAL_CONFIG* config);
+        void Initialize(IControl* iMsg);
 
         void EnableClientCheck(const string& clientCheckKey, int clientCheckTime);
         void EnableTimeoutCheck(int timeoutTime, int checkInterval);
