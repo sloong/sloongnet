@@ -108,7 +108,7 @@ bool SloongNetService::Initialize(int argc, char **args)
 		// 	m_pLog->EnableNetworkLog(config.m_oLogInfo.NetworkPort);
 
 		m_pControl->Initialize(m_pConfig->m_oControlConfig.mqthreadquantity());
-		m_pControl->Add(Configuation, m_pConfig.get());
+		m_pControl->Add(Configuation, &m_pConfig->m_oControlConfig);
 		m_pControl->Add(Logger, m_pLog.get());
 
 		m_pControl->RegisterEvent(ProgramExit);
@@ -116,7 +116,7 @@ bool SloongNetService::Initialize(int argc, char **args)
 		try
 		{
 			IData::Initialize(m_pControl.get());
-			m_pNetwork->Initialize(m_pControl.get(),&m_pConfig->m_oControlConfig);
+			m_pNetwork->Initialize(m_pControl.get());
 		}
 		catch (exception e)
 		{

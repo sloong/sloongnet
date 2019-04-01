@@ -4,7 +4,6 @@
 
 #include "main.h"
 
-#include "MessageTypeDef.h"
 using namespace ProtobufMessage;
 
 #include "SQLiteEx.h"
