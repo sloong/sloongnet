@@ -1,6 +1,7 @@
 #include "lconnect.h"
 #include <sys/socket.h>
 #include "utility.h"
+#include "defines.h"
 
 bool support_ssl_reconnect = false;
 
@@ -15,7 +16,7 @@ Sloong::lConnect::~lConnect()
 	Close();
 }
 
-void Sloong::lConnect::Initialize(int sock, SSL_CTX* ctx )
+void Sloong::lConnect::Initialize(int sock, SSL_CTX* ctx, bool useLongLongSize)
 {
 	m_nSocket = sock;
 	m_strAddress = CUtility::GetSocketIP(m_nSocket);
@@ -29,6 +30,47 @@ void Sloong::lConnect::Initialize(int sock, SSL_CTX* ctx )
 		SSL_set_accept_state(m_pSSL);
 		do_handshake();
 	}
+	
+    m_bUseLongLongSize = useLongLongSize;
+}
+
+void Sloong::lConnect::Initialize( string addressPort, SSL_CTX* ctx, bool useLongLongSize)
+{
+	auto params = CUniversal::split(addressPort, ":");
+    m_strAddress = params[0];
+    m_nPort = atoi(params[1].c_str());
+	if (ctx)
+	{
+		m_pSSL = SSL_new(ctx);
+	}
+    m_bUseLongLongSize = useLongLongSize;
+}
+
+
+bool Sloong::lConnect::Connect()
+{
+    struct sockaddr_in remote_addr;
+    memset(&remote_addr, 0, sizeof(remote_addr));
+    remote_addr.sin_family = AF_INET;
+    remote_addr.sin_addr.s_addr = inet_addr(m_strAddress.c_str());
+    remote_addr.sin_port = htons(m_nPort);
+    if ((m_nSocket = socket(PF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        perror("socket error");
+        return false;
+    }
+    if (connect(m_nSocket, (struct sockaddr *)&remote_addr, sizeof(struct sockaddr)) < 0)
+    {
+        perror("connect error");
+        return false;
+    }
+	if (m_pSSL)
+	{
+		SSL_set_fd(m_pSSL, m_nSocket);
+		SSL_set_accept_state(m_pSSL);
+		do_handshake();
+	}
+    return true;
 }
 
 int Sloong::lConnect::SSL_Read_Ex(SSL* ssl, char* buf, int nSize, int nTimeout, bool bAgagin)
@@ -59,11 +101,90 @@ int Sloong::lConnect::SSL_Write_Ex(SSL * ssl, char * buf, int len)
 	return 0;
 }
 
-int Sloong::lConnect::Read(char * data, int len, int timeout, bool bagain)
+
+long long Sloong::lConnect::RecvLengthData()
+{
+    if( m_bUseLongLongSize ) {
+        char nLen[s_llLen] = {0};
+        if(Read(nLen, s_llLen)<1)
+			return -1;
+		
+        auto len = CUniversal::BytesToInt64(nLen);
+        return len;
+    }else{
+        char nLen[s_lLen] = {0};
+        if(Read(nLen, s_lLen)<1)
+			return -1;
+        auto len = CUniversal::BytesToInt32(nLen);
+        return len;
+    }
+}
+
+bool Sloong::lConnect::SendLengthData(long long lengthData)
+{
+	string szLengthData;
+    if( m_bUseLongLongSize ) {
+        char m_pMsgBuffer[s_llLen] = {0};
+        char *pCpyPoint = m_pMsgBuffer;
+        CUniversal::Int64ToBytes(lengthData, pCpyPoint);
+        szLengthData = string(m_pMsgBuffer,s_llLen);
+    }else{
+        char m_pMsgBuffer[s_lLen] = {0};
+        char *pCpyPoint = m_pMsgBuffer;
+        CUniversal::Int32ToBytes(lengthData, pCpyPoint);
+        szLengthData = string(m_pMsgBuffer,s_lLen);
+    }
+	if( Write(szLengthData,0) < 1 )
+		return false;
+	return true;
+}
+
+
+int Sloong::lConnect::Write(string sendData, int index)
+{
+	return Write(sendData.c_str(),sendData.length(),index);
+}
+
+string Sloong::lConnect::Read(int len)
+{
+    string buf;
+    buf.resize(len);
+	int realLen = Read(buf.data(),len);
+	buf.resize(realLen);
+    return buf;
+}
+
+
+int Sloong::lConnect::SendPackage(string sendData, int index)
+{
+	if( index == 0 )
+	{
+		if( !SendLengthData(sendData.size()))
+		return -1;
+	}
+
+	return Write(sendData, index);
+}
+
+
+bool Sloong::lConnect::RecvPackage(string& res)
+{
+    auto len = RecvLengthData();
+	if( len < 1 )
+		return false;
+	
+    res.resize(len);
+	if( Read( res.data(), len) < 1)
+		return false;
+
+	return true;
+}
+
+int Sloong::lConnect::Read(char * data, int len)
 {
 	// 未启用SSL时直接发送数据
 	if (!m_pSSL)
-		return CUniversal::RecvEx(m_nSocket, data, len, timeout, bagain);
+		return CUniversal::RecvEx(m_nSocket, data, len, m_nTimeout, m_bAgain);
 
 	if (!CheckSSLStatus(true))
 	{
@@ -172,11 +293,6 @@ void Sloong::lConnect::Close()
 	}
 	shutdown(m_nSocket, SHUT_RDWR);
 	close(m_nSocket);
-}
-
-int Sloong::lConnect::GetSocketID()
-{
-	return m_nSocket;
 }
 
 int Sloong::lConnect::G_InitializeSSL(SSL_CTX*& ctx, string certFile, string keyFile, string passwd)

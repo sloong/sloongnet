@@ -8,7 +8,7 @@
 #include "DataTransPackage.h"
 #include "configuation.h"
 #include "SQLiteEx.h"
-
+#include "config.pb.h"
 #include "version.h"
 using namespace Sloong::Events;
 
@@ -104,8 +104,6 @@ bool SloongNetService::Initialize(int argc, char **args)
 		m_pConfig->LoadAll();
 
 		m_pLog->Initialize(m_pConfig->m_oControlConfig.logpath(), "", m_pConfig->m_oControlConfig.debugmode(), LOGLEVEL(m_pConfig->m_oControlConfig.loglevel()), LOGTYPE::DAY);
-		// if (config.m_oLogInfo.NetworkPort != 0)
-		// 	m_pLog->EnableNetworkLog(config.m_oLogInfo.NetworkPort);
 
 		m_pControl->Initialize(m_pConfig->m_oControlConfig.mqthreadquantity());
 		m_pControl->Add(Configuation, &m_pConfig->m_oControlConfig);
@@ -173,7 +171,18 @@ void Sloong::SloongNetService::OnReceivePackage(SmartEvent evt)
 	// 	pack->ResponsePackage(strRes,pExData,nExSize);
 	// }else{
 	// 	m_pLog->Error("Error in process");
-	pack->ResponsePackage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
+	ProtobufMessage::MessagePackage msgPack;
+	msgPack.ParseFromString(strMsg);
+	string config;
+	if( msgPack.function() == MessageType::GetConfig)
+	{
+		if( msgPack.sender() == ModuleType::Proxy)
+		{
+			m_pConfig->m_oProxyConfig.SerializeToString(&config);
+		}
+	}
+
+	pack->ResponsePackage(config);
 	// }
 
 	net_evt->SetDataPackage(pack);

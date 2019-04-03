@@ -52,12 +52,12 @@ namespace Sloong
         SSL_CTX*                m_pCTX = nullptr;
         ProtobufMessage::GLOBAL_CONFIG*          m_pConfig = nullptr;
         // Timeout check
-		int m_nConnectTimeoutTime;
-        int m_nCheckTimeoutInterval;
+		int m_nConnectTimeoutTime=0;
+        int m_nCheckTimeoutInterval=0;
         // Client check 
-        string  m_strClientCheckKey;
-		int m_nClientCheckKeyLength;
-        int m_nClientCheckTime;
+        string  m_strClientCheckKey="";
+		int m_nClientCheckKeyLength=0;
+        int m_nClientCheckTime=0;
     };
 }
 

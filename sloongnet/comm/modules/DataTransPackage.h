@@ -1,21 +1,19 @@
 #ifndef DATA_TRANS_PACKAGE_H
 #define DATA_TRANS_PACKAGE_H
 
-
-#include "IObject.h"
+#include "main.h"
 
 #include "lconnect.h"
 namespace Sloong
 {
-    class CDataTransPackage : IObject
+    class CDataTransPackage
     {
 	public:
 		~CDataTransPackage(){
-			SAFE_DELETE_ARR(m_pMsgBuffer);
 			SAFE_DELETE_ARR(m_pExBuffer);
 		}
 
-        void Initialize(IControl*,SmartConnect);
+        void Initialize(SmartConnect conn,CLog* log= nullptr);
 
         /**
          * @Remarks: When process done, should call this function to response this package.
@@ -23,6 +21,10 @@ namespace Sloong
          * @Return: 
          */
         void ResponsePackage(const string& msg, const char* exData = nullptr, int exSize = 0);
+
+        void RequestPackage( int SerialNumber, int priorityLevel,const string& msg);
+
+        void PrepareSendPackageData( const string& msg, int priorityLevel, const char* exData = nullptr, int exSize = 0);
 
     public:
         /**
@@ -32,7 +34,7 @@ namespace Sloong
          *          if other error happened else return Error 
          *          if md5 check failed, return Invalied.
          */
-        NetworkResult RecvPackage(ULONG);
+        NetworkResult RecvPackage();
 
         /**
          * @Remarks: send this package
@@ -41,7 +43,7 @@ namespace Sloong
          */
         NetworkResult SendPackage();
 
-        inline string GetRecvMessage(){ return strMessage; }
+        inline string GetRecvMessage(){ return m_strMessage; }
 
         inline int GetSocketID(){return m_pCon->GetSocketID(); }
 
@@ -58,7 +60,7 @@ namespace Sloong
 
     protected:
         // Send data info
-        char* m_pMsgBuffer=nullptr;
+        string m_szMsgBuffer;
         int m_nMsgSize=0;
 		const char* m_pExBuffer=nullptr;
 		int m_nExSize=0;
@@ -69,13 +71,14 @@ namespace Sloong
         long long m_nSerialNumber = -1;
         
         // received MD5, used to check the validity of message 
-        string strMD5 = "";
+        string m_strMD5 = "";
         
         // request message of this package.
-        string strMessage = "";
+        string m_strMessage = "";
 
     protected:
         SmartConnect    m_pCon;
+        CLog*           m_pLog = nullptr;
     };
 
     typedef shared_ptr<CDataTransPackage> SmartPackage;

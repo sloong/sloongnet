@@ -6,7 +6,7 @@
 #include "utility.h"
 #include "NetworkEvent.h"
 #include "DataTransPackage.h"
-#include "SocketEx.h"
+#include "lconnect.h"
 using namespace Sloong;
 using namespace Sloong::Events;
 
@@ -91,13 +91,28 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		pack.set_function(MessageType::GetConfig);
 		pack.set_sender(ModuleType::Proxy);
 		pack.set_receiver(ModuleType::ControlCenter);
-		string msg;
-		pack.SerializeToString(&msg);
+		
+		int length = pack.ByteSize();
+		char* pszBuf = new char[length]();
+		pack.SerializeToArray(pszBuf,length);
 
-		m_pSocket->SendPackage(msg);
-		string result = m_pSocket->RecvPackage();
+		CDataTransPackage dataPackage;
+		dataPackage.Initialize(m_pSocket);
+		dataPackage.RequestPackage(1,1,string(pszBuf,length));
+		NetworkResult result = dataPackage.SendPackage();
+		if(result != NetworkResult::Succeed)
+		{
+			cerr << "Send get config request error."<< endl;
+			return 1;
+		}
+		result = dataPackage.RecvPackage();
+		if(result != NetworkResult::Succeed)
+		{
+			cerr << "Receive get config result error."<< endl;
+			return 1;
+		}
 
-		m_oConfig.ParseFromString(result);
+		m_oConfig.ParseFromString(dataPackage.GetRecvMessage());
 		
 		auto serv_config = m_oConfig.serverconfig();
 		m_pControl->Initialize(serv_config.mqthreadquantity());
@@ -142,11 +157,14 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 
 bool SloongNetProxy::ConnectToControl(string controlAddress)
 {
-	m_pSocket = make_unique<CSocketEx>(controlAddress);
+	
+	m_pSocket = make_shared<lConnect>();
+	m_pSocket->Initialize(controlAddress,nullptr);
+	m_pSocket->SetProperty(0,true);
 	m_pSocket->Connect();
 	
-	string clientCheckKey = "c2xvb25nYzJ4dmIyNW5PRFJtT0dWa01ERTBNalZsTkRBd01XUmlZV1UxT0RZM05tRmlaamd3TmpsbmJtOXZiSE1nbm9vbHM";
-	m_pSocket->Send(clientCheckKey);
+	/*string clientCheckKey = "c2xvb25nYzJ4dmIyNW5PRFJtT0dWa01ERTBNalZsTkRBd01XUmlZV1UxT0RZM05tRmlaamd3TmpsbmJtOXZiSE1nbm9vbHM";
+	m_pSocket->Send(clientCheckKey);*/
 }
 
 void SloongNetProxy::Run()

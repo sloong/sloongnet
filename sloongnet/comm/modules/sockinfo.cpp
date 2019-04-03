@@ -94,39 +94,29 @@ NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 	bool bLoop = false;
 	do 
 	{
-		// 先读取消息长度
-		char pLongBuffer[s_llLen + 1] = {0};
-		int nRecvSize = m_pCon->Read( pLongBuffer, s_llLen, 2);
-		if (nRecvSize < 0)
+		auto package = make_shared<CDataTransPackage>();
+		package->Initialize(m_pCon,m_pLog);
+		auto res = package->RecvPackage();
+		if( res == NetworkResult::Error)
 		{
 			// 读取错误,将这个连接从监听中移除并关闭连接
 			return NetworkResult::Error;
+		}else if( res == NetworkResult::Invalid)
+		{
+			auto event = make_shared<CNetworkEvent>(EVENT_TYPE::MonitorSendStatus);
+			event->SetSocketID(m_pCon->GetSocketID());
+			m_iC->SendMessage(event);
+			AddToSendList(package);
 		}
-		else if (nRecvSize == 0)
+		/*else if (nRecvSize == 0)
 		{
 			//由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
 			return NetworkResult::Succeed;
-		}
+		}*/
 		else
 		{
 			bLoop = true;
-			long long dtlen = CUniversal::BytesToInt64(pLongBuffer);
-			// package length cannot big than 2147483648. this is max value for int.
-			if (dtlen <= 0 || dtlen > 2147483648 || nRecvSize != s_llLen)
-			{
-				m_pLog->Error("Receive data length error.");
-				return NetworkResult::Error;
-			}
-
-			auto package = make_shared<CDataTransPackage>();
-			package->Initialize(m_iC,m_pCon);
-			auto res = package->RecvPackage(dtlen);
-			if ( res == NetworkResult::Invalid ){
-				AddToSendList(package);
-			}else if( res == NetworkResult::Error ){
-				return NetworkResult::Error;
-			}
-
+			
 			// update the socket time
 			m_ActiveTime = time(NULL);
 			

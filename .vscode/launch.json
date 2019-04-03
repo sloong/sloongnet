@@ -22,10 +22,9 @@
             "name": "Proxy Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/debug/sloongnet_control",
+            "program": "${workspaceFolder}/build/debug/sloongnet_proxy/sloongnet_proxy",
             "args": [
-                    "-r",
-                    "default.conf",
+                    "127.0.0.1:8002"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
