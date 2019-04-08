@@ -4,9 +4,18 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "build_proxy",
             "type": "shell",
-            "command": "./build/build.sh ",
+            "command": "./build/build.sh proxy",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build_control",
+            "type": "shell",
+            "command": "./build/build.sh control",
             "group": {
                 "kind": "build",
                 "isDefault": true
