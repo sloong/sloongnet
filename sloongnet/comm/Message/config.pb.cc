@@ -36,6 +36,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* PROXY_CONFIG_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   PROXY_CONFIG_reflection_ = NULL;
+const ::google::protobuf::Descriptor* FIREWALL_CONFIG_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  FIREWALL_CONFIG_reflection_ = NULL;
 const ::google::protobuf::Descriptor* PROCESS_CONFIG_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   PROCESS_CONFIG_reflection_ = NULL;
@@ -153,7 +156,22 @@ void protobuf_AssignDesc_config_2eproto() {
       sizeof(PROXY_CONFIG),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROXY_CONFIG, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROXY_CONFIG, _is_default_instance_));
-  PROCESS_CONFIG_descriptor_ = file->message_type(5);
+  FIREWALL_CONFIG_descriptor_ = file->message_type(5);
+  static const int FIREWALL_CONFIG_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FIREWALL_CONFIG, serverconfig_),
+  };
+  FIREWALL_CONFIG_reflection_ =
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
+      FIREWALL_CONFIG_descriptor_,
+      FIREWALL_CONFIG::default_instance_,
+      FIREWALL_CONFIG_offsets_,
+      -1,
+      -1,
+      -1,
+      sizeof(FIREWALL_CONFIG),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FIREWALL_CONFIG, _internal_metadata_),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FIREWALL_CONFIG, _is_default_instance_));
+  PROCESS_CONFIG_descriptor_ = file->message_type(6);
   static const int PROCESS_CONFIG_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROCESS_CONFIG, luacontextquantity_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROCESS_CONFIG, luascriptfolder_),
@@ -198,6 +216,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
       PROXY_CONFIG_descriptor_, &PROXY_CONFIG::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+      FIREWALL_CONFIG_descriptor_, &FIREWALL_CONFIG::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
       PROCESS_CONFIG_descriptor_, &PROCESS_CONFIG::default_instance());
 }
 
@@ -214,6 +234,8 @@ void protobuf_ShutdownFile_config_2eproto() {
   delete DATA_CONFIG_reflection_;
   delete PROXY_CONFIG::default_instance_;
   delete PROXY_CONFIG_reflection_;
+  delete FIREWALL_CONFIG::default_instance_;
+  delete FIREWALL_CONFIG_reflection_;
   delete PROCESS_CONFIG::default_instance_;
   delete PROCESS_CONFIG_reflection_;
 }
@@ -248,13 +270,15 @@ void protobuf_AddDesc_config_2eproto() {
     "Time\030\001 \001(\005\022\026\n\016ClientCheckKey\030\002 \001(\t\022\034\n\024Ti"
     "meoutCheckInterval\030\003 \001(\005\022\023\n\013TimeoutTime\030"
     "\004 \001(\005\0224\n\014ServerConfig\030\005 \001(\0132\036.ProtobufMe"
-    "ssage.GLOBAL_CONFIG\"\347\001\n\016PROCESS_CONFIG\022\032"
-    "\n\022LuaContextQuantity\030\001 \001(\005\022\027\n\017LuaScriptF"
-    "older\030\002 \001(\t\022\024\n\014LuaEntryFile\030\003 \001(\t\022\030\n\020Lua"
-    "EntryFunction\030\004 \001(\t\022\032\n\022LuaProcessFunctio"
-    "n\030\005 \001(\t\022\036\n\026LuaSocketCloseFunction\030\006 \001(\t\022"
-    "4\n\014ServerConfig\030\007 \001(\0132\036.ProtobufMessage."
-    "GLOBAL_CONFIGb\006proto3", 1141);
+    "ssage.GLOBAL_CONFIG\"G\n\017FIREWALL_CONFIG\0224"
+    "\n\014ServerConfig\030\005 \001(\0132\036.ProtobufMessage.G"
+    "LOBAL_CONFIG\"\347\001\n\016PROCESS_CONFIG\022\032\n\022LuaCo"
+    "ntextQuantity\030\001 \001(\005\022\027\n\017LuaScriptFolder\030\002"
+    " \001(\t\022\024\n\014LuaEntryFile\030\003 \001(\t\022\030\n\020LuaEntryFu"
+    "nction\030\004 \001(\t\022\032\n\022LuaProcessFunction\030\005 \001(\t"
+    "\022\036\n\026LuaSocketCloseFunction\030\006 \001(\t\0224\n\014Serv"
+    "erConfig\030\007 \001(\0132\036.ProtobufMessage.GLOBAL_"
+    "CONFIGb\006proto3", 1214);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "config.proto", &protobuf_RegisterTypes);
   MessagePackage::default_instance_ = new MessagePackage();
@@ -262,12 +286,14 @@ void protobuf_AddDesc_config_2eproto() {
   DB_CONFIG::default_instance_ = new DB_CONFIG();
   DATA_CONFIG::default_instance_ = new DATA_CONFIG();
   PROXY_CONFIG::default_instance_ = new PROXY_CONFIG();
+  FIREWALL_CONFIG::default_instance_ = new FIREWALL_CONFIG();
   PROCESS_CONFIG::default_instance_ = new PROCESS_CONFIG();
   MessagePackage::default_instance_->InitAsDefaultInstance();
   GLOBAL_CONFIG::default_instance_->InitAsDefaultInstance();
   DB_CONFIG::default_instance_->InitAsDefaultInstance();
   DATA_CONFIG::default_instance_->InitAsDefaultInstance();
   PROXY_CONFIG::default_instance_->InitAsDefaultInstance();
+  FIREWALL_CONFIG::default_instance_->InitAsDefaultInstance();
   PROCESS_CONFIG::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_config_2eproto);
 }
@@ -3631,6 +3657,272 @@ void PROXY_CONFIG::set_allocated_serverconfig(::ProtobufMessage::GLOBAL_CONFIG* 
     
   }
   // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.PROXY_CONFIG.ServerConfig)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
+
+// ===================================================================
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int FIREWALL_CONFIG::kServerConfigFieldNumber;
+#endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
+
+FIREWALL_CONFIG::FIREWALL_CONFIG()
+  : ::google::protobuf::Message(), _internal_metadata_(NULL) {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:ProtobufMessage.FIREWALL_CONFIG)
+}
+
+void FIREWALL_CONFIG::InitAsDefaultInstance() {
+  _is_default_instance_ = true;
+  serverconfig_ = const_cast< ::ProtobufMessage::GLOBAL_CONFIG*>(&::ProtobufMessage::GLOBAL_CONFIG::default_instance());
+}
+
+FIREWALL_CONFIG::FIREWALL_CONFIG(const FIREWALL_CONFIG& from)
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:ProtobufMessage.FIREWALL_CONFIG)
+}
+
+void FIREWALL_CONFIG::SharedCtor() {
+    _is_default_instance_ = false;
+  _cached_size_ = 0;
+  serverconfig_ = NULL;
+}
+
+FIREWALL_CONFIG::~FIREWALL_CONFIG() {
+  // @@protoc_insertion_point(destructor:ProtobufMessage.FIREWALL_CONFIG)
+  SharedDtor();
+}
+
+void FIREWALL_CONFIG::SharedDtor() {
+  if (this != default_instance_) {
+    delete serverconfig_;
+  }
+}
+
+void FIREWALL_CONFIG::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* FIREWALL_CONFIG::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return FIREWALL_CONFIG_descriptor_;
+}
+
+const FIREWALL_CONFIG& FIREWALL_CONFIG::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_config_2eproto();
+  return *default_instance_;
+}
+
+FIREWALL_CONFIG* FIREWALL_CONFIG::default_instance_ = NULL;
+
+FIREWALL_CONFIG* FIREWALL_CONFIG::New(::google::protobuf::Arena* arena) const {
+  FIREWALL_CONFIG* n = new FIREWALL_CONFIG;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
+}
+
+void FIREWALL_CONFIG::Clear() {
+// @@protoc_insertion_point(message_clear_start:ProtobufMessage.FIREWALL_CONFIG)
+  if (GetArenaNoVirtual() == NULL && serverconfig_ != NULL) delete serverconfig_;
+  serverconfig_ = NULL;
+}
+
+bool FIREWALL_CONFIG::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!GOOGLE_PREDICT_TRUE(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:ProtobufMessage.FIREWALL_CONFIG)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 5;
+      case 5: {
+        if (tag == 42) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_serverconfig()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormatLite::SkipField(input, tag));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:ProtobufMessage.FIREWALL_CONFIG)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:ProtobufMessage.FIREWALL_CONFIG)
+  return false;
+#undef DO_
+}
+
+void FIREWALL_CONFIG::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:ProtobufMessage.FIREWALL_CONFIG)
+  // optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 5;
+  if (this->has_serverconfig()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      5, *this->serverconfig_, output);
+  }
+
+  // @@protoc_insertion_point(serialize_end:ProtobufMessage.FIREWALL_CONFIG)
+}
+
+::google::protobuf::uint8* FIREWALL_CONFIG::InternalSerializeWithCachedSizesToArray(
+    bool deterministic, ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:ProtobufMessage.FIREWALL_CONFIG)
+  // optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 5;
+  if (this->has_serverconfig()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      InternalWriteMessageNoVirtualToArray(
+        5, *this->serverconfig_, false, target);
+  }
+
+  // @@protoc_insertion_point(serialize_to_array_end:ProtobufMessage.FIREWALL_CONFIG)
+  return target;
+}
+
+int FIREWALL_CONFIG::ByteSize() const {
+// @@protoc_insertion_point(message_byte_size_start:ProtobufMessage.FIREWALL_CONFIG)
+  int total_size = 0;
+
+  // optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 5;
+  if (this->has_serverconfig()) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        *this->serverconfig_);
+  }
+
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void FIREWALL_CONFIG::MergeFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:ProtobufMessage.FIREWALL_CONFIG)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  const FIREWALL_CONFIG* source = 
+      ::google::protobuf::internal::DynamicCastToGenerated<const FIREWALL_CONFIG>(
+          &from);
+  if (source == NULL) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:ProtobufMessage.FIREWALL_CONFIG)
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:ProtobufMessage.FIREWALL_CONFIG)
+    MergeFrom(*source);
+  }
+}
+
+void FIREWALL_CONFIG::MergeFrom(const FIREWALL_CONFIG& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:ProtobufMessage.FIREWALL_CONFIG)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  if (from.has_serverconfig()) {
+    mutable_serverconfig()->::ProtobufMessage::GLOBAL_CONFIG::MergeFrom(from.serverconfig());
+  }
+}
+
+void FIREWALL_CONFIG::CopyFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:ProtobufMessage.FIREWALL_CONFIG)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void FIREWALL_CONFIG::CopyFrom(const FIREWALL_CONFIG& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:ProtobufMessage.FIREWALL_CONFIG)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool FIREWALL_CONFIG::IsInitialized() const {
+
+  return true;
+}
+
+void FIREWALL_CONFIG::Swap(FIREWALL_CONFIG* other) {
+  if (other == this) return;
+  InternalSwap(other);
+}
+void FIREWALL_CONFIG::InternalSwap(FIREWALL_CONFIG* other) {
+  std::swap(serverconfig_, other->serverconfig_);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
+}
+
+::google::protobuf::Metadata FIREWALL_CONFIG::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = FIREWALL_CONFIG_descriptor_;
+  metadata.reflection = FIREWALL_CONFIG_reflection_;
+  return metadata;
+}
+
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// FIREWALL_CONFIG
+
+// optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 5;
+bool FIREWALL_CONFIG::has_serverconfig() const {
+  return !_is_default_instance_ && serverconfig_ != NULL;
+}
+void FIREWALL_CONFIG::clear_serverconfig() {
+  if (GetArenaNoVirtual() == NULL && serverconfig_ != NULL) delete serverconfig_;
+  serverconfig_ = NULL;
+}
+const ::ProtobufMessage::GLOBAL_CONFIG& FIREWALL_CONFIG::serverconfig() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.FIREWALL_CONFIG.ServerConfig)
+  return serverconfig_ != NULL ? *serverconfig_ : *default_instance_->serverconfig_;
+}
+::ProtobufMessage::GLOBAL_CONFIG* FIREWALL_CONFIG::mutable_serverconfig() {
+  
+  if (serverconfig_ == NULL) {
+    serverconfig_ = new ::ProtobufMessage::GLOBAL_CONFIG;
+  }
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.FIREWALL_CONFIG.ServerConfig)
+  return serverconfig_;
+}
+::ProtobufMessage::GLOBAL_CONFIG* FIREWALL_CONFIG::release_serverconfig() {
+  // @@protoc_insertion_point(field_release:ProtobufMessage.FIREWALL_CONFIG.ServerConfig)
+  
+  ::ProtobufMessage::GLOBAL_CONFIG* temp = serverconfig_;
+  serverconfig_ = NULL;
+  return temp;
+}
+void FIREWALL_CONFIG::set_allocated_serverconfig(::ProtobufMessage::GLOBAL_CONFIG* serverconfig) {
+  delete serverconfig_;
+  serverconfig_ = serverconfig;
+  if (serverconfig) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.FIREWALL_CONFIG.ServerConfig)
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS

@@ -40,7 +40,7 @@ message DB_CONFIG
 
 message DATA_CONFIG
 {
-    int32     DataReceivePort=1;
+    int32     DataReceivePort=1; 
     int32     DataRecvTime=2;
     GLOBAL_CONFIG   ServerConfig=3;
 } 
@@ -50,6 +50,10 @@ message PROXY_CONFIG{
     string  ClientCheckKey=2;
     int32     TimeoutCheckInterval=3;
     int32       TimeoutTime=4;
+    GLOBAL_CONFIG   ServerConfig=5;
+};
+
+message FIREWALL_CONFIG{
     GLOBAL_CONFIG   ServerConfig=5;
 };
 
