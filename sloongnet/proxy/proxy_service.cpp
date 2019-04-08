@@ -116,14 +116,13 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		
 		auto serv_config = m_oConfig.serverconfig();
 		m_pControl->Initialize(serv_config.mqthreadquantity());
-		m_pControl->Add(Configuation, m_oConfig.mutable_serverconfig());
+		m_pControl->Add(DATA_ITEM::GlobalConfiguation, m_oConfig.mutable_serverconfig());
+		m_pControl->Add(DATA_ITEM::ModuleConfiguation, &m_oConfig);
 		m_pControl->Add(Logger, m_pLog.get());
 
 		m_pControl->RegisterEvent(ProgramExit);
 		m_pControl->RegisterEvent(ProgramStart);
-		m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetProxy::OnReceivePackage, this, std::placeholders::_1));
-		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProxy::OnSocketClose, this, std::placeholders::_1));
-
+		
 		try
 		{
 			IData::Initialize(m_pControl.get());
@@ -136,6 +135,10 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 			m_pLog->Error(string("Excepiton happened in initialize for ControlCenter. Message:") + string(e.what()));
 			return false;
 		}
+
+		m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetProxy::OnReceivePackage, this, std::placeholders::_1));
+		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProxy::OnSocketClose, this, std::placeholders::_1));
+
 		return true;
 	}
 	catch (exception &e)

@@ -54,7 +54,7 @@ message PROXY_CONFIG{
 };
 
 message PROCESS_CONFIG{
-    string  LuaContextQuantity=1;
+    int32  LuaContextQuantity=1;
     string  LuaScriptFolder=2;
     string  LuaEntryFile=3;
     string  LuaEntryFunction=4;

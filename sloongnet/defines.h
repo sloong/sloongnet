@@ -120,7 +120,9 @@ enum NetworkResult
 
 typedef enum g_em_DataItem
 {
-	Configuation,
+	GlobalConfiguation,
+	ModuleType,
+	ModuleConfiguation,
 	Logger,
 }DATA_ITEM;
 

@@ -1,5 +1,4 @@
 /* File Name: server.c */
-#include "CmdProcess.h"
 #include "process_service.h"
 #include "NetworkHub.h"
 #include "ControlHub.h"
@@ -8,6 +7,8 @@
 #include "utility.h"
 #include "NetworkEvent.h"
 #include "DataTransPackage.h"
+#include "lconnect.h"
+using namespace Sloong;
 using namespace Sloong::Events;
 
 IControl* Sloong::IData::m_iC = nullptr;
@@ -57,6 +58,10 @@ SloongNetProcess::~SloongNetProcess()
     m_pLog->End();
 }
 
+void PrientHelp()
+{
+	cout << "param: address:port" << endl;
+}
 
 bool SloongNetProcess::Initialize(int argc, char** args)
 {
@@ -75,38 +80,69 @@ bool SloongNetProcess::Initialize(int argc, char** args)
 
 	try
 	{
-		// CmdProcess会根据参数来加载正确的配置信息。成功返回true。
-		if (CCmdProcess::Parser(argc, args, &config))
+		if (argc != 2)
 		{
-			LOGTYPE oType = LOGTYPE::ONEFILE;
-			if (!config.m_oLogInfo.LogWriteToOneFile)
-			{
-				oType = LOGTYPE::DAY;
-			}
-			m_pLog->Initialize(config.m_oLogInfo.LogPath, "",config.m_oLogInfo.DebugMode, LOGLEVEL(config.m_oLogInfo.LogLevel), oType);
-			if (config.m_oLogInfo.NetworkPort != 0)
-				m_pLog->EnableNetworkLog(config.m_oLogInfo.NetworkPort);
-				
-			m_pControl->Initialize(config.m_nMessageCenterThreadQuantity);
-			m_pControl->Add(Configuation, &config);
-			m_pControl->Add(Logger, m_pLog.get());
-			
-			m_pControl->RegisterEvent(ProgramExit);
-			m_pControl->RegisterEvent(ProgramStart);
-			m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetProcess::OnReceivePackage, this, std::placeholders::_1));
-			m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProcess::OnSocketClose, this, std::placeholders::_1));
-
-			try{
-				IData::Initialize(m_pControl.get());
-				m_pNetwork->Initialize(m_pControl.get());
-				m_pProcess->Initialize(m_pControl.get());
-			}
-			catch(exception e){
-				m_pLog->Error(string("Excepiton happened in initialize for ControlCenter. Message:")+  string(e.what()));
-				return false;
-			}
-			return true;
+			PrientHelp();
+			return false;
 		}
+
+		if( !ConnectToControl(args[1]))
+		{
+			cout << "Connect to control fialed." <<endl;
+		}
+
+		ProtobufMessage::MessagePackage pack;
+		pack.set_function(MessageType::GetConfig);
+		pack.set_sender(ModuleType::Process);
+		pack.set_receiver(ModuleType::ControlCenter);
+		
+		int length = pack.ByteSize();
+		char* pszBuf = new char[length]();
+		pack.SerializeToArray(pszBuf,length);
+
+		CDataTransPackage dataPackage;
+		dataPackage.Initialize(m_pSocket);
+		dataPackage.RequestPackage(1,1,string(pszBuf,length));
+		NetworkResult result = dataPackage.SendPackage();
+		if(result != NetworkResult::Succeed)
+		{
+			cerr << "Send get config request error."<< endl;
+			return 1;
+		}
+		result = dataPackage.RecvPackage();
+		if(result != NetworkResult::Succeed)
+		{
+			cerr << "Receive get config result error."<< endl;
+			return 1;
+		}
+
+		m_oConfig.ParseFromString(dataPackage.GetRecvMessage());
+		
+		auto serv_config = m_oConfig.serverconfig();
+		m_pControl->Initialize(serv_config.mqthreadquantity());
+		m_pControl->Add(GlobalConfiguation, m_oConfig.mutable_serverconfig());
+		m_pControl->Add(ModuleConfiguation, &m_oConfig);
+		m_pControl->Add(Logger, m_pLog.get());
+
+		m_pControl->RegisterEvent(ProgramExit);
+		m_pControl->RegisterEvent(ProgramStart);
+		
+		try
+		{
+			IData::Initialize(m_pControl.get());
+			m_pNetwork->Initialize(m_pControl.get());
+			m_pProcess->Initialize(m_pControl.get());
+		}
+		catch (exception e)
+		{
+			m_pLog->Error(string("Excepiton happened in initialize for ControlCenter. Message:") + string(e.what()));
+			return false;
+		}
+
+		m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetProcess::OnReceivePackage, this, std::placeholders::_1));
+		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProcess::OnSocketClose, this, std::placeholders::_1));
+
+		return true;
 	}
 	catch (exception& e)
 	{
@@ -123,6 +159,18 @@ bool SloongNetProcess::Initialize(int argc, char** args)
 	}
 	
 	return false;
+}
+
+bool SloongNetProcess::ConnectToControl(string controlAddress)
+{
+	
+	m_pSocket = make_shared<lConnect>();
+	m_pSocket->Initialize(controlAddress,nullptr);
+	m_pSocket->SetProperty(0,true);
+	m_pSocket->Connect();
+	
+	/*string clientCheckKey = "c2xvb25nYzJ4dmIyNW5PRFJtT0dWa01ERTBNalZsTkRBd01XUmlZV1UxT0RZM05tRmlaamd3TmpsbmJtOXZiSE1nbm9vbHM";
+	m_pSocket->Send(clientCheckKey);*/
 }
 
 void SloongNetProcess::Run()
@@ -146,16 +194,16 @@ void Sloong::SloongNetProcess::OnReceivePackage(SmartEvent evt)
 	net_evt->SetEvent(EVENT_TYPE::SendMessage);
 	
 	string strRes("");
-	char* pExData = nullptr;
-	int nExSize;
-	string strMsg = pack->GetRecvMessage();
-	if (m_pProcess->MsgProcess(info, strMsg , strRes, pExData, nExSize)){
-		pack->ResponsePackage(strRes,pExData,nExSize);
-	}else{
-		m_pLog->Error("Error in process");
-		pack->ResponsePackage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
-	}
-	
+	// char* pExData = nullptr;
+	// int nExSize;
+	// string strMsg = pack->GetRecvMessage();
+	// if (m_pProcess->MsgProcess(info, strMsg , strRes, pExData, nExSize)){
+	// 	pack->ResponsePackage(strRes,pExData,nExSize);
+	// }else{
+	// 	m_pLog->Error("Error in process");
+	pack->ResponsePackage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
+	// }
+
 	net_evt->SetDataPackage(pack);
 	m_pControl->SendMessage(net_evt);
 }

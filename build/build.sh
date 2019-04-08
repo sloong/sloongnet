@@ -11,7 +11,7 @@
 
 show_help(){
 	echo -e "build.sh [module] [operation]
-module: proxy|control
+module: proxy|control|firewall|process|data
 operation:
 	-r: to build release version 
 	-d: to build debug version 
@@ -90,6 +90,9 @@ if [ $# -lt 2 ]; then
 	case $1 in 
 		proxy) init proxy;;
 		control) init control;;
+		firewall) init firewall;;
+		process) init process;;
+		data) init data;;
 		* ) show_help;;
 	esac
 	build

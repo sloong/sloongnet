@@ -4,18 +4,53 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "rebuild_message",
+            "type": "shell",
+            "command": "./sloongnet/comm/Message/rebuild.sh",
+            "problemMatcher": []
+        },
+        {
             "label": "build_proxy",
             "type": "shell",
             "command": "./build/build.sh proxy",
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "problemMatcher": []
         },
         {
             "label": "build_control",
             "type": "shell",
             "command": "./build/build.sh control",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build_firewall",
+            "type": "shell",
+            "command": "./build/build.sh firewall",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build_process",
+            "type": "shell",
+            "command": "./build/build.sh process",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "build_data",
+            "type": "shell",
+            "command": "./build/build.sh data",
             "group": {
                 "kind": "build",
                 "isDefault": true

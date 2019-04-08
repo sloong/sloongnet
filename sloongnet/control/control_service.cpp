@@ -106,7 +106,7 @@ bool SloongNetService::Initialize(int argc, char **args)
 		m_pLog->Initialize(m_pConfig->m_oControlConfig.logpath(), "", m_pConfig->m_oControlConfig.debugmode(), LOGLEVEL(m_pConfig->m_oControlConfig.loglevel()), LOGTYPE::DAY);
 
 		m_pControl->Initialize(m_pConfig->m_oControlConfig.mqthreadquantity());
-		m_pControl->Add(Configuation, &m_pConfig->m_oControlConfig);
+		m_pControl->Add(DATA_ITEM::GlobalConfiguation, &m_pConfig->m_oControlConfig);
 		m_pControl->Add(Logger, m_pLog.get());
 
 		m_pControl->RegisterEvent(ProgramExit);

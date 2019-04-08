@@ -249,7 +249,7 @@ void protobuf_AddDesc_config_2eproto() {
     "meoutCheckInterval\030\003 \001(\005\022\023\n\013TimeoutTime\030"
     "\004 \001(\005\0224\n\014ServerConfig\030\005 \001(\0132\036.ProtobufMe"
     "ssage.GLOBAL_CONFIG\"\347\001\n\016PROCESS_CONFIG\022\032"
-    "\n\022LuaContextQuantity\030\001 \001(\t\022\027\n\017LuaScriptF"
+    "\n\022LuaContextQuantity\030\001 \001(\005\022\027\n\017LuaScriptF"
     "older\030\002 \001(\t\022\024\n\014LuaEntryFile\030\003 \001(\t\022\030\n\020Lua"
     "EntryFunction\030\004 \001(\t\022\032\n\022LuaProcessFunctio"
     "n\030\005 \001(\t\022\036\n\026LuaSocketCloseFunction\030\006 \001(\t\022"
@@ -3670,7 +3670,7 @@ void PROCESS_CONFIG::SharedCtor() {
     _is_default_instance_ = false;
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
-  luacontextquantity_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  luacontextquantity_ = 0;
   luascriptfolder_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   luaentryfile_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   luaentryfunction_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
@@ -3685,7 +3685,6 @@ PROCESS_CONFIG::~PROCESS_CONFIG() {
 }
 
 void PROCESS_CONFIG::SharedDtor() {
-  luacontextquantity_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   luascriptfolder_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   luaentryfile_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   luaentryfunction_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
@@ -3723,7 +3722,7 @@ PROCESS_CONFIG* PROCESS_CONFIG::New(::google::protobuf::Arena* arena) const {
 
 void PROCESS_CONFIG::Clear() {
 // @@protoc_insertion_point(message_clear_start:ProtobufMessage.PROCESS_CONFIG)
-  luacontextquantity_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  luacontextquantity_ = 0;
   luascriptfolder_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   luaentryfile_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   luaentryfunction_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
@@ -3743,15 +3742,13 @@ bool PROCESS_CONFIG::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional string LuaContextQuantity = 1;
+      // optional int32 LuaContextQuantity = 1;
       case 1: {
-        if (tag == 10) {
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_luacontextquantity()));
-          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-            this->luacontextquantity().data(), this->luacontextquantity().length(),
-            ::google::protobuf::internal::WireFormatLite::PARSE,
-            "ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity"));
+        if (tag == 8) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &luacontextquantity_)));
+
         } else {
           goto handle_unusual;
         }
@@ -3881,14 +3878,9 @@ failure:
 void PROCESS_CONFIG::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:ProtobufMessage.PROCESS_CONFIG)
-  // optional string LuaContextQuantity = 1;
-  if (this->luacontextquantity().size() > 0) {
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-      this->luacontextquantity().data(), this->luacontextquantity().length(),
-      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
-      "ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity");
-    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      1, this->luacontextquantity(), output);
+  // optional int32 LuaContextQuantity = 1;
+  if (this->luacontextquantity() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->luacontextquantity(), output);
   }
 
   // optional string LuaScriptFolder = 2;
@@ -3953,15 +3945,9 @@ void PROCESS_CONFIG::SerializeWithCachedSizes(
 ::google::protobuf::uint8* PROCESS_CONFIG::InternalSerializeWithCachedSizesToArray(
     bool deterministic, ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:ProtobufMessage.PROCESS_CONFIG)
-  // optional string LuaContextQuantity = 1;
-  if (this->luacontextquantity().size() > 0) {
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-      this->luacontextquantity().data(), this->luacontextquantity().length(),
-      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
-      "ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity");
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        1, this->luacontextquantity(), target);
+  // optional int32 LuaContextQuantity = 1;
+  if (this->luacontextquantity() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->luacontextquantity(), target);
   }
 
   // optional string LuaScriptFolder = 2;
@@ -4034,10 +4020,10 @@ int PROCESS_CONFIG::ByteSize() const {
 // @@protoc_insertion_point(message_byte_size_start:ProtobufMessage.PROCESS_CONFIG)
   int total_size = 0;
 
-  // optional string LuaContextQuantity = 1;
-  if (this->luacontextquantity().size() > 0) {
+  // optional int32 LuaContextQuantity = 1;
+  if (this->luacontextquantity() != 0) {
     total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::StringSize(
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->luacontextquantity());
   }
 
@@ -4111,9 +4097,8 @@ void PROCESS_CONFIG::MergeFrom(const PROCESS_CONFIG& from) {
   if (GOOGLE_PREDICT_FALSE(&from == this)) {
     ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
   }
-  if (from.luacontextquantity().size() > 0) {
-
-    luacontextquantity_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.luacontextquantity_);
+  if (from.luacontextquantity() != 0) {
+    set_luacontextquantity(from.luacontextquantity());
   }
   if (from.luascriptfolder().size() > 0) {
 
@@ -4164,7 +4149,7 @@ void PROCESS_CONFIG::Swap(PROCESS_CONFIG* other) {
   InternalSwap(other);
 }
 void PROCESS_CONFIG::InternalSwap(PROCESS_CONFIG* other) {
-  luacontextquantity_.Swap(&other->luacontextquantity_);
+  std::swap(luacontextquantity_, other->luacontextquantity_);
   luascriptfolder_.Swap(&other->luascriptfolder_);
   luaentryfile_.Swap(&other->luaentryfile_);
   luaentryfunction_.Swap(&other->luaentryfunction_);
@@ -4186,48 +4171,18 @@ void PROCESS_CONFIG::InternalSwap(PROCESS_CONFIG* other) {
 #if PROTOBUF_INLINE_NOT_IN_HEADERS
 // PROCESS_CONFIG
 
-// optional string LuaContextQuantity = 1;
+// optional int32 LuaContextQuantity = 1;
 void PROCESS_CONFIG::clear_luacontextquantity() {
-  luacontextquantity_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  luacontextquantity_ = 0;
 }
- const ::std::string& PROCESS_CONFIG::luacontextquantity() const {
+ ::google::protobuf::int32 PROCESS_CONFIG::luacontextquantity() const {
   // @@protoc_insertion_point(field_get:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
-  return luacontextquantity_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  return luacontextquantity_;
 }
- void PROCESS_CONFIG::set_luacontextquantity(const ::std::string& value) {
+ void PROCESS_CONFIG::set_luacontextquantity(::google::protobuf::int32 value) {
   
-  luacontextquantity_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  luacontextquantity_ = value;
   // @@protoc_insertion_point(field_set:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
-}
- void PROCESS_CONFIG::set_luacontextquantity(const char* value) {
-  
-  luacontextquantity_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
-}
- void PROCESS_CONFIG::set_luacontextquantity(const char* value, size_t size) {
-  
-  luacontextquantity_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
-}
- ::std::string* PROCESS_CONFIG::mutable_luacontextquantity() {
-  
-  // @@protoc_insertion_point(field_mutable:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
-  return luacontextquantity_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
- ::std::string* PROCESS_CONFIG::release_luacontextquantity() {
-  // @@protoc_insertion_point(field_release:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
-  
-  return luacontextquantity_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
- void PROCESS_CONFIG::set_allocated_luacontextquantity(::std::string* luacontextquantity) {
-  if (luacontextquantity != NULL) {
-    
-  } else {
-    
-  }
-  luacontextquantity_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), luacontextquantity);
-  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
 }
 
 // optional string LuaScriptFolder = 2;

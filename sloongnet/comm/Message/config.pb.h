@@ -780,16 +780,11 @@ class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
 
   // accessors -------------------------------------------------------
 
-  // optional string LuaContextQuantity = 1;
+  // optional int32 LuaContextQuantity = 1;
   void clear_luacontextquantity();
   static const int kLuaContextQuantityFieldNumber = 1;
-  const ::std::string& luacontextquantity() const;
-  void set_luacontextquantity(const ::std::string& value);
-  void set_luacontextquantity(const char* value);
-  void set_luacontextquantity(const char* value, size_t size);
-  ::std::string* mutable_luacontextquantity();
-  ::std::string* release_luacontextquantity();
-  void set_allocated_luacontextquantity(::std::string* luacontextquantity);
+  ::google::protobuf::int32 luacontextquantity() const;
+  void set_luacontextquantity(::google::protobuf::int32 value);
 
   // optional string LuaScriptFolder = 2;
   void clear_luascriptfolder();
@@ -860,13 +855,13 @@ class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   bool _is_default_instance_;
-  ::google::protobuf::internal::ArenaStringPtr luacontextquantity_;
   ::google::protobuf::internal::ArenaStringPtr luascriptfolder_;
   ::google::protobuf::internal::ArenaStringPtr luaentryfile_;
   ::google::protobuf::internal::ArenaStringPtr luaentryfunction_;
   ::google::protobuf::internal::ArenaStringPtr luaprocessfunction_;
   ::google::protobuf::internal::ArenaStringPtr luasocketclosefunction_;
   ::ProtobufMessage::GLOBAL_CONFIG* serverconfig_;
+  ::google::protobuf::int32 luacontextquantity_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_config_2eproto();
   friend void protobuf_AssignDesc_config_2eproto();
@@ -1797,48 +1792,18 @@ inline void PROXY_CONFIG::set_allocated_serverconfig(::ProtobufMessage::GLOBAL_C
 
 // PROCESS_CONFIG
 
-// optional string LuaContextQuantity = 1;
+// optional int32 LuaContextQuantity = 1;
 inline void PROCESS_CONFIG::clear_luacontextquantity() {
-  luacontextquantity_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  luacontextquantity_ = 0;
 }
-inline const ::std::string& PROCESS_CONFIG::luacontextquantity() const {
+inline ::google::protobuf::int32 PROCESS_CONFIG::luacontextquantity() const {
   // @@protoc_insertion_point(field_get:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
-  return luacontextquantity_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  return luacontextquantity_;
 }
-inline void PROCESS_CONFIG::set_luacontextquantity(const ::std::string& value) {
+inline void PROCESS_CONFIG::set_luacontextquantity(::google::protobuf::int32 value) {
   
-  luacontextquantity_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  luacontextquantity_ = value;
   // @@protoc_insertion_point(field_set:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
-}
-inline void PROCESS_CONFIG::set_luacontextquantity(const char* value) {
-  
-  luacontextquantity_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
-}
-inline void PROCESS_CONFIG::set_luacontextquantity(const char* value, size_t size) {
-  
-  luacontextquantity_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
-}
-inline ::std::string* PROCESS_CONFIG::mutable_luacontextquantity() {
-  
-  // @@protoc_insertion_point(field_mutable:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
-  return luacontextquantity_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline ::std::string* PROCESS_CONFIG::release_luacontextquantity() {
-  // @@protoc_insertion_point(field_release:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
-  
-  return luacontextquantity_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline void PROCESS_CONFIG::set_allocated_luacontextquantity(::std::string* luacontextquantity) {
-  if (luacontextquantity != NULL) {
-    
-  } else {
-    
-  }
-  luacontextquantity_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), luacontextquantity);
-  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.PROCESS_CONFIG.LuaContextQuantity)
 }
 
 // optional string LuaScriptFolder = 2;

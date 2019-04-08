@@ -39,5 +39,5 @@ using namespace std;
 #include "config.pb.h"
 #include "defines.h"
 #include "EasySync.h"
-
+#include "lconnect.h"
 #endif //SLOONGNET_MAIN_H

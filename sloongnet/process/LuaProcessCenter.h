@@ -31,9 +31,10 @@ namespace Sloong
 		vector<CLua*>	m_pLuaList;
 		vector<bool>	m_oReloadList;
 		queue<int>		m_oFreeLuaContext;
-		CEasySync      m_oSSync;
+		CEasySync		m_oSSync;
 		mutex			m_oLuaContextMutex;
 		unique_ptr<CGlobalFunction> m_pGFunc;
+		ProtobufMessage::PROCESS_CONFIG* m_pConfig;
 	};
 
 }

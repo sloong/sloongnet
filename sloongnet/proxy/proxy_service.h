@@ -8,7 +8,6 @@ namespace Sloong
 {
 	class CControlHub;
 	class CNetworkHub;
-	class lConnect;
 	class SloongNetProxy
 	{
 	public:

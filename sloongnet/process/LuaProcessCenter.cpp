@@ -1,5 +1,5 @@
 #include "LuaProcessCenter.h"
-#include "serverconfig.h"
+#include "config.pb.h"
 #include "globalfunction.h"
 #include "IData.h"
 using namespace Sloong;
@@ -27,7 +27,7 @@ void Sloong::CLuaProcessCenter::Initialize(IControl* iMsg)
 	g_pLog = m_pLog;
 
 	m_pGFunc->Initialize(m_iC);
-	m_pConfig = IData::GetServerConfig();
+	m_pConfig = IData::GetProcessConfig();
 
 	m_iC->RegisterEvent(EVENT_TYPE::ProcessMessage);
 	m_iC->RegisterEvent(EVENT_TYPE::ReloadLuaContext);
@@ -38,7 +38,7 @@ void Sloong::CLuaProcessCenter::Initialize(IControl* iMsg)
 	// 在处理开始之前根据队列情况拿到某lua环境的id并将其移除出可用队列
 	// 在处理完毕之后重新加回到可用队列中。
 	// 这里使用处理线程池的数量进行初始化，保证在所有线程都在处理Lua请求时不会因luacontext发生堵塞
-	for (int i = 0; i < m_pConfig->m_nLuaProcessThreadQuantity; i++)
+	for (int i = 0; i < m_pConfig->luacontextquantity(); i++)
 		NewThreadInit();
 
 }
@@ -64,9 +64,9 @@ int Sloong::CLuaProcessCenter::NewThreadInit()
 {
 	CLua* pLua = new CLua();
 	pLua->SetErrorHandle(HandleError);
-	pLua->SetScriptFolder(m_pConfig->m_oLuaConfigInfo.ScriptFolder);
+	pLua->SetScriptFolder(m_pConfig->luascriptfolder());
 	m_pGFunc->RegistFuncToLua(pLua);
-	InitLua(pLua, m_pConfig->m_oLuaConfigInfo.ScriptFolder);
+	InitLua(pLua, m_pConfig->luascriptfolder());
 	m_pLuaList.push_back(pLua);
 	m_oReloadList.push_back(false);
 	int id = m_pLuaList.size() - 1;
@@ -76,7 +76,7 @@ int Sloong::CLuaProcessCenter::NewThreadInit()
 
 void Sloong::CLuaProcessCenter::InitLua(CLua* pLua, string folder)
 {
-	if (!pLua->RunScript(m_pConfig->m_oLuaConfigInfo.EntryFile))
+	if (!pLua->RunScript(m_pConfig->luaentryfile()))
 	{
 		throw normal_except("Run Script Fialed.");
 	}
@@ -85,7 +85,7 @@ void Sloong::CLuaProcessCenter::InitLua(CLua* pLua, string folder)
 	{
 		folder += '/';
 	}
-	pLua->RunFunction(m_pConfig->m_oLuaConfigInfo.EntryFunction, CUniversal::Format("'%s'", folder));
+	pLua->RunFunction(m_pConfig->luaentryfunction(), CUniversal::Format("'%s'", folder));
 }
 
 void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket* uinfo)
@@ -93,7 +93,7 @@ void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket* uinfo)
 	// call close function.
 	int id = GetFreeLuaContext();
 	CLua* pLua = m_pLuaList[id];
-	pLua->RunFunction(m_pConfig->m_oLuaConfigInfo.SocketCloseFunction, uinfo);
+	pLua->RunFunction(m_pConfig->luasocketclosefunction(), uinfo);
 	m_oFreeLuaContext.push(id);
 }
 
@@ -120,7 +120,7 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo,const string & ms
 
 	if (m_oReloadList[id] == true)
 	{
-		InitLua(pLua, m_pConfig->m_oLuaConfigInfo.ScriptFolder);
+		InitLua(pLua, m_pConfig->luascriptfolder());
 		m_oReloadList[id] = false;
 	}
 
@@ -130,7 +130,7 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo,const string & ms
 	bool bRes;
 	try
 	{
-		bRes = pLua->RunFunction(m_pConfig->m_oLuaConfigInfo.ProcessFunction, pUInfo, &creq, &cres);
+		bRes = pLua->RunFunction(m_pConfig->luaprocessfunction(), pUInfo, &creq, &cres);
 	}
 	catch(...)
 	{
