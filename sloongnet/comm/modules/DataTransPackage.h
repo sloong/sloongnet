@@ -13,7 +13,13 @@ namespace Sloong
 			SAFE_DELETE_ARR(m_pExBuffer);
 		}
 
-        void Initialize(SmartConnect conn,CLog* log= nullptr);
+        void Initialize(SmartConnect conn, CLog* log= nullptr);
+
+        void SetProperty( bool bEnableSerial, bool bEnableMD5Check, bool bEnablePriority){
+            m_bEnableSerialNumber = bEnableSerial;
+            m_bEnableMD5Check = bEnableMD5Check;
+            m_bEnablePriorityLevel = bEnablePriority;
+        }
 
         /**
          * @Remarks: When process done, should call this function to response this package.
@@ -22,9 +28,9 @@ namespace Sloong
          */
         void ResponsePackage(const string& msg, const char* exData = nullptr, int exSize = 0);
 
-        void RequestPackage( int SerialNumber, int priorityLevel,const string& msg);
+        void RequestPackage( const string& msg);
 
-        void PrepareSendPackageData( const string& msg, int priorityLevel, const char* exData = nullptr, int exSize = 0);
+        void PrepareSendPackageData( const string& msg, const char* exData = nullptr, int exSize = 0);
 
     public:
         /**
@@ -54,10 +60,26 @@ namespace Sloong
          */
         inline bool IsBigPackage(){ return m_nExSize > 0 ? true : false; }
 
-    public:
-        // priority of this package
-        int nPriority = 0;
+        int GetPriority(){
+            return m_nPriority;
+        }
 
+        void SetPriority(int value){
+            m_nPriority=value;
+        }
+
+        u_int64_t GetSerialNumber(){
+            return m_nSerialNumber;
+        }
+
+        void SetSerialNumber(u_int64_t value){
+            m_nSerialNumber = value;
+        }
+
+        void AddSerialNumber( u_int64_t& value ){
+            m_nSerialNumber = value;
+            value++;
+        }
     protected:
         // Send data info
         string m_szMsgBuffer;
@@ -68,13 +90,19 @@ namespace Sloong
 		int m_nPackSize=0;
 
         // serial number of this package
-        long long m_nSerialNumber = -1;
+        u_int64_t m_nSerialNumber = -1;
         
         // received MD5, used to check the validity of message 
         string m_strMD5 = "";
-        
+        // priority of this package
+        int m_nPriority = 0;
         // request message of this package.
         string m_strMessage = "";
+
+    protected:
+        bool m_bEnableSerialNumber = true;
+        bool m_bEnableMD5Check = true;
+        bool m_bEnablePriorityLevel = true;
 
     protected:
         SmartConnect    m_pCon;

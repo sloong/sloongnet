@@ -20,6 +20,8 @@ namespace Sloong
         void EnableTimeoutCheck(int timeoutTime, int checkInterval);
         void EnableSSL(string certFile, string keyFile, string passwd);
 
+        void AddMonitorSocket(int socket );
+
         // event handler
         void Run(SmartEvent event);
 		void Exit(SmartEvent event);

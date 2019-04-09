@@ -138,11 +138,12 @@ void protobuf_AssignDesc_config_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DATA_CONFIG, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DATA_CONFIG, _is_default_instance_));
   PROXY_CONFIG_descriptor_ = file->message_type(4);
-  static const int PROXY_CONFIG_offsets_[5] = {
+  static const int PROXY_CONFIG_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROXY_CONFIG, clientchecktime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROXY_CONFIG, clientcheckkey_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROXY_CONFIG, timeoutcheckinterval_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROXY_CONFIG, timeouttime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROXY_CONFIG, processaddress_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROXY_CONFIG, serverconfig_),
   };
   PROXY_CONFIG_reflection_ =
@@ -266,19 +267,19 @@ void protobuf_AddDesc_config_2eproto() {
     "LOBAL_CONFIG\"r\n\013DATA_CONFIG\022\027\n\017DataRecei"
     "vePort\030\001 \001(\005\022\024\n\014DataRecvTime\030\002 \001(\005\0224\n\014Se"
     "rverConfig\030\003 \001(\0132\036.ProtobufMessage.GLOBA"
-    "L_CONFIG\"\250\001\n\014PROXY_CONFIG\022\027\n\017ClientCheck"
+    "L_CONFIG\"\300\001\n\014PROXY_CONFIG\022\027\n\017ClientCheck"
     "Time\030\001 \001(\005\022\026\n\016ClientCheckKey\030\002 \001(\t\022\034\n\024Ti"
     "meoutCheckInterval\030\003 \001(\005\022\023\n\013TimeoutTime\030"
-    "\004 \001(\005\0224\n\014ServerConfig\030\005 \001(\0132\036.ProtobufMe"
-    "ssage.GLOBAL_CONFIG\"G\n\017FIREWALL_CONFIG\0224"
-    "\n\014ServerConfig\030\005 \001(\0132\036.ProtobufMessage.G"
-    "LOBAL_CONFIG\"\347\001\n\016PROCESS_CONFIG\022\032\n\022LuaCo"
-    "ntextQuantity\030\001 \001(\005\022\027\n\017LuaScriptFolder\030\002"
-    " \001(\t\022\024\n\014LuaEntryFile\030\003 \001(\t\022\030\n\020LuaEntryFu"
-    "nction\030\004 \001(\t\022\032\n\022LuaProcessFunction\030\005 \001(\t"
-    "\022\036\n\026LuaSocketCloseFunction\030\006 \001(\t\0224\n\014Serv"
-    "erConfig\030\007 \001(\0132\036.ProtobufMessage.GLOBAL_"
-    "CONFIGb\006proto3", 1214);
+    "\004 \001(\005\022\026\n\016ProcessAddress\030\005 \001(\t\0224\n\014ServerC"
+    "onfig\030\006 \001(\0132\036.ProtobufMessage.GLOBAL_CON"
+    "FIG\"G\n\017FIREWALL_CONFIG\0224\n\014ServerConfig\030\005"
+    " \001(\0132\036.ProtobufMessage.GLOBAL_CONFIG\"\347\001\n"
+    "\016PROCESS_CONFIG\022\032\n\022LuaContextQuantity\030\001 "
+    "\001(\005\022\027\n\017LuaScriptFolder\030\002 \001(\t\022\024\n\014LuaEntry"
+    "File\030\003 \001(\t\022\030\n\020LuaEntryFunction\030\004 \001(\t\022\032\n\022"
+    "LuaProcessFunction\030\005 \001(\t\022\036\n\026LuaSocketClo"
+    "seFunction\030\006 \001(\t\0224\n\014ServerConfig\030\007 \001(\0132\036"
+    ".ProtobufMessage.GLOBAL_CONFIGb\006proto3", 1238);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "config.proto", &protobuf_RegisterTypes);
   MessagePackage::default_instance_ = new MessagePackage();
@@ -3125,6 +3126,7 @@ const int PROXY_CONFIG::kClientCheckTimeFieldNumber;
 const int PROXY_CONFIG::kClientCheckKeyFieldNumber;
 const int PROXY_CONFIG::kTimeoutCheckIntervalFieldNumber;
 const int PROXY_CONFIG::kTimeoutTimeFieldNumber;
+const int PROXY_CONFIG::kProcessAddressFieldNumber;
 const int PROXY_CONFIG::kServerConfigFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -3155,6 +3157,7 @@ void PROXY_CONFIG::SharedCtor() {
   clientcheckkey_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   timeoutcheckinterval_ = 0;
   timeouttime_ = 0;
+  processaddress_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   serverconfig_ = NULL;
 }
 
@@ -3165,6 +3168,7 @@ PROXY_CONFIG::~PROXY_CONFIG() {
 
 void PROXY_CONFIG::SharedDtor() {
   clientcheckkey_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  processaddress_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != default_instance_) {
     delete serverconfig_;
   }
@@ -3216,6 +3220,7 @@ void PROXY_CONFIG::Clear() {
   ZR_(clientchecktime_, timeoutcheckinterval_);
   clientcheckkey_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   timeouttime_ = 0;
+  processaddress_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (GetArenaNoVirtual() == NULL && serverconfig_ != NULL) delete serverconfig_;
   serverconfig_ = NULL;
 
@@ -3291,13 +3296,30 @@ bool PROXY_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(42)) goto parse_ServerConfig;
+        if (input->ExpectTag(42)) goto parse_ProcessAddress;
         break;
       }
 
-      // optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 5;
+      // optional string ProcessAddress = 5;
       case 5: {
         if (tag == 42) {
+         parse_ProcessAddress:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_processaddress()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->processaddress().data(), this->processaddress().length(),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "ProtobufMessage.PROXY_CONFIG.ProcessAddress"));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(50)) goto parse_ServerConfig;
+        break;
+      }
+
+      // optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 6;
+      case 6: {
+        if (tag == 50) {
          parse_ServerConfig:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_serverconfig()));
@@ -3357,10 +3379,20 @@ void PROXY_CONFIG::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->timeouttime(), output);
   }
 
-  // optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 5;
+  // optional string ProcessAddress = 5;
+  if (this->processaddress().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->processaddress().data(), this->processaddress().length(),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "ProtobufMessage.PROXY_CONFIG.ProcessAddress");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      5, this->processaddress(), output);
+  }
+
+  // optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 6;
   if (this->has_serverconfig()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      5, *this->serverconfig_, output);
+      6, *this->serverconfig_, output);
   }
 
   // @@protoc_insertion_point(serialize_end:ProtobufMessage.PROXY_CONFIG)
@@ -3395,11 +3427,22 @@ void PROXY_CONFIG::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->timeouttime(), target);
   }
 
-  // optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 5;
+  // optional string ProcessAddress = 5;
+  if (this->processaddress().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->processaddress().data(), this->processaddress().length(),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "ProtobufMessage.PROXY_CONFIG.ProcessAddress");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        5, this->processaddress(), target);
+  }
+
+  // optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 6;
   if (this->has_serverconfig()) {
     target = ::google::protobuf::internal::WireFormatLite::
       InternalWriteMessageNoVirtualToArray(
-        5, *this->serverconfig_, false, target);
+        6, *this->serverconfig_, false, target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:ProtobufMessage.PROXY_CONFIG)
@@ -3438,7 +3481,14 @@ int PROXY_CONFIG::ByteSize() const {
         this->timeouttime());
   }
 
-  // optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 5;
+  // optional string ProcessAddress = 5;
+  if (this->processaddress().size() > 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->processaddress());
+  }
+
+  // optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 6;
   if (this->has_serverconfig()) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
@@ -3486,6 +3536,10 @@ void PROXY_CONFIG::MergeFrom(const PROXY_CONFIG& from) {
   if (from.timeouttime() != 0) {
     set_timeouttime(from.timeouttime());
   }
+  if (from.processaddress().size() > 0) {
+
+    processaddress_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.processaddress_);
+  }
   if (from.has_serverconfig()) {
     mutable_serverconfig()->::ProtobufMessage::GLOBAL_CONFIG::MergeFrom(from.serverconfig());
   }
@@ -3519,6 +3573,7 @@ void PROXY_CONFIG::InternalSwap(PROXY_CONFIG* other) {
   clientcheckkey_.Swap(&other->clientcheckkey_);
   std::swap(timeoutcheckinterval_, other->timeoutcheckinterval_);
   std::swap(timeouttime_, other->timeouttime_);
+  processaddress_.Swap(&other->processaddress_);
   std::swap(serverconfig_, other->serverconfig_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -3621,7 +3676,51 @@ void PROXY_CONFIG::clear_timeouttime() {
   // @@protoc_insertion_point(field_set:ProtobufMessage.PROXY_CONFIG.TimeoutTime)
 }
 
-// optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 5;
+// optional string ProcessAddress = 5;
+void PROXY_CONFIG::clear_processaddress() {
+  processaddress_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ const ::std::string& PROXY_CONFIG::processaddress() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.PROXY_CONFIG.ProcessAddress)
+  return processaddress_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void PROXY_CONFIG::set_processaddress(const ::std::string& value) {
+  
+  processaddress_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:ProtobufMessage.PROXY_CONFIG.ProcessAddress)
+}
+ void PROXY_CONFIG::set_processaddress(const char* value) {
+  
+  processaddress_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.PROXY_CONFIG.ProcessAddress)
+}
+ void PROXY_CONFIG::set_processaddress(const char* value, size_t size) {
+  
+  processaddress_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.PROXY_CONFIG.ProcessAddress)
+}
+ ::std::string* PROXY_CONFIG::mutable_processaddress() {
+  
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.PROXY_CONFIG.ProcessAddress)
+  return processaddress_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ ::std::string* PROXY_CONFIG::release_processaddress() {
+  // @@protoc_insertion_point(field_release:ProtobufMessage.PROXY_CONFIG.ProcessAddress)
+  
+  return processaddress_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void PROXY_CONFIG::set_allocated_processaddress(::std::string* processaddress) {
+  if (processaddress != NULL) {
+    
+  } else {
+    
+  }
+  processaddress_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), processaddress);
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.PROXY_CONFIG.ProcessAddress)
+}
+
+// optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 6;
 bool PROXY_CONFIG::has_serverconfig() const {
   return !_is_default_instance_ && serverconfig_ != NULL;
 }

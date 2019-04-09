@@ -21,7 +21,7 @@ operation:
 
 
 SCRIPTFOLDER=$(dirname $(readlink -f $0))
-echo "ScriptFolder: "$SCRIPTFOLDER
+#echo "ScriptFolder: "$SCRIPTFOLDER
 # cd to current file folder
 cd $SCRIPTFOLDER
 
@@ -81,22 +81,42 @@ zip(){
 }
 
 
-if [ $# -lt 1 ]; then
+# -eq 等于,
+# -ne 不等于
+# -gt 大于,
+# -ge 大于等于,
+# -lt 小于,
+# -le 小于等于
+if [ $# -eq 0 ]; then
 	show_help
 	exit
 fi
 
-if [ $# -lt 2 ]; then
+if [ $# -ge 1 ]; then
 	case $1 in 
 		proxy) init proxy;;
 		control) init control;;
 		firewall) init firewall;;
 		process) init process;;
 		data) init data;;
+		all) 
+			init proxy
+			build
+			init control
+			build
+			init firewall
+			build
+			init process
+			build
+			init data
+			build;;
 		* ) show_help;;
 	esac
-	build
-else
+	if [ $# -eq 1 ]; then
+		build
+	fi
+fi
+if [ $# -eq 2 ]; then
 	case $2 in 
 		-r) build_release;;
 		-d) build_debug;;

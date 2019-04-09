@@ -1,7 +1,7 @@
 #include "NetworkHub.h"
 #include "epollex.h"
 #include "sockinfo.h"
-#include "NetworkEvent.h"
+#include "NetworkEvent.hpp"
 #include "IData.h"
 
 using namespace Sloong::Events;
@@ -114,7 +114,6 @@ void Sloong::CNetworkHub::SendCloseConnectEvent(int socket)
 	auto event = make_shared<CNetworkEvent>(EVENT_TYPE::SocketClose);
 	event->SetSocketID(socket);
 	event->SetUserInfo(info->m_pUserInfo.get());
-	event->SetHandler(this);
 	m_iC->SendMessage(event);
 }
 
@@ -140,6 +139,17 @@ void Sloong::CNetworkHub::EnableSSL(string certFile, string keyFile, string pass
 		m_pLog->Error("Initialize SSL environment error.");
 		m_pLog->Error(lConnect::G_FormatSSLErrorMsg(ret));
 	}
+}
+
+void Sloong::CNetworkHub::AddMonitorSocket( int nSocket )
+{
+	auto info = make_shared<CSockInfo>();
+	info->Initialize(m_iC, nSocket, m_pCTX);
+
+	unique_lock<mutex> sockLck(m_oSockListMutex);
+	m_SockList[nSocket] = info;
+	sockLck.unlock();
+	m_pEpoll->AddMonitorSocket(nSocket);
 }
 
 /*************************************************

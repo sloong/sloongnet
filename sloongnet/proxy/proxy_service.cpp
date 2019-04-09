@@ -4,9 +4,8 @@
 #include "ControlHub.h"
 #include "IData.h"
 #include "utility.h"
-#include "NetworkEvent.h"
+#include "NetworkEvent.hpp"
 #include "DataTransPackage.h"
-#include "lconnect.h"
 using namespace Sloong;
 using namespace Sloong::Events;
 
@@ -88,17 +87,18 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		}
 
 		ProtobufMessage::MessagePackage pack;
-		pack.set_function(MessageType::GetConfig);
+		pack.set_function(MessageFunction::GetConfig);
 		pack.set_sender(ModuleType::Proxy);
 		pack.set_receiver(ModuleType::ControlCenter);
 		
-		int length = pack.ByteSize();
-		char* pszBuf = new char[length]();
-		pack.SerializeToArray(pszBuf,length);
+		string strMsg;
+		pack.SerializeToString(&strMsg);
 
 		CDataTransPackage dataPackage;
 		dataPackage.Initialize(m_pSocket);
-		dataPackage.RequestPackage(1,1,string(pszBuf,length));
+		dataPackage.SetProperty(true,false,true);
+		dataPackage.AddSerialNumber(m_nSerialNumber);
+		dataPackage.RequestPackage(strMsg);
 		NetworkResult result = dataPackage.SendPackage();
 		if(result != NetworkResult::Succeed)
 		{
@@ -139,6 +139,7 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetProxy::OnReceivePackage, this, std::placeholders::_1));
 		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProxy::OnSocketClose, this, std::placeholders::_1));
 
+		ConnectToProcess();
 		return true;
 	}
 	catch (exception &e)
@@ -158,6 +159,23 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 	return false;
 }
 
+bool SloongNetProxy::ConnectToProcess()
+{
+	auto list = CUniversal::split(m_oConfig.processaddress(),";");
+	for( auto item = list.begin();item!= list.end(); item++ )
+	{
+		auto connect = make_shared<lConnect>();
+
+		connect->Initialize(*item,nullptr);
+		connect->SetProperty(0,true);
+		connect->Connect();
+		int sockID = connect->GetSocketID();
+		m_mapProcessList[sockID] = connect;
+		m_mapProcessLoadList[sockID] = 0;
+		m_pNetwork->AddMonitorSocket(sockID);
+	}
+}
+
 bool SloongNetProxy::ConnectToControl(string controlAddress)
 {
 	
@@ -175,6 +193,7 @@ void SloongNetProxy::Run()
 	m_pLog->Info("Application begin running.");
 	m_pControl->SendMessage(EVENT_TYPE::ProgramStart);
 }
+ 
 
 void Sloong::SloongNetProxy::OnReceivePackage(SmartEvent evt)
 {
@@ -185,23 +204,62 @@ void Sloong::SloongNetProxy::OnReceivePackage(SmartEvent evt)
 		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
 		return;
 	}
+	auto event_happend_socket = net_evt->GetSocketID();
 	SmartPackage pack = net_evt->GetDataPackage();
 
-	net_evt->SetEvent(EVENT_TYPE::SendMessage);
+	if( m_mapProcessLoadList.find(event_happend_socket) == m_mapProcessLoadList.end() )
+	{
+		// Step 1: 将已经收到的来自客户端的请求内容转换为protobuf格式
+		ProtobufMessage::MessagePackage msg;
+		msg.set_sender(ModuleType::Proxy);
+		msg.set_receiver(ModuleType::Process);
+		msg.set_function(MessageFunction::SendRequest);
+		msg.set_context(pack->GetRecvMessage());
+		string sendMsg;
+		msg.SerializeToString(&sendMsg);
 
-	string strRes("");
-	// char* pExData = nullptr;
-	// int nExSize;
-	// string strMsg = pack->GetRecvMessage();
-	// if (m_pProcess->MsgProcess(info, strMsg , strRes, pExData, nExSize)){
-	// 	pack->ResponsePackage(strRes,pExData,nExSize);
-	// }else{
-	// 	m_pLog->Error("Error in process");
-	pack->ResponsePackage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
-	// }
+		// Step 2: 根据负载情况找到发送的目标Process服务
+		auto process_id = m_mapProcessList.begin();
 
-	net_evt->SetDataPackage(pack);
-	m_pControl->SendMessage(net_evt);
+		// Step 3: 根据流水号将来自客户端的Event对象保存起来
+		m_mapEventList[m_nSerialNumber] = net_evt;
+
+		// Step 4: 创建发送到指定process服务的DataTrans包
+		auto transPack = make_shared<CDataTransPackage>();
+		transPack->Initialize(process_id->second);
+		transPack->SetProperty(true,false,true);
+		transPack->SetPriority(pack->GetPriority());
+		transPack->AddSerialNumber(m_nSerialNumber);
+		transPack->RequestPackage(sendMsg);
+
+		// Step 5: 新建一个NetworkEx类型的事件，将上面准备完毕的数据发送出去。
+		auto process_event = make_shared<CNetworkEvent>(EVENT_TYPE::RequestMessage);
+		process_event->SetSocketID(process_id->second->GetSocketID());
+		process_event->SetDataPackage(transPack);
+		m_pControl->SendMessage(process_event);
+	}
+	else
+	{
+		// Step 1: 根据收到的SerailNumber找到对应保存的来自客户端的Event对象
+		auto event_obj = m_mapEventList.find(pack->GetSerialNumber());
+		if( event_obj == m_mapEventList.end() )
+		{
+			m_pLog->Error(CUniversal::Format("Event list no have target event data. SerailNumber:[%d]",pack->GetSerialNumber()));
+			return;
+		}
+		auto client_request = dynamic_pointer_cast<CNetworkEvent>(event_obj->second);
+
+		// Step 2: 将Process服务处理完毕的消息转换为正常格式
+		ProtobufMessage::MessagePackage msg;
+		msg.ParseFromString(pack->GetRecvMessage());
+
+
+		// Step 3: 发送相应数据
+		client_request->SetEvent(EVENT_TYPE::SendMessage);
+		auto client_request_package = client_request->GetDataPackage();
+		client_request_package->ResponsePackage(msg.context());
+		m_pControl->SendMessage(client_request);
+	}
 }
 
 void Sloong::SloongNetProxy::OnSocketClose(SmartEvent event)
@@ -215,7 +273,7 @@ void Sloong::SloongNetProxy::OnSocketClose(SmartEvent event)
 	}
 	// call close function.
 	//m_pProcess->CloseSocket(info);
-	net_evt->CallCallbackFunc(net_evt);
+	//net_evt->CallCallbackFunc(net_evt);
 }
 
 void Sloong::SloongNetProxy::Exit()

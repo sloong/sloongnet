@@ -1,7 +1,7 @@
 #include "sockinfo.h"
 #include <univ/luapacket.h>
 #include "DataTransPackage.h"
-#include "NetworkEvent.h"
+#include "NetworkEvent.hpp"
 using namespace Sloong;
 using namespace Sloong::Universal;
 using namespace Sloong::Events;
@@ -158,9 +158,10 @@ void Sloong::CSockInfo::ProcessPrepareSendList()
 		{
 			auto pack = m_oPrepareSendList.front();
 			m_oPrepareSendList.pop();
-			m_pSendList[pack->nPriority].push(pack);
+			auto priority = pack->GetPriority();
+			m_pSendList[priority].push(pack);
 			m_pLog->Debug(CUniversal::Format("Add send package to send list[%d]. send list size[%d], prepare send list size[%d]",
-								pack->nPriority,m_pSendList[pack->nPriority].size(),m_oPrepareSendList.size()));
+								priority,m_pSendList[priority].size(),m_oPrepareSendList.size()));
 		}
 		prelck.unlock();
 		sendListlck.unlock();

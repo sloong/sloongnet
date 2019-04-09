@@ -25,12 +25,14 @@ namespace Sloong
         void LoadProcessConfig( string serverIp, ProtobufMessage::PROCESS_CONFIG& config );
         void LoadDataConfig( string serverIp, ProtobufMessage::DATA_CONFIG& config );
         void LoadDBConfig( string serverIp, ProtobufMessage::DB_CONFIG& config );
+        void LoadFirewallConfig( string serverIp, ProtobufMessage::FIREWALL_CONFIG& config );
 
         void SaveControlConfig(){}
         void SaveProxyConfig(){}
         void SaveProcessConfig(){}
         void SaveDataConfig(){}
         void SaveDBConfig(){}
+        void SaveFirewallConfig(){}
 
         string GetStringConfig(string table_name, string domain, string key, string def);
 
@@ -45,6 +47,7 @@ namespace Sloong
         ProtobufMessage::PROXY_CONFIG    m_oProxyConfig;
         ProtobufMessage::PROCESS_CONFIG  m_oProcessConfig;
         ProtobufMessage::DATA_CONFIG     m_oDataConfig;
+        ProtobufMessage::FIREWALL_CONFIG    m_oFirewallConfig;
         ProtobufMessage::DB_CONFIG       m_oDBConfig;
 
     protected:

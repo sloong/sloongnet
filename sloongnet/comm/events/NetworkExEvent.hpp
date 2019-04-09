@@ -1,16 +1,17 @@
 #pragma once
-#include "NormalEvent.h"
+#include "NormalEvent.hpp"
+#include "ExtendEvent.h"
 #include "main.h"
 namespace Sloong
 {
 	class CDataTransPackage;
 	namespace Events
 	{
-		class CNetworkEvent : public CNormalEvent
+		class CNetworkExEvent : public CNormalEvent, public CExtendEvent
 		{
 		public:
-			CNetworkEvent(EVENT_TYPE t){ m_emType = t; }
-			virtual	~CNetworkEvent();
+			CNetworkExEvent(EVENT_TYPE t){ m_emType = t; }
+			virtual	~CNetworkExEvent(){}
 
 			inline int GetSocketID() { return m_nSocketID; }
 			inline void SetSocketID(int id) { m_nSocketID = id; }
@@ -28,4 +29,3 @@ namespace Sloong
 
 	}
 }
-

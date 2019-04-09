@@ -18,6 +18,7 @@ namespace Sloong
 		void Run(int nPort, int nWorkThreadNum);
 		void Exit();
 
+		void AddMonitorSocket(int socket);
 		void SetEventHandler(EpollEventHandlerFunc,EpollEventHandlerFunc,EpollEventHandlerFunc,EpollEventHandlerFunc);
         
 		void MonitorSendStatus(int socket);

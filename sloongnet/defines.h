@@ -27,9 +27,10 @@ const int s_llLen = 8;
 const int s_lLen = 4;
 const int s_PriorityLevel = 5;
 
-enum MessageType
+enum MessageFunction
 {
 	GetConfig,
+	SendRequest,
 };
 
 enum ModuleType
@@ -39,6 +40,7 @@ enum ModuleType
 	Process,
 	Firewall,
 	DataCenter,
+	DBCenter,
 };
 
 
@@ -57,6 +59,10 @@ typedef enum g_DataCenter_Event_Type
 	// 需要在处理完成后调用回调函数以清除连接信息。
 	// 参数类型为CNetworkEvent
 	SocketClose,
+
+	// 在内部使用的交互信息。
+	// 需要指定发送的目标Socket
+	RequestMessage,
 
 	// 需要发送数据给客户端时，使用该消息
 	SendMessage,

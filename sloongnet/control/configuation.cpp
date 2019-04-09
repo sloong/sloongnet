@@ -54,27 +54,44 @@ void Sloong::CConfiguation::LoadControlConfig( string serverIp, ProtobufMessage:
 
 void Sloong::CConfiguation::LoadProxyConfig(string serverIp, PROXY_CONFIG &config)
 {
-    config.set_clientcheckkey( GetString("proxy", serverIp, "ClientCheckKey", "sloong.com"));
-    config.set_clientchecktime( GetInt("proxy", serverIp, "ClientCheckTime", 2));
-    config.set_timeoutcheckinterval( GetInt("proxy", serverIp, "TimeoutCheckInterval", 5));
-    LoadGlobalConfig("proxy", serverIp, config.mutable_serverconfig());
+    string module_name = "proxy";
+    config.set_clientcheckkey( GetString(module_name, serverIp, "ClientCheckKey", "sloong.com"));
+    config.set_clientchecktime( GetInt(module_name, serverIp, "ClientCheckTime", 2));
+    config.set_timeoutcheckinterval( GetInt(module_name, serverIp, "TimeoutCheckInterval", 5));
+    LoadGlobalConfig(module_name, serverIp, config.mutable_serverconfig());
 }
 
 
 void Sloong::CConfiguation::LoadProcessConfig( string serverIp, ProtobufMessage::PROCESS_CONFIG& config )
 {
-    //config.set_luaentryfile()
+    string module_name = "process";
+    config.set_luacontextquantity( GetInt(module_name,serverIp, "LuaContextQuantity", 10));
+    config.set_luaentryfile(GetString(module_name,serverIp,"LuaEntryFile", "init.lua"));
+    config.set_luaentryfunction(GetString(module_name, serverIp, "LuaEntryFunction", "Init"));
+    config.set_luaprocessfunction(GetString(module_name, serverIp, "LuaProcessFunction", "ProgressMessage"));
+    config.set_luascriptfolder(GetString(module_name, serverIp, "LuaScriptFolder", "./scripts"));
+    config.set_luasocketclosefunction(GetString(module_name, serverIp, "LuaSocketCloseFunction", "SocketCloseProcess"));
+    LoadGlobalConfig(module_name, serverIp, config.mutable_serverconfig());
 }
 
 
 void Sloong::CConfiguation::LoadDataConfig( string serverIp, ProtobufMessage::DATA_CONFIG& config )
 {
-
+    string module_name = "data";
+    config.set_datareceiveport(GetInt(module_name, serverIp, "DataReceivePort", 0));
+    config.set_datarecvtime(GetInt(module_name, serverIp, "DataRecvTime", 5));
+    LoadGlobalConfig("data", serverIp, config.mutable_serverconfig());
 }
 
 void Sloong::CConfiguation::LoadDBConfig( string serverIp, ProtobufMessage::DB_CONFIG& config )
 {
+    LoadGlobalConfig("db", serverIp, config.mutable_serverconfig());
+}
 
+void Sloong::CConfiguation::LoadFirewallConfig( string serverIp, ProtobufMessage::FIREWALL_CONFIG& config )
+{
+    string module_name = "firewall";
+    LoadGlobalConfig(module_name, serverIp, config.mutable_serverconfig());
 }
 
 bool Sloong::CConfiguation::GetBoolen(string domain, string ip, string key, bool def)

@@ -50,7 +50,8 @@ message PROXY_CONFIG{
     string  ClientCheckKey=2;
     int32     TimeoutCheckInterval=3;
     int32       TimeoutTime=4;
-    GLOBAL_CONFIG   ServerConfig=5;
+    string      ProcessAddress=5;
+    GLOBAL_CONFIG   ServerConfig=6;
 };
 
 message FIREWALL_CONFIG{

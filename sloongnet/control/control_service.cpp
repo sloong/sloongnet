@@ -4,7 +4,7 @@
 #include "ControlHub.h"
 #include "IData.h"
 #include "utility.h"
-#include "NetworkEvent.h"
+#include "NetworkEvent.hpp"
 #include "DataTransPackage.h"
 #include "configuation.h"
 #include "SQLiteEx.h"
@@ -122,7 +122,6 @@ bool SloongNetService::Initialize(int argc, char **args)
 			return false;
 		}
 		m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetService::OnReceivePackage, this, std::placeholders::_1));
-		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetService::OnSocketClose, this, std::placeholders::_1));
 
 		return true;
 	}
@@ -163,43 +162,35 @@ void Sloong::SloongNetService::OnReceivePackage(SmartEvent evt)
 
 	net_evt->SetEvent(EVENT_TYPE::SendMessage);
 
-	string strRes("");
-	// char* pExData = nullptr;
-	// int nExSize;
-	string strMsg = pack->GetRecvMessage();
-	// if (m_pProcess->MsgProcess(info, strMsg , strRes, pExData, nExSize)){
-	// 	pack->ResponsePackage(strRes,pExData,nExSize);
-	// }else{
-	// 	m_pLog->Error("Error in process");
 	ProtobufMessage::MessagePackage msgPack;
-	msgPack.ParseFromString(strMsg);
+	msgPack.ParseFromString(pack->GetRecvMessage());
 	string config;
-	if( msgPack.function() == MessageType::GetConfig)
+	if( msgPack.function() == MessageFunction::GetConfig)
 	{
-		if( msgPack.sender() == ModuleType::Proxy)
+		switch(msgPack.sender())
 		{
-			m_pConfig->m_oProxyConfig.SerializeToString(&config);
+			case ModuleType::Proxy:
+				m_pConfig->m_oProxyConfig.SerializeToString(&config);
+				break;
+			case ModuleType::Process:
+				m_pConfig->m_oProcessConfig.SerializeToString(&config);
+				break;
+			case ModuleType::Firewall:
+				m_pConfig->m_oFirewallConfig.SerializeToString(&config);
+				break;
+			case ModuleType::DataCenter:
+				m_pConfig->m_oDataConfig.SerializeToString(&config);
+				break;
+			case ModuleType::DBCenter:
+				m_pConfig->m_oDBConfig.SerializeToString(&config);
+				break;
 		}
 	}
 
 	pack->ResponsePackage(config);
-	// }
 
 	net_evt->SetDataPackage(pack);
 	m_pControl->SendMessage(net_evt);
-}
-
-void Sloong::SloongNetService::OnSocketClose(SmartEvent event)
-{
-	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
-	auto info = net_evt->GetUserInfo();
-	if (!info)
-	{
-		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
-		return;
-	}
-	// call close function.
-	net_evt->CallCallbackFunc(net_evt);
 }
 
 void Sloong::SloongNetService::Exit()

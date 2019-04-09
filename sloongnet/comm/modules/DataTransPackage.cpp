@@ -2,52 +2,56 @@
 
 #include "main.h"
 
+const int g_nMD5Length = 32;
+
 void Sloong::CDataTransPackage::Initialize(SmartConnect conn, CLog* pLog)
 {
 	m_pCon = conn;	
 	m_pLog = pLog;
 }
 
-void Sloong::CDataTransPackage::PrepareSendPackageData( const string& msg, int priorityLevel, const char* pExData , int nExSize)
+void Sloong::CDataTransPackage::PrepareSendPackageData( const string& msg, const char* pExData , int nExSize)
 {
-	// get the message md5
-	string md5 = CMD5::Encode(msg);
-
 	// calculate the send buffer length
-	long long nBufLen = s_llLen + md5.length() + msg.size();
+	long long nBufLen = msg.size();
+	if( m_bEnableMD5Check )
+	{
+		nBufLen += g_nMD5Length;
+	}
+	if( m_bEnablePriorityLevel )
+	{
+		nBufLen += 1;
+	}
+	if( m_bEnableSerialNumber ){
+		nBufLen += s_llLen;
+	}
 	if (pExData != NULL && nExSize > 0)
 	{
 		nBufLen += s_llLen;
 	}
-	if( priorityLevel != -1 )
-	{
-		nBufLen += 1;
-	}
 
-	if (m_pLog!= nullptr)
-	{
-		m_pLog->Verbos(CUniversal::Format("SEND<<<[%d][%s]<<<%s",m_nSerialNumber,md5,msg));
-		if( pExData != nullptr )
-			m_pLog->Verbos(CUniversal::Format("SEND_EXDATA<<<[%d]<<<DATALEN[%d]",m_nSerialNumber,nExSize));
-	}
+	string logString = "SEND<<<";
 
 	m_szMsgBuffer.resize(nBufLen);
 	char *pCpyPoint = m_szMsgBuffer.data();
 
-	/*long long nMsgLen = nBufLen - s_llLen;
-	CUniversal::Int64ToBytes(nMsgLen, pCpyPoint);
-	pCpyPoint += 8;*/
-	if( priorityLevel != -1 )
-	{
-		*pCpyPoint = (char)priorityLevel;
+	// copy the data to buffer. the order is Priority -> SerialNum -> MD5
+	if( m_bEnablePriorityLevel ){
+		*pCpyPoint = (char)m_nPriority;
+		logString += CUniversal::Format("[%d]",m_nPriority);
 		pCpyPoint += 1;
 	}
-	
-	CUniversal::Int64ToBytes(m_nSerialNumber, pCpyPoint);
-	pCpyPoint += s_llLen;
-	
-	memcpy(pCpyPoint, md5.c_str(), md5.length());
-	pCpyPoint += md5.length();
+	if( m_bEnableSerialNumber ){
+		CUniversal::Int64ToBytes(m_nSerialNumber, pCpyPoint);
+		logString += CUniversal::Format("[%d]",m_nSerialNumber);
+		pCpyPoint += s_llLen;
+	}
+	if( m_bEnableMD5Check ){
+		string md5 = CMD5::Encode(msg);
+		memcpy(pCpyPoint, md5.c_str(), md5.length());
+		logString += CUniversal::Format("[%s]",md5);
+		pCpyPoint += md5.length();
+	}
 	
 	memcpy(pCpyPoint, msg.c_str(), msg.length());
 	pCpyPoint += msg.length();
@@ -56,7 +60,14 @@ void Sloong::CDataTransPackage::PrepareSendPackageData( const string& msg, int p
 	{
 		long long Exlen = nExSize;
 		CUniversal::Int64ToBytes(Exlen, pCpyPoint);
+		logString += CUniversal::Format("&&&EXDATA<<<[%d]",nExSize);
 		pCpyPoint += 8;
+	}
+
+	logString += "<<<" + msg;
+	if (m_pLog!= nullptr)
+	{
+		m_pLog->Verbos(logString);
 	}
 
 	m_pExBuffer = pExData;
@@ -64,18 +75,15 @@ void Sloong::CDataTransPackage::PrepareSendPackageData( const string& msg, int p
 }
 
 
-void Sloong::CDataTransPackage::RequestPackage( int SerialNumber, int priorityLevel, const string& msg)
+void Sloong::CDataTransPackage::RequestPackage(  const string& msg )
 {
-	m_nSerialNumber = SerialNumber;
-	PrepareSendPackageData(msg,priorityLevel,nullptr,0);
+	PrepareSendPackageData(msg,nullptr,0);
 }
 
 void Sloong::CDataTransPackage::ResponsePackage(const string &msg, const char *pExData, int nExSize)
 {
-	PrepareSendPackageData(msg,0,pExData,nExSize);
+	PrepareSendPackageData(msg,pExData,nExSize);
 }
-
-
 
 
 /**
@@ -158,45 +166,37 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage()
 	if( !m_pCon->RecvPackage(result))
 		return NetworkResult::Error;
 	
-	const char* data = result.data();
+	const char* pMsg = result.data();
+	int msgLength = result.length();
 
-
-	// TODO: 这里对于优先级的设置以及使用还是有一些问题的。目前优先级只是用在了发送，处理并未使用到优先级
-	const char *pMsg = NULL;
-	
-		char pLevel[2] = {0};
-		pLevel[0] = data[0];
-		int level = pLevel[0];
-		if (level > s_PriorityLevel || level < 0)
+	if( m_bEnablePriorityLevel ){
+		int m_nPriority = pMsg[0];
+		if (m_nPriority > s_PriorityLevel || m_nPriority < 0)
 		{
 			if( m_pLog )
-				m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", level, s_PriorityLevel));
+				m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_nPriority, s_PriorityLevel));
 			return NetworkResult::Error;
 		}
-		else
-		{
-			nPriority = level;
-		}
-		pMsg = &data[1];
-	
-
-	// TODO: 这里对于优先级，以及流水号和MD5这些的配置项有些不太合理，这里先暂时直接在构造函数中传进来，后面考虑怎么优化处理
-	
-		// TODO: 接收长度信息这个可以直接在lConnect这个类里直接集成
+		pMsg += 1;
+		msgLength -= 1;
+	}
+	if( m_bEnableSerialNumber ){
+		// TODO： 这里直接把pMsg传进去应该也是可以的
 		char pLongBuffer[s_llLen + 1] = {0};
 		memcpy(pLongBuffer, pMsg, s_llLen);
 		m_nSerialNumber = CUniversal::BytesToInt64(pLongBuffer);
 		pMsg += s_llLen;
-	
+		msgLength -= s_llLen;
+	}
+	if( m_bEnableMD5Check ){
+		m_strMD5 = string(pMsg,g_nMD5Length);
+		pMsg += g_nMD5Length;
+		msgLength -= g_nMD5Length;
+	}
 
-	
-		m_strMD5 = string(pMsg,32);
-		pMsg += 32;
-	
+	m_strMessage = string(pMsg,msgLength);
 
-	m_strMessage = string(pMsg,result.length()-1-s_llLen-32);
-
-	
+	if( m_bEnableMD5Check ){
 		string rmd5 = CMD5::Encode(m_strMessage);
 		CUniversal::touper(m_strMD5);
 		CUniversal::touper(rmd5);
@@ -207,6 +207,7 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage()
 			ResponsePackage(strSend);
 			return NetworkResult::Invalid;
 		}
+	}
 
 	if( m_pLog )
 		m_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%s]<<<%s",m_nSerialNumber,m_strMD5, m_strMessage));

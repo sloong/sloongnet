@@ -692,10 +692,21 @@ class PROXY_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_po
   ::google::protobuf::int32 timeouttime() const;
   void set_timeouttime(::google::protobuf::int32 value);
 
-  // optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 5;
+  // optional string ProcessAddress = 5;
+  void clear_processaddress();
+  static const int kProcessAddressFieldNumber = 5;
+  const ::std::string& processaddress() const;
+  void set_processaddress(const ::std::string& value);
+  void set_processaddress(const char* value);
+  void set_processaddress(const char* value, size_t size);
+  ::std::string* mutable_processaddress();
+  ::std::string* release_processaddress();
+  void set_allocated_processaddress(::std::string* processaddress);
+
+  // optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 6;
   bool has_serverconfig() const;
   void clear_serverconfig();
-  static const int kServerConfigFieldNumber = 5;
+  static const int kServerConfigFieldNumber = 6;
   const ::ProtobufMessage::GLOBAL_CONFIG& serverconfig() const;
   ::ProtobufMessage::GLOBAL_CONFIG* mutable_serverconfig();
   ::ProtobufMessage::GLOBAL_CONFIG* release_serverconfig();
@@ -709,6 +720,7 @@ class PROXY_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_po
   ::google::protobuf::internal::ArenaStringPtr clientcheckkey_;
   ::google::protobuf::int32 clientchecktime_;
   ::google::protobuf::int32 timeoutcheckinterval_;
+  ::google::protobuf::internal::ArenaStringPtr processaddress_;
   ::ProtobufMessage::GLOBAL_CONFIG* serverconfig_;
   ::google::protobuf::int32 timeouttime_;
   mutable int _cached_size_;
@@ -1836,7 +1848,51 @@ inline void PROXY_CONFIG::set_timeouttime(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:ProtobufMessage.PROXY_CONFIG.TimeoutTime)
 }
 
-// optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 5;
+// optional string ProcessAddress = 5;
+inline void PROXY_CONFIG::clear_processaddress() {
+  processaddress_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& PROXY_CONFIG::processaddress() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.PROXY_CONFIG.ProcessAddress)
+  return processaddress_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void PROXY_CONFIG::set_processaddress(const ::std::string& value) {
+  
+  processaddress_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:ProtobufMessage.PROXY_CONFIG.ProcessAddress)
+}
+inline void PROXY_CONFIG::set_processaddress(const char* value) {
+  
+  processaddress_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.PROXY_CONFIG.ProcessAddress)
+}
+inline void PROXY_CONFIG::set_processaddress(const char* value, size_t size) {
+  
+  processaddress_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.PROXY_CONFIG.ProcessAddress)
+}
+inline ::std::string* PROXY_CONFIG::mutable_processaddress() {
+  
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.PROXY_CONFIG.ProcessAddress)
+  return processaddress_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* PROXY_CONFIG::release_processaddress() {
+  // @@protoc_insertion_point(field_release:ProtobufMessage.PROXY_CONFIG.ProcessAddress)
+  
+  return processaddress_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void PROXY_CONFIG::set_allocated_processaddress(::std::string* processaddress) {
+  if (processaddress != NULL) {
+    
+  } else {
+    
+  }
+  processaddress_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), processaddress);
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.PROXY_CONFIG.ProcessAddress)
+}
+
+// optional .ProtobufMessage.GLOBAL_CONFIG ServerConfig = 6;
 inline bool PROXY_CONFIG::has_serverconfig() const {
   return !_is_default_instance_ && serverconfig_ != NULL;
 }

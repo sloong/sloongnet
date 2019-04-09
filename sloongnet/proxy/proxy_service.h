@@ -15,9 +15,11 @@ namespace Sloong
 		~SloongNetProxy();
 
 		bool Initialize(int argc, char** args);
-		bool ConnectToControl(string controlAddress);
 		void Run();
 		void Exit();
+
+		bool ConnectToControl(string controlAddress);
+		bool ConnectToProcess();
 
 		void OnReceivePackage(SmartEvent evt);
 		void OnSocketClose(SmartEvent evt);
@@ -26,6 +28,11 @@ namespace Sloong
 		unique_ptr<CControlHub> m_pControl;
 		shared_ptr<lConnect>	m_pSocket;
 		unique_ptr<CLog>	m_pLog;
+		// 
+		map<int,int>	m_mapProcessLoadList;
+		map<int,SmartConnect> 	m_mapProcessList;
+		map<u_int64_t,SmartEvent> m_mapEventList;
+		u_int64_t	m_nSerialNumber=0;
 		ProtobufMessage::PROXY_CONFIG m_oConfig;
 	};
 

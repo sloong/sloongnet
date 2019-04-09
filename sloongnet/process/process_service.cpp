@@ -5,9 +5,8 @@
 #include "LuaProcessCenter.h"
 #include "IData.h"
 #include "utility.h"
-#include "NetworkEvent.h"
+#include "NetworkEvent.hpp"
 #include "DataTransPackage.h"
-#include "lconnect.h"
 using namespace Sloong;
 using namespace Sloong::Events;
 
@@ -92,17 +91,18 @@ bool SloongNetProcess::Initialize(int argc, char** args)
 		}
 
 		ProtobufMessage::MessagePackage pack;
-		pack.set_function(MessageType::GetConfig);
+		pack.set_function(MessageFunction::GetConfig);
 		pack.set_sender(ModuleType::Process);
 		pack.set_receiver(ModuleType::ControlCenter);
 		
-		int length = pack.ByteSize();
-		char* pszBuf = new char[length]();
-		pack.SerializeToArray(pszBuf,length);
+		string strMsg;
+		pack.SerializeToString(&strMsg);
 
 		CDataTransPackage dataPackage;
 		dataPackage.Initialize(m_pSocket);
-		dataPackage.RequestPackage(1,1,string(pszBuf,length));
+		dataPackage.SetProperty(true,false,true);
+		dataPackage.AddSerialNumber(m_nSerialNumber);
+		dataPackage.RequestPackage(strMsg);
 		NetworkResult result = dataPackage.SendPackage();
 		if(result != NetworkResult::Succeed)
 		{
@@ -120,8 +120,8 @@ bool SloongNetProcess::Initialize(int argc, char** args)
 		
 		auto serv_config = m_oConfig.serverconfig();
 		m_pControl->Initialize(serv_config.mqthreadquantity());
-		m_pControl->Add(GlobalConfiguation, m_oConfig.mutable_serverconfig());
-		m_pControl->Add(ModuleConfiguation, &m_oConfig);
+		m_pControl->Add(DATA_ITEM::GlobalConfiguation, m_oConfig.mutable_serverconfig());
+		m_pControl->Add(DATA_ITEM::ModuleConfiguation, &m_oConfig);
 		m_pControl->Add(Logger, m_pLog.get());
 
 		m_pControl->RegisterEvent(ProgramExit);
@@ -218,8 +218,8 @@ void Sloong::SloongNetProcess::OnSocketClose(SmartEvent event)
 		return;
 	}
 	// call close function.
-	m_pProcess->CloseSocket(info);
-	net_evt->CallCallbackFunc(net_evt);
+	//m_pProcess->CloseSocket(info);
+	//net_evt->CallCallbackFunc(net_evt);
 }
 
 void Sloong::SloongNetProcess::Exit()

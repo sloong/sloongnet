@@ -3,7 +3,7 @@
 #include "ControlHub.h"
 #include "IData.h"
 #include "utility.h"
-#include "NetworkEvent.h"
+#include "NetworkEvent.hpp"
 #include "DataTransPackage.h"
 using namespace Sloong;
 using namespace Sloong::Events;
@@ -86,17 +86,18 @@ bool SloongNetDataCenter::Initialize(int argc, char **args)
 		}
 
 		ProtobufMessage::MessagePackage pack;
-		pack.set_function(MessageType::GetConfig);
+		pack.set_function(MessageFunction::GetConfig);
 		pack.set_sender(ModuleType::DataCenter);
 		pack.set_receiver(ModuleType::ControlCenter);
 		
-		int length = pack.ByteSize();
-		char* pszBuf = new char[length]();
-		pack.SerializeToArray(pszBuf,length);
+		string strMsg;
+		pack.SerializeToString(&strMsg);
 
 		CDataTransPackage dataPackage;
 		dataPackage.Initialize(m_pSocket);
-		dataPackage.RequestPackage(1,1,string(pszBuf,length));
+		dataPackage.SetProperty(true,false,true);
+		dataPackage.AddSerialNumber(m_nSerialNumber);
+		dataPackage.RequestPackage(strMsg);
 		NetworkResult result = dataPackage.SendPackage();
 		if(result != NetworkResult::Succeed)
 		{
@@ -211,7 +212,7 @@ void Sloong::SloongNetDataCenter::OnSocketClose(SmartEvent event)
 	}
 	// call close function.
 	//m_pProcess->CloseSocket(info);
-	net_evt->CallCallbackFunc(net_evt);
+	//net_evt->CallCallbackFunc(net_evt);
 }
 
 void Sloong::SloongNetDataCenter::Exit()

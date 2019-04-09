@@ -3,7 +3,7 @@
 #include "epollex.h"
 #include "lconnect.h"
 #include "sockinfo.h"
-#include "NetworkEvent.h"
+#include "NetworkEvent.hpp"
 
 
 #include <sys/socket.h>
@@ -77,6 +77,12 @@ void Sloong::CEpollEx::Run(int nPort, int nWorkThreadNum)
 	CThreadPool::AddWorkThread( std::bind(&CEpollEx::MainWorkLoop, this, std::placeholders::_1), nullptr, nWorkThreadNum);
 }
 
+
+void Sloong::CEpollEx::AddMonitorSocket(int nSocket)
+{
+	SetSocketNonblocking(nSocket);
+	CtlEpollEvent(EPOLL_CTL_ADD, nSocket, EPOLLIN);
+}
 
 void Sloong::CEpollEx::SetEventHandler(EpollEventHandlerFunc accept,EpollEventHandlerFunc recv,EpollEventHandlerFunc send,EpollEventHandlerFunc other)
 {

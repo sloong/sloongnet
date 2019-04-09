@@ -1,6 +1,6 @@
 
 #include "ControlHub.h"
-#include "NormalEvent.h"
+#include "NormalEvent.hpp"
 using namespace Sloong::Events;
 
 
