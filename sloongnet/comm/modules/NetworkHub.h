@@ -19,8 +19,11 @@ namespace Sloong
         void EnableClientCheck(const string& clientCheckKey, int clientCheckTime);
         void EnableTimeoutCheck(int timeoutTime, int checkInterval);
         void EnableSSL(string certFile, string keyFile, string passwd);
+        void SetProperty(DataTransPackageProperty value){
+            m_emPackageProperty = value;
+        }
 
-        void AddMonitorSocket(int socket );
+        void AddMonitorSocket(int socket,DataTransPackageProperty property );
 
         // event handler
         void Run(SmartEvent event);
@@ -60,6 +63,7 @@ namespace Sloong
         string  m_strClientCheckKey="";
 		int m_nClientCheckKeyLength=0;
         int m_nClientCheckTime=0;
+        DataTransPackageProperty m_emPackageProperty = EnableAll;
     };
 }
 

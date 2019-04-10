@@ -89,14 +89,13 @@ bool SloongNetDataCenter::Initialize(int argc, char **args)
 		pack.set_function(MessageFunction::GetConfig);
 		pack.set_sender(ModuleType::DataCenter);
 		pack.set_receiver(ModuleType::ControlCenter);
-		
+
 		string strMsg;
 		pack.SerializeToString(&strMsg);
 
 		CDataTransPackage dataPackage;
 		dataPackage.Initialize(m_pSocket);
-		dataPackage.SetProperty(true,false,true);
-		dataPackage.AddSerialNumber(m_nSerialNumber);
+		dataPackage.SetProperty(DataTransPackageProperty::DisableAll);
 		dataPackage.RequestPackage(strMsg);
 		NetworkResult result = dataPackage.SendPackage();
 		if(result != NetworkResult::Succeed)

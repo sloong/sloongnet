@@ -132,4 +132,13 @@ typedef enum g_em_DataItem
 	Logger,
 }DATA_ITEM;
 
+
+enum DataTransPackageProperty{
+    DisableAll = 0x00,
+    EnablePriorityLevel = 0x01,
+    EnableSerialNumber = 0x02,
+    EnableMD5Check = 0x04,
+    EnableAll = 0x07,
+};
+
 #endif

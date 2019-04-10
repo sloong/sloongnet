@@ -4,12 +4,13 @@ package ProtobufMessage;
 message MessagePackage
 {
     int32 Function = 1;
-    int32 SerailNumber = 2;
-    string CheckString = 3;
-    int32 Sender = 4;
-    int32 Receiver = 5;
-    string Context = 6;
-    bytes ExtendData = 7;
+    int32 PriorityLevel = 2;
+    int32 SerialNumber = 3;
+    string CheckString = 4;
+    int32 Sender = 5;
+    int32 Receiver = 6;
+    string Context = 7;
+    bytes ExtendData = 8;
 }
 
 message GLOBAL_CONFIG

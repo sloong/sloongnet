@@ -100,8 +100,7 @@ bool SloongNetProcess::Initialize(int argc, char** args)
 
 		CDataTransPackage dataPackage;
 		dataPackage.Initialize(m_pSocket);
-		dataPackage.SetProperty(true,false,true);
-		dataPackage.AddSerialNumber(m_nSerialNumber);
+		dataPackage.SetProperty(DataTransPackageProperty::DisableAll);
 		dataPackage.RequestPackage(strMsg);
 		NetworkResult result = dataPackage.SendPackage();
 		if(result != NetworkResult::Succeed)

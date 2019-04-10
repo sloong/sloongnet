@@ -14,16 +14,16 @@ void Sloong::CDataTransPackage::PrepareSendPackageData( const string& msg, const
 {
 	// calculate the send buffer length
 	long long nBufLen = msg.size();
-	if( m_bEnableMD5Check )
-	{
-		nBufLen += g_nMD5Length;
-	}
-	if( m_bEnablePriorityLevel )
+	if( m_emProperty & DataTransPackageProperty::EnablePriorityLevel )
 	{
 		nBufLen += 1;
 	}
-	if( m_bEnableSerialNumber ){
+	if( m_emProperty & DataTransPackageProperty::EnableSerialNumber ){
 		nBufLen += s_llLen;
+	}
+	if( m_emProperty & DataTransPackageProperty::EnableMD5Check )
+	{
+		nBufLen += g_nMD5Length;
 	}
 	if (pExData != NULL && nExSize > 0)
 	{
@@ -36,17 +36,17 @@ void Sloong::CDataTransPackage::PrepareSendPackageData( const string& msg, const
 	char *pCpyPoint = m_szMsgBuffer.data();
 
 	// copy the data to buffer. the order is Priority -> SerialNum -> MD5
-	if( m_bEnablePriorityLevel ){
+	if( m_emProperty & DataTransPackageProperty::EnablePriorityLevel ){
 		*pCpyPoint = (char)m_nPriority;
 		logString += CUniversal::Format("[%d]",m_nPriority);
 		pCpyPoint += 1;
 	}
-	if( m_bEnableSerialNumber ){
+	if( m_emProperty & DataTransPackageProperty::EnableSerialNumber ){
 		CUniversal::Int64ToBytes(m_nSerialNumber, pCpyPoint);
 		logString += CUniversal::Format("[%d]",m_nSerialNumber);
 		pCpyPoint += s_llLen;
 	}
-	if( m_bEnableMD5Check ){
+	if( m_emProperty & DataTransPackageProperty::EnableMD5Check ){
 		string md5 = CMD5::Encode(msg);
 		memcpy(pCpyPoint, md5.c_str(), md5.length());
 		logString += CUniversal::Format("[%s]",md5);
@@ -169,7 +169,7 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage()
 	const char* pMsg = result.data();
 	int msgLength = result.length();
 
-	if( m_bEnablePriorityLevel ){
+	if( m_emProperty & DataTransPackageProperty::EnablePriorityLevel ){
 		int m_nPriority = pMsg[0];
 		if (m_nPriority > s_PriorityLevel || m_nPriority < 0)
 		{
@@ -180,7 +180,7 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage()
 		pMsg += 1;
 		msgLength -= 1;
 	}
-	if( m_bEnableSerialNumber ){
+	if( m_emProperty & DataTransPackageProperty::EnableSerialNumber ){
 		// TODO： 这里直接把pMsg传进去应该也是可以的
 		char pLongBuffer[s_llLen + 1] = {0};
 		memcpy(pLongBuffer, pMsg, s_llLen);
@@ -188,7 +188,7 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage()
 		pMsg += s_llLen;
 		msgLength -= s_llLen;
 	}
-	if( m_bEnableMD5Check ){
+	if( m_emProperty & DataTransPackageProperty::EnableMD5Check ){
 		m_strMD5 = string(pMsg,g_nMD5Length);
 		pMsg += g_nMD5Length;
 		msgLength -= g_nMD5Length;
@@ -196,7 +196,7 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage()
 
 	m_strMessage = string(pMsg,msgLength);
 
-	if( m_bEnableMD5Check ){
+	if( m_emProperty & DataTransPackageProperty::EnableMD5Check ){
 		string rmd5 = CMD5::Encode(m_strMessage);
 		CUniversal::touper(m_strMD5);
 		CUniversal::touper(rmd5);

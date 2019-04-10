@@ -112,15 +112,21 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::int32 function() const;
   void set_function(::google::protobuf::int32 value);
 
-  // optional int32 SerailNumber = 2;
-  void clear_serailnumber();
-  static const int kSerailNumberFieldNumber = 2;
-  ::google::protobuf::int32 serailnumber() const;
-  void set_serailnumber(::google::protobuf::int32 value);
+  // optional int32 PriorityLevel = 2;
+  void clear_prioritylevel();
+  static const int kPriorityLevelFieldNumber = 2;
+  ::google::protobuf::int32 prioritylevel() const;
+  void set_prioritylevel(::google::protobuf::int32 value);
 
-  // optional string CheckString = 3;
+  // optional int32 SerialNumber = 3;
+  void clear_serialnumber();
+  static const int kSerialNumberFieldNumber = 3;
+  ::google::protobuf::int32 serialnumber() const;
+  void set_serialnumber(::google::protobuf::int32 value);
+
+  // optional string CheckString = 4;
   void clear_checkstring();
-  static const int kCheckStringFieldNumber = 3;
+  static const int kCheckStringFieldNumber = 4;
   const ::std::string& checkstring() const;
   void set_checkstring(const ::std::string& value);
   void set_checkstring(const char* value);
@@ -129,21 +135,21 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::std::string* release_checkstring();
   void set_allocated_checkstring(::std::string* checkstring);
 
-  // optional int32 Sender = 4;
+  // optional int32 Sender = 5;
   void clear_sender();
-  static const int kSenderFieldNumber = 4;
+  static const int kSenderFieldNumber = 5;
   ::google::protobuf::int32 sender() const;
   void set_sender(::google::protobuf::int32 value);
 
-  // optional int32 Receiver = 5;
+  // optional int32 Receiver = 6;
   void clear_receiver();
-  static const int kReceiverFieldNumber = 5;
+  static const int kReceiverFieldNumber = 6;
   ::google::protobuf::int32 receiver() const;
   void set_receiver(::google::protobuf::int32 value);
 
-  // optional string Context = 6;
+  // optional string Context = 7;
   void clear_context();
-  static const int kContextFieldNumber = 6;
+  static const int kContextFieldNumber = 7;
   const ::std::string& context() const;
   void set_context(const ::std::string& value);
   void set_context(const char* value);
@@ -152,9 +158,9 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::std::string* release_context();
   void set_allocated_context(::std::string* context);
 
-  // optional bytes ExtendData = 7;
+  // optional bytes ExtendData = 8;
   void clear_extenddata();
-  static const int kExtendDataFieldNumber = 7;
+  static const int kExtendDataFieldNumber = 8;
   const ::std::string& extenddata() const;
   void set_extenddata(const ::std::string& value);
   void set_extenddata(const char* value);
@@ -169,12 +175,13 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   bool _is_default_instance_;
   ::google::protobuf::int32 function_;
-  ::google::protobuf::int32 serailnumber_;
+  ::google::protobuf::int32 prioritylevel_;
   ::google::protobuf::internal::ArenaStringPtr checkstring_;
+  ::google::protobuf::int32 serialnumber_;
   ::google::protobuf::int32 sender_;
-  ::google::protobuf::int32 receiver_;
   ::google::protobuf::internal::ArenaStringPtr context_;
   ::google::protobuf::internal::ArenaStringPtr extenddata_;
+  ::google::protobuf::int32 receiver_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_config_2eproto();
   friend void protobuf_AssignDesc_config_2eproto();
@@ -990,21 +997,35 @@ inline void MessagePackage::set_function(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.Function)
 }
 
-// optional int32 SerailNumber = 2;
-inline void MessagePackage::clear_serailnumber() {
-  serailnumber_ = 0;
+// optional int32 PriorityLevel = 2;
+inline void MessagePackage::clear_prioritylevel() {
+  prioritylevel_ = 0;
 }
-inline ::google::protobuf::int32 MessagePackage::serailnumber() const {
-  // @@protoc_insertion_point(field_get:ProtobufMessage.MessagePackage.SerailNumber)
-  return serailnumber_;
+inline ::google::protobuf::int32 MessagePackage::prioritylevel() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.MessagePackage.PriorityLevel)
+  return prioritylevel_;
 }
-inline void MessagePackage::set_serailnumber(::google::protobuf::int32 value) {
+inline void MessagePackage::set_prioritylevel(::google::protobuf::int32 value) {
   
-  serailnumber_ = value;
-  // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.SerailNumber)
+  prioritylevel_ = value;
+  // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.PriorityLevel)
 }
 
-// optional string CheckString = 3;
+// optional int32 SerialNumber = 3;
+inline void MessagePackage::clear_serialnumber() {
+  serialnumber_ = 0;
+}
+inline ::google::protobuf::int32 MessagePackage::serialnumber() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.MessagePackage.SerialNumber)
+  return serialnumber_;
+}
+inline void MessagePackage::set_serialnumber(::google::protobuf::int32 value) {
+  
+  serialnumber_ = value;
+  // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.SerialNumber)
+}
+
+// optional string CheckString = 4;
 inline void MessagePackage::clear_checkstring() {
   checkstring_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1048,7 +1069,7 @@ inline void MessagePackage::set_allocated_checkstring(::std::string* checkstring
   // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.MessagePackage.CheckString)
 }
 
-// optional int32 Sender = 4;
+// optional int32 Sender = 5;
 inline void MessagePackage::clear_sender() {
   sender_ = 0;
 }
@@ -1062,7 +1083,7 @@ inline void MessagePackage::set_sender(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.Sender)
 }
 
-// optional int32 Receiver = 5;
+// optional int32 Receiver = 6;
 inline void MessagePackage::clear_receiver() {
   receiver_ = 0;
 }
@@ -1076,7 +1097,7 @@ inline void MessagePackage::set_receiver(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.Receiver)
 }
 
-// optional string Context = 6;
+// optional string Context = 7;
 inline void MessagePackage::clear_context() {
   context_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1120,7 +1141,7 @@ inline void MessagePackage::set_allocated_context(::std::string* context) {
   // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.MessagePackage.Context)
 }
 
-// optional bytes ExtendData = 7;
+// optional bytes ExtendData = 8;
 inline void MessagePackage::clear_extenddata() {
   extenddata_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }

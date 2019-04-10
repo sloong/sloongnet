@@ -15,10 +15,8 @@ namespace Sloong
 
         void Initialize(SmartConnect conn, CLog* log= nullptr);
 
-        void SetProperty( bool bEnableSerial, bool bEnableMD5Check, bool bEnablePriority){
-            m_bEnableSerialNumber = bEnableSerial;
-            m_bEnableMD5Check = bEnableMD5Check;
-            m_bEnablePriorityLevel = bEnablePriority;
+        void SetProperty( DataTransPackageProperty value ){
+            m_emProperty = value;
         }
 
         /**
@@ -100,9 +98,7 @@ namespace Sloong
         string m_strMessage = "";
 
     protected:
-        bool m_bEnableSerialNumber = true;
-        bool m_bEnableMD5Check = true;
-        bool m_bEnablePriorityLevel = true;
+        DataTransPackageProperty m_emProperty = DataTransPackageProperty::EnableAll;
 
     protected:
         SmartConnect    m_pCon;

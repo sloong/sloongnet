@@ -96,8 +96,7 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 
 		CDataTransPackage dataPackage;
 		dataPackage.Initialize(m_pSocket);
-		dataPackage.SetProperty(true,false,true);
-		dataPackage.AddSerialNumber(m_nSerialNumber);
+		dataPackage.SetProperty(DataTransPackageProperty::DisableAll);
 		dataPackage.RequestPackage(strMsg);
 		NetworkResult result = dataPackage.SendPackage();
 		if(result != NetworkResult::Succeed)
@@ -172,7 +171,7 @@ bool SloongNetProxy::ConnectToProcess()
 		int sockID = connect->GetSocketID();
 		m_mapProcessList[sockID] = connect;
 		m_mapProcessLoadList[sockID] = 0;
-		m_pNetwork->AddMonitorSocket(sockID);
+		m_pNetwork->AddMonitorSocket(sockID, DataTransPackageProperty::DisableAll );
 	}
 }
 
@@ -215,6 +214,8 @@ void Sloong::SloongNetProxy::OnReceivePackage(SmartEvent evt)
 		msg.set_receiver(ModuleType::Process);
 		msg.set_function(MessageFunction::SendRequest);
 		msg.set_context(pack->GetRecvMessage());
+		msg.set_prioritylevel(pack->GetPriority());
+		msg.set_serialnumber(m_nSerialNumber);
 		string sendMsg;
 		msg.SerializeToString(&sendMsg);
 
@@ -227,9 +228,9 @@ void Sloong::SloongNetProxy::OnReceivePackage(SmartEvent evt)
 		// Step 4: 创建发送到指定process服务的DataTrans包
 		auto transPack = make_shared<CDataTransPackage>();
 		transPack->Initialize(process_id->second);
-		transPack->SetProperty(true,false,true);
-		transPack->SetPriority(pack->GetPriority());
-		transPack->AddSerialNumber(m_nSerialNumber);
+		transPack->SetProperty(DataTransPackageProperty::DisableAll);
+		
+	
 		transPack->RequestPackage(sendMsg);
 
 		// Step 5: 新建一个NetworkEx类型的事件，将上面准备完毕的数据发送出去。
@@ -237,6 +238,7 @@ void Sloong::SloongNetProxy::OnReceivePackage(SmartEvent evt)
 		process_event->SetSocketID(process_id->second->GetSocketID());
 		process_event->SetDataPackage(transPack);
 		m_pControl->SendMessage(process_event);
+		m_nSerialNumber++;
 	}
 	else
 	{

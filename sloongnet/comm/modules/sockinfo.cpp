@@ -96,6 +96,7 @@ NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 	{
 		auto package = make_shared<CDataTransPackage>();
 		package->Initialize(m_pCon,m_pLog);
+		package->SetProperty(m_emPackageProperty);
 		auto res = package->RecvPackage();
 		if( res == NetworkResult::Error)
 		{

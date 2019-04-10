@@ -54,9 +54,10 @@ void protobuf_AssignDesc_config_2eproto() {
       "config.proto");
   GOOGLE_CHECK(file != NULL);
   MessagePackage_descriptor_ = file->message_type(0);
-  static const int MessagePackage_offsets_[7] = {
+  static const int MessagePackage_offsets_[8] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, function_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, serailnumber_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, prioritylevel_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, serialnumber_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, checkstring_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, sender_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, receiver_),
@@ -249,37 +250,38 @@ void protobuf_AddDesc_config_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\014config.proto\022\017ProtobufMessage\"\224\001\n\016Mess"
-    "agePackage\022\020\n\010Function\030\001 \001(\005\022\024\n\014SerailNu"
-    "mber\030\002 \001(\005\022\023\n\013CheckString\030\003 \001(\t\022\016\n\006Sende"
-    "r\030\004 \001(\005\022\020\n\010Receiver\030\005 \001(\005\022\017\n\007Context\030\006 \001"
-    "(\t\022\022\n\nExtendData\030\007 \001(\014\"\214\002\n\rGLOBAL_CONFIG"
-    "\022\022\n\nListenPort\030\001 \001(\005\022\017\n\007LogPath\030\002 \001(\t\022\020\n"
-    "\010LogLevel\030\003 \001(\005\022\021\n\tDebugMode\030\004 \001(\010\022\030\n\020MQ"
-    "ThreadQuantity\030\005 \001(\005\022\021\n\tEnableSSL\030\006 \001(\010\022"
-    "\024\n\014CertFilePath\030\007 \001(\t\022\023\n\013KeyFilePath\030\010 \001"
-    "(\t\022\022\n\nCertPasswd\030\t \001(\t\022\023\n\013ConnectTime\030\n "
-    "\001(\005\022\023\n\013ReceiveTime\030\013 \001(\005\022\033\n\023EPollThreadQ"
-    "uantity\030\014 \001(\005\"\234\001\n\tDB_CONFIG\022\025\n\rServerAdd"
-    "ress\030\001 \001(\t\022\022\n\nServerPort\030\002 \001(\005\022\014\n\004User\030\003"
-    " \001(\t\022\016\n\006Passwd\030\004 \001(\t\022\020\n\010Database\030\005 \001(\t\0224"
-    "\n\014ServerConfig\030\006 \001(\0132\036.ProtobufMessage.G"
-    "LOBAL_CONFIG\"r\n\013DATA_CONFIG\022\027\n\017DataRecei"
-    "vePort\030\001 \001(\005\022\024\n\014DataRecvTime\030\002 \001(\005\0224\n\014Se"
-    "rverConfig\030\003 \001(\0132\036.ProtobufMessage.GLOBA"
-    "L_CONFIG\"\300\001\n\014PROXY_CONFIG\022\027\n\017ClientCheck"
-    "Time\030\001 \001(\005\022\026\n\016ClientCheckKey\030\002 \001(\t\022\034\n\024Ti"
-    "meoutCheckInterval\030\003 \001(\005\022\023\n\013TimeoutTime\030"
-    "\004 \001(\005\022\026\n\016ProcessAddress\030\005 \001(\t\0224\n\014ServerC"
-    "onfig\030\006 \001(\0132\036.ProtobufMessage.GLOBAL_CON"
-    "FIG\"G\n\017FIREWALL_CONFIG\0224\n\014ServerConfig\030\005"
-    " \001(\0132\036.ProtobufMessage.GLOBAL_CONFIG\"\347\001\n"
-    "\016PROCESS_CONFIG\022\032\n\022LuaContextQuantity\030\001 "
-    "\001(\005\022\027\n\017LuaScriptFolder\030\002 \001(\t\022\024\n\014LuaEntry"
-    "File\030\003 \001(\t\022\030\n\020LuaEntryFunction\030\004 \001(\t\022\032\n\022"
-    "LuaProcessFunction\030\005 \001(\t\022\036\n\026LuaSocketClo"
-    "seFunction\030\006 \001(\t\0224\n\014ServerConfig\030\007 \001(\0132\036"
-    ".ProtobufMessage.GLOBAL_CONFIGb\006proto3", 1238);
+    "\n\014config.proto\022\017ProtobufMessage\"\253\001\n\016Mess"
+    "agePackage\022\020\n\010Function\030\001 \001(\005\022\025\n\rPriority"
+    "Level\030\002 \001(\005\022\024\n\014SerialNumber\030\003 \001(\005\022\023\n\013Che"
+    "ckString\030\004 \001(\t\022\016\n\006Sender\030\005 \001(\005\022\020\n\010Receiv"
+    "er\030\006 \001(\005\022\017\n\007Context\030\007 \001(\t\022\022\n\nExtendData\030"
+    "\010 \001(\014\"\214\002\n\rGLOBAL_CONFIG\022\022\n\nListenPort\030\001 "
+    "\001(\005\022\017\n\007LogPath\030\002 \001(\t\022\020\n\010LogLevel\030\003 \001(\005\022\021"
+    "\n\tDebugMode\030\004 \001(\010\022\030\n\020MQThreadQuantity\030\005 "
+    "\001(\005\022\021\n\tEnableSSL\030\006 \001(\010\022\024\n\014CertFilePath\030\007"
+    " \001(\t\022\023\n\013KeyFilePath\030\010 \001(\t\022\022\n\nCertPasswd\030"
+    "\t \001(\t\022\023\n\013ConnectTime\030\n \001(\005\022\023\n\013ReceiveTim"
+    "e\030\013 \001(\005\022\033\n\023EPollThreadQuantity\030\014 \001(\005\"\234\001\n"
+    "\tDB_CONFIG\022\025\n\rServerAddress\030\001 \001(\t\022\022\n\nSer"
+    "verPort\030\002 \001(\005\022\014\n\004User\030\003 \001(\t\022\016\n\006Passwd\030\004 "
+    "\001(\t\022\020\n\010Database\030\005 \001(\t\0224\n\014ServerConfig\030\006 "
+    "\001(\0132\036.ProtobufMessage.GLOBAL_CONFIG\"r\n\013D"
+    "ATA_CONFIG\022\027\n\017DataReceivePort\030\001 \001(\005\022\024\n\014D"
+    "ataRecvTime\030\002 \001(\005\0224\n\014ServerConfig\030\003 \001(\0132"
+    "\036.ProtobufMessage.GLOBAL_CONFIG\"\300\001\n\014PROX"
+    "Y_CONFIG\022\027\n\017ClientCheckTime\030\001 \001(\005\022\026\n\016Cli"
+    "entCheckKey\030\002 \001(\t\022\034\n\024TimeoutCheckInterva"
+    "l\030\003 \001(\005\022\023\n\013TimeoutTime\030\004 \001(\005\022\026\n\016ProcessA"
+    "ddress\030\005 \001(\t\0224\n\014ServerConfig\030\006 \001(\0132\036.Pro"
+    "tobufMessage.GLOBAL_CONFIG\"G\n\017FIREWALL_C"
+    "ONFIG\0224\n\014ServerConfig\030\005 \001(\0132\036.ProtobufMe"
+    "ssage.GLOBAL_CONFIG\"\347\001\n\016PROCESS_CONFIG\022\032"
+    "\n\022LuaContextQuantity\030\001 \001(\005\022\027\n\017LuaScriptF"
+    "older\030\002 \001(\t\022\024\n\014LuaEntryFile\030\003 \001(\t\022\030\n\020Lua"
+    "EntryFunction\030\004 \001(\t\022\032\n\022LuaProcessFunctio"
+    "n\030\005 \001(\t\022\036\n\026LuaSocketCloseFunction\030\006 \001(\t\022"
+    "4\n\014ServerConfig\030\007 \001(\0132\036.ProtobufMessage."
+    "GLOBAL_CONFIGb\006proto3", 1261);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "config.proto", &protobuf_RegisterTypes);
   MessagePackage::default_instance_ = new MessagePackage();
@@ -310,7 +312,8 @@ struct StaticDescriptorInitializer_config_2eproto {
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int MessagePackage::kFunctionFieldNumber;
-const int MessagePackage::kSerailNumberFieldNumber;
+const int MessagePackage::kPriorityLevelFieldNumber;
+const int MessagePackage::kSerialNumberFieldNumber;
 const int MessagePackage::kCheckStringFieldNumber;
 const int MessagePackage::kSenderFieldNumber;
 const int MessagePackage::kReceiverFieldNumber;
@@ -341,7 +344,8 @@ void MessagePackage::SharedCtor() {
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   function_ = 0;
-  serailnumber_ = 0;
+  prioritylevel_ = 0;
+  serialnumber_ = 0;
   checkstring_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   sender_ = 0;
   receiver_ = 0;
@@ -405,9 +409,10 @@ void MessagePackage::Clear() {
            ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
 } while (0)
 
-  ZR_(function_, serailnumber_);
-  ZR_(sender_, receiver_);
+  ZR_(function_, prioritylevel_);
+  ZR_(serialnumber_, sender_);
   checkstring_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  receiver_ = 0;
   context_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   extenddata_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 
@@ -436,28 +441,43 @@ bool MessagePackage::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(16)) goto parse_SerailNumber;
+        if (input->ExpectTag(16)) goto parse_PriorityLevel;
         break;
       }
 
-      // optional int32 SerailNumber = 2;
+      // optional int32 PriorityLevel = 2;
       case 2: {
         if (tag == 16) {
-         parse_SerailNumber:
+         parse_PriorityLevel:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &serailnumber_)));
+                 input, &prioritylevel_)));
 
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_CheckString;
+        if (input->ExpectTag(24)) goto parse_SerialNumber;
         break;
       }
 
-      // optional string CheckString = 3;
+      // optional int32 SerialNumber = 3;
       case 3: {
-        if (tag == 26) {
+        if (tag == 24) {
+         parse_SerialNumber:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &serialnumber_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(34)) goto parse_CheckString;
+        break;
+      }
+
+      // optional string CheckString = 4;
+      case 4: {
+        if (tag == 34) {
          parse_CheckString:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_checkstring()));
@@ -468,13 +488,13 @@ bool MessagePackage::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(32)) goto parse_Sender;
+        if (input->ExpectTag(40)) goto parse_Sender;
         break;
       }
 
-      // optional int32 Sender = 4;
-      case 4: {
-        if (tag == 32) {
+      // optional int32 Sender = 5;
+      case 5: {
+        if (tag == 40) {
          parse_Sender:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
@@ -483,13 +503,13 @@ bool MessagePackage::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(40)) goto parse_Receiver;
+        if (input->ExpectTag(48)) goto parse_Receiver;
         break;
       }
 
-      // optional int32 Receiver = 5;
-      case 5: {
-        if (tag == 40) {
+      // optional int32 Receiver = 6;
+      case 6: {
+        if (tag == 48) {
          parse_Receiver:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
@@ -498,13 +518,13 @@ bool MessagePackage::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(50)) goto parse_Context;
+        if (input->ExpectTag(58)) goto parse_Context;
         break;
       }
 
-      // optional string Context = 6;
-      case 6: {
-        if (tag == 50) {
+      // optional string Context = 7;
+      case 7: {
+        if (tag == 58) {
          parse_Context:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_context()));
@@ -515,13 +535,13 @@ bool MessagePackage::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(58)) goto parse_ExtendData;
+        if (input->ExpectTag(66)) goto parse_ExtendData;
         break;
       }
 
-      // optional bytes ExtendData = 7;
-      case 7: {
-        if (tag == 58) {
+      // optional bytes ExtendData = 8;
+      case 8: {
+        if (tag == 66) {
          parse_ExtendData:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_extenddata()));
@@ -561,45 +581,50 @@ void MessagePackage::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->function(), output);
   }
 
-  // optional int32 SerailNumber = 2;
-  if (this->serailnumber() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->serailnumber(), output);
+  // optional int32 PriorityLevel = 2;
+  if (this->prioritylevel() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->prioritylevel(), output);
   }
 
-  // optional string CheckString = 3;
+  // optional int32 SerialNumber = 3;
+  if (this->serialnumber() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->serialnumber(), output);
+  }
+
+  // optional string CheckString = 4;
   if (this->checkstring().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->checkstring().data(), this->checkstring().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "ProtobufMessage.MessagePackage.CheckString");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      3, this->checkstring(), output);
+      4, this->checkstring(), output);
   }
 
-  // optional int32 Sender = 4;
+  // optional int32 Sender = 5;
   if (this->sender() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->sender(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->sender(), output);
   }
 
-  // optional int32 Receiver = 5;
+  // optional int32 Receiver = 6;
   if (this->receiver() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->receiver(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->receiver(), output);
   }
 
-  // optional string Context = 6;
+  // optional string Context = 7;
   if (this->context().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->context().data(), this->context().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "ProtobufMessage.MessagePackage.Context");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      6, this->context(), output);
+      7, this->context(), output);
   }
 
-  // optional bytes ExtendData = 7;
+  // optional bytes ExtendData = 8;
   if (this->extenddata().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
-      7, this->extenddata(), output);
+      8, this->extenddata(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:ProtobufMessage.MessagePackage)
@@ -613,12 +638,17 @@ void MessagePackage::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->function(), target);
   }
 
-  // optional int32 SerailNumber = 2;
-  if (this->serailnumber() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->serailnumber(), target);
+  // optional int32 PriorityLevel = 2;
+  if (this->prioritylevel() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->prioritylevel(), target);
   }
 
-  // optional string CheckString = 3;
+  // optional int32 SerialNumber = 3;
+  if (this->serialnumber() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->serialnumber(), target);
+  }
+
+  // optional string CheckString = 4;
   if (this->checkstring().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->checkstring().data(), this->checkstring().length(),
@@ -626,20 +656,20 @@ void MessagePackage::SerializeWithCachedSizes(
       "ProtobufMessage.MessagePackage.CheckString");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->checkstring(), target);
+        4, this->checkstring(), target);
   }
 
-  // optional int32 Sender = 4;
+  // optional int32 Sender = 5;
   if (this->sender() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->sender(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->sender(), target);
   }
 
-  // optional int32 Receiver = 5;
+  // optional int32 Receiver = 6;
   if (this->receiver() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->receiver(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->receiver(), target);
   }
 
-  // optional string Context = 6;
+  // optional string Context = 7;
   if (this->context().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->context().data(), this->context().length(),
@@ -647,14 +677,14 @@ void MessagePackage::SerializeWithCachedSizes(
       "ProtobufMessage.MessagePackage.Context");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        6, this->context(), target);
+        7, this->context(), target);
   }
 
-  // optional bytes ExtendData = 7;
+  // optional bytes ExtendData = 8;
   if (this->extenddata().size() > 0) {
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
-        7, this->extenddata(), target);
+        8, this->extenddata(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:ProtobufMessage.MessagePackage)
@@ -672,42 +702,49 @@ int MessagePackage::ByteSize() const {
         this->function());
   }
 
-  // optional int32 SerailNumber = 2;
-  if (this->serailnumber() != 0) {
+  // optional int32 PriorityLevel = 2;
+  if (this->prioritylevel() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
-        this->serailnumber());
+        this->prioritylevel());
   }
 
-  // optional string CheckString = 3;
+  // optional int32 SerialNumber = 3;
+  if (this->serialnumber() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->serialnumber());
+  }
+
+  // optional string CheckString = 4;
   if (this->checkstring().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->checkstring());
   }
 
-  // optional int32 Sender = 4;
+  // optional int32 Sender = 5;
   if (this->sender() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->sender());
   }
 
-  // optional int32 Receiver = 5;
+  // optional int32 Receiver = 6;
   if (this->receiver() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->receiver());
   }
 
-  // optional string Context = 6;
+  // optional string Context = 7;
   if (this->context().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->context());
   }
 
-  // optional bytes ExtendData = 7;
+  // optional bytes ExtendData = 8;
   if (this->extenddata().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::BytesSize(
@@ -745,8 +782,11 @@ void MessagePackage::MergeFrom(const MessagePackage& from) {
   if (from.function() != 0) {
     set_function(from.function());
   }
-  if (from.serailnumber() != 0) {
-    set_serailnumber(from.serailnumber());
+  if (from.prioritylevel() != 0) {
+    set_prioritylevel(from.prioritylevel());
+  }
+  if (from.serialnumber() != 0) {
+    set_serialnumber(from.serialnumber());
   }
   if (from.checkstring().size() > 0) {
 
@@ -793,7 +833,8 @@ void MessagePackage::Swap(MessagePackage* other) {
 }
 void MessagePackage::InternalSwap(MessagePackage* other) {
   std::swap(function_, other->function_);
-  std::swap(serailnumber_, other->serailnumber_);
+  std::swap(prioritylevel_, other->prioritylevel_);
+  std::swap(serialnumber_, other->serialnumber_);
   checkstring_.Swap(&other->checkstring_);
   std::swap(sender_, other->sender_);
   std::swap(receiver_, other->receiver_);
@@ -828,21 +869,35 @@ void MessagePackage::clear_function() {
   // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.Function)
 }
 
-// optional int32 SerailNumber = 2;
-void MessagePackage::clear_serailnumber() {
-  serailnumber_ = 0;
+// optional int32 PriorityLevel = 2;
+void MessagePackage::clear_prioritylevel() {
+  prioritylevel_ = 0;
 }
- ::google::protobuf::int32 MessagePackage::serailnumber() const {
-  // @@protoc_insertion_point(field_get:ProtobufMessage.MessagePackage.SerailNumber)
-  return serailnumber_;
+ ::google::protobuf::int32 MessagePackage::prioritylevel() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.MessagePackage.PriorityLevel)
+  return prioritylevel_;
 }
- void MessagePackage::set_serailnumber(::google::protobuf::int32 value) {
+ void MessagePackage::set_prioritylevel(::google::protobuf::int32 value) {
   
-  serailnumber_ = value;
-  // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.SerailNumber)
+  prioritylevel_ = value;
+  // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.PriorityLevel)
 }
 
-// optional string CheckString = 3;
+// optional int32 SerialNumber = 3;
+void MessagePackage::clear_serialnumber() {
+  serialnumber_ = 0;
+}
+ ::google::protobuf::int32 MessagePackage::serialnumber() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.MessagePackage.SerialNumber)
+  return serialnumber_;
+}
+ void MessagePackage::set_serialnumber(::google::protobuf::int32 value) {
+  
+  serialnumber_ = value;
+  // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.SerialNumber)
+}
+
+// optional string CheckString = 4;
 void MessagePackage::clear_checkstring() {
   checkstring_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -886,7 +941,7 @@ void MessagePackage::clear_checkstring() {
   // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.MessagePackage.CheckString)
 }
 
-// optional int32 Sender = 4;
+// optional int32 Sender = 5;
 void MessagePackage::clear_sender() {
   sender_ = 0;
 }
@@ -900,7 +955,7 @@ void MessagePackage::clear_sender() {
   // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.Sender)
 }
 
-// optional int32 Receiver = 5;
+// optional int32 Receiver = 6;
 void MessagePackage::clear_receiver() {
   receiver_ = 0;
 }
@@ -914,7 +969,7 @@ void MessagePackage::clear_receiver() {
   // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.Receiver)
 }
 
-// optional string Context = 6;
+// optional string Context = 7;
 void MessagePackage::clear_context() {
   context_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -958,7 +1013,7 @@ void MessagePackage::clear_context() {
   // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.MessagePackage.Context)
 }
 
-// optional bytes ExtendData = 7;
+// optional bytes ExtendData = 8;
 void MessagePackage::clear_extenddata() {
   extenddata_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }

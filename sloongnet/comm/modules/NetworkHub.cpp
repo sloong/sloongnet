@@ -141,11 +141,11 @@ void Sloong::CNetworkHub::EnableSSL(string certFile, string keyFile, string pass
 	}
 }
 
-void Sloong::CNetworkHub::AddMonitorSocket( int nSocket )
+void Sloong::CNetworkHub::AddMonitorSocket( int nSocket, DataTransPackageProperty property )
 {
 	auto info = make_shared<CSockInfo>();
 	info->Initialize(m_iC, nSocket, m_pCTX);
-
+	info->SetProperty(property);
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList[nSocket] = info;
 	sockLck.unlock();
@@ -210,7 +210,7 @@ NetworkResult Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 
 	auto info = make_shared<CSockInfo>();
 	info->Initialize(m_iC, conn_sock, m_pCTX);
-
+	info->SetProperty(m_emPackageProperty);
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList[conn_sock] = info;
 	sockLck.unlock();

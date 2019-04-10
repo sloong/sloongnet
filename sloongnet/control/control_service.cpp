@@ -115,6 +115,7 @@ bool SloongNetService::Initialize(int argc, char **args)
 		{
 			IData::Initialize(m_pControl.get());
 			m_pNetwork->Initialize(m_pControl.get());
+			m_pNetwork->SetProperty(DataTransPackageProperty::DisableAll);
 		}
 		catch (exception e)
 		{
