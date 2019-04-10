@@ -167,7 +167,7 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 						}else{
 							m_pLog->Warn("Accept error.");
 						}
-						return;
+						continue;
 					}
 					auto res = OnNewAccept(conn_sock);
 					if( res  == NetworkResult::Error){

@@ -88,6 +88,7 @@ bool SloongNetProcess::Initialize(int argc, char** args)
 		if( !ConnectToControl(args[1]))
 		{
 			cout << "Connect to control fialed." <<endl;
+			return false;
 		}
 
 		ProtobufMessage::MessagePackage pack;
@@ -106,18 +107,22 @@ bool SloongNetProcess::Initialize(int argc, char** args)
 		if(result != NetworkResult::Succeed)
 		{
 			cerr << "Send get config request error."<< endl;
-			return 1;
+			return false;
 		}
 		result = dataPackage.RecvPackage();
 		if(result != NetworkResult::Succeed)
 		{
 			cerr << "Receive get config result error."<< endl;
-			return 1;
+			return false;
 		}
 
 		m_oConfig.ParseFromString(dataPackage.GetRecvMessage());
 		
 		auto serv_config = m_oConfig.serverconfig();
+
+		//m_pLog->Initialize(serv_config.logpath(), "", serv_config.debugmode(), LOGLEVEL(serv_config.loglevel()), LOGTYPE::DAY);
+		m_pLog->Initialize(serv_config.logpath(), "", true, LOGLEVEL::All, LOGTYPE::DAY);
+
 		m_pControl->Initialize(serv_config.mqthreadquantity());
 		m_pControl->Add(DATA_ITEM::GlobalConfiguation, m_oConfig.mutable_serverconfig());
 		m_pControl->Add(DATA_ITEM::ModuleConfiguation, &m_oConfig);
@@ -176,6 +181,7 @@ void SloongNetProcess::Run()
 {
 	m_pLog->Info("Application begin running.");
 	m_pControl->SendMessage(EVENT_TYPE::ProgramStart);
+	m_oSync.wait();
 }
 
 
@@ -226,4 +232,5 @@ void Sloong::SloongNetProcess::Exit()
 	m_pLog->Info("Application will exit.");
 	m_pControl->SendMessage(EVENT_TYPE::ProgramExit);
 	m_pControl->Exit();
+	m_oSync.notify_one();
 }

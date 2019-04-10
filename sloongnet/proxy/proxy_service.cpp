@@ -84,6 +84,7 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		if( !ConnectToControl(args[1]))
 		{
 			cout << "Connect to control fialed." <<endl;
+			return false;
 		}
 
 		ProtobufMessage::MessagePackage pack;
@@ -102,18 +103,22 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		if(result != NetworkResult::Succeed)
 		{
 			cerr << "Send get config request error."<< endl;
-			return 1;
+			return false;
 		}
 		result = dataPackage.RecvPackage();
 		if(result != NetworkResult::Succeed)
 		{
 			cerr << "Receive get config result error."<< endl;
-			return 1;
+			return false;
 		}
 
 		m_oConfig.ParseFromString(dataPackage.GetRecvMessage());
 		
 		auto serv_config = m_oConfig.serverconfig();
+
+		//m_pLog->Initialize(serv_config.logpath(), "", serv_config.debugmode(), LOGLEVEL(serv_config.loglevel()), LOGTYPE::DAY);
+		m_pLog->Initialize(serv_config.logpath(), "", true, LOGLEVEL::All, LOGTYPE::DAY);
+
 		m_pControl->Initialize(serv_config.mqthreadquantity());
 		m_pControl->Add(DATA_ITEM::GlobalConfiguation, m_oConfig.mutable_serverconfig());
 		m_pControl->Add(DATA_ITEM::ModuleConfiguation, &m_oConfig);
@@ -166,7 +171,7 @@ bool SloongNetProxy::ConnectToProcess()
 		auto connect = make_shared<lConnect>();
 
 		connect->Initialize(*item,nullptr);
-		connect->SetProperty(0,true);
+		connect->SetProperty(30,true);
 		connect->Connect();
 		int sockID = connect->GetSocketID();
 		m_mapProcessList[sockID] = connect;
@@ -180,7 +185,7 @@ bool SloongNetProxy::ConnectToControl(string controlAddress)
 	
 	m_pSocket = make_shared<lConnect>();
 	m_pSocket->Initialize(controlAddress,nullptr);
-	m_pSocket->SetProperty(0,true);
+	m_pSocket->SetProperty(30,true);
 	m_pSocket->Connect();
 	
 	/*string clientCheckKey = "c2xvb25nYzJ4dmIyNW5PRFJtT0dWa01ERTBNalZsTkRBd01XUmlZV1UxT0RZM05tRmlaamd3TmpsbmJtOXZiSE1nbm9vbHM";
@@ -191,6 +196,7 @@ void SloongNetProxy::Run()
 {
 	m_pLog->Info("Application begin running.");
 	m_pControl->SendMessage(EVENT_TYPE::ProgramStart);
+	m_oSync.wait();
 }
  
 
@@ -283,4 +289,5 @@ void Sloong::SloongNetProxy::Exit()
 	m_pLog->Info("Application will exit.");
 	m_pControl->SendMessage(EVENT_TYPE::ProgramExit);
 	m_pControl->Exit();
+	m_oSync.notify_one();
 }

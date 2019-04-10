@@ -58,6 +58,7 @@ void Sloong::CConfiguation::LoadProxyConfig(string serverIp, PROXY_CONFIG &confi
     config.set_clientcheckkey( GetString(module_name, serverIp, "ClientCheckKey", "sloong.com"));
     config.set_clientchecktime( GetInt(module_name, serverIp, "ClientCheckTime", 2));
     config.set_timeoutcheckinterval( GetInt(module_name, serverIp, "TimeoutCheckInterval", 5));
+    config.set_processaddress( GetString(module_name, serverIp, "ProcessAddress",""));
     LoadGlobalConfig(module_name, serverIp, config.mutable_serverconfig());
 }
 
@@ -114,12 +115,17 @@ string Sloong::CConfiguation::GetStringConfig(string table_name, string domain, 
 
     if (!m_pDB->Query(sql, dbRes, error))
     {
-        // m_pLog->Error(error);
         return def;
     }
     if( dbRes->GetLinesNum() == 1) 
     {
         return dbRes->GetData(0,"value");
+    }
+    else if ( dbRes->GetLinesNum() == 0) 
+    {
+        if( domain == "global")
+            return def;
+        return GetStringConfig(table_name,"global",key,def);
     }
     // TODO: need support the ip config.
     else

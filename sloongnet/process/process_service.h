@@ -30,6 +30,7 @@ namespace Sloong
 		unique_ptr<CLog>	m_pLog;
 		u_int64_t	m_nSerialNumber=0;
 		ProtobufMessage::PROCESS_CONFIG m_oConfig;
+		CEasySync			m_oSync;
 	};
 
 }

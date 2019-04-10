@@ -169,6 +169,7 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage()
 	const char* pMsg = result.data();
 	int msgLength = result.length();
 
+	string logString = "RECV<<<";
 	if( m_emProperty & DataTransPackageProperty::EnablePriorityLevel ){
 		int m_nPriority = pMsg[0];
 		if (m_nPriority > s_PriorityLevel || m_nPriority < 0)
@@ -177,6 +178,7 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage()
 				m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_nPriority, s_PriorityLevel));
 			return NetworkResult::Error;
 		}
+		logString += CUniversal::Format("[%d]",s_PriorityLevel);
 		pMsg += 1;
 		msgLength -= 1;
 	}
@@ -185,16 +187,19 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage()
 		char pLongBuffer[s_llLen + 1] = {0};
 		memcpy(pLongBuffer, pMsg, s_llLen);
 		m_nSerialNumber = CUniversal::BytesToInt64(pLongBuffer);
+		logString += CUniversal::Format("[%d]",m_nSerialNumber);
 		pMsg += s_llLen;
 		msgLength -= s_llLen;
 	}
 	if( m_emProperty & DataTransPackageProperty::EnableMD5Check ){
 		m_strMD5 = string(pMsg,g_nMD5Length);
+		logString += CUniversal::Format("[%d]",m_strMD5);
 		pMsg += g_nMD5Length;
 		msgLength -= g_nMD5Length;
 	}
 
 	m_strMessage = string(pMsg,msgLength);
+	logString += "<<<" + m_strMessage;
 
 	if( m_emProperty & DataTransPackageProperty::EnableMD5Check ){
 		string rmd5 = CMD5::Encode(m_strMessage);
@@ -203,6 +208,8 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage()
 		if (m_strMD5 != rmd5)
 		{
 			// handle error.
+			if( m_pLog )
+				m_pLog->Warn(CUniversal::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_strMessage, rmd5, m_strMD5 ));
 			string strSend = CUniversal::Format("{\"errno\": \"-1\",\"errmsg\" : \"package check error\",\"server_md5\":\"%s\",\"client_md5\":\"%s\",\"check_string\":\"%s\"}", rmd5, m_strMD5, m_strMessage);
 			ResponsePackage(strSend);
 			return NetworkResult::Invalid;
@@ -210,7 +217,7 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage()
 	}
 
 	if( m_pLog )
-		m_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%s]<<<%s",m_nSerialNumber,m_strMD5, m_strMessage));
+		m_pLog->Verbos(logString);
 
 	return NetworkResult::Succeed;
 }

@@ -51,6 +51,8 @@ void Sloong::CNetworkHub::Run(SmartEvent event)
 {
 	m_bIsRunning = true;
 	m_pEpoll->Run(m_pConfig->listenport(), m_pConfig->epollthreadquantity());
+	if( m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0 )
+		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this, std::placeholders::_1), nullptr);
 }
 
 void Sloong::CNetworkHub::Exit(SmartEvent event)
@@ -128,7 +130,6 @@ void Sloong::CNetworkHub::EnableTimeoutCheck(int timeoutTime, int checkInterval)
 {
 	m_nConnectTimeoutTime = timeoutTime;
 	m_nCheckTimeoutInterval = checkInterval;
-	CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this, std::placeholders::_1), nullptr);
 }
 
 void Sloong::CNetworkHub::EnableSSL(string certFile, string keyFile, string passwd)

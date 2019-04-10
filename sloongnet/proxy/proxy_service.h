@@ -34,6 +34,7 @@ namespace Sloong
 		map<u_int64_t,SmartEvent> m_mapEventList;
 		u_int64_t	m_nSerialNumber=0;
 		ProtobufMessage::PROXY_CONFIG m_oConfig;
+		CEasySync			m_oSync;
 	};
 
 }

@@ -103,7 +103,8 @@ bool SloongNetService::Initialize(int argc, char **args)
 		m_pConfig->Initialize("system");
 		m_pConfig->LoadAll();
 
-		m_pLog->Initialize(m_pConfig->m_oControlConfig.logpath(), "", m_pConfig->m_oControlConfig.debugmode(), LOGLEVEL(m_pConfig->m_oControlConfig.loglevel()), LOGTYPE::DAY);
+		//m_pLog->Initialize(m_pConfig->m_oControlConfig.logpath(), "", m_pConfig->m_oControlConfig.debugmode(), LOGLEVEL(m_pConfig->m_oControlConfig.loglevel()), LOGTYPE::DAY);
+		m_pLog->Initialize(m_pConfig->m_oControlConfig.logpath(), "", true, LOGLEVEL::All, LOGTYPE::DAY);
 
 		m_pControl->Initialize(m_pConfig->m_oControlConfig.mqthreadquantity());
 		m_pControl->Add(DATA_ITEM::GlobalConfiguation, &m_pConfig->m_oControlConfig);
