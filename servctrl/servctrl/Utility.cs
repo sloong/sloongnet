@@ -620,6 +620,11 @@ namespace Sloong
             return BitConverter.GetBytes(IPAddress.HostToNetworkOrder(l));
         }
 
+        public static byte[] Int32ToBytes(Int32 l)
+        {
+            return BitConverter.GetBytes(IPAddress.HostToNetworkOrder(l));
+        }
+
         public static long BytesToLong(byte[] b)
         {
             return IPAddress.NetworkToHostOrder(BitConverter.ToInt64(b, 0));

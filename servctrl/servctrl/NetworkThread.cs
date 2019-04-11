@@ -149,7 +149,7 @@ namespace Sloong
             {
                 info.m_Client = new TcpClient(info.m_URL, info.m_nPort);
                 // send check key
-                var key = "clinecheckkeyforsloongnet";
+                var key = "c2xvb25nYzJ4dmIyNW5PRFJtT0dWa01ERTBNalZsTkRBd01XUmlZV1UxT0RZM05tRmlaamd3TmpsbmJtOXZiSE1nbm9vbHM";
                 var gbk = Encoding.GetEncoding("GB2312");
                 byte[] sendByte = gbk.GetBytes(key);
                 info.m_Conn = info.m_Client.GetStream();
@@ -231,11 +231,11 @@ namespace Sloong
                         var gbk = Encoding.GetEncoding("GB2312");
 
                         // 计算长度
-                        long lLen = gbk.GetByteCount(msg) + 32 + 8 + 1;
+                        int lLen = gbk.GetByteCount(msg) + 32 + 8 + 1;
 
                         // 开始准备数据
                         /// 长度
-                        sendList.AddRange(Utility.LongToBytes(lLen));
+                        sendList.AddRange(Utility.Int32ToBytes(lLen));
 
                         /// 优先级
                         sendList.Add(pack.level);
