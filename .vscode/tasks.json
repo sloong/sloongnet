@@ -13,10 +13,7 @@
             "label": "build_proxy",
             "type": "shell",
             "command": "./build/build.sh proxy",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "problemMatcher": []
         },
         {
@@ -53,6 +50,16 @@
             "label": "build_data",
             "type": "shell",
             "command": "./build/build.sh data",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "build_all",
+            "type": "shell",
+            "command": "./build/build.sh all",
             "group": {
                 "kind": "build",
                 "isDefault": true

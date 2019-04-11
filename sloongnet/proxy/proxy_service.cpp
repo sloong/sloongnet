@@ -105,7 +105,7 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 			cerr << "Send get config request error."<< endl;
 			return false;
 		}
-		result = dataPackage.RecvPackage();
+		result = dataPackage.RecvPackage(0);
 		if(result != NetworkResult::Succeed)
 		{
 			cerr << "Receive get config result error."<< endl;
@@ -170,8 +170,7 @@ bool SloongNetProxy::ConnectToProcess()
 	{
 		auto connect = make_shared<lConnect>();
 
-		connect->Initialize(*item,nullptr);
-		connect->SetProperty(30,true);
+		connect->Initialize(*item,nullptr); 
 		connect->Connect();
 		int sockID = connect->GetSocketID();
 		m_mapProcessList[sockID] = connect;
@@ -185,9 +184,7 @@ bool SloongNetProxy::ConnectToControl(string controlAddress)
 	
 	m_pSocket = make_shared<lConnect>();
 	m_pSocket->Initialize(controlAddress,nullptr);
-	m_pSocket->SetProperty(30,true);
 	m_pSocket->Connect();
-	
 	/*string clientCheckKey = "c2xvb25nYzJ4dmIyNW5PRFJtT0dWa01ERTBNalZsTkRBd01XUmlZV1UxT0RZM05tRmlaamd3TmpsbmJtOXZiSE1nbm9vbHM";
 	m_pSocket->Send(clientCheckKey);*/
 }

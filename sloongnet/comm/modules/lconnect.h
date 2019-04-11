@@ -7,7 +7,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <memory>
-
+#include "defines.h"
 using namespace std;
 namespace Sloong
 {
@@ -43,11 +43,6 @@ namespace Sloong
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
 		void Initialize( string addressPort, SSL_CTX* ctx= nullptr, bool useLongLongSize = false);
 
-		void SetProperty(int timeoutTime, bool bAgain){
-			m_nTimeout = timeoutTime;
-			m_bAgain = bAgain;
-		}
-
 		bool Connect();
 
 		// 读取对端发送的数据，返回实际读取到的长度
@@ -55,16 +50,22 @@ namespace Sloong
 		// Return：
 		//	  -1 - 读取发生错误。且无法恢复。需要关闭连接。
 		//    >= 0 - 读取到的数据长度
-		int Read(char* data, int len);
+		int Read(char* data, int len, int timeOut, bool bAgage );
 
 		// 读取对端发送的数据，以string格式返回读取到的内容
 		// 汉书并不保证数据会全部读取完成才返回。只会尝试尽可能多的读取，直到发生错误或者都去完成。所以需要检查期望读取的长度和实际读取的长度
-		string Read(int len);
+		string Read(int len, int timeOut, bool bAgage );
+		
+		// 接收一个数据包
+		// 如果接收到了所有的数据，那么返回succeed.
+		// 如果接收到了部分数据之后发生错误，直接返回Error
+		// 如果接收到了部分数据，并且超时设置为0，那么将会重复尝试，直至全部接收完毕或者发生其他错误，
+		// 如果接收到了部分数据，并且超时时间大于0，那么将会在发生超时之后，返回Timeout
+		// 如果没有接收到数据，并且发生了错误，返回Error
+		// 没有接收到数据，发生了超时，返回Timeout
+		NetworkResult RecvPackage(string& res, int timeOut = 0);
 
-		// 首先根据在Initialize函数中的参数发送Package长度（4Bit/8Bit）。然后在发送数据包本身
-		bool RecvPackage(string& res);
-
-		long long RecvLengthData();
+		long long RecvLengthData(int timeout);
 
 		// 向对端发送数据，返回实际发送的长度
 		// 函数并不保证数据会全部发送完成才返回。只能尝试尽可能多的发送，直到发生错误或者全部发送完成。需要检查期望发送的长度和实际发送的长度
@@ -75,6 +76,7 @@ namespace Sloong
 
 		int Write(string sendData, int index);
 
+		// 首先根据在Initialize函数中的参数发送Package长度（4Bit/8Bit）。然后在发送数据包本身
 		int SendPackage(string sendData, int index);
 
 		bool SendLengthData(long long lengthData);
@@ -97,11 +99,6 @@ namespace Sloong
 	public:
 		string m_strAddress;
 		int m_nPort;
-		
-		int m_nTimeout = 5;
-		bool m_bAgain = false;
-
-
 	private:
 		int m_nSocket;
 		SSL* m_pSSL = nullptr;

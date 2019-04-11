@@ -160,11 +160,12 @@ NetworkResult Sloong::CDataTransPackage::SendPackage()
 	}
 }
 
-NetworkResult Sloong::CDataTransPackage::RecvPackage()
+NetworkResult Sloong::CDataTransPackage::RecvPackage(int timeout)
 {
 	string result;
-	if( !m_pCon->RecvPackage(result))
-		return NetworkResult::Error;
+	auto net_res = m_pCon->RecvPackage(result,timeout);
+	if( net_res != NetworkResult::Succeed )
+		return net_res;
 	
 	const char* pMsg = result.data();
 	int msgLength = result.length();

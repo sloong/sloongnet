@@ -2,6 +2,7 @@
 #include <univ/luapacket.h>
 #include "DataTransPackage.h"
 #include "NetworkEvent.hpp"
+#include "IData.h"
 using namespace Sloong;
 using namespace Sloong::Universal;
 using namespace Sloong::Events;
@@ -34,6 +35,8 @@ void Sloong::CSockInfo::Initialize(IControl* iMsg, int sock, SSL_CTX* ctx)
 {
 	IObject::Initialize(iMsg);
 	m_ActiveTime = time(NULL);
+	auto serv_config = IData::GetGlobalConfig();
+	m_ReceiveTimeout = serv_config->receivetime();
 	m_pCon->Initialize(sock,ctx);
 	m_pUserInfo->SetData("ip", m_pCon->m_strAddress);
 	m_pUserInfo->SetData("port", CUniversal::ntos(m_pCon->m_nPort));
@@ -97,7 +100,7 @@ NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 		auto package = make_shared<CDataTransPackage>();
 		package->Initialize(m_pCon,m_pLog);
 		package->SetProperty(m_emPackageProperty);
-		auto res = package->RecvPackage();
+		auto res = package->RecvPackage(m_ReceiveTimeout);
 		if( res == NetworkResult::Error)
 		{
 			// 读取错误,将这个连接从监听中移除并关闭连接
@@ -109,11 +112,11 @@ NetworkResult Sloong::CSockInfo::OnDataCanReceive()
 			m_iC->SendMessage(event);
 			AddToSendList(package);
 		}
-		/*else if (nRecvSize == 0)
+		else if (res == NetworkResult::Retry)
 		{
 			//由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
 			return NetworkResult::Succeed;
-		}*/
+		}
 		else
 		{
 			bLoop = true;

@@ -103,7 +103,7 @@ bool SloongNetFirewall::Initialize(int argc, char **args)
 			cerr << "Send get config request error."<< endl;
 			return 1;
 		}
-		result = dataPackage.RecvPackage();
+		result = dataPackage.RecvPackage(0);
 		if(result != NetworkResult::Succeed)
 		{
 			cerr << "Receive get config result error."<< endl;
@@ -159,7 +159,6 @@ bool SloongNetFirewall::ConnectToControl(string controlAddress)
 	
 	m_pSocket = make_shared<lConnect>();
 	m_pSocket->Initialize(controlAddress,nullptr);
-	m_pSocket->SetProperty(0,true);
 	m_pSocket->Connect();
 	
 	/*string clientCheckKey = "c2xvb25nYzJ4dmIyNW5PRFJtT0dWa01ERTBNalZsTkRBd01XUmlZV1UxT0RZM05tRmlaamd3TmpsbmJtOXZiSE1nbm9vbHM";

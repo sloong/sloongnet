@@ -163,7 +163,7 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 					if (conn_sock == -1)
 					{
 						if (errno == EAGAIN){
-							m_pLog->Verbos("Accept end. But the result is -1 and the errno is EAGAIN.");
+							m_pLog->Verbos("Accept end.");
 						}else{
 							m_pLog->Warn("Accept error.");
 						}

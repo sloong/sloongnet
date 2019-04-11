@@ -102,22 +102,28 @@ int Sloong::lConnect::SSL_Write_Ex(SSL * ssl, char * buf, int len)
 }
 
 
-long long Sloong::lConnect::RecvLengthData()
+// 成功返回数据包长度
+// 超时返回0
+// 错误返回-1
+long long Sloong::lConnect::RecvLengthData(int timeout)
 {
+	int bRes=0;
     if( m_bUseLongLongSize ) {
         char nLen[s_llLen] = {0};
-        if(Read(nLen, s_llLen)<1)
-			return -1;
-		
-        auto len = CUniversal::BytesToInt64(nLen);
-        return len;
+		bRes = Read(nLen, s_llLen, timeout, false);
+        if(bRes>1){
+			auto len = CUniversal::BytesToInt64(nLen);
+        	return len;
+		}
     }else{
         char nLen[s_lLen] = {0};
-        if(Read(nLen, s_lLen)<1)
-			return -1;
-        auto len = CUniversal::BytesToInt32(nLen);
-        return len;
+        bRes = Read(nLen, s_lLen, timeout, false);
+		if (bRes>1){
+			auto len = CUniversal::BytesToInt32(nLen);
+        	return len;
+		}
     }
+	return bRes;
 }
 
 bool Sloong::lConnect::SendLengthData(long long lengthData)
@@ -145,11 +151,11 @@ int Sloong::lConnect::Write(string sendData, int index)
 	return Write(sendData.c_str(),sendData.length(),index);
 }
 
-string Sloong::lConnect::Read(int len)
+string Sloong::lConnect::Read(int len, int timeOut, bool bAgage)
 {
     string buf;
     buf.resize(len);
-	int realLen = Read(buf.data(),len);
+	int realLen = Read(buf.data(),len,timeOut,bAgage);
 	buf.resize(realLen);
     return buf;
 }
@@ -167,24 +173,27 @@ int Sloong::lConnect::SendPackage(string sendData, int index)
 }
 
 
-bool Sloong::lConnect::RecvPackage(string& res)
+NetworkResult Sloong::lConnect::RecvPackage(string& res, int timeout)
 {
-    auto len = RecvLengthData();
-	if( len < 1 )
-		return false;
+    auto len = RecvLengthData(timeout);
+	if( len == 0 )
+		return NetworkResult::Retry;
+	else if( len < 0 )
+		return NetworkResult::Error;
 	
     res.resize(len);
-	if( Read( res.data(), len) < 1)
-		return false;
+	// 一旦成功接收数据之后，就不再关心超时信息，持续接收直到成功或者失败。
+	if( Read( res.data(), len, timeout, true) < 1)
+		return NetworkResult::Error;
 
-	return true;
+	return NetworkResult::Succeed;
 }
 
-int Sloong::lConnect::Read(char * data, int len)
+int Sloong::lConnect::Read(char * data, int len, int timeOut, bool bAgage)
 {
 	// 未启用SSL时直接发送数据
 	if (!m_pSSL)
-		return CUniversal::RecvEx(m_nSocket, data, len, m_nTimeout, m_bAgain);
+		return CUniversal::RecvEx(m_nSocket, data, len, timeOut, bAgage);
 
 	if (!CheckSSLStatus(true))
 	{
