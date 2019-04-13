@@ -143,7 +143,6 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetProxy::OnReceivePackage, this, std::placeholders::_1));
 		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProxy::OnSocketClose, this, std::placeholders::_1));
 
-		ConnectToProcess();
 		return true;
 	}
 	catch (exception &e)
@@ -193,6 +192,7 @@ void SloongNetProxy::Run()
 {
 	m_pLog->Info("Application begin running.");
 	m_pControl->SendMessage(EVENT_TYPE::ProgramStart);
+	ConnectToProcess();
 	m_oSync.wait();
 }
  
@@ -230,14 +230,14 @@ void Sloong::SloongNetProxy::OnReceivePackage(SmartEvent evt)
 
 		// Step 4: 创建发送到指定process服务的DataTrans包
 		auto transPack = make_shared<CDataTransPackage>();
-		transPack->Initialize(process_id->second);
+		transPack->Initialize(process_id->second,m_pLog.get());
 		transPack->SetProperty(DataTransPackageProperty::DisableAll);
 		
 	
 		transPack->RequestPackage(sendMsg);
 
 		// Step 5: 新建一个NetworkEx类型的事件，将上面准备完毕的数据发送出去。
-		auto process_event = make_shared<CNetworkEvent>(EVENT_TYPE::RequestMessage);
+		auto process_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
 		process_event->SetSocketID(process_id->second->GetSocketID());
 		process_event->SetDataPackage(transPack);
 		m_pControl->SendMessage(process_event);
@@ -245,19 +245,18 @@ void Sloong::SloongNetProxy::OnReceivePackage(SmartEvent evt)
 	}
 	else
 	{
-		// Step 1: 根据收到的SerailNumber找到对应保存的来自客户端的Event对象
-		auto event_obj = m_mapEventList.find(pack->GetSerialNumber());
+		// Step 1: 将Process服务处理完毕的消息转换为正常格式
+		ProtobufMessage::MessagePackage msg;
+		msg.ParseFromString(pack->GetRecvMessage());
+
+		// Step 2: 根据收到的SerailNumber找到对应保存的来自客户端的Event对象
+		auto event_obj = m_mapEventList.find(msg.serialnumber());
 		if( event_obj == m_mapEventList.end() )
 		{
 			m_pLog->Error(CUniversal::Format("Event list no have target event data. SerailNumber:[%d]",pack->GetSerialNumber()));
 			return;
 		}
 		auto client_request = dynamic_pointer_cast<CNetworkEvent>(event_obj->second);
-
-		// Step 2: 将Process服务处理完毕的消息转换为正常格式
-		ProtobufMessage::MessagePackage msg;
-		msg.ParseFromString(pack->GetRecvMessage());
-
 
 		// Step 3: 发送相应数据
 		client_request->SetEvent(EVENT_TYPE::SendMessage);

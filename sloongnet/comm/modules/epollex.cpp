@@ -112,6 +112,7 @@ void Sloong::CEpollEx::CtlEpollEvent(int opt, int sock, int events)
 	// ET模式时，事件就绪时，假设对事件没做处理，内核不会反复通知事件就绪  	EPOLLET
 	ent.events = events | EPOLLERR | EPOLLHUP | EPOLLET;
 
+	m_pLog->Verbos(CUniversal::Format("Control epoll opt: Socket[%d] opt[%d]",sock, opt));
 	// 设置事件到epoll对象
 	epoll_ctl(m_EpollHandle, opt, sock, &ent);
 }
@@ -185,7 +186,7 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 			// EPOLLIN 可读消息
 			else if (m_Events[i].events&EPOLLIN)
 			{
-				m_pLog->Verbos("EPoll EPOLLIN event happened.Data Can Receive.");
+				m_pLog->Verbos(CUniversal::Format("EPoll EPOLLIN event happened. Socket[%d] Data Can Receive.",fd));
 				auto res = OnDataCanReceive(fd);
 				if( res  != NetworkResult::Error)
 					MonitorSendStatus(fd);
@@ -193,7 +194,7 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 			// EPOLLOUT 可写消息
 			else if (m_Events[i].events&EPOLLOUT)
 			{
-				m_pLog->Verbos("EPoll EPOLLOUT event happened.Can Write Data.");
+				m_pLog->Verbos(CUniversal::Format("EPoll EPOLLOUT event happened.Socket[%d] Can Write Data.",fd));
 				auto res = OnCanWriteData(fd);
 				// 所有消息全部发送完毕后只需要监听可读消息就可以了。
 				if( res == NetworkResult::Succeed)
@@ -203,7 +204,7 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 			}
 			else
 			{
-				m_pLog->Verbos("EPoll unkuown event happened.close this connnect.");
+				m_pLog->Verbos(CUniversal::Format("EPoll unkuown event happened.Socket[%d] close this connnect.",fd));
 				OnOtherEventHappened(fd);
 			}
 		}

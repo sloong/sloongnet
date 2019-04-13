@@ -31,6 +31,7 @@ enum MessageFunction
 {
 	GetConfig,
 	SendRequest,
+	ResponseRequest,
 };
 
 enum ModuleType

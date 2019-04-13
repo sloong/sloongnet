@@ -198,16 +198,23 @@ void Sloong::SloongNetProcess::OnReceivePackage(SmartEvent evt)
 	net_evt->SetEvent(EVENT_TYPE::SendMessage);
 	
 	string strRes("");
-	// char* pExData = nullptr;
-	// int nExSize;
-	// string strMsg = pack->GetRecvMessage();
-	// if (m_pProcess->MsgProcess(info, strMsg , strRes, pExData, nExSize)){
-	// 	pack->ResponsePackage(strRes,pExData,nExSize);
-	// }else{
-	// 	m_pLog->Error("Error in process");
-	pack->ResponsePackage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
-	// }
+	char* pExData = nullptr;
+	int nExSize;
 
+	ProtobufMessage::MessagePackage msg;
+	msg.ParseFromString(pack->GetRecvMessage());
+	msg.set_sender(ModuleType::Process);
+	msg.set_receiver(ModuleType::Proxy);
+	msg.set_function(MessageFunction::ResponseRequest);
+	if (m_pProcess->MsgProcess(info, msg.context() , strRes, pExData, nExSize)){
+		msg.set_context(strRes);
+	}else{
+		m_pLog->Error("Error in process");
+		msg.set_context("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
+	}
+	string res;
+	msg.SerializeToString(&res);
+	pack->ResponsePackage(res,pExData,nExSize);
 	net_evt->SetDataPackage(pack);
 	m_pControl->SendMessage(net_evt);
 }
