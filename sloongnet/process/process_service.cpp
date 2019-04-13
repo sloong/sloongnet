@@ -135,6 +135,7 @@ bool SloongNetProcess::Initialize(int argc, char** args)
 		{
 			IData::Initialize(m_pControl.get());
 			m_pNetwork->Initialize(m_pControl.get());
+			m_pNetwork->SetProperty(DataTransPackageProperty::DisableAll);
 			m_pProcess->Initialize(m_pControl.get());
 		}
 		catch (exception e)
