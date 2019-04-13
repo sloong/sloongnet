@@ -630,6 +630,11 @@ namespace Sloong
             return IPAddress.NetworkToHostOrder(BitConverter.ToInt64(b, 0));
         }
 
+        public static int BytesToInt32(byte[] b)
+        {
+            return IPAddress.NetworkToHostOrder(BitConverter.ToInt32(b, 0));
+        }
+
         public static byte[] RecvEx( Stream stream, long len, int overTime)
         {
             byte[] recvRes = new byte[len];
@@ -867,10 +872,10 @@ namespace Sloong
 
         public static long RecvDataLength(Stream st, int overTime)
         {
-            byte[] leng = Utility.RecvEx(st, 8, overTime);
+            byte[] leng = Utility.RecvEx(st, 4, overTime);
 
-            var hostLen = Utility.BytesToLong(leng);
-            if (hostLen <= 0 || hostLen > 2147483648)
+            var hostLen = Utility.BytesToInt32(leng);
+            if (hostLen <= 0 || hostLen > Int32.MaxValue)
             {
                 throw new Exception(string.Format("Recv length error. the length is:{0}. the data is:{1}", hostLen, leng.ToString()));
             }
