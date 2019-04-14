@@ -334,12 +334,12 @@ namespace Sloong
                     if (true)
                     {
                         priority = Utility.RecvEx(info.m_Conn, 1, 10000)[0];
-                        index = 1;
+                        index += 1;
                     }
                     if (AppStatus.bEnableSwift)
                     {
                         nSwift = Utility.BytesToLong(Utility.RecvEx(info.m_Conn, 8, 10000));
-                        index = 8;
+                        index += 8;
                     }
                     
                     if (AppStatus.bEnableMD5)
