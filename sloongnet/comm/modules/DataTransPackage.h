@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-#include "lconnect.h"
+#include "EasyConnect.h"
 namespace Sloong
 {
     class CDataTransPackage

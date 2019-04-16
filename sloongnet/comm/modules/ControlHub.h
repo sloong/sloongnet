@@ -19,6 +19,8 @@ namespace Sloong
         void SendMessage(EVENT_TYPE msgType);
 		void SendMessage(SmartEvent evt);
 
+		void CallMessage(SmartEvent evt);
+
 		void RegisterEvent(EVENT_TYPE t);
 		void RegisterEventHandler(EVENT_TYPE t, MsgHandlerFunc func);
 
@@ -40,14 +42,13 @@ namespace Sloong
 
 		bool AddTemp(string name, void* object);
 		void* GetTemp(string name);
-
     protected:
          // Data
 		map<DATA_ITEM, void*> m_oDataList;
 		map<string, void*> m_oTempDataList;
         // Message
         map<EVENT_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;
-		queue<shared_ptr<IEvent>> m_oMsgList;
+		queue<SmartEvent> m_oMsgList;
 		mutex m_oMsgListMutex;
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;
 		CEasySync	m_oSync;

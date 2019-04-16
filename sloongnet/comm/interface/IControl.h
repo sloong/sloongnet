@@ -18,6 +18,7 @@ namespace Sloong
 		// Message
 		virtual void SendMessage(EVENT_TYPE msgType) = 0;
 		virtual void SendMessage(SmartEvent evt) = 0;
+		virtual void CallMessage(SmartEvent evt) = 0;
 		virtual void RegisterEvent(EVENT_TYPE t) = 0;
 		virtual void RegisterEventHandler(EVENT_TYPE t, MsgHandlerFunc func) = 0;
 	};

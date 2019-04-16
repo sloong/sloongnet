@@ -133,6 +133,7 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 			m_pNetwork->Initialize(m_pControl.get());
 			m_pNetwork->EnableClientCheck(m_oConfig.clientcheckkey(),m_oConfig.clientchecktime());
 			m_pNetwork->EnableTimeoutCheck(m_oConfig.timeouttime(), m_oConfig.timeoutcheckinterval());
+			m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetProxy::MessagePackageProcesser, this, std::placeholders::_1));
 		}
 		catch (exception e)
 		{
@@ -140,7 +141,6 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 			return false;
 		}
 
-		m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetProxy::OnReceivePackage, this, std::placeholders::_1));
 		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProxy::OnSocketClose, this, std::placeholders::_1));
 
 		return true;
@@ -167,7 +167,7 @@ bool SloongNetProxy::ConnectToProcess()
 	auto list = CUniversal::split(m_oConfig.processaddress(),";");
 	for( auto item = list.begin();item!= list.end(); item++ )
 	{
-		auto connect = make_shared<lConnect>();
+		auto connect = make_shared<EasyConnect>();
 
 		connect->Initialize(*item,nullptr); 
 		connect->Connect();
@@ -181,7 +181,7 @@ bool SloongNetProxy::ConnectToProcess()
 bool SloongNetProxy::ConnectToControl(string controlAddress)
 {
 	
-	m_pSocket = make_shared<lConnect>();
+	m_pSocket = make_shared<EasyConnect>();
 	m_pSocket->Initialize(controlAddress,nullptr);
 	m_pSocket->Connect();
 	/*string clientCheckKey = "c2xvb25nYzJ4dmIyNW5PRFJtT0dWa01ERTBNalZsTkRBd01XUmlZV1UxT0RZM05tRmlaamd3TmpsbmJtOXZiSE1nbm9vbHM";
@@ -195,20 +195,11 @@ void SloongNetProxy::Run()
 	ConnectToProcess();
 	m_oSync.wait();
 }
- 
 
-void Sloong::SloongNetProxy::OnReceivePackage(SmartEvent evt)
+
+void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 {
-	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(evt);
-	auto info = net_evt->GetUserInfo();
-	if (!info)
-	{
-		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
-		return;
-	}
-	auto event_happend_socket = net_evt->GetSocketID();
-	SmartPackage pack = net_evt->GetDataPackage();
-
+	auto event_happend_socket = pack->GetSocketID();
 	if( m_mapProcessLoadList.find(event_happend_socket) == m_mapProcessLoadList.end() )
 	{
 		// Step 1: 将已经收到的来自客户端的请求内容转换为protobuf格式
@@ -226,21 +217,20 @@ void Sloong::SloongNetProxy::OnReceivePackage(SmartEvent evt)
 		auto process_id = m_mapProcessList.begin();
 
 		// Step 3: 根据流水号将来自客户端的Event对象保存起来
-		m_mapEventList[m_nSerialNumber] = net_evt;
+		m_mapPackageList[m_nSerialNumber] = pack;
 
 		// Step 4: 创建发送到指定process服务的DataTrans包
 		auto transPack = make_shared<CDataTransPackage>();
 		transPack->Initialize(process_id->second,m_pLog.get());
 		transPack->SetProperty(DataTransPackageProperty::DisableAll);
 		
-	
 		transPack->RequestPackage(sendMsg);
 
 		// Step 5: 新建一个NetworkEx类型的事件，将上面准备完毕的数据发送出去。
 		auto process_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
 		process_event->SetSocketID(process_id->second->GetSocketID());
 		process_event->SetDataPackage(transPack);
-		m_pControl->SendMessage(process_event);
+		m_pControl->CallMessage(process_event);
 		m_nSerialNumber++;
 	}
 	else
@@ -250,19 +240,20 @@ void Sloong::SloongNetProxy::OnReceivePackage(SmartEvent evt)
 		msg.ParseFromString(pack->GetRecvMessage());
 
 		// Step 2: 根据收到的SerailNumber找到对应保存的来自客户端的Event对象
-		auto event_obj = m_mapEventList.find(msg.serialnumber());
-		if( event_obj == m_mapEventList.end() )
+		auto event_obj = m_mapPackageList.find(msg.serialnumber());
+		if( event_obj == m_mapPackageList.end() )
 		{
 			m_pLog->Error(CUniversal::Format("Event list no have target event data. SerailNumber:[%d]",pack->GetSerialNumber()));
 			return;
 		}
-		auto client_request = dynamic_pointer_cast<CNetworkEvent>(event_obj->second);
+		auto client_request_package = event_obj->second;
+		client_request_package->ResponsePackage(msg.context());
 
 		// Step 3: 发送相应数据
-		client_request->SetEvent(EVENT_TYPE::SendMessage);
-		auto client_request_package = client_request->GetDataPackage();
-		client_request_package->ResponsePackage(msg.context());
-		m_pControl->SendMessage(client_request);
+		auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
+		response_event->SetSocketID(client_request_package->GetSocketID());
+		response_event->SetDataPackage(client_request_package);
+		m_pControl->CallMessage(response_event);
 	}
 }
 

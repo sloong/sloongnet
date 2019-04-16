@@ -1,22 +1,22 @@
-#include "lconnect.h"
+#include "EasyConnect.h"
 #include <sys/socket.h>
 #include "utility.h"
 #include "defines.h"
 
 bool support_ssl_reconnect = false;
 
-Sloong::lConnect::lConnect()
+Sloong::EasyConnect::EasyConnect()
 {
 	m_stStatus = ConnectStatus::Disconnect;
 }
 
 
-Sloong::lConnect::~lConnect()
+Sloong::EasyConnect::~EasyConnect()
 {
 	Close();
 }
 
-void Sloong::lConnect::Initialize(int sock, SSL_CTX* ctx, bool useLongLongSize)
+void Sloong::EasyConnect::Initialize(int sock, SSL_CTX* ctx, bool useLongLongSize)
 {
 	m_nSocket = sock;
 	m_strAddress = CUtility::GetSocketIP(m_nSocket);
@@ -34,7 +34,7 @@ void Sloong::lConnect::Initialize(int sock, SSL_CTX* ctx, bool useLongLongSize)
     m_bUseLongLongSize = useLongLongSize;
 }
 
-void Sloong::lConnect::Initialize( string addressPort, SSL_CTX* ctx, bool useLongLongSize)
+void Sloong::EasyConnect::Initialize( string addressPort, SSL_CTX* ctx, bool useLongLongSize)
 {
 	auto params = CUniversal::split(addressPort, ":");
     m_strAddress = params[0];
@@ -47,7 +47,7 @@ void Sloong::lConnect::Initialize( string addressPort, SSL_CTX* ctx, bool useLon
 }
 
 
-bool Sloong::lConnect::Connect()
+bool Sloong::EasyConnect::Connect()
 {
     struct sockaddr_in remote_addr;
     memset(&remote_addr, 0, sizeof(remote_addr));
@@ -73,7 +73,7 @@ bool Sloong::lConnect::Connect()
     return true;
 }
 
-int Sloong::lConnect::SSL_Read_Ex(SSL* ssl, char* buf, int nSize, int nTimeout, bool bAgagin)
+int Sloong::EasyConnect::SSL_Read_Ex(SSL* ssl, char* buf, int nSize, int nTimeout, bool bAgagin)
 {
 	if (nSize <= 0)
 		return 0;
@@ -96,7 +96,7 @@ int Sloong::lConnect::SSL_Read_Ex(SSL* ssl, char* buf, int nSize, int nTimeout, 
 }
 
 
-int Sloong::lConnect::SSL_Write_Ex(SSL * ssl, char * buf, int len)
+int Sloong::EasyConnect::SSL_Write_Ex(SSL * ssl, char * buf, int len)
 {
 	return 0;
 }
@@ -105,7 +105,7 @@ int Sloong::lConnect::SSL_Write_Ex(SSL * ssl, char * buf, int len)
 // 成功返回数据包长度
 // 超时返回0
 // 错误返回-1
-long long Sloong::lConnect::RecvLengthData(int timeout)
+long long Sloong::EasyConnect::RecvLengthData(int timeout)
 {
 	int bRes=0;
     if( m_bUseLongLongSize ) {
@@ -126,7 +126,7 @@ long long Sloong::lConnect::RecvLengthData(int timeout)
 	return bRes;
 }
 
-bool Sloong::lConnect::SendLengthData(long long lengthData)
+bool Sloong::EasyConnect::SendLengthData(long long lengthData)
 {
 	string szLengthData;
     if( m_bUseLongLongSize ) {
@@ -146,12 +146,12 @@ bool Sloong::lConnect::SendLengthData(long long lengthData)
 }
 
 
-int Sloong::lConnect::Write(string sendData, int index)
+int Sloong::EasyConnect::Write(string sendData, int index)
 {
 	return Write(sendData.c_str(),sendData.length(),index);
 }
 
-string Sloong::lConnect::Read(int len, int timeOut, bool bAgage)
+string Sloong::EasyConnect::Read(int len, int timeOut, bool bAgage)
 {
     string buf;
     buf.resize(len);
@@ -161,7 +161,7 @@ string Sloong::lConnect::Read(int len, int timeOut, bool bAgage)
 }
 
 
-int Sloong::lConnect::SendPackage(string sendData, int index)
+int Sloong::EasyConnect::SendPackage(string sendData, int index)
 {
 	if( index == 0 )
 	{
@@ -173,7 +173,7 @@ int Sloong::lConnect::SendPackage(string sendData, int index)
 }
 
 
-NetworkResult Sloong::lConnect::RecvPackage(string& res, int timeout)
+NetworkResult Sloong::EasyConnect::RecvPackage(string& res, int timeout)
 {
     auto len = RecvLengthData(timeout);
 	if( len == 0 )
@@ -189,7 +189,7 @@ NetworkResult Sloong::lConnect::RecvPackage(string& res, int timeout)
 	return NetworkResult::Succeed;
 }
 
-int Sloong::lConnect::Read(char * data, int len, int timeOut, bool bAgage)
+int Sloong::EasyConnect::Read(char * data, int len, int timeOut, bool bAgage)
 {
 	// 未启用SSL时直接发送数据
 	if (!m_pSSL)
@@ -235,7 +235,7 @@ int Sloong::lConnect::Read(char * data, int len, int timeOut, bool bAgage)
 		return ret;
 }
 
-int Sloong::lConnect::Write(const char* data, int len, int index)
+int Sloong::EasyConnect::Write(const char* data, int len, int index)
 {
 	// 未启用SSL时直接发送数据
 	if (!m_pSSL)	
@@ -293,7 +293,7 @@ int Sloong::lConnect::Write(const char* data, int len, int index)
 	
 }
 
-void Sloong::lConnect::Close()
+void Sloong::EasyConnect::Close()
 {
 	if (m_pSSL)
 	{
@@ -304,7 +304,7 @@ void Sloong::lConnect::Close()
 	close(m_nSocket);
 }
 
-int Sloong::lConnect::G_InitializeSSL(SSL_CTX*& ctx, string certFile, string keyFile, string passwd)
+int Sloong::EasyConnect::G_InitializeSSL(SSL_CTX*& ctx, string certFile, string keyFile, string passwd)
 {
 	SSL_library_init();
 	OpenSSL_add_all_algorithms();/* load & register all cryptos, etc. */
@@ -342,12 +342,12 @@ int Sloong::lConnect::G_InitializeSSL(SSL_CTX*& ctx, string certFile, string key
 	return S_OK;
 }
 
-string Sloong::lConnect::G_FormatSSLErrorMsg(int code)
+string Sloong::EasyConnect::G_FormatSSLErrorMsg(int code)
 {
 	return string(ERR_error_string(code, NULL));
 }
 
-bool Sloong::lConnect::do_handshake()
+bool Sloong::EasyConnect::do_handshake()
 {
 	int res = SSL_do_handshake(m_pSSL);
 	if (1 == res)
@@ -370,7 +370,7 @@ bool Sloong::lConnect::do_handshake()
 	return false;
 }
 
-bool Sloong::lConnect::CheckSSLStatus(bool bRead)
+bool Sloong::EasyConnect::CheckSSLStatus(bool bRead)
 {
 	if (!m_pSSL) return true;
 

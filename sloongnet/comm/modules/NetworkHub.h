@@ -1,13 +1,11 @@
 #pragma once
 
 #include "IObject.h"
-
+#include "DataTransPackage.h"
 namespace Sloong
-{
-    class CEasySync;
+{ 
     class CSockInfo;
     class CEpollEx;
-    class CConfiguation;
     class CNetworkHub : IObject
     {
     public:
@@ -32,8 +30,13 @@ namespace Sloong
         void CloseConnectEventHandler(SmartEvent event);
 		void MonitorSendStatusEventHandler(SmartEvent evt);
 
+        void RegisterMessageProcesser(std::function<void(SmartPackage)> value){
+            m_pProcessFunc = value;
+        }
+
         // Work thread.
-		void CheckTimeoutWorkLoop(SMARTER params);
+		void CheckTimeoutWorkLoop(SMARTER params=nullptr);
+        void MessageProcessWorkLoop(SMARTER params=nullptr);
 
         // Callback function
         NetworkResult OnNewAccept( int nSocket );
@@ -53,9 +56,11 @@ namespace Sloong
         mutex                   m_oSockListMutex;
         bool                    m_bIsRunning;
         unique_ptr<CEpollEx>    m_pEpoll;
-        CEasySync              m_oSync;
+        CEasySync               m_oCheckTimeoutThreadSync;
+        
         SSL_CTX*                m_pCTX = nullptr;
         ProtobufMessage::GLOBAL_CONFIG*          m_pConfig = nullptr;
+
         // Timeout check
 		int m_nConnectTimeoutTime=0;
         int m_nCheckTimeoutInterval=0;
@@ -64,6 +69,10 @@ namespace Sloong
 		int m_nClientCheckKeyLength=0;
         int m_nClientCheckTime=0;
         DataTransPackageProperty m_emPackageProperty = EnableAll;
+        // For message process 
+        CEasySync               m_oProcessThreadSync;
+        std::function<void(SmartPackage)>          m_pProcessFunc = nullptr;
+        queue_ex<SmartPackage>*    m_pWaitProcessList;
     };
 }
 

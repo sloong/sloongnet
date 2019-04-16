@@ -26,9 +26,8 @@ bool Sloong::CControlHub::Add(DATA_ITEM item, void * object)
 {
 	auto it = m_oDataList.find(item);
 	if (it != m_oDataList.end())
-	{
 		return false;
-	}
+	
 	m_oDataList.insert(make_pair(item, object));
 	return false;
 }
@@ -37,9 +36,8 @@ void * Sloong::CControlHub::Get(DATA_ITEM item)
 {
 	auto data = m_oDataList.find(item);
 	if (data == m_oDataList.end())
-	{
 		return nullptr;
-	}
+
 	return (*data).second;
 }
 
@@ -58,9 +56,8 @@ void * Sloong::CControlHub::GetTemp(string name)
 {
 	auto item = m_oTempDataList.find(name);
 	if (item == m_oTempDataList.end())
-	{
 		return nullptr;
-	}
+
 	m_oTempDataList.erase(name);
 	return (*item).second;
 }
@@ -96,15 +93,28 @@ void Sloong::CControlHub::RegisterEvent(EVENT_TYPE t)
  */
 void Sloong::CControlHub::RegisterEventHandler(EVENT_TYPE t, MsgHandlerFunc func)
 {
-	if (m_oMsgHandlerList.find(t) == m_oMsgHandlerList.end())
-	{
+	if (m_oMsgHandlerList.find(t) == m_oMsgHandlerList.end()){
 		throw normal_except("Target event is not regist.");
-	}
-	else{
+	}else{
 		m_oMsgHandlerList[t].push_back(func);
 	}
 }
 
+
+void Sloong::CControlHub::CallMessage(SmartEvent event)
+{
+	auto evt_type = event->GetEvent();
+	auto handler_list = m_oMsgHandlerList[evt_type];
+	int handler_num = handler_list.size();
+	if ( handler_num == 0 )
+		return;
+
+	for (int i = 0; i < handler_num; i++)
+	{
+		auto func = handler_list[i];
+		func(event);
+	}
+}
 
 void Sloong::CControlHub::MessageWorkLoop(SMARTER param)
 {
@@ -112,21 +122,17 @@ void Sloong::CControlHub::MessageWorkLoop(SMARTER param)
 	{
 		try
 		{
-			if (m_emStatus == RUN_STATUS::Created)
-			{
+			if (m_emStatus == RUN_STATUS::Created){
 				SLEEP(100);
 				continue;
 			}
-			if (m_oMsgList.empty())
-			{
+			if (m_oMsgList.empty())	{
 				m_oSync.wait_for(1);
 				continue;
 			}
-			if (!m_oMsgList.empty())
-			{
+			if (!m_oMsgList.empty()){
 				unique_lock<mutex> lck(m_oMsgListMutex);
-				if (m_oMsgList.empty())
-				{
+				if (m_oMsgList.empty())	{
 					lck.unlock();
 					continue;
 				}
@@ -136,24 +142,11 @@ void Sloong::CControlHub::MessageWorkLoop(SMARTER param)
 				lck.unlock();
 
 				// Get the message handler list.
-				auto evt_type = p->GetEvent();
-				auto handler_list = m_oMsgHandlerList[evt_type];
-				int handler_num = handler_list.size();
-				if ( handler_num == 0 )
-					continue;
-
-				for (int i = 0; i < handler_num; i++)
-				{
-					auto func = handler_list[i];
-					func(p);
-				}
+				CallMessage(p);
 			}
-		}
-		catch (...)
-		{
+		}catch (...){
 			cerr << "Unhandle exception in MessageCenter work loop." << endl;
 		}
-		
 	}
 }
 

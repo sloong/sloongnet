@@ -24,7 +24,7 @@ namespace Sloong
 	protected:
 		unique_ptr<CNetworkHub> m_pNetwork;
 		unique_ptr<CControlHub> m_pControl;
-		shared_ptr<lConnect>	m_pSocket;
+		shared_ptr<EasyConnect>	m_pSocket;
 		unique_ptr<CLog>		m_pLog;
 		u_int64_t	m_nSerialNumber=0;
 		ProtobufMessage::FIREWALL_CONFIG m_oConfig;

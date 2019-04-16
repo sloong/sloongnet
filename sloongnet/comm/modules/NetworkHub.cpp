@@ -9,6 +9,7 @@ using namespace Sloong::Events;
 Sloong::CNetworkHub::CNetworkHub()
 {
 	m_pEpoll = make_unique<CEpollEx>();
+	m_pWaitProcessList = new queue_ex<SmartPackage>[s_PriorityLevel]();
 }
 
 Sloong::CNetworkHub::~CNetworkHub()
@@ -17,6 +18,14 @@ Sloong::CNetworkHub::~CNetworkHub()
 	{
 		SSL_CTX_free(m_pCTX);
 	}
+	for (int i = 0; i < s_PriorityLevel;i++)
+	{
+		while (!m_pWaitProcessList[i].empty())
+		{
+			m_pWaitProcessList[i].pop();
+        }
+	}
+	SAFE_DELETE_ARR(m_pWaitProcessList);
 }
 
 void Sloong::CNetworkHub::Initialize(IControl *iMsg)
@@ -36,7 +45,6 @@ void Sloong::CNetworkHub::Initialize(IControl *iMsg)
 							  std::bind(&CNetworkHub::OnCanWriteData, this, std::placeholders::_1),
 							  std::bind(&CNetworkHub::OnOtherEventHappened, this, std::placeholders::_1));
 
-	m_iC->RegisterEvent(EVENT_TYPE::ReveivePackage);
 	m_iC->RegisterEvent(EVENT_TYPE::SocketClose);
 	m_iC->RegisterEvent(EVENT_TYPE::SendMessage);
 	m_iC->RegisterEvent(EVENT_TYPE::MonitorSendStatus);
@@ -53,12 +61,22 @@ void Sloong::CNetworkHub::Run(SmartEvent event)
 	m_pEpoll->Run(m_pConfig->listenport(), m_pConfig->epollthreadquantity());
 	if( m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0 )
 		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this, std::placeholders::_1), nullptr);
+
+	if( m_pProcessFunc == nullptr ){
+		m_pLog->Fatal("Process function is null.");
+	}
+
+	if( m_pConfig->processthreadquantity() < 1 )
+		m_pLog->Fatal("the config value for process work quantity is invalid, please check.");	
+		
+	CThreadPool::AddWorkThread(std::bind(&CNetworkHub::MessageProcessWorkLoop, this, std::placeholders::_1), nullptr, m_pConfig->processthreadquantity() );
 }
 
 void Sloong::CNetworkHub::Exit(SmartEvent event)
 {
 	m_bIsRunning = false;
-	m_oSync.notify_all();
+	m_oCheckTimeoutThreadSync.notify_all();
+	m_oProcessThreadSync.notify_all();
 	m_pEpoll->Exit();
 }
 
@@ -134,11 +152,11 @@ void Sloong::CNetworkHub::EnableTimeoutCheck(int timeoutTime, int checkInterval)
 
 void Sloong::CNetworkHub::EnableSSL(string certFile, string keyFile, string passwd)
 {
-	int ret = lConnect::G_InitializeSSL(m_pCTX, certFile, keyFile, passwd);
+	int ret = EasyConnect::G_InitializeSSL(m_pCTX, certFile, keyFile, passwd);
 	if (ret != S_OK)
 	{
 		m_pLog->Error("Initialize SSL environment error.");
-		m_pLog->Error(lConnect::G_FormatSSLErrorMsg(ret));
+		m_pLog->Error(EasyConnect::G_FormatSSLErrorMsg(ret));
 	}
 }
 
@@ -183,10 +201,37 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop(SMARTER param)
 		}
 		sockLck.unlock();
 		m_pLog->Verbos(CUniversal::Format("Check connect timeout done. wait [%d] seconds.", tinterval));
-		m_oSync.wait_for(tinterval);
+		m_oCheckTimeoutThreadSync.wait_for(tinterval);
 	}
 	m_pLog->Info("check timeout connect thread is exit ");
 }
+
+
+
+/// 消息处理工作线程函数
+// 按照优先级，逐个处理待处理队列。每个队列处理完毕时，重新根据优先级处理，尽量保证高优先级的处理
+// 为了避免影响接收时的效率，将队列操作放松到最低。以每次一定数量的处理来逐级加锁。
+void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
+{
+	m_pLog->Verbos("MessageProcessWorkLoop thread is running.");
+	while (m_bIsRunning)
+	{
+		for( int i = 0; i < s_PriorityLevel; i++ )
+		{
+			if( m_pWaitProcessList[i].empty())
+				continue;
+			while( !m_pWaitProcessList[i].empty() )
+			{
+				auto param = m_pWaitProcessList[i].pop();
+				m_pProcessFunc(param);
+			}
+			break;
+		}
+		m_oProcessThreadSync.wait();
+	}
+	m_pLog->Info("MessageProcessWorkLoop thread is exit ");
+}
+
 
 /// 有新链接到达。
 /// 接收链接之后，需要客户端首先发送客户端校验信息。只有校验成功之后才会进行SSL处理
@@ -221,6 +266,8 @@ NetworkResult Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 	return NetworkResult::Succeed;
 }
 
+
+
 NetworkResult Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
 {
 	shared_ptr<CSockInfo> info = m_SockList[nSocket];
@@ -231,9 +278,18 @@ NetworkResult Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
 		return NetworkResult::Error;
 	}
 
-	auto res = info->OnDataCanReceive();
+	queue<SmartPackage> readList;
+	auto res = info->OnDataCanReceive(readList);
 	if (res == NetworkResult::Error)
 		SendCloseConnectEvent(nSocket);
+
+	if( !readList.empty())
+	{
+		auto item = readList.front();
+		readList.pop();
+		m_pWaitProcessList[item->GetPriority()].push(item);
+	}
+	m_oProcessThreadSync.notify_all();
 	return res;
 }
 

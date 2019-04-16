@@ -157,7 +157,7 @@ bool SloongNetDataCenter::Initialize(int argc, char **args)
 bool SloongNetDataCenter::ConnectToControl(string controlAddress)
 {
 	
-	m_pSocket = make_shared<lConnect>();
+	m_pSocket = make_shared<EasyConnect>();
 	m_pSocket->Initialize(controlAddress,nullptr);
 	m_pSocket->Connect();
 	

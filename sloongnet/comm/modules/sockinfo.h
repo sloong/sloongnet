@@ -2,7 +2,7 @@
 #define SOCKINFO_H
 
 
-#include "lconnect.h"
+#include "EasyConnect.h"
 
 #include "DataTransPackage.h"
 
@@ -25,7 +25,7 @@ namespace Sloong
 		 * 		if happened errors, return Error.
 		 * @Note: It always read all data in one time, so no return Retry.
 		 */
-		NetworkResult OnDataCanReceive();
+		NetworkResult OnDataCanReceive( queue<SmartPackage>& readList );
 
 		/**
 		 * @Remarks: When data can send, should call this function to send the package.
@@ -52,16 +52,16 @@ namespace Sloong
 	protected:
 		void ProcessPrepareSendList();
 		NetworkResult ProcessSendList();
-		int GetSendInfoList(queue<shared_ptr<CDataTransPackage>>*& list );
-		shared_ptr<CDataTransPackage> GetSendInfo(queue<shared_ptr<CDataTransPackage>>* list);
+		int GetSendInfoList(queue<SmartPackage>*& list );
+		SmartPackage GetSendInfo(queue<SmartPackage>* list);
 		void AddToSendList(SmartPackage pack);
 
 	public:
-        queue<shared_ptr<CDataTransPackage>>* m_pSendList; // the send list of the bytes.
-        queue<shared_ptr<CDataTransPackage>> m_oPrepareSendList;
+        queue<SmartPackage>* m_pSendList; // the send list of the bytes.
+        queue<SmartPackage> m_oPrepareSendList;
 
 		time_t m_ActiveTime;
-		shared_ptr<lConnect> m_pCon;
+		shared_ptr<EasyConnect> m_pCon;
 
 		unique_ptr<CLuaPacket> m_pUserInfo;
         mutex m_oSockReadMutex;

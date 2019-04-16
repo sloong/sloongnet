@@ -29,11 +29,11 @@ namespace Sloong
 	// 有两种使用方式：
 	//  1：作为接受方，此时需要提供一个已经建立连接的SOCKET。
 	//  2：作为发起方，此时需要提供一个目标地址，之后会自动处理连接过程
-	class lConnect
+	class EasyConnect
 	{
 	public:
-		lConnect();
-		~lConnect();
+		EasyConnect();
+		~EasyConnect();
 
 		// 以接受方的方式初始化
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
@@ -109,7 +109,7 @@ namespace Sloong
 		ConnectStatus m_stStatus;
 	};
 
-	typedef shared_ptr<lConnect> SmartConnect;
+	typedef shared_ptr<EasyConnect> SmartConnect;
 
 }
 

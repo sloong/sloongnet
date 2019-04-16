@@ -15,18 +15,25 @@ message MessagePackage
 
 message GLOBAL_CONFIG
 {
-    int32     ListenPort = 1;
-    string  LogPath = 2;
-    int32 LogLevel =3 ;
-    bool    DebugMode = 4;
-    int32     MQThreadQuantity =5;
-    bool    EnableSSL=6;
-    string  CertFilePath=7;
-    string  KeyFilePath=8;
-    string  CertPasswd=9;
-    int32     ConnectTime=10;
-    int32     ReceiveTime=11;
-    int32     EPollThreadQuantity=12;
+    // Network 
+    int32   ListenPort = 1;
+    bool    EnableSSL=2;
+    string  CertFilePath=3;
+    string  KeyFilePath=4;
+    string  CertPasswd=5;
+    int32   ConnectTime=6;
+    int32   ReceiveTime=7;
+
+    // Log 
+    string  LogPath = 8;
+    int32   LogLevel =9 ;
+    bool    DebugMode = 10;
+
+    // Performance
+    int32   MQThreadQuantity =11;// Message queue work thread quantity 
+    int32   EPollThreadQuantity=12;// EPoll event process thread quantity
+    int32   ProcessThreadQuantity=13;// work thread for DataPackage process quantity
+    int32   PrioritySize=14;// Priority Size for the list. the priority level cannot bigger than this value.
 };
 
 message DB_CONFIG

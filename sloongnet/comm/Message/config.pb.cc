@@ -76,19 +76,21 @@ void protobuf_AssignDesc_config_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, _is_default_instance_));
   GLOBAL_CONFIG_descriptor_ = file->message_type(1);
-  static const int GLOBAL_CONFIG_offsets_[12] = {
+  static const int GLOBAL_CONFIG_offsets_[14] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, listenport_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, logpath_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, loglevel_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, debugmode_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, mqthreadquantity_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, enablessl_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, certfilepath_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, keyfilepath_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, certpasswd_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, connecttime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, receivetime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, logpath_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, loglevel_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, debugmode_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, mqthreadquantity_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, epollthreadquantity_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, processthreadquantity_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, prioritysize_),
   };
   GLOBAL_CONFIG_reflection_ =
     ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
@@ -255,33 +257,34 @@ void protobuf_AddDesc_config_2eproto() {
     "Level\030\002 \001(\005\022\024\n\014SerialNumber\030\003 \001(\005\022\023\n\013Che"
     "ckString\030\004 \001(\t\022\016\n\006Sender\030\005 \001(\005\022\020\n\010Receiv"
     "er\030\006 \001(\005\022\017\n\007Context\030\007 \001(\t\022\022\n\nExtendData\030"
-    "\010 \001(\014\"\214\002\n\rGLOBAL_CONFIG\022\022\n\nListenPort\030\001 "
-    "\001(\005\022\017\n\007LogPath\030\002 \001(\t\022\020\n\010LogLevel\030\003 \001(\005\022\021"
-    "\n\tDebugMode\030\004 \001(\010\022\030\n\020MQThreadQuantity\030\005 "
-    "\001(\005\022\021\n\tEnableSSL\030\006 \001(\010\022\024\n\014CertFilePath\030\007"
-    " \001(\t\022\023\n\013KeyFilePath\030\010 \001(\t\022\022\n\nCertPasswd\030"
-    "\t \001(\t\022\023\n\013ConnectTime\030\n \001(\005\022\023\n\013ReceiveTim"
-    "e\030\013 \001(\005\022\033\n\023EPollThreadQuantity\030\014 \001(\005\"\234\001\n"
-    "\tDB_CONFIG\022\025\n\rServerAddress\030\001 \001(\t\022\022\n\nSer"
-    "verPort\030\002 \001(\005\022\014\n\004User\030\003 \001(\t\022\016\n\006Passwd\030\004 "
-    "\001(\t\022\020\n\010Database\030\005 \001(\t\0224\n\014ServerConfig\030\006 "
-    "\001(\0132\036.ProtobufMessage.GLOBAL_CONFIG\"r\n\013D"
-    "ATA_CONFIG\022\027\n\017DataReceivePort\030\001 \001(\005\022\024\n\014D"
-    "ataRecvTime\030\002 \001(\005\0224\n\014ServerConfig\030\003 \001(\0132"
-    "\036.ProtobufMessage.GLOBAL_CONFIG\"\300\001\n\014PROX"
-    "Y_CONFIG\022\027\n\017ClientCheckTime\030\001 \001(\005\022\026\n\016Cli"
-    "entCheckKey\030\002 \001(\t\022\034\n\024TimeoutCheckInterva"
-    "l\030\003 \001(\005\022\023\n\013TimeoutTime\030\004 \001(\005\022\026\n\016ProcessA"
-    "ddress\030\005 \001(\t\0224\n\014ServerConfig\030\006 \001(\0132\036.Pro"
-    "tobufMessage.GLOBAL_CONFIG\"G\n\017FIREWALL_C"
-    "ONFIG\0224\n\014ServerConfig\030\005 \001(\0132\036.ProtobufMe"
-    "ssage.GLOBAL_CONFIG\"\347\001\n\016PROCESS_CONFIG\022\032"
-    "\n\022LuaContextQuantity\030\001 \001(\005\022\027\n\017LuaScriptF"
-    "older\030\002 \001(\t\022\024\n\014LuaEntryFile\030\003 \001(\t\022\030\n\020Lua"
-    "EntryFunction\030\004 \001(\t\022\032\n\022LuaProcessFunctio"
-    "n\030\005 \001(\t\022\036\n\026LuaSocketCloseFunction\030\006 \001(\t\022"
-    "4\n\014ServerConfig\030\007 \001(\0132\036.ProtobufMessage."
-    "GLOBAL_CONFIGb\006proto3", 1261);
+    "\010 \001(\014\"\301\002\n\rGLOBAL_CONFIG\022\022\n\nListenPort\030\001 "
+    "\001(\005\022\021\n\tEnableSSL\030\002 \001(\010\022\024\n\014CertFilePath\030\003"
+    " \001(\t\022\023\n\013KeyFilePath\030\004 \001(\t\022\022\n\nCertPasswd\030"
+    "\005 \001(\t\022\023\n\013ConnectTime\030\006 \001(\005\022\023\n\013ReceiveTim"
+    "e\030\007 \001(\005\022\017\n\007LogPath\030\010 \001(\t\022\020\n\010LogLevel\030\t \001"
+    "(\005\022\021\n\tDebugMode\030\n \001(\010\022\030\n\020MQThreadQuantit"
+    "y\030\013 \001(\005\022\033\n\023EPollThreadQuantity\030\014 \001(\005\022\035\n\025"
+    "ProcessThreadQuantity\030\r \001(\005\022\024\n\014PriorityS"
+    "ize\030\016 \001(\005\"\234\001\n\tDB_CONFIG\022\025\n\rServerAddress"
+    "\030\001 \001(\t\022\022\n\nServerPort\030\002 \001(\005\022\014\n\004User\030\003 \001(\t"
+    "\022\016\n\006Passwd\030\004 \001(\t\022\020\n\010Database\030\005 \001(\t\0224\n\014Se"
+    "rverConfig\030\006 \001(\0132\036.ProtobufMessage.GLOBA"
+    "L_CONFIG\"r\n\013DATA_CONFIG\022\027\n\017DataReceivePo"
+    "rt\030\001 \001(\005\022\024\n\014DataRecvTime\030\002 \001(\005\0224\n\014Server"
+    "Config\030\003 \001(\0132\036.ProtobufMessage.GLOBAL_CO"
+    "NFIG\"\300\001\n\014PROXY_CONFIG\022\027\n\017ClientCheckTime"
+    "\030\001 \001(\005\022\026\n\016ClientCheckKey\030\002 \001(\t\022\034\n\024Timeou"
+    "tCheckInterval\030\003 \001(\005\022\023\n\013TimeoutTime\030\004 \001("
+    "\005\022\026\n\016ProcessAddress\030\005 \001(\t\0224\n\014ServerConfi"
+    "g\030\006 \001(\0132\036.ProtobufMessage.GLOBAL_CONFIG\""
+    "G\n\017FIREWALL_CONFIG\0224\n\014ServerConfig\030\005 \001(\013"
+    "2\036.ProtobufMessage.GLOBAL_CONFIG\"\347\001\n\016PRO"
+    "CESS_CONFIG\022\032\n\022LuaContextQuantity\030\001 \001(\005\022"
+    "\027\n\017LuaScriptFolder\030\002 \001(\t\022\024\n\014LuaEntryFile"
+    "\030\003 \001(\t\022\030\n\020LuaEntryFunction\030\004 \001(\t\022\032\n\022LuaP"
+    "rocessFunction\030\005 \001(\t\022\036\n\026LuaSocketCloseFu"
+    "nction\030\006 \001(\t\0224\n\014ServerConfig\030\007 \001(\0132\036.Pro"
+    "tobufMessage.GLOBAL_CONFIGb\006proto3", 1314);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "config.proto", &protobuf_RegisterTypes);
   MessagePackage::default_instance_ = new MessagePackage();
@@ -1063,17 +1066,19 @@ void MessagePackage::clear_extenddata() {
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int GLOBAL_CONFIG::kListenPortFieldNumber;
-const int GLOBAL_CONFIG::kLogPathFieldNumber;
-const int GLOBAL_CONFIG::kLogLevelFieldNumber;
-const int GLOBAL_CONFIG::kDebugModeFieldNumber;
-const int GLOBAL_CONFIG::kMQThreadQuantityFieldNumber;
 const int GLOBAL_CONFIG::kEnableSSLFieldNumber;
 const int GLOBAL_CONFIG::kCertFilePathFieldNumber;
 const int GLOBAL_CONFIG::kKeyFilePathFieldNumber;
 const int GLOBAL_CONFIG::kCertPasswdFieldNumber;
 const int GLOBAL_CONFIG::kConnectTimeFieldNumber;
 const int GLOBAL_CONFIG::kReceiveTimeFieldNumber;
+const int GLOBAL_CONFIG::kLogPathFieldNumber;
+const int GLOBAL_CONFIG::kLogLevelFieldNumber;
+const int GLOBAL_CONFIG::kDebugModeFieldNumber;
+const int GLOBAL_CONFIG::kMQThreadQuantityFieldNumber;
 const int GLOBAL_CONFIG::kEPollThreadQuantityFieldNumber;
+const int GLOBAL_CONFIG::kProcessThreadQuantityFieldNumber;
+const int GLOBAL_CONFIG::kPrioritySizeFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 GLOBAL_CONFIG::GLOBAL_CONFIG()
@@ -1099,17 +1104,19 @@ void GLOBAL_CONFIG::SharedCtor() {
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   listenport_ = 0;
-  logpath_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  loglevel_ = 0;
-  debugmode_ = false;
-  mqthreadquantity_ = 0;
   enablessl_ = false;
   certfilepath_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   keyfilepath_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   certpasswd_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   connecttime_ = 0;
   receivetime_ = 0;
+  logpath_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  loglevel_ = 0;
+  debugmode_ = false;
+  mqthreadquantity_ = 0;
   epollthreadquantity_ = 0;
+  processthreadquantity_ = 0;
+  prioritysize_ = 0;
 }
 
 GLOBAL_CONFIG::~GLOBAL_CONFIG() {
@@ -1118,10 +1125,10 @@ GLOBAL_CONFIG::~GLOBAL_CONFIG() {
 }
 
 void GLOBAL_CONFIG::SharedDtor() {
-  logpath_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   certfilepath_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   keyfilepath_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   certpasswd_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  logpath_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != default_instance_) {
   }
 }
@@ -1169,12 +1176,15 @@ void GLOBAL_CONFIG::Clear() {
            ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
 } while (0)
 
-  ZR_(listenport_, enablessl_);
-  logpath_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  ZR_(listenport_, connecttime_);
+  enablessl_ = false;
   certfilepath_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   keyfilepath_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  ZR_(connecttime_, epollthreadquantity_);
   certpasswd_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  receivetime_ = 0;
+  logpath_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  ZR_(loglevel_, prioritysize_);
+  debugmode_ = false;
 
 #undef ZR_HELPER_
 #undef ZR_
@@ -1201,75 +1211,13 @@ bool GLOBAL_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(18)) goto parse_LogPath;
+        if (input->ExpectTag(16)) goto parse_EnableSSL;
         break;
       }
 
-      // optional string LogPath = 2;
+      // optional bool EnableSSL = 2;
       case 2: {
-        if (tag == 18) {
-         parse_LogPath:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_logpath()));
-          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-            this->logpath().data(), this->logpath().length(),
-            ::google::protobuf::internal::WireFormatLite::PARSE,
-            "ProtobufMessage.GLOBAL_CONFIG.LogPath"));
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(24)) goto parse_LogLevel;
-        break;
-      }
-
-      // optional int32 LogLevel = 3;
-      case 3: {
-        if (tag == 24) {
-         parse_LogLevel:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &loglevel_)));
-
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(32)) goto parse_DebugMode;
-        break;
-      }
-
-      // optional bool DebugMode = 4;
-      case 4: {
-        if (tag == 32) {
-         parse_DebugMode:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &debugmode_)));
-
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(40)) goto parse_MQThreadQuantity;
-        break;
-      }
-
-      // optional int32 MQThreadQuantity = 5;
-      case 5: {
-        if (tag == 40) {
-         parse_MQThreadQuantity:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &mqthreadquantity_)));
-
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(48)) goto parse_EnableSSL;
-        break;
-      }
-
-      // optional bool EnableSSL = 6;
-      case 6: {
-        if (tag == 48) {
+        if (tag == 16) {
          parse_EnableSSL:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
@@ -1278,13 +1226,13 @@ bool GLOBAL_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(58)) goto parse_CertFilePath;
+        if (input->ExpectTag(26)) goto parse_CertFilePath;
         break;
       }
 
-      // optional string CertFilePath = 7;
-      case 7: {
-        if (tag == 58) {
+      // optional string CertFilePath = 3;
+      case 3: {
+        if (tag == 26) {
          parse_CertFilePath:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_certfilepath()));
@@ -1295,13 +1243,13 @@ bool GLOBAL_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(66)) goto parse_KeyFilePath;
+        if (input->ExpectTag(34)) goto parse_KeyFilePath;
         break;
       }
 
-      // optional string KeyFilePath = 8;
-      case 8: {
-        if (tag == 66) {
+      // optional string KeyFilePath = 4;
+      case 4: {
+        if (tag == 34) {
          parse_KeyFilePath:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_keyfilepath()));
@@ -1312,13 +1260,13 @@ bool GLOBAL_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(74)) goto parse_CertPasswd;
+        if (input->ExpectTag(42)) goto parse_CertPasswd;
         break;
       }
 
-      // optional string CertPasswd = 9;
-      case 9: {
-        if (tag == 74) {
+      // optional string CertPasswd = 5;
+      case 5: {
+        if (tag == 42) {
          parse_CertPasswd:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_certpasswd()));
@@ -1329,13 +1277,13 @@ bool GLOBAL_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(80)) goto parse_ConnectTime;
+        if (input->ExpectTag(48)) goto parse_ConnectTime;
         break;
       }
 
-      // optional int32 ConnectTime = 10;
-      case 10: {
-        if (tag == 80) {
+      // optional int32 ConnectTime = 6;
+      case 6: {
+        if (tag == 48) {
          parse_ConnectTime:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
@@ -1344,17 +1292,79 @@ bool GLOBAL_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(88)) goto parse_ReceiveTime;
+        if (input->ExpectTag(56)) goto parse_ReceiveTime;
         break;
       }
 
-      // optional int32 ReceiveTime = 11;
-      case 11: {
-        if (tag == 88) {
+      // optional int32 ReceiveTime = 7;
+      case 7: {
+        if (tag == 56) {
          parse_ReceiveTime:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &receivetime_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(66)) goto parse_LogPath;
+        break;
+      }
+
+      // optional string LogPath = 8;
+      case 8: {
+        if (tag == 66) {
+         parse_LogPath:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_logpath()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->logpath().data(), this->logpath().length(),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "ProtobufMessage.GLOBAL_CONFIG.LogPath"));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(72)) goto parse_LogLevel;
+        break;
+      }
+
+      // optional int32 LogLevel = 9;
+      case 9: {
+        if (tag == 72) {
+         parse_LogLevel:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &loglevel_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(80)) goto parse_DebugMode;
+        break;
+      }
+
+      // optional bool DebugMode = 10;
+      case 10: {
+        if (tag == 80) {
+         parse_DebugMode:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &debugmode_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(88)) goto parse_MQThreadQuantity;
+        break;
+      }
+
+      // optional int32 MQThreadQuantity = 11;
+      case 11: {
+        if (tag == 88) {
+         parse_MQThreadQuantity:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &mqthreadquantity_)));
 
         } else {
           goto handle_unusual;
@@ -1370,6 +1380,36 @@ bool GLOBAL_CONFIG::MergePartialFromCodedStream(
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &epollthreadquantity_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(104)) goto parse_ProcessThreadQuantity;
+        break;
+      }
+
+      // optional int32 ProcessThreadQuantity = 13;
+      case 13: {
+        if (tag == 104) {
+         parse_ProcessThreadQuantity:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &processthreadquantity_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(112)) goto parse_PrioritySize;
+        break;
+      }
+
+      // optional int32 PrioritySize = 14;
+      case 14: {
+        if (tag == 112) {
+         parse_PrioritySize:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &prioritysize_)));
 
         } else {
           goto handle_unusual;
@@ -1407,79 +1447,89 @@ void GLOBAL_CONFIG::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->listenport(), output);
   }
 
-  // optional string LogPath = 2;
-  if (this->logpath().size() > 0) {
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-      this->logpath().data(), this->logpath().length(),
-      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
-      "ProtobufMessage.GLOBAL_CONFIG.LogPath");
-    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      2, this->logpath(), output);
-  }
-
-  // optional int32 LogLevel = 3;
-  if (this->loglevel() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->loglevel(), output);
-  }
-
-  // optional bool DebugMode = 4;
-  if (this->debugmode() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(4, this->debugmode(), output);
-  }
-
-  // optional int32 MQThreadQuantity = 5;
-  if (this->mqthreadquantity() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->mqthreadquantity(), output);
-  }
-
-  // optional bool EnableSSL = 6;
+  // optional bool EnableSSL = 2;
   if (this->enablessl() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(6, this->enablessl(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(2, this->enablessl(), output);
   }
 
-  // optional string CertFilePath = 7;
+  // optional string CertFilePath = 3;
   if (this->certfilepath().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->certfilepath().data(), this->certfilepath().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "ProtobufMessage.GLOBAL_CONFIG.CertFilePath");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      7, this->certfilepath(), output);
+      3, this->certfilepath(), output);
   }
 
-  // optional string KeyFilePath = 8;
+  // optional string KeyFilePath = 4;
   if (this->keyfilepath().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->keyfilepath().data(), this->keyfilepath().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "ProtobufMessage.GLOBAL_CONFIG.KeyFilePath");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      8, this->keyfilepath(), output);
+      4, this->keyfilepath(), output);
   }
 
-  // optional string CertPasswd = 9;
+  // optional string CertPasswd = 5;
   if (this->certpasswd().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->certpasswd().data(), this->certpasswd().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "ProtobufMessage.GLOBAL_CONFIG.CertPasswd");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      9, this->certpasswd(), output);
+      5, this->certpasswd(), output);
   }
 
-  // optional int32 ConnectTime = 10;
+  // optional int32 ConnectTime = 6;
   if (this->connecttime() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(10, this->connecttime(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->connecttime(), output);
   }
 
-  // optional int32 ReceiveTime = 11;
+  // optional int32 ReceiveTime = 7;
   if (this->receivetime() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(11, this->receivetime(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->receivetime(), output);
+  }
+
+  // optional string LogPath = 8;
+  if (this->logpath().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->logpath().data(), this->logpath().length(),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "ProtobufMessage.GLOBAL_CONFIG.LogPath");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      8, this->logpath(), output);
+  }
+
+  // optional int32 LogLevel = 9;
+  if (this->loglevel() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(9, this->loglevel(), output);
+  }
+
+  // optional bool DebugMode = 10;
+  if (this->debugmode() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(10, this->debugmode(), output);
+  }
+
+  // optional int32 MQThreadQuantity = 11;
+  if (this->mqthreadquantity() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(11, this->mqthreadquantity(), output);
   }
 
   // optional int32 EPollThreadQuantity = 12;
   if (this->epollthreadquantity() != 0) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(12, this->epollthreadquantity(), output);
+  }
+
+  // optional int32 ProcessThreadQuantity = 13;
+  if (this->processthreadquantity() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(13, this->processthreadquantity(), output);
+  }
+
+  // optional int32 PrioritySize = 14;
+  if (this->prioritysize() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(14, this->prioritysize(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:ProtobufMessage.GLOBAL_CONFIG)
@@ -1493,38 +1543,12 @@ void GLOBAL_CONFIG::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->listenport(), target);
   }
 
-  // optional string LogPath = 2;
-  if (this->logpath().size() > 0) {
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-      this->logpath().data(), this->logpath().length(),
-      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
-      "ProtobufMessage.GLOBAL_CONFIG.LogPath");
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        2, this->logpath(), target);
-  }
-
-  // optional int32 LogLevel = 3;
-  if (this->loglevel() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->loglevel(), target);
-  }
-
-  // optional bool DebugMode = 4;
-  if (this->debugmode() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(4, this->debugmode(), target);
-  }
-
-  // optional int32 MQThreadQuantity = 5;
-  if (this->mqthreadquantity() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->mqthreadquantity(), target);
-  }
-
-  // optional bool EnableSSL = 6;
+  // optional bool EnableSSL = 2;
   if (this->enablessl() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(6, this->enablessl(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(2, this->enablessl(), target);
   }
 
-  // optional string CertFilePath = 7;
+  // optional string CertFilePath = 3;
   if (this->certfilepath().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->certfilepath().data(), this->certfilepath().length(),
@@ -1532,10 +1556,10 @@ void GLOBAL_CONFIG::SerializeWithCachedSizes(
       "ProtobufMessage.GLOBAL_CONFIG.CertFilePath");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        7, this->certfilepath(), target);
+        3, this->certfilepath(), target);
   }
 
-  // optional string KeyFilePath = 8;
+  // optional string KeyFilePath = 4;
   if (this->keyfilepath().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->keyfilepath().data(), this->keyfilepath().length(),
@@ -1543,10 +1567,10 @@ void GLOBAL_CONFIG::SerializeWithCachedSizes(
       "ProtobufMessage.GLOBAL_CONFIG.KeyFilePath");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        8, this->keyfilepath(), target);
+        4, this->keyfilepath(), target);
   }
 
-  // optional string CertPasswd = 9;
+  // optional string CertPasswd = 5;
   if (this->certpasswd().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->certpasswd().data(), this->certpasswd().length(),
@@ -1554,22 +1578,58 @@ void GLOBAL_CONFIG::SerializeWithCachedSizes(
       "ProtobufMessage.GLOBAL_CONFIG.CertPasswd");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        9, this->certpasswd(), target);
+        5, this->certpasswd(), target);
   }
 
-  // optional int32 ConnectTime = 10;
+  // optional int32 ConnectTime = 6;
   if (this->connecttime() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(10, this->connecttime(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->connecttime(), target);
   }
 
-  // optional int32 ReceiveTime = 11;
+  // optional int32 ReceiveTime = 7;
   if (this->receivetime() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(11, this->receivetime(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->receivetime(), target);
+  }
+
+  // optional string LogPath = 8;
+  if (this->logpath().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->logpath().data(), this->logpath().length(),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "ProtobufMessage.GLOBAL_CONFIG.LogPath");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        8, this->logpath(), target);
+  }
+
+  // optional int32 LogLevel = 9;
+  if (this->loglevel() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(9, this->loglevel(), target);
+  }
+
+  // optional bool DebugMode = 10;
+  if (this->debugmode() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(10, this->debugmode(), target);
+  }
+
+  // optional int32 MQThreadQuantity = 11;
+  if (this->mqthreadquantity() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(11, this->mqthreadquantity(), target);
   }
 
   // optional int32 EPollThreadQuantity = 12;
   if (this->epollthreadquantity() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(12, this->epollthreadquantity(), target);
+  }
+
+  // optional int32 ProcessThreadQuantity = 13;
+  if (this->processthreadquantity() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(13, this->processthreadquantity(), target);
+  }
+
+  // optional int32 PrioritySize = 14;
+  if (this->prioritysize() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(14, this->prioritysize(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:ProtobufMessage.GLOBAL_CONFIG)
@@ -1587,70 +1647,70 @@ int GLOBAL_CONFIG::ByteSize() const {
         this->listenport());
   }
 
-  // optional string LogPath = 2;
-  if (this->logpath().size() > 0) {
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::StringSize(
-        this->logpath());
-  }
-
-  // optional int32 LogLevel = 3;
-  if (this->loglevel() != 0) {
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::Int32Size(
-        this->loglevel());
-  }
-
-  // optional bool DebugMode = 4;
-  if (this->debugmode() != 0) {
-    total_size += 1 + 1;
-  }
-
-  // optional int32 MQThreadQuantity = 5;
-  if (this->mqthreadquantity() != 0) {
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::Int32Size(
-        this->mqthreadquantity());
-  }
-
-  // optional bool EnableSSL = 6;
+  // optional bool EnableSSL = 2;
   if (this->enablessl() != 0) {
     total_size += 1 + 1;
   }
 
-  // optional string CertFilePath = 7;
+  // optional string CertFilePath = 3;
   if (this->certfilepath().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->certfilepath());
   }
 
-  // optional string KeyFilePath = 8;
+  // optional string KeyFilePath = 4;
   if (this->keyfilepath().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->keyfilepath());
   }
 
-  // optional string CertPasswd = 9;
+  // optional string CertPasswd = 5;
   if (this->certpasswd().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->certpasswd());
   }
 
-  // optional int32 ConnectTime = 10;
+  // optional int32 ConnectTime = 6;
   if (this->connecttime() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->connecttime());
   }
 
-  // optional int32 ReceiveTime = 11;
+  // optional int32 ReceiveTime = 7;
   if (this->receivetime() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->receivetime());
+  }
+
+  // optional string LogPath = 8;
+  if (this->logpath().size() > 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->logpath());
+  }
+
+  // optional int32 LogLevel = 9;
+  if (this->loglevel() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->loglevel());
+  }
+
+  // optional bool DebugMode = 10;
+  if (this->debugmode() != 0) {
+    total_size += 1 + 1;
+  }
+
+  // optional int32 MQThreadQuantity = 11;
+  if (this->mqthreadquantity() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->mqthreadquantity());
   }
 
   // optional int32 EPollThreadQuantity = 12;
@@ -1658,6 +1718,20 @@ int GLOBAL_CONFIG::ByteSize() const {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->epollthreadquantity());
+  }
+
+  // optional int32 ProcessThreadQuantity = 13;
+  if (this->processthreadquantity() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->processthreadquantity());
+  }
+
+  // optional int32 PrioritySize = 14;
+  if (this->prioritysize() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->prioritysize());
   }
 
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
@@ -1691,19 +1765,6 @@ void GLOBAL_CONFIG::MergeFrom(const GLOBAL_CONFIG& from) {
   if (from.listenport() != 0) {
     set_listenport(from.listenport());
   }
-  if (from.logpath().size() > 0) {
-
-    logpath_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.logpath_);
-  }
-  if (from.loglevel() != 0) {
-    set_loglevel(from.loglevel());
-  }
-  if (from.debugmode() != 0) {
-    set_debugmode(from.debugmode());
-  }
-  if (from.mqthreadquantity() != 0) {
-    set_mqthreadquantity(from.mqthreadquantity());
-  }
   if (from.enablessl() != 0) {
     set_enablessl(from.enablessl());
   }
@@ -1725,8 +1786,27 @@ void GLOBAL_CONFIG::MergeFrom(const GLOBAL_CONFIG& from) {
   if (from.receivetime() != 0) {
     set_receivetime(from.receivetime());
   }
+  if (from.logpath().size() > 0) {
+
+    logpath_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.logpath_);
+  }
+  if (from.loglevel() != 0) {
+    set_loglevel(from.loglevel());
+  }
+  if (from.debugmode() != 0) {
+    set_debugmode(from.debugmode());
+  }
+  if (from.mqthreadquantity() != 0) {
+    set_mqthreadquantity(from.mqthreadquantity());
+  }
   if (from.epollthreadquantity() != 0) {
     set_epollthreadquantity(from.epollthreadquantity());
+  }
+  if (from.processthreadquantity() != 0) {
+    set_processthreadquantity(from.processthreadquantity());
+  }
+  if (from.prioritysize() != 0) {
+    set_prioritysize(from.prioritysize());
   }
 }
 
@@ -1755,17 +1835,19 @@ void GLOBAL_CONFIG::Swap(GLOBAL_CONFIG* other) {
 }
 void GLOBAL_CONFIG::InternalSwap(GLOBAL_CONFIG* other) {
   std::swap(listenport_, other->listenport_);
-  logpath_.Swap(&other->logpath_);
-  std::swap(loglevel_, other->loglevel_);
-  std::swap(debugmode_, other->debugmode_);
-  std::swap(mqthreadquantity_, other->mqthreadquantity_);
   std::swap(enablessl_, other->enablessl_);
   certfilepath_.Swap(&other->certfilepath_);
   keyfilepath_.Swap(&other->keyfilepath_);
   certpasswd_.Swap(&other->certpasswd_);
   std::swap(connecttime_, other->connecttime_);
   std::swap(receivetime_, other->receivetime_);
+  logpath_.Swap(&other->logpath_);
+  std::swap(loglevel_, other->loglevel_);
+  std::swap(debugmode_, other->debugmode_);
+  std::swap(mqthreadquantity_, other->mqthreadquantity_);
   std::swap(epollthreadquantity_, other->epollthreadquantity_);
+  std::swap(processthreadquantity_, other->processthreadquantity_);
+  std::swap(prioritysize_, other->prioritysize_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
 }
@@ -1795,93 +1877,7 @@ void GLOBAL_CONFIG::clear_listenport() {
   // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.ListenPort)
 }
 
-// optional string LogPath = 2;
-void GLOBAL_CONFIG::clear_logpath() {
-  logpath_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
- const ::std::string& GLOBAL_CONFIG::logpath() const {
-  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.LogPath)
-  return logpath_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
- void GLOBAL_CONFIG::set_logpath(const ::std::string& value) {
-  
-  logpath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.LogPath)
-}
- void GLOBAL_CONFIG::set_logpath(const char* value) {
-  
-  logpath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:ProtobufMessage.GLOBAL_CONFIG.LogPath)
-}
- void GLOBAL_CONFIG::set_logpath(const char* value, size_t size) {
-  
-  logpath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.GLOBAL_CONFIG.LogPath)
-}
- ::std::string* GLOBAL_CONFIG::mutable_logpath() {
-  
-  // @@protoc_insertion_point(field_mutable:ProtobufMessage.GLOBAL_CONFIG.LogPath)
-  return logpath_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
- ::std::string* GLOBAL_CONFIG::release_logpath() {
-  // @@protoc_insertion_point(field_release:ProtobufMessage.GLOBAL_CONFIG.LogPath)
-  
-  return logpath_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
- void GLOBAL_CONFIG::set_allocated_logpath(::std::string* logpath) {
-  if (logpath != NULL) {
-    
-  } else {
-    
-  }
-  logpath_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), logpath);
-  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.GLOBAL_CONFIG.LogPath)
-}
-
-// optional int32 LogLevel = 3;
-void GLOBAL_CONFIG::clear_loglevel() {
-  loglevel_ = 0;
-}
- ::google::protobuf::int32 GLOBAL_CONFIG::loglevel() const {
-  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.LogLevel)
-  return loglevel_;
-}
- void GLOBAL_CONFIG::set_loglevel(::google::protobuf::int32 value) {
-  
-  loglevel_ = value;
-  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.LogLevel)
-}
-
-// optional bool DebugMode = 4;
-void GLOBAL_CONFIG::clear_debugmode() {
-  debugmode_ = false;
-}
- bool GLOBAL_CONFIG::debugmode() const {
-  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.DebugMode)
-  return debugmode_;
-}
- void GLOBAL_CONFIG::set_debugmode(bool value) {
-  
-  debugmode_ = value;
-  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.DebugMode)
-}
-
-// optional int32 MQThreadQuantity = 5;
-void GLOBAL_CONFIG::clear_mqthreadquantity() {
-  mqthreadquantity_ = 0;
-}
- ::google::protobuf::int32 GLOBAL_CONFIG::mqthreadquantity() const {
-  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.MQThreadQuantity)
-  return mqthreadquantity_;
-}
- void GLOBAL_CONFIG::set_mqthreadquantity(::google::protobuf::int32 value) {
-  
-  mqthreadquantity_ = value;
-  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.MQThreadQuantity)
-}
-
-// optional bool EnableSSL = 6;
+// optional bool EnableSSL = 2;
 void GLOBAL_CONFIG::clear_enablessl() {
   enablessl_ = false;
 }
@@ -1895,7 +1891,7 @@ void GLOBAL_CONFIG::clear_enablessl() {
   // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.EnableSSL)
 }
 
-// optional string CertFilePath = 7;
+// optional string CertFilePath = 3;
 void GLOBAL_CONFIG::clear_certfilepath() {
   certfilepath_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1939,7 +1935,7 @@ void GLOBAL_CONFIG::clear_certfilepath() {
   // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.GLOBAL_CONFIG.CertFilePath)
 }
 
-// optional string KeyFilePath = 8;
+// optional string KeyFilePath = 4;
 void GLOBAL_CONFIG::clear_keyfilepath() {
   keyfilepath_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1983,7 +1979,7 @@ void GLOBAL_CONFIG::clear_keyfilepath() {
   // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.GLOBAL_CONFIG.KeyFilePath)
 }
 
-// optional string CertPasswd = 9;
+// optional string CertPasswd = 5;
 void GLOBAL_CONFIG::clear_certpasswd() {
   certpasswd_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -2027,7 +2023,7 @@ void GLOBAL_CONFIG::clear_certpasswd() {
   // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.GLOBAL_CONFIG.CertPasswd)
 }
 
-// optional int32 ConnectTime = 10;
+// optional int32 ConnectTime = 6;
 void GLOBAL_CONFIG::clear_connecttime() {
   connecttime_ = 0;
 }
@@ -2041,7 +2037,7 @@ void GLOBAL_CONFIG::clear_connecttime() {
   // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.ConnectTime)
 }
 
-// optional int32 ReceiveTime = 11;
+// optional int32 ReceiveTime = 7;
 void GLOBAL_CONFIG::clear_receivetime() {
   receivetime_ = 0;
 }
@@ -2053,6 +2049,92 @@ void GLOBAL_CONFIG::clear_receivetime() {
   
   receivetime_ = value;
   // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.ReceiveTime)
+}
+
+// optional string LogPath = 8;
+void GLOBAL_CONFIG::clear_logpath() {
+  logpath_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ const ::std::string& GLOBAL_CONFIG::logpath() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.LogPath)
+  return logpath_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void GLOBAL_CONFIG::set_logpath(const ::std::string& value) {
+  
+  logpath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.LogPath)
+}
+ void GLOBAL_CONFIG::set_logpath(const char* value) {
+  
+  logpath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:ProtobufMessage.GLOBAL_CONFIG.LogPath)
+}
+ void GLOBAL_CONFIG::set_logpath(const char* value, size_t size) {
+  
+  logpath_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:ProtobufMessage.GLOBAL_CONFIG.LogPath)
+}
+ ::std::string* GLOBAL_CONFIG::mutable_logpath() {
+  
+  // @@protoc_insertion_point(field_mutable:ProtobufMessage.GLOBAL_CONFIG.LogPath)
+  return logpath_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ ::std::string* GLOBAL_CONFIG::release_logpath() {
+  // @@protoc_insertion_point(field_release:ProtobufMessage.GLOBAL_CONFIG.LogPath)
+  
+  return logpath_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void GLOBAL_CONFIG::set_allocated_logpath(::std::string* logpath) {
+  if (logpath != NULL) {
+    
+  } else {
+    
+  }
+  logpath_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), logpath);
+  // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.GLOBAL_CONFIG.LogPath)
+}
+
+// optional int32 LogLevel = 9;
+void GLOBAL_CONFIG::clear_loglevel() {
+  loglevel_ = 0;
+}
+ ::google::protobuf::int32 GLOBAL_CONFIG::loglevel() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.LogLevel)
+  return loglevel_;
+}
+ void GLOBAL_CONFIG::set_loglevel(::google::protobuf::int32 value) {
+  
+  loglevel_ = value;
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.LogLevel)
+}
+
+// optional bool DebugMode = 10;
+void GLOBAL_CONFIG::clear_debugmode() {
+  debugmode_ = false;
+}
+ bool GLOBAL_CONFIG::debugmode() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.DebugMode)
+  return debugmode_;
+}
+ void GLOBAL_CONFIG::set_debugmode(bool value) {
+  
+  debugmode_ = value;
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.DebugMode)
+}
+
+// optional int32 MQThreadQuantity = 11;
+void GLOBAL_CONFIG::clear_mqthreadquantity() {
+  mqthreadquantity_ = 0;
+}
+ ::google::protobuf::int32 GLOBAL_CONFIG::mqthreadquantity() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.MQThreadQuantity)
+  return mqthreadquantity_;
+}
+ void GLOBAL_CONFIG::set_mqthreadquantity(::google::protobuf::int32 value) {
+  
+  mqthreadquantity_ = value;
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.MQThreadQuantity)
 }
 
 // optional int32 EPollThreadQuantity = 12;
@@ -2067,6 +2149,34 @@ void GLOBAL_CONFIG::clear_epollthreadquantity() {
   
   epollthreadquantity_ = value;
   // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.EPollThreadQuantity)
+}
+
+// optional int32 ProcessThreadQuantity = 13;
+void GLOBAL_CONFIG::clear_processthreadquantity() {
+  processthreadquantity_ = 0;
+}
+ ::google::protobuf::int32 GLOBAL_CONFIG::processthreadquantity() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.ProcessThreadQuantity)
+  return processthreadquantity_;
+}
+ void GLOBAL_CONFIG::set_processthreadquantity(::google::protobuf::int32 value) {
+  
+  processthreadquantity_ = value;
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.ProcessThreadQuantity)
+}
+
+// optional int32 PrioritySize = 14;
+void GLOBAL_CONFIG::clear_prioritysize() {
+  prioritysize_ = 0;
+}
+ ::google::protobuf::int32 GLOBAL_CONFIG::prioritysize() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.GLOBAL_CONFIG.PrioritySize)
+  return prioritysize_;
+}
+ void GLOBAL_CONFIG::set_prioritysize(::google::protobuf::int32 value) {
+  
+  prioritysize_ = value;
+  // @@protoc_insertion_point(field_set:ProtobufMessage.GLOBAL_CONFIG.PrioritySize)
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS

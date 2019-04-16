@@ -1,7 +1,7 @@
 // load system file
 
 #include "epollex.h"
-#include "lconnect.h"
+#include "EasyConnect.h"
 #include "sockinfo.h"
 #include "NetworkEvent.hpp"
 

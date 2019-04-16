@@ -8,24 +8,21 @@ using namespace Sloong::Universal;
 using namespace Sloong::Events;
 Sloong::CSockInfo::CSockInfo()
 {
-	m_pSendList = new queue<shared_ptr<CDataTransPackage>>[s_PriorityLevel]();
-	m_pCon = make_shared<lConnect>();
+	m_pSendList = new queue<SmartPackage>[s_PriorityLevel]();
+	m_pCon = make_shared<EasyConnect>();
 	m_pUserInfo = make_unique<CLuaPacket>();
 }
 
 CSockInfo::~CSockInfo()
 {
-	for (int i = 0; i < s_PriorityLevel;i++)
-	{
-		while (!m_pSendList[i].empty())
-		{
+	for (int i = 0; i < s_PriorityLevel;i++){
+		while (!m_pSendList[i].empty()){
 			m_pSendList[i].pop();
         }
 	}
 	SAFE_DELETE_ARR(m_pSendList);
 
-    while (!m_oPrepareSendList.empty())
-    {
+    while (!m_oPrepareSendList.empty()){
         m_oPrepareSendList.pop();
     }
 }
@@ -45,16 +42,12 @@ void Sloong::CSockInfo::Initialize(IControl* iMsg, int sock, SSL_CTX* ctx)
 NetworkResult Sloong::CSockInfo::ResponseDataPackage(SmartPackage pack)
 {	
 	// if have exdata, directly add to epoll list.
-	if (pack->IsBigPackage())
-	{
+	if (pack->IsBigPackage()){
 		AddToSendList(pack);
 		return NetworkResult::Retry;
-	}
-	else
-	{
+	}else{
 		// check the send list size. if all empty, try send message directly.
-		if ((m_bIsSendListEmpty == false && !m_oPrepareSendList.empty()) || m_oSockSendMutex.try_lock() == false)
-		{
+		if ((m_bIsSendListEmpty == false && !m_oPrepareSendList.empty()) || m_oSockSendMutex.try_lock() == false){
 			AddToSendList(pack);
 			return NetworkResult::Retry;
 		}
@@ -63,14 +56,12 @@ NetworkResult Sloong::CSockInfo::ResponseDataPackage(SmartPackage pack)
 	unique_lock<mutex> lck(m_oSockSendMutex, std::adopt_lock);
 	// if code run here. the all list is empty. and no have exdata. try send message
 	auto res = pack->SendPackage();
-	if ( res == NetworkResult::Error )
-	{
+	if ( res == NetworkResult::Error ){
 		// TODO: 这里应该对错误进行区分处理
 		m_pLog->Warn(CUniversal::Format("Send data failed.[%s]", m_pCon->m_strAddress));//, m_pCon->G_FormatSSLErrorMsg(nMsgSend)));
 		return NetworkResult::Error;
 	}
-	if (res == NetworkResult::Retry )
-	{
+	if (res == NetworkResult::Retry ){
 		AddToSendList(pack);
 		return NetworkResult::Retry;
 	}
@@ -88,49 +79,33 @@ void Sloong::CSockInfo::AddToSendList(SmartPackage pack)
 }
 
 
-NetworkResult Sloong::CSockInfo::OnDataCanReceive()
+NetworkResult Sloong::CSockInfo::OnDataCanReceive( queue<SmartPackage>& readList )
 {
-	// The app is used ET mode, so should wait the mutex. 
 	unique_lock<mutex> srlck(m_oSockReadMutex);
 
 	// 已经连接的用户,收到数据,可以开始读入
 	bool bLoop = false;
-	do 
-	{
+	do {
 		auto package = make_shared<CDataTransPackage>();
 		package->Initialize(m_pCon,m_pLog);
 		package->SetProperty(m_emPackageProperty);
 		auto res = package->RecvPackage(m_ReceiveTimeout);
-		if( res == NetworkResult::Error)
-		{
+		if( res == NetworkResult::Error){
 			// 读取错误,将这个连接从监听中移除并关闭连接
 			return NetworkResult::Error;
-		}else if( res == NetworkResult::Invalid)
-		{
+		}else if( res == NetworkResult::Invalid){
 			auto event = make_shared<CNetworkEvent>(EVENT_TYPE::MonitorSendStatus);
 			event->SetSocketID(m_pCon->GetSocketID());
 			m_iC->SendMessage(event);
 			AddToSendList(package);
-		}
-		else if (res == NetworkResult::Retry)
-		{
+		}else if (res == NetworkResult::Retry){
 			//由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
 			return NetworkResult::Succeed;
-		}
-		else
-		{
+		}else{
 			bLoop = true;
-			
 			// update the socket time
 			m_ActiveTime = time(NULL);
-			
-			// Add the sock event to list
-			auto event = make_shared<CNetworkEvent>(EVENT_TYPE::ReveivePackage);
-			
-			event->SetSocketID(m_pCon->GetSocketID());
-			event->SetUserInfo(m_pUserInfo.get());
-			event->SetDataPackage(package);
-			m_iC->SendMessage(event);
+			readList.push(package);
 		}
 	}while (bLoop);
 
@@ -149,17 +124,14 @@ NetworkResult Sloong::CSockInfo::OnDataCanSend()
 void Sloong::CSockInfo::ProcessPrepareSendList()
 {
 	// progress the prepare send list first
-	if (!m_oPrepareSendList.empty())
-	{
+	if (!m_oPrepareSendList.empty()){
 		unique_lock<mutex> prelck(m_oPreSendMutex);
 		if (m_oPrepareSendList.empty())
-		{
 			return;
-		}
+		
 		unique_lock<mutex> sendListlck(m_oSendListMutex);
 		
-		while (!m_oPrepareSendList.empty())
-		{
+		while (!m_oPrepareSendList.empty()){
 			auto pack = m_oPrepareSendList.front();
 			m_oPrepareSendList.pop();
 			auto priority = pack->GetPriority();
