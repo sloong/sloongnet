@@ -173,19 +173,9 @@ void SloongNetFirewall::Run()
 
 void Sloong::SloongNetFirewall::MessagePackageProcesser(SmartPackage pack)
 {
-	string strRes("");
-	// char* pExData = nullptr;
-	// int nExSize;
-	// string strMsg = pack->GetRecvMessage();
-	// if (m_pProcess->MsgProcess(info, strMsg , strRes, pExData, nExSize)){
-	// 	pack->ResponsePackage(strRes,pExData,nExSize);
-	// }else{
-	// 	m_pLog->Error("Error in process");
 	pack->ResponsePackage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
-	// }
-
 	auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
-	response_event->SetSocketID(client_request_package->GetSocketID());
+	response_event->SetSocketID(pack->GetSocketID());
 	response_event->SetDataPackage(pack);
 	m_pControl->CallMessage(response_event);
 }
