@@ -117,13 +117,13 @@ bool SloongNetService::Initialize(int argc, char **args)
 			IData::Initialize(m_pControl.get());
 			m_pNetwork->Initialize(m_pControl.get());
 			m_pNetwork->SetProperty(DataTransPackageProperty::DisableAll);
+			m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetService::MessagePackageProcesser, this, std::placeholders::_1));
 		}
 		catch (exception e)
 		{
 			m_pLog->Error(string("Excepiton happened in initialize for ControlCenter. Message:") + string(e.what()));
 			return false;
 		}
-		m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetService::OnReceivePackage, this, std::placeholders::_1));
 
 		return true;
 	}
@@ -151,19 +151,8 @@ void SloongNetService::Run()
 	m_oSync.wait();
 }
 
-void Sloong::SloongNetService::OnReceivePackage(SmartEvent evt)
+void Sloong::SloongNetService::MessagePackageProcesser(SmartPackage pack)
 {
-	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(evt);
-	auto info = net_evt->GetUserInfo();
-	if (!info)
-	{
-		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
-		return;
-	}
-	SmartPackage pack = net_evt->GetDataPackage();
-
-	net_evt->SetEvent(EVENT_TYPE::SendMessage);
-
 	ProtobufMessage::MessagePackage msgPack;
 	msgPack.ParseFromString(pack->GetRecvMessage());
 	string config;
@@ -191,8 +180,10 @@ void Sloong::SloongNetService::OnReceivePackage(SmartEvent evt)
 
 	pack->ResponsePackage(config);
 
-	net_evt->SetDataPackage(pack);
-	m_pControl->SendMessage(net_evt);
+	auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
+	response_event->SetSocketID(pack->GetSocketID());
+	response_event->SetDataPackage(pack);
+	m_pControl->CallMessage(response_event);
 }
 
 void Sloong::SloongNetService::Exit()

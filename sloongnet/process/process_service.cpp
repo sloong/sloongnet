@@ -136,6 +136,7 @@ bool SloongNetProcess::Initialize(int argc, char** args)
 			IData::Initialize(m_pControl.get());
 			m_pNetwork->Initialize(m_pControl.get());
 			m_pNetwork->SetProperty(DataTransPackageProperty::DisableAll);
+			m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetProcess::MessagePackageProcesser, this, std::placeholders::_1))
 			m_pProcess->Initialize(m_pControl.get());
 		}
 		catch (exception e)
@@ -144,7 +145,6 @@ bool SloongNetProcess::Initialize(int argc, char** args)
 			return false;
 		}
 
-		m_pControl->RegisterEventHandler(ReveivePackage, std::bind(&SloongNetProcess::OnReceivePackage, this, std::placeholders::_1));
 		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProcess::OnSocketClose, this, std::placeholders::_1));
 
 		return true;
@@ -185,19 +185,8 @@ void SloongNetProcess::Run()
 }
 
 
-void Sloong::SloongNetProcess::OnReceivePackage(SmartEvent evt)
+void Sloong::SloongNetProcess::MessagePackageProcesser(SmartPackage pack)
 {	
-	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(evt);
-	auto info = net_evt->GetUserInfo();
-	if (!info)
-	{
-		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
-		return;
-	}
-	SmartPackage pack = net_evt->GetDataPackage();
-
-	net_evt->SetEvent(EVENT_TYPE::SendMessage);
-	
 	string strRes("");
 	char* pExData = nullptr;
 	int nExSize;
@@ -216,8 +205,10 @@ void Sloong::SloongNetProcess::OnReceivePackage(SmartEvent evt)
 	string res;
 	msg.SerializeToString(&res);
 	pack->ResponsePackage(res,pExData,nExSize);
-	net_evt->SetDataPackage(pack);
-	m_pControl->SendMessage(net_evt);
+	auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
+	response_event->SetSocketID(pack->GetSocketID());
+	response_event->SetDataPackage(pack);
+	m_pControl->CallMessage(response_event);
 }
 
 void Sloong::SloongNetProcess::OnSocketClose(SmartEvent event)

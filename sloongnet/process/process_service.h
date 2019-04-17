@@ -4,6 +4,7 @@
 
 #include "IEvent.h"
 #include "IControl.h"
+#include "DataTransPackage.h"
 namespace Sloong
 {
 	class CControlHub;
@@ -20,7 +21,7 @@ namespace Sloong
 		void Run();
 		void Exit();
 
-		void OnReceivePackage(SmartEvent evt);
+		void MessagePackageProcesser(SmartPackage);
 		void OnSocketClose(SmartEvent evt);
 	protected:
 		unique_ptr<CNetworkHub> m_pNetwork;

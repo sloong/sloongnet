@@ -1,5 +1,6 @@
 {
     "C_Cpp.intelliSenseEngineFallback": "Enabled",
+    "C_Cpp.intelliSenseCacheSize":10240,
     "files.encoding": "utf8",
     "files.associations": {
         "condition_variable": "cpp",
@@ -73,5 +74,6 @@
         "xtree": "cpp",
         "xutility": "cpp"
     },
-    "C_Cpp.errorSquiggles": "Disabled"
+    "C_Cpp.errorSquiggles": "Disabled",
+    "terminal.integrated.shell.windows": "C:\\WINDOWS\\System32\\bash.exe"
 }
