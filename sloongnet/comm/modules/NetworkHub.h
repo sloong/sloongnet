@@ -30,8 +30,19 @@ namespace Sloong
         void CloseConnectEventHandler(SmartEvent event);
 		void MonitorSendStatusEventHandler(SmartEvent evt);
 
+
         void RegisterMessageProcesser(std::function<void(SmartPackage)> value){
             m_pProcessFunc = value;
+        }
+
+        /**
+         * @Remarks: In default case, the connect just accept and add to epoll watch list. 
+         *       if want do other operation, call this function and set the process, when accpet ent, will call this function .
+         * @Params: the function bind for processer
+         * @Return: NO
+         */
+        void RegisterAccpetConnectProcesser(std::function<void(shared_ptr<CSockInfo>)> value){
+            m_pAccpetFunc = value;
         }
 
         // Work thread.
@@ -72,6 +83,7 @@ namespace Sloong
         // For message process 
         CEasySync               m_oProcessThreadSync;
         std::function<void(SmartPackage)>          m_pProcessFunc = nullptr;
+        std::function<void(shared_ptr<CSockInfo>)>  m_pAccpetFunc = nullptr;
         queue_ex<SmartPackage>*    m_pWaitProcessList;
     };
 }

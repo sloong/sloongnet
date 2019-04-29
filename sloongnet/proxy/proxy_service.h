@@ -23,7 +23,7 @@ namespace Sloong
 		bool ConnectToProcess();
 
 		void MessagePackageProcesser(SmartPackage evt);
-
+		void AcceptConnectProcesser(shared_ptr<CSockInfo>);
 		void OnSocketClose(SmartEvent evt);
 	protected:
 		unique_ptr<CNetworkHub> m_pNetwork;
@@ -33,6 +33,7 @@ namespace Sloong
 		// 
 		map<int,int>	m_mapProcessLoadList;
 		map<int,SmartConnect> 	m_mapProcessList;
+		map<int,string>		m_mapUUIDList;
 		map<u_int64_t,SmartPackage> m_mapPackageList;
 		u_int64_t	m_nSerialNumber=0;
 		ProtobufMessage::PROXY_CONFIG m_oConfig;

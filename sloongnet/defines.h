@@ -29,9 +29,25 @@ const int s_PriorityLevel = 5;
 
 enum MessageFunction
 {
+	// Sender: All 
+	// Processer: Control
+	// Response: Yes
+	// Response data: ExtendData - config data is not UTF8 string. cannot save in context field.
 	GetConfig,
-	SendRequest,
-	ResponseRequest,
+
+	// Sender: Process 
+	// Processer: Control
+	// Response: No
+	// Note: if the socket uuid is registed, the control will send error message 
+	UserLogin,
+
+	// Sender: Procxy
+	// Processer : Process 
+	// Response: Yes
+	// Response data: Context - result with JSON string. 
+	ProcessMessage,
+	
+
 };
 
 enum ModuleType
@@ -126,13 +142,5 @@ typedef enum g_em_DataItem
 	Logger,
 }DATA_ITEM;
 
-
-enum DataTransPackageProperty{
-    DisableAll = 0x00,
-    EnablePriorityLevel = 0x01,
-    EnableSerialNumber = 0x02,
-    EnableMD5Check = 0x04,
-    EnableAll = 0x07,
-};
 
 #endif

@@ -32,6 +32,7 @@ namespace Sloong
 		u_int64_t	m_nSerialNumber=0;
 		ProtobufMessage::PROCESS_CONFIG m_oConfig;
 		CEasySync			m_oSync;
+		map<string, unique_ptr<CLuaPacket>> m_mapUserInfoList;
 	};
 
 }

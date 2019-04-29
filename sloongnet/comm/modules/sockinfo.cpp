@@ -10,7 +10,6 @@ Sloong::CSockInfo::CSockInfo()
 {
 	m_pSendList = new queue<SmartPackage>[s_PriorityLevel]();
 	m_pCon = make_shared<EasyConnect>();
-	m_pUserInfo = make_unique<CLuaPacket>();
 }
 
 CSockInfo::~CSockInfo()
@@ -35,8 +34,6 @@ void Sloong::CSockInfo::Initialize(IControl* iMsg, int sock, SSL_CTX* ctx)
 	auto serv_config = IData::GetGlobalConfig();
 	m_ReceiveTimeout = serv_config->receivetime();
 	m_pCon->Initialize(sock,ctx);
-	m_pUserInfo->SetData("ip", m_pCon->m_strAddress);
-	m_pUserInfo->SetData("port", CUniversal::ntos(m_pCon->m_nPort));
 }
 
 NetworkResult Sloong::CSockInfo::ResponseDataPackage(SmartPackage pack)

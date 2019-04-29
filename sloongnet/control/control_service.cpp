@@ -1,4 +1,11 @@
-/* File Name: server.c */
+/*
+ * @Author: WCB
+ * @LastEditors: WCB
+ * @Description: Control center service 
+ * @Date: 2019-04-14 14:41:59
+ * @LastEditTime: 2019-04-19 19:02:50
+ */
+
 #include "control_service.h"
 #include "NetworkHub.h"
 #include "ControlHub.h"
@@ -71,6 +78,12 @@ void PrientHelp()
 	cout << "param: listen port" << endl;
 }
 
+/**
+ * @Remarks: If have errors, the error message will print to standard output device.
+ * @Params: CMD line. from System.
+ * @Return: return true if no error, service can continue to run.
+ * 			return false if error. service must exit. 
+ */
 bool SloongNetService::Initialize(int argc, char **args)
 {
 	set_terminate(sloong_terminator);
@@ -144,6 +157,11 @@ bool SloongNetService::Initialize(int argc, char **args)
 	return false;
 }
 
+/**
+ * @Remarks: Send the ProgramStart message. and wait the exit sync object. 
+ * @Params: NO
+ * @Return: NO
+ */
 void SloongNetService::Run()
 {
 	m_pLog->Info("Application begin running.");

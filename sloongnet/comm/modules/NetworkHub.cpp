@@ -261,6 +261,10 @@ NetworkResult Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 	m_SockList[conn_sock] = info;
 	sockLck.unlock();
 
+	if( m_pAcceptFunc ){
+		m_pAccpetFunc(info);
+	}
+
 	m_pLog->Info(CUniversal::Format("Accept client:[%s:%d].", info->m_pCon->m_strAddress, info->m_pCon->m_nPort));
 
 	return NetworkResult::Succeed;

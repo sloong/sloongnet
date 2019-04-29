@@ -8,6 +8,7 @@
 #include "DataTransPackage.h"
 using namespace Sloong;
 using namespace Sloong::Events;
+using namespace ProtobufMessage;
 
 IControl *Sloong::IData::m_iC = nullptr;
 
@@ -35,8 +36,16 @@ void on_SIGINT_Event(int signal)
 
 int main(int argc, char **args)
 {
-	if (g_AppService.Initialize(argc, args))
+	try
+	{
+		if (g_AppService.Initialize(argc, args))
 		g_AppService.Run();
+	}
+	catch (...)
+	{
+		cout << "Unhandle exception happened, system will shutdown. " << endl;
+		CUtility::write_call_stack();
+	}
 }
 
 SloongNetProxy::SloongNetProxy()
@@ -82,18 +91,17 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		}
 
 		if( !ConnectToControl(args[1]))
-		{
-			cout << "Connect to control fialed." <<endl;
-			return false;
-		}
+			throw string("Connect to control fialed.");
+	
 
-		ProtobufMessage::MessagePackage pack;
-		pack.set_function(MessageFunction::GetConfig);
-		pack.set_sender(ModuleType::Proxy);
-		pack.set_receiver(ModuleType::ControlCenter);
+		MessagePackage get_config_request_buf;
+		get_config_request_buf.set_function(MessageFunction::GetConfig);
+		get_config_request_buf.set_sender(ModuleType::Proxy);
+		get_config_request_buf.set_receiver(ModuleType::ControlCenter);
+		get_config_request_buf.set_type(MessagePackage_Types::MessagePackage_Types_Request);
 		
 		string strMsg;
-		pack.SerializeToString(&strMsg);
+		get_config_request_buf.SerializeToString(&strMsg);
 
 		CDataTransPackage dataPackage;
 		dataPackage.Initialize(m_pSocket);
@@ -101,18 +109,19 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		dataPackage.RequestPackage(strMsg);
 		NetworkResult result = dataPackage.SendPackage();
 		if(result != NetworkResult::Succeed)
-		{
-			cerr << "Send get config request error."<< endl;
-			return false;
-		}
+			throw string("Send get config request error.");
+
 		result = dataPackage.RecvPackage(0);
 		if(result != NetworkResult::Succeed)
-		{
-			cerr << "Receive get config result error."<< endl;
-			return false;
-		}
+			throw string("Receive get config result error.");
 
-		m_oConfig.ParseFromString(dataPackage.GetRecvMessage());
+		MessagePackage get_config_response_buf;
+		if(!get_config_response_buf.ParseFromString(dataPackage.GetRecvMessage()))
+			throw string("Parse the get config response data error.");
+	
+
+		if(!m_oConfig.ParseFromString(get_config_response_buf.extenddata()))
+			throw string("Parse the config struct error.");
 		
 		auto serv_config = m_oConfig.serverconfig();
 
@@ -153,10 +162,9 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 	{
 		cout << "exception happened, system will shutdown. message:" << e.what() << endl;
 	}
-	catch (...)
+	catch (string &e)
 	{
-		cout << "Unhandle exception happened, system will shutdown. " << endl;
-		CUtility::write_call_stack();
+		cerr << e << endl;
 	}
 
 	return false;
@@ -197,6 +205,33 @@ void SloongNetProxy::Run()
 }
 
 
+void SendRequestToControl(MessageFunction func, string context)
+{
+	ProtobufMessage::MessagePackage msg;
+		msg.set_sender(ModuleType::Proxy);
+		msg.set_receiver(ModuleType::Process);
+		msg.set_function(MessageFunction::SendRequest);
+		msg.set_context(pack->GetRecvMessage());
+}
+
+
+// Case 1:
+// 		In this function, build the uuid by the socket id. and regist the uuid to control. 
+// 		then send all message to process server must have this uuid.
+// 		the process server processed by this value.
+// Case 2:
+//		In this function, just build the uuid, and use it in next request, but no regist to control, because ne login no should have userinfo.
+//		so process server always create new empty UserInfo to run process function. if in this request, the user is logined, so the empty UserInfo isChanged. so we regist it in this time. 
+void Sloong::SloongNetProcess::AcceptConnectProcesser(shared_ptr<CSockInfo> info){
+	var uuid = CUtility::GenUUID();
+	// regist this uuid to control. if succeed, the control do nothing. but if it is registed, the control will send an error message. then retry regist again.
+	m_mapUUIDList[info->GetSocketID()] = uuid;
+}
+
+
+
+
+
 void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 {
 	auto event_happend_socket = pack->GetSocketID();
@@ -206,10 +241,12 @@ void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 		ProtobufMessage::MessagePackage msg;
 		msg.set_sender(ModuleType::Proxy);
 		msg.set_receiver(ModuleType::Process);
-		msg.set_function(MessageFunction::SendRequest);
+		msg.set_function(MessageFunction::ProcessMessage);
 		msg.set_context(pack->GetRecvMessage());
 		msg.set_prioritylevel(pack->GetPriority());
 		msg.set_serialnumber(m_nSerialNumber);
+		msg.set_extenddata(m_mapUUIDList[pack->GetSocketID()].data());
+		
 		string sendMsg;
 		msg.SerializeToString(&sendMsg);
 
@@ -238,22 +275,30 @@ void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 		// Step 1: 将Process服务处理完毕的消息转换为正常格式
 		ProtobufMessage::MessagePackage msg;
 		msg.ParseFromString(pack->GetRecvMessage());
+		auto func = (MessageFunction)msg.function();
+		switch(func){
+			case MessageFunction::ProcessMessage:
+				// Step 2: 根据收到的SerailNumber找到对应保存的来自客户端的Event对象
+				auto event_obj = m_mapPackageList.find(msg.serialnumber());
+				if( event_obj == m_mapPackageList.end() )
+				{
+					m_pLog->Error(CUniversal::Format("Event list no have target event data. SerailNumber:[%d]",pack->GetSerialNumber()));
+					return;
+				}
+				auto client_request_package = event_obj->second;
+				client_request_package->ResponsePackage(msg.context());
 
-		// Step 2: 根据收到的SerailNumber找到对应保存的来自客户端的Event对象
-		auto event_obj = m_mapPackageList.find(msg.serialnumber());
-		if( event_obj == m_mapPackageList.end() )
-		{
-			m_pLog->Error(CUniversal::Format("Event list no have target event data. SerailNumber:[%d]",pack->GetSerialNumber()));
-			return;
+				// Step 3: 发送相应数据
+				auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
+				response_event->SetSocketID(client_request_package->GetSocketID());
+				response_event->SetDataPackage(client_request_package);
+				m_pControl->CallMessage(response_event);
+			break;
+
 		}
-		auto client_request_package = event_obj->second;
-		client_request_package->ResponsePackage(msg.context());
 
-		// Step 3: 发送相应数据
-		auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
-		response_event->SetSocketID(client_request_package->GetSocketID());
-		response_event->SetDataPackage(client_request_package);
-		m_pControl->CallMessage(response_event);
+
+		
 	}
 }
 

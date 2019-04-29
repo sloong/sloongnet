@@ -26,6 +26,7 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/repeated_field.h>
 #include <google/protobuf/extension_set.h>
+#include <google/protobuf/generated_enum_reflection.h>
 #include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 
@@ -44,6 +45,27 @@ class MessagePackage;
 class PROCESS_CONFIG;
 class PROXY_CONFIG;
 
+enum MessagePackage_Types {
+  MessagePackage_Types_Request = 0,
+  MessagePackage_Types_Response = 1,
+  MessagePackage_Types_MessagePackage_Types_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
+  MessagePackage_Types_MessagePackage_Types_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
+};
+bool MessagePackage_Types_IsValid(int value);
+const MessagePackage_Types MessagePackage_Types_Types_MIN = MessagePackage_Types_Request;
+const MessagePackage_Types MessagePackage_Types_Types_MAX = MessagePackage_Types_Response;
+const int MessagePackage_Types_Types_ARRAYSIZE = MessagePackage_Types_Types_MAX + 1;
+
+const ::google::protobuf::EnumDescriptor* MessagePackage_Types_descriptor();
+inline const ::std::string& MessagePackage_Types_Name(MessagePackage_Types value) {
+  return ::google::protobuf::internal::NameOfEnum(
+    MessagePackage_Types_descriptor(), value);
+}
+inline bool MessagePackage_Types_Parse(
+    const ::std::string& name, MessagePackage_Types* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<MessagePackage_Types>(
+    MessagePackage_Types_descriptor(), name, value);
+}
 // ===================================================================
 
 class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:ProtobufMessage.MessagePackage) */ {
@@ -103,6 +125,32 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::Metadata GetMetadata() const;
 
   // nested types ----------------------------------------------------
+
+  typedef MessagePackage_Types Types;
+  static const Types Request =
+    MessagePackage_Types_Request;
+  static const Types Response =
+    MessagePackage_Types_Response;
+  static inline bool Types_IsValid(int value) {
+    return MessagePackage_Types_IsValid(value);
+  }
+  static const Types Types_MIN =
+    MessagePackage_Types_Types_MIN;
+  static const Types Types_MAX =
+    MessagePackage_Types_Types_MAX;
+  static const int Types_ARRAYSIZE =
+    MessagePackage_Types_Types_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor*
+  Types_descriptor() {
+    return MessagePackage_Types_descriptor();
+  }
+  static inline const ::std::string& Types_Name(Types value) {
+    return MessagePackage_Types_Name(value);
+  }
+  static inline bool Types_Parse(const ::std::string& name,
+      Types* value) {
+    return MessagePackage_Types_Parse(name, value);
+  }
 
   // accessors -------------------------------------------------------
 
@@ -169,6 +217,12 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::std::string* release_extenddata();
   void set_allocated_extenddata(::std::string* extenddata);
 
+  // optional .ProtobufMessage.MessagePackage.Types type = 9;
+  void clear_type();
+  static const int kTypeFieldNumber = 9;
+  ::ProtobufMessage::MessagePackage_Types type() const;
+  void set_type(::ProtobufMessage::MessagePackage_Types value);
+
   // @@protoc_insertion_point(class_scope:ProtobufMessage.MessagePackage)
  private:
 
@@ -180,8 +234,9 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::int32 serialnumber_;
   ::google::protobuf::int32 sender_;
   ::google::protobuf::internal::ArenaStringPtr context_;
-  ::google::protobuf::internal::ArenaStringPtr extenddata_;
   ::google::protobuf::int32 receiver_;
+  int type_;
+  ::google::protobuf::internal::ArenaStringPtr extenddata_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_config_2eproto();
   friend void protobuf_AssignDesc_config_2eproto();
@@ -1197,6 +1252,20 @@ inline void MessagePackage::set_allocated_extenddata(::std::string* extenddata) 
   }
   extenddata_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), extenddata);
   // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.MessagePackage.ExtendData)
+}
+
+// optional .ProtobufMessage.MessagePackage.Types type = 9;
+inline void MessagePackage::clear_type() {
+  type_ = 0;
+}
+inline ::ProtobufMessage::MessagePackage_Types MessagePackage::type() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.MessagePackage.type)
+  return static_cast< ::ProtobufMessage::MessagePackage_Types >(type_);
+}
+inline void MessagePackage::set_type(::ProtobufMessage::MessagePackage_Types value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.type)
 }
 
 // -------------------------------------------------------------------
@@ -2328,6 +2397,20 @@ inline void PROCESS_CONFIG::set_allocated_serverconfig(::ProtobufMessage::GLOBAL
 // @@protoc_insertion_point(namespace_scope)
 
 }  // namespace ProtobufMessage
+
+#ifndef SWIG
+namespace google {
+namespace protobuf {
+
+template <> struct is_proto_enum< ::ProtobufMessage::MessagePackage_Types> : ::google::protobuf::internal::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::ProtobufMessage::MessagePackage_Types>() {
+  return ::ProtobufMessage::MessagePackage_Types_descriptor();
+}
+
+}  // namespace protobuf
+}  // namespace google
+#endif  // SWIG
 
 // @@protoc_insertion_point(global_scope)
 

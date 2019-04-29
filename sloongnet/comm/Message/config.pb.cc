@@ -24,6 +24,7 @@ namespace {
 const ::google::protobuf::Descriptor* MessagePackage_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   MessagePackage_reflection_ = NULL;
+const ::google::protobuf::EnumDescriptor* MessagePackage_Types_descriptor_ = NULL;
 const ::google::protobuf::Descriptor* GLOBAL_CONFIG_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GLOBAL_CONFIG_reflection_ = NULL;
@@ -54,7 +55,7 @@ void protobuf_AssignDesc_config_2eproto() {
       "config.proto");
   GOOGLE_CHECK(file != NULL);
   MessagePackage_descriptor_ = file->message_type(0);
-  static const int MessagePackage_offsets_[8] = {
+  static const int MessagePackage_offsets_[9] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, function_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, prioritylevel_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, serialnumber_),
@@ -63,6 +64,7 @@ void protobuf_AssignDesc_config_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, receiver_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, context_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, extenddata_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, type_),
   };
   MessagePackage_reflection_ =
     ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
@@ -75,6 +77,7 @@ void protobuf_AssignDesc_config_2eproto() {
       sizeof(MessagePackage),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, _is_default_instance_));
+  MessagePackage_Types_descriptor_ = MessagePackage_descriptor_->enum_type(0);
   GLOBAL_CONFIG_descriptor_ = file->message_type(1);
   static const int GLOBAL_CONFIG_offsets_[14] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, listenport_),
@@ -252,39 +255,42 @@ void protobuf_AddDesc_config_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\014config.proto\022\017ProtobufMessage\"\253\001\n\016Mess"
+    "\n\014config.proto\022\017ProtobufMessage\"\204\002\n\016Mess"
     "agePackage\022\020\n\010Function\030\001 \001(\005\022\025\n\rPriority"
     "Level\030\002 \001(\005\022\024\n\014SerialNumber\030\003 \001(\005\022\023\n\013Che"
     "ckString\030\004 \001(\t\022\016\n\006Sender\030\005 \001(\005\022\020\n\010Receiv"
     "er\030\006 \001(\005\022\017\n\007Context\030\007 \001(\t\022\022\n\nExtendData\030"
-    "\010 \001(\014\"\301\002\n\rGLOBAL_CONFIG\022\022\n\nListenPort\030\001 "
-    "\001(\005\022\021\n\tEnableSSL\030\002 \001(\010\022\024\n\014CertFilePath\030\003"
-    " \001(\t\022\023\n\013KeyFilePath\030\004 \001(\t\022\022\n\nCertPasswd\030"
-    "\005 \001(\t\022\023\n\013ConnectTime\030\006 \001(\005\022\023\n\013ReceiveTim"
-    "e\030\007 \001(\005\022\017\n\007LogPath\030\010 \001(\t\022\020\n\010LogLevel\030\t \001"
-    "(\005\022\021\n\tDebugMode\030\n \001(\010\022\030\n\020MQThreadQuantit"
-    "y\030\013 \001(\005\022\033\n\023EPollThreadQuantity\030\014 \001(\005\022\035\n\025"
-    "ProcessThreadQuantity\030\r \001(\005\022\024\n\014PriorityS"
-    "ize\030\016 \001(\005\"\234\001\n\tDB_CONFIG\022\025\n\rServerAddress"
-    "\030\001 \001(\t\022\022\n\nServerPort\030\002 \001(\005\022\014\n\004User\030\003 \001(\t"
-    "\022\016\n\006Passwd\030\004 \001(\t\022\020\n\010Database\030\005 \001(\t\0224\n\014Se"
+    "\010 \001(\014\0223\n\004type\030\t \001(\0162%.ProtobufMessage.Me"
+    "ssagePackage.Types\"\"\n\005Types\022\013\n\007Request\020\000"
+    "\022\014\n\010Response\020\001\"\301\002\n\rGLOBAL_CONFIG\022\022\n\nList"
+    "enPort\030\001 \001(\005\022\021\n\tEnableSSL\030\002 \001(\010\022\024\n\014CertF"
+    "ilePath\030\003 \001(\t\022\023\n\013KeyFilePath\030\004 \001(\t\022\022\n\nCe"
+    "rtPasswd\030\005 \001(\t\022\023\n\013ConnectTime\030\006 \001(\005\022\023\n\013R"
+    "eceiveTime\030\007 \001(\005\022\017\n\007LogPath\030\010 \001(\t\022\020\n\010Log"
+    "Level\030\t \001(\005\022\021\n\tDebugMode\030\n \001(\010\022\030\n\020MQThre"
+    "adQuantity\030\013 \001(\005\022\033\n\023EPollThreadQuantity\030"
+    "\014 \001(\005\022\035\n\025ProcessThreadQuantity\030\r \001(\005\022\024\n\014"
+    "PrioritySize\030\016 \001(\005\"\234\001\n\tDB_CONFIG\022\025\n\rServ"
+    "erAddress\030\001 \001(\t\022\022\n\nServerPort\030\002 \001(\005\022\014\n\004U"
+    "ser\030\003 \001(\t\022\016\n\006Passwd\030\004 \001(\t\022\020\n\010Database\030\005 "
+    "\001(\t\0224\n\014ServerConfig\030\006 \001(\0132\036.ProtobufMess"
+    "age.GLOBAL_CONFIG\"r\n\013DATA_CONFIG\022\027\n\017Data"
+    "ReceivePort\030\001 \001(\005\022\024\n\014DataRecvTime\030\002 \001(\005\022"
+    "4\n\014ServerConfig\030\003 \001(\0132\036.ProtobufMessage."
+    "GLOBAL_CONFIG\"\300\001\n\014PROXY_CONFIG\022\027\n\017Client"
+    "CheckTime\030\001 \001(\005\022\026\n\016ClientCheckKey\030\002 \001(\t\022"
+    "\034\n\024TimeoutCheckInterval\030\003 \001(\005\022\023\n\013Timeout"
+    "Time\030\004 \001(\005\022\026\n\016ProcessAddress\030\005 \001(\t\0224\n\014Se"
     "rverConfig\030\006 \001(\0132\036.ProtobufMessage.GLOBA"
-    "L_CONFIG\"r\n\013DATA_CONFIG\022\027\n\017DataReceivePo"
-    "rt\030\001 \001(\005\022\024\n\014DataRecvTime\030\002 \001(\005\0224\n\014Server"
-    "Config\030\003 \001(\0132\036.ProtobufMessage.GLOBAL_CO"
-    "NFIG\"\300\001\n\014PROXY_CONFIG\022\027\n\017ClientCheckTime"
-    "\030\001 \001(\005\022\026\n\016ClientCheckKey\030\002 \001(\t\022\034\n\024Timeou"
-    "tCheckInterval\030\003 \001(\005\022\023\n\013TimeoutTime\030\004 \001("
-    "\005\022\026\n\016ProcessAddress\030\005 \001(\t\0224\n\014ServerConfi"
-    "g\030\006 \001(\0132\036.ProtobufMessage.GLOBAL_CONFIG\""
-    "G\n\017FIREWALL_CONFIG\0224\n\014ServerConfig\030\005 \001(\013"
-    "2\036.ProtobufMessage.GLOBAL_CONFIG\"\347\001\n\016PRO"
-    "CESS_CONFIG\022\032\n\022LuaContextQuantity\030\001 \001(\005\022"
-    "\027\n\017LuaScriptFolder\030\002 \001(\t\022\024\n\014LuaEntryFile"
-    "\030\003 \001(\t\022\030\n\020LuaEntryFunction\030\004 \001(\t\022\032\n\022LuaP"
-    "rocessFunction\030\005 \001(\t\022\036\n\026LuaSocketCloseFu"
-    "nction\030\006 \001(\t\0224\n\014ServerConfig\030\007 \001(\0132\036.Pro"
-    "tobufMessage.GLOBAL_CONFIGb\006proto3", 1314);
+    "L_CONFIG\"G\n\017FIREWALL_CONFIG\0224\n\014ServerCon"
+    "fig\030\005 \001(\0132\036.ProtobufMessage.GLOBAL_CONFI"
+    "G\"\347\001\n\016PROCESS_CONFIG\022\032\n\022LuaContextQuanti"
+    "ty\030\001 \001(\005\022\027\n\017LuaScriptFolder\030\002 \001(\t\022\024\n\014Lua"
+    "EntryFile\030\003 \001(\t\022\030\n\020LuaEntryFunction\030\004 \001("
+    "\t\022\032\n\022LuaProcessFunction\030\005 \001(\t\022\036\n\026LuaSock"
+    "etCloseFunction\030\006 \001(\t\0224\n\014ServerConfig\030\007 "
+    "\001(\0132\036.ProtobufMessage.GLOBAL_CONFIGb\006pro"
+    "to3", 1403);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "config.proto", &protobuf_RegisterTypes);
   MessagePackage::default_instance_ = new MessagePackage();
@@ -313,6 +319,27 @@ struct StaticDescriptorInitializer_config_2eproto {
 
 // ===================================================================
 
+const ::google::protobuf::EnumDescriptor* MessagePackage_Types_descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return MessagePackage_Types_descriptor_;
+}
+bool MessagePackage_Types_IsValid(int value) {
+  switch(value) {
+    case 0:
+    case 1:
+      return true;
+    default:
+      return false;
+  }
+}
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+const MessagePackage_Types MessagePackage::Request;
+const MessagePackage_Types MessagePackage::Response;
+const MessagePackage_Types MessagePackage::Types_MIN;
+const MessagePackage_Types MessagePackage::Types_MAX;
+const int MessagePackage::Types_ARRAYSIZE;
+#endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int MessagePackage::kFunctionFieldNumber;
 const int MessagePackage::kPriorityLevelFieldNumber;
@@ -322,6 +349,7 @@ const int MessagePackage::kSenderFieldNumber;
 const int MessagePackage::kReceiverFieldNumber;
 const int MessagePackage::kContextFieldNumber;
 const int MessagePackage::kExtendDataFieldNumber;
+const int MessagePackage::kTypeFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 MessagePackage::MessagePackage()
@@ -354,6 +382,7 @@ void MessagePackage::SharedCtor() {
   receiver_ = 0;
   context_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   extenddata_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  type_ = 0;
 }
 
 MessagePackage::~MessagePackage() {
@@ -418,6 +447,7 @@ void MessagePackage::Clear() {
   receiver_ = 0;
   context_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   extenddata_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  type_ = 0;
 
 #undef ZR_HELPER_
 #undef ZR_
@@ -551,6 +581,22 @@ bool MessagePackage::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(72)) goto parse_type;
+        break;
+      }
+
+      // optional .ProtobufMessage.MessagePackage.Types type = 9;
+      case 9: {
+        if (tag == 72) {
+         parse_type:
+          int value;
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          set_type(static_cast< ::ProtobufMessage::MessagePackage_Types >(value));
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -630,6 +676,12 @@ void MessagePackage::SerializeWithCachedSizes(
       8, this->extenddata(), output);
   }
 
+  // optional .ProtobufMessage.MessagePackage.Types type = 9;
+  if (this->type() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      9, this->type(), output);
+  }
+
   // @@protoc_insertion_point(serialize_end:ProtobufMessage.MessagePackage)
 }
 
@@ -688,6 +740,12 @@ void MessagePackage::SerializeWithCachedSizes(
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
         8, this->extenddata(), target);
+  }
+
+  // optional .ProtobufMessage.MessagePackage.Types type = 9;
+  if (this->type() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      9, this->type(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:ProtobufMessage.MessagePackage)
@@ -754,6 +812,12 @@ int MessagePackage::ByteSize() const {
         this->extenddata());
   }
 
+  // optional .ProtobufMessage.MessagePackage.Types type = 9;
+  if (this->type() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
+  }
+
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = total_size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
@@ -809,6 +873,9 @@ void MessagePackage::MergeFrom(const MessagePackage& from) {
 
     extenddata_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.extenddata_);
   }
+  if (from.type() != 0) {
+    set_type(from.type());
+  }
 }
 
 void MessagePackage::CopyFrom(const ::google::protobuf::Message& from) {
@@ -843,6 +910,7 @@ void MessagePackage::InternalSwap(MessagePackage* other) {
   std::swap(receiver_, other->receiver_);
   context_.Swap(&other->context_);
   extenddata_.Swap(&other->extenddata_);
+  std::swap(type_, other->type_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
 }
@@ -1058,6 +1126,20 @@ void MessagePackage::clear_extenddata() {
   }
   extenddata_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), extenddata);
   // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.MessagePackage.ExtendData)
+}
+
+// optional .ProtobufMessage.MessagePackage.Types type = 9;
+void MessagePackage::clear_type() {
+  type_ = 0;
+}
+ ::ProtobufMessage::MessagePackage_Types MessagePackage::type() const {
+  // @@protoc_insertion_point(field_get:ProtobufMessage.MessagePackage.type)
+  return static_cast< ::ProtobufMessage::MessagePackage_Types >(type_);
+}
+ void MessagePackage::set_type(::ProtobufMessage::MessagePackage_Types value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.type)
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS

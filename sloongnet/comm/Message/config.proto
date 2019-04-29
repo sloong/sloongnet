@@ -11,6 +11,11 @@ message MessagePackage
     int32 Receiver = 6;
     string Context = 7;
     bytes ExtendData = 8;
+    enum Types{
+        Request = 0;
+        Response = 1;
+    }
+    Types type = 9;
 }
 
 message GLOBAL_CONFIG

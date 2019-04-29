@@ -184,7 +184,6 @@ void SloongNetProcess::Run()
 	m_oSync.wait();
 }
 
-
 void Sloong::SloongNetProcess::MessagePackageProcesser(SmartPackage pack)
 {	
 	string strRes("");
@@ -193,22 +192,35 @@ void Sloong::SloongNetProcess::MessagePackageProcesser(SmartPackage pack)
 
 	ProtobufMessage::MessagePackage msg;
 	msg.ParseFromString(pack->GetRecvMessage());
-	msg.set_sender(ModuleType::Process);
-	msg.set_receiver(ModuleType::Proxy);
-	msg.set_function(MessageFunction::ResponseRequest);
-	if (m_pProcess->MsgProcess(info, msg.context() , strRes, pExData, nExSize)){
-		msg.set_context(strRes);
-	}else{
-		m_pLog->Error("Error in process");
-		msg.set_context("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
+	switch((MessageFunction)msg.function())
+	{
+		case MessageFunction::ProcessMessage:
+			string uuid = msg.extenddata();
+			auto infoItem = m_mapUserInfoList.find(uuid);
+			if( infoItem == m_mapUserInfoList.end() )
+			{
+				m_mapUserInfoList[uuid] = make_unique<CLuaPacket>();
+				infoItem= m_mapUserInfoList.find(uuid);
+			}
+			msg.set_sender(ModuleType::Process);
+			msg.set_receiver(ModuleType::Proxy);
+			msg.set_function(MessageFunction::ResponseRequest);
+			if (m_pProcess->MsgProcess(infoItem->second.get(), msg.context() , strRes, pExData, nExSize)){
+				msg.set_context(strRes);
+			}else{
+				m_pLog->Error("Error in process");
+				msg.set_context("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
+			}
+			string res;
+			msg.SerializeToString(&res);
+			pack->ResponsePackage(res,pExData,nExSize);
+			auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
+			response_event->SetSocketID(pack->GetSocketID());
+			response_event->SetDataPackage(pack);
+			m_pControl->CallMessage(response_event);
+		break;
 	}
-	string res;
-	msg.SerializeToString(&res);
-	pack->ResponsePackage(res,pExData,nExSize);
-	auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
-	response_event->SetSocketID(pack->GetSocketID());
-	response_event->SetDataPackage(pack);
-	m_pControl->CallMessage(response_event);
+
 }
 
 void Sloong::SloongNetProcess::OnSocketClose(SmartEvent event)
