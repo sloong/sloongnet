@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2019-04-19 19:02:50
+ * @LastEditTime: 2019-04-30 16:58:50
  */
 
 #include "control_service.h"
@@ -129,7 +129,6 @@ bool SloongNetService::Initialize(int argc, char **args)
 		{
 			IData::Initialize(m_pControl.get());
 			m_pNetwork->Initialize(m_pControl.get());
-			m_pNetwork->SetProperty(DataTransPackageProperty::DisableAll);
 			m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetService::MessagePackageProcesser, this, std::placeholders::_1));
 		}
 		catch (exception e)

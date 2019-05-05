@@ -91,18 +91,14 @@ bool SloongNetProcess::Initialize(int argc, char** args)
 			return false;
 		}
 
-		ProtobufMessage::MessagePackage pack;
-		pack.set_function(MessageFunction::GetConfig);
-		pack.set_sender(ModuleType::Process);
-		pack.set_receiver(ModuleType::ControlCenter);
-		
-		string strMsg;
-		pack.SerializeToString(&strMsg);
+		auto pack=make_shared<MessagePackage>();
+		pack->set_function(MessageFunction::GetConfig);
+		pack->set_sender(ModuleType::Process);
+		pack->set_receiver(ModuleType::ControlCenter);
 
 		CDataTransPackage dataPackage;
 		dataPackage.Initialize(m_pSocket);
-		dataPackage.SetProperty(DataTransPackageProperty::DisableAll);
-		dataPackage.RequestPackage(strMsg);
+		dataPackage.RequestPackage(pack);
 		NetworkResult result = dataPackage.SendPackage();
 		if(result != NetworkResult::Succeed)
 		{
@@ -135,8 +131,7 @@ bool SloongNetProcess::Initialize(int argc, char** args)
 		{
 			IData::Initialize(m_pControl.get());
 			m_pNetwork->Initialize(m_pControl.get());
-			m_pNetwork->SetProperty(DataTransPackageProperty::DisableAll);
-			m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetProcess::MessagePackageProcesser, this, std::placeholders::_1))
+			m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetProcess::MessagePackageProcesser, this, std::placeholders::_1));
 			m_pProcess->Initialize(m_pControl.get());
 		}
 		catch (exception e)
@@ -190,30 +185,24 @@ void Sloong::SloongNetProcess::MessagePackageProcesser(SmartPackage pack)
 	char* pExData = nullptr;
 	int nExSize;
 
-	ProtobufMessage::MessagePackage msg;
-	msg.ParseFromString(pack->GetRecvMessage());
-	switch((MessageFunction)msg.function())
+	auto msg = pack->GetRecvPackage();
+	switch((MessageFunction)msg->function())
 	{
 		case MessageFunction::ProcessMessage:
-			string uuid = msg.extenddata();
+			string uuid = msg->extenddata();
 			auto infoItem = m_mapUserInfoList.find(uuid);
 			if( infoItem == m_mapUserInfoList.end() )
 			{
 				m_mapUserInfoList[uuid] = make_unique<CLuaPacket>();
 				infoItem= m_mapUserInfoList.find(uuid);
 			}
-			msg.set_sender(ModuleType::Process);
-			msg.set_receiver(ModuleType::Proxy);
-			msg.set_function(MessageFunction::ResponseRequest);
-			if (m_pProcess->MsgProcess(infoItem->second.get(), msg.context() , strRes, pExData, nExSize)){
-				msg.set_context(strRes);
+			if (m_pProcess->MsgProcess(infoItem->second.get(), msg->context() , strRes, pExData, nExSize)){
+				msg->set_context(strRes);
 			}else{
 				m_pLog->Error("Error in process");
-				msg.set_context("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
+				msg->set_context("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
 			}
-			string res;
-			msg.SerializeToString(&res);
-			pack->ResponsePackage(res,pExData,nExSize);
+			pack->ResponsePackage(msg);
 			auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
 			response_event->SetSocketID(pack->GetSocketID());
 			response_event->SetDataPackage(pack);

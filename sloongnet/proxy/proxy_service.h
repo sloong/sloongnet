@@ -4,6 +4,7 @@
 
 #include "IEvent.h"
 #include "IControl.h"
+#include "sockinfo.h"
 #include "DataTransPackage.h"
 namespace Sloong
 {

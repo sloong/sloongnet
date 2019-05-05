@@ -85,7 +85,6 @@ NetworkResult Sloong::CSockInfo::OnDataCanReceive( queue<SmartPackage>& readList
 	do {
 		auto package = make_shared<CDataTransPackage>();
 		package->Initialize(m_pCon,m_pLog);
-		package->SetProperty(m_emPackageProperty);
 		auto res = package->RecvPackage(m_ReceiveTimeout);
 		if( res == NetworkResult::Error){
 			// 读取错误,将这个连接从监听中移除并关闭连接

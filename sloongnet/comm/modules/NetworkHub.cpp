@@ -133,7 +133,9 @@ void Sloong::CNetworkHub::SendCloseConnectEvent(int socket)
 
 	auto event = make_shared<CNetworkEvent>(EVENT_TYPE::SocketClose);
 	event->SetSocketID(socket);
-	event->SetUserInfo(info->m_pUserInfo.get());
+
+	//TODO：
+	//event->SetUserInfo(info->m_pUserInfo.get());
 	m_iC->SendMessage(event);
 }
 
@@ -160,11 +162,10 @@ void Sloong::CNetworkHub::EnableSSL(string certFile, string keyFile, string pass
 	}
 }
 
-void Sloong::CNetworkHub::AddMonitorSocket( int nSocket, DataTransPackageProperty property )
+void Sloong::CNetworkHub::AddMonitorSocket( int nSocket )
 {
 	auto info = make_shared<CSockInfo>();
 	info->Initialize(m_iC, nSocket, m_pCTX);
-	info->SetProperty(property);
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList[nSocket] = info;
 	sockLck.unlock();
@@ -256,13 +257,12 @@ NetworkResult Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 
 	auto info = make_shared<CSockInfo>();
 	info->Initialize(m_iC, conn_sock, m_pCTX);
-	info->SetProperty(m_emPackageProperty);
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList[conn_sock] = info;
 	sockLck.unlock();
 
 	if( m_pAcceptFunc ){
-		m_pAccpetFunc(info);
+		m_pAcceptFunc(info);
 	}
 
 	m_pLog->Info(CUniversal::Format("Accept client:[%s:%d].", info->m_pCon->m_strAddress, info->m_pCon->m_nPort));

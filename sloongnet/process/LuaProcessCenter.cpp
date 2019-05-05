@@ -29,9 +29,7 @@ void Sloong::CLuaProcessCenter::Initialize(IControl* iMsg)
 	m_pGFunc->Initialize(m_iC);
 	m_pConfig = IData::GetProcessConfig();
 
-	m_iC->RegisterEvent(EVENT_TYPE::ProcessMessage);
 	m_iC->RegisterEvent(EVENT_TYPE::ReloadLuaContext);
-	//m_iC->RegisterEventHandler(ProcessMessage, this, EventHandler);
 	m_iC->RegisterEventHandler(ReloadLuaContext, std::bind(&CLuaProcessCenter::ReloadContext,this,std::placeholders::_1));
 	// 主要的循环方式为，根据输入的处理数来初始化指定数量的lua环境。
 	// 然后将其加入到可用队列
@@ -141,12 +139,12 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo,const string & ms
 	m_oFreeLuaContext.push(id);
 	if (bRes)
 	{
-		res = cres.GetData("json_response_message");
-		string need = cres.GetData("NeedExData");
+		res = cres.GetData("json_response_message","");
+		string need = cres.GetData("NeedExData","false");
 		if ( need == "true"	)
 		{
-			auto uuid = cres.GetData("ExDataUUID");
-			auto len = cres.GetData("ExDataSize");
+			auto uuid = cres.GetData("ExDataUUID","");
+			auto len = cres.GetData("ExDataSize","");
 			auto pData = m_iC->GetTemp("SendList" + uuid);
 			if (pData == nullptr)
 			{

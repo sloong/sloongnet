@@ -2,22 +2,18 @@
 #define DATA_TRANS_PACKAGE_H
 
 #include "main.h"
-
+#include "config.pb.h"
 #include "EasyConnect.h"
+
+using namespace ProtobufMessage;
+
 namespace Sloong
 {
     class CDataTransPackage
     {
 	public:
-		~CDataTransPackage(){
-			SAFE_DELETE_ARR(m_pExBuffer);
-		}
-
         void Initialize(SmartConnect conn, CLog* log= nullptr);
 
-        void SetProperty( DataTransPackageProperty value ){
-            m_emProperty = value;
-        }
 
         /**
          * @Remarks: When process done, should call this function to response this package.
@@ -26,7 +22,8 @@ namespace Sloong
          */
         void ResponsePackage(const string& msg, const char* exData = nullptr, int exSize = 0);
 
-        void RequestPackage( const string& msg);
+        void RequestPackage( shared_ptr<MessagePackage> pack );
+        void ResponsePackage( shared_ptr<MessagePackage> pack );
 
         void PrepareSendPackageData( const string& msg, const char* exData = nullptr, int exSize = 0);
 
@@ -47,7 +44,9 @@ namespace Sloong
          */
         NetworkResult SendPackage();
 
-        inline string GetRecvMessage(){ return m_strMessage; }
+        shared_ptr<MessagePackage> GetRecvPackage(){ return m_pReceivedPackage;}
+
+        inline string GetRecvMessage(){ return m_pReceivedPackage->context(); }
 
         inline int GetSocketID(){return m_pCon->GetSocketID(); }
 
@@ -56,50 +55,34 @@ namespace Sloong
          * @Params: 
          * @Return: 
          */
-        inline bool IsBigPackage(){ return m_nExSize > 0 ? true : false; }
+        inline bool IsBigPackage(){ return m_pReceivedPackage->extenddata().length() > 0 ? true : false; }
 
         int GetPriority(){
-            return m_nPriority;
+            return m_pReceivedPackage->prioritylevel();
         }
 
         void SetPriority(int value){
-            m_nPriority=value;
+            m_pReceivedPackage->set_prioritylevel(value);
         }
 
         u_int64_t GetSerialNumber(){
-            return m_nSerialNumber;
+            return m_pReceivedPackage->serialnumber();
         }
 
         void SetSerialNumber(u_int64_t value){
-            m_nSerialNumber = value;
+            m_pReceivedPackage->set_serialnumber(value);
         }
 
         void AddSerialNumber( u_int64_t& value ){
-            m_nSerialNumber = value;
+            m_pReceivedPackage->set_serialnumber(value);
             value++;
         }
     protected:
         // Send data info
-        string m_szMsgBuffer;
-        int m_nMsgSize=0;
-		const char* m_pExBuffer=nullptr;
-		int m_nExSize=0;
+        string m_strPackageData;
         int m_nSent=0;
-		int m_nPackSize=0;
-
-        // serial number of this package
-        u_int64_t m_nSerialNumber = -1;
-        
-        // received MD5, used to check the validity of message 
-        string m_strMD5 = "";
-        // priority of this package
-        int m_nPriority = 0;
-        // request message of this package.
-        string m_strMessage = "";
-
-    protected:
-        DataTransPackageProperty m_emProperty = DataTransPackageProperty::EnableAll;
-
+		int m_nPackageSize=0;
+        shared_ptr<MessagePackage> m_pReceivedPackage;
     protected:
         SmartConnect    m_pCon;
         CLog*           m_pLog = nullptr;

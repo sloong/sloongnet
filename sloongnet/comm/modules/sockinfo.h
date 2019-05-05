@@ -45,10 +45,6 @@ namespace Sloong
 		 */
 		NetworkResult ResponseDataPackage(SmartPackage pack);
 
-		void SetProperty( DataTransPackageProperty value ){
-            m_emPackageProperty = value;
-        }
-
 	protected:
 		void ProcessPrepareSendList();
 		NetworkResult ProcessSendList();
@@ -70,8 +66,6 @@ namespace Sloong
 		int m_nLastSentTags = -1;
         bool m_bIsSendListEmpty = true;
 		int m_ReceiveTimeout = 0;
-		// 指示这个链接在接收数据包的时候，数据包的接收类型
-		DataTransPackageProperty m_emPackageProperty = DataTransPackageProperty::EnableAll;
 	};
 
 }

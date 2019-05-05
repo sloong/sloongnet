@@ -1,9 +1,5 @@
 #include "DataTransPackage.h"
 
-#include "main.h"
-
-const int g_nMD5Length = 32;
-
 void Sloong::CDataTransPackage::Initialize(SmartConnect conn, CLog* pLog)
 {
 	m_pCon = conn;	
@@ -13,77 +9,44 @@ void Sloong::CDataTransPackage::Initialize(SmartConnect conn, CLog* pLog)
 void Sloong::CDataTransPackage::PrepareSendPackageData( const string& msg, const char* pExData , int nExSize)
 {
 	// calculate the send buffer length
-	long long nBufLen = msg.size();
-	if( m_emProperty & DataTransPackageProperty::EnablePriorityLevel )
-	{
-		nBufLen += 1;
-	}
-	if( m_emProperty & DataTransPackageProperty::EnableSerialNumber ){
-		nBufLen += s_llLen;
-	}
-	if( m_emProperty & DataTransPackageProperty::EnableMD5Check )
-	{
-		nBufLen += g_nMD5Length;
-	}
-	if (pExData != NULL && nExSize > 0)
-	{
-		nBufLen += s_llLen;
-	}
-
-	string logString = "SEND<<<";
-
-	m_szMsgBuffer.resize(nBufLen);
-	char *pCpyPoint = m_szMsgBuffer.data();
-
-	// copy the data to buffer. the order is Priority -> SerialNum -> MD5
-	if( m_emProperty & DataTransPackageProperty::EnablePriorityLevel ){
-		*pCpyPoint = (char)m_nPriority;
-		logString += CUniversal::Format("[%d]",m_nPriority);
-		pCpyPoint += 1;
-	}
-	if( m_emProperty & DataTransPackageProperty::EnableSerialNumber ){
-		CUniversal::Int64ToBytes(m_nSerialNumber, pCpyPoint);
-		logString += CUniversal::Format("[%d]",m_nSerialNumber);
-		pCpyPoint += s_llLen;
-	}
-	if( m_emProperty & DataTransPackageProperty::EnableMD5Check ){
-		string md5 = CMD5::Encode(msg);
-		memcpy(pCpyPoint, md5.c_str(), md5.length());
-		logString += CUniversal::Format("[%s]",md5);
-		pCpyPoint += md5.length();
-	}
+	m_pReceivedPackage->set_context(msg);
 	
-	memcpy(pCpyPoint, msg.c_str(), msg.length());
-	pCpyPoint += msg.length();
-
 	if (pExData != NULL && nExSize > 0)
 	{
-		long long Exlen = nExSize;
-		CUniversal::Int64ToBytes(Exlen, pCpyPoint);
-		logString += CUniversal::Format("&&&EXDATA<<<[%d]",nExSize);
-		pCpyPoint += 8;
+		m_pReceivedPackage->set_extenddata(pExData,nExSize);
 	}
 
-	logString += "<<<" + msg;
 	if (m_pLog!= nullptr)
 	{
-		m_pLog->Verbos(logString);
+		m_pLog->Verbos(CUniversal::Format("SEND<<<[%d][%d]<<<%s&&&EXDATA<<<[%d]",m_pReceivedPackage->prioritylevel(),
+										m_pReceivedPackage->serialnumber(),m_pReceivedPackage->context(),nExSize));
 	}
-
-	m_pExBuffer = pExData;
-	m_nExSize = nExSize;
+	m_pReceivedPackage->SerializeToString(&m_strPackageData);
+	m_nPackageSize = m_strPackageData.length();
 }
 
 
-void Sloong::CDataTransPackage::RequestPackage(  const string& msg )
+void Sloong::CDataTransPackage::RequestPackage( shared_ptr<MessagePackage> pack )
 {
-	PrepareSendPackageData(msg,nullptr,0);
+	m_pReceivedPackage = pack;
+	PrepareSendPackageData(pack->context(),nullptr,0);
 }
+
+
+void Sloong::CDataTransPackage::ResponsePackage( shared_ptr<MessagePackage> pack )
+{
+	m_pReceivedPackage = pack;
+	PrepareSendPackageData(pack->context(),nullptr,0);
+}
+
 
 void Sloong::CDataTransPackage::ResponsePackage(const string &msg, const char *pExData, int nExSize)
 {
+	m_pReceivedPackage->set_type(MessagePackage_Types::MessagePackage_Types_Response);
 	PrepareSendPackageData(msg,pExData,nExSize);
 }
+
+
 
 
 /**
@@ -94,66 +57,19 @@ void Sloong::CDataTransPackage::ResponsePackage(const string &msg, const char *p
  */
 NetworkResult Sloong::CDataTransPackage::SendPackage()
 {
-	int nMsgSize = m_szMsgBuffer.length();
-	// 首先检查是不是已经发送过部分的数据了
-	if (m_nSent > 0)
-	{
-		// 先检查普通数据发送状态
-		if (m_nSent < nMsgSize)
-		{
-			int nSentSize = m_pCon->SendPackage(m_szMsgBuffer,m_nSent);
-			if (nSentSize < 0)
-			{
-				return NetworkResult::Error;
-			}
-			else
-			{
-				m_nSent = nSentSize;
-			}
-		}
-		// 已经发送完普通数据了，需要继续发送扩展数据
-		if (m_nSent >= nMsgSize && m_nExSize > 0)
-		{
-			int nSentSize = m_pCon->Write(m_pExBuffer, m_nExSize, m_nSent - nMsgSize);
-			if (nSentSize < 0)
-			{
-				return NetworkResult::Error;
-			}
-			else
-			{
-				m_nSent = nMsgSize + nSentSize;
-			}
-		}
+	int nSentSize = m_pCon->SendPackage(m_strPackageData, m_nSent);
+	if (nSentSize < 0){
+		return NetworkResult::Error;
+	}else{
+		m_nSent += nSentSize;
 	}
-	else
-	{
-		// send normal data.
-		m_nSent = m_pCon->SendPackage(m_szMsgBuffer, m_nSent);
-		// when send nurmal data succeeded, try send exdata in one time.
-		if (m_nSent != -1 && m_nSent == nMsgSize && m_nExSize > 0)
-		{
-			int nSentSize = m_pCon->Write(m_pExBuffer, m_nExSize, 0);
-			if (nSentSize < 0)
-			{
-				return NetworkResult::Error;
-			}
-			else
-			{
-				m_nSent = nMsgSize + nSentSize;
-			}
-		}
-	}
-	if( m_pLog )
-		m_pLog->Verbos(CUniversal::Format("Send Info : AllSize[%d],ExSize[%d],Sent[%d]", m_nPackSize, m_nExSize, m_nSent));
 
-	// check send result.
-	// send done, remove the is sent data and try send next package.
-	if (m_nSent < m_nPackSize)
-	{
+	if( m_pLog )
+		m_pLog->Verbos(CUniversal::Format("Send Info : AllSize[%d],Sent[%d]", m_nPackageSize, m_nSent));
+
+	if (m_nSent < m_nPackageSize){
 		return NetworkResult::Retry;
-	}
-	else
-	{
+	}else{
 		if( m_pLog )
 			m_pLog->Verbos(CUniversal::Format("Message package send succeed, remove from send list. All size[%d]", m_nSent));
 		return NetworkResult::Succeed;
@@ -166,59 +82,38 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage(int timeout)
 	auto net_res = m_pCon->RecvPackage(result,timeout);
 	if( net_res != NetworkResult::Succeed )
 		return net_res;
+
+	m_pReceivedPackage = make_shared<MessagePackage>();
+	if(!m_pReceivedPackage->ParseFromString(result))
+	{
+		if( m_pLog )
+			m_pLog->Error("Parser receive data error.");
+		return NetworkResult::Error;
+	}
+
+	if (m_pReceivedPackage->prioritylevel() > s_PriorityLevel || m_pReceivedPackage->prioritylevel() < 0)
+	{
+		if( m_pLog )
+			m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_pReceivedPackage->prioritylevel(), s_PriorityLevel));
+		return NetworkResult::Error;
+	}
 	
-	const char* pMsg = result.data();
-	int msgLength = result.length();
+	if( m_pLog )
+		m_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%d]<<<%s",m_pReceivedPackage->prioritylevel(),m_pReceivedPackage->serialnumber(),m_pReceivedPackage->context()));
 
-	string logString = "RECV<<<";
-	if( m_emProperty & DataTransPackageProperty::EnablePriorityLevel ){
-		int m_nPriority = pMsg[0];
-		if (m_nPriority > s_PriorityLevel || m_nPriority < 0)
-		{
-			if( m_pLog )
-				m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_nPriority, s_PriorityLevel));
-			return NetworkResult::Error;
-		}
-		logString += CUniversal::Format("[%d]",s_PriorityLevel);
-		pMsg += 1;
-		msgLength -= 1;
-	}
-	if( m_emProperty & DataTransPackageProperty::EnableSerialNumber ){
-		// TODO： 这里直接把pMsg传进去应该也是可以的
-		char pLongBuffer[s_llLen + 1] = {0};
-		memcpy(pLongBuffer, pMsg, s_llLen);
-		m_nSerialNumber = CUniversal::BytesToInt64(pLongBuffer);
-		logString += CUniversal::Format("[%d]",m_nSerialNumber);
-		pMsg += s_llLen;
-		msgLength -= s_llLen;
-	}
-	if( m_emProperty & DataTransPackageProperty::EnableMD5Check ){
-		m_strMD5 = string(pMsg,g_nMD5Length);
-		logString += CUniversal::Format("[%d]",m_strMD5);
-		pMsg += g_nMD5Length;
-		msgLength -= g_nMD5Length;
-	}
-
-	m_strMessage = string(pMsg,msgLength);
-	logString += "<<<" + m_strMessage;
-
-	if( m_emProperty & DataTransPackageProperty::EnableMD5Check ){
-		string rmd5 = CMD5::Encode(m_strMessage);
-		CUniversal::touper(m_strMD5);
-		CUniversal::touper(rmd5);
-		if (m_strMD5 != rmd5)
+	if( m_pReceivedPackage->checkstring().length() > 0 ){
+		string rmd5 = CMD5::Encode(m_pReceivedPackage->context());
+		if ( strcasecmp(m_pReceivedPackage->checkstring().c_str(),rmd5.c_str()) != 0)
 		{
 			// handle error.
 			if( m_pLog )
-				m_pLog->Warn(CUniversal::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_strMessage, rmd5, m_strMD5 ));
-			string strSend = CUniversal::Format("{\"errno\": \"-1\",\"errmsg\" : \"package check error\",\"server_md5\":\"%s\",\"client_md5\":\"%s\",\"check_string\":\"%s\"}", rmd5, m_strMD5, m_strMessage);
+				m_pLog->Warn(CUniversal::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_pReceivedPackage->context(), rmd5, m_pReceivedPackage->checkstring() ));
+			string strSend = CUniversal::Format("{\"errno\": \"-1\",\"errmsg\" : \"package check error\",\"server_md5\":\"%s\",\"client_md5\":\"%s\",\"check_string\":\"%s\"}", rmd5, m_pReceivedPackage->checkstring(), m_pReceivedPackage->context());
 			ResponsePackage(strSend);
 			return NetworkResult::Invalid;
 		}
 	}
 
-	if( m_pLog )
-		m_pLog->Verbos(logString);
 
 	return NetworkResult::Succeed;
 }

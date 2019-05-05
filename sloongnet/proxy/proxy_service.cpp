@@ -94,19 +94,15 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 			throw string("Connect to control fialed.");
 	
 
-		MessagePackage get_config_request_buf;
-		get_config_request_buf.set_function(MessageFunction::GetConfig);
-		get_config_request_buf.set_sender(ModuleType::Proxy);
-		get_config_request_buf.set_receiver(ModuleType::ControlCenter);
-		get_config_request_buf.set_type(MessagePackage_Types::MessagePackage_Types_Request);
+		auto get_config_request_buf = make_shared<MessagePackage>();
+		get_config_request_buf->set_function(MessageFunction::GetConfig);
+		get_config_request_buf->set_sender(ModuleType::Proxy);
+		get_config_request_buf->set_receiver(ModuleType::ControlCenter);
+		get_config_request_buf->set_type(MessagePackage_Types::MessagePackage_Types_Request);
 		
-		string strMsg;
-		get_config_request_buf.SerializeToString(&strMsg);
-
 		CDataTransPackage dataPackage;
 		dataPackage.Initialize(m_pSocket);
-		dataPackage.SetProperty(DataTransPackageProperty::DisableAll);
-		dataPackage.RequestPackage(strMsg);
+		dataPackage.RequestPackage(get_config_request_buf);
 		NetworkResult result = dataPackage.SendPackage();
 		if(result != NetworkResult::Succeed)
 			throw string("Send get config request error.");
@@ -115,12 +111,12 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		if(result != NetworkResult::Succeed)
 			throw string("Receive get config result error.");
 
-		MessagePackage get_config_response_buf;
-		if(!get_config_response_buf.ParseFromString(dataPackage.GetRecvMessage()))
+		auto get_config_response_buf = dataPackage.GetRecvPackage();
+		if(!get_config_response_buf)
 			throw string("Parse the get config response data error.");
 	
 
-		if(!m_oConfig.ParseFromString(get_config_response_buf.extenddata()))
+		if(!m_oConfig.ParseFromString(get_config_response_buf->extenddata()))
 			throw string("Parse the config struct error.");
 		
 		auto serv_config = m_oConfig.serverconfig();
@@ -182,7 +178,7 @@ bool SloongNetProxy::ConnectToProcess()
 		int sockID = connect->GetSocketID();
 		m_mapProcessList[sockID] = connect;
 		m_mapProcessLoadList[sockID] = 0;
-		m_pNetwork->AddMonitorSocket(sockID, DataTransPackageProperty::DisableAll );
+		m_pNetwork->AddMonitorSocket(sockID );
 	}
 }
 
@@ -207,11 +203,6 @@ void SloongNetProxy::Run()
 
 void SendRequestToControl(MessageFunction func, string context)
 {
-	ProtobufMessage::MessagePackage msg;
-		msg.set_sender(ModuleType::Proxy);
-		msg.set_receiver(ModuleType::Process);
-		msg.set_function(MessageFunction::SendRequest);
-		msg.set_context(pack->GetRecvMessage());
 }
 
 
@@ -222,10 +213,10 @@ void SendRequestToControl(MessageFunction func, string context)
 // Case 2:
 //		In this function, just build the uuid, and use it in next request, but no regist to control, because ne login no should have userinfo.
 //		so process server always create new empty UserInfo to run process function. if in this request, the user is logined, so the empty UserInfo isChanged. so we regist it in this time. 
-void Sloong::SloongNetProcess::AcceptConnectProcesser(shared_ptr<CSockInfo> info){
-	var uuid = CUtility::GenUUID();
+void Sloong::SloongNetProxy::AcceptConnectProcesser(shared_ptr<CSockInfo> info){
+	auto uuid = CUtility::GenUUID();
 	// regist this uuid to control. if succeed, the control do nothing. but if it is registed, the control will send an error message. then retry regist again.
-	m_mapUUIDList[info->GetSocketID()] = uuid;
+	m_mapUUIDList[info->m_pCon->GetSocketID()] = uuid;
 }
 
 
@@ -238,17 +229,14 @@ void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 	if( m_mapProcessLoadList.find(event_happend_socket) == m_mapProcessLoadList.end() )
 	{
 		// Step 1: 将已经收到的来自客户端的请求内容转换为protobuf格式
-		ProtobufMessage::MessagePackage msg;
-		msg.set_sender(ModuleType::Proxy);
-		msg.set_receiver(ModuleType::Process);
-		msg.set_function(MessageFunction::ProcessMessage);
-		msg.set_context(pack->GetRecvMessage());
-		msg.set_prioritylevel(pack->GetPriority());
-		msg.set_serialnumber(m_nSerialNumber);
-		msg.set_extenddata(m_mapUUIDList[pack->GetSocketID()].data());
-		
-		string sendMsg;
-		msg.SerializeToString(&sendMsg);
+		auto sendMsg = make_shared<MessagePackage>();
+		sendMsg->set_sender(ModuleType::Proxy);
+		sendMsg->set_receiver(ModuleType::Process);
+		sendMsg->set_function(MessageFunction::ProcessMessage);
+		sendMsg->set_context(pack->GetRecvMessage());
+		sendMsg->set_prioritylevel(pack->GetPriority());
+		sendMsg->set_serialnumber(m_nSerialNumber);
+		sendMsg->set_extenddata(m_mapUUIDList[pack->GetSocketID()].data());
 
 		// Step 2: 根据负载情况找到发送的目标Process服务
 		auto process_id = m_mapProcessList.begin();
@@ -259,7 +247,6 @@ void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 		// Step 4: 创建发送到指定process服务的DataTrans包
 		auto transPack = make_shared<CDataTransPackage>();
 		transPack->Initialize(process_id->second,m_pLog.get());
-		transPack->SetProperty(DataTransPackageProperty::DisableAll);
 		
 		transPack->RequestPackage(sendMsg);
 
@@ -273,20 +260,19 @@ void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 	else
 	{
 		// Step 1: 将Process服务处理完毕的消息转换为正常格式
-		ProtobufMessage::MessagePackage msg;
-		msg.ParseFromString(pack->GetRecvMessage());
-		auto func = (MessageFunction)msg.function();
+		auto recvMsg = pack->GetRecvPackage();
+		auto func = (MessageFunction)recvMsg->function();
 		switch(func){
 			case MessageFunction::ProcessMessage:
 				// Step 2: 根据收到的SerailNumber找到对应保存的来自客户端的Event对象
-				auto event_obj = m_mapPackageList.find(msg.serialnumber());
+				auto event_obj = m_mapPackageList.find(recvMsg->serialnumber());
 				if( event_obj == m_mapPackageList.end() )
 				{
 					m_pLog->Error(CUniversal::Format("Event list no have target event data. SerailNumber:[%d]",pack->GetSerialNumber()));
 					return;
 				}
 				auto client_request_package = event_obj->second;
-				client_request_package->ResponsePackage(msg.context());
+				client_request_package->ResponsePackage(recvMsg);
 
 				// Step 3: 发送相应数据
 				auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
