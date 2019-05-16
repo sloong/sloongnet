@@ -48,6 +48,8 @@ namespace Sloong
 
         inline string GetRecvMessage(){ return m_pReceivedPackage->context(); }
 
+        string GetExtendData() { return m_pReceivedPackage->extenddata(); }
+
         inline int GetSocketID(){return m_pCon->GetSocketID(); }
 
         /**

@@ -92,7 +92,8 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 
 		if( !ConnectToControl(args[1]))
 			throw string("Connect to control fialed.");
-	
+
+		cout << "Connect to control succeed." << endl;
 
 		auto get_config_request_buf = make_shared<MessagePackage>();
 		get_config_request_buf->set_function(MessageFunction::GetConfig);
@@ -100,12 +101,14 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 		get_config_request_buf->set_receiver(ModuleType::ControlCenter);
 		get_config_request_buf->set_type(MessagePackage_Types::MessagePackage_Types_Request);
 		
+		cout << "Start get configuation." << endl;
+
 		CDataTransPackage dataPackage;
 		dataPackage.Initialize(m_pSocket);
 		dataPackage.RequestPackage(get_config_request_buf);
 		NetworkResult result = dataPackage.SendPackage();
 		if(result != NetworkResult::Succeed)
-			throw string("Send get config request error.");
+			throw string("Send get config request error.");		
 
 		result = dataPackage.RecvPackage(0);
 		if(result != NetworkResult::Succeed)
@@ -118,6 +121,8 @@ bool SloongNetProxy::Initialize(int argc, char **args)
 
 		if(!m_oConfig.ParseFromString(get_config_response_buf->extenddata()))
 			throw string("Parse the config struct error.");
+
+		cout << "Get configuation succeed." << endl;
 		
 		auto serv_config = m_oConfig.serverconfig();
 

@@ -219,12 +219,10 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 	{
 		for( int i = 0; i < s_PriorityLevel; i++ )
 		{
-			if( m_pWaitProcessList[i].empty())
-				continue;
-			while( !m_pWaitProcessList[i].empty() )
+			SmartPackage pack;
+			while( m_pWaitProcessList[i].TryPop(pack) )
 			{
-				auto param = m_pWaitProcessList[i].pop();
-				m_pProcessFunc(param);
+				m_pProcessFunc(pack);
 			}
 			break;
 		}

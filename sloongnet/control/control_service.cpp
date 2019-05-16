@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2019-04-30 16:58:50
+ * @LastEditTime: 2019-05-16 19:46:51
  */
 
 #include "control_service.h"
@@ -170,12 +170,12 @@ void SloongNetService::Run()
 
 void Sloong::SloongNetService::MessagePackageProcesser(SmartPackage pack)
 {
-	ProtobufMessage::MessagePackage msgPack;
-	msgPack.ParseFromString(pack->GetRecvMessage());
+	auto msgPack = pack->GetRecvPackage();
 	string config;
-	if( msgPack.function() == MessageFunction::GetConfig)
+	if( msgPack->function() == MessageFunction::GetConfig)
 	{
-		switch(msgPack.sender())
+		m_pLog->Verbos(CUniversal::Format("Porcess [GetConfig] request: sender[%d]",msgPack->sender()));
+		switch(msgPack->sender())
 		{
 			case ModuleType::Proxy:
 				m_pConfig->m_oProxyConfig.SerializeToString(&config);
@@ -195,7 +195,7 @@ void Sloong::SloongNetService::MessagePackageProcesser(SmartPackage pack)
 		}
 	}
 
-	pack->ResponsePackage(config);
+	pack->ResponsePackage("",config.data(),config.length());
 
 	auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
 	response_event->SetSocketID(pack->GetSocketID());

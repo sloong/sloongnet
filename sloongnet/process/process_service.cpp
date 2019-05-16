@@ -37,8 +37,16 @@ void on_SIGINT_Event(int signal)
 
 int main( int argc, char** args )
 {
-	if(g_AppService.Initialize(argc,args))
-		g_AppService.Run();
+	try
+	{
+		if (g_AppService.Initialize(argc, args))
+			g_AppService.Run();
+	}
+	catch (...)
+	{
+		cout << "Unhandle exception happened, system will shutdown. " << endl;
+		CUtility::write_call_stack();
+	}
 }
 
 
@@ -91,28 +99,36 @@ bool SloongNetProcess::Initialize(int argc, char** args)
 			return false;
 		}
 
-		auto pack=make_shared<MessagePackage>();
-		pack->set_function(MessageFunction::GetConfig);
-		pack->set_sender(ModuleType::Process);
-		pack->set_receiver(ModuleType::ControlCenter);
+		cout << "Connect to control succeed." << endl;
+
+		auto get_config_request_buf = make_shared<MessagePackage>();
+		get_config_request_buf->set_function(MessageFunction::GetConfig);
+		get_config_request_buf->set_sender(ModuleType::Process);
+		get_config_request_buf->set_receiver(ModuleType::ControlCenter);
+		get_config_request_buf->set_type(MessagePackage_Types::MessagePackage_Types_Request);
+		
+		cout << "Start get configuation." << endl;
 
 		CDataTransPackage dataPackage;
 		dataPackage.Initialize(m_pSocket);
-		dataPackage.RequestPackage(pack);
+		dataPackage.RequestPackage(get_config_request_buf);
 		NetworkResult result = dataPackage.SendPackage();
 		if(result != NetworkResult::Succeed)
-		{
-			cerr << "Send get config request error."<< endl;
-			return false;
-		}
+			throw string("Send get config request error.");		
+
 		result = dataPackage.RecvPackage(0);
 		if(result != NetworkResult::Succeed)
-		{
-			cerr << "Receive get config result error."<< endl; 
-			return false;
-		}
+			throw string("Receive get config result error.");
 
-		m_oConfig.ParseFromString(dataPackage.GetRecvMessage());
+		auto get_config_response_buf = dataPackage.GetRecvPackage();
+		if(!get_config_response_buf)
+			throw string("Parse the get config response data error.");
+	
+		auto exdata = get_config_response_buf->extenddata();
+		if(!m_oConfig.ParseFromString(exdata))
+			throw string("Parse the config struct error.");
+
+		cout << "Get configuation succeed." << endl;
 		
 		auto serv_config = m_oConfig.serverconfig();
 
@@ -152,10 +168,9 @@ bool SloongNetProcess::Initialize(int argc, char** args)
     {
         cout << "exception happened, system will shutdown. message:" << e.what() << endl;
     }
-	catch (...)
+	catch (string &e)
 	{
-		cout << "Unhandle exception happened, system will shutdown. "<< endl;
-		CUtility::write_call_stack();
+		cerr << e << endl;
 	}
 	
 	return false;

@@ -43,6 +43,7 @@ void Sloong::CConfiguation::LoadGlobalConfig(string domain, string ip, GLOBAL_CO
     config->set_epollthreadquantity(GetInt(domain, ip, "EPollThreadQuantity", 3));
     config->set_keyfilepath(GetString(domain, ip, "KeyFilePath", ""));
     config->set_mqthreadquantity(GetInt(domain, ip, "MQThreadQuantity", 3));
+    config->set_processthreadquantity(GetInt(domain, ip, "ProcessThreadQuantity", 5));
     config->set_receivetime(GetInt(domain, ip, "ReceiveTime", 5));
     config->set_prioritysize(GetInt(domain, ip, "PrioritySize", 5));
 }

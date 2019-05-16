@@ -55,7 +55,16 @@ build(){
 	fi
 	cd $PROJECT
 	cmake -DCMAKE_BUILD_TYPE=$MAKEFLAG $CMAKE_FILE_PATH
+	if [ $? -ne 0 ];then
+		echo "Run cmake cmd return error. build stop."
+		exit 1
+	fi
 	make
+	if [ $? -ne 0 ];then
+		echo "Run make cmd return error. build stop."
+		exit 1
+	fi
+
 	cd ../../
 }
 
