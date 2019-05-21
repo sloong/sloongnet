@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SLOONGNET_INTERFACE_CONTROL_H
+#define SLOONGNET_INTERFACE_CONTROL_H
 
 #include "main.h"
 #include "IEvent.h"
@@ -24,3 +25,4 @@ namespace Sloong
 	};
 }
 
+#endif

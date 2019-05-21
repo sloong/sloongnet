@@ -20,7 +20,7 @@ namespace Sloong
         bool LoadAll();
         bool SaveAll();
 
-        void LoadControlConfig( string serverIp, ProtobufMessage::GLOBAL_CONFIG& config );
+        void LoadControlConfig( string serverIp, ProtobufMessage::CONTROL_CONFIG& config );
         void LoadProxyConfig( string serverIp, ProtobufMessage::PROXY_CONFIG& config );
         void LoadProcessConfig( string serverIp, ProtobufMessage::PROCESS_CONFIG& config );
         void LoadDataConfig( string serverIp, ProtobufMessage::DATA_CONFIG& config );
@@ -43,7 +43,8 @@ namespace Sloong
         int GetInt( string domain, string ip, string key, int def );
 
     public:
-        ProtobufMessage::GLOBAL_CONFIG   m_oControlConfig;
+        map<int,ProtobufMessage::GLOBAL_CONFIG> m_oServerConfigList;
+        ProtobufMessage::CONTROL_CONFIG   m_oControlConfig;
         ProtobufMessage::PROXY_CONFIG    m_oProxyConfig;
         ProtobufMessage::PROCESS_CONFIG  m_oProcessConfig;
         ProtobufMessage::DATA_CONFIG     m_oDataConfig;

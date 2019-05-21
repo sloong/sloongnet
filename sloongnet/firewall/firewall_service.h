@@ -2,33 +2,20 @@
 #define SLOONGNET_FIREWALL_SERVICE_H
 
 
-#include "IEvent.h"
-#include "IControl.h"
-#include "DataTransPackage.h"
+#include "base_service.h"
 namespace Sloong
 {
-	class CControlHub;
-	class CNetworkHub;
-	class SloongNetFirewall
+	class SloongNetFirewall : public CSloongBaseService
 	{
 	public:
-		SloongNetFirewall();
-		~SloongNetFirewall();
+		SloongNetFirewall() : CSloongBaseService(ModuleType::Firewall){}
 
 		bool Initialize(int argc, char** args);
-		bool ConnectToControl(string controlAddress);
-		void Run();
-		void Exit();
 
 		void MessagePackageProcesser(SmartPackage);
 
 		void OnSocketClose(SmartEvent evt);
 	protected:
-		unique_ptr<CNetworkHub> m_pNetwork;
-		unique_ptr<CControlHub> m_pControl;
-		shared_ptr<EasyConnect>	m_pSocket;
-		unique_ptr<CLog>		m_pLog;
-		u_int64_t	m_nSerialNumber=0;
 		ProtobufMessage::FIREWALL_CONFIG m_oConfig;
 	};
 

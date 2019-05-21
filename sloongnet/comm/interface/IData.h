@@ -1,6 +1,7 @@
-#pragma once
+#ifndef SLOONGNET_INTERFACE_DATA_H
+#define SLOONGNET_INTERFACE_DATA_H
 
-#include "main.h"
+#include "IControl.h"
 namespace Sloong
 {
 	class CConfiguation;
@@ -27,3 +28,5 @@ namespace Sloong
 		static IControl* m_iC;
 	};
 }
+
+#endif

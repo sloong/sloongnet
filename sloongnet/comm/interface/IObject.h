@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SLOONGNET_INTERFACE_OBJECT_H
+#define SLOONGNET_INTERFACE_OBJECT_H
 
 #include "main.h"
 
@@ -20,3 +21,5 @@ namespace Sloong
         CLog*       m_pLog;
     };
 }
+
+#endif

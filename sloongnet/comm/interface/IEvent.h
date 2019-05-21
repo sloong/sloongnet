@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SLOONGNET_INTERFACE_EVENT_H
+#define SLOONGNET_INTERFACE_EVENT_H
+
 #include "main.h"
 
 // 事件的接口
@@ -27,3 +29,5 @@ namespace Sloong
 		return tmp;
 	}
 }
+
+#endif

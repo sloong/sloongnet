@@ -3,6 +3,12 @@
 Sloong::CConfiguation::CConfiguation()
 {
     m_pDB = make_unique<CSQLiteEx>();
+    m_oServerConfigList[ModuleType::ControlCenter] = GLOBAL_CONFIG();
+    m_oServerConfigList[ModuleType::Proxy] = GLOBAL_CONFIG();
+    m_oServerConfigList[ModuleType::Process] = GLOBAL_CONFIG();
+    m_oServerConfigList[ModuleType::Firewall] = GLOBAL_CONFIG();
+    m_oServerConfigList[ModuleType::DataCenter] = GLOBAL_CONFIG();
+    m_oServerConfigList[ModuleType::DBCenter] = GLOBAL_CONFIG();
 }
 
 
@@ -17,6 +23,7 @@ bool Sloong::CConfiguation::LoadAll()
     LoadControlConfig("",m_oControlConfig);
     LoadDataConfig("",m_oDataConfig);
     LoadDBConfig("",m_oDBConfig);
+    LoadFirewallConfig("",m_oFirewallConfig);
     LoadProcessConfig("",m_oProcessConfig);
     LoadProxyConfig("", m_oProxyConfig);
 }
@@ -29,6 +36,7 @@ bool Sloong::CConfiguation::SaveAll()
     SaveProcessConfig();
     SaveProxyConfig();
 }
+
 
 void Sloong::CConfiguation::LoadGlobalConfig(string domain, string ip, GLOBAL_CONFIG* config)
 {
@@ -49,9 +57,9 @@ void Sloong::CConfiguation::LoadGlobalConfig(string domain, string ip, GLOBAL_CO
 }
 
 
-void Sloong::CConfiguation::LoadControlConfig( string serverIp, ProtobufMessage::GLOBAL_CONFIG& config )
+void Sloong::CConfiguation::LoadControlConfig( string serverIp, ProtobufMessage::CONTROL_CONFIG& config )
 {
-    LoadGlobalConfig("control", serverIp, &config);
+    LoadGlobalConfig("control", serverIp, &m_oServerConfigList[ModuleType::ControlCenter]);
 }
 
 void Sloong::CConfiguation::LoadProxyConfig(string serverIp, PROXY_CONFIG &config)
@@ -61,7 +69,7 @@ void Sloong::CConfiguation::LoadProxyConfig(string serverIp, PROXY_CONFIG &confi
     config.set_clientchecktime( GetInt(module_name, serverIp, "ClientCheckTime", 2));
     config.set_timeoutcheckinterval( GetInt(module_name, serverIp, "TimeoutCheckInterval", 5));
     config.set_processaddress( GetString(module_name, serverIp, "ProcessAddress",""));
-    LoadGlobalConfig(module_name, serverIp, config.mutable_serverconfig());
+    LoadGlobalConfig(module_name, serverIp, &m_oServerConfigList[ModuleType::Proxy]);
 }
 
 
@@ -74,7 +82,7 @@ void Sloong::CConfiguation::LoadProcessConfig( string serverIp, ProtobufMessage:
     config.set_luaprocessfunction(GetString(module_name, serverIp, "LuaProcessFunction", "ProgressMessage"));
     config.set_luascriptfolder(GetString(module_name, serverIp, "LuaScriptFolder", "./scripts"));
     config.set_luasocketclosefunction(GetString(module_name, serverIp, "LuaSocketCloseFunction", "SocketCloseProcess"));
-    LoadGlobalConfig(module_name, serverIp, config.mutable_serverconfig());
+    LoadGlobalConfig(module_name, serverIp, &m_oServerConfigList[ModuleType::Process]);
 }
 
 
@@ -83,18 +91,18 @@ void Sloong::CConfiguation::LoadDataConfig( string serverIp, ProtobufMessage::DA
     string module_name = "data";
     config.set_datareceiveport(GetInt(module_name, serverIp, "DataReceivePort", 0));
     config.set_datarecvtime(GetInt(module_name, serverIp, "DataRecvTime", 5));
-    LoadGlobalConfig("data", serverIp, config.mutable_serverconfig());
+    LoadGlobalConfig("data", serverIp, &m_oServerConfigList[ModuleType::DataCenter]);
 }
 
 void Sloong::CConfiguation::LoadDBConfig( string serverIp, ProtobufMessage::DB_CONFIG& config )
 {
-    LoadGlobalConfig("db", serverIp, config.mutable_serverconfig());
+    LoadGlobalConfig("db", serverIp, &m_oServerConfigList[ModuleType::DBCenter]);
 }
 
 void Sloong::CConfiguation::LoadFirewallConfig( string serverIp, ProtobufMessage::FIREWALL_CONFIG& config )
 {
     string module_name = "firewall";
-    LoadGlobalConfig(module_name, serverIp, config.mutable_serverconfig());
+    LoadGlobalConfig(module_name, serverIp, &m_oServerConfigList[ModuleType::Firewall]);
 }
 
 bool Sloong::CConfiguation::GetBoolen(string domain, string ip, string key, bool def)

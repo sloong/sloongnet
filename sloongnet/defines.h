@@ -33,7 +33,15 @@ enum MessageFunction
 	// Processer: Control
 	// Response: Yes
 	// Response data: ExtendData - config data is not UTF8 string. cannot save in context field.
-	GetConfig,
+	// Note: Get the general server config data. the data type is GLOBAL_CONFIG.
+	GetGeneralConfig,
+
+	// Sender: All 
+	// Processer: Control
+	// Response: Yes
+	// Response data: ExtendData - config data is not UTF8 string. cannot save in context field.
+	// Note: Get the special server config data, the data type is different with Sender.
+	GetSpecialConfig,
 
 	// Sender: Process 
 	// Processer: Control
@@ -52,6 +60,7 @@ enum MessageFunction
 
 enum ModuleType
 {
+	Undefine,
 	Proxy,
 	ControlCenter,
 	Process,
@@ -131,7 +140,6 @@ enum NetworkResult
 typedef enum g_em_DataItem
 {
 	GlobalConfiguation,
-	ModuleType,
 	ModuleConfiguation,
 	Logger,
 }DATA_ITEM;

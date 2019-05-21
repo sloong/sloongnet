@@ -2,44 +2,25 @@
 #include "proxy_service.h"
 #include "NetworkHub.h"
 #include "ControlHub.h"
-#include "IData.h"
+#include "DataTransPackage.h"
+
 #include "utility.h"
 #include "NetworkEvent.hpp"
-#include "DataTransPackage.h"
+
+
 using namespace Sloong;
 using namespace Sloong::Events;
 using namespace ProtobufMessage;
 
-IControl *Sloong::IData::m_iC = nullptr;
-
-void sloong_terminator()
-{
-	cout << "Unkonw error happened, system will shutdown. " << endl;
-	CUtility::write_call_stack();
-	exit(0);
-}
-
-void on_sigint(int signal)
-{
-	cout << "Unhandle signal happened, system will shutdown. signal:" << signal << endl;
-	CUtility::write_call_stack();
-	exit(0);
-}
-
-// 成功加载后即创建UServer对象，并开始运行。
-SloongNetProxy g_AppService;
-
-void on_SIGINT_Event(int signal)
-{
-	g_AppService.Exit();
-}
 
 int main(int argc, char **args)
 {
 	try
 	{
-		if (g_AppService.Initialize(argc, args))
-		g_AppService.Run();
+		Sloong::CSloongBaseService::g_pAppService = make_unique<SloongNetProxy>();
+
+		if (Sloong::CSloongBaseService::g_pAppService->Initialize(argc, args))
+			Sloong::CSloongBaseService::g_pAppService->Run();
 	}
 	catch (...)
 	{
@@ -48,126 +29,35 @@ int main(int argc, char **args)
 	}
 }
 
-SloongNetProxy::SloongNetProxy()
-{
-	m_pLog = make_unique<CLog>();
-	m_pNetwork = make_unique<CNetworkHub>();
-	m_pControl = make_unique<CControlHub>();
-}
-
-SloongNetProxy::~SloongNetProxy()
-{
-	Exit();
-	CThreadPool::Exit();
-	m_pLog->End();
-}
-
-void PrientHelp()
-{
-	cout << "param: address:port" << endl;
-}
-
 bool SloongNetProxy::Initialize(int argc, char **args)
 {
-	set_terminate(sloong_terminator);
-	set_unexpected(sloong_terminator);
-
-	//SIG_IGN:忽略信号的处理程序
-	//SIGPIPE:在reader终止之后写pipe的时候发生
-	signal(SIGPIPE, SIG_IGN); // this signal should call the socket check function. and remove the timeout socket.
-	//SIGCHLD: 进程Terminate或Stop的时候,SIGPIPE会发送给进程的父进程,缺省情况下该Signal会被忽略
-	signal(SIGCHLD, SIG_IGN);
-	//SIGINT:由Interrupt Key产生,通常是Ctrl+c或者Delete,发送给所有的ForeGroundGroup进程.
-	signal(SIGINT, &on_SIGINT_Event);
-	// SIGSEGV:当一个进程执行了一个无效的内存引用，或发生段错误时发送给它的信号
-	signal(SIGSEGV, &on_sigint);
-
 	try
 	{
-		if (argc != 2)
-		{
-			PrientHelp();
-			return false;
-		}
+		if( CSloongBaseService::Initialize(argc,args))
+			throw string("Error in CSloongBaseService::Initialize");
 
-		if( !ConnectToControl(args[1]))
-			throw string("Connect to control fialed.");
-
-		cout << "Connect to control succeed." << endl;
-
-		auto get_config_request_buf = make_shared<MessagePackage>();
-		get_config_request_buf->set_function(MessageFunction::GetConfig);
-		get_config_request_buf->set_sender(ModuleType::Proxy);
-		get_config_request_buf->set_receiver(ModuleType::ControlCenter);
-		get_config_request_buf->set_type(MessagePackage_Types::MessagePackage_Types_Request);
-		
-		cout << "Start get configuation." << endl;
-
-		CDataTransPackage dataPackage;
-		dataPackage.Initialize(m_pSocket);
-		dataPackage.RequestPackage(get_config_request_buf);
-		NetworkResult result = dataPackage.SendPackage();
-		if(result != NetworkResult::Succeed)
-			throw string("Send get config request error.");		
-
-		result = dataPackage.RecvPackage(0);
-		if(result != NetworkResult::Succeed)
-			throw string("Receive get config result error.");
-
-		auto get_config_response_buf = dataPackage.GetRecvPackage();
-		if(!get_config_response_buf)
-			throw string("Parse the get config response data error.");
-	
-
-		if(!m_oConfig.ParseFromString(get_config_response_buf->extenddata()))
+		if(!m_oConfig.ParseFromString(m_szConfigData))
 			throw string("Parse the config struct error.");
+		else
+			cout << "Parse special configuation succeed." << endl;
 
-		cout << "Get configuation succeed." << endl;
+		m_pNetwork->EnableClientCheck(m_oConfig.clientcheckkey(),m_oConfig.clientchecktime());
+		m_pNetwork->EnableTimeoutCheck(m_oConfig.timeouttime(), m_oConfig.timeoutcheckinterval());
 		
-		auto serv_config = m_oConfig.serverconfig();
-
-		//m_pLog->Initialize(serv_config.logpath(), "", serv_config.debugmode(), LOGLEVEL(serv_config.loglevel()), LOGTYPE::DAY);
-		m_pLog->Initialize(serv_config.logpath(), "", true, LOGLEVEL::All, LOGTYPE::DAY);
-
-		m_pControl->Initialize(serv_config.mqthreadquantity());
-		m_pControl->Add(DATA_ITEM::GlobalConfiguation, m_oConfig.mutable_serverconfig());
-		m_pControl->Add(DATA_ITEM::ModuleConfiguation, &m_oConfig);
-		m_pControl->Add(Logger, m_pLog.get());
-
-		m_pControl->RegisterEvent(ProgramExit);
-		m_pControl->RegisterEvent(ProgramStart);
-		
-		try
-		{
-			IData::Initialize(m_pControl.get());
-			m_pNetwork->Initialize(m_pControl.get());
-			m_pNetwork->EnableClientCheck(m_oConfig.clientcheckkey(),m_oConfig.clientchecktime());
-			m_pNetwork->EnableTimeoutCheck(m_oConfig.timeouttime(), m_oConfig.timeoutcheckinterval());
-			m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetProxy::MessagePackageProcesser, this, std::placeholders::_1));
-		}
-		catch (exception e)
-		{
-			m_pLog->Error(string("Excepiton happened in initialize for ControlCenter. Message:") + string(e.what()));
-			return false;
-		}
-
-		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProxy::OnSocketClose, this, std::placeholders::_1));
-
+        m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetProxy::MessagePackageProcesser, this, std::placeholders::_1));
+		m_pNetwork->RegisterAccpetConnectProcesser(std::bind(&SloongNetProxy::AcceptConnectProcesser, this, std::placeholders::_1));
+        m_pControl->RegisterEventHandler(ProgramStart,std::bind(&SloongNetProxy::OnStart, this, std::placeholders::_1));
+        m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProxy::OnSocketClose, this, std::placeholders::_1));
 		return true;
 	}
 	catch (exception &e)
-	{
-		cout << "exception happened, system will shutdown. message:" << e.what() << endl;
-	}
-	catch (normal_except &e)
-	{
-		cout << "exception happened, system will shutdown. message:" << e.what() << endl;
-	}
-	catch (string &e)
-	{
-		cerr << e << endl;
-	}
-
+    {
+        cout << "exception happened, system will shutdown. message:" << e.what() << endl;
+    }
+    catch (string &e)
+    {
+        cerr << e << endl;
+    }
 	return false;
 }
 
@@ -187,28 +77,12 @@ bool SloongNetProxy::ConnectToProcess()
 	}
 }
 
-bool SloongNetProxy::ConnectToControl(string controlAddress)
-{
-	
-	m_pSocket = make_shared<EasyConnect>();
-	m_pSocket->Initialize(controlAddress,nullptr);
-	m_pSocket->Connect();
-	/*string clientCheckKey = "c2xvb25nYzJ4dmIyNW5PRFJtT0dWa01ERTBNalZsTkRBd01XUmlZV1UxT0RZM05tRmlaamd3TmpsbmJtOXZiSE1nbm9vbHM";
-	m_pSocket->Send(clientCheckKey);*/
-}
 
-void SloongNetProxy::Run()
+void SloongNetProxy::OnStart(SmartEvent evt)
 {
-	m_pLog->Info("Application begin running.");
-	m_pControl->SendMessage(EVENT_TYPE::ProgramStart);
 	ConnectToProcess();
-	m_oSync.wait();
 }
 
-
-void SendRequestToControl(MessageFunction func, string context)
-{
-}
 
 
 // Case 1:
@@ -223,8 +97,6 @@ void Sloong::SloongNetProxy::AcceptConnectProcesser(shared_ptr<CSockInfo> info){
 	// regist this uuid to control. if succeed, the control do nothing. but if it is registed, the control will send an error message. then retry regist again.
 	m_mapUUIDList[info->m_pCon->GetSocketID()] = uuid;
 }
-
-
 
 
 
@@ -307,10 +179,3 @@ void Sloong::SloongNetProxy::OnSocketClose(SmartEvent event)
 	//net_evt->CallCallbackFunc(net_evt);
 }
 
-void Sloong::SloongNetProxy::Exit()
-{
-	m_pLog->Info("Application will exit.");
-	m_pControl->SendMessage(EVENT_TYPE::ProgramExit);
-	m_pControl->Exit();
-	m_oSync.notify_one();
-}
