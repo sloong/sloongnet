@@ -28,7 +28,7 @@ Sloong::CNetworkHub::~CNetworkHub()
 	SAFE_DELETE_ARR(m_pWaitProcessList);
 }
 
-void Sloong::CNetworkHub::Initialize(IControl *iMsg)
+CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 {
 	IObject::Initialize(iMsg);
 
@@ -53,6 +53,8 @@ void Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	m_iC->RegisterEventHandler(EVENT_TYPE::SendMessage, std::bind(&CNetworkHub::SendMessageEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::SocketClose, std::bind(&CNetworkHub::CloseConnectEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::MonitorSendStatus, std::bind(&CNetworkHub::MonitorSendStatusEventHandler, this, std::placeholders::_1));
+
+	return CResult::Succeed;
 }
 
 void Sloong::CNetworkHub::Run(SmartEvent event)

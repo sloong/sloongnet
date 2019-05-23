@@ -29,7 +29,7 @@ bool SloongNetDataCenter::Initialize(int argc, char **args)
 {
 	try
 	{
-		if( CSloongBaseService::Initialize(argc,args))
+		if( !CSloongBaseService::Initialize(argc,args))
 			throw string("Error in CSloongBaseService::Initialize");
 
 		if(!m_oConfig.ParseFromString(m_szConfigData))

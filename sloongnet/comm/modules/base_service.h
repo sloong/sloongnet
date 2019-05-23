@@ -29,7 +29,7 @@ namespace Sloong
         virtual string GetConfigFromControl(MessageFunction func);
 
         // Just call it without Control module.
-		virtual bool Initialize(int argc, char** args);
+		virtual CResult Initialize(int argc, char** args);
 
 		virtual void Run();
 
@@ -37,11 +37,9 @@ namespace Sloong
 
 		virtual bool ConnectToControl(string controlAddress);
 
-         
+        virtual void PrientHelp();
 
     protected:
-        static void PrientHelp();
-
         static void sloong_terminator();
 
         static void on_sigint(int signal);

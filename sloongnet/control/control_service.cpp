@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2019-05-21 15:01:16
+ * @LastEditTime: 2019-05-23 10:25:15
  */
 
 #include "control_service.h"
@@ -24,10 +24,15 @@ int main(int argc, char **args)
 	{
 		Sloong::CSloongBaseService::g_pAppService = make_unique<SloongControlService>();
 
-		if (Sloong::CSloongBaseService::g_pAppService->Initialize(argc, args))
+		auto res = Sloong::CSloongBaseService::g_pAppService->Initialize(argc, args);
+		if (res.IsSucceed()){
 			Sloong::CSloongBaseService::g_pAppService->Run();
-
-		return 0;
+			return 0;
+		}
+		else{
+			cout << "Initialize error. message: " << res.Message() << endl;
+			return -1;
+		}
 	}
 	catch (...)
 	{
@@ -44,7 +49,7 @@ void PrintVersion()
 	cout << COPYRIGHT_TEXT << endl;
 }
 
-void PrientHelp()
+void SloongControlService::PrientHelp()
 {
 	cout << "param: listen port" << endl;
 }
@@ -55,42 +60,28 @@ void PrientHelp()
  * @Return: return true if no error, service can continue to run.
  * 			return false if error. service must exit. 
  */
-bool SloongControlService::Initialize(int argc, char **args)
+CResult SloongControlService::Initialize(int argc, char **args)
 {
-	try
+	int port = atoi(args[1]);
+	if (port == 0)
 	{
-		int port = atoi(args[1]);
-		if (port == 0)
-		{
-			cout << "Convert [" << args[1] << "] to int port fialed." << endl;
-			return false;
-		}
-
-		m_pAllConfig->Initialize("system");
-		m_pAllConfig->LoadAll();
-
-		string config;
-		m_pAllConfig->m_oControlConfig.SerializeToString(&config);
-		m_oServerConfig.ParseFromString(config);
-		
-		if( CSloongBaseService::Initialize(argc,args))
-			throw string("Error in CSloongBaseService::Initialize");
-		
-		m_pNetwork->RegisterMessageProcesser(std::bind(&SloongControlService::MessagePackageProcesser, this, std::placeholders::_1));
-		
-		return true;
+		cout << "Convert [" << args[1] << "] to int port fialed." << endl;
+		return CResult(false);
 	}
-	catch (exception &e)
-	{
-		cout << "exception happened, system will shutdown. message:" << e.what() << endl;
-	}
-	catch (...)
-	{
-		cout << "Unhandle exception happened, system will shutdown. " << endl;
-		CUtility::write_call_stack();
-	}
-
-	return false;
+	m_pAllConfig->Initialize("system");
+	m_pAllConfig->LoadAll();
+	string config;
+	m_pAllConfig->m_oServerConfigList[ModuleType::ControlCenter].SerializeToString(&config);
+	if(!m_oServerConfig.ParseFromString(config))
+		return CResult(false, "Parser server general config error.");
+	
+	auto res = CSloongBaseService::Initialize(argc,args);
+	if( !res.IsSucceed())
+		return res;
+	
+	m_pNetwork->RegisterMessageProcesser(std::bind(&SloongControlService::MessagePackageProcesser, this, std::placeholders::_1));
+	
+	return CResult::Succeed;
 }
 
 void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)

@@ -10,7 +10,7 @@ namespace Sloong
     {
 	public:
 		// Always return true
-		bool Initialize(int);
+		CResult Initialize(int);
 
 		void Run();
 		void Exit();

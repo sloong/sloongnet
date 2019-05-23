@@ -15,10 +15,11 @@ namespace Sloong
 			m_pAllConfig = make_unique<CConfiguation>();
 		}
 
-		bool Initialize(int argc, char** args);
+		CResult Initialize(int argc, char** args);
 		
 		void MessagePackageProcesser(SmartPackage);
 		void OnSocketClose(SmartEvent);
+		void PrientHelp();
 	protected:
 		unique_ptr<CConfiguation>	m_pAllConfig;
 		ProtobufMessage::CONTROL_CONFIG m_oConfig;

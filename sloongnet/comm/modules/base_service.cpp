@@ -63,10 +63,10 @@ string CSloongBaseService::GetConfigFromControl(MessageFunction func)
     return get_config_response_buf->extenddata();
 }
 
-bool CSloongBaseService::Initialize(int argc, char** args)
+CResult CSloongBaseService::Initialize(int argc, char** args)
 {
     if(m_emModuleType == ModuleType::Undefine)
-        throw string("Module type is no define."); 
+        return CResult(false,"Module type is no define."); 
         
     set_terminate(sloong_terminator);
     set_unexpected(sloong_terminator);
@@ -79,23 +79,23 @@ bool CSloongBaseService::Initialize(int argc, char** args)
     signal(SIGINT, &on_SIGINT_Event);
     // SIGSEGV:当一个进程执行了一个无效的内存引用，或发生段错误时发送给它的信号
     signal(SIGSEGV, &on_sigint);
-    try
-    {
+    
         if (argc != 2)
         {
             PrientHelp();
-            return false;
+            return CResult(false);
         }
 
         if(m_emModuleType != ModuleType::ControlCenter )
         {
             if( !ConnectToControl(args[1]))
-            throw string("Connect to control fialed.");
+                return CResult("Connect to control fialed.");
+
             cout << "Connect to control succeed." << endl;
             cout << "Start get configuation." << endl;
             auto serverConfig = GetConfigFromControl(MessageFunction::GetGeneralConfig);
             if(!m_oServerConfig.ParseFromString(serverConfig))
-                throw string("Parse the config struct error.");
+                return CResult("Parse the config struct error.");
             
             cout << "Get configuation succeed." << endl;
             
@@ -106,32 +106,21 @@ bool CSloongBaseService::Initialize(int argc, char** args)
         
         //m_pLog->Initialize(serv_config.logpath(), "", serv_config.debugmode(), LOGLEVEL(serv_config.loglevel()), LOGTYPE::DAY);
         m_pLog->Initialize(m_oServerConfig.logpath(), "", true, LOGLEVEL::All, LOGTYPE::DAY);
-        try
-        {
-            m_pControl->Initialize(m_oServerConfig.mqthreadquantity());
+        
+        auto res = m_pControl->Initialize(m_oServerConfig.mqthreadquantity());
+        if( res.IsSucceed() ){
             m_pControl->Add(DATA_ITEM::GlobalConfiguation, &m_oServerConfig);
             m_pControl->Add(Logger, m_pLog.get());
             m_pControl->RegisterEvent(ProgramExit);
             m_pControl->RegisterEvent(ProgramStart);
             IData::Initialize(m_pControl.get());
-            m_pNetwork->Initialize(m_pControl.get());
+            res = m_pNetwork->Initialize(m_pControl.get());
+            if( res .IsSucceed())
+                return CResult::Succeed;
         }
-        catch (exception e)
-        {
-            m_pLog->Error(string("Excepiton happened in initialize function. Message:") + string(e.what()));
-            return false;
-        }
-        return true;
-    }
-    catch (exception &e)
-    {
-        cout << "exception happened, system will shutdown. message:" << e.what() << endl;
-    }
-    catch (string &e)
-    {
-        cerr << e << endl;
-    }
-    return false;
+        
+        m_pLog->Fatal(res.Message());
+        return res;
 }
 
 

@@ -1,14 +1,8 @@
-#ifndef LCONNECT_H_
-#define LCONNECT_H_
+#ifndef SLOONGNET_EASY_CONNECT_H
+#define SLOONGNET_EASY_CONNECT_H
 
-#include <string>
-
-// include the openssl file before inclue this file
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-#include <memory>
-#include "defines.h"
-using namespace std;
+#include "stdafx.h"
+#include "result.h"
 namespace Sloong
 {
 	namespace Universal
@@ -23,7 +17,7 @@ namespace Sloong
 		Ready,
 		WaitRead,
 		WaitWrite,
-		Error,
+		ConnectError,
 	};
 
 	// 有两种使用方式：
@@ -113,6 +107,6 @@ namespace Sloong
 
 }
 
-#endif // !LCONNECT_H_
+#endif // !SLOONGNET_EASY_CONNECT_H
 
 

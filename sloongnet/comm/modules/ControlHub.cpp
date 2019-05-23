@@ -4,12 +4,14 @@
 using namespace Sloong::Events;
 
 
-bool Sloong::CControlHub::Initialize(int quantity)
+CResult Sloong::CControlHub::Initialize(int quantity)
 {
+	if( quantity < 1 )
+		return CResult(false,"CControlHub work quantity must big than 0.");
 	CThreadPool::AddWorkThread(std::bind(&CControlHub::MessageWorkLoop, this, std::placeholders::_1), nullptr, quantity);
 	CThreadPool::Run();
 	Run();
-    return true;
+    return CResult(true);
 }
 
 void Sloong::CControlHub::Run()

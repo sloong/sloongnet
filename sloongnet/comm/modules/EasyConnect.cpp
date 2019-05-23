@@ -221,15 +221,15 @@ int Sloong::EasyConnect::Read(char * data, int len, int timeOut, bool bAgage)
 			}
 			else
 			{
-				m_stStatus = ConnectStatus::Error;
+				m_stStatus = ConnectStatus::ConnectError;
 			}
 			break;
 		default:
-			m_stStatus = ConnectStatus::Error;
+			m_stStatus = ConnectStatus::ConnectError;
 			break;
 		}
 	}
-	if (m_stStatus == ConnectStatus::Error)
+	if (m_stStatus == ConnectStatus::ConnectError)
 		return -1;
 	else
 		return ret;
@@ -274,12 +274,12 @@ int Sloong::EasyConnect::Write(const char* data, int len, int index)
 			}
 			else
 			{
-				m_stStatus = ConnectStatus::Error;
+				m_stStatus = ConnectStatus::ConnectError;
 				return -1;
 			}
 			break;
 		default:
-			m_stStatus = ConnectStatus::Error;
+			m_stStatus = ConnectStatus::ConnectError;
 			return -1;
 			break;
 		}
@@ -287,7 +287,7 @@ int Sloong::EasyConnect::Write(const char* data, int len, int index)
 	}
 	else
 	{
-		m_stStatus = ConnectStatus::Error;
+		m_stStatus = ConnectStatus::ConnectError;
 		return -1;
 	}
 	
@@ -364,7 +364,7 @@ bool Sloong::EasyConnect::do_handshake()
 		//m_stStatus = ConnectStatus::WaitRead;
 		break;
 	default:
-		m_stStatus = ConnectStatus::Error;
+		m_stStatus = ConnectStatus::ConnectError;
 		break;
 	}
 	return false;

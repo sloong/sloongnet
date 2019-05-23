@@ -12,7 +12,7 @@ namespace Sloong
         CNetworkHub();
         ~CNetworkHub();
 
-        void Initialize(IControl* iMsg);
+        CResult Initialize(IControl* iMsg);
 
         void EnableClientCheck(const string& clientCheckKey, int clientCheckTime);
         void EnableTimeoutCheck(int timeoutTime, int checkInterval);
