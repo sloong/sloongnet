@@ -89,13 +89,13 @@ CResult CSloongBaseService::Initialize(int argc, char** args)
         if(m_emModuleType != ModuleType::ControlCenter )
         {
             if( !ConnectToControl(args[1]))
-                return CResult("Connect to control fialed.");
+                return CResult(false,"Connect to control fialed.");
 
             cout << "Connect to control succeed." << endl;
             cout << "Start get configuation." << endl;
             auto serverConfig = GetConfigFromControl(MessageFunction::GetGeneralConfig);
             if(!m_oServerConfig.ParseFromString(serverConfig))
-                return CResult("Parse the config struct error.");
+                return CResult(false,"Parse the config struct error.");
             
             cout << "Get configuation succeed." << endl;
             

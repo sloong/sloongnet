@@ -17,8 +17,15 @@ int main( int argc, char** args )
 	{
 		Sloong::CSloongBaseService::g_pAppService = make_unique<SloongNetProcess>();
 
-		if (Sloong::CSloongBaseService::g_pAppService->Initialize(argc, args))
+		auto res = Sloong::CSloongBaseService::g_pAppService->Initialize(argc, args);
+		if (res.IsSucceed()){
 			Sloong::CSloongBaseService::g_pAppService->Run();
+			return 0;
+		}
+		else{
+			cout << "Initialize error. message: " << res.Message() << endl;
+			return -1;
+		}
 	}
 	catch (...)
 	{
@@ -29,35 +36,22 @@ int main( int argc, char** args )
 
 
 
-bool SloongNetProcess::Initialize(int argc, char** args)
+CResult SloongNetProcess::Initialize(int argc, char** args)
 {
-	try
-	{
-		if( !CSloongBaseService::Initialize(argc,args))
-			throw string("Error in CSloongBaseService::Initialize");
-
-		if(!m_oConfig.ParseFromString(m_szConfigData))
-			throw string("Parse the config struct error.");
-		else
-			cout << "Parse special configuation succeed." << endl;
-
-		
-		m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetProcess::MessagePackageProcesser, this, std::placeholders::_1));
-		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProcess::OnSocketClose, this, std::placeholders::_1));
-		m_pProcess->Initialize(m_pControl.get());
-		
-		return true;
-	}
-	catch (exception& e)
-	{
-		cout << "exception happened, system will shutdown. message:" << e.what() << endl;
-	}
-	catch (string &e)
-	{
-		cerr << e << endl;
-	}
+	auto res = CSloongBaseService::Initialize(argc,args);
+	if( !res.IsSucceed())
+		return res;
+	if(!m_oConfig.ParseFromString(m_szConfigData))
+		return CResult(false,"Parse the config struct error.");
+	else
+		cout << "Parse special configuation succeed." << endl;
 	
-	return false;
+	m_pControl->Add(DATA_ITEM::ModuleConfiguation, &m_oConfig);
+	m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetProcess::MessagePackageProcesser, this, std::placeholders::_1));
+	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProcess::OnSocketClose, this, std::placeholders::_1));
+	m_pProcess->Initialize(m_pControl.get());
+	
+	return CResult::Succeed;
 }
 
 void Sloong::SloongNetProcess::MessagePackageProcesser(SmartPackage pack)

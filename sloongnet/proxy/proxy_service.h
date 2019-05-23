@@ -11,7 +11,7 @@ namespace Sloong
 	public:
 		SloongNetProxy() : CSloongBaseService(ModuleType::Proxy){}
 
-		bool Initialize(int argc, char** args);
+		CResult Initialize(int argc, char** args);
 		
 		bool ConnectToProcess();
 

@@ -78,6 +78,8 @@ CResult SloongControlService::Initialize(int argc, char **args)
 	auto res = CSloongBaseService::Initialize(argc,args);
 	if( !res.IsSucceed())
 		return res;
+
+	m_pControl->Add(DATA_ITEM::ModuleConfiguation, &m_oConfig);
 	
 	m_pNetwork->RegisterMessageProcesser(std::bind(&SloongControlService::MessagePackageProcesser, this, std::placeholders::_1));
 	

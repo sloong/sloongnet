@@ -14,7 +14,7 @@ namespace Sloong
 			m_pProcess = make_unique<CLuaProcessCenter>();
 		}
 
-		bool Initialize(int argc, char** args);
+		CResult Initialize(int argc, char** args);
 
 		void MessagePackageProcesser(SmartPackage);
 		void OnSocketClose(SmartEvent evt);

@@ -19,8 +19,15 @@ int main(int argc, char **args)
 	{
 		Sloong::CSloongBaseService::g_pAppService = make_unique<SloongNetProxy>();
 
-		if (Sloong::CSloongBaseService::g_pAppService->Initialize(argc, args))
+		auto res = Sloong::CSloongBaseService::g_pAppService->Initialize(argc, args);
+		if (res.IsSucceed()){
 			Sloong::CSloongBaseService::g_pAppService->Run();
+			return 0;
+		}
+		else{
+			cout << "Initialize error. message: " << res.Message() << endl;
+			return -1;
+		}
 	}
 	catch (...)
 	{
@@ -29,36 +36,26 @@ int main(int argc, char **args)
 	}
 }
 
-bool SloongNetProxy::Initialize(int argc, char **args)
+CResult SloongNetProxy::Initialize(int argc, char **args)
 {
-	try
-	{
-		if( !CSloongBaseService::Initialize(argc,args))
-			throw string("Error in CSloongBaseService::Initialize");
+	auto res = CSloongBaseService::Initialize(argc,args);
+	if( !res.IsSucceed())
+		return res;
 
-		if(!m_oConfig.ParseFromString(m_szConfigData))
-			throw string("Parse the config struct error.");
-		else
-			cout << "Parse special configuation succeed." << endl;
+	if(!m_oConfig.ParseFromString(m_szConfigData))
+		return CResult(false,"Parse the config struct error.");
+	else
+		cout << "Parse special configuation succeed." << endl;
 
-		m_pNetwork->EnableClientCheck(m_oConfig.clientcheckkey(),m_oConfig.clientchecktime());
-		m_pNetwork->EnableTimeoutCheck(m_oConfig.timeouttime(), m_oConfig.timeoutcheckinterval());
-		
-        m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetProxy::MessagePackageProcesser, this, std::placeholders::_1));
-		m_pNetwork->RegisterAccpetConnectProcesser(std::bind(&SloongNetProxy::AcceptConnectProcesser, this, std::placeholders::_1));
-        m_pControl->RegisterEventHandler(ProgramStart,std::bind(&SloongNetProxy::OnStart, this, std::placeholders::_1));
-        m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProxy::OnSocketClose, this, std::placeholders::_1));
-		return true;
-	}
-	catch (exception &e)
-    {
-        cout << "exception happened, system will shutdown. message:" << e.what() << endl;
-    }
-    catch (string &e)
-    {
-        cerr << e << endl;
-    }
-	return false;
+	m_pControl->Add(DATA_ITEM::ModuleConfiguation, &m_oConfig);
+	m_pNetwork->EnableClientCheck(m_oConfig.clientcheckkey(),m_oConfig.clientchecktime());
+	m_pNetwork->EnableTimeoutCheck(m_oConfig.timeouttime(), m_oConfig.timeoutcheckinterval());
+	
+	m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetProxy::MessagePackageProcesser, this, std::placeholders::_1));
+	m_pNetwork->RegisterAccpetConnectProcesser(std::bind(&SloongNetProxy::AcceptConnectProcesser, this, std::placeholders::_1));
+	m_pControl->RegisterEventHandler(ProgramStart,std::bind(&SloongNetProxy::OnStart, this, std::placeholders::_1));
+	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProxy::OnSocketClose, this, std::placeholders::_1));
+	return CResult::Succeed;
 }
 
 bool SloongNetProxy::ConnectToProcess()
