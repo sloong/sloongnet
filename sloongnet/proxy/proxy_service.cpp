@@ -23,8 +23,7 @@ int main(int argc, char **args)
 		if (res.IsSucceed()){
 			Sloong::CSloongBaseService::g_pAppService->Run();
 			return 0;
-		}
-		else{
+		}else{
 			cout << "Initialize error. message: " << res.Message() << endl;
 			return -1;
 		}

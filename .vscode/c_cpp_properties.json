@@ -13,7 +13,7 @@
                 "/usr/include/lua5.3/",
                 "${workspaceFolder}/sloongnet/comm/interface/",
                 "${workspaceFolder}/sloongnet/**",
-                "${workspaceFolder}/sloongnet/comm/Message"
+                "${workspaceFolder}/sloongnet/comm/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/cpp",

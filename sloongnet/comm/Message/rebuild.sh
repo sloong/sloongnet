@@ -3,3 +3,4 @@ SCRIPTFOLDER=$(dirname $(readlink -f $0))
 # cd to current file folder
 cd $SCRIPTFOLDER
 protoc --cpp_out=./ ./config.proto
+protoc --csharp_out=./ ./config.proto
