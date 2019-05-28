@@ -33,7 +33,7 @@ namespace servctrl.UI
 
         private void UserLoginCBF( object param )
         {
-            MessagePackage pack = param as MessagePackage;
+            MessageData pack = param as MessageData;
 
         }
     }

@@ -155,20 +155,17 @@ namespace Sloong.Interface
         public string PreviewPath;
     }
 
-    public delegate bool CallBackFunc(MessagePackage page);
-    public class MessagePackage
+    public delegate bool CallBackFunc(MessageData page);
+    public class MessageData
     {
-        public string SendMessage = string.Empty;
+        public ProtobufMessage.MessagePackage SendPackage = new ProtobufMessage.MessagePackage();
+        public ProtobufMessage.MessagePackage ReceivePackage = new ProtobufMessage.MessagePackage();
         public bool IsSent = false;
-        public string ReceivedMessages = null;
         public bool IsReceived = false;
-        public byte[] ReceivedExData = null;
         public bool NeedExData = false;
-        public long SwiftNumber = -1;
         public CallBackFunc ReceivedHandler = null;
         public object[] MessageExInfo = null;
         public int SocketID = 0;
-        public byte level = 0;
         public DateTime send;
         public DateTime recv;
     }

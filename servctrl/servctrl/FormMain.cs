@@ -40,8 +40,8 @@ namespace servctrl
         FormManage formManage = null;
         private Log log = null;
         private NetworkThread _Nt = null;
-        private Queue<MessagePackage> _SendList = null;
-        Dictionary<long, MessagePackage> _MessageList = null;
+        private Queue<MessageData> _SendList = null;
+        Dictionary<long, MessageData> _MessageList = null;
         int _SwiftNum = 1;
         int nCurrentSocketIndex = 0;
 
@@ -54,11 +54,11 @@ namespace servctrl
             set { }
         }
 
-        Queue<MessagePackage> SendList
+        Queue<MessageData> SendList
         {
             get
             {
-                return pageHost[ShareItem.SendList] as Queue<MessagePackage>;
+                return pageHost[ShareItem.SendList] as Queue<MessageData>;
             }
         }
         ComboBox ServList
@@ -93,8 +93,8 @@ namespace servctrl
             this.share = new DataCenter();
             appStatus = new ApplicationStatus();
             _Nt = new NetworkThread(this.share);
-            _SendList = new Queue<MessagePackage>();
-            _MessageList = new Dictionary<long, MessagePackage>();
+            _SendList = new Queue<MessageData>();
+            _MessageList = new Dictionary<long, MessageData>();
             appStatus.ExitApp = false;
             appStatus.RunStatus = RunStatus.Run;
             appStatus.bEnableMD5 = true;
@@ -306,7 +306,7 @@ namespace servctrl
             log.Dispose();
         }
 
-        void AddMessageRequest(object[] Params, bool bExData, Func<MessagePackage, bool> pCallBack)
+        void AddMessageRequest(object[] Params, bool bExData, Func<MessageData, bool> pCallBack)
         {
             try
             {
@@ -317,17 +317,16 @@ namespace servctrl
 
                 if (msg == null)
                     return;
-                MessagePackage pack = new MessagePackage();
-                pack.SendMessage = msg.ToString();
-                pack.SwiftNumber = _SwiftNum;
+                MessageData pack = new MessageData();
+                pack.SendPackage.Context = msg.ToString();
+                pack.SendPackage.SerialNumber = _SwiftNum;
                 pack.NeedExData = bExData;
                 pack.MessageExInfo = Params;
-                pack.level = level;
+                pack.SendPackage.PriorityLevel = level;
                 if (pCallBack != null)
                     pack.ReceivedHandler = new CallBackFunc(pCallBack);
                 SendList.Enqueue(pack);
                 _SwiftNum++;
-
             }
             catch (Exception e)
             {
