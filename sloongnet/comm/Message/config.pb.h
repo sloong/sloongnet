@@ -46,26 +46,26 @@ class MessagePackage;
 class PROCESS_CONFIG;
 class PROXY_CONFIG;
 
-enum MessagePackage_Types {
-  MessagePackage_Types_Request = 0,
-  MessagePackage_Types_Response = 1,
-  MessagePackage_Types_MessagePackage_Types_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
-  MessagePackage_Types_MessagePackage_Types_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
+enum MessagePackage_MsgTypes {
+  MessagePackage_MsgTypes_Request = 0,
+  MessagePackage_MsgTypes_Response = 1,
+  MessagePackage_MsgTypes_MessagePackage_MsgTypes_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
+  MessagePackage_MsgTypes_MessagePackage_MsgTypes_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
-bool MessagePackage_Types_IsValid(int value);
-const MessagePackage_Types MessagePackage_Types_Types_MIN = MessagePackage_Types_Request;
-const MessagePackage_Types MessagePackage_Types_Types_MAX = MessagePackage_Types_Response;
-const int MessagePackage_Types_Types_ARRAYSIZE = MessagePackage_Types_Types_MAX + 1;
+bool MessagePackage_MsgTypes_IsValid(int value);
+const MessagePackage_MsgTypes MessagePackage_MsgTypes_MsgTypes_MIN = MessagePackage_MsgTypes_Request;
+const MessagePackage_MsgTypes MessagePackage_MsgTypes_MsgTypes_MAX = MessagePackage_MsgTypes_Response;
+const int MessagePackage_MsgTypes_MsgTypes_ARRAYSIZE = MessagePackage_MsgTypes_MsgTypes_MAX + 1;
 
-const ::google::protobuf::EnumDescriptor* MessagePackage_Types_descriptor();
-inline const ::std::string& MessagePackage_Types_Name(MessagePackage_Types value) {
+const ::google::protobuf::EnumDescriptor* MessagePackage_MsgTypes_descriptor();
+inline const ::std::string& MessagePackage_MsgTypes_Name(MessagePackage_MsgTypes value) {
   return ::google::protobuf::internal::NameOfEnum(
-    MessagePackage_Types_descriptor(), value);
+    MessagePackage_MsgTypes_descriptor(), value);
 }
-inline bool MessagePackage_Types_Parse(
-    const ::std::string& name, MessagePackage_Types* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<MessagePackage_Types>(
-    MessagePackage_Types_descriptor(), name, value);
+inline bool MessagePackage_MsgTypes_Parse(
+    const ::std::string& name, MessagePackage_MsgTypes* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<MessagePackage_MsgTypes>(
+    MessagePackage_MsgTypes_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -127,30 +127,30 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
 
   // nested types ----------------------------------------------------
 
-  typedef MessagePackage_Types Types;
-  static const Types Request =
-    MessagePackage_Types_Request;
-  static const Types Response =
-    MessagePackage_Types_Response;
-  static inline bool Types_IsValid(int value) {
-    return MessagePackage_Types_IsValid(value);
+  typedef MessagePackage_MsgTypes MsgTypes;
+  static const MsgTypes Request =
+    MessagePackage_MsgTypes_Request;
+  static const MsgTypes Response =
+    MessagePackage_MsgTypes_Response;
+  static inline bool MsgTypes_IsValid(int value) {
+    return MessagePackage_MsgTypes_IsValid(value);
   }
-  static const Types Types_MIN =
-    MessagePackage_Types_Types_MIN;
-  static const Types Types_MAX =
-    MessagePackage_Types_Types_MAX;
-  static const int Types_ARRAYSIZE =
-    MessagePackage_Types_Types_ARRAYSIZE;
+  static const MsgTypes MsgTypes_MIN =
+    MessagePackage_MsgTypes_MsgTypes_MIN;
+  static const MsgTypes MsgTypes_MAX =
+    MessagePackage_MsgTypes_MsgTypes_MAX;
+  static const int MsgTypes_ARRAYSIZE =
+    MessagePackage_MsgTypes_MsgTypes_ARRAYSIZE;
   static inline const ::google::protobuf::EnumDescriptor*
-  Types_descriptor() {
-    return MessagePackage_Types_descriptor();
+  MsgTypes_descriptor() {
+    return MessagePackage_MsgTypes_descriptor();
   }
-  static inline const ::std::string& Types_Name(Types value) {
-    return MessagePackage_Types_Name(value);
+  static inline const ::std::string& MsgTypes_Name(MsgTypes value) {
+    return MessagePackage_MsgTypes_Name(value);
   }
-  static inline bool Types_Parse(const ::std::string& name,
-      Types* value) {
-    return MessagePackage_Types_Parse(name, value);
+  static inline bool MsgTypes_Parse(const ::std::string& name,
+      MsgTypes* value) {
+    return MessagePackage_MsgTypes_Parse(name, value);
   }
 
   // accessors -------------------------------------------------------
@@ -218,11 +218,11 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::std::string* release_extenddata();
   void set_allocated_extenddata(::std::string* extenddata);
 
-  // optional .ProtobufMessage.MessagePackage.Types type = 9;
+  // optional .ProtobufMessage.MessagePackage.MsgTypes type = 9;
   void clear_type();
   static const int kTypeFieldNumber = 9;
-  ::ProtobufMessage::MessagePackage_Types type() const;
-  void set_type(::ProtobufMessage::MessagePackage_Types value);
+  ::ProtobufMessage::MessagePackage_MsgTypes type() const;
+  void set_type(::ProtobufMessage::MessagePackage_MsgTypes value);
 
   // @@protoc_insertion_point(class_scope:ProtobufMessage.MessagePackage)
  private:
@@ -1294,15 +1294,15 @@ inline void MessagePackage::set_allocated_extenddata(::std::string* extenddata) 
   // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.MessagePackage.ExtendData)
 }
 
-// optional .ProtobufMessage.MessagePackage.Types type = 9;
+// optional .ProtobufMessage.MessagePackage.MsgTypes type = 9;
 inline void MessagePackage::clear_type() {
   type_ = 0;
 }
-inline ::ProtobufMessage::MessagePackage_Types MessagePackage::type() const {
+inline ::ProtobufMessage::MessagePackage_MsgTypes MessagePackage::type() const {
   // @@protoc_insertion_point(field_get:ProtobufMessage.MessagePackage.type)
-  return static_cast< ::ProtobufMessage::MessagePackage_Types >(type_);
+  return static_cast< ::ProtobufMessage::MessagePackage_MsgTypes >(type_);
 }
-inline void MessagePackage::set_type(::ProtobufMessage::MessagePackage_Types value) {
+inline void MessagePackage::set_type(::ProtobufMessage::MessagePackage_MsgTypes value) {
   
   type_ = value;
   // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.type)
@@ -2286,10 +2286,10 @@ inline void PROCESS_CONFIG::set_allocated_luasocketclosefunction(::std::string* 
 namespace google {
 namespace protobuf {
 
-template <> struct is_proto_enum< ::ProtobufMessage::MessagePackage_Types> : ::google::protobuf::internal::true_type {};
+template <> struct is_proto_enum< ::ProtobufMessage::MessagePackage_MsgTypes> : ::google::protobuf::internal::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::ProtobufMessage::MessagePackage_Types>() {
-  return ::ProtobufMessage::MessagePackage_Types_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::ProtobufMessage::MessagePackage_MsgTypes>() {
+  return ::ProtobufMessage::MessagePackage_MsgTypes_descriptor();
 }
 
 }  // namespace protobuf

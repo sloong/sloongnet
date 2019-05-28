@@ -22,37 +22,37 @@ namespace ProtobufMessage {
     static ConfigReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cgxjb25maWcucHJvdG8SD1Byb3RvYnVmTWVzc2FnZSKEAgoOTWVzc2FnZVBh",
+            "Cgxjb25maWcucHJvdG8SD1Byb3RvYnVmTWVzc2FnZSKKAgoOTWVzc2FnZVBh",
             "Y2thZ2USEAoIRnVuY3Rpb24YASABKAUSFQoNUHJpb3JpdHlMZXZlbBgCIAEo",
             "BRIUCgxTZXJpYWxOdW1iZXIYAyABKAUSEwoLQ2hlY2tTdHJpbmcYBCABKAkS",
             "DgoGU2VuZGVyGAUgASgFEhAKCFJlY2VpdmVyGAYgASgFEg8KB0NvbnRleHQY",
-            "ByABKAkSEgoKRXh0ZW5kRGF0YRgIIAEoDBIzCgR0eXBlGAkgASgOMiUuUHJv",
-            "dG9idWZNZXNzYWdlLk1lc3NhZ2VQYWNrYWdlLlR5cGVzIiIKBVR5cGVzEgsK",
-            "B1JlcXVlc3QQABIMCghSZXNwb25zZRABIsECCg1HTE9CQUxfQ09ORklHEhIK",
-            "Ckxpc3RlblBvcnQYASABKAUSEQoJRW5hYmxlU1NMGAIgASgIEhQKDENlcnRG",
-            "aWxlUGF0aBgDIAEoCRITCgtLZXlGaWxlUGF0aBgEIAEoCRISCgpDZXJ0UGFz",
-            "c3dkGAUgASgJEhMKC0Nvbm5lY3RUaW1lGAYgASgFEhMKC1JlY2VpdmVUaW1l",
-            "GAcgASgFEg8KB0xvZ1BhdGgYCCABKAkSEAoITG9nTGV2ZWwYCSABKAUSEQoJ",
-            "RGVidWdNb2RlGAogASgIEhgKEE1RVGhyZWFkUXVhbnRpdHkYCyABKAUSGwoT",
-            "RVBvbGxUaHJlYWRRdWFudGl0eRgMIAEoBRIdChVQcm9jZXNzVGhyZWFkUXVh",
-            "bnRpdHkYDSABKAUSFAoMUHJpb3JpdHlTaXplGA4gASgFIiMKDkNPTlRST0xf",
-            "Q09ORklHEhEKCUJsb2NrVGltZRgBIAEoBSJmCglEQl9DT05GSUcSFQoNU2Vy",
-            "dmVyQWRkcmVzcxgBIAEoCRISCgpTZXJ2ZXJQb3J0GAIgASgFEgwKBFVzZXIY",
-            "AyABKAkSDgoGUGFzc3dkGAQgASgJEhAKCERhdGFiYXNlGAUgASgJIjwKC0RB",
-            "VEFfQ09ORklHEhcKD0RhdGFSZWNlaXZlUG9ydBgBIAEoBRIUCgxEYXRhUmVj",
-            "dlRpbWUYAiABKAUiigEKDFBST1hZX0NPTkZJRxIXCg9DbGllbnRDaGVja1Rp",
-            "bWUYASABKAUSFgoOQ2xpZW50Q2hlY2tLZXkYAiABKAkSHAoUVGltZW91dENo",
-            "ZWNrSW50ZXJ2YWwYAyABKAUSEwoLVGltZW91dFRpbWUYBCABKAUSFgoOUHJv",
-            "Y2Vzc0FkZHJlc3MYBSABKAkiJAoPRklSRVdBTExfQ09ORklHEhEKCUJsb2Nr",
-            "VGltZRgBIAEoBSKxAQoOUFJPQ0VTU19DT05GSUcSGgoSTHVhQ29udGV4dFF1",
-            "YW50aXR5GAEgASgFEhcKD0x1YVNjcmlwdEZvbGRlchgCIAEoCRIUCgxMdWFF",
-            "bnRyeUZpbGUYAyABKAkSGAoQTHVhRW50cnlGdW5jdGlvbhgEIAEoCRIaChJM",
-            "dWFQcm9jZXNzRnVuY3Rpb24YBSABKAkSHgoWTHVhU29ja2V0Q2xvc2VGdW5j",
-            "dGlvbhgGIAEoCWIGcHJvdG8z"));
+            "ByABKAkSEgoKRXh0ZW5kRGF0YRgIIAEoDBI2CgR0eXBlGAkgASgOMiguUHJv",
+            "dG9idWZNZXNzYWdlLk1lc3NhZ2VQYWNrYWdlLk1zZ1R5cGVzIiUKCE1zZ1R5",
+            "cGVzEgsKB1JlcXVlc3QQABIMCghSZXNwb25zZRABIsECCg1HTE9CQUxfQ09O",
+            "RklHEhIKCkxpc3RlblBvcnQYASABKAUSEQoJRW5hYmxlU1NMGAIgASgIEhQK",
+            "DENlcnRGaWxlUGF0aBgDIAEoCRITCgtLZXlGaWxlUGF0aBgEIAEoCRISCgpD",
+            "ZXJ0UGFzc3dkGAUgASgJEhMKC0Nvbm5lY3RUaW1lGAYgASgFEhMKC1JlY2Vp",
+            "dmVUaW1lGAcgASgFEg8KB0xvZ1BhdGgYCCABKAkSEAoITG9nTGV2ZWwYCSAB",
+            "KAUSEQoJRGVidWdNb2RlGAogASgIEhgKEE1RVGhyZWFkUXVhbnRpdHkYCyAB",
+            "KAUSGwoTRVBvbGxUaHJlYWRRdWFudGl0eRgMIAEoBRIdChVQcm9jZXNzVGhy",
+            "ZWFkUXVhbnRpdHkYDSABKAUSFAoMUHJpb3JpdHlTaXplGA4gASgFIiMKDkNP",
+            "TlRST0xfQ09ORklHEhEKCUJsb2NrVGltZRgBIAEoBSJmCglEQl9DT05GSUcS",
+            "FQoNU2VydmVyQWRkcmVzcxgBIAEoCRISCgpTZXJ2ZXJQb3J0GAIgASgFEgwK",
+            "BFVzZXIYAyABKAkSDgoGUGFzc3dkGAQgASgJEhAKCERhdGFiYXNlGAUgASgJ",
+            "IjwKC0RBVEFfQ09ORklHEhcKD0RhdGFSZWNlaXZlUG9ydBgBIAEoBRIUCgxE",
+            "YXRhUmVjdlRpbWUYAiABKAUiigEKDFBST1hZX0NPTkZJRxIXCg9DbGllbnRD",
+            "aGVja1RpbWUYASABKAUSFgoOQ2xpZW50Q2hlY2tLZXkYAiABKAkSHAoUVGlt",
+            "ZW91dENoZWNrSW50ZXJ2YWwYAyABKAUSEwoLVGltZW91dFRpbWUYBCABKAUS",
+            "FgoOUHJvY2Vzc0FkZHJlc3MYBSABKAkiJAoPRklSRVdBTExfQ09ORklHEhEK",
+            "CUJsb2NrVGltZRgBIAEoBSKxAQoOUFJPQ0VTU19DT05GSUcSGgoSTHVhQ29u",
+            "dGV4dFF1YW50aXR5GAEgASgFEhcKD0x1YVNjcmlwdEZvbGRlchgCIAEoCRIU",
+            "CgxMdWFFbnRyeUZpbGUYAyABKAkSGAoQTHVhRW50cnlGdW5jdGlvbhgEIAEo",
+            "CRIaChJMdWFQcm9jZXNzRnVuY3Rpb24YBSABKAkSHgoWTHVhU29ja2V0Q2xv",
+            "c2VGdW5jdGlvbhgGIAEoCWIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::ProtobufMessage.MessagePackage), global::ProtobufMessage.MessagePackage.Parser, new[]{ "Function", "PriorityLevel", "SerialNumber", "CheckString", "Sender", "Receiver", "Context", "ExtendData", "Type" }, null, new[]{ typeof(global::ProtobufMessage.MessagePackage.Types.Types) }, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::ProtobufMessage.MessagePackage), global::ProtobufMessage.MessagePackage.Parser, new[]{ "Function", "PriorityLevel", "SerialNumber", "CheckString", "Sender", "Receiver", "Context", "ExtendData", "Type" }, null, new[]{ typeof(global::ProtobufMessage.MessagePackage.Types.MsgTypes) }, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::ProtobufMessage.GLOBAL_CONFIG), global::ProtobufMessage.GLOBAL_CONFIG.Parser, new[]{ "ListenPort", "EnableSSL", "CertFilePath", "KeyFilePath", "CertPasswd", "ConnectTime", "ReceiveTime", "LogPath", "LogLevel", "DebugMode", "MQThreadQuantity", "EPollThreadQuantity", "ProcessThreadQuantity", "PrioritySize" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::ProtobufMessage.CONTROL_CONFIG), global::ProtobufMessage.CONTROL_CONFIG.Parser, new[]{ "BlockTime" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::ProtobufMessage.DB_CONFIG), global::ProtobufMessage.DB_CONFIG.Parser, new[]{ "ServerAddress", "ServerPort", "User", "Passwd", "Database" }, null, null, null),
@@ -196,9 +196,9 @@ namespace ProtobufMessage {
 
     /// <summary>Field number for the "type" field.</summary>
     public const int TypeFieldNumber = 9;
-    private global::ProtobufMessage.MessagePackage.Types.Types type_ = 0;
+    private global::ProtobufMessage.MessagePackage.Types.MsgTypes type_ = 0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::ProtobufMessage.MessagePackage.Types.Types Type {
+    public global::ProtobufMessage.MessagePackage.Types.MsgTypes Type {
       get { return type_; }
       set {
         type_ = value;
@@ -398,7 +398,7 @@ namespace ProtobufMessage {
             break;
           }
           case 72: {
-            type_ = (global::ProtobufMessage.MessagePackage.Types.Types) input.ReadEnum();
+            type_ = (global::ProtobufMessage.MessagePackage.Types.MsgTypes) input.ReadEnum();
             break;
           }
         }
@@ -409,7 +409,7 @@ namespace ProtobufMessage {
     /// <summary>Container for nested types declared in the MessagePackage message type.</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static partial class Types {
-      public enum Types {
+      public enum MsgTypes {
         [pbr::OriginalName("Request")] Request = 0,
         [pbr::OriginalName("Response")] Response = 1,
       }
