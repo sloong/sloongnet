@@ -219,14 +219,19 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 	m_pLog->Verbos("MessageProcessWorkLoop thread is running.");
 	while (m_bIsRunning)
 	{
+		MessagePorcessListRetry:
 		for( int i = 0; i < s_PriorityLevel; i++ )
 		{
+			if( m_pWaitProcessList[i].empty())
+			{
+				continue;
+			}
 			SmartPackage pack;
 			while( m_pWaitProcessList[i].TryPop(pack) )
 			{
 				m_pProcessFunc(pack);
 			}
-			break;
+			goto MessagePorcessListRetry;
 		}
 		m_oProcessThreadSync.wait();
 	}

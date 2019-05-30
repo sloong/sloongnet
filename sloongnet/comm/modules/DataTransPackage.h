@@ -20,12 +20,12 @@ namespace Sloong
          * @Params: 
          * @Return: 
          */
-        void ResponsePackage(const string& msg, const char* exData = nullptr, int exSize = 0);
+        void ResponsePackage(const string& msg, const string& exdata="");
 
         void RequestPackage( shared_ptr<MessagePackage> pack );
         void ResponsePackage( shared_ptr<MessagePackage> pack );
 
-        void PrepareSendPackageData( const string& msg, const char* exData = nullptr, int exSize = 0);
+        void PrepareSendPackageData( const string& msg, const string& exdata="");
 
     public:
         /**

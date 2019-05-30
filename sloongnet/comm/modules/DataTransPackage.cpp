@@ -6,20 +6,20 @@ void Sloong::CDataTransPackage::Initialize(SmartConnect conn, CLog* pLog)
 	m_pLog = pLog;
 }
 
-void Sloong::CDataTransPackage::PrepareSendPackageData( const string& msg, const char* pExData , int nExSize)
+void Sloong::CDataTransPackage::PrepareSendPackageData( const string& msg, const string& exdata)
 {
 	// calculate the send buffer length
 	m_pReceivedPackage->set_context(msg);
 	
-	if (pExData != NULL && nExSize > 0)
+	if (exdata.length() > 0)
 	{
-		m_pReceivedPackage->set_extenddata(pExData,nExSize);
+		m_pReceivedPackage->set_extenddata(exdata);
 	}
 
 	if (m_pLog!= nullptr)
 	{
 		m_pLog->Verbos(CUniversal::Format("SEND<<<[%d][%d]<<<%s&&&EXDATA<<<[%d]",m_pReceivedPackage->prioritylevel(),
-										m_pReceivedPackage->serialnumber(),m_pReceivedPackage->context(),nExSize));
+										m_pReceivedPackage->serialnumber(),m_pReceivedPackage->context(),exdata.length()));
 	}
 	m_pReceivedPackage->SerializeToString(&m_strPackageData);
 	m_nPackageSize = m_strPackageData.length();
@@ -29,21 +29,21 @@ void Sloong::CDataTransPackage::PrepareSendPackageData( const string& msg, const
 void Sloong::CDataTransPackage::RequestPackage( shared_ptr<MessagePackage> pack )
 {
 	m_pReceivedPackage = pack;
-	PrepareSendPackageData(pack->context(),nullptr,0);
+	PrepareSendPackageData(pack->context());
 }
 
 
 void Sloong::CDataTransPackage::ResponsePackage( shared_ptr<MessagePackage> pack )
 {
 	m_pReceivedPackage = pack;
-	PrepareSendPackageData(pack->context(),nullptr,0);
+	PrepareSendPackageData(pack->context());
 }
 
 
-void Sloong::CDataTransPackage::ResponsePackage(const string &msg, const char *pExData, int nExSize)
+void Sloong::CDataTransPackage::ResponsePackage(const string &msg, const string& exdata)
 {
 	m_pReceivedPackage->set_type(MessagePackage_Types::MessagePackage_Types_Response);
-	PrepareSendPackageData(msg,pExData,nExSize);
+	PrepareSendPackageData(msg,exdata);
 }
 
 
