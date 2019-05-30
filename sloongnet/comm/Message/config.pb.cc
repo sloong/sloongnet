@@ -24,7 +24,7 @@ namespace {
 const ::google::protobuf::Descriptor* MessagePackage_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   MessagePackage_reflection_ = NULL;
-const ::google::protobuf::EnumDescriptor* MessagePackage_Types_descriptor_ = NULL;
+const ::google::protobuf::EnumDescriptor* MessagePackage_MsgTypes_descriptor_ = NULL;
 const ::google::protobuf::Descriptor* GLOBAL_CONFIG_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GLOBAL_CONFIG_reflection_ = NULL;
@@ -80,7 +80,7 @@ void protobuf_AssignDesc_config_2eproto() {
       sizeof(MessagePackage),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessagePackage, _is_default_instance_));
-  MessagePackage_Types_descriptor_ = MessagePackage_descriptor_->enum_type(0);
+  MessagePackage_MsgTypes_descriptor_ = MessagePackage_descriptor_->enum_type(0);
   GLOBAL_CONFIG_descriptor_ = file->message_type(1);
   static const int GLOBAL_CONFIG_offsets_[14] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, listenport_),
@@ -273,36 +273,36 @@ void protobuf_AddDesc_config_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\014config.proto\022\017ProtobufMessage\"\204\002\n\016Mess"
+    "\n\014config.proto\022\017ProtobufMessage\"\212\002\n\016Mess"
     "agePackage\022\020\n\010Function\030\001 \001(\005\022\025\n\rPriority"
     "Level\030\002 \001(\005\022\024\n\014SerialNumber\030\003 \001(\005\022\023\n\013Che"
     "ckString\030\004 \001(\t\022\016\n\006Sender\030\005 \001(\005\022\020\n\010Receiv"
     "er\030\006 \001(\005\022\017\n\007Context\030\007 \001(\t\022\022\n\nExtendData\030"
-    "\010 \001(\014\0223\n\004type\030\t \001(\0162%.ProtobufMessage.Me"
-    "ssagePackage.Types\"\"\n\005Types\022\013\n\007Request\020\000"
-    "\022\014\n\010Response\020\001\"\301\002\n\rGLOBAL_CONFIG\022\022\n\nList"
-    "enPort\030\001 \001(\005\022\021\n\tEnableSSL\030\002 \001(\010\022\024\n\014CertF"
-    "ilePath\030\003 \001(\t\022\023\n\013KeyFilePath\030\004 \001(\t\022\022\n\nCe"
-    "rtPasswd\030\005 \001(\t\022\023\n\013ConnectTime\030\006 \001(\005\022\023\n\013R"
-    "eceiveTime\030\007 \001(\005\022\017\n\007LogPath\030\010 \001(\t\022\020\n\010Log"
-    "Level\030\t \001(\005\022\021\n\tDebugMode\030\n \001(\010\022\030\n\020MQThre"
-    "adQuantity\030\013 \001(\005\022\033\n\023EPollThreadQuantity\030"
-    "\014 \001(\005\022\035\n\025ProcessThreadQuantity\030\r \001(\005\022\024\n\014"
-    "PrioritySize\030\016 \001(\005\"#\n\016CONTROL_CONFIG\022\021\n\t"
-    "BlockTime\030\001 \001(\005\"f\n\tDB_CONFIG\022\025\n\rServerAd"
-    "dress\030\001 \001(\t\022\022\n\nServerPort\030\002 \001(\005\022\014\n\004User\030"
-    "\003 \001(\t\022\016\n\006Passwd\030\004 \001(\t\022\020\n\010Database\030\005 \001(\t\""
-    "<\n\013DATA_CONFIG\022\027\n\017DataReceivePort\030\001 \001(\005\022"
-    "\024\n\014DataRecvTime\030\002 \001(\005\"\212\001\n\014PROXY_CONFIG\022\027"
-    "\n\017ClientCheckTime\030\001 \001(\005\022\026\n\016ClientCheckKe"
-    "y\030\002 \001(\t\022\034\n\024TimeoutCheckInterval\030\003 \001(\005\022\023\n"
-    "\013TimeoutTime\030\004 \001(\005\022\026\n\016ProcessAddress\030\005 \001"
-    "(\t\"$\n\017FIREWALL_CONFIG\022\021\n\tBlockTime\030\001 \001(\005"
-    "\"\261\001\n\016PROCESS_CONFIG\022\032\n\022LuaContextQuantit"
-    "y\030\001 \001(\005\022\027\n\017LuaScriptFolder\030\002 \001(\t\022\024\n\014LuaE"
-    "ntryFile\030\003 \001(\t\022\030\n\020LuaEntryFunction\030\004 \001(\t"
-    "\022\032\n\022LuaProcessFunction\030\005 \001(\t\022\036\n\026LuaSocke"
-    "tCloseFunction\030\006 \001(\tb\006proto3", 1188);
+    "\010 \001(\014\0226\n\004type\030\t \001(\0162(.ProtobufMessage.Me"
+    "ssagePackage.MsgTypes\"%\n\010MsgTypes\022\013\n\007Req"
+    "uest\020\000\022\014\n\010Response\020\001\"\301\002\n\rGLOBAL_CONFIG\022\022"
+    "\n\nListenPort\030\001 \001(\005\022\021\n\tEnableSSL\030\002 \001(\010\022\024\n"
+    "\014CertFilePath\030\003 \001(\t\022\023\n\013KeyFilePath\030\004 \001(\t"
+    "\022\022\n\nCertPasswd\030\005 \001(\t\022\023\n\013ConnectTime\030\006 \001("
+    "\005\022\023\n\013ReceiveTime\030\007 \001(\005\022\017\n\007LogPath\030\010 \001(\t\022"
+    "\020\n\010LogLevel\030\t \001(\005\022\021\n\tDebugMode\030\n \001(\010\022\030\n\020"
+    "MQThreadQuantity\030\013 \001(\005\022\033\n\023EPollThreadQua"
+    "ntity\030\014 \001(\005\022\035\n\025ProcessThreadQuantity\030\r \001"
+    "(\005\022\024\n\014PrioritySize\030\016 \001(\005\"#\n\016CONTROL_CONF"
+    "IG\022\021\n\tBlockTime\030\001 \001(\005\"f\n\tDB_CONFIG\022\025\n\rSe"
+    "rverAddress\030\001 \001(\t\022\022\n\nServerPort\030\002 \001(\005\022\014\n"
+    "\004User\030\003 \001(\t\022\016\n\006Passwd\030\004 \001(\t\022\020\n\010Database\030"
+    "\005 \001(\t\"<\n\013DATA_CONFIG\022\027\n\017DataReceivePort\030"
+    "\001 \001(\005\022\024\n\014DataRecvTime\030\002 \001(\005\"\212\001\n\014PROXY_CO"
+    "NFIG\022\027\n\017ClientCheckTime\030\001 \001(\005\022\026\n\016ClientC"
+    "heckKey\030\002 \001(\t\022\034\n\024TimeoutCheckInterval\030\003 "
+    "\001(\005\022\023\n\013TimeoutTime\030\004 \001(\005\022\026\n\016ProcessAddre"
+    "ss\030\005 \001(\t\"$\n\017FIREWALL_CONFIG\022\021\n\tBlockTime"
+    "\030\001 \001(\005\"\261\001\n\016PROCESS_CONFIG\022\032\n\022LuaContextQ"
+    "uantity\030\001 \001(\005\022\027\n\017LuaScriptFolder\030\002 \001(\t\022\024"
+    "\n\014LuaEntryFile\030\003 \001(\t\022\030\n\020LuaEntryFunction"
+    "\030\004 \001(\t\022\032\n\022LuaProcessFunction\030\005 \001(\t\022\036\n\026Lu"
+    "aSocketCloseFunction\030\006 \001(\tb\006proto3", 1194);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "config.proto", &protobuf_RegisterTypes);
   MessagePackage::default_instance_ = new MessagePackage();
@@ -333,11 +333,11 @@ struct StaticDescriptorInitializer_config_2eproto {
 
 // ===================================================================
 
-const ::google::protobuf::EnumDescriptor* MessagePackage_Types_descriptor() {
+const ::google::protobuf::EnumDescriptor* MessagePackage_MsgTypes_descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return MessagePackage_Types_descriptor_;
+  return MessagePackage_MsgTypes_descriptor_;
 }
-bool MessagePackage_Types_IsValid(int value) {
+bool MessagePackage_MsgTypes_IsValid(int value) {
   switch(value) {
     case 0:
     case 1:
@@ -348,11 +348,11 @@ bool MessagePackage_Types_IsValid(int value) {
 }
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
-const MessagePackage_Types MessagePackage::Request;
-const MessagePackage_Types MessagePackage::Response;
-const MessagePackage_Types MessagePackage::Types_MIN;
-const MessagePackage_Types MessagePackage::Types_MAX;
-const int MessagePackage::Types_ARRAYSIZE;
+const MessagePackage_MsgTypes MessagePackage::Request;
+const MessagePackage_MsgTypes MessagePackage::Response;
+const MessagePackage_MsgTypes MessagePackage::MsgTypes_MIN;
+const MessagePackage_MsgTypes MessagePackage::MsgTypes_MAX;
+const int MessagePackage::MsgTypes_ARRAYSIZE;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int MessagePackage::kFunctionFieldNumber;
@@ -599,7 +599,7 @@ bool MessagePackage::MergePartialFromCodedStream(
         break;
       }
 
-      // optional .ProtobufMessage.MessagePackage.Types type = 9;
+      // optional .ProtobufMessage.MessagePackage.MsgTypes type = 9;
       case 9: {
         if (tag == 72) {
          parse_type:
@@ -607,7 +607,7 @@ bool MessagePackage::MergePartialFromCodedStream(
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
                  input, &value)));
-          set_type(static_cast< ::ProtobufMessage::MessagePackage_Types >(value));
+          set_type(static_cast< ::ProtobufMessage::MessagePackage_MsgTypes >(value));
         } else {
           goto handle_unusual;
         }
@@ -690,7 +690,7 @@ void MessagePackage::SerializeWithCachedSizes(
       8, this->extenddata(), output);
   }
 
-  // optional .ProtobufMessage.MessagePackage.Types type = 9;
+  // optional .ProtobufMessage.MessagePackage.MsgTypes type = 9;
   if (this->type() != 0) {
     ::google::protobuf::internal::WireFormatLite::WriteEnum(
       9, this->type(), output);
@@ -756,7 +756,7 @@ void MessagePackage::SerializeWithCachedSizes(
         8, this->extenddata(), target);
   }
 
-  // optional .ProtobufMessage.MessagePackage.Types type = 9;
+  // optional .ProtobufMessage.MessagePackage.MsgTypes type = 9;
   if (this->type() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
       9, this->type(), target);
@@ -826,7 +826,7 @@ int MessagePackage::ByteSize() const {
         this->extenddata());
   }
 
-  // optional .ProtobufMessage.MessagePackage.Types type = 9;
+  // optional .ProtobufMessage.MessagePackage.MsgTypes type = 9;
   if (this->type() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
@@ -1142,15 +1142,15 @@ void MessagePackage::clear_extenddata() {
   // @@protoc_insertion_point(field_set_allocated:ProtobufMessage.MessagePackage.ExtendData)
 }
 
-// optional .ProtobufMessage.MessagePackage.Types type = 9;
+// optional .ProtobufMessage.MessagePackage.MsgTypes type = 9;
 void MessagePackage::clear_type() {
   type_ = 0;
 }
- ::ProtobufMessage::MessagePackage_Types MessagePackage::type() const {
+ ::ProtobufMessage::MessagePackage_MsgTypes MessagePackage::type() const {
   // @@protoc_insertion_point(field_get:ProtobufMessage.MessagePackage.type)
-  return static_cast< ::ProtobufMessage::MessagePackage_Types >(type_);
+  return static_cast< ::ProtobufMessage::MessagePackage_MsgTypes >(type_);
 }
- void MessagePackage::set_type(::ProtobufMessage::MessagePackage_Types value) {
+ void MessagePackage::set_type(::ProtobufMessage::MessagePackage_MsgTypes value) {
   
   type_ = value;
   // @@protoc_insertion_point(field_set:ProtobufMessage.MessagePackage.type)

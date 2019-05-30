@@ -42,8 +42,13 @@ void Sloong::CDataTransPackage::ResponsePackage( shared_ptr<MessagePackage> pack
 
 void Sloong::CDataTransPackage::ResponsePackage(const string &msg, const string& exdata)
 {
+<<<<<<< HEAD
 	m_pReceivedPackage->set_type(MessagePackage_Types::MessagePackage_Types_Response);
 	PrepareSendPackageData(msg,exdata);
+=======
+	m_pReceivedPackage->set_type(MessagePackage_MsgTypes::MessagePackage_MsgTypes_Response);
+	PrepareSendPackageData(msg,pExData,nExSize);
+>>>>>>> 9e5a8679cf8a138e2f3e0697becf97bb3ccfefb6
 }
 
 

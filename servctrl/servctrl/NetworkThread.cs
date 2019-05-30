@@ -1,9 +1,12 @@
 ﻿
+using Google.Protobuf;
+using ProtobufMessage;
 using servctrl;
 using Sloong;
 using Sloong.Interface;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
@@ -32,19 +35,19 @@ namespace Sloong
             }
         }
 
-        Dictionary<long, MessagePackage> MsgList
+        Dictionary<long, MessageData> MsgList
         {
             get
             {
-                return _DC[ShareItem.MessageList] as Dictionary<long, MessagePackage>;
+                return _DC[ShareItem.MessageList] as Dictionary<long, MessageData>;
             }
         }
 
-        Queue<MessagePackage> SendList
+        Queue<MessageData> SendList
         {
             get
             {
-                return _DC[ShareItem.SendList] as Queue<MessagePackage>;
+                return _DC[ShareItem.SendList] as Queue<MessageData>;
             }
         }
 
@@ -225,55 +228,31 @@ namespace Sloong
                     if (SendList != null && SendList.Count > 0)
                     {
                         var pack = SendList.Dequeue();
-                        var msg = pack.SendMessage;
-                        string md5 = "";
-                        List<byte> sendList = new List<byte>();
-                        var gbk = Encoding.GetEncoding("GB2312");
-
-                        // 计算长度
-                        int lLen = gbk.GetByteCount(msg) + 32 + 8 + 1;
-
-                        // 开始准备数据
-                        /// 长度
-                        sendList.AddRange(Utility.Int32ToBytes(lLen));
-
-                        /// 优先级
-                        sendList.Add(pack.level);
-
-                        /// 流水号
-                        if (AppStatus.bEnableSwift)
+                        using (MemoryStream send_data_stream = new MemoryStream())
                         {
-                            sendList.AddRange(Utility.LongToBytes(pack.SwiftNumber));
-                        }
+                            // Save the person to a stream
 
-                        /// md5
-                        if (AppStatus.bEnableMD5)
-                        {
-                            md5 = Utility.MD5_Encoding(msg, gbk);
-                            sendList.AddRange(gbk.GetBytes(md5));
-                        }
+                            send_data_stream.Write(Utility.Int32ToBytes(pack.SendPackage.CalculateSize()),0,4);
+                            pack.SendPackage.WriteTo(send_data_stream);
+                            var socket_stream = SocketMap[pack.SocketID].m_Conn;
+                            if (!m_RecvThreadList.ContainsKey(pack.SocketID))
+                            {
+                                var mainRecv = new Thread(() => RecvWorkLoop(pack.SocketID));
+                                mainRecv.Name = "Network Recv Thread :" + pack.SocketID.ToString();
+                                m_RecvThreadList[pack.SocketID] = mainRecv;
+                                mainRecv.Start();
+                            }
 
+                            lock (socket_stream)
+                            {
+                                socket_stream.Write(send_data_stream.ToArray(), 0, (int)send_data_stream.Length);
 
-                        sendList.AddRange(gbk.GetBytes(msg));
-                        var steam = SocketMap[pack.SocketID].m_Conn;
-                        if( !m_RecvThreadList.ContainsKey(pack.SocketID))
-                        {
-                            var mainRecv = new Thread(() => RecvWorkLoop(pack.SocketID));
-                            mainRecv.Name = "Network Recv Thread :" + pack.SocketID.ToString();
-                            m_RecvThreadList[pack.SocketID] = mainRecv;
-                            mainRecv.Start();
-                        }
-                        
-                        lock (steam)
-                        {
-                            steam.Write(sendList.ToArray(),0, sendList.Count);
-                            
-                            //Utility.SendEx(Sock, sendList);
-                            pack.IsSent = true;
-                            pack.send = DateTime.Now;
-                            // only add to list when enable swift.
-                            if (AppStatus.bEnableSwift)
-                                MsgList.Add(pack.SwiftNumber, pack);
+                                //Utility.SendEx(Sock, sendList);
+                                pack.IsSent = true;
+                                pack.send = DateTime.Now;
+                                // only add to list when enable swift.
+                                MsgList.Add(pack.SendPackage.SerialNumber, pack);
+                            }
                         }
                     }
                     else
@@ -326,50 +305,25 @@ namespace Sloong
                     // TODO : 需要替换为支持SSL的接收                    
                     long nLength = Utility.RecvDataLength(info.m_Conn, 10000);
                     
+                    byte[] data = Utility.RecvEx(info.m_Conn, nLength, 10000);
+                    var receivePackage = MessagePackage.Parser.ParseFrom(data);
 
-                    long nSwift = -1;
-                    string md5 = "";
-                    int index = 0;
-                    int priority;
-                    if (true)
+
+                    if (MsgList.ContainsKey(receivePackage.SerialNumber))
                     {
-                        priority = Utility.RecvEx(info.m_Conn, 1, 10000)[0];
-                        index += 1;
-                    }
-                    if (AppStatus.bEnableSwift)
-                    {
-                        nSwift = Utility.BytesToLong(Utility.RecvEx(info.m_Conn, 8, 10000));
-                        index += 8;
-                    }
-                    
-                    if (AppStatus.bEnableMD5)
-                    {
-                        byte[] bMD5 = Utility.RecvEx(info.m_Conn, 32, 10000);
-                        md5 = Encoding.GetEncoding("GB2312").GetString(bMD5);
-                        index += 32;
-                    }
-                    byte[] data = Utility.RecvEx(info.m_Conn, nLength - index, 10000);
-                    string strRecv = Encoding.GetEncoding("GB2312").GetString(data);
-                    if (MsgList.ContainsKey(nSwift))
-                    {
-                        var pack = MsgList[nSwift];
+                        var pack = MsgList[receivePackage.SerialNumber];
                         pack.recv = DateTime.Now;
-                        pack.ReceivedMessages = strRecv;
-                        if (pack.NeedExData)
-                        {
-                            byte[] exData = Utility.RecvEx(info.m_Conn, Utility.RecvDataLength(info.m_Conn, 0), 0);
-                            pack.ReceivedExData = exData;
-                        }
+                        pack.ReceivePackage = receivePackage;
                         pack.IsReceived = true;
                         if (pack.ReceivedHandler != null)
                         {
-                            pack.ReceivedHandler.BeginInvoke(pack, WhenRecvDone, pack.SwiftNumber);
+                            pack.ReceivedHandler.BeginInvoke(pack, WhenRecvDone, pack.ReceivePackage.SerialNumber);
                         }
                     }
                     else
                     {
                         // no the swift number, error.
-                        throw new Exception("Received message but no checked the swift number. please check the message:" + strRecv);
+                        throw new Exception("Received message but no checked the swift number.");
                     }
                 }
                 catch (Exception ex)

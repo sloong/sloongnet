@@ -44,7 +44,7 @@ string CSloongBaseService::GetConfigFromControl(MessageFunction func)
     get_config_request_buf->set_function(func);
     get_config_request_buf->set_sender(m_emModuleType);
     get_config_request_buf->set_receiver(ModuleType::ControlCenter);
-    get_config_request_buf->set_type(MessagePackage_Types::MessagePackage_Types_Request);
+    get_config_request_buf->set_type(MessagePackage_MsgTypes::MessagePackage_MsgTypes_Request);
     
     
     CDataTransPackage dataPackage;

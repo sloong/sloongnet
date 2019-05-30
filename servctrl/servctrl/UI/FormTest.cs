@@ -171,10 +171,10 @@ namespace servctrl
 
         public bool ProcResult(object param)
         {
-            MessagePackage pack = param as MessagePackage;
+            MessageData pack = param as MessageData;
             try
             {
-                JObject jres = JObject.Parse(pack.ReceivedMessages);
+                JObject jres = JObject.Parse(pack.ReceivePackage.Context);
                 if (jres["errno"].ToString() != "0")
                 {
                     AddLogItem("Fialed! The Error Message is:" + jres["errmsg"].ToString());
@@ -183,7 +183,7 @@ namespace servctrl
                 else
                 {
                     var time = pack.recv - pack.send;
-                    AddLogItem(pack.SwiftNumber.ToString() + "|" + time.TotalMilliseconds + "|" + jres.ToString());
+                    AddLogItem(pack.ReceivePackage.SerialNumber.ToString() + "|" + time.TotalMilliseconds + "|" + jres.ToString());
                 }
             }
             catch(Exception e)
@@ -266,14 +266,14 @@ namespace servctrl
 
         private bool ReadToUpdate(object param)
         {
-            MessagePackage pack = param as MessagePackage;
+            MessageData pack = param as MessageData;
             
-            if(!Utility.Check(pack.ReceivedMessages))
+            if(!Utility.Check(pack.ReceivePackage.Context))
             {
                 listBoxLog.Items.Add("Receive message is empty");
                 return false;
             }
-            JObject jres = JObject.Parse(pack.ReceivedMessages);
+            JObject jres = JObject.Parse(pack.ReceivePackage.Context);
             if (jres["errno"].ToString() != "0")
             {
                 listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + jres["errmsg"].ToString());
@@ -303,14 +303,14 @@ namespace servctrl
 
         private bool UploadEnd(object param)
         {
-            MessagePackage pack = param as MessagePackage;
+            MessageData pack = param as MessageData;
 
-            if (!Utility.Check(pack.ReceivedMessages))
+            if (!Utility.Check(pack.ReceivePackage.Context))
             {
                 listBoxLog.Items.Add("Receive message is empty");
                 return false;
             }
-            JObject jres = JObject.Parse(pack.ReceivedMessages);
+            JObject jres = JObject.Parse(pack.ReceivePackage.Context);
             if (jres["errno"].ToString() != "0")
             {
                 listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + jres["errmsg"].ToString());
@@ -349,14 +349,14 @@ namespace servctrl
 
         private bool UploadTCPResult(object param)
         {
-            MessagePackage pack = param as MessagePackage;
+            MessageData pack = param as MessageData;
 
-            if (!Utility.Check(pack.ReceivedMessages))
+            if (!Utility.Check(pack.ReceivePackage.Context))
             {
                 listBoxLog.Items.Add("Receive message is empty");
                 return false;
             }
-            JObject jres = JObject.Parse(pack.ReceivedMessages);
+            JObject jres = JObject.Parse(pack.ReceivePackage.Context);
             if (jres["errno"].ToString() != "0")
             {
                 listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + jres["errmsg"].ToString());
@@ -428,14 +428,14 @@ namespace servctrl
 
         private bool UploadTCPStart( object param )
         {
-            MessagePackage pack = param as MessagePackage;
+            MessageData pack = param as MessageData;
 
-            if (!Utility.Check(pack.ReceivedMessages))
+            if (!Utility.Check(pack.ReceivePackage.Context))
             {
                 listBoxLog.Items.Add("Receive message is empty");
                 return false;
             }
-            JObject jres = JObject.Parse(pack.ReceivedMessages);
+            JObject jres = JObject.Parse(pack.ReceivePackage.Context);
             if (jres["errno"].ToString() != "0")
             {
                 listBoxLog.SelectedIndex = listBoxLog.Items.Add("Fialed! The Error Message is:" + jres["errmsg"].ToString());
