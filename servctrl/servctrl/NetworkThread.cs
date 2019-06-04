@@ -338,7 +338,7 @@ namespace Sloong
 
         public void WhenRecvDone(IAsyncResult res)
         {
-            long nIndex = (long)res.AsyncState;
+            long nIndex = Convert.ToInt64(res.AsyncState);
             MsgList.Remove(nIndex);
         }
     }
