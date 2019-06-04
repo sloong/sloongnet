@@ -108,16 +108,19 @@ int Sloong::EasyConnect::SSL_Write_Ex(SSL * ssl, char * buf, int len)
 long long Sloong::EasyConnect::RecvLengthData(int timeout)
 {
 	int bRes=0;
+	int nTimeout = timeout;
+	if( nTimeout != 0 )
+		nTimeout = 1;
     if( m_bUseLongLongSize ) {
         char nLen[s_llLen] = {0};
-		bRes = Read(nLen, s_llLen, timeout, false);
+		bRes = Read(nLen, s_llLen, nTimeout, false);
         if(bRes>1){
 			auto len = CUniversal::BytesToInt64(nLen);
         	return len;
 		}
     }else{
         char nLen[s_lLen] = {0};
-        bRes = Read(nLen, s_lLen, timeout, false);
+        bRes = Read(nLen, s_lLen, nTimeout, false);
 		if (bRes>1){
 			auto len = CUniversal::BytesToInt32(nLen);
         	return len;
