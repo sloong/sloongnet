@@ -139,13 +139,12 @@ void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 			case MessageFunction::ProcessMessage:
 				// Step 2: 根据收到的SerailNumber找到对应保存的来自客户端的Event对象
 				auto event_obj = m_mapPackageList.find(recvMsg->serialnumber());
-				if( event_obj == m_mapPackageList.end() )
-				{
+				if( event_obj == m_mapPackageList.end() ){
 					m_pLog->Error(CUniversal::Format("Event list no have target event data. SerailNumber:[%d]",pack->GetSerialNumber()));
 					return;
 				}
 				auto client_request_package = event_obj->second;
-				client_request_package->ResponsePackage(recvMsg);
+				client_request_package->ResponsePackage(recvMsg->context(),recvMsg->extenddata());
 
 				// Step 3: 发送相应数据
 				auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
@@ -153,11 +152,7 @@ void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 				response_event->SetDataPackage(client_request_package);
 				m_pControl->CallMessage(response_event);
 			break;
-
 		}
-
-
-		
 	}
 }
 

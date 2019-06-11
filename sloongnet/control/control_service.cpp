@@ -125,7 +125,7 @@ void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 			}
 		}break;
 	}
-	pack->ResponsePackage("",config.data(),config.length());
+	pack->ResponsePackage("",config);
 
 	auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
 	response_event->SetSocketID(pack->GetSocketID());
