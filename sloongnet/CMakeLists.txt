@@ -1,15 +1,11 @@
 cmake_minimum_required(VERSION 3.2)
 
-project(sloongnet_control)
+project(sloongnet)
 
 include_directories(
     "$(PROJECT_BINARY_DIR)"
     "$(PROJECT_BINARY_DIR)../"
-    "$(PROJECT_BINARY_DIR)../comm/interface"
-    "$(PROJECT_BINARY_DIR)../comm/events"
-    "$(PROJECT_BINARY_DIR)../comm/modules"
-    "$(PROJECT_BINARY_DIR)../comm/Message"
-    "$(PROJECT_BINARY_DIR)../reference"
+    "$(PROJECT_BINARY_DIR)../*"
     "/usr/include/glib-2.0"
 	# ubuntu path
     "/usr/lib/x86_64-linux-gnu/glib-2.0/include"
@@ -45,7 +41,7 @@ set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 
 #当前目录下所有源文件赋给SRC_LIST
 #AUX_SOURCE_DIRECTORY(. SRC_LIST) 
-file(GLOB_RECURSE COMM_SRC_LIST "../comm/*.c*")
+file(GLOB_RECURSE COMM_SRC_LIST "../*.c*")
 file(GLOB_RECURSE SRC_LIST "*.c*")
 list(APPEND SRC_LIST ${COMM_SRC_LIST})
 

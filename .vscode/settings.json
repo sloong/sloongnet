@@ -75,5 +75,5 @@
         "xutility": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
-    "terminal.integrated.shell.windows": "C:\\WINDOWS\\System32\\bash.exe"
+    "terminal.integrated.shell.windows": "C:\\WINDOWS\\System32\\wsl.exe"
 }

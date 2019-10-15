@@ -144,7 +144,7 @@
             },
             "pipeTransport": {
                 "pipeCwd": "",
-                "pipeProgram": "${env:windir}\\SysNative\\bash.exe",
+                "pipeProgram": "${env:windir}\\system32\\bash.exe",
                 "pipeArgs": [
                     "-c"
                 ],

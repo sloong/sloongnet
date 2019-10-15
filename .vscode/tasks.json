@@ -6,54 +6,7 @@
         {
             "label": "rebuild_message",
             "type": "shell",
-            "command": "./sloongnet/comm/Message/rebuild.sh",
-            "problemMatcher": []
-        },
-        {
-            "label": "build_proxy",
-            "type": "shell",
-            "command": "./build/build.sh proxy",
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "build_control",
-            "type": "shell",
-            "command": "./build/build.sh control",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "build_firewall",
-            "type": "shell",
-            "command": "./build/build.sh firewall",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "build_process",
-            "type": "shell",
-            "command": "./build/build.sh process",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": "$gcc"
-        },
-        {
-            "label": "build_data",
-            "type": "shell",
-            "command": "./build/build.sh data",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "command": "./sloongnet/Message/rebuild.sh",
             "problemMatcher": []
         },
         {

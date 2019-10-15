@@ -1,3 +1,10 @@
+/*
+ * @Author: WCB
+ * @Date: 2019-10-15 10:41:43
+ * @LastEditors: WCB
+ * @LastEditTime: 2019-10-15 10:41:43
+ * @Description: file content
+ */
 #include "base_service.h"
 
 #include "ControlHub.h"
@@ -17,7 +24,7 @@ void CSloongBaseService::PrientHelp()
     cout << "param: address:port" << endl;
 }
 
- void CSloongBaseService::sloong_terminator()
+void CSloongBaseService::sloong_terminator()
 {
     cout << "Unkonw error happened, system will shutdown. " << endl;
     CUtility::write_call_stack();
