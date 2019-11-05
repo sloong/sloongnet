@@ -92,22 +92,35 @@ void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 	string config;
 	switch( msgPack->function() )
 	{
-		case MessageFunction::GetGeneralConfig:
+		case MessageFunction::GetServerConfig:
 		{
-			m_pLog->Verbos(CUniversal::Format("Porcess [GetGerenalConfig] request: sender[%d]",msgPack->sender()));
-			auto item = m_pAllConfig->m_oServerConfigList.find(msgPack->sender());
-			if( item == m_pAllConfig->m_oServerConfigList.end() )
+			auto sender = msg->senderuuid();
+			if( sender.size() == 0 )
 			{
-				// Error
+				// TODO: 这里需要根据情况增加一个ip显示。
+				m_pLog->Verbos(CUniversal::Format("New module[IP:] add to system. wait configuation. ");
 			}
-			(*item).second.SerializeToString(&config);
+			else
+			{
+				m_pLog->Verbos(CUniversal::Format("Porcess [GetGerenalConfig] request: sender[%d]",sender);
+				auto item = m_pAllConfig->m_oServerConfigList.find(sender);
+				if( item != m_pAllConfig->m_oServerConfigList.end() )
+				{
+					(*item).second.SerializeToString(&config);
+				}
+				else
+				{
+					// Error
+					m_pLog->Verbos(CUniversal::Format("Module[IP:|UUID:] is no registe in system. wait admin process.");
+				}
+			}
 		}break;
 		case MessageFunction::GetSpecialConfig:
 		{
 			m_pLog->Verbos(CUniversal::Format("Porcess [GetSpecialConfig] request: sender[%d]",msgPack->sender()));
 			switch(msgPack->sender())
 			{
-				case ModuleType::Proxy:
+				case ModuleType::Gateway:
 					m_pAllConfig->m_oProxyConfig.SerializeToString(&config);
 					break;
 				case ModuleType::Process:

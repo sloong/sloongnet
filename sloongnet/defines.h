@@ -34,14 +34,8 @@ enum MessageFunction
 	// Response: Yes
 	// Response data: ExtendData - config data is not UTF8 string. cannot save in context field.
 	// Note: Get the general server config data. the data type is GLOBAL_CONFIG.
-	GetGeneralConfig,
+	GetServerConfig,
 
-	// Sender: All 
-	// Processer: Control
-	// Response: Yes
-	// Response data: ExtendData - config data is not UTF8 string. cannot save in context field.
-	// Note: Get the special server config data, the data type is different with Sender.
-	GetSpecialConfig,
 
 	// Sender: Process 
 	// Processer: Control
@@ -57,18 +51,6 @@ enum MessageFunction
 	
 
 };
-
-enum ModuleType
-{
-	Undefine,
-	Proxy,
-	ControlCenter,
-	Process,
-	Firewall,
-	DataCenter,
-	DBCenter,
-};
-
 
 typedef enum g_DataCenter_Event_Type
 {

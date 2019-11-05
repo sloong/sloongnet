@@ -53,10 +53,8 @@ namespace Sloong
 		unique_ptr<CLog>	m_pLog;
 
 		u_int64_t	m_nSerialNumber=0;
-        ProtobufMessage::GLOBAL_CONFIG m_oServerConfig;
-		string      m_szConfigData;
+        Protocol::GLOBAL_CONFIG m_oServerConfig;
 		CEasySync			m_oSync;
-        ModuleType      m_emModuleType = ModuleType::Undefine; 
     public:
         static unique_ptr<CSloongBaseService> g_pAppService;
 	};

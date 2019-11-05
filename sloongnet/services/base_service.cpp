@@ -45,14 +45,40 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
 }
 
 
-string CSloongBaseService::GetConfigFromControl(MessageFunction func)
+bool ReadAllText(string path, string& out)
+{
+    FILE* fp = NULL;
+
+	fp = fopen(path.c_str(), "r");
+    if( fp )
+    {
+        fseek(fp, 0, SEEK_END);
+        int len = ftell(fp);
+        rewind(fp);    //指针复位
+        char* buf = new char[len];
+        memset(buf,0,len);
+        fread(buf, 1, len, fp);
+        fclose(fp);
+        out = string(buf,len);
+        SAFE_DELETE_ARR(buf);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+string CSloongBaseService::GetConfigFromControl()
 {
     auto get_config_request_buf = make_shared<MessagePackage>();
-    get_config_request_buf->set_function(func);
-    get_config_request_buf->set_sender(m_emModuleType);
-    get_config_request_buf->set_receiver(ModuleType::ControlCenter);
-    get_config_request_buf->set_type(MessagePackage_MsgTypes::MessagePackage_MsgTypes_Request);
-    
+    get_config_request_buf->set_function(MessageFunction::GetServerConfig);
+    get_config_request_buf->set_receiver(Protocol::ModuleType::Control);
+    get_config_request_buf->set_type(Protocol::MsgTypes::Request);
+    string uuid;
+    if( ReadAllText("uuid.dat",uuid))
+        get_config_request_buf->set_sender(uuid.c_str());
     
     CDataTransPackage dataPackage;
     dataPackage.Initialize(m_pSocket);
@@ -87,47 +113,57 @@ CResult CSloongBaseService::Initialize(int argc, char** args)
     // SIGSEGV:当一个进程执行了一个无效的内存引用，或发生段错误时发送给它的信号
     signal(SIGSEGV, &on_sigint);
     
-        if (argc != 2)
-        {
-            PrientHelp();
-            return CResult(false);
-        }
+    // 这里参数有两种形式。
+    // 1 只有端口。 此时为控制中心模式
+    // 2 地址：端口。此时为非控制中心模式
+    if (argc != 2)
+    {
+        PrientHelp();
+        return CResult(false);
+    }
 
-        if(m_emModuleType != ModuleType::ControlCenter )
-        {
-            if( !ConnectToControl(args[1]))
-                return CResult(false,"Connect to control fialed.");
+    vector<string> addr;
+    CUniversal::splitString(args[1],addr,":");
 
+    if(addr.size()>1)
+    {
+        if( !ConnectToControl(args[1]))
+            return CResult(false,"Connect to control fialed.");
+        else
             cout << "Connect to control succeed." << endl;
+
+        do
+        {
             cout << "Start get configuation." << endl;
-            auto serverConfig = GetConfigFromControl(MessageFunction::GetGeneralConfig);
+            auto serverConfig = GetConfigFromControl();
             if(!m_oServerConfig.ParseFromString(serverConfig))
                 return CResult(false,"Parse the config struct error.");
-            
-            cout << "Get configuation succeed." << endl;
-            
-            cout << "Start get special configuation." << endl;
-            m_szConfigData = GetConfigFromControl(MessageFunction::GetSpecialConfig);
-            cout << "Get special configuation succeed." << endl;
-        }
+        } while (m_oServerConfig.type() != ModuleType::Unconfigured);
+
+        cout << "Get configuation succeed." << endl;
+    }
+
+    #ifdef DEBUG
+    m_oServerConfig.set_debugmode(true);
+    m_oServerConfig.set_loglevel(LOGLEVEL::All);
+    #endif
+    
+    m_pLog->Initialize(m_oServerConfig.logpath(), "", m_oServerConfig.debugmode(), LOGLEVEL(m_oServerConfig.loglevel()), LOGTYPE::DAY);
         
-        //m_pLog->Initialize(serv_config.logpath(), "", serv_config.debugmode(), LOGLEVEL(serv_config.loglevel()), LOGTYPE::DAY);
-        m_pLog->Initialize(m_oServerConfig.logpath(), "", true, LOGLEVEL::All, LOGTYPE::DAY);
-        
-        auto res = m_pControl->Initialize(m_oServerConfig.mqthreadquantity());
-        if( res.IsSucceed() ){
-            m_pControl->Add(DATA_ITEM::GlobalConfiguation, &m_oServerConfig);
-            m_pControl->Add(Logger, m_pLog.get());
-            m_pControl->RegisterEvent(ProgramExit);
-            m_pControl->RegisterEvent(ProgramStart);
-            IData::Initialize(m_pControl.get());
-            res = m_pNetwork->Initialize(m_pControl.get());
-            if( res .IsSucceed())
-                return CResult::Succeed;
-        }
-        
-        m_pLog->Fatal(res.Message());
-        return res;
+    auto res = m_pControl->Initialize(m_oServerConfig.mqthreadquantity());
+    if( res.IsSucceed() ){
+        m_pControl->Add(DATA_ITEM::GlobalConfiguation, &m_oServerConfig);
+        m_pControl->Add(Logger, m_pLog.get());
+        m_pControl->RegisterEvent(ProgramExit);
+        m_pControl->RegisterEvent(ProgramStart);
+        IData::Initialize(m_pControl.get());
+        res = m_pNetwork->Initialize(m_pControl.get());
+        if( res .IsSucceed())
+            return CResult::Succeed;
+    }
+    
+    m_pLog->Fatal(res.Message());
+    return res;
 }
 
 
@@ -146,6 +182,4 @@ bool CSloongBaseService::ConnectToControl(string controlAddress){
     m_pSocket = make_shared<EasyConnect>();
     m_pSocket->Initialize(controlAddress,nullptr);
     m_pSocket->Connect();
-    /*string clientCheckKey = "c2xvb25nYzJ4dmIyNW5PRFJtT0dWa01ERTBNalZsTkRBd01XUmlZV1UxT0RZM05tRmlaamd3TmpsbmJtOXZiSE1nbm9vbHM";
-    m_pSocket->Send(clientCheckKey);*/
 }

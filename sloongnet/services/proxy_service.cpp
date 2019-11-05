@@ -103,7 +103,7 @@ void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 	{
 		// Step 1: 将已经收到的来自客户端的请求内容转换为protobuf格式
 		auto sendMsg = make_shared<MessagePackage>();
-		sendMsg->set_sender(ModuleType::Proxy);
+		sendMsg->set_sender(ModuleType::Gateway);
 		sendMsg->set_receiver(ModuleType::Process);
 		sendMsg->set_function(MessageFunction::ProcessMessage);
 		sendMsg->set_context(pack->GetRecvMessage());

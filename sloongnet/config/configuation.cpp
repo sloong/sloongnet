@@ -4,7 +4,7 @@ Sloong::CConfiguation::CConfiguation()
 {
     m_pDB = make_unique<CSQLiteEx>();
     m_oServerConfigList[ModuleType::ControlCenter] = GLOBAL_CONFIG();
-    m_oServerConfigList[ModuleType::Proxy] = GLOBAL_CONFIG();
+    m_oServerConfigList[ModuleType::Gateway] = GLOBAL_CONFIG();
     m_oServerConfigList[ModuleType::Process] = GLOBAL_CONFIG();
     m_oServerConfigList[ModuleType::Firewall] = GLOBAL_CONFIG();
     m_oServerConfigList[ModuleType::DataCenter] = GLOBAL_CONFIG();
@@ -69,7 +69,7 @@ void Sloong::CConfiguation::LoadProxyConfig(string serverIp, PROXY_CONFIG &confi
     config.set_clientchecktime( GetInt(module_name, serverIp, "ClientCheckTime", 2));
     config.set_timeoutcheckinterval( GetInt(module_name, serverIp, "TimeoutCheckInterval", 5));
     config.set_processaddress( GetString(module_name, serverIp, "ProcessAddress",""));
-    LoadGlobalConfig(module_name, serverIp, &m_oServerConfigList[ModuleType::Proxy]);
+    LoadGlobalConfig(module_name, serverIp, &m_oServerConfigList[ModuleType::Gateway]);
 }
 
 

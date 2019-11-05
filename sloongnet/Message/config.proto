@@ -1,21 +1,44 @@
 syntax = "proto3";
-package ProtobufMessage;
+package Protocol;
 
-message MessagePackage
-{
-    int32 Function = 1;
-    int32 PriorityLevel = 2;
-    int32 SerialNumber = 3;
-    string CheckString = 4;
-    int32 Sender = 5;
-    int32 Receiver = 6;
-    string Context = 7;
-    bytes ExtendData = 8;
+    // Type
+    enum ModuleType{
+        Unconfigured = 0;
+        Control = 1;
+        Firewall = 2;
+        Gateway = 3;
+        Data = 4;
+        Process = 5;
+        DB = 6;
+    }
+
     enum MsgTypes{
         Request = 0;
         Response = 1;
     }
-    MsgTypes type = 9;
+
+message MessagePackage
+{
+    // 功能
+    int32 Function = 1;
+    // 优先级
+    int32 PriorityLevel = 2;
+    // 流水号
+    int32 SerialNumber = 3;
+    // 校验串
+    string CheckString = 4;
+    // 发送者的唯一标识符
+    string SenderUUID = 5;
+    // 指定接收者为指定类型的所有成员。如果指定了唯一接收者那么则忽略此选项。
+    int32 Receiver = 6;
+    // 指定唯一接收者
+    string ReceiverUUID = 7;
+    // 消息内容
+    string Context = 8;
+    // 扩展数据
+    bytes ExtendData = 9;
+    // 指示发送还是接收
+    MsgTypes Type = 10;
 }
 
 message GLOBAL_CONFIG
@@ -39,6 +62,10 @@ message GLOBAL_CONFIG
     int32   EPollThreadQuantity=12;// EPoll event process thread quantity
     int32   ProcessThreadQuantity=13;// work thread for DataPackage process quantity
     int32   PrioritySize=14;// Priority Size for the list. the priority level cannot bigger than this value.
+
+
+    ModuleType Type = 15;
+    bytes Config = 16;
 };
 
 message CONTROL_CONFIG
@@ -61,7 +88,7 @@ message DATA_CONFIG
     int32     DataRecvTime=2;
 } 
 
-message PROXY_CONFIG{
+message GATEWAY_CONFIG{
     int32     ClientCheckTime=1;
     string  ClientCheckKey=2;
     int32     TimeoutCheckInterval=3;

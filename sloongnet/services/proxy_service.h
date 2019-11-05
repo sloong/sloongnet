@@ -9,7 +9,7 @@ namespace Sloong
 	class SloongNetProxy : public CSloongBaseService
 	{
 	public:
-		SloongNetProxy() : CSloongBaseService(ModuleType::Proxy){}
+		SloongNetProxy() : CSloongBaseService(ModuleType::Gateway){}
 
 		CResult Initialize(int argc, char** args);
 		

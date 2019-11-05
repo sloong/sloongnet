@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace ProtobufMessage {
+namespace Protocol {
 
   /// <summary>Holder for reflection information generated from config.proto</summary>
   public static partial class ConfigReflection {
@@ -22,49 +22,73 @@ namespace ProtobufMessage {
     static ConfigReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cgxjb25maWcucHJvdG8SD1Byb3RvYnVmTWVzc2FnZSKKAgoOTWVzc2FnZVBh",
-            "Y2thZ2USEAoIRnVuY3Rpb24YASABKAUSFQoNUHJpb3JpdHlMZXZlbBgCIAEo",
-            "BRIUCgxTZXJpYWxOdW1iZXIYAyABKAUSEwoLQ2hlY2tTdHJpbmcYBCABKAkS",
-            "DgoGU2VuZGVyGAUgASgFEhAKCFJlY2VpdmVyGAYgASgFEg8KB0NvbnRleHQY",
-            "ByABKAkSEgoKRXh0ZW5kRGF0YRgIIAEoDBI2CgR0eXBlGAkgASgOMiguUHJv",
-            "dG9idWZNZXNzYWdlLk1lc3NhZ2VQYWNrYWdlLk1zZ1R5cGVzIiUKCE1zZ1R5",
-            "cGVzEgsKB1JlcXVlc3QQABIMCghSZXNwb25zZRABIsECCg1HTE9CQUxfQ09O",
-            "RklHEhIKCkxpc3RlblBvcnQYASABKAUSEQoJRW5hYmxlU1NMGAIgASgIEhQK",
-            "DENlcnRGaWxlUGF0aBgDIAEoCRITCgtLZXlGaWxlUGF0aBgEIAEoCRISCgpD",
-            "ZXJ0UGFzc3dkGAUgASgJEhMKC0Nvbm5lY3RUaW1lGAYgASgFEhMKC1JlY2Vp",
-            "dmVUaW1lGAcgASgFEg8KB0xvZ1BhdGgYCCABKAkSEAoITG9nTGV2ZWwYCSAB",
-            "KAUSEQoJRGVidWdNb2RlGAogASgIEhgKEE1RVGhyZWFkUXVhbnRpdHkYCyAB",
-            "KAUSGwoTRVBvbGxUaHJlYWRRdWFudGl0eRgMIAEoBRIdChVQcm9jZXNzVGhy",
-            "ZWFkUXVhbnRpdHkYDSABKAUSFAoMUHJpb3JpdHlTaXplGA4gASgFIiMKDkNP",
-            "TlRST0xfQ09ORklHEhEKCUJsb2NrVGltZRgBIAEoBSJmCglEQl9DT05GSUcS",
-            "FQoNU2VydmVyQWRkcmVzcxgBIAEoCRISCgpTZXJ2ZXJQb3J0GAIgASgFEgwK",
-            "BFVzZXIYAyABKAkSDgoGUGFzc3dkGAQgASgJEhAKCERhdGFiYXNlGAUgASgJ",
-            "IjwKC0RBVEFfQ09ORklHEhcKD0RhdGFSZWNlaXZlUG9ydBgBIAEoBRIUCgxE",
-            "YXRhUmVjdlRpbWUYAiABKAUiigEKDFBST1hZX0NPTkZJRxIXCg9DbGllbnRD",
-            "aGVja1RpbWUYASABKAUSFgoOQ2xpZW50Q2hlY2tLZXkYAiABKAkSHAoUVGlt",
-            "ZW91dENoZWNrSW50ZXJ2YWwYAyABKAUSEwoLVGltZW91dFRpbWUYBCABKAUS",
-            "FgoOUHJvY2Vzc0FkZHJlc3MYBSABKAkiJAoPRklSRVdBTExfQ09ORklHEhEK",
-            "CUJsb2NrVGltZRgBIAEoBSKxAQoOUFJPQ0VTU19DT05GSUcSGgoSTHVhQ29u",
-            "dGV4dFF1YW50aXR5GAEgASgFEhcKD0x1YVNjcmlwdEZvbGRlchgCIAEoCRIU",
-            "CgxMdWFFbnRyeUZpbGUYAyABKAkSGAoQTHVhRW50cnlGdW5jdGlvbhgEIAEo",
-            "CRIaChJMdWFQcm9jZXNzRnVuY3Rpb24YBSABKAkSHgoWTHVhU29ja2V0Q2xv",
-            "c2VGdW5jdGlvbhgGIAEoCWIGcHJvdG8z"));
+            "Cgxjb25maWcucHJvdG8SCFByb3RvY29sIucBCg5NZXNzYWdlUGFja2FnZRIQ",
+            "CghGdW5jdGlvbhgBIAEoBRIVCg1Qcmlvcml0eUxldmVsGAIgASgFEhQKDFNl",
+            "cmlhbE51bWJlchgDIAEoBRITCgtDaGVja1N0cmluZxgEIAEoCRISCgpTZW5k",
+            "ZXJVVUlEGAUgASgJEhAKCFJlY2VpdmVyGAYgASgFEhQKDFJlY2VpdmVyVVVJ",
+            "RBgHIAEoCRIPCgdDb250ZXh0GAggASgJEhIKCkV4dGVuZERhdGEYCSABKAwS",
+            "IAoEVHlwZRgKIAEoDjISLlByb3RvY29sLk1zZ1R5cGVzIvUCCg1HTE9CQUxf",
+            "Q09ORklHEhIKCkxpc3RlblBvcnQYASABKAUSEQoJRW5hYmxlU1NMGAIgASgI",
+            "EhQKDENlcnRGaWxlUGF0aBgDIAEoCRITCgtLZXlGaWxlUGF0aBgEIAEoCRIS",
+            "CgpDZXJ0UGFzc3dkGAUgASgJEhMKC0Nvbm5lY3RUaW1lGAYgASgFEhMKC1Jl",
+            "Y2VpdmVUaW1lGAcgASgFEg8KB0xvZ1BhdGgYCCABKAkSEAoITG9nTGV2ZWwY",
+            "CSABKAUSEQoJRGVidWdNb2RlGAogASgIEhgKEE1RVGhyZWFkUXVhbnRpdHkY",
+            "CyABKAUSGwoTRVBvbGxUaHJlYWRRdWFudGl0eRgMIAEoBRIdChVQcm9jZXNz",
+            "VGhyZWFkUXVhbnRpdHkYDSABKAUSFAoMUHJpb3JpdHlTaXplGA4gASgFEiIK",
+            "BFR5cGUYDyABKA4yFC5Qcm90b2NvbC5Nb2R1bGVUeXBlEg4KBkNvbmZpZxgQ",
+            "IAEoDCIjCg5DT05UUk9MX0NPTkZJRxIRCglCbG9ja1RpbWUYASABKAUiZgoJ",
+            "REJfQ09ORklHEhUKDVNlcnZlckFkZHJlc3MYASABKAkSEgoKU2VydmVyUG9y",
+            "dBgCIAEoBRIMCgRVc2VyGAMgASgJEg4KBlBhc3N3ZBgEIAEoCRIQCghEYXRh",
+            "YmFzZRgFIAEoCSI8CgtEQVRBX0NPTkZJRxIXCg9EYXRhUmVjZWl2ZVBvcnQY",
+            "ASABKAUSFAoMRGF0YVJlY3ZUaW1lGAIgASgFIowBCg5HQVRFV0FZX0NPTkZJ",
+            "RxIXCg9DbGllbnRDaGVja1RpbWUYASABKAUSFgoOQ2xpZW50Q2hlY2tLZXkY",
+            "AiABKAkSHAoUVGltZW91dENoZWNrSW50ZXJ2YWwYAyABKAUSEwoLVGltZW91",
+            "dFRpbWUYBCABKAUSFgoOUHJvY2Vzc0FkZHJlc3MYBSABKAkiJAoPRklSRVdB",
+            "TExfQ09ORklHEhEKCUJsb2NrVGltZRgBIAEoBSKxAQoOUFJPQ0VTU19DT05G",
+            "SUcSGgoSTHVhQ29udGV4dFF1YW50aXR5GAEgASgFEhcKD0x1YVNjcmlwdEZv",
+            "bGRlchgCIAEoCRIUCgxMdWFFbnRyeUZpbGUYAyABKAkSGAoQTHVhRW50cnlG",
+            "dW5jdGlvbhgEIAEoCRIaChJMdWFQcm9jZXNzRnVuY3Rpb24YBSABKAkSHgoW",
+            "THVhU29ja2V0Q2xvc2VGdW5jdGlvbhgGIAEoCSplCgpNb2R1bGVUeXBlEhAK",
+            "DFVuY29uZmlndXJlZBAAEgsKB0NvbnRyb2wQARIMCghGaXJld2FsbBACEgsK",
+            "B0dhdGV3YXkQAxIICgREYXRhEAQSCwoHUHJvY2VzcxAFEgYKAkRCEAYqJQoI",
+            "TXNnVHlwZXMSCwoHUmVxdWVzdBAAEgwKCFJlc3BvbnNlEAFiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::ProtobufMessage.MessagePackage), global::ProtobufMessage.MessagePackage.Parser, new[]{ "Function", "PriorityLevel", "SerialNumber", "CheckString", "Sender", "Receiver", "Context", "ExtendData", "Type" }, null, new[]{ typeof(global::ProtobufMessage.MessagePackage.Types.MsgTypes) }, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::ProtobufMessage.GLOBAL_CONFIG), global::ProtobufMessage.GLOBAL_CONFIG.Parser, new[]{ "ListenPort", "EnableSSL", "CertFilePath", "KeyFilePath", "CertPasswd", "ConnectTime", "ReceiveTime", "LogPath", "LogLevel", "DebugMode", "MQThreadQuantity", "EPollThreadQuantity", "ProcessThreadQuantity", "PrioritySize" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::ProtobufMessage.CONTROL_CONFIG), global::ProtobufMessage.CONTROL_CONFIG.Parser, new[]{ "BlockTime" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::ProtobufMessage.DB_CONFIG), global::ProtobufMessage.DB_CONFIG.Parser, new[]{ "ServerAddress", "ServerPort", "User", "Passwd", "Database" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::ProtobufMessage.DATA_CONFIG), global::ProtobufMessage.DATA_CONFIG.Parser, new[]{ "DataReceivePort", "DataRecvTime" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::ProtobufMessage.PROXY_CONFIG), global::ProtobufMessage.PROXY_CONFIG.Parser, new[]{ "ClientCheckTime", "ClientCheckKey", "TimeoutCheckInterval", "TimeoutTime", "ProcessAddress" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::ProtobufMessage.FIREWALL_CONFIG), global::ProtobufMessage.FIREWALL_CONFIG.Parser, new[]{ "BlockTime" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::ProtobufMessage.PROCESS_CONFIG), global::ProtobufMessage.PROCESS_CONFIG.Parser, new[]{ "LuaContextQuantity", "LuaScriptFolder", "LuaEntryFile", "LuaEntryFunction", "LuaProcessFunction", "LuaSocketCloseFunction" }, null, null, null)
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ModuleType), typeof(global::Protocol.MsgTypes), }, new pbr::GeneratedClrTypeInfo[] {
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.MessagePackage), global::Protocol.MessagePackage.Parser, new[]{ "Function", "PriorityLevel", "SerialNumber", "CheckString", "SenderUUID", "Receiver", "ReceiverUUID", "Context", "ExtendData", "Type" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.GLOBAL_CONFIG), global::Protocol.GLOBAL_CONFIG.Parser, new[]{ "ListenPort", "EnableSSL", "CertFilePath", "KeyFilePath", "CertPasswd", "ConnectTime", "ReceiveTime", "LogPath", "LogLevel", "DebugMode", "MQThreadQuantity", "EPollThreadQuantity", "ProcessThreadQuantity", "PrioritySize", "Type", "Config" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.CONTROL_CONFIG), global::Protocol.CONTROL_CONFIG.Parser, new[]{ "BlockTime" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.DB_CONFIG), global::Protocol.DB_CONFIG.Parser, new[]{ "ServerAddress", "ServerPort", "User", "Passwd", "Database" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.DATA_CONFIG), global::Protocol.DATA_CONFIG.Parser, new[]{ "DataReceivePort", "DataRecvTime" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.GATEWAY_CONFIG), global::Protocol.GATEWAY_CONFIG.Parser, new[]{ "ClientCheckTime", "ClientCheckKey", "TimeoutCheckInterval", "TimeoutTime", "ProcessAddress" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.FIREWALL_CONFIG), global::Protocol.FIREWALL_CONFIG.Parser, new[]{ "BlockTime" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.PROCESS_CONFIG), global::Protocol.PROCESS_CONFIG.Parser, new[]{ "LuaContextQuantity", "LuaScriptFolder", "LuaEntryFile", "LuaEntryFunction", "LuaProcessFunction", "LuaSocketCloseFunction" }, null, null, null)
           }));
     }
     #endregion
 
   }
+  #region Enums
+  /// <summary>
+  ///  Type
+  /// </summary>
+  public enum ModuleType {
+    [pbr::OriginalName("Unconfigured")] Unconfigured = 0,
+    [pbr::OriginalName("Control")] Control = 1,
+    [pbr::OriginalName("Firewall")] Firewall = 2,
+    [pbr::OriginalName("Gateway")] Gateway = 3,
+    [pbr::OriginalName("Data")] Data = 4,
+    [pbr::OriginalName("Process")] Process = 5,
+    [pbr::OriginalName("DB")] Db = 6,
+  }
+
+  public enum MsgTypes {
+    [pbr::OriginalName("Request")] Request = 0,
+    [pbr::OriginalName("Response")] Response = 1,
+  }
+
+  #endregion
+
   #region Messages
   public sealed partial class MessagePackage : pb::IMessage<MessagePackage> {
     private static readonly pb::MessageParser<MessagePackage> _parser = new pb::MessageParser<MessagePackage>(() => new MessagePackage());
@@ -73,7 +97,7 @@ namespace ProtobufMessage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::ProtobufMessage.ConfigReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Protocol.ConfigReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -94,8 +118,9 @@ namespace ProtobufMessage {
       priorityLevel_ = other.priorityLevel_;
       serialNumber_ = other.serialNumber_;
       checkString_ = other.checkString_;
-      sender_ = other.sender_;
+      senderUUID_ = other.senderUUID_;
       receiver_ = other.receiver_;
+      receiverUUID_ = other.receiverUUID_;
       context_ = other.context_;
       extendData_ = other.extendData_;
       type_ = other.type_;
@@ -109,6 +134,9 @@ namespace ProtobufMessage {
     /// <summary>Field number for the "Function" field.</summary>
     public const int FunctionFieldNumber = 1;
     private int function_;
+    /// <summary>
+    ///  功能
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Function {
       get { return function_; }
@@ -120,6 +148,9 @@ namespace ProtobufMessage {
     /// <summary>Field number for the "PriorityLevel" field.</summary>
     public const int PriorityLevelFieldNumber = 2;
     private int priorityLevel_;
+    /// <summary>
+    ///  优先级
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int PriorityLevel {
       get { return priorityLevel_; }
@@ -131,6 +162,9 @@ namespace ProtobufMessage {
     /// <summary>Field number for the "SerialNumber" field.</summary>
     public const int SerialNumberFieldNumber = 3;
     private int serialNumber_;
+    /// <summary>
+    ///  流水号
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int SerialNumber {
       get { return serialNumber_; }
@@ -142,6 +176,9 @@ namespace ProtobufMessage {
     /// <summary>Field number for the "CheckString" field.</summary>
     public const int CheckStringFieldNumber = 4;
     private string checkString_ = "";
+    /// <summary>
+    ///  校验串
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string CheckString {
       get { return checkString_; }
@@ -150,20 +187,26 @@ namespace ProtobufMessage {
       }
     }
 
-    /// <summary>Field number for the "Sender" field.</summary>
-    public const int SenderFieldNumber = 5;
-    private int sender_;
+    /// <summary>Field number for the "SenderUUID" field.</summary>
+    public const int SenderUUIDFieldNumber = 5;
+    private string senderUUID_ = "";
+    /// <summary>
+    ///  发送者的唯一标识符
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int Sender {
-      get { return sender_; }
+    public string SenderUUID {
+      get { return senderUUID_; }
       set {
-        sender_ = value;
+        senderUUID_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
     /// <summary>Field number for the "Receiver" field.</summary>
     public const int ReceiverFieldNumber = 6;
     private int receiver_;
+    /// <summary>
+    ///  指定接收者为指定类型的所有成员。如果指定了唯一接收者那么则忽略此选项。
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Receiver {
       get { return receiver_; }
@@ -172,9 +215,26 @@ namespace ProtobufMessage {
       }
     }
 
+    /// <summary>Field number for the "ReceiverUUID" field.</summary>
+    public const int ReceiverUUIDFieldNumber = 7;
+    private string receiverUUID_ = "";
+    /// <summary>
+    ///  指定唯一接收者
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string ReceiverUUID {
+      get { return receiverUUID_; }
+      set {
+        receiverUUID_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     /// <summary>Field number for the "Context" field.</summary>
-    public const int ContextFieldNumber = 7;
+    public const int ContextFieldNumber = 8;
     private string context_ = "";
+    /// <summary>
+    ///  消息内容
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string Context {
       get { return context_; }
@@ -184,8 +244,11 @@ namespace ProtobufMessage {
     }
 
     /// <summary>Field number for the "ExtendData" field.</summary>
-    public const int ExtendDataFieldNumber = 8;
+    public const int ExtendDataFieldNumber = 9;
     private pb::ByteString extendData_ = pb::ByteString.Empty;
+    /// <summary>
+    ///  扩展数据
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pb::ByteString ExtendData {
       get { return extendData_; }
@@ -194,11 +257,14 @@ namespace ProtobufMessage {
       }
     }
 
-    /// <summary>Field number for the "type" field.</summary>
-    public const int TypeFieldNumber = 9;
-    private global::ProtobufMessage.MessagePackage.Types.MsgTypes type_ = 0;
+    /// <summary>Field number for the "Type" field.</summary>
+    public const int TypeFieldNumber = 10;
+    private global::Protocol.MsgTypes type_ = 0;
+    /// <summary>
+    ///  指示发送还是接收
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::ProtobufMessage.MessagePackage.Types.MsgTypes Type {
+    public global::Protocol.MsgTypes Type {
       get { return type_; }
       set {
         type_ = value;
@@ -222,8 +288,9 @@ namespace ProtobufMessage {
       if (PriorityLevel != other.PriorityLevel) return false;
       if (SerialNumber != other.SerialNumber) return false;
       if (CheckString != other.CheckString) return false;
-      if (Sender != other.Sender) return false;
+      if (SenderUUID != other.SenderUUID) return false;
       if (Receiver != other.Receiver) return false;
+      if (ReceiverUUID != other.ReceiverUUID) return false;
       if (Context != other.Context) return false;
       if (ExtendData != other.ExtendData) return false;
       if (Type != other.Type) return false;
@@ -237,8 +304,9 @@ namespace ProtobufMessage {
       if (PriorityLevel != 0) hash ^= PriorityLevel.GetHashCode();
       if (SerialNumber != 0) hash ^= SerialNumber.GetHashCode();
       if (CheckString.Length != 0) hash ^= CheckString.GetHashCode();
-      if (Sender != 0) hash ^= Sender.GetHashCode();
+      if (SenderUUID.Length != 0) hash ^= SenderUUID.GetHashCode();
       if (Receiver != 0) hash ^= Receiver.GetHashCode();
+      if (ReceiverUUID.Length != 0) hash ^= ReceiverUUID.GetHashCode();
       if (Context.Length != 0) hash ^= Context.GetHashCode();
       if (ExtendData.Length != 0) hash ^= ExtendData.GetHashCode();
       if (Type != 0) hash ^= Type.GetHashCode();
@@ -268,24 +336,28 @@ namespace ProtobufMessage {
         output.WriteRawTag(34);
         output.WriteString(CheckString);
       }
-      if (Sender != 0) {
-        output.WriteRawTag(40);
-        output.WriteInt32(Sender);
+      if (SenderUUID.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(SenderUUID);
       }
       if (Receiver != 0) {
         output.WriteRawTag(48);
         output.WriteInt32(Receiver);
       }
-      if (Context.Length != 0) {
+      if (ReceiverUUID.Length != 0) {
         output.WriteRawTag(58);
+        output.WriteString(ReceiverUUID);
+      }
+      if (Context.Length != 0) {
+        output.WriteRawTag(66);
         output.WriteString(Context);
       }
       if (ExtendData.Length != 0) {
-        output.WriteRawTag(66);
+        output.WriteRawTag(74);
         output.WriteBytes(ExtendData);
       }
       if (Type != 0) {
-        output.WriteRawTag(72);
+        output.WriteRawTag(80);
         output.WriteEnum((int) Type);
       }
     }
@@ -305,11 +377,14 @@ namespace ProtobufMessage {
       if (CheckString.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(CheckString);
       }
-      if (Sender != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Sender);
+      if (SenderUUID.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(SenderUUID);
       }
       if (Receiver != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(Receiver);
+      }
+      if (ReceiverUUID.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ReceiverUUID);
       }
       if (Context.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Context);
@@ -340,11 +415,14 @@ namespace ProtobufMessage {
       if (other.CheckString.Length != 0) {
         CheckString = other.CheckString;
       }
-      if (other.Sender != 0) {
-        Sender = other.Sender;
+      if (other.SenderUUID.Length != 0) {
+        SenderUUID = other.SenderUUID;
       }
       if (other.Receiver != 0) {
         Receiver = other.Receiver;
+      }
+      if (other.ReceiverUUID.Length != 0) {
+        ReceiverUUID = other.ReceiverUUID;
       }
       if (other.Context.Length != 0) {
         Context = other.Context;
@@ -381,8 +459,8 @@ namespace ProtobufMessage {
             CheckString = input.ReadString();
             break;
           }
-          case 40: {
-            Sender = input.ReadInt32();
+          case 42: {
+            SenderUUID = input.ReadString();
             break;
           }
           case 48: {
@@ -390,32 +468,24 @@ namespace ProtobufMessage {
             break;
           }
           case 58: {
-            Context = input.ReadString();
+            ReceiverUUID = input.ReadString();
             break;
           }
           case 66: {
+            Context = input.ReadString();
+            break;
+          }
+          case 74: {
             ExtendData = input.ReadBytes();
             break;
           }
-          case 72: {
-            type_ = (global::ProtobufMessage.MessagePackage.Types.MsgTypes) input.ReadEnum();
+          case 80: {
+            type_ = (global::Protocol.MsgTypes) input.ReadEnum();
             break;
           }
         }
       }
     }
-
-    #region Nested types
-    /// <summary>Container for nested types declared in the MessagePackage message type.</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static partial class Types {
-      public enum MsgTypes {
-        [pbr::OriginalName("Request")] Request = 0,
-        [pbr::OriginalName("Response")] Response = 1,
-      }
-
-    }
-    #endregion
 
   }
 
@@ -426,7 +496,7 @@ namespace ProtobufMessage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::ProtobufMessage.ConfigReflection.Descriptor.MessageTypes[1]; }
+      get { return global::Protocol.ConfigReflection.Descriptor.MessageTypes[1]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -457,6 +527,8 @@ namespace ProtobufMessage {
       ePollThreadQuantity_ = other.ePollThreadQuantity_;
       processThreadQuantity_ = other.processThreadQuantity_;
       prioritySize_ = other.prioritySize_;
+      type_ = other.type_;
+      config_ = other.config_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -636,6 +708,28 @@ namespace ProtobufMessage {
       }
     }
 
+    /// <summary>Field number for the "Type" field.</summary>
+    public const int TypeFieldNumber = 15;
+    private global::Protocol.ModuleType type_ = 0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Protocol.ModuleType Type {
+      get { return type_; }
+      set {
+        type_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "Config" field.</summary>
+    public const int ConfigFieldNumber = 16;
+    private pb::ByteString config_ = pb::ByteString.Empty;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pb::ByteString Config {
+      get { return config_; }
+      set {
+        config_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as GLOBAL_CONFIG);
@@ -663,6 +757,8 @@ namespace ProtobufMessage {
       if (EPollThreadQuantity != other.EPollThreadQuantity) return false;
       if (ProcessThreadQuantity != other.ProcessThreadQuantity) return false;
       if (PrioritySize != other.PrioritySize) return false;
+      if (Type != other.Type) return false;
+      if (Config != other.Config) return false;
       return true;
     }
 
@@ -683,6 +779,8 @@ namespace ProtobufMessage {
       if (EPollThreadQuantity != 0) hash ^= EPollThreadQuantity.GetHashCode();
       if (ProcessThreadQuantity != 0) hash ^= ProcessThreadQuantity.GetHashCode();
       if (PrioritySize != 0) hash ^= PrioritySize.GetHashCode();
+      if (Type != 0) hash ^= Type.GetHashCode();
+      if (Config.Length != 0) hash ^= Config.GetHashCode();
       return hash;
     }
 
@@ -749,6 +847,14 @@ namespace ProtobufMessage {
         output.WriteRawTag(112);
         output.WriteInt32(PrioritySize);
       }
+      if (Type != 0) {
+        output.WriteRawTag(120);
+        output.WriteEnum((int) Type);
+      }
+      if (Config.Length != 0) {
+        output.WriteRawTag(130, 1);
+        output.WriteBytes(Config);
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -795,6 +901,12 @@ namespace ProtobufMessage {
       }
       if (PrioritySize != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(PrioritySize);
+      }
+      if (Type != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Type);
+      }
+      if (Config.Length != 0) {
+        size += 2 + pb::CodedOutputStream.ComputeBytesSize(Config);
       }
       return size;
     }
@@ -845,6 +957,12 @@ namespace ProtobufMessage {
       }
       if (other.PrioritySize != 0) {
         PrioritySize = other.PrioritySize;
+      }
+      if (other.Type != 0) {
+        Type = other.Type;
+      }
+      if (other.Config.Length != 0) {
+        Config = other.Config;
       }
     }
 
@@ -912,6 +1030,14 @@ namespace ProtobufMessage {
             PrioritySize = input.ReadInt32();
             break;
           }
+          case 120: {
+            type_ = (global::Protocol.ModuleType) input.ReadEnum();
+            break;
+          }
+          case 130: {
+            Config = input.ReadBytes();
+            break;
+          }
         }
       }
     }
@@ -925,7 +1051,7 @@ namespace ProtobufMessage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::ProtobufMessage.ConfigReflection.Descriptor.MessageTypes[2]; }
+      get { return global::Protocol.ConfigReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1042,7 +1168,7 @@ namespace ProtobufMessage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::ProtobufMessage.ConfigReflection.Descriptor.MessageTypes[3]; }
+      get { return global::Protocol.ConfigReflection.Descriptor.MessageTypes[3]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1271,7 +1397,7 @@ namespace ProtobufMessage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::ProtobufMessage.ConfigReflection.Descriptor.MessageTypes[4]; }
+      get { return global::Protocol.ConfigReflection.Descriptor.MessageTypes[4]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1409,14 +1535,14 @@ namespace ProtobufMessage {
 
   }
 
-  public sealed partial class PROXY_CONFIG : pb::IMessage<PROXY_CONFIG> {
-    private static readonly pb::MessageParser<PROXY_CONFIG> _parser = new pb::MessageParser<PROXY_CONFIG>(() => new PROXY_CONFIG());
+  public sealed partial class GATEWAY_CONFIG : pb::IMessage<GATEWAY_CONFIG> {
+    private static readonly pb::MessageParser<GATEWAY_CONFIG> _parser = new pb::MessageParser<GATEWAY_CONFIG>(() => new GATEWAY_CONFIG());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<PROXY_CONFIG> Parser { get { return _parser; } }
+    public static pb::MessageParser<GATEWAY_CONFIG> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::ProtobufMessage.ConfigReflection.Descriptor.MessageTypes[5]; }
+      get { return global::Protocol.ConfigReflection.Descriptor.MessageTypes[5]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1425,14 +1551,14 @@ namespace ProtobufMessage {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public PROXY_CONFIG() {
+    public GATEWAY_CONFIG() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public PROXY_CONFIG(PROXY_CONFIG other) : this() {
+    public GATEWAY_CONFIG(GATEWAY_CONFIG other) : this() {
       clientCheckTime_ = other.clientCheckTime_;
       clientCheckKey_ = other.clientCheckKey_;
       timeoutCheckInterval_ = other.timeoutCheckInterval_;
@@ -1441,8 +1567,8 @@ namespace ProtobufMessage {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public PROXY_CONFIG Clone() {
-      return new PROXY_CONFIG(this);
+    public GATEWAY_CONFIG Clone() {
+      return new GATEWAY_CONFIG(this);
     }
 
     /// <summary>Field number for the "ClientCheckTime" field.</summary>
@@ -1502,11 +1628,11 @@ namespace ProtobufMessage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
-      return Equals(other as PROXY_CONFIG);
+      return Equals(other as GATEWAY_CONFIG);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(PROXY_CONFIG other) {
+    public bool Equals(GATEWAY_CONFIG other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -1583,7 +1709,7 @@ namespace ProtobufMessage {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(PROXY_CONFIG other) {
+    public void MergeFrom(GATEWAY_CONFIG other) {
       if (other == null) {
         return;
       }
@@ -1645,7 +1771,7 @@ namespace ProtobufMessage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::ProtobufMessage.ConfigReflection.Descriptor.MessageTypes[6]; }
+      get { return global::Protocol.ConfigReflection.Descriptor.MessageTypes[6]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1762,7 +1888,7 @@ namespace ProtobufMessage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::ProtobufMessage.ConfigReflection.Descriptor.MessageTypes[7]; }
+      get { return global::Protocol.ConfigReflection.Descriptor.MessageTypes[7]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

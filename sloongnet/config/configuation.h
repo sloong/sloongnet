@@ -37,19 +37,14 @@ namespace Sloong
         string GetStringConfig(string table_name, string domain, string key, string def);
 
     protected:
-        void LoadGlobalConfig(string domain,string ip,  ProtobufMessage::GLOBAL_CONFIG* config);
+        void LoadGlobalConfig(string domain,string ip,  Protocol::GLOBAL_CONFIG* config);
         bool GetBoolen( string domain, string ip, string key, bool def );
         string GetString( string domain, string ip,  string key, string def );
         int GetInt( string domain, string ip, string key, int def );
 
     public:
-        map<int,ProtobufMessage::GLOBAL_CONFIG> m_oServerConfigList;
-        ProtobufMessage::CONTROL_CONFIG   m_oControlConfig;
-        ProtobufMessage::PROXY_CONFIG    m_oProxyConfig;
-        ProtobufMessage::PROCESS_CONFIG  m_oProcessConfig;
-        ProtobufMessage::DATA_CONFIG     m_oDataConfig;
-        ProtobufMessage::FIREWALL_CONFIG    m_oFirewallConfig;
-        ProtobufMessage::DB_CONFIG       m_oDBConfig;
+        map<string,Protocol::GLOBAL_CONFIG> m_oServerConfigList;
+        Protocol::GLOBAL_CONFIG m_oWaitProcessConfig;
 
     protected:
         unique_ptr<CSQLiteEx> m_pDB;
