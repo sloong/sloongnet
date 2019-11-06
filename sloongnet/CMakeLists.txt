@@ -4,24 +4,13 @@ project(sloongnet)
 
 include_directories(
     "$(CMAKE_CURRENT_LIST_DIR)"
-    "$(CMAKE_CURRENT_LIST_DIR)config"
-    "$(CMAKE_CURRENT_LIST_DIR)events"
-    "$(CMAKE_CURRENT_LIST_DIR)interface"
-    "$(CMAKE_CURRENT_LIST_DIR)modules"
-    "$(CMAKE_CURRENT_LIST_DIR)process"
-    "$(CMAKE_CURRENT_LIST_DIR)services"
     "$(CMAKE_CURRENT_LIST_DIR)protocol"
     "/usr/include/glib-2.0" 
-	# ubuntu path
     "/usr/lib/x86_64-linux-gnu/glib-2.0/include"
-	# centos path
-	"/usr/lib64/glib-2.0/include"
 )
 
 link_directories(
     "/usr/local/lib/sloong"
-	#centos path
-	"/usr/lib64/mysql"
 )
 
 #允许gdb调试

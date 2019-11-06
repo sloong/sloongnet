@@ -280,7 +280,7 @@ void protobuf_AddDesc_protocol_2eproto() {
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\016protocol.proto\022\010Protocol\"\347\001\n\016MessagePa"
     "ckage\022\020\n\010Function\030\001 \001(\005\022\025\n\rPriorityLevel"
-    "\030\002 \001(\005\022\024\n\014SerialNumber\030\003 \001(\005\022\023\n\013CheckStr"
+    "\030\002 \001(\005\022\024\n\014SerialNumber\030\003 \001(\003\022\023\n\013CheckStr"
     "ing\030\004 \001(\t\022\022\n\nSenderUUID\030\005 \001(\t\022\020\n\010Receive"
     "r\030\006 \001(\005\022\024\n\014ReceiverUUID\030\007 \001(\t\022\017\n\007Context"
     "\030\010 \001(\t\022\022\n\nExtendData\030\t \001(\014\022 \n\004Type\030\n \001(\016"
@@ -412,7 +412,7 @@ void MessagePackage::SharedCtor() {
   _cached_size_ = 0;
   function_ = 0;
   prioritylevel_ = 0;
-  serialnumber_ = 0;
+  serialnumber_ = GOOGLE_LONGLONG(0);
   checkstring_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   senderuuid_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   receiver_ = 0;
@@ -480,10 +480,10 @@ void MessagePackage::Clear() {
            ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
 } while (0)
 
-  ZR_(function_, prioritylevel_);
-  ZR_(serialnumber_, receiver_);
+  ZR_(function_, serialnumber_);
   checkstring_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   senderuuid_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  receiver_ = 0;
   receiveruuid_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   context_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   extenddata_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
@@ -533,12 +533,12 @@ bool MessagePackage::MergePartialFromCodedStream(
         break;
       }
 
-      // optional int32 SerialNumber = 3;
+      // optional int64 SerialNumber = 3;
       case 3: {
         if (tag == 24) {
          parse_SerialNumber:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
                  input, &serialnumber_)));
 
         } else {
@@ -694,9 +694,9 @@ void MessagePackage::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->prioritylevel(), output);
   }
 
-  // optional int32 SerialNumber = 3;
+  // optional int64 SerialNumber = 3;
   if (this->serialnumber() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->serialnumber(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(3, this->serialnumber(), output);
   }
 
   // optional string CheckString = 4;
@@ -772,9 +772,9 @@ void MessagePackage::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->prioritylevel(), target);
   }
 
-  // optional int32 SerialNumber = 3;
+  // optional int64 SerialNumber = 3;
   if (this->serialnumber() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->serialnumber(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(3, this->serialnumber(), target);
   }
 
   // optional string CheckString = 4;
@@ -861,10 +861,10 @@ int MessagePackage::ByteSize() const {
         this->prioritylevel());
   }
 
-  // optional int32 SerialNumber = 3;
+  // optional int64 SerialNumber = 3;
   if (this->serialnumber() != 0) {
     total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::Int32Size(
+      ::google::protobuf::internal::WireFormatLite::Int64Size(
         this->serialnumber());
   }
 
@@ -1058,15 +1058,15 @@ void MessagePackage::clear_prioritylevel() {
   // @@protoc_insertion_point(field_set:Protocol.MessagePackage.PriorityLevel)
 }
 
-// optional int32 SerialNumber = 3;
+// optional int64 SerialNumber = 3;
 void MessagePackage::clear_serialnumber() {
-  serialnumber_ = 0;
+  serialnumber_ = GOOGLE_LONGLONG(0);
 }
- ::google::protobuf::int32 MessagePackage::serialnumber() const {
+ ::google::protobuf::int64 MessagePackage::serialnumber() const {
   // @@protoc_insertion_point(field_get:Protocol.MessagePackage.SerialNumber)
   return serialnumber_;
 }
- void MessagePackage::set_serialnumber(::google::protobuf::int32 value) {
+ void MessagePackage::set_serialnumber(::google::protobuf::int64 value) {
   
   serialnumber_ = value;
   // @@protoc_insertion_point(field_set:Protocol.MessagePackage.SerialNumber)

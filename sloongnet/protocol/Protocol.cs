@@ -24,7 +24,7 @@ namespace Protocol {
           string.Concat(
             "Cg5wcm90b2NvbC5wcm90bxIIUHJvdG9jb2wi5wEKDk1lc3NhZ2VQYWNrYWdl",
             "EhAKCEZ1bmN0aW9uGAEgASgFEhUKDVByaW9yaXR5TGV2ZWwYAiABKAUSFAoM",
-            "U2VyaWFsTnVtYmVyGAMgASgFEhMKC0NoZWNrU3RyaW5nGAQgASgJEhIKClNl",
+            "U2VyaWFsTnVtYmVyGAMgASgDEhMKC0NoZWNrU3RyaW5nGAQgASgJEhIKClNl",
             "bmRlclVVSUQYBSABKAkSEAoIUmVjZWl2ZXIYBiABKAUSFAoMUmVjZWl2ZXJV",
             "VUlEGAcgASgJEg8KB0NvbnRleHQYCCABKAkSEgoKRXh0ZW5kRGF0YRgJIAEo",
             "DBIgCgRUeXBlGAogASgOMhIuUHJvdG9jb2wuTXNnVHlwZXMi9wIKDUdMT0JB",
@@ -162,12 +162,12 @@ namespace Protocol {
 
     /// <summary>Field number for the "SerialNumber" field.</summary>
     public const int SerialNumberFieldNumber = 3;
-    private int serialNumber_;
+    private long serialNumber_;
     /// <summary>
     ///  流水号
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int SerialNumber {
+    public long SerialNumber {
       get { return serialNumber_; }
       set {
         serialNumber_ = value;
@@ -303,7 +303,7 @@ namespace Protocol {
       int hash = 1;
       if (Function != 0) hash ^= Function.GetHashCode();
       if (PriorityLevel != 0) hash ^= PriorityLevel.GetHashCode();
-      if (SerialNumber != 0) hash ^= SerialNumber.GetHashCode();
+      if (SerialNumber != 0L) hash ^= SerialNumber.GetHashCode();
       if (CheckString.Length != 0) hash ^= CheckString.GetHashCode();
       if (SenderUUID.Length != 0) hash ^= SenderUUID.GetHashCode();
       if (Receiver != 0) hash ^= Receiver.GetHashCode();
@@ -329,9 +329,9 @@ namespace Protocol {
         output.WriteRawTag(16);
         output.WriteInt32(PriorityLevel);
       }
-      if (SerialNumber != 0) {
+      if (SerialNumber != 0L) {
         output.WriteRawTag(24);
-        output.WriteInt32(SerialNumber);
+        output.WriteInt64(SerialNumber);
       }
       if (CheckString.Length != 0) {
         output.WriteRawTag(34);
@@ -372,8 +372,8 @@ namespace Protocol {
       if (PriorityLevel != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(PriorityLevel);
       }
-      if (SerialNumber != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(SerialNumber);
+      if (SerialNumber != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(SerialNumber);
       }
       if (CheckString.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(CheckString);
@@ -410,7 +410,7 @@ namespace Protocol {
       if (other.PriorityLevel != 0) {
         PriorityLevel = other.PriorityLevel;
       }
-      if (other.SerialNumber != 0) {
+      if (other.SerialNumber != 0L) {
         SerialNumber = other.SerialNumber;
       }
       if (other.CheckString.Length != 0) {
@@ -453,7 +453,7 @@ namespace Protocol {
             break;
           }
           case 24: {
-            SerialNumber = input.ReadInt32();
+            SerialNumber = input.ReadInt64();
             break;
           }
           case 34: {

@@ -38,5 +38,5 @@ build/debug
 build/release/
 build/*.tar
 servctrl/servctrl/bin/
-servctrl/servctrl/obj
+obj
 .vscode/

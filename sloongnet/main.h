@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 
-#include "protocol.pb.h"
+#include "protocol/protocol.pb.h"
 using namespace Protocol;
 
 #include "defines.h"

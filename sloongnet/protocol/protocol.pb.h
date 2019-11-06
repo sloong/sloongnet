@@ -167,11 +167,11 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::int32 prioritylevel() const;
   void set_prioritylevel(::google::protobuf::int32 value);
 
-  // optional int32 SerialNumber = 3;
+  // optional int64 SerialNumber = 3;
   void clear_serialnumber();
   static const int kSerialNumberFieldNumber = 3;
-  ::google::protobuf::int32 serialnumber() const;
-  void set_serialnumber(::google::protobuf::int32 value);
+  ::google::protobuf::int64 serialnumber() const;
+  void set_serialnumber(::google::protobuf::int64 value);
 
   // optional string CheckString = 4;
   void clear_checkstring();
@@ -247,14 +247,14 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
   bool _is_default_instance_;
   ::google::protobuf::int32 function_;
   ::google::protobuf::int32 prioritylevel_;
+  ::google::protobuf::int64 serialnumber_;
   ::google::protobuf::internal::ArenaStringPtr checkstring_;
-  ::google::protobuf::int32 serialnumber_;
-  ::google::protobuf::int32 receiver_;
   ::google::protobuf::internal::ArenaStringPtr senderuuid_;
   ::google::protobuf::internal::ArenaStringPtr receiveruuid_;
   ::google::protobuf::internal::ArenaStringPtr context_;
-  ::google::protobuf::internal::ArenaStringPtr extenddata_;
+  ::google::protobuf::int32 receiver_;
   int type_;
+  ::google::protobuf::internal::ArenaStringPtr extenddata_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
@@ -1156,15 +1156,15 @@ inline void MessagePackage::set_prioritylevel(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:Protocol.MessagePackage.PriorityLevel)
 }
 
-// optional int32 SerialNumber = 3;
+// optional int64 SerialNumber = 3;
 inline void MessagePackage::clear_serialnumber() {
-  serialnumber_ = 0;
+  serialnumber_ = GOOGLE_LONGLONG(0);
 }
-inline ::google::protobuf::int32 MessagePackage::serialnumber() const {
+inline ::google::protobuf::int64 MessagePackage::serialnumber() const {
   // @@protoc_insertion_point(field_get:Protocol.MessagePackage.SerialNumber)
   return serialnumber_;
 }
-inline void MessagePackage::set_serialnumber(::google::protobuf::int32 value) {
+inline void MessagePackage::set_serialnumber(::google::protobuf::int64 value) {
   
   serialnumber_ = value;
   // @@protoc_insertion_point(field_set:Protocol.MessagePackage.SerialNumber)
