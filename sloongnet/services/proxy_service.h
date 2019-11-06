@@ -9,7 +9,7 @@ namespace Sloong
 	class SloongNetProxy : public CSloongBaseService
 	{
 	public:
-		SloongNetProxy() : CSloongBaseService(ModuleType::Gateway){}
+		SloongNetProxy() : CSloongBaseService(){}
 
 		CResult Initialize(int argc, char** args);
 		
@@ -29,7 +29,7 @@ namespace Sloong
 		map<int,SmartConnect> 	m_mapProcessList;
 		map<int,string>		m_mapUUIDList;
 		map<u_int64_t,SmartPackage> m_mapPackageList;
-		ProtobufMessage::PROXY_CONFIG m_oConfig;
+		PROXY_CONFIG m_oConfig;
 	};
 
 }

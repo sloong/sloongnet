@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2019-05-23 10:25:15
+ * @LastEditTime: 2019-11-06 16:38:28
  */
 
 #include "control_service.h"
@@ -14,7 +14,6 @@
 #include "DataTransPackage.h"
 #include "configuation.h"
 #include "SQLiteEx.h"
-#include "config.pb.h"
 #include "version.h"
 using namespace Sloong::Events;
 
@@ -68,78 +67,66 @@ CResult SloongControlService::Initialize(int argc, char **args)
 		cout << "Convert [" << args[1] << "] to int port fialed." << endl;
 		return CResult(false);
 	}
-	m_pAllConfig->Initialize("system");
-	m_pAllConfig->LoadAll();
-	string config;
-	m_pAllConfig->m_oServerConfigList[ModuleType::ControlCenter].SerializeToString(&config);
-	if(!m_oServerConfig.ParseFromString(config))
-		return CResult(false, "Parser server general config error.");
-	
+	string uuid;
+	if( true ) // TODO: Check and load uuid from file
+	{
+		uuid = CUtility::GenUUID();
+		// TODO: Save uuid to file
+	}
+
+	m_pAllConfig->Initialize("configuation.db",uuid);
+	if(!m_oServerConfig.ParseFromString(m_pAllConfig->GetConfig(uuid)))
+	{
+		// If parse config error, run with default config.
+		cout <<  "Parser server general config error. run with default setting." << endl;
+		ResetControlConfig();
+	}
+		
 	auto res = CSloongBaseService::Initialize(argc,args);
 	if( !res.IsSucceed())
 		return res;
 
-	m_pControl->Add(DATA_ITEM::ModuleConfiguation, &m_oConfig);
+	m_pControl->Add(DATA_ITEM::ServerConfiguation , &m_oConfig);
 	
 	m_pNetwork->RegisterMessageProcesser(std::bind(&SloongControlService::MessagePackageProcesser, this, std::placeholders::_1));
 	
 	return CResult::Succeed;
 }
 
+void Sloong::SloongControlService::ResetControlConfig()
+{
+	
+}
+
 void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 {
 	auto msgPack = pack->GetRecvPackage();
-	string config;
 	switch( msgPack->function() )
 	{
 		case MessageFunction::GetServerConfig:
 		{
-			auto sender = msg->senderuuid();
+			auto sender = msgPack->senderuuid();
+			string config = "";
 			if( sender.size() == 0 )
 			{
 				// TODO: 这里需要根据情况增加一个ip显示。
-				m_pLog->Verbos(CUniversal::Format("New module[IP:] add to system. wait configuation. ");
+				m_pLog->Verbos(CUniversal::Format("New module[IP:%s] add to system. wait configuation. ","unspport"));
 			}
 			else
 			{
-				m_pLog->Verbos(CUniversal::Format("Porcess [GetGerenalConfig] request: sender[%d]",sender);
-				auto item = m_pAllConfig->m_oServerConfigList.find(sender);
-				if( item != m_pAllConfig->m_oServerConfigList.end() )
-				{
-					(*item).second.SerializeToString(&config);
-				}
-				else
+				m_pLog->Verbos(CUniversal::Format("Porcess [GetServerConfig] request: sender[%d]",sender));
+				config = m_pAllConfig->GetConfig(sender);
+				if(config == "" )
 				{
 					// Error
-					m_pLog->Verbos(CUniversal::Format("Module[IP:|UUID:] is no registe in system. wait admin process.");
+					m_pLog->Verbos(CUniversal::Format("Module[IP:%s|UUID:%s] is no registe in system. wait admin process.","unspport",sender));
+					
 				}
 			}
-		}break;
-		case MessageFunction::GetSpecialConfig:
-		{
-			m_pLog->Verbos(CUniversal::Format("Porcess [GetSpecialConfig] request: sender[%d]",msgPack->sender()));
-			switch(msgPack->sender())
-			{
-				case ModuleType::Gateway:
-					m_pAllConfig->m_oProxyConfig.SerializeToString(&config);
-					break;
-				case ModuleType::Process:
-					m_pAllConfig->m_oProcessConfig.SerializeToString(&config);
-					break;
-				case ModuleType::Firewall:
-					m_pAllConfig->m_oFirewallConfig.SerializeToString(&config);
-					break;
-				case ModuleType::DataCenter:
-					m_pAllConfig->m_oDataConfig.SerializeToString(&config);
-					break;
-				case ModuleType::DBCenter:
-					m_pAllConfig->m_oDBConfig.SerializeToString(&config);
-					break;
-			}
+			pack->ResponsePackage("",config);
 		}break;
 	}
-	pack->ResponsePackage("",config);
-
+	
 	auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
 	response_event->SetSocketID(pack->GetSocketID());
 	response_event->SetDataPackage(pack);

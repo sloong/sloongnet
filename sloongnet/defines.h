@@ -112,8 +112,7 @@ enum HashType
 
 typedef enum g_em_DataItem
 {
-	GlobalConfiguation,
-	ModuleConfiguation,
+	ServerConfiguation,
 	Logger,
 }DATA_ITEM;
 

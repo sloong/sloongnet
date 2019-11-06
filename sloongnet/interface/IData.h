@@ -1,3 +1,10 @@
+/*
+ * @Author: WCB
+ * @Date: 2019-11-05 08:59:19
+ * @LastEditors: WCB
+ * @LastEditTime: 2019-11-06 17:32:59
+ * @Description: file content
+ */
 #ifndef SLOONGNET_INTERFACE_DATA_H
 #define SLOONGNET_INTERFACE_DATA_H
 
@@ -11,17 +18,17 @@ namespace Sloong
 		static void Initialize(IControl* ic){
 			if ( m_iC == nullptr) m_iC = ic;
 		}
-		static ProtobufMessage::GLOBAL_CONFIG* GetGlobalConfig(){
-			return TYPE_TRANS<ProtobufMessage::GLOBAL_CONFIG*>(m_iC->Get(DATA_ITEM::GlobalConfiguation));
+		static GLOBAL_CONFIG* GetGlobalConfig(){
+			return TYPE_TRANS<GLOBAL_CONFIG*>(m_iC->Get(DATA_ITEM::ServerConfiguation ));
 		}
-		static ProtobufMessage::DATA_CONFIG* GetDataCenterConfig(){
-			return TYPE_TRANS<ProtobufMessage::DATA_CONFIG*>(m_iC->Get(DATA_ITEM::ModuleConfiguation));
-		}	
-		static ProtobufMessage::PROCESS_CONFIG* GetProcessConfig(){
-			return TYPE_TRANS<ProtobufMessage::PROCESS_CONFIG*>(m_iC->Get(DATA_ITEM::ModuleConfiguation));
-		}	
+		static PROCESS_CONFIG GetProcessConfig(){
+			GLOBAL_CONFIG* config = GetGlobalConfig();
+			PROCESS_CONFIG* exconfig1 = new PROCESS_CONFIG();
+			exconfig1->ParseFromString(config->exconfig());
+			return *exconfig1;
+		}
 		
-		static CLog*	GetLog(){
+		static CLog* GetLog(){
 			return TYPE_TRANS<CLog*>(m_iC->Get(DATA_ITEM::Logger));
 		}
 	public:

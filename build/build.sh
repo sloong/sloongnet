@@ -10,8 +10,7 @@
 
 
 show_help(){
-	echo -e "build.sh [module] [operation]
-module: proxy|control|firewall|process|data
+	echo -e "build.sh [operation]
 operation:
 	-r: to build release version 
 	-d: to build debug version 
@@ -21,39 +20,27 @@ operation:
 
 
 SCRIPTFOLDER=$(dirname $(readlink -f $0))
-#echo "ScriptFolder: "$SCRIPTFOLDER
+echo "ScriptFolder: "$SCRIPTFOLDER
 # cd to current file folder
 cd $SCRIPTFOLDER
+PROJECT=sloongnet
+MAKEFLAG=debug
+CMAKE_FILE_PATH=$SCRIPTFOLDER/../sloongnet
 
 # default value is debug
 VERSION_STR=$(cat $SCRIPTFOLDER/../version)
-MODULE=unknown
 
-init(){
-	MODULE=$1
-	PROJECT=sloongnet_$MODULE
-	MAKEFLAG=debug
-	CMAKE_FILE_PATH=$SCRIPTFOLDER/../sloongnet/$MODULE
-}
+
 
 clean(){
 	rm -rdf $MAKEFLAG/$PROJECT
 }
 
 build(){
-	if [ $MODULE = "unknown" ]; then
-		echo -e "Module error.\n"
-		show_help
-		exit
-	fi
 	if [ ! -d $MAKEFLAG  ];then
 		mkdir $MAKEFLAG
 	fi
 	cd $MAKEFLAG
-	if [ ! -d $PROJECT  ];then
-		mkdir $PROJECT
-	fi
-	cd $PROJECT
 	cmake -DCMAKE_BUILD_TYPE=$MAKEFLAG $CMAKE_FILE_PATH
 	if [ $? -ne 0 ];then
 		echo "Run cmake cmd return error. build stop."
@@ -101,32 +88,8 @@ if [ $# -eq 0 ]; then
 	exit
 fi
 
-if [ $# -ge 1 ]; then
+if [ $# -eq 1 ]; then
 	case $1 in 
-		proxy) init proxy;;
-		control) init control;;
-		firewall) init firewall;;
-		process) init process;;
-		data) init data;;
-		all) 
-			init proxy
-			build
-			init control
-			build
-			init firewall
-			build
-			init process
-			build
-			init data
-			build;;
-		* ) show_help;;
-	esac
-	if [ $# -eq 1 ]; then
-		build
-	fi
-fi
-if [ $# -eq 2 ]; then
-	case $2 in 
 		-r) build_release;;
 		-d) build_debug;;
 		-rz) 

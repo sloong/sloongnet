@@ -4,15 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "rebuild_message",
+            "label": "build",
             "type": "shell",
-            "command": "./sloongnet/Message/rebuild.sh",
-            "problemMatcher": []
-        },
-        {
-            "label": "build_all",
-            "type": "shell",
-            "command": "./build/build.sh all",
+            "command": "./build/build.sh -d",
             "group": {
                 "kind": "build",
                 "isDefault": true

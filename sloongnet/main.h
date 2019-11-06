@@ -4,7 +4,9 @@
 
 #include "stdafx.h"
 
-#include "config.pb.h"
+#include "protocol.pb.h"
+using namespace Protocol;
+
 #include "defines.h"
 #include "result.h"
 #include "EasySync.h"

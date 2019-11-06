@@ -8,15 +8,15 @@ namespace Sloong
 	class SloongNetFirewall : public CSloongBaseService
 	{
 	public:
-		SloongNetFirewall() : CSloongBaseService(ModuleType::Firewall){}
+		SloongNetFirewall() : CSloongBaseService(){}
 
-		bool Initialize(int argc, char** args);
+		CResult Initialize(int argc, char** args);
 
 		void MessagePackageProcesser(SmartPackage);
 
 		void OnSocketClose(SmartEvent evt);
 	protected:
-		ProtobufMessage::FIREWALL_CONFIG m_oConfig;
+		FIREWALL_CONFIG m_oConfig;
 	};
 
 }

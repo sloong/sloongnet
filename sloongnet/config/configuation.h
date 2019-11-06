@@ -1,12 +1,17 @@
+/*
+ * @Author: WCB
+ * @Date: 2019-11-05 08:59:19
+ * @LastEditors: WCB
+ * @LastEditTime: 2019-11-06 17:12:59
+ * @Description: file content
+ */
 
 #ifndef SLOONGNET_CONFIGUATION_H
 #define SLOONGNET_CONFIGUATION_H
 
 #include "main.h"
-
-using namespace ProtobufMessage;
-
 #include "SQLiteEx.h"
+
 namespace Sloong
 {
     class CConfiguation
@@ -14,42 +19,31 @@ namespace Sloong
     public:
         CConfiguation();
 
+        /**
+         * @Remarks: Init db and load all configuation template.
+         * @Params: dbPath : the path of sqlite file.
+         *          uuid : uuid string of the owner.
+         * @Return: 
+         */
+        bool Initialize( string dbPath, string uuid );
 
-        bool Initialize( string tableName );
+        bool LoadConfig( string uuid );
+        bool SaveConfig( string uuid );
+        bool SaveTemplate( string id );
+        bool ReloadTemplate( string id );
 
-        bool LoadAll();
-        bool SaveAll();
-
-        void LoadControlConfig( string serverIp, ProtobufMessage::CONTROL_CONFIG& config );
-        void LoadProxyConfig( string serverIp, ProtobufMessage::PROXY_CONFIG& config );
-        void LoadProcessConfig( string serverIp, ProtobufMessage::PROCESS_CONFIG& config );
-        void LoadDataConfig( string serverIp, ProtobufMessage::DATA_CONFIG& config );
-        void LoadDBConfig( string serverIp, ProtobufMessage::DB_CONFIG& config );
-        void LoadFirewallConfig( string serverIp, ProtobufMessage::FIREWALL_CONFIG& config );
-
-        void SaveControlConfig(){}
-        void SaveProxyConfig(){}
-        void SaveProcessConfig(){}
-        void SaveDataConfig(){}
-        void SaveDBConfig(){}
-        void SaveFirewallConfig(){}
-
-        string GetStringConfig(string table_name, string domain, string key, string def);
+        string GetConfig(string uuid);
 
     protected:
-        void LoadGlobalConfig(string domain,string ip,  Protocol::GLOBAL_CONFIG* config);
-        bool GetBoolen( string domain, string ip, string key, bool def );
-        string GetString( string domain, string ip,  string key, string def );
-        int GetInt( string domain, string ip, string key, int def );
+        bool LoadConfigTemplate(string tbName);
+        string GetStringConfig(string table_name, string key, string def);
 
-    public:
-        map<string,Protocol::GLOBAL_CONFIG> m_oServerConfigList;
-        Protocol::GLOBAL_CONFIG m_oWaitProcessConfig;
+    protected:
+        map<string,string> m_oServerConfigList;
+        map<string,string> m_oTemplateList;
 
     protected:
         unique_ptr<CSQLiteEx> m_pDB;
-        string      m_strTableName;
-
     };
 
 

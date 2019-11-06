@@ -1,3 +1,10 @@
+/*
+ * @Author: WCB
+ * @Date: 2019-11-05 08:59:19
+ * @LastEditors: WCB
+ * @LastEditTime: 2019-11-06 17:18:09
+ * @Description: file content
+ */
 #pragma once
 
 #include "IObject.h"
@@ -67,7 +74,7 @@ namespace Sloong
         CEasySync               m_oCheckTimeoutThreadSync;
         
         SSL_CTX*                m_pCTX = nullptr;
-        ProtobufMessage::GLOBAL_CONFIG*          m_pConfig = nullptr;
+        GLOBAL_CONFIG*          m_pConfig = nullptr;
 
         // Timeout check
 		int m_nConnectTimeoutTime=0;

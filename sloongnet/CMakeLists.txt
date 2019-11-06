@@ -3,10 +3,15 @@ cmake_minimum_required(VERSION 3.2)
 project(sloongnet)
 
 include_directories(
-    "$(PROJECT_BINARY_DIR)"
-    "$(PROJECT_BINARY_DIR)../"
-    "$(PROJECT_BINARY_DIR)../*"
-    "/usr/include/glib-2.0"
+    "$(CMAKE_CURRENT_LIST_DIR)"
+    "$(CMAKE_CURRENT_LIST_DIR)config"
+    "$(CMAKE_CURRENT_LIST_DIR)events"
+    "$(CMAKE_CURRENT_LIST_DIR)interface"
+    "$(CMAKE_CURRENT_LIST_DIR)modules"
+    "$(CMAKE_CURRENT_LIST_DIR)process"
+    "$(CMAKE_CURRENT_LIST_DIR)services"
+    "$(CMAKE_CURRENT_LIST_DIR)protocol"
+    "/usr/include/glib-2.0" 
 	# ubuntu path
     "/usr/lib/x86_64-linux-gnu/glib-2.0/include"
 	# centos path
@@ -41,9 +46,9 @@ set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 
 #当前目录下所有源文件赋给SRC_LIST
 #AUX_SOURCE_DIRECTORY(. SRC_LIST) 
-file(GLOB_RECURSE COMM_SRC_LIST "../*.c*")
+file(GLOB_RECURSE MODULE_SRC_LIST "./*/*.c*")
 file(GLOB_RECURSE SRC_LIST "*.c*")
-list(APPEND SRC_LIST ${COMM_SRC_LIST})
+list(APPEND SRC_LIST ${MODULE_SRC_LIST})
 
 #生成可执行文件
 add_executable(${PROJECT_NAME} ${SRC_LIST}) 

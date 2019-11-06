@@ -25,7 +25,6 @@ void Sloong::CDataTransPackage::PrepareSendPackageData( const string& msg, const
 	m_nPackageSize = m_strPackageData.length();
 }
 
-
 void Sloong::CDataTransPackage::RequestPackage( shared_ptr<MessagePackage> pack )
 {
 	m_pReceivedPackage = pack;
@@ -42,7 +41,7 @@ void Sloong::CDataTransPackage::ResponsePackage( shared_ptr<MessagePackage> pack
 
 void Sloong::CDataTransPackage::ResponsePackage(const string &msg, const string& exdata)
 {
-	m_pReceivedPackage->set_type(MessagePackage_MsgTypes::MessagePackage_MsgTypes_Response);
+	m_pReceivedPackage->set_type( MsgTypes::Response );
 	PrepareSendPackageData(msg,exdata);
 }
 

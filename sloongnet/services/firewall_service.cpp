@@ -25,7 +25,7 @@ int main(int argc, char **args)
 }
 
 
-bool SloongNetFirewall::Initialize(int argc, char **args)
+CResult SloongNetFirewall::Initialize(int argc, char **args)
 {
 	
 	try
@@ -41,7 +41,7 @@ bool SloongNetFirewall::Initialize(int argc, char **args)
 		m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetFirewall::MessagePackageProcesser, this, std::placeholders::_1));
 		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetFirewall::OnSocketClose, this, std::placeholders::_1));
 
-		return true;
+		return CResult::Succeed;
 	}
 	catch (exception &e)
 	{

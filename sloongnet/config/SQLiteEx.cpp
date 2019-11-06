@@ -1,5 +1,11 @@
+/*
+ * @Author: WCB
+ * @Date: 2019-11-05 08:59:19
+ * @LastEditors: WCB
+ * @LastEditTime: 2019-11-06 17:04:28
+ * @Description: file content
+ */
 
-#include "main.h"
 #include "SQLiteEx.h"
 
 Sloong::CSQLiteEx::~CSQLiteEx()

@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2019-10-15 10:41:43
+ * @LastEditTime: 2019-11-06 16:42:27
  * @Description: file content
  */
 #include "base_service.h"
@@ -12,9 +12,6 @@
 #include "DataTransPackage.h"
 
 #include "utility.h"
-
-using namespace ProtobufMessage;
-
 
 IControl* Sloong::IData::m_iC = nullptr;
 unique_ptr<CSloongBaseService> Sloong::CSloongBaseService::g_pAppService = nullptr;
@@ -78,7 +75,7 @@ string CSloongBaseService::GetConfigFromControl()
     get_config_request_buf->set_type(Protocol::MsgTypes::Request);
     string uuid;
     if( ReadAllText("uuid.dat",uuid))
-        get_config_request_buf->set_sender(uuid.c_str());
+        get_config_request_buf->set_senderuuid(uuid.c_str());
     
     CDataTransPackage dataPackage;
     dataPackage.Initialize(m_pSocket);
@@ -98,9 +95,6 @@ string CSloongBaseService::GetConfigFromControl()
 
 CResult CSloongBaseService::Initialize(int argc, char** args)
 {
-    if(m_emModuleType == ModuleType::Undefine)
-        return CResult(false,"Module type is no define."); 
-        
     set_terminate(sloong_terminator);
     set_unexpected(sloong_terminator);
     //SIG_IGN:忽略信号的处理程序
@@ -122,8 +116,7 @@ CResult CSloongBaseService::Initialize(int argc, char** args)
         return CResult(false);
     }
 
-    vector<string> addr;
-    CUniversal::splitString(args[1],addr,":");
+    vector<string> addr = CUniversal::split(args[1],":");
 
     if(addr.size()>1)
     {
@@ -136,8 +129,14 @@ CResult CSloongBaseService::Initialize(int argc, char** args)
         {
             cout << "Start get configuation." << endl;
             auto serverConfig = GetConfigFromControl();
+            if(serverConfig.size() == 0)
+            {
+                cout << "Control no return config infomation. wait 500ms and retry." << endl;
+                sleep(500);
+                continue;
+            }
             if(!m_oServerConfig.ParseFromString(serverConfig))
-                return CResult(false,"Parse the config struct error.");
+                return CResult(false,"Parse the config struct error. please check.");
         } while (m_oServerConfig.type() != ModuleType::Unconfigured);
 
         cout << "Get configuation succeed." << endl;
@@ -152,7 +151,7 @@ CResult CSloongBaseService::Initialize(int argc, char** args)
         
     auto res = m_pControl->Initialize(m_oServerConfig.mqthreadquantity());
     if( res.IsSucceed() ){
-        m_pControl->Add(DATA_ITEM::GlobalConfiguation, &m_oServerConfig);
+        m_pControl->Add(DATA_ITEM::ServerConfiguation, &m_oServerConfig);
         m_pControl->Add(Logger, m_pLog.get());
         m_pControl->RegisterEvent(ProgramExit);
         m_pControl->RegisterEvent(ProgramStart);

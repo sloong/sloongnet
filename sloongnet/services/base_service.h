@@ -13,11 +13,10 @@ namespace Sloong
 	class CSloongBaseService
 	{
 	public:
-		CSloongBaseService( ModuleType moduleType ){
+		CSloongBaseService(){
             m_pLog = make_unique<CLog>();
             m_pNetwork = make_unique<CNetworkHub>();
             m_pControl = make_unique<CControlHub>();
-            m_emModuleType = moduleType;
         }
 
 		virtual ~CSloongBaseService(){
@@ -26,7 +25,7 @@ namespace Sloong
             m_pLog->End();
         }
 
-        virtual string GetConfigFromControl(MessageFunction func);
+        virtual string GetConfigFromControl();
 
         // Just call it without Control module.
 		virtual CResult Initialize(int argc, char** args);

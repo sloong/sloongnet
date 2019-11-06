@@ -1,3 +1,10 @@
+/*
+ * @Author: WCB
+ * @Date: 2019-04-14 14:41:59
+ * @LastEditors: WCB
+ * @LastEditTime: 2019-11-06 17:33:54
+ * @Description: file content
+ */
 #pragma once
 
 #define LUA_INT_TYPE LUA_INT_LONG
@@ -34,7 +41,8 @@ namespace Sloong
 		CEasySync		m_oSSync;
 		mutex			m_oLuaContextMutex;
 		unique_ptr<CGlobalFunction> m_pGFunc;
-		ProtobufMessage::PROCESS_CONFIG* m_pConfig;
+		PROCESS_CONFIG* m_pConfig;
+		PROCESS_CONFIG m_oConfig;
 	};
 
 }

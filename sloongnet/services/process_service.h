@@ -10,7 +10,7 @@ namespace Sloong
 	class SloongNetProcess: public CSloongBaseService
 	{
 	public:
-		SloongNetProcess():CSloongBaseService(ModuleType::Process){
+		SloongNetProcess():CSloongBaseService(){
 			m_pProcess = make_unique<CLuaProcessCenter>();
 		}
 
@@ -21,7 +21,7 @@ namespace Sloong
 
 	protected:
 		unique_ptr<CLuaProcessCenter> m_pProcess;
-		ProtobufMessage::PROCESS_CONFIG m_oConfig;
+		PROCESS_CONFIG m_oConfig;
 		map<string, unique_ptr<CLuaPacket>> m_mapUserInfoList;
 	};
 

@@ -8,14 +8,14 @@ namespace Sloong
 	class SloongNetDataCenter : public CSloongBaseService
 	{
 	public:
-		SloongNetDataCenter() : CSloongBaseService(ModuleType::DataCenter){}
+		SloongNetDataCenter() : CSloongBaseService(){}
 
-		bool Initialize(int argc, char** args);
+		CResult Initialize(int argc, char** args);
 		
 		void MessagePackageProcesser(SmartPackage);
 		void OnSocketClose(SmartEvent evt);
 	protected:
-		ProtobufMessage::DATA_CONFIG m_oConfig;
+		DATA_CONFIG m_oConfig;
 	};
 
 }

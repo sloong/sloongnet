@@ -1,5 +1,4 @@
 #include "LuaProcessCenter.h"
-#include "config.pb.h"
 #include "globalfunction.h"
 #include "IData.h"
 using namespace Sloong;
@@ -27,7 +26,8 @@ void Sloong::CLuaProcessCenter::Initialize(IControl* iMsg)
 	g_pLog = m_pLog;
 
 	m_pGFunc->Initialize(m_iC);
-	m_pConfig = IData::GetProcessConfig();
+	m_oConfig = IData::GetProcessConfig();
+	m_pConfig = &m_oConfig;
 
 	m_iC->RegisterEvent(EVENT_TYPE::ReloadLuaContext);
 	m_iC->RegisterEventHandler(ReloadLuaContext, std::bind(&CLuaProcessCenter::ReloadContext,this,std::placeholders::_1));

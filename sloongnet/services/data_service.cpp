@@ -25,7 +25,7 @@ int main(int argc, char **args)
 }
 
 
-bool SloongNetDataCenter::Initialize(int argc, char **args)
+CResult SloongNetDataCenter::Initialize(int argc, char **args)
 {
 	try
 	{
@@ -40,7 +40,7 @@ bool SloongNetDataCenter::Initialize(int argc, char **args)
 		m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetDataCenter::MessagePackageProcesser, this, std::placeholders::_1));
 		m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetDataCenter::OnSocketClose, this, std::placeholders::_1));
 
-		return true;
+		return CResult::Succeed;
 	}
 	catch (exception &e)
 	{
@@ -52,7 +52,7 @@ bool SloongNetDataCenter::Initialize(int argc, char **args)
 		CUtility::write_call_stack();
 	}
 
-	return false;
+	return CResult(false);
 }
 
 void Sloong::SloongNetDataCenter::MessagePackageProcesser(SmartPackage pack)

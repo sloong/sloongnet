@@ -1,12 +1,14 @@
+/*
+ * @Author: WCB
+ * @Date: 2019-11-05 08:59:19
+ * @LastEditors: WCB
+ * @LastEditTime: 2019-11-06 17:14:15
+ * @Description: file content
+ */
 #ifndef DATA_TRANS_PACKAGE_H
 #define DATA_TRANS_PACKAGE_H
 
 #include "main.h"
-#include "config.pb.h"
-#include "EasyConnect.h"
-
-using namespace ProtobufMessage;
-
 namespace Sloong
 {
     class CDataTransPackage
