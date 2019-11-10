@@ -1,4 +1,4 @@
-#include "main.h"
+ï»¿#include "main.h"
 #include "version.h"
 #include "ServiceBuilder.h"
 #include "utility.h"
@@ -21,7 +21,7 @@ bool ReadAllText(string path, string& out)
 	{
 		fseek(fp, 0, SEEK_END);
 		long len = ftell(fp);
-		rewind(fp);    //Ö¸Õë¸´Î»
+		rewind(fp);    //æŒ‡é’ˆå¤ä½
 		char* buf = new char[len];
 		memset(buf, 0, len);
 		fread(buf, 1, len, fp);
@@ -72,9 +72,9 @@ void PrientHelp()
 
 unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 {
-	// ÕâÀï²ÎÊıÓĞÁ½ÖÖĞÎÊ½¡£
-	// 1 Ö»ÓĞ¶Ë¿Ú¡£ ´ËÊ±Îª¿ØÖÆÖĞĞÄÄ£Ê½
-	// 2 µØÖ·£º¶Ë¿Ú¡£´ËÊ±Îª·Ç¿ØÖÆÖĞĞÄÄ£Ê½
+	// è¿™é‡Œå‚æ•°æœ‰ä¸¤ç§å½¢å¼ã€‚
+	// 1 åªæœ‰ç«¯å£ã€‚ æ­¤æ—¶ä¸ºæ§åˆ¶ä¸­å¿ƒæ¨¡å¼
+	// 2 åœ°å€ï¼šç«¯å£ã€‚æ­¤æ—¶ä¸ºéæ§åˆ¶ä¸­å¿ƒæ¨¡å¼
 	if (argc != 2)
 	{
 		PrientHelp();
@@ -95,6 +95,7 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 			return nullptr;
 		}
 		config->set_type(ModuleType::Control);
+		config->set_listenport(port);
 	}
 	else
 	{

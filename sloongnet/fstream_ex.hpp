@@ -10,7 +10,7 @@ public:
 	static bool read_all(const string& path, string& data) 
 	{
 		ifstream f(path);
-		if (f.is_open)
+		if (f.is_open())
 		{
 			f.seekg(0, f.end);
 			int length = f.tellg();

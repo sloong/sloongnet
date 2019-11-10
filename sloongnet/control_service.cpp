@@ -30,12 +30,14 @@ CResult SloongControlService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
 
 	m_pAllConfig->Initialize("configuation.db", uuid);
 	auto config_str = m_pAllConfig->GetConfig(uuid);
+	auto port = config->listenport();
 	if (config_str.length() == 0 || !config->ParseFromString(config_str))
 	{
 		// If parse config error, run with default config.
 		cout <<  "Parser server config error. run with default setting." << endl;
 		ResetControlConfig(config.get());
 	}
+	config->set_listenport(port);
 	return CSloongBaseService::Initialize(config);
 }
 
@@ -55,7 +57,6 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
 	config->set_mqthreadquantity(1);
 	config->set_enablessl(false);
 	config->set_epollthreadquantity(1);
-	config->set_listenport(8002);
 }
 
 void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
