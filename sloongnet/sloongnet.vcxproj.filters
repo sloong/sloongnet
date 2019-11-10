@@ -167,6 +167,9 @@
     <ClInclude Include="queue_ex.hpp">
       <Filter>Extend</Filter>
     </ClInclude>
+    <ClInclude Include="fstream_ex.hpp">
+      <Filter>Extend</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ScriptEnging">

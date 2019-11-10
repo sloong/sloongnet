@@ -151,6 +151,7 @@
     <ClInclude Include="epollex.h" />
     <ClInclude Include="ExtendEvent.hpp" />
     <ClInclude Include="firewall_service.h" />
+    <ClInclude Include="fstream_ex.hpp" />
     <ClInclude Include="globalfunction.h" />
     <ClInclude Include="IControl.h" />
     <ClInclude Include="IData.h" />

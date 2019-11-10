@@ -26,7 +26,7 @@ namespace Sloong
 		void MessagePackageProcesser(SmartPackage);
 
 	protected:
-		void ResetControlConfig();
+		void ResetControlConfig(GLOBAL_CONFIG* config);
 
 	protected:
 		unique_ptr<CConfiguation>	m_pAllConfig = make_unique<CConfiguation>();;

@@ -10,7 +10,7 @@
 #include "utility.h"
 #include "NetworkEvent.hpp"
 #include "SQLiteEx.h"
-
+#include "fstream_ex.hpp"
 using namespace Sloong::Events;
 
 /**
@@ -22,18 +22,19 @@ using namespace Sloong::Events;
 CResult SloongControlService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
 {
 	string uuid;
-	if( true ) // TODO: Check and load uuid from file
+	if (!fstream_ex::read_all("uuid.dat",uuid) || uuid.length() == 0)
 	{
 		uuid = CUtility::GenUUID();
-		// TODO: Save uuid to file
+		fstream_ex::write_all("uuid.dat", uuid);
 	}
 
-	m_pAllConfig->Initialize("configuation.db",uuid);
-	if(!config->ParseFromString(m_pAllConfig->GetConfig(uuid)))
+	m_pAllConfig->Initialize("configuation.db", uuid);
+	auto config_str = m_pAllConfig->GetConfig(uuid);
+	if (config_str.length() == 0 || !config->ParseFromString(config_str))
 	{
 		// If parse config error, run with default config.
-		cout <<  "Parser server general config error. run with default setting." << endl;
-		ResetControlConfig();
+		cout <<  "Parser server config error. run with default setting." << endl;
+		ResetControlConfig(config.get());
 	}
 	return CSloongBaseService::Initialize(config);
 }
@@ -46,9 +47,15 @@ void Sloong::SloongControlService::AfterInit()
 
 }
 
-void Sloong::SloongControlService::ResetControlConfig()
+void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
 {
-	
+	config->set_logpath("/var/log/sloong");
+	config->set_loglevel(LOGLEVEL::Info);
+	config->set_debugmode(false);
+	config->set_mqthreadquantity(1);
+	config->set_enablessl(false);
+	config->set_epollthreadquantity(1);
+	config->set_listenport(8002);
 }
 
 void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)

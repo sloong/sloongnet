@@ -2,7 +2,7 @@
 #include "version.h"
 #include "ServiceBuilder.h"
 #include "utility.h"
-
+#include "fstream_ex.hpp"
 
 void PrintVersion()
 {
@@ -45,7 +45,7 @@ string GetConfigFromControl(SmartConnect con)
 	get_config_request_buf->set_receiver(Protocol::ModuleType::Control);
 	get_config_request_buf->set_type(Protocol::MsgTypes::Request);
 	string uuid;
-	if (ReadAllText("uuid.dat", uuid))
+	if (fstream_ex::read_all("uuid.dat", uuid))
 		get_config_request_buf->set_senderuuid(uuid.c_str());
 
 	CDataTransPackage dataPackage;
