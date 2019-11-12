@@ -27,7 +27,7 @@ namespace Sloong
         void RequestPackage( shared_ptr<MessagePackage> pack );
         void ResponsePackage( shared_ptr<MessagePackage> pack );
 
-        void PrepareSendPackageData( const string& msg, const string& exdata="");
+        void PrepareSendPackageData();
 
     public:
         /**
@@ -46,11 +46,11 @@ namespace Sloong
          */
         NetworkResult SendPackage();
 
-        shared_ptr<MessagePackage> GetRecvPackage(){ return m_pReceivedPackage;}
+        shared_ptr<MessagePackage> GetRecvPackage(){ return m_pTransPackage;}
 
-        inline string GetRecvMessage(){ return m_pReceivedPackage->context(); }
+        inline string GetRecvMessage(){ return m_pTransPackage->context(); }
 
-        string GetExtendData() { return m_pReceivedPackage->extenddata(); }
+        string GetExtendData() { return m_pTransPackage->extenddata(); }
 
         inline int GetSocketID(){return m_pCon->GetSocketID(); }
 
@@ -59,26 +59,26 @@ namespace Sloong
          * @Params: 
          * @Return: 
          */
-        inline bool IsBigPackage(){ return m_pReceivedPackage->extenddata().length() > 0 ? true : false; }
+        inline bool IsBigPackage(){ return m_pTransPackage->extenddata().length() > 0 ? true : false; }
 
         int GetPriority(){
-            return m_pReceivedPackage->prioritylevel();
+            return m_pTransPackage->prioritylevel();
         }
 
         void SetPriority(int value){
-            m_pReceivedPackage->set_prioritylevel(value);
+            m_pTransPackage->set_prioritylevel(value);
         }
 
         u_int64_t GetSerialNumber(){
-            return m_pReceivedPackage->serialnumber();
+            return m_pTransPackage->serialnumber();
         }
 
         void SetSerialNumber(u_int64_t value){
-            m_pReceivedPackage->set_serialnumber(value);
+            m_pTransPackage->set_serialnumber(value);
         }
 
         void AddSerialNumber( u_int64_t& value ){
-            m_pReceivedPackage->set_serialnumber(value);
+            m_pTransPackage->set_serialnumber(value);
             value++;
         }
     protected:
@@ -86,7 +86,7 @@ namespace Sloong
         string m_strPackageData;
         int m_nSent=0;
 		int m_nPackageSize=0;
-        shared_ptr<MessagePackage> m_pReceivedPackage;
+        shared_ptr<MessagePackage> m_pTransPackage;
     protected:
         SmartConnect    m_pCon;
         CLog*           m_pLog = nullptr;

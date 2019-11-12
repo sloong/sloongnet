@@ -42,8 +42,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>
-    </IncludePath>
+    <IncludePath>./include</IncludePath>
     <LibraryPath>
     </LibraryPath>
   </PropertyGroup>

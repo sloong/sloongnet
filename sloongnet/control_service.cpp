@@ -57,6 +57,7 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
 	config->set_mqthreadquantity(1);
 	config->set_enablessl(false);
 	config->set_epollthreadquantity(1);
+	config->set_processthreadquantity(1);
 }
 
 void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)

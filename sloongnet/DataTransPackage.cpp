@@ -6,46 +6,38 @@ void Sloong::CDataTransPackage::Initialize(SmartConnect conn, CLog* pLog)
 	m_pLog = pLog;
 }
 
-void Sloong::CDataTransPackage::PrepareSendPackageData( const string& msg, const string& exdata)
+void Sloong::CDataTransPackage::PrepareSendPackageData()
 {
-	// calculate the send buffer length
-	m_pReceivedPackage->set_context(msg);
-	
-	if (exdata.length() > 0)
-	{
-		m_pReceivedPackage->set_extenddata(exdata);
-	}
-
 	if (m_pLog!= nullptr)
 	{
-		m_pLog->Verbos(CUniversal::Format("SEND<<<[%d][%d]<<<%s&&&EXDATA<<<[%d]",m_pReceivedPackage->prioritylevel(),
-										m_pReceivedPackage->serialnumber(),m_pReceivedPackage->context(),exdata.length()));
+		m_pLog->Verbos(CUniversal::Format("SEND<<<[%d][%d]<<<%s&&&EXDATA<<<[%d]",m_pTransPackage->prioritylevel(),
+										m_pTransPackage->serialnumber(),m_pTransPackage->context(), m_pTransPackage->extenddata().length()));
 	}
-	m_pReceivedPackage->SerializeToString(&m_strPackageData);
+	m_pTransPackage->SerializeToString(&m_strPackageData);
 	m_nPackageSize = (int)m_strPackageData.length();
 }
 
 void Sloong::CDataTransPackage::RequestPackage( shared_ptr<MessagePackage> pack )
 {
-	m_pReceivedPackage = pack;
-	PrepareSendPackageData(pack->context());
+	m_pTransPackage = pack;
+	PrepareSendPackageData();
 }
 
 
 void Sloong::CDataTransPackage::ResponsePackage( shared_ptr<MessagePackage> pack )
 {
-	m_pReceivedPackage = pack;
-	PrepareSendPackageData(pack->context());
+	m_pTransPackage = pack;
+	PrepareSendPackageData();
 }
 
 
 void Sloong::CDataTransPackage::ResponsePackage(const string &msg, const string& exdata)
 {
-	m_pReceivedPackage->set_type( MsgTypes::Response );
-	PrepareSendPackageData(msg,exdata);
+	m_pTransPackage->set_type( MsgTypes::Response );
+	m_pTransPackage->set_context(msg);
+	m_pTransPackage->set_extenddata(exdata);
+	PrepareSendPackageData();
 }
-
-
 
 
 /**
@@ -82,32 +74,32 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage(int timeout)
 	if( net_res != NetworkResult::Succeed )
 		return net_res;
 
-	m_pReceivedPackage = make_shared<MessagePackage>();
-	if(!m_pReceivedPackage->ParseFromString(result))
+	m_pTransPackage = make_shared<MessagePackage>();
+	if(!m_pTransPackage->ParseFromString(result))
 	{
 		if( m_pLog )
 			m_pLog->Error("Parser receive data error.");
 		return NetworkResult::Error;
 	}
 
-	if (m_pReceivedPackage->prioritylevel() > s_PriorityLevel || m_pReceivedPackage->prioritylevel() < 0)
+	if (m_pTransPackage->prioritylevel() > s_PriorityLevel || m_pTransPackage->prioritylevel() < 0)
 	{
 		if( m_pLog )
-			m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_pReceivedPackage->prioritylevel(), s_PriorityLevel));
+			m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_pTransPackage->prioritylevel(), s_PriorityLevel));
 		return NetworkResult::Error;
 	}
 	
 	if( m_pLog )
-		m_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%d]<<<%s",m_pReceivedPackage->prioritylevel(),m_pReceivedPackage->serialnumber(),m_pReceivedPackage->context()));
+		m_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%d]<<<%s",m_pTransPackage->prioritylevel(),m_pTransPackage->serialnumber(),m_pTransPackage->context()));
 
-	if( m_pReceivedPackage->checkstring().length() > 0 ){
-		string rmd5 = CMD5::Encode(m_pReceivedPackage->context());
-		if ( strcasecmp(m_pReceivedPackage->checkstring().c_str(),rmd5.c_str()) != 0)
+	if( m_pTransPackage->checkstring().length() > 0 ){
+		string rmd5 = CMD5::Encode(m_pTransPackage->context());
+		if ( strcasecmp(m_pTransPackage->checkstring().c_str(),rmd5.c_str()) != 0)
 		{
 			// handle error.
 			if( m_pLog )
-				m_pLog->Warn(CUniversal::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_pReceivedPackage->context(), rmd5, m_pReceivedPackage->checkstring() ));
-			string strSend = CUniversal::Format("{\"errno\": \"-1\",\"errmsg\" : \"package check error\",\"server_md5\":\"%s\",\"client_md5\":\"%s\",\"check_string\":\"%s\"}", rmd5, m_pReceivedPackage->checkstring(), m_pReceivedPackage->context());
+				m_pLog->Warn(CUniversal::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_pTransPackage->context(), rmd5, m_pTransPackage->checkstring() ));
+			string strSend = CUniversal::Format("{\"errno\": \"-1\",\"errmsg\" : \"package check error\",\"server_md5\":\"%s\",\"client_md5\":\"%s\",\"check_string\":\"%s\"}", rmd5, m_pTransPackage->checkstring(), m_pTransPackage->context());
 			ResponsePackage(strSend);
 			return NetworkResult::Invalid;
 		}
