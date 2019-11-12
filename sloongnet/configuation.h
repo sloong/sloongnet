@@ -28,7 +28,7 @@ namespace Sloong
         bool Initialize( string dbPath, string uuid );
 
         bool LoadConfig( string uuid );
-        bool SaveConfig( string uuid );
+        bool SaveConfig( string uuid, string config );
         bool SaveTemplate( string id );
         bool ReloadTemplate( string id );
 

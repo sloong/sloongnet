@@ -22,39 +22,40 @@ namespace Protocol {
     static ProtocolReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg5wcm90b2NvbC5wcm90bxIIUHJvdG9jb2wivgEKDk1lc3NhZ2VQYWNrYWdl",
-            "EhAKCEZ1bmN0aW9uGAEgASgFEhUKDVByaW9yaXR5TGV2ZWwYAiABKAUSFAoM",
-            "U2VyaWFsTnVtYmVyGAMgASgDEhMKC0NoZWNrU3RyaW5nGAQgASgJEg4KBlNl",
-            "bmRlchgFIAEoCRIVCg1SZWNlaXZlckdyb3VwGAYgASgFEhAKCFJlY2VpdmVy",
-            "GAcgASgJEg8KB0NvbnRlbnQYCCABKAkSDgoGRXh0ZW5kGAkgASgMIvcCCg1H",
-            "TE9CQUxfQ09ORklHEhIKCkxpc3RlblBvcnQYASABKAUSEQoJRW5hYmxlU1NM",
-            "GAIgASgIEhQKDENlcnRGaWxlUGF0aBgDIAEoCRITCgtLZXlGaWxlUGF0aBgE",
-            "IAEoCRISCgpDZXJ0UGFzc3dkGAUgASgJEhMKC0Nvbm5lY3RUaW1lGAYgASgF",
-            "EhMKC1JlY2VpdmVUaW1lGAcgASgFEg8KB0xvZ1BhdGgYCCABKAkSEAoITG9n",
-            "TGV2ZWwYCSABKAUSEQoJRGVidWdNb2RlGAogASgIEhgKEE1RVGhyZWFkUXVh",
-            "bnRpdHkYCyABKAUSGwoTRVBvbGxUaHJlYWRRdWFudGl0eRgMIAEoBRIdChVQ",
-            "cm9jZXNzVGhyZWFkUXVhbnRpdHkYDSABKAUSFAoMUHJpb3JpdHlTaXplGA4g",
-            "ASgFEiIKBFR5cGUYDyABKA4yFC5Qcm90b2NvbC5Nb2R1bGVUeXBlEhAKCEV4",
-            "Q29uZmlnGBAgASgMIiMKDkNPTlRST0xfQ09ORklHEhEKCUJsb2NrVGltZRgB",
-            "IAEoBSJmCglEQl9DT05GSUcSFQoNU2VydmVyQWRkcmVzcxgBIAEoCRISCgpT",
-            "ZXJ2ZXJQb3J0GAIgASgFEgwKBFVzZXIYAyABKAkSDgoGUGFzc3dkGAQgASgJ",
-            "EhAKCERhdGFiYXNlGAUgASgJIjwKC0RBVEFfQ09ORklHEhcKD0RhdGFSZWNl",
-            "aXZlUG9ydBgBIAEoBRIUCgxEYXRhUmVjdlRpbWUYAiABKAUijAEKDkdBVEVX",
-            "QVlfQ09ORklHEhcKD0NsaWVudENoZWNrVGltZRgBIAEoBRIWCg5DbGllbnRD",
-            "aGVja0tleRgCIAEoCRIcChRUaW1lb3V0Q2hlY2tJbnRlcnZhbBgDIAEoBRIT",
-            "CgtUaW1lb3V0VGltZRgEIAEoBRIWCg5Qcm9jZXNzQWRkcmVzcxgFIAEoCSIk",
-            "Cg9GSVJFV0FMTF9DT05GSUcSEQoJQmxvY2tUaW1lGAEgASgFIrEBCg5QUk9D",
-            "RVNTX0NPTkZJRxIaChJMdWFDb250ZXh0UXVhbnRpdHkYASABKAUSFwoPTHVh",
-            "U2NyaXB0Rm9sZGVyGAIgASgJEhQKDEx1YUVudHJ5RmlsZRgDIAEoCRIYChBM",
-            "dWFFbnRyeUZ1bmN0aW9uGAQgASgJEhoKEkx1YVByb2Nlc3NGdW5jdGlvbhgF",
-            "IAEoCRIeChZMdWFTb2NrZXRDbG9zZUZ1bmN0aW9uGAYgASgJKmUKCk1vZHVs",
-            "ZVR5cGUSEAoMVW5jb25maWd1cmVkEAASCwoHQ29udHJvbBABEgwKCEZpcmV3",
-            "YWxsEAISCwoHR2F0ZXdheRADEggKBERhdGEQBBILCgdQcm9jZXNzEAUSBgoC",
-            "REIQBmIGcHJvdG8z"));
+            "Cg5wcm90b2NvbC5wcm90bxIIUHJvdG9jb2wiygEKC0RhdGFQYWNrYWdlEhAK",
+            "CEZ1bmN0aW9uGAEgASgFEhUKDVByaW9yaXR5TGV2ZWwYAiABKAUSFAoMU2Vy",
+            "aWFsTnVtYmVyGAMgASgDEhMKC0NoZWNrU3RyaW5nGAQgASgJEg4KBlNlbmRl",
+            "chgFIAEoCRIQCghSZWNlaXZlchgGIAEoBRIkCgZSZXN1bHQYByABKA4yFC5Q",
+            "cm90b2NvbC5SZXN1bHRUeXBlEg8KB0NvbnRlbnQYCCABKAkSDgoGRXh0ZW5k",
+            "GAkgASgMIvcCCg1HTE9CQUxfQ09ORklHEhIKCkxpc3RlblBvcnQYASABKAUS",
+            "EQoJRW5hYmxlU1NMGAIgASgIEhQKDENlcnRGaWxlUGF0aBgDIAEoCRITCgtL",
+            "ZXlGaWxlUGF0aBgEIAEoCRISCgpDZXJ0UGFzc3dkGAUgASgJEhMKC0Nvbm5l",
+            "Y3RUaW1lGAYgASgFEhMKC1JlY2VpdmVUaW1lGAcgASgFEg8KB0xvZ1BhdGgY",
+            "CCABKAkSEAoITG9nTGV2ZWwYCSABKAUSEQoJRGVidWdNb2RlGAogASgIEhgK",
+            "EE1RVGhyZWFkUXVhbnRpdHkYCyABKAUSGwoTRVBvbGxUaHJlYWRRdWFudGl0",
+            "eRgMIAEoBRIdChVQcm9jZXNzVGhyZWFkUXVhbnRpdHkYDSABKAUSFAoMUHJp",
+            "b3JpdHlTaXplGA4gASgFEiIKBFR5cGUYDyABKA4yFC5Qcm90b2NvbC5Nb2R1",
+            "bGVUeXBlEhAKCEV4Q29uZmlnGBAgASgMIiMKDkNPTlRST0xfQ09ORklHEhEK",
+            "CUJsb2NrVGltZRgBIAEoBSJmCglEQl9DT05GSUcSFQoNU2VydmVyQWRkcmVz",
+            "cxgBIAEoCRISCgpTZXJ2ZXJQb3J0GAIgASgFEgwKBFVzZXIYAyABKAkSDgoG",
+            "UGFzc3dkGAQgASgJEhAKCERhdGFiYXNlGAUgASgJIjwKC0RBVEFfQ09ORklH",
+            "EhcKD0RhdGFSZWNlaXZlUG9ydBgBIAEoBRIUCgxEYXRhUmVjdlRpbWUYAiAB",
+            "KAUijAEKDkdBVEVXQVlfQ09ORklHEhcKD0NsaWVudENoZWNrVGltZRgBIAEo",
+            "BRIWCg5DbGllbnRDaGVja0tleRgCIAEoCRIcChRUaW1lb3V0Q2hlY2tJbnRl",
+            "cnZhbBgDIAEoBRITCgtUaW1lb3V0VGltZRgEIAEoBRIWCg5Qcm9jZXNzQWRk",
+            "cmVzcxgFIAEoCSIkCg9GSVJFV0FMTF9DT05GSUcSEQoJQmxvY2tUaW1lGAEg",
+            "ASgFIrEBCg5QUk9DRVNTX0NPTkZJRxIaChJMdWFDb250ZXh0UXVhbnRpdHkY",
+            "ASABKAUSFwoPTHVhU2NyaXB0Rm9sZGVyGAIgASgJEhQKDEx1YUVudHJ5Rmls",
+            "ZRgDIAEoCRIYChBMdWFFbnRyeUZ1bmN0aW9uGAQgASgJEhoKEkx1YVByb2Nl",
+            "c3NGdW5jdGlvbhgFIAEoCRIeChZMdWFTb2NrZXRDbG9zZUZ1bmN0aW9uGAYg",
+            "ASgJKmUKCk1vZHVsZVR5cGUSEAoMVW5jb25maWd1cmVkEAASCwoHQ29udHJv",
+            "bBABEgwKCEZpcmV3YWxsEAISCwoHR2F0ZXdheRADEggKBERhdGEQBBILCgdQ",
+            "cm9jZXNzEAUSBgoCREIQBioxCgpSZXN1bHRUeXBlEgsKB1N1Y2NlZWQQABIJ",
+            "CgVFcnJvchABEgsKB1dhcm5pbmcQAmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ModuleType), }, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.MessagePackage), global::Protocol.MessagePackage.Parser, new[]{ "Function", "PriorityLevel", "SerialNumber", "CheckString", "Sender", "ReceiverGroup", "Receiver", "Content", "Extend" }, null, null, null),
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ModuleType), typeof(global::Protocol.ResultType), }, new pbr::GeneratedClrTypeInfo[] {
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.DataPackage), global::Protocol.DataPackage.Parser, new[]{ "Function", "PriorityLevel", "SerialNumber", "CheckString", "Sender", "Receiver", "Result", "Content", "Extend" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.GLOBAL_CONFIG), global::Protocol.GLOBAL_CONFIG.Parser, new[]{ "ListenPort", "EnableSSL", "CertFilePath", "KeyFilePath", "CertPasswd", "ConnectTime", "ReceiveTime", "LogPath", "LogLevel", "DebugMode", "MQThreadQuantity", "EPollThreadQuantity", "ProcessThreadQuantity", "PrioritySize", "Type", "ExConfig" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.CONTROL_CONFIG), global::Protocol.CONTROL_CONFIG.Parser, new[]{ "BlockTime" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.DB_CONFIG), global::Protocol.DB_CONFIG.Parser, new[]{ "ServerAddress", "ServerPort", "User", "Passwd", "Database" }, null, null, null),
@@ -81,13 +82,22 @@ namespace Protocol {
     [pbr::OriginalName("DB")] Db = 6,
   }
 
+  /// <summary>
+  ///  Result
+  /// </summary>
+  public enum ResultType {
+    [pbr::OriginalName("Succeed")] Succeed = 0,
+    [pbr::OriginalName("Error")] Error = 1,
+    [pbr::OriginalName("Warning")] Warning = 2,
+  }
+
   #endregion
 
   #region Messages
-  public sealed partial class MessagePackage : pb::IMessage<MessagePackage> {
-    private static readonly pb::MessageParser<MessagePackage> _parser = new pb::MessageParser<MessagePackage>(() => new MessagePackage());
+  public sealed partial class DataPackage : pb::IMessage<DataPackage> {
+    private static readonly pb::MessageParser<DataPackage> _parser = new pb::MessageParser<DataPackage>(() => new DataPackage());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<MessagePackage> Parser { get { return _parser; } }
+    public static pb::MessageParser<DataPackage> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
@@ -100,28 +110,28 @@ namespace Protocol {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public MessagePackage() {
+    public DataPackage() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public MessagePackage(MessagePackage other) : this() {
+    public DataPackage(DataPackage other) : this() {
       function_ = other.function_;
       priorityLevel_ = other.priorityLevel_;
       serialNumber_ = other.serialNumber_;
       checkString_ = other.checkString_;
       sender_ = other.sender_;
-      receiverGroup_ = other.receiverGroup_;
       receiver_ = other.receiver_;
+      result_ = other.result_;
       content_ = other.content_;
       extend_ = other.extend_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public MessagePackage Clone() {
-      return new MessagePackage(this);
+    public DataPackage Clone() {
+      return new DataPackage(this);
     }
 
     /// <summary>Field number for the "Function" field.</summary>
@@ -194,31 +204,31 @@ namespace Protocol {
       }
     }
 
-    /// <summary>Field number for the "ReceiverGroup" field.</summary>
-    public const int ReceiverGroupFieldNumber = 6;
-    private int receiverGroup_;
+    /// <summary>Field number for the "Receiver" field.</summary>
+    public const int ReceiverFieldNumber = 6;
+    private int receiver_;
     /// <summary>
-    ///  指定接收者为指定类型的所有成员。如果指定了唯一接收者那么则忽略此选项。
+    ///  指定接收者为指定类型的所有成员
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int ReceiverGroup {
-      get { return receiverGroup_; }
+    public int Receiver {
+      get { return receiver_; }
       set {
-        receiverGroup_ = value;
+        receiver_ = value;
       }
     }
 
-    /// <summary>Field number for the "Receiver" field.</summary>
-    public const int ReceiverFieldNumber = 7;
-    private string receiver_ = "";
+    /// <summary>Field number for the "Result" field.</summary>
+    public const int ResultFieldNumber = 7;
+    private global::Protocol.ResultType result_ = 0;
     /// <summary>
-    ///  指定唯一接收者
+    ///  结果代码
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Receiver {
-      get { return receiver_; }
+    public global::Protocol.ResultType Result {
+      get { return result_; }
       set {
-        receiver_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        result_ = value;
       }
     }
 
@@ -252,11 +262,11 @@ namespace Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
-      return Equals(other as MessagePackage);
+      return Equals(other as DataPackage);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(MessagePackage other) {
+    public bool Equals(DataPackage other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -268,8 +278,8 @@ namespace Protocol {
       if (SerialNumber != other.SerialNumber) return false;
       if (CheckString != other.CheckString) return false;
       if (Sender != other.Sender) return false;
-      if (ReceiverGroup != other.ReceiverGroup) return false;
       if (Receiver != other.Receiver) return false;
+      if (Result != other.Result) return false;
       if (Content != other.Content) return false;
       if (Extend != other.Extend) return false;
       return true;
@@ -283,8 +293,8 @@ namespace Protocol {
       if (SerialNumber != 0L) hash ^= SerialNumber.GetHashCode();
       if (CheckString.Length != 0) hash ^= CheckString.GetHashCode();
       if (Sender.Length != 0) hash ^= Sender.GetHashCode();
-      if (ReceiverGroup != 0) hash ^= ReceiverGroup.GetHashCode();
-      if (Receiver.Length != 0) hash ^= Receiver.GetHashCode();
+      if (Receiver != 0) hash ^= Receiver.GetHashCode();
+      if (Result != 0) hash ^= Result.GetHashCode();
       if (Content.Length != 0) hash ^= Content.GetHashCode();
       if (Extend.Length != 0) hash ^= Extend.GetHashCode();
       return hash;
@@ -317,13 +327,13 @@ namespace Protocol {
         output.WriteRawTag(42);
         output.WriteString(Sender);
       }
-      if (ReceiverGroup != 0) {
+      if (Receiver != 0) {
         output.WriteRawTag(48);
-        output.WriteInt32(ReceiverGroup);
+        output.WriteInt32(Receiver);
       }
-      if (Receiver.Length != 0) {
-        output.WriteRawTag(58);
-        output.WriteString(Receiver);
+      if (Result != 0) {
+        output.WriteRawTag(56);
+        output.WriteEnum((int) Result);
       }
       if (Content.Length != 0) {
         output.WriteRawTag(66);
@@ -353,11 +363,11 @@ namespace Protocol {
       if (Sender.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Sender);
       }
-      if (ReceiverGroup != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ReceiverGroup);
+      if (Receiver != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Receiver);
       }
-      if (Receiver.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Receiver);
+      if (Result != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Result);
       }
       if (Content.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Content);
@@ -369,7 +379,7 @@ namespace Protocol {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(MessagePackage other) {
+    public void MergeFrom(DataPackage other) {
       if (other == null) {
         return;
       }
@@ -388,11 +398,11 @@ namespace Protocol {
       if (other.Sender.Length != 0) {
         Sender = other.Sender;
       }
-      if (other.ReceiverGroup != 0) {
-        ReceiverGroup = other.ReceiverGroup;
-      }
-      if (other.Receiver.Length != 0) {
+      if (other.Receiver != 0) {
         Receiver = other.Receiver;
+      }
+      if (other.Result != 0) {
+        Result = other.Result;
       }
       if (other.Content.Length != 0) {
         Content = other.Content;
@@ -431,11 +441,11 @@ namespace Protocol {
             break;
           }
           case 48: {
-            ReceiverGroup = input.ReadInt32();
+            Receiver = input.ReadInt32();
             break;
           }
-          case 58: {
-            Receiver = input.ReadString();
+          case 56: {
+            result_ = (global::Protocol.ResultType) input.ReadEnum();
             break;
           }
           case 66: {

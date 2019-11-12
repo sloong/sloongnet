@@ -24,8 +24,8 @@ namespace Sloong
          */
         void ResponsePackage(const string& msg, const string& exdata="");
 
-        void RequestPackage( shared_ptr<MessagePackage> pack );
-        void ResponsePackage( shared_ptr<MessagePackage> pack );
+        void RequestPackage( shared_ptr<DataPackage> pack );
+        void ResponsePackage( shared_ptr<DataPackage> pack );
 
         void PrepareSendPackageData();
 
@@ -46,7 +46,7 @@ namespace Sloong
          */
         NetworkResult SendPackage();
 
-        shared_ptr<MessagePackage> GetRecvPackage(){ return m_pTransPackage;}
+        shared_ptr<DataPackage> GetRecvPackage(){ return m_pTransPackage;}
 
         inline string GetRecvMessage(){ return m_pTransPackage->content(); }
 
@@ -86,7 +86,7 @@ namespace Sloong
         string m_strPackageData;
         int m_nSent=0;
 		int m_nPackageSize=0;
-        shared_ptr<MessagePackage> m_pTransPackage;
+        shared_ptr<DataPackage> m_pTransPackage;
     protected:
         SmartConnect    m_pCon;
         CLog*           m_pLog = nullptr;

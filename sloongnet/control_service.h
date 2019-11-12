@@ -32,6 +32,7 @@ namespace Sloong
 	protected:
 		unique_ptr<CConfiguation>	m_pAllConfig = make_unique<CConfiguation>();
 		map<string, string>	m_oServerList;
+		map<string, string> m_oWaitConfigList;
 		CONTROL_CONFIG m_oConfig;
 		GLOBAL_CONFIG m_oWaitConfig;
 	};

@@ -13,9 +13,9 @@ void PrintVersion()
 
 string RegisteToControl(SmartConnect con, string uuid)
 {
-	auto req = make_shared<MessagePackage>();
+	auto req = make_shared<DataPackage>();
 	req->set_function(MessageFunction::RegisteServer);
-	req->set_receivergroup(Protocol::ModuleType::Control);
+	req->set_receiver(Protocol::ModuleType::Control);
 	req->set_sender(uuid);
 
 	CDataTransPackage dataPackage;
@@ -36,9 +36,9 @@ string RegisteToControl(SmartConnect con, string uuid)
 
 string GetConfigFromControl(SmartConnect con,string uuid)
 {
-	auto get_config_request_buf = make_shared<MessagePackage>();
+	auto get_config_request_buf = make_shared<DataPackage>();
 	get_config_request_buf->set_function(MessageFunction::GetServerConfig);
-	get_config_request_buf->set_receivergroup(Protocol::ModuleType::Control);
+	get_config_request_buf->set_receiver(Protocol::ModuleType::Control);
 	get_config_request_buf->set_sender(uuid);
 
 	CDataTransPackage dataPackage;

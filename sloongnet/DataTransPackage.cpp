@@ -17,14 +17,14 @@ void Sloong::CDataTransPackage::PrepareSendPackageData()
 	m_nPackageSize = (int)m_strPackageData.length();
 }
 
-void Sloong::CDataTransPackage::RequestPackage( shared_ptr<MessagePackage> pack )
+void Sloong::CDataTransPackage::RequestPackage( shared_ptr<DataPackage> pack )
 {
 	m_pTransPackage = pack;
 	PrepareSendPackageData();
 }
 
 
-void Sloong::CDataTransPackage::ResponsePackage( shared_ptr<MessagePackage> pack )
+void Sloong::CDataTransPackage::ResponsePackage( shared_ptr<DataPackage> pack )
 {
 	m_pTransPackage = pack;
 	PrepareSendPackageData();
@@ -73,7 +73,7 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage(int timeout)
 	if( net_res != NetworkResult::Succeed )
 		return net_res;
 
-	m_pTransPackage = make_shared<MessagePackage>();
+	m_pTransPackage = make_shared<DataPackage>();
 	if(!m_pTransPackage->ParseFromString(result))
 	{
 		if( m_pLog )

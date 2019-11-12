@@ -12,7 +12,14 @@ enum ModuleType{
     DB = 6;
 }
 
-message MessagePackage
+// Result
+enum ResultType{	
+	Succeed = 0;
+	Error = 1;
+	Warning = 2;
+}
+
+message DataPackage
 {
     // 功能
     int32 Function = 1;
@@ -24,10 +31,10 @@ message MessagePackage
     string CheckString = 4;
     // 发送者的唯一标识符
     string Sender = 5;
-    // 指定接收者为指定类型的所有成员。如果指定了唯一接收者那么则忽略此选项。
-    int32 ReceiverGroup = 6;
-    // 指定唯一接收者
-    string Receiver = 7;
+    // 指定接收者为指定类型的所有成员
+    int32 Receiver = 6;
+	// 结果代码
+	ResultType Result = 7;
     // 消息内容
     string Content = 8;
     // 扩展数据

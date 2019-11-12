@@ -11,6 +11,7 @@
 #include "NetworkEvent.hpp"
 #include "SQLiteEx.h"
 #include "fstream_ex.hpp"
+#include <jsoncpp/json/json.h>
 using namespace Sloong::Events;
 
 /**
@@ -70,41 +71,59 @@ void Sloong::SloongControlService::InitWaitConfig()
 void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 {
 	auto msgPack = pack->GetRecvPackage();
+	auto sender = msgPack->sender();
 	switch( msgPack->function() )
 	{
 	case MessageFunction::RegisteServer:
 	{
-		auto sender = msgPack->sender();
 		if (sender.size() == 0)
 		{
+			// TODO: 这里需要根据情况增加一个ip显示。
+			string ip = "unspport";
+			m_pLog->Verbos(CUniversal::Format("New module[IP:%s] add to system. wait configuation. ", ip));
 			sender = CUtility::GenUUID();
+			m_oWaitConfigList[sender] =ip;
 		}
 		// Add to server list
 		m_oServerList[sender] = "";
 		pack->ResponsePackage(sender);
 	}break;
+	case MessageFunction::SetServerConfig:
+	{
+		auto target = msgPack->content();
+		m_pAllConfig->SaveConfig(target, msgPack->extend());
+	}break;
 	case MessageFunction::GetServerConfig:
 	{
-		auto sender = msgPack->sender();
-		string config = "";
-		if (sender.size() == 0)
+		m_pLog->Verbos(CUniversal::Format("Porcess [GetServerConfig] request: sender[%d]", sender));
+		string config = m_pAllConfig->GetConfig(sender);
+		if (config == "")
 		{
-			// TODO: 这里需要根据情况增加一个ip显示。
-			m_pLog->Verbos(CUniversal::Format("New module[IP:%s] add to system. wait configuation. ","unspport"));
+			// Error
+			string ip = "unspport";
+			m_pLog->Verbos(CUniversal::Format("Module[IP:%s|UUID:%s] is no registe in system. wait admin process.", ip,sender));
 			m_oWaitConfig.SerializeToString(&config);
-		}
-		else
-		{
-			m_pLog->Verbos(CUniversal::Format("Porcess [GetServerConfig] request: sender[%d]",sender));
-			config = m_pAllConfig->GetConfig(sender);
-			if(config == "" )
-			{
-				// Error
-				m_pLog->Verbos(CUniversal::Format("Module[IP:%s|UUID:%s] is no registe in system. wait admin process.","unspport",sender));
-				m_oWaitConfig.SerializeToString(&config);
-			}
+			if (m_oWaitConfigList.end() == m_oWaitConfigList.find(sender))
+				m_oWaitConfigList[sender]= ip;
 		}
 		pack->ResponsePackage("",config);
+	}break;
+	case MessageFunction::GetWaitConfigList:
+	{
+		string list_str = "";
+		Json::Value root;
+		Json::Value list;
+		for (auto& i : m_oWaitConfigList) {
+			Json::Value item;
+			item["UUID"] = i.first;
+			item["IP"] = i.second;
+			list.append(item);
+//			list_str += CUniversal::Format("{\"UUID\":\"%s\",\"IP\":\"%s\"},", i.first, i.second);
+		}
+		root["WaitConfigList"] = list;
+		pack->ResponsePackage(root.toStyledString());
+		//list_str.substr(0, list_str.length() - 1);
+		//pack->ResponsePackage(CUniversal::Format("{\"WaitConfigList\":[%s]}", list_str));
 	}break;
 	}
 	

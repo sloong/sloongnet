@@ -65,8 +65,8 @@ void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 	if( m_mapProcessLoadList.find(event_happend_socket) == m_mapProcessLoadList.end() )
 	{
 		// Step 1: 将已经收到的来自客户端的请求内容转换为protobuf格式
-		auto sendMsg = make_shared<MessagePackage>();
-		sendMsg->set_receivergroup(ModuleType::Process);
+		auto sendMsg = make_shared<DataPackage>();
+		sendMsg->set_receiver(ModuleType::Process);
 		sendMsg->set_function(MessageFunction::ProcessMessage);
 		sendMsg->set_content(pack->GetRecvMessage());
 		sendMsg->set_prioritylevel(pack->GetPriority());

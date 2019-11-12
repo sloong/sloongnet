@@ -65,7 +65,7 @@ bool Sloong::CConfiguation::LoadConfig(string uuid)
     return true;
 }
 
-bool Sloong::CConfiguation::SaveConfig(string uuid)
+bool Sloong::CConfiguation::SaveConfig(string uuid, string config)
 {
     // TODO: add sqlite write function.
 	return true;

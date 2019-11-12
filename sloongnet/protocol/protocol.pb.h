@@ -40,10 +40,10 @@ void protobuf_ShutdownFile_protocol_2eproto();
 class CONTROL_CONFIG;
 class DATA_CONFIG;
 class DB_CONFIG;
+class DataPackage;
 class FIREWALL_CONFIG;
 class GATEWAY_CONFIG;
 class GLOBAL_CONFIG;
-class MessagePackage;
 class PROCESS_CONFIG;
 
 enum ModuleType {
@@ -72,34 +72,56 @@ inline bool ModuleType_Parse(
   return ::google::protobuf::internal::ParseNamedEnum<ModuleType>(
     ModuleType_descriptor(), name, value);
 }
+enum ResultType {
+  Succeed = 0,
+  Error = 1,
+  Warning = 2,
+  ResultType_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
+  ResultType_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
+};
+bool ResultType_IsValid(int value);
+const ResultType ResultType_MIN = Succeed;
+const ResultType ResultType_MAX = Warning;
+const int ResultType_ARRAYSIZE = ResultType_MAX + 1;
+
+const ::google::protobuf::EnumDescriptor* ResultType_descriptor();
+inline const ::std::string& ResultType_Name(ResultType value) {
+  return ::google::protobuf::internal::NameOfEnum(
+    ResultType_descriptor(), value);
+}
+inline bool ResultType_Parse(
+    const ::std::string& name, ResultType* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<ResultType>(
+    ResultType_descriptor(), name, value);
+}
 // ===================================================================
 
-class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:Protocol.MessagePackage) */ {
+class DataPackage : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:Protocol.DataPackage) */ {
  public:
-  MessagePackage();
-  virtual ~MessagePackage();
+  DataPackage();
+  virtual ~DataPackage();
 
-  MessagePackage(const MessagePackage& from);
+  DataPackage(const DataPackage& from);
 
-  inline MessagePackage& operator=(const MessagePackage& from) {
+  inline DataPackage& operator=(const DataPackage& from) {
     CopyFrom(from);
     return *this;
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const MessagePackage& default_instance();
+  static const DataPackage& default_instance();
 
-  void Swap(MessagePackage* other);
+  void Swap(DataPackage* other);
 
   // implements Message ----------------------------------------------
 
-  inline MessagePackage* New() const { return New(NULL); }
+  inline DataPackage* New() const { return New(NULL); }
 
-  MessagePackage* New(::google::protobuf::Arena* arena) const;
+  DataPackage* New(::google::protobuf::Arena* arena) const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const MessagePackage& from);
-  void MergeFrom(const MessagePackage& from);
+  void CopyFrom(const DataPackage& from);
+  void MergeFrom(const DataPackage& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -118,7 +140,7 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
   void SharedCtor();
   void SharedDtor();
   void SetCachedSize(int size) const;
-  void InternalSwap(MessagePackage* other);
+  void InternalSwap(DataPackage* other);
   private:
   inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
     return _internal_metadata_.arena();
@@ -174,22 +196,17 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::std::string* release_sender();
   void set_allocated_sender(::std::string* sender);
 
-  // optional int32 ReceiverGroup = 6;
-  void clear_receivergroup();
-  static const int kReceiverGroupFieldNumber = 6;
-  ::google::protobuf::int32 receivergroup() const;
-  void set_receivergroup(::google::protobuf::int32 value);
-
-  // optional string Receiver = 7;
+  // optional int32 Receiver = 6;
   void clear_receiver();
-  static const int kReceiverFieldNumber = 7;
-  const ::std::string& receiver() const;
-  void set_receiver(const ::std::string& value);
-  void set_receiver(const char* value);
-  void set_receiver(const char* value, size_t size);
-  ::std::string* mutable_receiver();
-  ::std::string* release_receiver();
-  void set_allocated_receiver(::std::string* receiver);
+  static const int kReceiverFieldNumber = 6;
+  ::google::protobuf::int32 receiver() const;
+  void set_receiver(::google::protobuf::int32 value);
+
+  // optional .Protocol.ResultType Result = 7;
+  void clear_result();
+  static const int kResultFieldNumber = 7;
+  ::Protocol::ResultType result() const;
+  void set_result(::Protocol::ResultType value);
 
   // optional string Content = 8;
   void clear_content();
@@ -213,7 +230,7 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::std::string* release_extend();
   void set_allocated_extend(::std::string* extend);
 
-  // @@protoc_insertion_point(class_scope:Protocol.MessagePackage)
+  // @@protoc_insertion_point(class_scope:Protocol.DataPackage)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -223,17 +240,17 @@ class MessagePackage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::int64 serialnumber_;
   ::google::protobuf::internal::ArenaStringPtr checkstring_;
   ::google::protobuf::internal::ArenaStringPtr sender_;
-  ::google::protobuf::internal::ArenaStringPtr receiver_;
+  ::google::protobuf::int32 receiver_;
+  int result_;
   ::google::protobuf::internal::ArenaStringPtr content_;
   ::google::protobuf::internal::ArenaStringPtr extend_;
-  ::google::protobuf::int32 receivergroup_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
   friend void protobuf_ShutdownFile_protocol_2eproto();
 
   void InitAsDefaultInstance();
-  static MessagePackage* default_instance_;
+  static DataPackage* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -1098,282 +1115,252 @@ class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
 // ===================================================================
 
 #if !PROTOBUF_INLINE_NOT_IN_HEADERS
-// MessagePackage
+// DataPackage
 
 // optional int32 Function = 1;
-inline void MessagePackage::clear_function() {
+inline void DataPackage::clear_function() {
   function_ = 0;
 }
-inline ::google::protobuf::int32 MessagePackage::function() const {
-  // @@protoc_insertion_point(field_get:Protocol.MessagePackage.Function)
+inline ::google::protobuf::int32 DataPackage::function() const {
+  // @@protoc_insertion_point(field_get:Protocol.DataPackage.Function)
   return function_;
 }
-inline void MessagePackage::set_function(::google::protobuf::int32 value) {
+inline void DataPackage::set_function(::google::protobuf::int32 value) {
   
   function_ = value;
-  // @@protoc_insertion_point(field_set:Protocol.MessagePackage.Function)
+  // @@protoc_insertion_point(field_set:Protocol.DataPackage.Function)
 }
 
 // optional int32 PriorityLevel = 2;
-inline void MessagePackage::clear_prioritylevel() {
+inline void DataPackage::clear_prioritylevel() {
   prioritylevel_ = 0;
 }
-inline ::google::protobuf::int32 MessagePackage::prioritylevel() const {
-  // @@protoc_insertion_point(field_get:Protocol.MessagePackage.PriorityLevel)
+inline ::google::protobuf::int32 DataPackage::prioritylevel() const {
+  // @@protoc_insertion_point(field_get:Protocol.DataPackage.PriorityLevel)
   return prioritylevel_;
 }
-inline void MessagePackage::set_prioritylevel(::google::protobuf::int32 value) {
+inline void DataPackage::set_prioritylevel(::google::protobuf::int32 value) {
   
   prioritylevel_ = value;
-  // @@protoc_insertion_point(field_set:Protocol.MessagePackage.PriorityLevel)
+  // @@protoc_insertion_point(field_set:Protocol.DataPackage.PriorityLevel)
 }
 
 // optional int64 SerialNumber = 3;
-inline void MessagePackage::clear_serialnumber() {
+inline void DataPackage::clear_serialnumber() {
   serialnumber_ = GOOGLE_LONGLONG(0);
 }
-inline ::google::protobuf::int64 MessagePackage::serialnumber() const {
-  // @@protoc_insertion_point(field_get:Protocol.MessagePackage.SerialNumber)
+inline ::google::protobuf::int64 DataPackage::serialnumber() const {
+  // @@protoc_insertion_point(field_get:Protocol.DataPackage.SerialNumber)
   return serialnumber_;
 }
-inline void MessagePackage::set_serialnumber(::google::protobuf::int64 value) {
+inline void DataPackage::set_serialnumber(::google::protobuf::int64 value) {
   
   serialnumber_ = value;
-  // @@protoc_insertion_point(field_set:Protocol.MessagePackage.SerialNumber)
+  // @@protoc_insertion_point(field_set:Protocol.DataPackage.SerialNumber)
 }
 
 // optional string CheckString = 4;
-inline void MessagePackage::clear_checkstring() {
+inline void DataPackage::clear_checkstring() {
   checkstring_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline const ::std::string& MessagePackage::checkstring() const {
-  // @@protoc_insertion_point(field_get:Protocol.MessagePackage.CheckString)
+inline const ::std::string& DataPackage::checkstring() const {
+  // @@protoc_insertion_point(field_get:Protocol.DataPackage.CheckString)
   return checkstring_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void MessagePackage::set_checkstring(const ::std::string& value) {
+inline void DataPackage::set_checkstring(const ::std::string& value) {
   
   checkstring_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:Protocol.MessagePackage.CheckString)
+  // @@protoc_insertion_point(field_set:Protocol.DataPackage.CheckString)
 }
-inline void MessagePackage::set_checkstring(const char* value) {
+inline void DataPackage::set_checkstring(const char* value) {
   
   checkstring_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:Protocol.MessagePackage.CheckString)
+  // @@protoc_insertion_point(field_set_char:Protocol.DataPackage.CheckString)
 }
-inline void MessagePackage::set_checkstring(const char* value, size_t size) {
+inline void DataPackage::set_checkstring(const char* value, size_t size) {
   
   checkstring_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:Protocol.MessagePackage.CheckString)
+  // @@protoc_insertion_point(field_set_pointer:Protocol.DataPackage.CheckString)
 }
-inline ::std::string* MessagePackage::mutable_checkstring() {
+inline ::std::string* DataPackage::mutable_checkstring() {
   
-  // @@protoc_insertion_point(field_mutable:Protocol.MessagePackage.CheckString)
+  // @@protoc_insertion_point(field_mutable:Protocol.DataPackage.CheckString)
   return checkstring_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline ::std::string* MessagePackage::release_checkstring() {
-  // @@protoc_insertion_point(field_release:Protocol.MessagePackage.CheckString)
+inline ::std::string* DataPackage::release_checkstring() {
+  // @@protoc_insertion_point(field_release:Protocol.DataPackage.CheckString)
   
   return checkstring_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void MessagePackage::set_allocated_checkstring(::std::string* checkstring) {
+inline void DataPackage::set_allocated_checkstring(::std::string* checkstring) {
   if (checkstring != NULL) {
     
   } else {
     
   }
   checkstring_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), checkstring);
-  // @@protoc_insertion_point(field_set_allocated:Protocol.MessagePackage.CheckString)
+  // @@protoc_insertion_point(field_set_allocated:Protocol.DataPackage.CheckString)
 }
 
 // optional string Sender = 5;
-inline void MessagePackage::clear_sender() {
+inline void DataPackage::clear_sender() {
   sender_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline const ::std::string& MessagePackage::sender() const {
-  // @@protoc_insertion_point(field_get:Protocol.MessagePackage.Sender)
+inline const ::std::string& DataPackage::sender() const {
+  // @@protoc_insertion_point(field_get:Protocol.DataPackage.Sender)
   return sender_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void MessagePackage::set_sender(const ::std::string& value) {
+inline void DataPackage::set_sender(const ::std::string& value) {
   
   sender_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:Protocol.MessagePackage.Sender)
+  // @@protoc_insertion_point(field_set:Protocol.DataPackage.Sender)
 }
-inline void MessagePackage::set_sender(const char* value) {
+inline void DataPackage::set_sender(const char* value) {
   
   sender_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:Protocol.MessagePackage.Sender)
+  // @@protoc_insertion_point(field_set_char:Protocol.DataPackage.Sender)
 }
-inline void MessagePackage::set_sender(const char* value, size_t size) {
+inline void DataPackage::set_sender(const char* value, size_t size) {
   
   sender_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:Protocol.MessagePackage.Sender)
+  // @@protoc_insertion_point(field_set_pointer:Protocol.DataPackage.Sender)
 }
-inline ::std::string* MessagePackage::mutable_sender() {
+inline ::std::string* DataPackage::mutable_sender() {
   
-  // @@protoc_insertion_point(field_mutable:Protocol.MessagePackage.Sender)
+  // @@protoc_insertion_point(field_mutable:Protocol.DataPackage.Sender)
   return sender_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline ::std::string* MessagePackage::release_sender() {
-  // @@protoc_insertion_point(field_release:Protocol.MessagePackage.Sender)
+inline ::std::string* DataPackage::release_sender() {
+  // @@protoc_insertion_point(field_release:Protocol.DataPackage.Sender)
   
   return sender_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void MessagePackage::set_allocated_sender(::std::string* sender) {
+inline void DataPackage::set_allocated_sender(::std::string* sender) {
   if (sender != NULL) {
     
   } else {
     
   }
   sender_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), sender);
-  // @@protoc_insertion_point(field_set_allocated:Protocol.MessagePackage.Sender)
+  // @@protoc_insertion_point(field_set_allocated:Protocol.DataPackage.Sender)
 }
 
-// optional int32 ReceiverGroup = 6;
-inline void MessagePackage::clear_receivergroup() {
-  receivergroup_ = 0;
+// optional int32 Receiver = 6;
+inline void DataPackage::clear_receiver() {
+  receiver_ = 0;
 }
-inline ::google::protobuf::int32 MessagePackage::receivergroup() const {
-  // @@protoc_insertion_point(field_get:Protocol.MessagePackage.ReceiverGroup)
-  return receivergroup_;
+inline ::google::protobuf::int32 DataPackage::receiver() const {
+  // @@protoc_insertion_point(field_get:Protocol.DataPackage.Receiver)
+  return receiver_;
 }
-inline void MessagePackage::set_receivergroup(::google::protobuf::int32 value) {
+inline void DataPackage::set_receiver(::google::protobuf::int32 value) {
   
-  receivergroup_ = value;
-  // @@protoc_insertion_point(field_set:Protocol.MessagePackage.ReceiverGroup)
+  receiver_ = value;
+  // @@protoc_insertion_point(field_set:Protocol.DataPackage.Receiver)
 }
 
-// optional string Receiver = 7;
-inline void MessagePackage::clear_receiver() {
-  receiver_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+// optional .Protocol.ResultType Result = 7;
+inline void DataPackage::clear_result() {
+  result_ = 0;
 }
-inline const ::std::string& MessagePackage::receiver() const {
-  // @@protoc_insertion_point(field_get:Protocol.MessagePackage.Receiver)
-  return receiver_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+inline ::Protocol::ResultType DataPackage::result() const {
+  // @@protoc_insertion_point(field_get:Protocol.DataPackage.Result)
+  return static_cast< ::Protocol::ResultType >(result_);
 }
-inline void MessagePackage::set_receiver(const ::std::string& value) {
+inline void DataPackage::set_result(::Protocol::ResultType value) {
   
-  receiver_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:Protocol.MessagePackage.Receiver)
-}
-inline void MessagePackage::set_receiver(const char* value) {
-  
-  receiver_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:Protocol.MessagePackage.Receiver)
-}
-inline void MessagePackage::set_receiver(const char* value, size_t size) {
-  
-  receiver_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:Protocol.MessagePackage.Receiver)
-}
-inline ::std::string* MessagePackage::mutable_receiver() {
-  
-  // @@protoc_insertion_point(field_mutable:Protocol.MessagePackage.Receiver)
-  return receiver_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline ::std::string* MessagePackage::release_receiver() {
-  // @@protoc_insertion_point(field_release:Protocol.MessagePackage.Receiver)
-  
-  return receiver_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline void MessagePackage::set_allocated_receiver(::std::string* receiver) {
-  if (receiver != NULL) {
-    
-  } else {
-    
-  }
-  receiver_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), receiver);
-  // @@protoc_insertion_point(field_set_allocated:Protocol.MessagePackage.Receiver)
+  result_ = value;
+  // @@protoc_insertion_point(field_set:Protocol.DataPackage.Result)
 }
 
 // optional string Content = 8;
-inline void MessagePackage::clear_content() {
+inline void DataPackage::clear_content() {
   content_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline const ::std::string& MessagePackage::content() const {
-  // @@protoc_insertion_point(field_get:Protocol.MessagePackage.Content)
+inline const ::std::string& DataPackage::content() const {
+  // @@protoc_insertion_point(field_get:Protocol.DataPackage.Content)
   return content_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void MessagePackage::set_content(const ::std::string& value) {
+inline void DataPackage::set_content(const ::std::string& value) {
   
   content_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:Protocol.MessagePackage.Content)
+  // @@protoc_insertion_point(field_set:Protocol.DataPackage.Content)
 }
-inline void MessagePackage::set_content(const char* value) {
+inline void DataPackage::set_content(const char* value) {
   
   content_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:Protocol.MessagePackage.Content)
+  // @@protoc_insertion_point(field_set_char:Protocol.DataPackage.Content)
 }
-inline void MessagePackage::set_content(const char* value, size_t size) {
+inline void DataPackage::set_content(const char* value, size_t size) {
   
   content_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:Protocol.MessagePackage.Content)
+  // @@protoc_insertion_point(field_set_pointer:Protocol.DataPackage.Content)
 }
-inline ::std::string* MessagePackage::mutable_content() {
+inline ::std::string* DataPackage::mutable_content() {
   
-  // @@protoc_insertion_point(field_mutable:Protocol.MessagePackage.Content)
+  // @@protoc_insertion_point(field_mutable:Protocol.DataPackage.Content)
   return content_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline ::std::string* MessagePackage::release_content() {
-  // @@protoc_insertion_point(field_release:Protocol.MessagePackage.Content)
+inline ::std::string* DataPackage::release_content() {
+  // @@protoc_insertion_point(field_release:Protocol.DataPackage.Content)
   
   return content_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void MessagePackage::set_allocated_content(::std::string* content) {
+inline void DataPackage::set_allocated_content(::std::string* content) {
   if (content != NULL) {
     
   } else {
     
   }
   content_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), content);
-  // @@protoc_insertion_point(field_set_allocated:Protocol.MessagePackage.Content)
+  // @@protoc_insertion_point(field_set_allocated:Protocol.DataPackage.Content)
 }
 
 // optional bytes Extend = 9;
-inline void MessagePackage::clear_extend() {
+inline void DataPackage::clear_extend() {
   extend_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline const ::std::string& MessagePackage::extend() const {
-  // @@protoc_insertion_point(field_get:Protocol.MessagePackage.Extend)
+inline const ::std::string& DataPackage::extend() const {
+  // @@protoc_insertion_point(field_get:Protocol.DataPackage.Extend)
   return extend_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void MessagePackage::set_extend(const ::std::string& value) {
+inline void DataPackage::set_extend(const ::std::string& value) {
   
   extend_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:Protocol.MessagePackage.Extend)
+  // @@protoc_insertion_point(field_set:Protocol.DataPackage.Extend)
 }
-inline void MessagePackage::set_extend(const char* value) {
+inline void DataPackage::set_extend(const char* value) {
   
   extend_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:Protocol.MessagePackage.Extend)
+  // @@protoc_insertion_point(field_set_char:Protocol.DataPackage.Extend)
 }
-inline void MessagePackage::set_extend(const void* value, size_t size) {
+inline void DataPackage::set_extend(const void* value, size_t size) {
   
   extend_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:Protocol.MessagePackage.Extend)
+  // @@protoc_insertion_point(field_set_pointer:Protocol.DataPackage.Extend)
 }
-inline ::std::string* MessagePackage::mutable_extend() {
+inline ::std::string* DataPackage::mutable_extend() {
   
-  // @@protoc_insertion_point(field_mutable:Protocol.MessagePackage.Extend)
+  // @@protoc_insertion_point(field_mutable:Protocol.DataPackage.Extend)
   return extend_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline ::std::string* MessagePackage::release_extend() {
-  // @@protoc_insertion_point(field_release:Protocol.MessagePackage.Extend)
+inline ::std::string* DataPackage::release_extend() {
+  // @@protoc_insertion_point(field_release:Protocol.DataPackage.Extend)
   
   return extend_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void MessagePackage::set_allocated_extend(::std::string* extend) {
+inline void DataPackage::set_allocated_extend(::std::string* extend) {
   if (extend != NULL) {
     
   } else {
     
   }
   extend_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), extend);
-  // @@protoc_insertion_point(field_set_allocated:Protocol.MessagePackage.Extend)
+  // @@protoc_insertion_point(field_set_allocated:Protocol.DataPackage.Extend)
 }
 
 // -------------------------------------------------------------------
@@ -2416,6 +2403,11 @@ template <> struct is_proto_enum< ::Protocol::ModuleType> : ::google::protobuf::
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::Protocol::ModuleType>() {
   return ::Protocol::ModuleType_descriptor();
+}
+template <> struct is_proto_enum< ::Protocol::ResultType> : ::google::protobuf::internal::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::Protocol::ResultType>() {
+  return ::Protocol::ResultType_descriptor();
 }
 
 }  // namespace protobuf
