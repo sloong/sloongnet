@@ -22,41 +22,39 @@ namespace Protocol {
     static ProtocolReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg5wcm90b2NvbC5wcm90bxIIUHJvdG9jb2wi5wEKDk1lc3NhZ2VQYWNrYWdl",
+            "Cg5wcm90b2NvbC5wcm90bxIIUHJvdG9jb2wivgEKDk1lc3NhZ2VQYWNrYWdl",
             "EhAKCEZ1bmN0aW9uGAEgASgFEhUKDVByaW9yaXR5TGV2ZWwYAiABKAUSFAoM",
-            "U2VyaWFsTnVtYmVyGAMgASgDEhMKC0NoZWNrU3RyaW5nGAQgASgJEhIKClNl",
-            "bmRlclVVSUQYBSABKAkSEAoIUmVjZWl2ZXIYBiABKAUSFAoMUmVjZWl2ZXJV",
-            "VUlEGAcgASgJEg8KB0NvbnRleHQYCCABKAkSEgoKRXh0ZW5kRGF0YRgJIAEo",
-            "DBIgCgRUeXBlGAogASgOMhIuUHJvdG9jb2wuTXNnVHlwZXMi9wIKDUdMT0JB",
-            "TF9DT05GSUcSEgoKTGlzdGVuUG9ydBgBIAEoBRIRCglFbmFibGVTU0wYAiAB",
-            "KAgSFAoMQ2VydEZpbGVQYXRoGAMgASgJEhMKC0tleUZpbGVQYXRoGAQgASgJ",
-            "EhIKCkNlcnRQYXNzd2QYBSABKAkSEwoLQ29ubmVjdFRpbWUYBiABKAUSEwoL",
-            "UmVjZWl2ZVRpbWUYByABKAUSDwoHTG9nUGF0aBgIIAEoCRIQCghMb2dMZXZl",
-            "bBgJIAEoBRIRCglEZWJ1Z01vZGUYCiABKAgSGAoQTVFUaHJlYWRRdWFudGl0",
-            "eRgLIAEoBRIbChNFUG9sbFRocmVhZFF1YW50aXR5GAwgASgFEh0KFVByb2Nl",
-            "c3NUaHJlYWRRdWFudGl0eRgNIAEoBRIUCgxQcmlvcml0eVNpemUYDiABKAUS",
-            "IgoEVHlwZRgPIAEoDjIULlByb3RvY29sLk1vZHVsZVR5cGUSEAoIRXhDb25m",
-            "aWcYECABKAwiIwoOQ09OVFJPTF9DT05GSUcSEQoJQmxvY2tUaW1lGAEgASgF",
-            "ImYKCURCX0NPTkZJRxIVCg1TZXJ2ZXJBZGRyZXNzGAEgASgJEhIKClNlcnZl",
-            "clBvcnQYAiABKAUSDAoEVXNlchgDIAEoCRIOCgZQYXNzd2QYBCABKAkSEAoI",
-            "RGF0YWJhc2UYBSABKAkiPAoLREFUQV9DT05GSUcSFwoPRGF0YVJlY2VpdmVQ",
-            "b3J0GAEgASgFEhQKDERhdGFSZWN2VGltZRgCIAEoBSKMAQoOR0FURVdBWV9D",
-            "T05GSUcSFwoPQ2xpZW50Q2hlY2tUaW1lGAEgASgFEhYKDkNsaWVudENoZWNr",
-            "S2V5GAIgASgJEhwKFFRpbWVvdXRDaGVja0ludGVydmFsGAMgASgFEhMKC1Rp",
-            "bWVvdXRUaW1lGAQgASgFEhYKDlByb2Nlc3NBZGRyZXNzGAUgASgJIiQKD0ZJ",
-            "UkVXQUxMX0NPTkZJRxIRCglCbG9ja1RpbWUYASABKAUisQEKDlBST0NFU1Nf",
-            "Q09ORklHEhoKEkx1YUNvbnRleHRRdWFudGl0eRgBIAEoBRIXCg9MdWFTY3Jp",
-            "cHRGb2xkZXIYAiABKAkSFAoMTHVhRW50cnlGaWxlGAMgASgJEhgKEEx1YUVu",
-            "dHJ5RnVuY3Rpb24YBCABKAkSGgoSTHVhUHJvY2Vzc0Z1bmN0aW9uGAUgASgJ",
-            "Eh4KFkx1YVNvY2tldENsb3NlRnVuY3Rpb24YBiABKAkqZQoKTW9kdWxlVHlw",
-            "ZRIQCgxVbmNvbmZpZ3VyZWQQABILCgdDb250cm9sEAESDAoIRmlyZXdhbGwQ",
-            "AhILCgdHYXRld2F5EAMSCAoERGF0YRAEEgsKB1Byb2Nlc3MQBRIGCgJEQhAG",
-            "KiUKCE1zZ1R5cGVzEgsKB1JlcXVlc3QQABIMCghSZXNwb25zZRABYgZwcm90",
-            "bzM="));
+            "U2VyaWFsTnVtYmVyGAMgASgDEhMKC0NoZWNrU3RyaW5nGAQgASgJEg4KBlNl",
+            "bmRlchgFIAEoCRIVCg1SZWNlaXZlckdyb3VwGAYgASgFEhAKCFJlY2VpdmVy",
+            "GAcgASgJEg8KB0NvbnRlbnQYCCABKAkSDgoGRXh0ZW5kGAkgASgMIvcCCg1H",
+            "TE9CQUxfQ09ORklHEhIKCkxpc3RlblBvcnQYASABKAUSEQoJRW5hYmxlU1NM",
+            "GAIgASgIEhQKDENlcnRGaWxlUGF0aBgDIAEoCRITCgtLZXlGaWxlUGF0aBgE",
+            "IAEoCRISCgpDZXJ0UGFzc3dkGAUgASgJEhMKC0Nvbm5lY3RUaW1lGAYgASgF",
+            "EhMKC1JlY2VpdmVUaW1lGAcgASgFEg8KB0xvZ1BhdGgYCCABKAkSEAoITG9n",
+            "TGV2ZWwYCSABKAUSEQoJRGVidWdNb2RlGAogASgIEhgKEE1RVGhyZWFkUXVh",
+            "bnRpdHkYCyABKAUSGwoTRVBvbGxUaHJlYWRRdWFudGl0eRgMIAEoBRIdChVQ",
+            "cm9jZXNzVGhyZWFkUXVhbnRpdHkYDSABKAUSFAoMUHJpb3JpdHlTaXplGA4g",
+            "ASgFEiIKBFR5cGUYDyABKA4yFC5Qcm90b2NvbC5Nb2R1bGVUeXBlEhAKCEV4",
+            "Q29uZmlnGBAgASgMIiMKDkNPTlRST0xfQ09ORklHEhEKCUJsb2NrVGltZRgB",
+            "IAEoBSJmCglEQl9DT05GSUcSFQoNU2VydmVyQWRkcmVzcxgBIAEoCRISCgpT",
+            "ZXJ2ZXJQb3J0GAIgASgFEgwKBFVzZXIYAyABKAkSDgoGUGFzc3dkGAQgASgJ",
+            "EhAKCERhdGFiYXNlGAUgASgJIjwKC0RBVEFfQ09ORklHEhcKD0RhdGFSZWNl",
+            "aXZlUG9ydBgBIAEoBRIUCgxEYXRhUmVjdlRpbWUYAiABKAUijAEKDkdBVEVX",
+            "QVlfQ09ORklHEhcKD0NsaWVudENoZWNrVGltZRgBIAEoBRIWCg5DbGllbnRD",
+            "aGVja0tleRgCIAEoCRIcChRUaW1lb3V0Q2hlY2tJbnRlcnZhbBgDIAEoBRIT",
+            "CgtUaW1lb3V0VGltZRgEIAEoBRIWCg5Qcm9jZXNzQWRkcmVzcxgFIAEoCSIk",
+            "Cg9GSVJFV0FMTF9DT05GSUcSEQoJQmxvY2tUaW1lGAEgASgFIrEBCg5QUk9D",
+            "RVNTX0NPTkZJRxIaChJMdWFDb250ZXh0UXVhbnRpdHkYASABKAUSFwoPTHVh",
+            "U2NyaXB0Rm9sZGVyGAIgASgJEhQKDEx1YUVudHJ5RmlsZRgDIAEoCRIYChBM",
+            "dWFFbnRyeUZ1bmN0aW9uGAQgASgJEhoKEkx1YVByb2Nlc3NGdW5jdGlvbhgF",
+            "IAEoCRIeChZMdWFTb2NrZXRDbG9zZUZ1bmN0aW9uGAYgASgJKmUKCk1vZHVs",
+            "ZVR5cGUSEAoMVW5jb25maWd1cmVkEAASCwoHQ29udHJvbBABEgwKCEZpcmV3",
+            "YWxsEAISCwoHR2F0ZXdheRADEggKBERhdGEQBBILCgdQcm9jZXNzEAUSBgoC",
+            "REIQBmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ModuleType), typeof(global::Protocol.MsgTypes), }, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.MessagePackage), global::Protocol.MessagePackage.Parser, new[]{ "Function", "PriorityLevel", "SerialNumber", "CheckString", "SenderUUID", "Receiver", "ReceiverUUID", "Context", "ExtendData", "Type" }, null, null, null),
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ModuleType), }, new pbr::GeneratedClrTypeInfo[] {
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.MessagePackage), global::Protocol.MessagePackage.Parser, new[]{ "Function", "PriorityLevel", "SerialNumber", "CheckString", "Sender", "ReceiverGroup", "Receiver", "Content", "Extend" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.GLOBAL_CONFIG), global::Protocol.GLOBAL_CONFIG.Parser, new[]{ "ListenPort", "EnableSSL", "CertFilePath", "KeyFilePath", "CertPasswd", "ConnectTime", "ReceiveTime", "LogPath", "LogLevel", "DebugMode", "MQThreadQuantity", "EPollThreadQuantity", "ProcessThreadQuantity", "PrioritySize", "Type", "ExConfig" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.CONTROL_CONFIG), global::Protocol.CONTROL_CONFIG.Parser, new[]{ "BlockTime" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.DB_CONFIG), global::Protocol.DB_CONFIG.Parser, new[]{ "ServerAddress", "ServerPort", "User", "Passwd", "Database" }, null, null, null),
@@ -81,11 +79,6 @@ namespace Protocol {
     [pbr::OriginalName("Data")] Data = 4,
     [pbr::OriginalName("Process")] Process = 5,
     [pbr::OriginalName("DB")] Db = 6,
-  }
-
-  public enum MsgTypes {
-    [pbr::OriginalName("Request")] Request = 0,
-    [pbr::OriginalName("Response")] Response = 1,
   }
 
   #endregion
@@ -119,12 +112,11 @@ namespace Protocol {
       priorityLevel_ = other.priorityLevel_;
       serialNumber_ = other.serialNumber_;
       checkString_ = other.checkString_;
-      senderUUID_ = other.senderUUID_;
+      sender_ = other.sender_;
+      receiverGroup_ = other.receiverGroup_;
       receiver_ = other.receiver_;
-      receiverUUID_ = other.receiverUUID_;
-      context_ = other.context_;
-      extendData_ = other.extendData_;
-      type_ = other.type_;
+      content_ = other.content_;
+      extend_ = other.extend_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -188,87 +180,73 @@ namespace Protocol {
       }
     }
 
-    /// <summary>Field number for the "SenderUUID" field.</summary>
-    public const int SenderUUIDFieldNumber = 5;
-    private string senderUUID_ = "";
+    /// <summary>Field number for the "Sender" field.</summary>
+    public const int SenderFieldNumber = 5;
+    private string sender_ = "";
     /// <summary>
     ///  发送者的唯一标识符
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string SenderUUID {
-      get { return senderUUID_; }
+    public string Sender {
+      get { return sender_; }
       set {
-        senderUUID_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        sender_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
-    /// <summary>Field number for the "Receiver" field.</summary>
-    public const int ReceiverFieldNumber = 6;
-    private int receiver_;
+    /// <summary>Field number for the "ReceiverGroup" field.</summary>
+    public const int ReceiverGroupFieldNumber = 6;
+    private int receiverGroup_;
     /// <summary>
     ///  指定接收者为指定类型的所有成员。如果指定了唯一接收者那么则忽略此选项。
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int Receiver {
-      get { return receiver_; }
+    public int ReceiverGroup {
+      get { return receiverGroup_; }
       set {
-        receiver_ = value;
+        receiverGroup_ = value;
       }
     }
 
-    /// <summary>Field number for the "ReceiverUUID" field.</summary>
-    public const int ReceiverUUIDFieldNumber = 7;
-    private string receiverUUID_ = "";
+    /// <summary>Field number for the "Receiver" field.</summary>
+    public const int ReceiverFieldNumber = 7;
+    private string receiver_ = "";
     /// <summary>
     ///  指定唯一接收者
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string ReceiverUUID {
-      get { return receiverUUID_; }
+    public string Receiver {
+      get { return receiver_; }
       set {
-        receiverUUID_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        receiver_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
-    /// <summary>Field number for the "Context" field.</summary>
-    public const int ContextFieldNumber = 8;
-    private string context_ = "";
+    /// <summary>Field number for the "Content" field.</summary>
+    public const int ContentFieldNumber = 8;
+    private string content_ = "";
     /// <summary>
     ///  消息内容
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Context {
-      get { return context_; }
+    public string Content {
+      get { return content_; }
       set {
-        context_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        content_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
-    /// <summary>Field number for the "ExtendData" field.</summary>
-    public const int ExtendDataFieldNumber = 9;
-    private pb::ByteString extendData_ = pb::ByteString.Empty;
+    /// <summary>Field number for the "Extend" field.</summary>
+    public const int ExtendFieldNumber = 9;
+    private pb::ByteString extend_ = pb::ByteString.Empty;
     /// <summary>
     ///  扩展数据
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pb::ByteString ExtendData {
-      get { return extendData_; }
+    public pb::ByteString Extend {
+      get { return extend_; }
       set {
-        extendData_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-
-    /// <summary>Field number for the "Type" field.</summary>
-    public const int TypeFieldNumber = 10;
-    private global::Protocol.MsgTypes type_ = 0;
-    /// <summary>
-    ///  指示发送还是接收
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Protocol.MsgTypes Type {
-      get { return type_; }
-      set {
-        type_ = value;
+        extend_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
@@ -289,12 +267,11 @@ namespace Protocol {
       if (PriorityLevel != other.PriorityLevel) return false;
       if (SerialNumber != other.SerialNumber) return false;
       if (CheckString != other.CheckString) return false;
-      if (SenderUUID != other.SenderUUID) return false;
+      if (Sender != other.Sender) return false;
+      if (ReceiverGroup != other.ReceiverGroup) return false;
       if (Receiver != other.Receiver) return false;
-      if (ReceiverUUID != other.ReceiverUUID) return false;
-      if (Context != other.Context) return false;
-      if (ExtendData != other.ExtendData) return false;
-      if (Type != other.Type) return false;
+      if (Content != other.Content) return false;
+      if (Extend != other.Extend) return false;
       return true;
     }
 
@@ -305,12 +282,11 @@ namespace Protocol {
       if (PriorityLevel != 0) hash ^= PriorityLevel.GetHashCode();
       if (SerialNumber != 0L) hash ^= SerialNumber.GetHashCode();
       if (CheckString.Length != 0) hash ^= CheckString.GetHashCode();
-      if (SenderUUID.Length != 0) hash ^= SenderUUID.GetHashCode();
-      if (Receiver != 0) hash ^= Receiver.GetHashCode();
-      if (ReceiverUUID.Length != 0) hash ^= ReceiverUUID.GetHashCode();
-      if (Context.Length != 0) hash ^= Context.GetHashCode();
-      if (ExtendData.Length != 0) hash ^= ExtendData.GetHashCode();
-      if (Type != 0) hash ^= Type.GetHashCode();
+      if (Sender.Length != 0) hash ^= Sender.GetHashCode();
+      if (ReceiverGroup != 0) hash ^= ReceiverGroup.GetHashCode();
+      if (Receiver.Length != 0) hash ^= Receiver.GetHashCode();
+      if (Content.Length != 0) hash ^= Content.GetHashCode();
+      if (Extend.Length != 0) hash ^= Extend.GetHashCode();
       return hash;
     }
 
@@ -337,29 +313,25 @@ namespace Protocol {
         output.WriteRawTag(34);
         output.WriteString(CheckString);
       }
-      if (SenderUUID.Length != 0) {
+      if (Sender.Length != 0) {
         output.WriteRawTag(42);
-        output.WriteString(SenderUUID);
+        output.WriteString(Sender);
       }
-      if (Receiver != 0) {
+      if (ReceiverGroup != 0) {
         output.WriteRawTag(48);
-        output.WriteInt32(Receiver);
+        output.WriteInt32(ReceiverGroup);
       }
-      if (ReceiverUUID.Length != 0) {
+      if (Receiver.Length != 0) {
         output.WriteRawTag(58);
-        output.WriteString(ReceiverUUID);
+        output.WriteString(Receiver);
       }
-      if (Context.Length != 0) {
+      if (Content.Length != 0) {
         output.WriteRawTag(66);
-        output.WriteString(Context);
+        output.WriteString(Content);
       }
-      if (ExtendData.Length != 0) {
+      if (Extend.Length != 0) {
         output.WriteRawTag(74);
-        output.WriteBytes(ExtendData);
-      }
-      if (Type != 0) {
-        output.WriteRawTag(80);
-        output.WriteEnum((int) Type);
+        output.WriteBytes(Extend);
       }
     }
 
@@ -378,23 +350,20 @@ namespace Protocol {
       if (CheckString.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(CheckString);
       }
-      if (SenderUUID.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(SenderUUID);
+      if (Sender.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Sender);
       }
-      if (Receiver != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Receiver);
+      if (ReceiverGroup != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ReceiverGroup);
       }
-      if (ReceiverUUID.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(ReceiverUUID);
+      if (Receiver.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Receiver);
       }
-      if (Context.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Context);
+      if (Content.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Content);
       }
-      if (ExtendData.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeBytesSize(ExtendData);
-      }
-      if (Type != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Type);
+      if (Extend.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeBytesSize(Extend);
       }
       return size;
     }
@@ -416,23 +385,20 @@ namespace Protocol {
       if (other.CheckString.Length != 0) {
         CheckString = other.CheckString;
       }
-      if (other.SenderUUID.Length != 0) {
-        SenderUUID = other.SenderUUID;
+      if (other.Sender.Length != 0) {
+        Sender = other.Sender;
       }
-      if (other.Receiver != 0) {
+      if (other.ReceiverGroup != 0) {
+        ReceiverGroup = other.ReceiverGroup;
+      }
+      if (other.Receiver.Length != 0) {
         Receiver = other.Receiver;
       }
-      if (other.ReceiverUUID.Length != 0) {
-        ReceiverUUID = other.ReceiverUUID;
+      if (other.Content.Length != 0) {
+        Content = other.Content;
       }
-      if (other.Context.Length != 0) {
-        Context = other.Context;
-      }
-      if (other.ExtendData.Length != 0) {
-        ExtendData = other.ExtendData;
-      }
-      if (other.Type != 0) {
-        Type = other.Type;
+      if (other.Extend.Length != 0) {
+        Extend = other.Extend;
       }
     }
 
@@ -461,27 +427,23 @@ namespace Protocol {
             break;
           }
           case 42: {
-            SenderUUID = input.ReadString();
+            Sender = input.ReadString();
             break;
           }
           case 48: {
-            Receiver = input.ReadInt32();
+            ReceiverGroup = input.ReadInt32();
             break;
           }
           case 58: {
-            ReceiverUUID = input.ReadString();
+            Receiver = input.ReadString();
             break;
           }
           case 66: {
-            Context = input.ReadString();
+            Content = input.ReadString();
             break;
           }
           case 74: {
-            ExtendData = input.ReadBytes();
-            break;
-          }
-          case 80: {
-            type_ = (global::Protocol.MsgTypes) input.ReadEnum();
+            Extend = input.ReadBytes();
             break;
           }
         }

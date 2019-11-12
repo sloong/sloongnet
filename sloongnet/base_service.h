@@ -47,7 +47,7 @@ namespace Sloong
 		shared_ptr<EasyConnect>	m_pSocket;
 		CEasySync				m_oSync;
 		u_int64_t				m_nSerialNumber=0;
-		
+		string					m_strUUID;
 		
     public:
         static unique_ptr<CSloongBaseService> g_pAppService;

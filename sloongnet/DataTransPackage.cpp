@@ -11,7 +11,7 @@ void Sloong::CDataTransPackage::PrepareSendPackageData()
 	if (m_pLog!= nullptr)
 	{
 		m_pLog->Verbos(CUniversal::Format("SEND<<<[%d][%d]<<<%s&&&EXDATA<<<[%d]",m_pTransPackage->prioritylevel(),
-										m_pTransPackage->serialnumber(),m_pTransPackage->context(), m_pTransPackage->extenddata().length()));
+										m_pTransPackage->serialnumber(),m_pTransPackage->content(), m_pTransPackage->extend().length()));
 	}
 	m_pTransPackage->SerializeToString(&m_strPackageData);
 	m_nPackageSize = (int)m_strPackageData.length();
@@ -33,9 +33,8 @@ void Sloong::CDataTransPackage::ResponsePackage( shared_ptr<MessagePackage> pack
 
 void Sloong::CDataTransPackage::ResponsePackage(const string &msg, const string& exdata)
 {
-	m_pTransPackage->set_type( MsgTypes::Response );
-	m_pTransPackage->set_context(msg);
-	m_pTransPackage->set_extenddata(exdata);
+	m_pTransPackage->set_content(msg);
+	m_pTransPackage->set_extend(exdata);
 	PrepareSendPackageData();
 }
 
@@ -90,16 +89,16 @@ NetworkResult Sloong::CDataTransPackage::RecvPackage(int timeout)
 	}
 	
 	if( m_pLog )
-		m_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%d]<<<%s",m_pTransPackage->prioritylevel(),m_pTransPackage->serialnumber(),m_pTransPackage->context()));
+		m_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%d]<<<%s",m_pTransPackage->prioritylevel(),m_pTransPackage->serialnumber(),m_pTransPackage->content()));
 
 	if( m_pTransPackage->checkstring().length() > 0 ){
-		string rmd5 = CMD5::Encode(m_pTransPackage->context());
+		string rmd5 = CMD5::Encode(m_pTransPackage->content());
 		if ( strcasecmp(m_pTransPackage->checkstring().c_str(),rmd5.c_str()) != 0)
 		{
 			// handle error.
 			if( m_pLog )
-				m_pLog->Warn(CUniversal::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_pTransPackage->context(), rmd5, m_pTransPackage->checkstring() ));
-			string strSend = CUniversal::Format("{\"errno\": \"-1\",\"errmsg\" : \"package check error\",\"server_md5\":\"%s\",\"client_md5\":\"%s\",\"check_string\":\"%s\"}", rmd5, m_pTransPackage->checkstring(), m_pTransPackage->context());
+				m_pLog->Warn(CUniversal::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_pTransPackage->content(), rmd5, m_pTransPackage->checkstring() ));
+			string strSend = CUniversal::Format("{\"errno\": \"-1\",\"errmsg\" : \"package check error\",\"server_md5\":\"%s\",\"client_md5\":\"%s\",\"check_string\":\"%s\"}", rmd5, m_pTransPackage->checkstring(), m_pTransPackage->content());
 			ResponsePackage(strSend);
 			return NetworkResult::Invalid;
 		}

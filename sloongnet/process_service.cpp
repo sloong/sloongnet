@@ -25,18 +25,18 @@ void Sloong::SloongNetProcess::MessagePackageProcesser(SmartPackage pack)
 	switch((MessageFunction)msg->function())
 	{
 		case MessageFunction::ProcessMessage:
-			string uuid = msg->extenddata();
+			string uuid = msg->extend();
 			auto infoItem = m_mapUserInfoList.find(uuid);
 			if( infoItem == m_mapUserInfoList.end() )
 			{
 				m_mapUserInfoList[uuid] = make_unique<CLuaPacket>();
 				infoItem= m_mapUserInfoList.find(uuid);
 			}
-			if (m_pProcess->MsgProcess(infoItem->second.get(), msg->context() , strRes, pExData, nExSize)){
-				msg->set_context(strRes);
+			if (m_pProcess->MsgProcess(infoItem->second.get(), msg->content() , strRes, pExData, nExSize)){
+				msg->set_content(strRes);
 			}else{
 				m_pLog->Error("Error in process");
-				msg->set_context("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
+				msg->set_content("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
 			}
 			pack->ResponsePackage(msg);
 			auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);

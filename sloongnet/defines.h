@@ -29,6 +29,12 @@ const int s_PriorityLevel = 5;
 
 enum MessageFunction
 {
+	// Sender: All
+	// Processer: Control
+	// Reponse: Yes
+	// Response data: Context - the uuid for sender.
+	RegisteServer,
+
 	// Sender: All 
 	// Processer: Control
 	// Response: Yes

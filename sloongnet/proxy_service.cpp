@@ -66,12 +66,12 @@ void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 	{
 		// Step 1: 将已经收到的来自客户端的请求内容转换为protobuf格式
 		auto sendMsg = make_shared<MessagePackage>();
-		sendMsg->set_receiver(ModuleType::Process);
+		sendMsg->set_receivergroup(ModuleType::Process);
 		sendMsg->set_function(MessageFunction::ProcessMessage);
-		sendMsg->set_context(pack->GetRecvMessage());
+		sendMsg->set_content(pack->GetRecvMessage());
 		sendMsg->set_prioritylevel(pack->GetPriority());
 		sendMsg->set_serialnumber(m_nSerialNumber);
-		sendMsg->set_extenddata(m_mapUUIDList[pack->GetSocketID()].data());
+		sendMsg->set_extend(m_mapUUIDList[pack->GetSocketID()].data());
 
 		// Step 2: 根据负载情况找到发送的目标Process服务
 		auto process_id = m_mapProcessList.begin();
@@ -106,7 +106,7 @@ void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 					return;
 				}
 				auto client_request_package = event_obj->second;
-				client_request_package->ResponsePackage(recvMsg->context(),recvMsg->extenddata());
+				client_request_package->ResponsePackage(recvMsg->content(),recvMsg->extend());
 
 				// Step 3: 发送相应数据
 				auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);

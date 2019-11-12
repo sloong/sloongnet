@@ -11,42 +11,35 @@ void PrintVersion()
 	cout << COPYRIGHT_TEXT << endl;
 }
 
-
-bool ReadAllText(string path, string& out)
+string RegisteToControl(SmartConnect con, string uuid)
 {
-	FILE* fp = NULL;
+	auto req = make_shared<MessagePackage>();
+	req->set_function(MessageFunction::RegisteServer);
+	req->set_receivergroup(Protocol::ModuleType::Control);
+	req->set_sender(uuid);
 
-	fp = fopen(path.c_str(), "r");
-	if (fp)
-	{
-		fseek(fp, 0, SEEK_END);
-		long len = ftell(fp);
-		rewind(fp);    //指针复位
-		char* buf = new char[len];
-		memset(buf, 0, len);
-		fread(buf, 1, len, fp);
-		fclose(fp);
-		out = string(buf, len);
-		SAFE_DELETE_ARR(buf);
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	CDataTransPackage dataPackage;
+	dataPackage.Initialize(con);
+	dataPackage.RequestPackage(req);
+	NetworkResult result = dataPackage.SendPackage();
+	if (result != NetworkResult::Succeed)
+		throw string("Send get config request error.");
+	result = dataPackage.RecvPackage(0);
+	if (result != NetworkResult::Succeed)
+		throw string("Receive get config result error.");
+	auto get_config_response_buf = dataPackage.GetRecvPackage();
+	if (!get_config_response_buf)
+		throw string("Parse the get config response data error.");
+
+	return get_config_response_buf->content();
 }
 
-
-
-string GetConfigFromControl(SmartConnect con)
+string GetConfigFromControl(SmartConnect con,string uuid)
 {
 	auto get_config_request_buf = make_shared<MessagePackage>();
 	get_config_request_buf->set_function(MessageFunction::GetServerConfig);
-	get_config_request_buf->set_receiver(Protocol::ModuleType::Control);
-	get_config_request_buf->set_type(Protocol::MsgTypes::Request);
-	string uuid;
-	if (fstream_ex::read_all("uuid.dat", uuid))
-		get_config_request_buf->set_senderuuid(uuid.c_str());
+	get_config_request_buf->set_receivergroup(Protocol::ModuleType::Control);
+	get_config_request_buf->set_sender(uuid);
 
 	CDataTransPackage dataPackage;
 	dataPackage.Initialize(con);
@@ -61,7 +54,7 @@ string GetConfigFromControl(SmartConnect con)
 	if (!get_config_response_buf)
 		throw string("Parse the get config response data error.");
 
-	return get_config_response_buf->extenddata();
+	return get_config_response_buf->extend();
 }
 
 void PrientHelp()
@@ -107,14 +100,23 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 			return nullptr;
 		}
 		cout << "Connect to control succeed." << endl;
+		string uuid;
+		fstream_ex::read_all("uuid.dat", uuid);
+		string server_uuid = RegisteToControl(con, uuid);
+		if (uuid != server_uuid)
+		{
+			fstream_ex::write_all("uuid.dat", server_uuid);
+			uuid = server_uuid;
+		}
+
 		do
 		{
 			cout << "Start get configuation." << endl;
-			auto serverConfig = GetConfigFromControl(con);
+			auto serverConfig = GetConfigFromControl(con,uuid);
 			if (serverConfig.size() == 0)
 			{
 				cout << "Control no return config infomation. wait 500ms and retry." << endl;
-				sleep(500);
+				SLEEP(500);
 				continue;
 			}
 			if (!config->ParseFromString(serverConfig))

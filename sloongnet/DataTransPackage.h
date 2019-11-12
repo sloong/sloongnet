@@ -48,9 +48,9 @@ namespace Sloong
 
         shared_ptr<MessagePackage> GetRecvPackage(){ return m_pTransPackage;}
 
-        inline string GetRecvMessage(){ return m_pTransPackage->context(); }
+        inline string GetRecvMessage(){ return m_pTransPackage->content(); }
 
-        string GetExtendData() { return m_pTransPackage->extenddata(); }
+        string GetExtendData() { return m_pTransPackage->extend(); }
 
         inline int GetSocketID(){return m_pCon->GetSocketID(); }
 
@@ -59,7 +59,7 @@ namespace Sloong
          * @Params: 
          * @Return: 
          */
-        inline bool IsBigPackage(){ return m_pTransPackage->extenddata().length() > 0 ? true : false; }
+        inline bool IsBigPackage(){ return m_pTransPackage->extend().length() > 0 ? true : false; }
 
         int GetPriority(){
             return m_pTransPackage->prioritylevel();

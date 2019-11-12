@@ -29,6 +29,7 @@ CResult SloongControlService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
 	}
 
 	m_pAllConfig->Initialize("configuation.db", uuid);
+	InitWaitConfig();
 	auto config_str = m_pAllConfig->GetConfig(uuid);
 	auto port = config->listenport();
 	if (config_str.length() == 0 || !config->ParseFromString(config_str))
@@ -58,6 +59,12 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
 	config->set_enablessl(false);
 	config->set_epollthreadquantity(1);
 	config->set_processthreadquantity(1);
+	config->set_receivetime(3);
+}
+
+void Sloong::SloongControlService::InitWaitConfig()
+{
+	m_oWaitConfig.set_type(ModuleType::Unconfigured);
 }
 
 void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
@@ -65,32 +72,44 @@ void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 	auto msgPack = pack->GetRecvPackage();
 	switch( msgPack->function() )
 	{
-		case MessageFunction::GetServerConfig:
+	case MessageFunction::RegisteServer:
+	{
+		auto sender = msgPack->sender();
+		if (sender.size() == 0)
 		{
-			auto sender = msgPack->senderuuid();
-			string config = "";
-			if( sender.size() == 0 )
+			sender = CUtility::GenUUID();
+		}
+		// Add to server list
+		m_oServerList[sender] = "";
+		pack->ResponsePackage(sender);
+	}break;
+	case MessageFunction::GetServerConfig:
+	{
+		auto sender = msgPack->sender();
+		string config = "";
+		if (sender.size() == 0)
+		{
+			// TODO: 这里需要根据情况增加一个ip显示。
+			m_pLog->Verbos(CUniversal::Format("New module[IP:%s] add to system. wait configuation. ","unspport"));
+			m_oWaitConfig.SerializeToString(&config);
+		}
+		else
+		{
+			m_pLog->Verbos(CUniversal::Format("Porcess [GetServerConfig] request: sender[%d]",sender));
+			config = m_pAllConfig->GetConfig(sender);
+			if(config == "" )
 			{
-				// TODO: 这里需要根据情况增加一个ip显示。
-				m_pLog->Verbos(CUniversal::Format("New module[IP:%s] add to system. wait configuation. ","unspport"));
+				// Error
+				m_pLog->Verbos(CUniversal::Format("Module[IP:%s|UUID:%s] is no registe in system. wait admin process.","unspport",sender));
+				m_oWaitConfig.SerializeToString(&config);
 			}
-			else
-			{
-				m_pLog->Verbos(CUniversal::Format("Porcess [GetServerConfig] request: sender[%d]",sender));
-				config = m_pAllConfig->GetConfig(sender);
-				if(config == "" )
-				{
-					// Error
-					m_pLog->Verbos(CUniversal::Format("Module[IP:%s|UUID:%s] is no registe in system. wait admin process.","unspport",sender));
-					
-				}
-			}
-			pack->ResponsePackage("",config);
-		}break;
+		}
+		pack->ResponsePackage("",config);
+	}break;
 	}
 	
 	auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
 	response_event->SetSocketID(pack->GetSocketID());
 	response_event->SetDataPackage(pack);
-	m_pControl->CallMessage(response_event);
+	m_pControl->SendMessage(response_event);
 }

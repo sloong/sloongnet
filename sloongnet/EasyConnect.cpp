@@ -178,7 +178,7 @@ int Sloong::EasyConnect::SendPackage(string sendData, int index)
 
 NetworkResult Sloong::EasyConnect::RecvPackage(string& res, int timeout)
 {
-    auto len = RecvLengthData(timeout);
+    auto len = RecvLengthData(1);
 	if( len == 0 )
 		return NetworkResult::Retry;
 	else if( len < 0 )

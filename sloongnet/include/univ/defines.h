@@ -8,7 +8,7 @@
     #define SLEEP(t) Sleep(t)
 
 #else
-    #define SLEEP(t) sleep((double)t/1000.0)
+    #define SLEEP(t) usleep(t)
 
     #ifndef 	LPCWSTR
     #define		LPCWSTR		const wchar_t*
