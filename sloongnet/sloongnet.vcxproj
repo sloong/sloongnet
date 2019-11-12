@@ -95,6 +95,22 @@
     <ClInclude Include="IControl.h" />
     <ClInclude Include="IData.h" />
     <ClInclude Include="IEvent.h" />
+    <ClInclude Include="include\univ\Base64.h" />
+    <ClInclude Include="include\univ\blowfish.h" />
+    <ClInclude Include="include\univ\defines.h" />
+    <ClInclude Include="include\univ\DES.h" />
+    <ClInclude Include="include\univ\exception.h" />
+    <ClInclude Include="include\univ\hash.h" />
+    <ClInclude Include="include\univ\log.h" />
+    <ClInclude Include="include\univ\lua.h" />
+    <ClInclude Include="include\univ\luapacket.h" />
+    <ClInclude Include="include\univ\Lunar.h" />
+    <ClInclude Include="include\univ\resource.h" />
+    <ClInclude Include="include\univ\stdafx.h" />
+    <ClInclude Include="include\univ\targetver.h" />
+    <ClInclude Include="include\univ\threadpool.h" />
+    <ClInclude Include="include\univ\univ.h" />
+    <ClInclude Include="include\univ\version.h" />
     <ClInclude Include="IObject.h" />
     <ClInclude Include="LuaProcessCenter.h" />
     <ClInclude Include="main.h" />
@@ -122,28 +138,38 @@
     <None Include="protocol\protocol.proto" />
     <None Include="protocol\rebuild.sh" />
   </ItemGroup>
+  <ItemGroup>
+    <Library Include="include\libuniv.so" />
+  </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <CppLanguageStandard>c++17</CppLanguageStandard>
-      <CppAdditionalWarning>no-deprecated-declarations;empty-body;conversion;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
+      <CppAdditionalWarning>no-deprecated-declarations;empty-body;return-type;parentheses;no-format;uninitialized;unreachable-code;unused-function;unused-value;unused-variable;%(CppAdditionalWarning)</CppAdditionalWarning>
       <PreprocessorDefinitions>DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>./include;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <LibraryDependencies>uuid;ssl;crypto;lua5.3;glib-2.0;univ;sqlite3;protobuf;boost_serialization;%(LibraryDependencies)</LibraryDependencies>
-      <AdditionalLibraryDirectories>.\include;%(Link.AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>./include;%(Link.AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </Link>
+    <RemotePostBuildEvent>
+      <Command>
+      </Command>
+    </RemotePostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Control|x64'">
     <ClCompile>
       <CppLanguageStandard>c++17</CppLanguageStandard>
-      <AdditionalIncludeDirectories>$(RemoteProjectDir)/interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <LibraryDependencies>uuid;ssl;crypto;lua5.3;glib-2.0;univ;sqlite3;protobuf;boost_serialization;%(LibraryDependencies)</LibraryDependencies>
+      <AdditionalLibraryDirectories>./include;%(Link.AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -170,6 +170,54 @@
     <ClInclude Include="fstream_ex.hpp">
       <Filter>Extend</Filter>
     </ClInclude>
+    <ClInclude Include="include\univ\Base64.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\blowfish.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\defines.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\DES.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\exception.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\hash.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\log.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\lua.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\luapacket.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\Lunar.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\resource.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\stdafx.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\targetver.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\threadpool.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\univ.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
+    <ClInclude Include="include\univ\version.h">
+      <Filter>include\univ</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ScriptEnging">
@@ -199,6 +247,12 @@
     <Filter Include="Extend">
       <UniqueIdentifier>{e3c33c2c-73e7-4895-9b01-68ad1c873529}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{9c88dec3-fde7-4228-9a48-8eb70516f3bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\univ">
+      <UniqueIdentifier>{6be119ae-fed4-436c-b51f-533488522096}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
@@ -213,5 +267,10 @@
     <None Include="protocol\rebuild.sh">
       <Filter>Protocol</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="include\libuniv.so">
+      <Filter>include</Filter>
+    </Library>
   </ItemGroup>
 </Project>
