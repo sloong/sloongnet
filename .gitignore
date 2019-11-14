@@ -39,5 +39,4 @@ build/release/
 build/*.tar
 servctrl/servctrl/bin/
 obj
-.vscode/
 *.pyc
