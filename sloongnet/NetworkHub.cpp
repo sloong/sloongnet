@@ -89,6 +89,9 @@ void Sloong::CNetworkHub::SendMessageEventHandler(SmartEvent event)
 	int socket = pack->GetSocketID();
 	shared_ptr<CSockInfo> info = m_SockList[socket];
 
+	if (info == nullptr)
+		return;
+
 	auto res = info->ResponseDataPackage(pack);
 	if (res == NetworkResult::Retry)
 	{

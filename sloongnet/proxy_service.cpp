@@ -67,7 +67,7 @@ void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 		// Step 1: 将已经收到的来自客户端的请求内容转换为protobuf格式
 		auto sendMsg = make_shared<DataPackage>();
 		sendMsg->set_receiver(ModuleType::Process);
-		sendMsg->set_function(MessageFunction::ProcessMessage);
+		sendMsg->set_function(Functions::ProcessMessage);
 		sendMsg->set_content(pack->GetRecvMessage());
 		sendMsg->set_prioritylevel(pack->GetPriority());
 		sendMsg->set_serialnumber(m_nSerialNumber);
@@ -96,9 +96,9 @@ void Sloong::SloongNetProxy::MessagePackageProcesser(SmartPackage pack)
 	{
 		// Step 1: 将Process服务处理完毕的消息转换为正常格式
 		auto recvMsg = pack->GetRecvPackage();
-		auto func = (MessageFunction)recvMsg->function();
+		auto func = recvMsg->function();
 		switch(func){
-			case MessageFunction::ProcessMessage:
+			case Functions::ProcessMessage:
 				// Step 2: 根据收到的SerailNumber找到对应保存的来自客户端的Event对象
 				auto event_obj = m_mapPackageList.find(recvMsg->serialnumber());
 				if( event_obj == m_mapPackageList.end() ){

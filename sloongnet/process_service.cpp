@@ -22,9 +22,9 @@ void Sloong::SloongNetProcess::MessagePackageProcesser(SmartPackage pack)
 	int nExSize;
 
 	auto msg = pack->GetRecvPackage();
-	switch((MessageFunction)msg->function())
+	switch(msg->function())
 	{
-		case MessageFunction::ProcessMessage:
+		case Functions::ProcessMessage:
 			string uuid = msg->extend();
 			auto infoItem = m_mapUserInfoList.find(uuid);
 			if( infoItem == m_mapUserInfoList.end() )

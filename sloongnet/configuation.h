@@ -29,10 +29,12 @@ namespace Sloong
 
         bool LoadConfig( string uuid );
         bool SaveConfig( string uuid, string config );
-        bool SaveTemplate( string id );
+        bool SaveTemplate( string id, string config);
         bool ReloadTemplate( string id );
 
         string GetConfig(string uuid);
+		map<string, string> GetTemplateList() { return m_oTemplateList; }
+
 
     protected:
         bool LoadConfigTemplate(string tbName);

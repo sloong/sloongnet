@@ -12,6 +12,7 @@
 #include "SQLiteEx.h"
 #include "fstream_ex.hpp"
 #include <jsoncpp/json/json.h>
+#include "univ/Base64.h"
 using namespace Sloong::Events;
 
 /**
@@ -74,7 +75,7 @@ void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 	auto sender = msgPack->sender();
 	switch( msgPack->function() )
 	{
-	case MessageFunction::RegisteServer:
+	case Functions::RegisteServer:
 	{
 		if (sender.size() == 0)
 		{
@@ -88,12 +89,46 @@ void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 		m_oServerList[sender] = "";
 		pack->ResponsePackage(sender);
 	}break;
-	case MessageFunction::SetServerConfig:
+	case Functions::GetConfigTemplateList: 
+	{
+		auto tpl_list = m_pAllConfig->GetTemplateList();
+		Json::Value list;
+		for (auto& i : tpl_list)
+		{
+			Json::Value item;
+			item["ID"] = i.first;
+			item["Config"] = CBase64::Encode(i.second);
+			list.append(item);
+		}
+		Json::Value root;
+		root["ConfigTemplateList"] = list;
+		pack->ResponsePackage(root.toStyledString());
+	}break;
+	case Functions::SetServerConfig:
 	{
 		auto target = msgPack->content();
-		m_pAllConfig->SaveConfig(target, msgPack->extend());
+		if (!m_pAllConfig->SaveConfig(target, msgPack->extend()))
+		{
+			pack->ResponsePackage(ResultType::Error, "");
+		}
+		else
+		{
+			pack->ResponsePackage("Succeed", "");
+		}
 	}break;
-	case MessageFunction::GetServerConfig:
+	case Functions::SetServerConfigTemplate:
+	{
+		auto target = msgPack->content();
+		if(!m_pAllConfig->SaveTemplate(target, msgPack->extend()))
+		{
+			pack->ResponsePackage(ResultType::Error, "");
+		}
+		else
+		{
+			pack->ResponsePackage("Succeed", "");
+		}
+	}break;
+	case Functions::GetServerConfig:
 	{
 		m_pLog->Verbos(CUniversal::Format("Porcess [GetServerConfig] request: sender[%d]", sender));
 		string config = m_pAllConfig->GetConfig(sender);
@@ -108,7 +143,7 @@ void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 		}
 		pack->ResponsePackage("",config);
 	}break;
-	case MessageFunction::GetWaitConfigList:
+	case Functions::GetWaitConfigList:
 	{
 		string list_str = "";
 		Json::Value root;

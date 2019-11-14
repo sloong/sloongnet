@@ -22,39 +22,44 @@ namespace Protocol {
     static ProtocolReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg5wcm90b2NvbC5wcm90bxIIUHJvdG9jb2wiygEKC0RhdGFQYWNrYWdlEhAK",
-            "CEZ1bmN0aW9uGAEgASgFEhUKDVByaW9yaXR5TGV2ZWwYAiABKAUSFAoMU2Vy",
-            "aWFsTnVtYmVyGAMgASgDEhMKC0NoZWNrU3RyaW5nGAQgASgJEg4KBlNlbmRl",
-            "chgFIAEoCRIQCghSZWNlaXZlchgGIAEoBRIkCgZSZXN1bHQYByABKA4yFC5Q",
-            "cm90b2NvbC5SZXN1bHRUeXBlEg8KB0NvbnRlbnQYCCABKAkSDgoGRXh0ZW5k",
-            "GAkgASgMIvcCCg1HTE9CQUxfQ09ORklHEhIKCkxpc3RlblBvcnQYASABKAUS",
-            "EQoJRW5hYmxlU1NMGAIgASgIEhQKDENlcnRGaWxlUGF0aBgDIAEoCRITCgtL",
-            "ZXlGaWxlUGF0aBgEIAEoCRISCgpDZXJ0UGFzc3dkGAUgASgJEhMKC0Nvbm5l",
-            "Y3RUaW1lGAYgASgFEhMKC1JlY2VpdmVUaW1lGAcgASgFEg8KB0xvZ1BhdGgY",
-            "CCABKAkSEAoITG9nTGV2ZWwYCSABKAUSEQoJRGVidWdNb2RlGAogASgIEhgK",
-            "EE1RVGhyZWFkUXVhbnRpdHkYCyABKAUSGwoTRVBvbGxUaHJlYWRRdWFudGl0",
-            "eRgMIAEoBRIdChVQcm9jZXNzVGhyZWFkUXVhbnRpdHkYDSABKAUSFAoMUHJp",
-            "b3JpdHlTaXplGA4gASgFEiIKBFR5cGUYDyABKA4yFC5Qcm90b2NvbC5Nb2R1",
-            "bGVUeXBlEhAKCEV4Q29uZmlnGBAgASgMIiMKDkNPTlRST0xfQ09ORklHEhEK",
-            "CUJsb2NrVGltZRgBIAEoBSJmCglEQl9DT05GSUcSFQoNU2VydmVyQWRkcmVz",
-            "cxgBIAEoCRISCgpTZXJ2ZXJQb3J0GAIgASgFEgwKBFVzZXIYAyABKAkSDgoG",
-            "UGFzc3dkGAQgASgJEhAKCERhdGFiYXNlGAUgASgJIjwKC0RBVEFfQ09ORklH",
-            "EhcKD0RhdGFSZWNlaXZlUG9ydBgBIAEoBRIUCgxEYXRhUmVjdlRpbWUYAiAB",
-            "KAUijAEKDkdBVEVXQVlfQ09ORklHEhcKD0NsaWVudENoZWNrVGltZRgBIAEo",
-            "BRIWCg5DbGllbnRDaGVja0tleRgCIAEoCRIcChRUaW1lb3V0Q2hlY2tJbnRl",
-            "cnZhbBgDIAEoBRITCgtUaW1lb3V0VGltZRgEIAEoBRIWCg5Qcm9jZXNzQWRk",
-            "cmVzcxgFIAEoCSIkCg9GSVJFV0FMTF9DT05GSUcSEQoJQmxvY2tUaW1lGAEg",
-            "ASgFIrEBCg5QUk9DRVNTX0NPTkZJRxIaChJMdWFDb250ZXh0UXVhbnRpdHkY",
-            "ASABKAUSFwoPTHVhU2NyaXB0Rm9sZGVyGAIgASgJEhQKDEx1YUVudHJ5Rmls",
-            "ZRgDIAEoCRIYChBMdWFFbnRyeUZ1bmN0aW9uGAQgASgJEhoKEkx1YVByb2Nl",
-            "c3NGdW5jdGlvbhgFIAEoCRIeChZMdWFTb2NrZXRDbG9zZUZ1bmN0aW9uGAYg",
-            "ASgJKmUKCk1vZHVsZVR5cGUSEAoMVW5jb25maWd1cmVkEAASCwoHQ29udHJv",
-            "bBABEgwKCEZpcmV3YWxsEAISCwoHR2F0ZXdheRADEggKBERhdGEQBBILCgdQ",
-            "cm9jZXNzEAUSBgoCREIQBioxCgpSZXN1bHRUeXBlEgsKB1N1Y2NlZWQQABIJ",
-            "CgVFcnJvchABEgsKB1dhcm5pbmcQAmIGcHJvdG8z"));
+            "Cg5wcm90b2NvbC5wcm90bxIIUHJvdG9jb2wi3wEKC0RhdGFQYWNrYWdlEiUK",
+            "CEZ1bmN0aW9uGAEgASgOMhMuUHJvdG9jb2wuRnVuY3Rpb25zEhUKDVByaW9y",
+            "aXR5TGV2ZWwYAiABKAUSFAoMU2VyaWFsTnVtYmVyGAMgASgDEhMKC0NoZWNr",
+            "U3RyaW5nGAQgASgJEg4KBlNlbmRlchgFIAEoCRIQCghSZWNlaXZlchgGIAEo",
+            "BRIkCgZSZXN1bHQYByABKA4yFC5Qcm90b2NvbC5SZXN1bHRUeXBlEg8KB0Nv",
+            "bnRlbnQYCCABKAkSDgoGRXh0ZW5kGAkgASgMIvcCCg1HTE9CQUxfQ09ORklH",
+            "EhIKCkxpc3RlblBvcnQYASABKAUSEQoJRW5hYmxlU1NMGAIgASgIEhQKDENl",
+            "cnRGaWxlUGF0aBgDIAEoCRITCgtLZXlGaWxlUGF0aBgEIAEoCRISCgpDZXJ0",
+            "UGFzc3dkGAUgASgJEhMKC0Nvbm5lY3RUaW1lGAYgASgFEhMKC1JlY2VpdmVU",
+            "aW1lGAcgASgFEg8KB0xvZ1BhdGgYCCABKAkSEAoITG9nTGV2ZWwYCSABKAUS",
+            "EQoJRGVidWdNb2RlGAogASgIEhgKEE1RVGhyZWFkUXVhbnRpdHkYCyABKAUS",
+            "GwoTRVBvbGxUaHJlYWRRdWFudGl0eRgMIAEoBRIdChVQcm9jZXNzVGhyZWFk",
+            "UXVhbnRpdHkYDSABKAUSFAoMUHJpb3JpdHlTaXplGA4gASgFEiIKBFR5cGUY",
+            "DyABKA4yFC5Qcm90b2NvbC5Nb2R1bGVUeXBlEhAKCEV4Q29uZmlnGBAgASgM",
+            "IiMKDkNPTlRST0xfQ09ORklHEhEKCUJsb2NrVGltZRgBIAEoBSJmCglEQl9D",
+            "T05GSUcSFQoNU2VydmVyQWRkcmVzcxgBIAEoCRISCgpTZXJ2ZXJQb3J0GAIg",
+            "ASgFEgwKBFVzZXIYAyABKAkSDgoGUGFzc3dkGAQgASgJEhAKCERhdGFiYXNl",
+            "GAUgASgJIjwKC0RBVEFfQ09ORklHEhcKD0RhdGFSZWNlaXZlUG9ydBgBIAEo",
+            "BRIUCgxEYXRhUmVjdlRpbWUYAiABKAUijAEKDkdBVEVXQVlfQ09ORklHEhcK",
+            "D0NsaWVudENoZWNrVGltZRgBIAEoBRIWCg5DbGllbnRDaGVja0tleRgCIAEo",
+            "CRIcChRUaW1lb3V0Q2hlY2tJbnRlcnZhbBgDIAEoBRITCgtUaW1lb3V0VGlt",
+            "ZRgEIAEoBRIWCg5Qcm9jZXNzQWRkcmVzcxgFIAEoCSIkCg9GSVJFV0FMTF9D",
+            "T05GSUcSEQoJQmxvY2tUaW1lGAEgASgFIrEBCg5QUk9DRVNTX0NPTkZJRxIa",
+            "ChJMdWFDb250ZXh0UXVhbnRpdHkYASABKAUSFwoPTHVhU2NyaXB0Rm9sZGVy",
+            "GAIgASgJEhQKDEx1YUVudHJ5RmlsZRgDIAEoCRIYChBMdWFFbnRyeUZ1bmN0",
+            "aW9uGAQgASgJEhoKEkx1YVByb2Nlc3NGdW5jdGlvbhgFIAEoCRIeChZMdWFT",
+            "b2NrZXRDbG9zZUZ1bmN0aW9uGAYgASgJKmUKCk1vZHVsZVR5cGUSEAoMVW5j",
+            "b25maWd1cmVkEAASCwoHQ29udHJvbBABEgwKCEZpcmV3YWxsEAISCwoHR2F0",
+            "ZXdheRADEggKBERhdGEQBBILCgdQcm9jZXNzEAUSBgoCREIQBioxCgpSZXN1",
+            "bHRUeXBlEgsKB1N1Y2NlZWQQABIJCgVFcnJvchABEgsKB1dhcm5pbmcQAirT",
+            "AQoJRnVuY3Rpb25zEhEKDVJlZ2lzdGVTZXJ2ZXIQABIVChFHZXRXYWl0Q29u",
+            "ZmlnTGlzdBABEhkKFUdldENvbmZpZ1RlbXBsYXRlTGlzdBACEhsKF1NldFNl",
+            "cnZlckNvbmZpZ1RlbXBsYXRlEAMSFwoTU2V0U2VydmVyVG9UZW1wbGF0ZRAE",
+            "EhMKD1NldFNlcnZlckNvbmZpZxAFEhMKD0dldFNlcnZlckNvbmZpZxAGEg0K",
+            "CVVzZXJMb2dpbhAHEhIKDlByb2Nlc3NNZXNzYWdlEAhiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ModuleType), typeof(global::Protocol.ResultType), }, new pbr::GeneratedClrTypeInfo[] {
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ModuleType), typeof(global::Protocol.ResultType), typeof(global::Protocol.Functions), }, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.DataPackage), global::Protocol.DataPackage.Parser, new[]{ "Function", "PriorityLevel", "SerialNumber", "CheckString", "Sender", "Receiver", "Result", "Content", "Extend" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.GLOBAL_CONFIG), global::Protocol.GLOBAL_CONFIG.Parser, new[]{ "ListenPort", "EnableSSL", "CertFilePath", "KeyFilePath", "CertPasswd", "ConnectTime", "ReceiveTime", "LogPath", "LogLevel", "DebugMode", "MQThreadQuantity", "EPollThreadQuantity", "ProcessThreadQuantity", "PrioritySize", "Type", "ExConfig" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.CONTROL_CONFIG), global::Protocol.CONTROL_CONFIG.Parser, new[]{ "BlockTime" }, null, null, null),
@@ -89,6 +94,87 @@ namespace Protocol {
     [pbr::OriginalName("Succeed")] Succeed = 0,
     [pbr::OriginalName("Error")] Error = 1,
     [pbr::OriginalName("Warning")] Warning = 2,
+  }
+
+  public enum Functions {
+    /// <summary>
+    ///  Flow: ContrulUI -> Control
+    /// Response: Content(string) - the uuid for sender.
+    /// </summary>
+    [pbr::OriginalName("RegisteServer")] RegisteServer = 0,
+    /// <summary>
+    ///  Flow: ContrulUI -> Control
+    /// Response: Content(JSON) - wait config list. 
+    /// Format: 
+    /// {
+    /// "WaitConfigList": [
+    /// {
+    /// "UUID": "",
+    /// "IP": ""
+    /// }
+    /// ]
+    /// }
+    /// </summary>
+    [pbr::OriginalName("GetWaitConfigList")] GetWaitConfigList = 1,
+    /// <summary>
+    ///  Flow: ControlUI -> Control
+    /// Response: Content(JSON) - Config template  list.
+    /// Format: 
+    /// {
+    /// "ConfigTemplateList": [
+    /// {
+    /// "ID": "",
+    /// "Config": "" //Base64
+    /// }
+    /// ]
+    /// }
+    /// </summary>
+    [pbr::OriginalName("GetConfigTemplateList")] GetConfigTemplateList = 2,
+    /// <summary>
+    ///  Flow: ControlUI -> Control
+    /// Request: Content - Config template ID
+    /// Extend - Target template config
+    /// Response: Result
+    /// </summary>
+    [pbr::OriginalName("SetServerConfigTemplate")] SetServerConfigTemplate = 3,
+    /// <summary>
+    ///  Flow: ControlUI -> Control
+    /// Request: Content(JSON) - config info.
+    /// Format:
+    /// {
+    /// "ServerUUID":"",
+    /// "TemplateID":"",
+    /// }
+    /// Response: Result
+    /// </summary>
+    [pbr::OriginalName("SetServerToTemplate")] SetServerToTemplate = 4,
+    /// <summary>
+    ///  Flow: ControlUI -> Control
+    /// Request: Content - Target server UUID
+    /// Extend - Target server config
+    /// Response: Result
+    /// </summary>
+    [pbr::OriginalName("SetServerConfig")] SetServerConfig = 5,
+    /// <summary>
+    ///  Sender: All 
+    /// Processer: Control
+    /// Response: ExtendData(bytes) - config data is not UTF8 string. cannot save in context field.
+    /// Note: Get the general server config data. the data type is GLOBAL_CONFIG.
+    /// </summary>
+    [pbr::OriginalName("GetServerConfig")] GetServerConfig = 6,
+    /// <summary>
+    ///  Sender: Process 
+    ///  Processer: Control
+    ///  Response: No
+    ///  Note: if the socket uuid is registed, the control will send error message 
+    /// </summary>
+    [pbr::OriginalName("UserLogin")] UserLogin = 7,
+    /// <summary>
+    ///  Sender: Procxy
+    /// Processer : Process 
+    /// Response data: Content - result with JSON string. 
+    /// </summary>
+    [pbr::OriginalName("ProcessMessage")] ProcessMessage = 8,
   }
 
   #endregion
@@ -136,12 +222,12 @@ namespace Protocol {
 
     /// <summary>Field number for the "Function" field.</summary>
     public const int FunctionFieldNumber = 1;
-    private int function_;
+    private global::Protocol.Functions function_ = 0;
     /// <summary>
     ///  功能
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int Function {
+    public global::Protocol.Functions Function {
       get { return function_; }
       set {
         function_ = value;
@@ -309,7 +395,7 @@ namespace Protocol {
     public void WriteTo(pb::CodedOutputStream output) {
       if (Function != 0) {
         output.WriteRawTag(8);
-        output.WriteInt32(Function);
+        output.WriteEnum((int) Function);
       }
       if (PriorityLevel != 0) {
         output.WriteRawTag(16);
@@ -349,7 +435,7 @@ namespace Protocol {
     public int CalculateSize() {
       int size = 0;
       if (Function != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Function);
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Function);
       }
       if (PriorityLevel != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(PriorityLevel);
@@ -421,7 +507,7 @@ namespace Protocol {
             input.SkipLastField();
             break;
           case 8: {
-            Function = input.ReadInt32();
+            function_ = (global::Protocol.Functions) input.ReadEnum();
             break;
           }
           case 16: {

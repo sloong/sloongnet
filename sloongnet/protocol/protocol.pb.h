@@ -94,6 +94,34 @@ inline bool ResultType_Parse(
   return ::google::protobuf::internal::ParseNamedEnum<ResultType>(
     ResultType_descriptor(), name, value);
 }
+enum Functions {
+  RegisteServer = 0,
+  GetWaitConfigList = 1,
+  GetConfigTemplateList = 2,
+  SetServerConfigTemplate = 3,
+  SetServerToTemplate = 4,
+  SetServerConfig = 5,
+  GetServerConfig = 6,
+  UserLogin = 7,
+  ProcessMessage = 8,
+  Functions_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
+  Functions_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
+};
+bool Functions_IsValid(int value);
+const Functions Functions_MIN = RegisteServer;
+const Functions Functions_MAX = ProcessMessage;
+const int Functions_ARRAYSIZE = Functions_MAX + 1;
+
+const ::google::protobuf::EnumDescriptor* Functions_descriptor();
+inline const ::std::string& Functions_Name(Functions value) {
+  return ::google::protobuf::internal::NameOfEnum(
+    Functions_descriptor(), value);
+}
+inline bool Functions_Parse(
+    const ::std::string& name, Functions* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<Functions>(
+    Functions_descriptor(), name, value);
+}
 // ===================================================================
 
 class DataPackage : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:Protocol.DataPackage) */ {
@@ -156,11 +184,11 @@ class DataPackage : public ::google::protobuf::Message /* @@protoc_insertion_poi
 
   // accessors -------------------------------------------------------
 
-  // optional int32 Function = 1;
+  // optional .Protocol.Functions Function = 1;
   void clear_function();
   static const int kFunctionFieldNumber = 1;
-  ::google::protobuf::int32 function() const;
-  void set_function(::google::protobuf::int32 value);
+  ::Protocol::Functions function() const;
+  void set_function(::Protocol::Functions value);
 
   // optional int32 PriorityLevel = 2;
   void clear_prioritylevel();
@@ -235,7 +263,7 @@ class DataPackage : public ::google::protobuf::Message /* @@protoc_insertion_poi
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   bool _is_default_instance_;
-  ::google::protobuf::int32 function_;
+  int function_;
   ::google::protobuf::int32 prioritylevel_;
   ::google::protobuf::int64 serialnumber_;
   ::google::protobuf::internal::ArenaStringPtr checkstring_;
@@ -1117,15 +1145,15 @@ class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
 #if !PROTOBUF_INLINE_NOT_IN_HEADERS
 // DataPackage
 
-// optional int32 Function = 1;
+// optional .Protocol.Functions Function = 1;
 inline void DataPackage::clear_function() {
   function_ = 0;
 }
-inline ::google::protobuf::int32 DataPackage::function() const {
+inline ::Protocol::Functions DataPackage::function() const {
   // @@protoc_insertion_point(field_get:Protocol.DataPackage.Function)
-  return function_;
+  return static_cast< ::Protocol::Functions >(function_);
 }
-inline void DataPackage::set_function(::google::protobuf::int32 value) {
+inline void DataPackage::set_function(::Protocol::Functions value) {
   
   function_ = value;
   // @@protoc_insertion_point(field_set:Protocol.DataPackage.Function)
@@ -2408,6 +2436,11 @@ template <> struct is_proto_enum< ::Protocol::ResultType> : ::google::protobuf::
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::Protocol::ResultType>() {
   return ::Protocol::ResultType_descriptor();
+}
+template <> struct is_proto_enum< ::Protocol::Functions> : ::google::protobuf::internal::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::Protocol::Functions>() {
+  return ::Protocol::Functions_descriptor();
 }
 
 }  // namespace protobuf

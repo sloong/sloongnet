@@ -23,11 +23,13 @@ namespace Sloong
          * @Return: 
          */
         void ResponsePackage(const string& msg, const string& exdata="");
+		void ResponsePackage(ResultType result, const string& message);
 
         void RequestPackage( shared_ptr<DataPackage> pack );
         void ResponsePackage( shared_ptr<DataPackage> pack );
 
-        void PrepareSendPackageData();
+	protected:
+		void PrepareSendPackageData();
 
     public:
         /**

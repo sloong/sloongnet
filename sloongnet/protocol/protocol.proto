@@ -19,10 +19,82 @@ enum ResultType{
 	Warning = 2;
 }
 
+
+enum Functions{
+	/* Flow: ContrulUI -> Control
+	   Response: Content(string) - the uuid for sender.
+	*/
+	RegisteServer=0;
+	/* Flow: ContrulUI -> Control
+	   Response: Content(JSON) - wait config list. 
+					Format: 
+					{
+					  "WaitConfigList": [
+						{
+						  "UUID": "",
+						  "IP": ""
+						}
+					  ]
+					}
+	*/
+	GetWaitConfigList=1;
+	/* Flow: ControlUI -> Control
+	   Response: Content(JSON) - Config template  list.
+					Format: 
+					{
+					  "ConfigTemplateList": [
+						{
+						  "ID": "",
+						  "Config": "" //Base64
+						}
+					  ]
+					}
+	*/
+	GetConfigTemplateList=2;
+	/* Flow: ControlUI -> Control
+	   Request: Content - Config template ID
+				Extend - Target template config
+	   Response: Result
+	*/
+	SetServerConfigTemplate=3;
+	/* Flow: ControlUI -> Control
+	   Request: Content(JSON) - config info.
+					Format:
+					{
+					  "ServerUUID":"",
+					  "TemplateID":"",
+					}
+	   Response: Result
+	*/
+	SetServerToTemplate=4;
+	/* Flow: ControlUI -> Control
+	   Request: Content - Target server UUID
+                Extend - Target server config
+	   Response: Result
+	*/
+	SetServerConfig=5;
+	/* Sender: All 
+	   Processer: Control
+	   Response: ExtendData(bytes) - config data is not UTF8 string. cannot save in context field.
+	   Note: Get the general server config data. the data type is GLOBAL_CONFIG.
+	*/
+	GetServerConfig=6;
+	// Sender: Process 
+	// Processer: Control
+	// Response: No
+	// Note: if the socket uuid is registed, the control will send error message 
+	UserLogin=7;
+	/* Sender: Procxy
+	   Processer : Process 
+	   Response data: Content - result with JSON string. 
+	*/
+	ProcessMessage=8;
+}
+
 message DataPackage
 {
     // 功能
-    int32 Function = 1;
+    Functions Function = 1;
     // 优先级
     int32 PriorityLevel = 2;
     // 流水号

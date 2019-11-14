@@ -35,9 +35,17 @@ void Sloong::CDataTransPackage::ResponsePackage(const string &msg, const string&
 {
 	m_pTransPackage->set_content(msg);
 	m_pTransPackage->set_extend(exdata);
+	m_pTransPackage->set_result(ResultType::Succeed);
 	PrepareSendPackageData();
 }
 
+
+void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string& message)
+{
+	m_pTransPackage->set_result(result);
+	m_pTransPackage->set_content(message);
+	PrepareSendPackageData();
+}
 
 /**
  * @Remarks: 
