@@ -1,0 +1,43 @@
+<!--
+ * @Author: WCB
+ * @Date: 2019-11-14 14:14:34
+ * @LastEditors: WCB
+ * @LastEditTime: 2019-11-14 14:51:06
+ * @Description: file content
+ -->
+{%extends "base.html" %}
+
+{% block mainbody %}
+
+{% if NoWaitConfigList %}
+<p>没有待配置服务</p>
+{% else %}
+{% for item in WaitConfigList %}
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>UUID</th>
+            <th>IP</th>
+            <th>开始分配</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ item.UUID }}</td>
+            <td>{{ item.IP }}</td>
+            <td><a href="/settings/config/{{item.UUID}}"><button type="button" class="btn btn-default">Start</button></a></td>
+        </tr>
+    </tbody>
+</table>
+{% endfor %}
+{% endif %}
+
+{% endblock %}
+
+{% block javascript %}
+function configServer(uuid){
+    alera("test");
+}
+
+{% endblock %}

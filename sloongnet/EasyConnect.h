@@ -57,7 +57,7 @@ namespace Sloong
 		// 如果接收到了部分数据，并且超时时间大于0，那么将会在发生超时之后，返回Timeout
 		// 如果没有接收到数据，并且发生了错误，返回Error
 		// 没有接收到数据，发生了超时，返回Timeout
-		NetworkResult RecvPackage(string& res, int timeOut = 0);
+		NetworkResult RecvPackage(string& res, int timeOut = 0, int lenTimeout = 1);
 
 		long long RecvLengthData(int timeout);
 

@@ -1,0 +1,54 @@
+<!--
+ * @Author: WCB
+ * @Date: 2019-11-14 14:14:34
+ * @LastEditors: WCB
+ * @LastEditTime: 2019-11-14 20:42:05
+ * @Description: file content
+ -->
+{%extends "base.html" %}
+{% load filters_extend %}
+{% block mainbody %}
+
+
+<div class="row clearfix">
+    <div class="col-md-3 column"></div>
+    <div class="col-md-6 column">
+
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>配置名称</th>
+                    <th>配置值</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for key,value in ConfigList.items %}
+                <tr>
+                    <td>{{ key }}</td>
+                    <td>{% if value|isbool %}<input type="checkbox">
+                        {% elif value|isint %}<input type="text" class="form-control">
+                        {% elif value|isstr %}<input type="text" class="form-control">
+                        {% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div align="center">
+            <button type="button" class="btn btn-primary">确认</button>
+
+            <button type="button" class="btn btn-default">取消</button>
+        </div>
+    </div>
+    <div class="col-md-3 column"></div>
+</div>
+</div>
+
+
+{% endblock %}
+
+{% block javascript %}
+function configServer(uuid){
+alera("test");
+}
+
+{% endblock %}

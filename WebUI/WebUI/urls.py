@@ -1,3 +1,10 @@
+'''
+@Author: WCB
+@Date: 2019-11-14 16:03:08
+@LastEditors: WCB
+@LastEditTime: 2019-11-14 16:03:08
+@Description: file content
+'''
 """WebUI URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -17,6 +24,6 @@ from django.contrib import admin
 from django.urls import include,path
 
 urlpatterns = [
-    path('settings',include('settings.urls')),
+    path('settings/',include('settings.urls')),
     path('admin/', admin.site.urls),
 ]

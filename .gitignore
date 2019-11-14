@@ -40,3 +40,4 @@ build/*.tar
 servctrl/servctrl/bin/
 obj
 *.pyc
+/sloongnet/bin/

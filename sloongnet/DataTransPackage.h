@@ -39,7 +39,7 @@ namespace Sloong
          *          if other error happened else return Error 
          *          if md5 check failed, return Invalied.
          */
-        NetworkResult RecvPackage(int );
+        NetworkResult RecvPackage(int,int=1);
 
         /**
          * @Remarks: send this package

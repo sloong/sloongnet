@@ -23,13 +23,13 @@ string RegisteToControl(SmartConnect con, string uuid)
 	dataPackage.RequestPackage(req);
 	NetworkResult result = dataPackage.SendPackage();
 	if (result != NetworkResult::Succeed)
-		throw string("Send get config request error.");
-	result = dataPackage.RecvPackage(0);
+		throw string("Send Registe request error.");
+	result = dataPackage.RecvPackage(0,0);
 	if (result != NetworkResult::Succeed)
-		throw string("Receive get config result error.");
+		throw string("Receive Registe result error.");
 	auto get_config_response_buf = dataPackage.GetRecvPackage();
 	if (!get_config_response_buf)
-		throw string("Parse the get config response data error.");
+		throw string("Parse Registe response data error.");
 
 	return get_config_response_buf->content();
 }
@@ -47,7 +47,7 @@ string GetConfigFromControl(SmartConnect con,string uuid)
 	NetworkResult result = dataPackage.SendPackage();
 	if (result != NetworkResult::Succeed)
 		throw string("Send get config request error.");
-	result = dataPackage.RecvPackage(0);
+	result = dataPackage.RecvPackage(0,0);
 	if (result != NetworkResult::Succeed)
 		throw string("Receive get config result error.");
 	auto get_config_response_buf = dataPackage.GetRecvPackage();
@@ -124,7 +124,7 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 				cout << "Parse the config struct error. please check." << endl;
 				return nullptr;
 			}
-		} while (config->type() != ModuleType::Unconfigured);
+		} while (config->type() == ModuleType::Unconfigured);
 		cout << "Get configuation succeed." << endl;
 	}
 	return config;
@@ -155,6 +155,14 @@ int main(int argc, char** args)
 
 		Sloong::CSloongBaseService::g_pAppService->Run();
 		return 0;
+	}
+	catch (string & msg)
+	{
+		cout << "exception happened, message:" << msg << endl;
+	}
+	catch (exception & exc)
+	{
+		cout << "exception happened, message:" << exc.what() << endl;
 	}
 	catch (...)
 	{

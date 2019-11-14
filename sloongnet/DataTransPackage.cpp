@@ -74,10 +74,10 @@ NetworkResult Sloong::CDataTransPackage::SendPackage()
 	}
 }
 
-NetworkResult Sloong::CDataTransPackage::RecvPackage(int timeout)
+NetworkResult Sloong::CDataTransPackage::RecvPackage(int timeout,int lentimeout)
 {
 	string result;
-	auto net_res = m_pCon->RecvPackage(result,timeout);
+	auto net_res = m_pCon->RecvPackage(result,timeout, lentimeout);
 	if( net_res != NetworkResult::Succeed )
 		return net_res;
 

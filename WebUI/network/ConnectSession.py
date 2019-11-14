@@ -1,10 +1,13 @@
+'''
+@Author: WCB
+@Date: 2019-11-14 13:57:27
+@LastEditors: WCB
+@LastEditTime: 2019-11-14 14:04:17
+@Description: Manage connect session.
+'''
 import socket
 
-from protocol.protocol_pb2 import *
-#from protocol.protocol import *
-
-
-class MessagePackage:
+class ConnectSession:
     s = socket.socket()
     isconnect = False
     host = 'localhost'
@@ -17,24 +20,22 @@ class MessagePackage:
         self.s.connect((self.host,self.port))
         self.isconnect = True
 
-    def send(self):
+    '''
+    @Remarks: send data to control
+    @Params: sendata with bytes
+    @Return: recved data
+    '''
+    def send(self,senddata):
         if not self.isconnect :
             self.connect()
-        send_pack = DataPackage()
-        send_pack.Function = Functions.GetWaitConfigList
-        senddata = send_pack.SerializeToString()
+
         self.s.sendall(len(senddata).to_bytes(4,byteorder="big"))
         self.s.sendall(senddata)
         len_data = self.s.recv(4)
         while  len(len_data) < 4 :
             len_data += self.s.recv(4-len(len_data))
         data = self.s.recv(int.from_bytes(len_data,byteorder="big"))
-        recv_pack = DataPackage()
-        recv_pack.ParseFromString(data)
-        return recv_pack.Content
+        return data
 
 
-pack = MessagePackage()
-
-def GetMessagePackage():
-    return pack
+session = ConnectSession()
