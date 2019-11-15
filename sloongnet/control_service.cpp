@@ -55,7 +55,7 @@ void Sloong::SloongControlService::AfterInit()
 void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
 {
 	config->set_logpath("/var/log/sloong");
-	config->set_loglevel(LOGLEVEL::Info);
+	config->set_loglevel(Protocol::LogLevel::Info);
 	config->set_debugmode(false);
 	config->set_mqthreadquantity(1);
 	config->set_enablessl(false);

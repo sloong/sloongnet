@@ -51,7 +51,7 @@ CResult CSloongBaseService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
     
     #ifdef DEBUG
     m_pServerConfig->set_debugmode(true);
-    m_pServerConfig->set_loglevel(LOGLEVEL::All);
+    m_pServerConfig->set_loglevel(Protocol::LogLevel::All);
     #endif
     
     m_pLog->Initialize(m_pServerConfig->logpath(), "", m_pServerConfig->debugmode(), LOGLEVEL(m_pServerConfig->loglevel()), LOGTYPE::DAY);
