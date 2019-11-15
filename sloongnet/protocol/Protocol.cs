@@ -27,39 +27,42 @@ namespace Protocol {
             "aXR5TGV2ZWwYAiABKAUSFAoMU2VyaWFsTnVtYmVyGAMgASgDEhMKC0NoZWNr",
             "U3RyaW5nGAQgASgJEg4KBlNlbmRlchgFIAEoCRIQCghSZWNlaXZlchgGIAEo",
             "BRIkCgZSZXN1bHQYByABKA4yFC5Qcm90b2NvbC5SZXN1bHRUeXBlEg8KB0Nv",
-            "bnRlbnQYCCABKAkSDgoGRXh0ZW5kGAkgASgMIvcCCg1HTE9CQUxfQ09ORklH",
+            "bnRlbnQYCCABKAkSDgoGRXh0ZW5kGAkgASgMIosDCg1HTE9CQUxfQ09ORklH",
             "EhIKCkxpc3RlblBvcnQYASABKAUSEQoJRW5hYmxlU1NMGAIgASgIEhQKDENl",
             "cnRGaWxlUGF0aBgDIAEoCRITCgtLZXlGaWxlUGF0aBgEIAEoCRISCgpDZXJ0",
             "UGFzc3dkGAUgASgJEhMKC0Nvbm5lY3RUaW1lGAYgASgFEhMKC1JlY2VpdmVU",
-            "aW1lGAcgASgFEg8KB0xvZ1BhdGgYCCABKAkSEAoITG9nTGV2ZWwYCSABKAUS",
-            "EQoJRGVidWdNb2RlGAogASgIEhgKEE1RVGhyZWFkUXVhbnRpdHkYCyABKAUS",
-            "GwoTRVBvbGxUaHJlYWRRdWFudGl0eRgMIAEoBRIdChVQcm9jZXNzVGhyZWFk",
-            "UXVhbnRpdHkYDSABKAUSFAoMUHJpb3JpdHlTaXplGA4gASgFEiIKBFR5cGUY",
-            "DyABKA4yFC5Qcm90b2NvbC5Nb2R1bGVUeXBlEhAKCEV4Q29uZmlnGBAgASgM",
-            "IiMKDkNPTlRST0xfQ09ORklHEhEKCUJsb2NrVGltZRgBIAEoBSJmCglEQl9D",
-            "T05GSUcSFQoNU2VydmVyQWRkcmVzcxgBIAEoCRISCgpTZXJ2ZXJQb3J0GAIg",
-            "ASgFEgwKBFVzZXIYAyABKAkSDgoGUGFzc3dkGAQgASgJEhAKCERhdGFiYXNl",
-            "GAUgASgJIjwKC0RBVEFfQ09ORklHEhcKD0RhdGFSZWNlaXZlUG9ydBgBIAEo",
-            "BRIUCgxEYXRhUmVjdlRpbWUYAiABKAUijAEKDkdBVEVXQVlfQ09ORklHEhcK",
-            "D0NsaWVudENoZWNrVGltZRgBIAEoBRIWCg5DbGllbnRDaGVja0tleRgCIAEo",
-            "CRIcChRUaW1lb3V0Q2hlY2tJbnRlcnZhbBgDIAEoBRITCgtUaW1lb3V0VGlt",
-            "ZRgEIAEoBRIWCg5Qcm9jZXNzQWRkcmVzcxgFIAEoCSIkCg9GSVJFV0FMTF9D",
-            "T05GSUcSEQoJQmxvY2tUaW1lGAEgASgFIrEBCg5QUk9DRVNTX0NPTkZJRxIa",
-            "ChJMdWFDb250ZXh0UXVhbnRpdHkYASABKAUSFwoPTHVhU2NyaXB0Rm9sZGVy",
-            "GAIgASgJEhQKDEx1YUVudHJ5RmlsZRgDIAEoCRIYChBMdWFFbnRyeUZ1bmN0",
-            "aW9uGAQgASgJEhoKEkx1YVByb2Nlc3NGdW5jdGlvbhgFIAEoCRIeChZMdWFT",
-            "b2NrZXRDbG9zZUZ1bmN0aW9uGAYgASgJKmUKCk1vZHVsZVR5cGUSEAoMVW5j",
-            "b25maWd1cmVkEAASCwoHQ29udHJvbBABEgwKCEZpcmV3YWxsEAISCwoHR2F0",
-            "ZXdheRADEggKBERhdGEQBBILCgdQcm9jZXNzEAUSBgoCREIQBioxCgpSZXN1",
-            "bHRUeXBlEgsKB1N1Y2NlZWQQABIJCgVFcnJvchABEgsKB1dhcm5pbmcQAirT",
-            "AQoJRnVuY3Rpb25zEhEKDVJlZ2lzdGVTZXJ2ZXIQABIVChFHZXRXYWl0Q29u",
-            "ZmlnTGlzdBABEhkKFUdldENvbmZpZ1RlbXBsYXRlTGlzdBACEhsKF1NldFNl",
-            "cnZlckNvbmZpZ1RlbXBsYXRlEAMSFwoTU2V0U2VydmVyVG9UZW1wbGF0ZRAE",
-            "EhMKD1NldFNlcnZlckNvbmZpZxAFEhMKD0dldFNlcnZlckNvbmZpZxAGEg0K",
-            "CVVzZXJMb2dpbhAHEhIKDlByb2Nlc3NNZXNzYWdlEAhiBnByb3RvMw=="));
+            "aW1lGAcgASgFEg8KB0xvZ1BhdGgYCCABKAkSJAoITG9nTGV2ZWwYCSABKA4y",
+            "Ei5Qcm90b2NvbC5Mb2dMZXZlbBIRCglEZWJ1Z01vZGUYCiABKAgSGAoQTVFU",
+            "aHJlYWRRdWFudGl0eRgLIAEoBRIbChNFUG9sbFRocmVhZFF1YW50aXR5GAwg",
+            "ASgFEh0KFVByb2Nlc3NUaHJlYWRRdWFudGl0eRgNIAEoBRIUCgxQcmlvcml0",
+            "eVNpemUYDiABKAUSIgoEVHlwZRgPIAEoDjIULlByb3RvY29sLk1vZHVsZVR5",
+            "cGUSEAoIRXhDb25maWcYECABKAwiIwoOQ09OVFJPTF9DT05GSUcSEQoJQmxv",
+            "Y2tUaW1lGAEgASgFImYKCURCX0NPTkZJRxIVCg1TZXJ2ZXJBZGRyZXNzGAEg",
+            "ASgJEhIKClNlcnZlclBvcnQYAiABKAUSDAoEVXNlchgDIAEoCRIOCgZQYXNz",
+            "d2QYBCABKAkSEAoIRGF0YWJhc2UYBSABKAkiPAoLREFUQV9DT05GSUcSFwoP",
+            "RGF0YVJlY2VpdmVQb3J0GAEgASgFEhQKDERhdGFSZWN2VGltZRgCIAEoBSKM",
+            "AQoOR0FURVdBWV9DT05GSUcSFwoPQ2xpZW50Q2hlY2tUaW1lGAEgASgFEhYK",
+            "DkNsaWVudENoZWNrS2V5GAIgASgJEhwKFFRpbWVvdXRDaGVja0ludGVydmFs",
+            "GAMgASgFEhMKC1RpbWVvdXRUaW1lGAQgASgFEhYKDlByb2Nlc3NBZGRyZXNz",
+            "GAUgASgJIiQKD0ZJUkVXQUxMX0NPTkZJRxIRCglCbG9ja1RpbWUYASABKAUi",
+            "sQEKDlBST0NFU1NfQ09ORklHEhoKEkx1YUNvbnRleHRRdWFudGl0eRgBIAEo",
+            "BRIXCg9MdWFTY3JpcHRGb2xkZXIYAiABKAkSFAoMTHVhRW50cnlGaWxlGAMg",
+            "ASgJEhgKEEx1YUVudHJ5RnVuY3Rpb24YBCABKAkSGgoSTHVhUHJvY2Vzc0Z1",
+            "bmN0aW9uGAUgASgJEh4KFkx1YVNvY2tldENsb3NlRnVuY3Rpb24YBiABKAkq",
+            "ZQoKTW9kdWxlVHlwZRIQCgxVbmNvbmZpZ3VyZWQQABILCgdDb250cm9sEAES",
+            "DAoIRmlyZXdhbGwQAhILCgdHYXRld2F5EAMSCAoERGF0YRAEEgsKB1Byb2Nl",
+            "c3MQBRIGCgJEQhAGKjEKClJlc3VsdFR5cGUSCwoHU3VjY2VlZBAAEgkKBUVy",
+            "cm9yEAESCwoHV2FybmluZxACKl4KCExvZ0xldmVsEgcKA0FsbBAAEgoKBlZl",
+            "cmJvcxABEgkKBURlYnVnEAISCAoESW5mbxADEggKBFdhcm4QBBIHCgNFcnIQ",
+            "BRIKCgZBc3NlcnQQBhIJCgVGYXRhbBAHKtMBCglGdW5jdGlvbnMSEQoNUmVn",
+            "aXN0ZVNlcnZlchAAEhUKEUdldFdhaXRDb25maWdMaXN0EAESGQoVR2V0Q29u",
+            "ZmlnVGVtcGxhdGVMaXN0EAISGwoXU2V0U2VydmVyQ29uZmlnVGVtcGxhdGUQ",
+            "AxIXChNTZXRTZXJ2ZXJUb1RlbXBsYXRlEAQSEwoPU2V0U2VydmVyQ29uZmln",
+            "EAUSEwoPR2V0U2VydmVyQ29uZmlnEAYSDQoJVXNlckxvZ2luEAcSEgoOUHJv",
+            "Y2Vzc01lc3NhZ2UQCGIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ModuleType), typeof(global::Protocol.ResultType), typeof(global::Protocol.Functions), }, new pbr::GeneratedClrTypeInfo[] {
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ModuleType), typeof(global::Protocol.ResultType), typeof(global::Protocol.LogLevel), typeof(global::Protocol.Functions), }, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.DataPackage), global::Protocol.DataPackage.Parser, new[]{ "Function", "PriorityLevel", "SerialNumber", "CheckString", "Sender", "Receiver", "Result", "Content", "Extend" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.GLOBAL_CONFIG), global::Protocol.GLOBAL_CONFIG.Parser, new[]{ "ListenPort", "EnableSSL", "CertFilePath", "KeyFilePath", "CertPasswd", "ConnectTime", "ReceiveTime", "LogPath", "LogLevel", "DebugMode", "MQThreadQuantity", "EPollThreadQuantity", "ProcessThreadQuantity", "PrioritySize", "Type", "ExConfig" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.CONTROL_CONFIG), global::Protocol.CONTROL_CONFIG.Parser, new[]{ "BlockTime" }, null, null, null),
@@ -94,6 +97,20 @@ namespace Protocol {
     [pbr::OriginalName("Succeed")] Succeed = 0,
     [pbr::OriginalName("Error")] Error = 1,
     [pbr::OriginalName("Warning")] Warning = 2,
+  }
+
+  /// <summary>
+  ///  LogLevel
+  /// </summary>
+  public enum LogLevel {
+    [pbr::OriginalName("All")] All = 0,
+    [pbr::OriginalName("Verbos")] Verbos = 1,
+    [pbr::OriginalName("Debug")] Debug = 2,
+    [pbr::OriginalName("Info")] Info = 3,
+    [pbr::OriginalName("Warn")] Warn = 4,
+    [pbr::OriginalName("Err")] Err = 5,
+    [pbr::OriginalName("Assert")] Assert = 6,
+    [pbr::OriginalName("Fatal")] Fatal = 7,
   }
 
   public enum Functions {
@@ -691,9 +708,9 @@ namespace Protocol {
 
     /// <summary>Field number for the "LogLevel" field.</summary>
     public const int LogLevelFieldNumber = 9;
-    private int logLevel_;
+    private global::Protocol.LogLevel logLevel_ = 0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int LogLevel {
+    public global::Protocol.LogLevel LogLevel {
       get { return logLevel_; }
       set {
         logLevel_ = value;
@@ -884,7 +901,7 @@ namespace Protocol {
       }
       if (LogLevel != 0) {
         output.WriteRawTag(72);
-        output.WriteInt32(LogLevel);
+        output.WriteEnum((int) LogLevel);
       }
       if (DebugMode != false) {
         output.WriteRawTag(80);
@@ -944,7 +961,7 @@ namespace Protocol {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(LogPath);
       }
       if (LogLevel != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(LogLevel);
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) LogLevel);
       }
       if (DebugMode != false) {
         size += 1 + 1;
@@ -1066,7 +1083,7 @@ namespace Protocol {
             break;
           }
           case 72: {
-            LogLevel = input.ReadInt32();
+            logLevel_ = (global::Protocol.LogLevel) input.ReadEnum();
             break;
           }
           case 80: {

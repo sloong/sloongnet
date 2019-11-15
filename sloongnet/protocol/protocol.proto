@@ -19,6 +19,18 @@ enum ResultType{
 	Warning = 2;
 }
 
+// LogLevel
+enum LogLevel{
+	All = 0;
+	Verbos = 1;
+	Debug = 2;
+	Info = 3;
+	Warn = 4;
+	Err = 5;
+	Assert = 6;
+	Fatal = 7;	
+}
+
 
 enum Functions{
 	/* Flow: ContrulUI -> Control
@@ -126,7 +138,7 @@ message GLOBAL_CONFIG
 
     // Log 
     string  LogPath = 8;
-    int32   LogLevel =9 ;
+    LogLevel   LogLevel =9 ;
     bool    DebugMode = 10;
 
     // Performance

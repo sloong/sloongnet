@@ -47,6 +47,7 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
   PROCESS_CONFIG_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* ModuleType_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ResultType_descriptor_ = NULL;
+const ::google::protobuf::EnumDescriptor* LogLevel_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* Functions_descriptor_ = NULL;
 
 }  // namespace
@@ -218,7 +219,8 @@ void protobuf_AssignDesc_protocol_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROCESS_CONFIG, _is_default_instance_));
   ModuleType_descriptor_ = file->enum_type(0);
   ResultType_descriptor_ = file->enum_type(1);
-  Functions_descriptor_ = file->enum_type(2);
+  LogLevel_descriptor_ = file->enum_type(2);
+  Functions_descriptor_ = file->enum_type(3);
 }
 
 namespace {
@@ -285,40 +287,43 @@ void protobuf_AddDesc_protocol_2eproto() {
     "\030\003 \001(\003\022\023\n\013CheckString\030\004 \001(\t\022\016\n\006Sender\030\005 "
     "\001(\t\022\020\n\010Receiver\030\006 \001(\005\022$\n\006Result\030\007 \001(\0162\024."
     "Protocol.ResultType\022\017\n\007Content\030\010 \001(\t\022\016\n\006"
-    "Extend\030\t \001(\014\"\367\002\n\rGLOBAL_CONFIG\022\022\n\nListen"
+    "Extend\030\t \001(\014\"\213\003\n\rGLOBAL_CONFIG\022\022\n\nListen"
     "Port\030\001 \001(\005\022\021\n\tEnableSSL\030\002 \001(\010\022\024\n\014CertFil"
     "ePath\030\003 \001(\t\022\023\n\013KeyFilePath\030\004 \001(\t\022\022\n\nCert"
     "Passwd\030\005 \001(\t\022\023\n\013ConnectTime\030\006 \001(\005\022\023\n\013Rec"
-    "eiveTime\030\007 \001(\005\022\017\n\007LogPath\030\010 \001(\t\022\020\n\010LogLe"
-    "vel\030\t \001(\005\022\021\n\tDebugMode\030\n \001(\010\022\030\n\020MQThread"
-    "Quantity\030\013 \001(\005\022\033\n\023EPollThreadQuantity\030\014 "
-    "\001(\005\022\035\n\025ProcessThreadQuantity\030\r \001(\005\022\024\n\014Pr"
-    "ioritySize\030\016 \001(\005\022\"\n\004Type\030\017 \001(\0162\024.Protoco"
-    "l.ModuleType\022\020\n\010ExConfig\030\020 \001(\014\"#\n\016CONTRO"
-    "L_CONFIG\022\021\n\tBlockTime\030\001 \001(\005\"f\n\tDB_CONFIG"
-    "\022\025\n\rServerAddress\030\001 \001(\t\022\022\n\nServerPort\030\002 "
-    "\001(\005\022\014\n\004User\030\003 \001(\t\022\016\n\006Passwd\030\004 \001(\t\022\020\n\010Dat"
-    "abase\030\005 \001(\t\"<\n\013DATA_CONFIG\022\027\n\017DataReceiv"
-    "ePort\030\001 \001(\005\022\024\n\014DataRecvTime\030\002 \001(\005\"\214\001\n\016GA"
-    "TEWAY_CONFIG\022\027\n\017ClientCheckTime\030\001 \001(\005\022\026\n"
-    "\016ClientCheckKey\030\002 \001(\t\022\034\n\024TimeoutCheckInt"
-    "erval\030\003 \001(\005\022\023\n\013TimeoutTime\030\004 \001(\005\022\026\n\016Proc"
-    "essAddress\030\005 \001(\t\"$\n\017FIREWALL_CONFIG\022\021\n\tB"
-    "lockTime\030\001 \001(\005\"\261\001\n\016PROCESS_CONFIG\022\032\n\022Lua"
-    "ContextQuantity\030\001 \001(\005\022\027\n\017LuaScriptFolder"
-    "\030\002 \001(\t\022\024\n\014LuaEntryFile\030\003 \001(\t\022\030\n\020LuaEntry"
-    "Function\030\004 \001(\t\022\032\n\022LuaProcessFunction\030\005 \001"
-    "(\t\022\036\n\026LuaSocketCloseFunction\030\006 \001(\t*e\n\nMo"
-    "duleType\022\020\n\014Unconfigured\020\000\022\013\n\007Control\020\001\022"
-    "\014\n\010Firewall\020\002\022\013\n\007Gateway\020\003\022\010\n\004Data\020\004\022\013\n\007"
-    "Process\020\005\022\006\n\002DB\020\006*1\n\nResultType\022\013\n\007Succe"
-    "ed\020\000\022\t\n\005Error\020\001\022\013\n\007Warning\020\002*\323\001\n\tFunctio"
-    "ns\022\021\n\rRegisteServer\020\000\022\025\n\021GetWaitConfigLi"
-    "st\020\001\022\031\n\025GetConfigTemplateList\020\002\022\033\n\027SetSe"
-    "rverConfigTemplate\020\003\022\027\n\023SetServerToTempl"
-    "ate\020\004\022\023\n\017SetServerConfig\020\005\022\023\n\017GetServerC"
-    "onfig\020\006\022\r\n\tUserLogin\020\007\022\022\n\016ProcessMessage"
-    "\020\010b\006proto3", 1570);
+    "eiveTime\030\007 \001(\005\022\017\n\007LogPath\030\010 \001(\t\022$\n\010LogLe"
+    "vel\030\t \001(\0162\022.Protocol.LogLevel\022\021\n\tDebugMo"
+    "de\030\n \001(\010\022\030\n\020MQThreadQuantity\030\013 \001(\005\022\033\n\023EP"
+    "ollThreadQuantity\030\014 \001(\005\022\035\n\025ProcessThread"
+    "Quantity\030\r \001(\005\022\024\n\014PrioritySize\030\016 \001(\005\022\"\n\004"
+    "Type\030\017 \001(\0162\024.Protocol.ModuleType\022\020\n\010ExCo"
+    "nfig\030\020 \001(\014\"#\n\016CONTROL_CONFIG\022\021\n\tBlockTim"
+    "e\030\001 \001(\005\"f\n\tDB_CONFIG\022\025\n\rServerAddress\030\001 "
+    "\001(\t\022\022\n\nServerPort\030\002 \001(\005\022\014\n\004User\030\003 \001(\t\022\016\n"
+    "\006Passwd\030\004 \001(\t\022\020\n\010Database\030\005 \001(\t\"<\n\013DATA_"
+    "CONFIG\022\027\n\017DataReceivePort\030\001 \001(\005\022\024\n\014DataR"
+    "ecvTime\030\002 \001(\005\"\214\001\n\016GATEWAY_CONFIG\022\027\n\017Clie"
+    "ntCheckTime\030\001 \001(\005\022\026\n\016ClientCheckKey\030\002 \001("
+    "\t\022\034\n\024TimeoutCheckInterval\030\003 \001(\005\022\023\n\013Timeo"
+    "utTime\030\004 \001(\005\022\026\n\016ProcessAddress\030\005 \001(\t\"$\n\017"
+    "FIREWALL_CONFIG\022\021\n\tBlockTime\030\001 \001(\005\"\261\001\n\016P"
+    "ROCESS_CONFIG\022\032\n\022LuaContextQuantity\030\001 \001("
+    "\005\022\027\n\017LuaScriptFolder\030\002 \001(\t\022\024\n\014LuaEntryFi"
+    "le\030\003 \001(\t\022\030\n\020LuaEntryFunction\030\004 \001(\t\022\032\n\022Lu"
+    "aProcessFunction\030\005 \001(\t\022\036\n\026LuaSocketClose"
+    "Function\030\006 \001(\t*e\n\nModuleType\022\020\n\014Unconfig"
+    "ured\020\000\022\013\n\007Control\020\001\022\014\n\010Firewall\020\002\022\013\n\007Gat"
+    "eway\020\003\022\010\n\004Data\020\004\022\013\n\007Process\020\005\022\006\n\002DB\020\006*1\n"
+    "\nResultType\022\013\n\007Succeed\020\000\022\t\n\005Error\020\001\022\013\n\007W"
+    "arning\020\002*^\n\010LogLevel\022\007\n\003All\020\000\022\n\n\006Verbos\020"
+    "\001\022\t\n\005Debug\020\002\022\010\n\004Info\020\003\022\010\n\004Warn\020\004\022\007\n\003Err\020"
+    "\005\022\n\n\006Assert\020\006\022\t\n\005Fatal\020\007*\323\001\n\tFunctions\022\021"
+    "\n\rRegisteServer\020\000\022\025\n\021GetWaitConfigList\020\001"
+    "\022\031\n\025GetConfigTemplateList\020\002\022\033\n\027SetServer"
+    "ConfigTemplate\020\003\022\027\n\023SetServerToTemplate\020"
+    "\004\022\023\n\017SetServerConfig\020\005\022\023\n\017GetServerConfi"
+    "g\020\006\022\r\n\tUserLogin\020\007\022\022\n\016ProcessMessage\020\010b\006"
+    "proto3", 1686);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "protocol.proto", &protobuf_RegisterTypes);
   DataPackage::default_instance_ = new DataPackage();
@@ -374,6 +379,26 @@ bool ResultType_IsValid(int value) {
     case 0:
     case 1:
     case 2:
+      return true;
+    default:
+      return false;
+  }
+}
+
+const ::google::protobuf::EnumDescriptor* LogLevel_descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return LogLevel_descriptor_;
+}
+bool LogLevel_IsValid(int value) {
+  switch(value) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
       return true;
     default:
       return false;
@@ -1526,14 +1551,15 @@ bool GLOBAL_CONFIG::MergePartialFromCodedStream(
         break;
       }
 
-      // optional int32 LogLevel = 9;
+      // optional .Protocol.LogLevel LogLevel = 9;
       case 9: {
         if (tag == 72) {
          parse_LogLevel:
+          int value;
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &loglevel_)));
-
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          set_loglevel(static_cast< ::Protocol::LogLevel >(value));
         } else {
           goto handle_unusual;
         }
@@ -1729,9 +1755,10 @@ void GLOBAL_CONFIG::SerializeWithCachedSizes(
       8, this->logpath(), output);
   }
 
-  // optional int32 LogLevel = 9;
+  // optional .Protocol.LogLevel LogLevel = 9;
   if (this->loglevel() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(9, this->loglevel(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      9, this->loglevel(), output);
   }
 
   // optional bool DebugMode = 10;
@@ -1841,9 +1868,10 @@ void GLOBAL_CONFIG::SerializeWithCachedSizes(
         8, this->logpath(), target);
   }
 
-  // optional int32 LogLevel = 9;
+  // optional .Protocol.LogLevel LogLevel = 9;
   if (this->loglevel() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(9, this->loglevel(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      9, this->loglevel(), target);
   }
 
   // optional bool DebugMode = 10;
@@ -1946,11 +1974,10 @@ int GLOBAL_CONFIG::ByteSize() const {
         this->logpath());
   }
 
-  // optional int32 LogLevel = 9;
+  // optional .Protocol.LogLevel LogLevel = 9;
   if (this->loglevel() != 0) {
     total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::Int32Size(
-        this->loglevel());
+      ::google::protobuf::internal::WireFormatLite::EnumSize(this->loglevel());
   }
 
   // optional bool DebugMode = 10;
@@ -2369,15 +2396,15 @@ void GLOBAL_CONFIG::clear_logpath() {
   // @@protoc_insertion_point(field_set_allocated:Protocol.GLOBAL_CONFIG.LogPath)
 }
 
-// optional int32 LogLevel = 9;
+// optional .Protocol.LogLevel LogLevel = 9;
 void GLOBAL_CONFIG::clear_loglevel() {
   loglevel_ = 0;
 }
- ::google::protobuf::int32 GLOBAL_CONFIG::loglevel() const {
+ ::Protocol::LogLevel GLOBAL_CONFIG::loglevel() const {
   // @@protoc_insertion_point(field_get:Protocol.GLOBAL_CONFIG.LogLevel)
-  return loglevel_;
+  return static_cast< ::Protocol::LogLevel >(loglevel_);
 }
- void GLOBAL_CONFIG::set_loglevel(::google::protobuf::int32 value) {
+ void GLOBAL_CONFIG::set_loglevel(::Protocol::LogLevel value) {
   
   loglevel_ = value;
   // @@protoc_insertion_point(field_set:Protocol.GLOBAL_CONFIG.LogLevel)

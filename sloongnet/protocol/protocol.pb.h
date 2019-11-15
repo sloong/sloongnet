@@ -94,6 +94,33 @@ inline bool ResultType_Parse(
   return ::google::protobuf::internal::ParseNamedEnum<ResultType>(
     ResultType_descriptor(), name, value);
 }
+enum LogLevel {
+  All = 0,
+  Verbos = 1,
+  Debug = 2,
+  Info = 3,
+  Warn = 4,
+  Err = 5,
+  Assert = 6,
+  Fatal = 7,
+  LogLevel_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
+  LogLevel_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
+};
+bool LogLevel_IsValid(int value);
+const LogLevel LogLevel_MIN = All;
+const LogLevel LogLevel_MAX = Fatal;
+const int LogLevel_ARRAYSIZE = LogLevel_MAX + 1;
+
+const ::google::protobuf::EnumDescriptor* LogLevel_descriptor();
+inline const ::std::string& LogLevel_Name(LogLevel value) {
+  return ::google::protobuf::internal::NameOfEnum(
+    LogLevel_descriptor(), value);
+}
+inline bool LogLevel_Parse(
+    const ::std::string& name, LogLevel* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<LogLevel>(
+    LogLevel_descriptor(), name, value);
+}
 enum Functions {
   RegisteServer = 0,
   GetWaitConfigList = 1,
@@ -410,11 +437,11 @@ class GLOBAL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_p
   ::std::string* release_logpath();
   void set_allocated_logpath(::std::string* logpath);
 
-  // optional int32 LogLevel = 9;
+  // optional .Protocol.LogLevel LogLevel = 9;
   void clear_loglevel();
   static const int kLogLevelFieldNumber = 9;
-  ::google::protobuf::int32 loglevel() const;
-  void set_loglevel(::google::protobuf::int32 value);
+  ::Protocol::LogLevel loglevel() const;
+  void set_loglevel(::Protocol::LogLevel value);
 
   // optional bool DebugMode = 10;
   void clear_debugmode();
@@ -477,7 +504,7 @@ class GLOBAL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_p
   bool debugmode_;
   ::google::protobuf::int32 receivetime_;
   ::google::protobuf::internal::ArenaStringPtr logpath_;
-  ::google::protobuf::int32 loglevel_;
+  int loglevel_;
   ::google::protobuf::int32 mqthreadquantity_;
   ::google::protobuf::int32 epollthreadquantity_;
   ::google::protobuf::int32 processthreadquantity_;
@@ -1627,15 +1654,15 @@ inline void GLOBAL_CONFIG::set_allocated_logpath(::std::string* logpath) {
   // @@protoc_insertion_point(field_set_allocated:Protocol.GLOBAL_CONFIG.LogPath)
 }
 
-// optional int32 LogLevel = 9;
+// optional .Protocol.LogLevel LogLevel = 9;
 inline void GLOBAL_CONFIG::clear_loglevel() {
   loglevel_ = 0;
 }
-inline ::google::protobuf::int32 GLOBAL_CONFIG::loglevel() const {
+inline ::Protocol::LogLevel GLOBAL_CONFIG::loglevel() const {
   // @@protoc_insertion_point(field_get:Protocol.GLOBAL_CONFIG.LogLevel)
-  return loglevel_;
+  return static_cast< ::Protocol::LogLevel >(loglevel_);
 }
-inline void GLOBAL_CONFIG::set_loglevel(::google::protobuf::int32 value) {
+inline void GLOBAL_CONFIG::set_loglevel(::Protocol::LogLevel value) {
   
   loglevel_ = value;
   // @@protoc_insertion_point(field_set:Protocol.GLOBAL_CONFIG.LogLevel)
@@ -2436,6 +2463,11 @@ template <> struct is_proto_enum< ::Protocol::ResultType> : ::google::protobuf::
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::Protocol::ResultType>() {
   return ::Protocol::ResultType_descriptor();
+}
+template <> struct is_proto_enum< ::Protocol::LogLevel> : ::google::protobuf::internal::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::Protocol::LogLevel>() {
+  return ::Protocol::LogLevel_descriptor();
 }
 template <> struct is_proto_enum< ::Protocol::Functions> : ::google::protobuf::internal::true_type {};
 template <>

@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-14 14:40:15
  * @LastEditors: WCB
- * @LastEditTime: 2019-11-14 20:42:55
+ * @LastEditTime: 2019-11-15 14:49:28
  * @Description: file content
  -->
 <!DOCTYPE html>
@@ -10,7 +10,7 @@
 <html>
 
 <head>
-    <title>{{ Title }} - {{ AppName }}</title>
+    <title>{{ ModuleName }} - {{ SiteName }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" />
@@ -23,17 +23,15 @@
         <div class="row clearfix">
             <div class="col-md-12 column">
                 {% block mainbody %}
-                <p>original</p>
+                <p>Base page content</p>
                 {% endblock %}
             </div>
         </div>
     </div>
-
     <script text="text/javascript">
         {% block javascript %}
         {% endblock %}
     </script>
-
     <!-- jQuery -->
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <!-- jQuery Easing -->

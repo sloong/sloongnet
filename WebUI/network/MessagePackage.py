@@ -2,7 +2,7 @@
 @Author: WCB
 @Date: 2019-11-14 13:59:50
 @LastEditors: WCB
-@LastEditTime: 2019-11-14 14:05:15
+@LastEditTime: 2019-11-15 15:07:33
 @Description: Message package module
 '''
 from protocol import protocol_pb2 as protocol
@@ -20,6 +20,6 @@ class MessagePackage:
         recv_pack = protocol.DataPackage()
 
         recv_pack.ParseFromString(recv_data)
-        return recv_pack.Content
+        return (recv_pack.Result,recv_pack.Content)
 
 
