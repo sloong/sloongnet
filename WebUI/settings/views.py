@@ -2,7 +2,7 @@
 @Author: WCB
 @Date: 2019-11-14 14:05:25
 @LastEditors: WCB
-@LastEditTime: 2019-11-15 15:30:16
+@LastEditTime: 2019-11-18 16:56:10
 @Description: file conten
 '''
 from django.shortcuts import render
@@ -36,20 +36,28 @@ def config(request,uuid):
 def config_show(request,uuid):
     c = context.GetContext()
     config_list = {}
-    config_list['ModuleType'] = tuple(protocol.ModuleType.items()[1:])
-    config_list['ListenPort'] = 8002
-    config_list['EnableSSL'] = False
-    config_list['CertFilePath'] = ''
-    config_list['KeyFilePath'] = ''
-    config_list['CertPasswd'] = ''
-    config_list['ConnectTime'] = 5
-    config_list['ReceiveTime'] = 5
-    config_list['LogPath']='./log/sloong/'
-    config_list['LogLevel']=tuple(protocol.LogLevel.items())
-    config_list['DebugMode']=True
-    config_list['MQThreadQuantity']=1
-    config_list['ProcessThreadQuantity']=1
-    config_list['PrioritySize']=5
+    '''
+    这里的结构为多级列表，每一条为一个选项。
+    每个选项需要多个参数，为一个tuple.
+    1. 类型 为str类型文本.
+    2. 默认值
+    3. 是否必填
+    4. 规则描述。int为tuple(min,max)。string为正则表达式。enum为enum列表。None为不启用
+    '''
+    config_list['ModuleType'] =  tuple( 'tuple', 1, True, tuple(protocol.ModuleType.items()[1:]))
+    config_list['ListenPort'] = tuple( 'int', 8002, True, tuple( 1000,65535 ))
+    config_list['EnableSSL'] =  tuple( 'bool', False, True, None )
+    config_list['CertFilePath'] = tuple( 'str', '', False, None) 
+    config_list['KeyFilePath'] = tuple( 'str','', False, None) 
+    config_list['CertPasswd'] = tuple( 'str','', False, None) 
+    config_list['ConnectTime'] = tuple( 'int',5, True, tuple(0, 20))
+    config_list['ReceiveTime'] = tuple( 'int',5, True, tuple(0, 20))
+    config_list['LogPath'] = tuple( 'str','', True, None)
+    config_list['LogLevel']= tuple( 'tuple',protocol.LogLevel.Info, True, tuple(protocol.LogLevel.items())) 
+    config_list['DebugMode']= tuple( 'bool',False, True, None )
+    config_list['MQThreadQuantity']=  tuple( 'int',1, True, tuple(1, 20))
+    config_list['ProcessThreadQuantity']=  tuple( 'int',1, True, tuple(1, 20))
+    config_list['PrioritySize']=  tuple( 'int',3, True, tuple(0, 20))
 
     c['ConfigList'] = config_list
     return render(request, 'config.html', c)
@@ -77,3 +85,4 @@ def config_response(request,uuid):
         return HttpResponseRedirect("/settings/")
     else:
         return render(request, 'config.html', {'Response':True,'Result':False,'Message':msg})
+

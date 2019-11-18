@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-14 14:14:34
  * @LastEditors: WCB
- * @LastEditTime: 2019-11-15 15:15:37
+ * @LastEditTime: 2019-11-18 17:03:40
  * @Description: file content
  -->
 {%extends "base.html" %}
@@ -27,17 +27,18 @@
                     <tr>
                         <td>{{ key }}</td>
                         <td>
-                            {% if value|isbool %}<input type="checkbox" name="{{ key }}">
-                            {% elif value|isint %}<input type="number" name="{{ key }}" class="form-control"
-                                required="required" value="{{ value }}">
-                            {% elif value|isstr %}<input type="text" name="{{ key }}" class="form-control"
-                                required="required" value="{{ value }}">
-                            {% elif value|istuple %}
-                            <select class="form-control" name="{{ key }}">
-                                {% for i in value %}
-                                <option value="{{ i.1 }}">{{ i.0 }}</option>
-                                {% endfor %}
-                            </select>
+                            {% if value.1=='bool' %}
+                                <input type="checkbox" name="{{ key }}" {% if value.2 %}checked="checked"{% endif %} >
+                            {% elif value.1=='int' %}
+                                <input type="number" name="{{ key }}" class="form-control" {% if value.3 %}required="required"{% endif %} value="{{ value.2 }}">
+                            {% elif value.1=='str' %}
+                                <input type="text" name="{{ key }}" class="form-control" {% if value.3 %}required="required"{% endif %} value="{{ value.2 }}">
+                            {% elif value.1=='tuple' %}
+                                <select class="form-control" name="{{ key }}">
+                                    {% for i in value.4 %}
+                                    <option value="{{ i.1 }}" {% if value.2 == i.1 %}selected="selected"{% endif %} >{{ i.0 }}</option>
+                                    {% endfor %}
+                                </select>
                             {% endif %}
                         </td>
                     </tr>
