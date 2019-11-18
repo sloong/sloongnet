@@ -25,21 +25,21 @@ namespace Sloong
          *          uuid : uuid string of the owner.
          * @Return: 
          */
-        bool Initialize( string dbPath, string uuid );
+		CResult Initialize( string dbPath, string uuid );
 
-        bool LoadConfig( string uuid );
-        bool SaveConfig( string uuid, string config );
-        bool SaveTemplate( string id, string config);
-        bool ReloadTemplate( string id );
+		CResult LoadConfig( string uuid );
+        CResult SaveConfig( string uuid, string config );
+		CResult SaveTemplate( string id, string config);
+		CResult ReloadTemplate( string id );
 
         string GetConfig(string uuid);
 		map<string, string> GetTemplateList() { return m_oTemplateList; }
 
 
     protected:
-        bool LoadConfigTemplate(string tbName);
+		CResult LoadConfigTemplate(string tbName);
         string GetStringConfig(string table_name, string key, string def);
-		bool AddOrInsertRecord(const string& table_name, const map<string, string>& list, string where_str);
+		CResult AddOrInsertRecord(const string& table_name, const map<string, string>& list, string where_str);
 
     protected:
         map<string,string> m_oServerConfigList;

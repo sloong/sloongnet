@@ -107,25 +107,27 @@ void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 	case Functions::SetServerConfig:
 	{
 		auto target = msgPack->content();
-		if (!m_pAllConfig->SaveConfig(target, msgPack->extend()))
+		auto res = m_pAllConfig->SaveConfig(target, msgPack->extend());
+		if (res.IsSucceed())
 		{
-			pack->ResponsePackage(ResultType::Error, "");
+			pack->ResponsePackage("Succeed", "");
 		}
 		else
 		{
-			pack->ResponsePackage("Succeed", "");
+			pack->ResponsePackage(ResultType::Error, res.Message());
 		}
 	}break;
 	case Functions::SetServerConfigTemplate:
 	{
 		auto target = msgPack->content();
-		if(!m_pAllConfig->SaveTemplate(target, msgPack->extend()))
+		auto res = m_pAllConfig->SaveTemplate(target, msgPack->extend());
+		if(res.IsSucceed())
 		{
-			pack->ResponsePackage(ResultType::Error, "");
+			pack->ResponsePackage("Succeed", "");
 		}
 		else
 		{
-			pack->ResponsePackage("Succeed", "");
+			pack->ResponsePackage(ResultType::Error, res.Message());
 		}
 	}break;
 	case Functions::GetServerConfig:
@@ -153,12 +155,9 @@ void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 			item["UUID"] = i.first;
 			item["IP"] = i.second;
 			list.append(item);
-//			list_str += CUniversal::Format("{\"UUID\":\"%s\",\"IP\":\"%s\"},", i.first, i.second);
 		}
 		root["WaitConfigList"] = list;
 		pack->ResponsePackage(root.toStyledString());
-		//list_str.substr(0, list_str.length() - 1);
-		//pack->ResponsePackage(CUniversal::Format("{\"WaitConfigList\":[%s]}", list_str));
 	}break;
 	}
 	

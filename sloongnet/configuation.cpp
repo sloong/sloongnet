@@ -18,15 +18,15 @@ Sloong::CConfiguation::CConfiguation()
 }
 
 
-bool Sloong::CConfiguation::Initialize(string dbPath, string uuid)
+CResult Sloong::CConfiguation::Initialize(string dbPath, string uuid)
 {
     m_pDB->Initialize(dbPath);
     LoadConfigTemplate(CONFIG_TPL_TBL_NAME);
     LoadConfig(uuid);
-    return true;
+    return CResult::Succeed;
 }
 
-bool Sloong::CConfiguation::LoadConfigTemplate(string tbName)
+CResult Sloong::CConfiguation::LoadConfigTemplate(string tbName)
 {
     EasyResult dbRes = make_shared<CDBResult>();
     string error;
@@ -34,7 +34,7 @@ bool Sloong::CConfiguation::LoadConfigTemplate(string tbName)
 
     if (!m_pDB->Query(sql, dbRes, error))
     {
-        return false;
+        return CResult(false);
     }
     else if( dbRes->GetLinesNum() >= 0 ) 
     {
@@ -45,13 +45,13 @@ bool Sloong::CConfiguation::LoadConfigTemplate(string tbName)
             auto value = dbRes->GetData(0, "value");
             m_oTemplateList[key] = value;
         }
-        return true;
+        return CResult::Succeed;
     }
     else
     {
-        throw normal_except("No support function.");
+		return CResult(false, "No support function.");
     }
-    return false;
+    
 }
 
 /**
@@ -59,37 +59,41 @@ bool Sloong::CConfiguation::LoadConfigTemplate(string tbName)
  * @Params: 
  * @Return: 
  */
-bool Sloong::CConfiguation::LoadConfig(string uuid)
+CResult Sloong::CConfiguation::LoadConfig(string uuid)
 {
     m_oServerConfigList[uuid] = GetStringConfig(CONFIGS_TBL_NAME,uuid,"");
-    return true;
+    return CResult::Succeed;
 }
 
-bool Sloong::CConfiguation::SaveConfig(string uuid, string config)
+CResult Sloong::CConfiguation::SaveConfig(string uuid, string config)
 {
     // TODO: add sqlite write function.
 	map<string, string> kvlist = {
 		{"key",uuid},
 		{"value",config},
 	};
-	
-	AddOrInsertRecord(CONFIGS_TBL_NAME, kvlist, CUniversal::Format("`key`=\"%s\"", uuid.c_str()));
-	return true;
+	auto res = AddOrInsertRecord(CONFIGS_TBL_NAME, kvlist, CUniversal::Format("`key`=\"%s\"", uuid.c_str()));
+	if (res.IsSucceed())
+	{
+		m_oServerConfigList[uuid] = config;
+		return CResult::Succeed;
+	}
+	return res;
 }
 
-bool Sloong::CConfiguation::SaveTemplate( string id, string config)
+CResult Sloong::CConfiguation::SaveTemplate( string id, string config)
 {
     // TODO: add sqlite write function.
-	return true;
+	return CResult::Succeed;
 }
 
-bool Sloong::CConfiguation::ReloadTemplate( string id )
+CResult Sloong::CConfiguation::ReloadTemplate( string id )
 {
     m_oTemplateList[id] = GetStringConfig(CONFIG_TPL_TBL_NAME, id, "");
-	return true;
+	return CResult::Succeed;
 }
 
-bool Sloong::CConfiguation::AddOrInsertRecord(const string& table_name,const map<string,string>& list, string where_str)
+CResult Sloong::CConfiguation::AddOrInsertRecord(const string& table_name,const map<string,string>& list, string where_str)
 {
 	auto i = list.begin();
 	string key_list = i->first;
@@ -107,9 +111,9 @@ bool Sloong::CConfiguation::AddOrInsertRecord(const string& table_name,const map
 	string error;
 	if (!m_pDB->Query(sql, dbRes, error))
 	{
-		return false;
+		return CResult(false,error);
 	}
-	return true;
+	return CResult::Succeed;
 }
 
 string Sloong::CConfiguation::GetStringConfig(string table_name, string key, string def)
