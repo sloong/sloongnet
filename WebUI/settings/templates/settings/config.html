@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-14 14:14:34
  * @LastEditors: WCB
- * @LastEditTime: 2019-11-18 17:03:40
+ * @LastEditTime: 2019-11-18 18:51:54
  * @Description: file content
  -->
 {%extends "base.html" %}
@@ -27,16 +27,16 @@
                     <tr>
                         <td>{{ key }}</td>
                         <td>
-                            {% if value.1=='bool' %}
-                                <input type="checkbox" name="{{ key }}" {% if value.2 %}checked="checked"{% endif %} >
-                            {% elif value.1=='int' %}
-                                <input type="number" name="{{ key }}" class="form-control" {% if value.3 %}required="required"{% endif %} value="{{ value.2 }}">
-                            {% elif value.1=='str' %}
-                                <input type="text" name="{{ key }}" class="form-control" {% if value.3 %}required="required"{% endif %} value="{{ value.2 }}">
-                            {% elif value.1=='tuple' %}
+                            {% if value.0 == 'bool' %}
+                                <input type="checkbox" name="{{ key }}" {% if value.1 %}checked="checked"{% endif %} >
+                            {% elif value.0 == 'int' %}
+                                <input type="number" name="{{ key }}" class="form-control" {% if value.2 %}required="required"{% endif %} value="{{ value.1 }}">
+                            {% elif value.0 == 'str' %}
+                                <input type="text" name="{{ key }}" class="form-control" {% if value.2 %}required="required"{% endif %} value="{{ value.1 }}">
+                            {% elif value.0 == 'tuple' %}
                                 <select class="form-control" name="{{ key }}">
-                                    {% for i in value.4 %}
-                                    <option value="{{ i.1 }}" {% if value.2 == i.1 %}selected="selected"{% endif %} >{{ i.0 }}</option>
+                                    {% for i in value.3 %}
+                                    <option value="{{ i.1 }}" {% if value.1 == i.1 %}selected="selected"{% endif %} >{{ i.0 }}</option>
                                     {% endfor %}
                                 </select>
                             {% endif %}

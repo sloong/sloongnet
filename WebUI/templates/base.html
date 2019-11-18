@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-14 14:40:15
  * @LastEditors: WCB
- * @LastEditTime: 2019-11-15 14:49:28
+ * @LastEditTime: 2019-11-18 18:55:43
  * @Description: file content
  -->
 <!DOCTYPE html>
@@ -28,10 +28,7 @@
             </div>
         </div>
     </div>
-    <script text="text/javascript">
-        {% block javascript %}
-        {% endblock %}
-    </script>
+    
     <!-- jQuery -->
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <!-- jQuery Easing -->
@@ -42,6 +39,10 @@
     <script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
     <!-- Magnific Popup -->
     <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+    <script text="text/javascript">
+        {% block javascript %}
+        {% endblock %}
+    </script>
     <br>
     <br>
     <nav class="navbar navbar-default navbar-bottom form-control-static">
