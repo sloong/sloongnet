@@ -30,7 +30,7 @@ CResult SloongControlService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
 		fstream_ex::write_all("uuid.dat", uuid);
 	}
 
-	m_pAllConfig->Initialize("configuation.db", uuid);
+	m_pAllConfig->Initialize("/data/configuation.db", uuid);
 	InitWaitConfig();
 	auto config_str = m_pAllConfig->GetConfig(uuid);
 	auto port = config->listenport();

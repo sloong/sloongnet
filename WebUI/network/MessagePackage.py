@@ -13,9 +13,10 @@ class MessagePackage:
     def __init(self):
         self.pack.Sender = "0"
 
-    def Request(self, func, msg ):
+    def Request(self, func, msg, extend= b'' ):
         self.pack.Function = func
         self.pack.Content = msg
+        self.pack.Extend = extend
         recv_data = ConnectSession.session.send(self.pack.SerializeToString())
         recv_pack = protocol.DataPackage()
 

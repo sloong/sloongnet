@@ -39,6 +39,7 @@ namespace Sloong
     protected:
         bool LoadConfigTemplate(string tbName);
         string GetStringConfig(string table_name, string key, string def);
+		bool AddOrInsertRecord(const string& table_name, const map<string, string>& list, string where_str);
 
     protected:
         map<string,string> m_oServerConfigList;

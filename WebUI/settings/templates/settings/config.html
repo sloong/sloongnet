@@ -29,9 +29,9 @@
                         <td>
                             {% if value|isbool %}<input type="checkbox" name="{{ key }}">
                             {% elif value|isint %}<input type="number" name="{{ key }}" class="form-control"
-                                required="required">
+                                required="required" value="{{ value }}">
                             {% elif value|isstr %}<input type="text" name="{{ key }}" class="form-control"
-                                required="required">
+                                required="required" value="{{ value }}">
                             {% elif value|istuple %}
                             <select class="form-control" name="{{ key }}">
                                 {% for i in value %}

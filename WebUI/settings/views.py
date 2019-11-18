@@ -15,7 +15,9 @@ import json
 def index(request):
     c = context.GetContext()
     pack = MessagePackage.MessagePackage()
-    (_,data) = pack.Request(protocol.Functions.GetWaitConfigList,'')
+    (code,data) = pack.Request(protocol.Functions.GetWaitConfigList,'')
+    if code != protocol.ResultType.Succeed:
+        c['ErrorMessage'] = data
     jres = json.loads(data)
     if not jres['WaitConfigList'] :
         c["NoWaitConfigList"] = True
@@ -35,16 +37,16 @@ def config_show(request,uuid):
     c = context.GetContext()
     config_list = {}
     config_list['ModuleType'] = tuple(protocol.ModuleType.items()[1:])
-    config_list['ListenPort'] = 0
+    config_list['ListenPort'] = 8002
     config_list['EnableSSL'] = False
     config_list['CertFilePath'] = ''
     config_list['KeyFilePath'] = ''
     config_list['CertPasswd'] = ''
-    config_list['ConnectTime'] = 0
-    config_list['ReceiveTime'] =0
-    config_list['LogPath']=''
+    config_list['ConnectTime'] = 5
+    config_list['ReceiveTime'] = 5
+    config_list['LogPath']='./log/sloong/'
     config_list['LogLevel']=tuple(protocol.LogLevel.items())
-    config_list['DebugMode']=False
+    config_list['DebugMode']=True
     config_list['MQThreadQuantity']=1
     config_list['ProcessThreadQuantity']=1
     config_list['PrioritySize']=5
@@ -57,9 +59,21 @@ def config_response(request,uuid):
     config = protocol.GLOBAL_CONFIG()
     config.Type = int(request.GET['ModuleType'])
     config.ListenPort = int(request.GET['ListenPort'])
-    (res,msg) = pack.Request(protocol.Functions.SetServerConfig,config.SerializeToString())
+    config.EnableSSL = bool(request.GET.get('EnableSSL','False'))
+    config.CertFilePath = request.GET['CertFilePath']
+    config.KeyFilePath = request.GET['KeyFilePath']
+    config.CertPasswd = request.GET['CertPasswd']
+    config.ConnectTime = int(request.GET['ConnectTime'])
+    config.ReceiveTime = int(request.GET['ReceiveTime'])
+    config.LogPath = request.GET['LogPath']
+    config.LogLevel = int(request.GET['LogLevel'])
+    config.DebugMode = bool(request.GET.get('DebugMode','Flase'))
+    config.MQThreadQuantity = int(request.GET['MQThreadQuantity'])
+    config.ProcessThreadQuantity = int(request.GET['ProcessThreadQuantity'])
+    config.PrioritySize = int(request.GET['PrioritySize'])
+
+    (res,msg) = pack.Request(protocol.Functions.SetServerConfig, uuid, config.SerializeToString())
     if res == protocol.ResultType.Succeed:
         return HttpResponseRedirect("/settings/")
     else:
         return render(request, 'config.html', {'Response':True,'Result':False,'Message':msg})
-

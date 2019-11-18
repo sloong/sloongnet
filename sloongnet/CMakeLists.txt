@@ -35,8 +35,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-switch -Wno-return-type -Wno-
 # C++ 版本
 set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 
-set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,./")
-
 #当前目录下所有源文件赋给SRC_LIST
 #AUX_SOURCE_DIRECTORY(. SRC_LIST) 
 #file(GLOB_RECURSE MODULE_SRC_LIST "./*/*.c*")
@@ -49,7 +47,7 @@ add_executable(${PROJECT_NAME} ${SRC_LIST})
 
 #添加C++11编译选项,但是只有CMAKE 3.1支持
 #target_compile_features(mmseg PRIVATE cxx_range_for)
-
+set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,./")
 
 #添加链接库
 target_link_libraries(${PROJECT_NAME} m)

@@ -68,6 +68,12 @@ bool Sloong::CConfiguation::LoadConfig(string uuid)
 bool Sloong::CConfiguation::SaveConfig(string uuid, string config)
 {
     // TODO: add sqlite write function.
+	map<string, string> kvlist = {
+		{"key",uuid},
+		{"value",config},
+	};
+	
+	AddOrInsertRecord(CONFIGS_TBL_NAME, kvlist, CUniversal::Format("`key`=\"%s\"", uuid.c_str()));
 	return true;
 }
 
@@ -83,6 +89,28 @@ bool Sloong::CConfiguation::ReloadTemplate( string id )
 	return true;
 }
 
+bool Sloong::CConfiguation::AddOrInsertRecord(const string& table_name,const map<string,string>& list, string where_str)
+{
+	auto i = list.begin();
+	string key_list = i->first;
+	string value_list = i->second;
+	for ( i++ ; i != list.end(); i++) {
+		key_list = CUniversal::Format("%s,`%s`", key_list, i->first.c_str());
+		value_list = CUniversal::Format("%s,\"%s\"", value_list, i->second.c_str());
+	}
+	string sql = CUniversal::Format("INSERT INTO %s (%s) VALUES(%s)",
+		table_name.c_str(), key_list.c_str(), value_list.c_str());
+	if (where_str.length() > 0)
+		sql += " ON DUPLICATE KEY UPDATE " + where_str;
+
+	EasyResult dbRes = make_shared<CDBResult>();
+	string error;
+	if (!m_pDB->Query(sql, dbRes, error))
+	{
+		return false;
+	}
+	return true;
+}
 
 string Sloong::CConfiguation::GetStringConfig(string table_name, string key, string def)
 {
