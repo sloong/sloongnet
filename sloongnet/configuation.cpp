@@ -7,6 +7,7 @@
  */
 
 #include "configuation.h"
+#include "univ/Base64.h"
 
 const static string CONFIG_TPL_TBL_NAME = "configutaion_template";
 const static string CONFIGS_TBL_NAME = "configuations";
@@ -61,7 +62,9 @@ CResult Sloong::CConfiguation::LoadConfigTemplate(string tbName)
  */
 CResult Sloong::CConfiguation::LoadConfig(string uuid)
 {
-    m_oServerConfigList[uuid] = GetStringConfig(CONFIGS_TBL_NAME,uuid,"");
+	auto config = GetStringConfig(CONFIGS_TBL_NAME, uuid, "");
+	if (config.length() > 0)
+		m_oServerConfigList[uuid] = CBase64::Decode(config);
     return CResult::Succeed;
 }
 
@@ -70,9 +73,9 @@ CResult Sloong::CConfiguation::SaveConfig(string uuid, string config)
     // TODO: add sqlite write function.
 	map<string, string> kvlist = {
 		{"key",uuid},
-		{"value",config},
+		{"value", CBase64::Encode(config)},
 	};
-	auto res = AddOrInsertRecord(CONFIGS_TBL_NAME, kvlist, CUniversal::Format("`key`=\"%s\"", uuid.c_str()));
+	auto res = AddOrInsertRecord(CONFIGS_TBL_NAME, kvlist, "");// CUniversal::Format("`key`='%s'", uuid.c_str()));
 	if (res.IsSucceed())
 	{
 		m_oServerConfigList[uuid] = config;
@@ -96,13 +99,15 @@ CResult Sloong::CConfiguation::ReloadTemplate( string id )
 CResult Sloong::CConfiguation::AddOrInsertRecord(const string& table_name,const map<string,string>& list, string where_str)
 {
 	auto i = list.begin();
-	string key_list = i->first;
-	string value_list = i->second;
+	string key_list = "'" + i->first + "'";
+	string value_list = "'" + i->second + "'";
 	for ( i++ ; i != list.end(); i++) {
-		key_list = CUniversal::Format("%s,`%s`", key_list, i->first.c_str());
-		value_list = CUniversal::Format("%s,\"%s\"", value_list, i->second.c_str());
+		if (i->first.length() == 0)
+			continue;
+		key_list = CUniversal::Format("%s,'%s'", key_list, i->first.c_str());
+		value_list = CUniversal::Format("%s,'%s'", value_list, i->second.c_str());
 	}
-	string sql = CUniversal::Format("INSERT INTO %s (%s) VALUES(%s)",
+	string sql = CUniversal::Format("REPLACE INTO %s (%s) VALUES(%s)",
 		table_name.c_str(), key_list.c_str(), value_list.c_str());
 	if (where_str.length() > 0)
 		sql += " ON DUPLICATE KEY UPDATE " + where_str;
@@ -113,6 +118,7 @@ CResult Sloong::CConfiguation::AddOrInsertRecord(const string& table_name,const 
 	{
 		return CResult(false,error);
 	}
+
 	return CResult::Succeed;
 }
 

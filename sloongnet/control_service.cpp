@@ -110,6 +110,7 @@ void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 		auto res = m_pAllConfig->SaveConfig(target, msgPack->extend());
 		if (res.IsSucceed())
 		{
+			m_oWaitConfigList.erase(target);
 			pack->ResponsePackage("Succeed", "");
 		}
 		else
