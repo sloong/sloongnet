@@ -2,19 +2,19 @@
 @Author: WCB
 @Date: 2019-11-14 14:05:25
 @LastEditors: WCB
-@LastEditTime: 2019-11-18 19:42:24
+@LastEditTime: 2019-11-19 16:16:41
 @Description: file conten
 '''
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
-from network import MessagePackage
+from network import message_package
 from protocol import protocol_pb2 as protocol
 from . import context
 import json
 
 def index(request):
     c = context.GetContext()
-    pack = MessagePackage.MessagePackage()
+    pack = message_package.MessagePackage()
     (code,data) = pack.Request(protocol.Functions.GetWaitConfigList,'')
     if code != protocol.ResultType.Succeed:
         c['ErrorMessage'] = data
@@ -63,7 +63,7 @@ def config_show(request,uuid):
     return render(request, 'config.html', c)
 
 def config_response(request,uuid):
-    pack = MessagePackage.MessagePackage()
+    pack = message_package.MessagePackage()
     config = protocol.GLOBAL_CONFIG()
     config.Type = int(request.GET['ModuleType'])
     config.ListenPort = int(request.GET['ListenPort'])

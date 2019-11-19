@@ -2,11 +2,11 @@
 @Author: WCB
 @Date: 2019-11-14 13:59:50
 @LastEditors: WCB
-@LastEditTime: 2019-11-15 15:07:33
+@LastEditTime: 2019-11-19 16:18:19
 @Description: Message package module
 '''
 from protocol import protocol_pb2 as protocol
-from . import ConnectSession
+from . import connect_session
 
 class MessagePackage:
     pack = protocol.DataPackage()
@@ -17,7 +17,7 @@ class MessagePackage:
         self.pack.Function = func
         self.pack.Content = msg
         self.pack.Extend = extend
-        recv_data = ConnectSession.session.send(self.pack.SerializeToString())
+        recv_data = connect_session.session.send(self.pack.SerializeToString())
         recv_pack = protocol.DataPackage()
 
         recv_pack.ParseFromString(recv_data)
