@@ -101,6 +101,12 @@ enum Functions{
 	   Response data: Content - result with JSON string. 
 	*/
 	ProcessMessage=8;
+	/*
+	   Flow: Control -> All
+	   Request: 
+	   Response: NO
+	*/
+	RestartService=9;
 }
 
 message DataPackage

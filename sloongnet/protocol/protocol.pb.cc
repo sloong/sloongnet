@@ -317,13 +317,13 @@ void protobuf_AddDesc_protocol_2eproto() {
     "\nResultType\022\013\n\007Succeed\020\000\022\t\n\005Error\020\001\022\013\n\007W"
     "arning\020\002*^\n\010LogLevel\022\007\n\003All\020\000\022\n\n\006Verbos\020"
     "\001\022\t\n\005Debug\020\002\022\010\n\004Info\020\003\022\010\n\004Warn\020\004\022\007\n\003Err\020"
-    "\005\022\n\n\006Assert\020\006\022\t\n\005Fatal\020\007*\323\001\n\tFunctions\022\021"
+    "\005\022\n\n\006Assert\020\006\022\t\n\005Fatal\020\007*\347\001\n\tFunctions\022\021"
     "\n\rRegisteServer\020\000\022\025\n\021GetWaitConfigList\020\001"
     "\022\031\n\025GetConfigTemplateList\020\002\022\033\n\027SetServer"
     "ConfigTemplate\020\003\022\027\n\023SetServerToTemplate\020"
     "\004\022\023\n\017SetServerConfig\020\005\022\023\n\017GetServerConfi"
-    "g\020\006\022\r\n\tUserLogin\020\007\022\022\n\016ProcessMessage\020\010b\006"
-    "proto3", 1686);
+    "g\020\006\022\r\n\tUserLogin\020\007\022\022\n\016ProcessMessage\020\010\022\022"
+    "\n\016RestartService\020\tb\006proto3", 1706);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "protocol.proto", &protobuf_RegisterTypes);
   DataPackage::default_instance_ = new DataPackage();
@@ -420,6 +420,7 @@ bool Functions_IsValid(int value) {
     case 6:
     case 7:
     case 8:
+    case 9:
       return true;
     default:
       return false;

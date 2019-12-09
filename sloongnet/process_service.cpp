@@ -25,16 +25,18 @@ void Sloong::SloongNetProcess::MessagePackageProcesser(SmartPackage pack)
 	switch(msg->function())
 	{
 		case Functions::ProcessMessage:
+		{
 			string uuid = msg->extend();
 			auto infoItem = m_mapUserInfoList.find(uuid);
-			if( infoItem == m_mapUserInfoList.end() )
+			if (infoItem == m_mapUserInfoList.end())
 			{
 				m_mapUserInfoList[uuid] = make_unique<CLuaPacket>();
-				infoItem= m_mapUserInfoList.find(uuid);
+				infoItem = m_mapUserInfoList.find(uuid);
 			}
-			if (m_pProcess->MsgProcess(infoItem->second.get(), msg->content() , strRes, pExData, nExSize)){
+			if (m_pProcess->MsgProcess(infoItem->second.get(), msg->content(), strRes, pExData, nExSize)) {
 				msg->set_content(strRes);
-			}else{
+			}
+			else {
 				m_pLog->Error("Error in process");
 				msg->set_content("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
 			}
@@ -43,7 +45,12 @@ void Sloong::SloongNetProcess::MessagePackageProcesser(SmartPackage pack)
 			response_event->SetSocketID(pack->GetSocketID());
 			response_event->SetDataPackage(pack);
 			m_pControl->CallMessage(response_event);
-			break;
+		}break;
+		case Functions::RestartServcie:
+		{
+			m_oExitResult = ResultEnum::Retry;
+			m_oExitSync.notify_all();
+		}break;
 	}
 
 }

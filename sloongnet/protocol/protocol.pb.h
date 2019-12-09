@@ -131,12 +131,13 @@ enum Functions {
   GetServerConfig = 6,
   UserLogin = 7,
   ProcessMessage = 8,
+  RestartService = 9,
   Functions_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   Functions_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool Functions_IsValid(int value);
 const Functions Functions_MIN = RegisteServer;
-const Functions Functions_MAX = ProcessMessage;
+const Functions Functions_MAX = RestartService;
 const int Functions_ARRAYSIZE = Functions_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Functions_descriptor();

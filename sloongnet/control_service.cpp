@@ -160,6 +160,12 @@ void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 		root["WaitConfigList"] = list;
 		pack->ResponsePackage(root.toStyledString());
 	}break;
+	case Functions::RestartServcie:
+	{
+		m_oExitResult = ResultEnum::Retry;
+		m_oExitSync.notify_all();
+		return;
+	}break;
 	}
 	
 	auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);

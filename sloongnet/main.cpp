@@ -21,11 +21,11 @@ string RegisteToControl(SmartConnect con, string uuid)
 	CDataTransPackage dataPackage;
 	dataPackage.Initialize(con);
 	dataPackage.RequestPackage(req);
-	NetworkResult result = dataPackage.SendPackage();
-	if (result != NetworkResult::Succeed)
+	ResultEnum result = dataPackage.SendPackage();
+	if (result != ResultEnum::Succeed)
 		throw string("Send Registe request error.");
 	result = dataPackage.RecvPackage(0,0);
-	if (result != NetworkResult::Succeed)
+	if (result != ResultEnum::Succeed)
 		throw string("Receive Registe result error.");
 	auto get_config_response_buf = dataPackage.GetRecvPackage();
 	if (!get_config_response_buf)
@@ -44,11 +44,11 @@ string GetConfigFromControl(SmartConnect con,string uuid)
 	CDataTransPackage dataPackage;
 	dataPackage.Initialize(con);
 	dataPackage.RequestPackage(get_config_request_buf);
-	NetworkResult result = dataPackage.SendPackage();
-	if (result != NetworkResult::Succeed)
+	ResultEnum result = dataPackage.SendPackage();
+	if (result != ResultEnum::Succeed)
 		throw string("Send get config request error.");
 	result = dataPackage.RecvPackage(0,0);
-	if (result != NetworkResult::Succeed)
+	if (result != ResultEnum::Succeed)
 		throw string("Receive get config result error.");
 	auto get_config_response_buf = dataPackage.GetRecvPackage();
 	if (!get_config_response_buf)
@@ -135,25 +135,29 @@ int main(int argc, char** args)
 {
 	try
 	{
-		auto config = Initialize(argc, args);
-		if (!config) {
-			cout << "Initialize error." << endl;
-			return -1;
-		}
+		CResult code = CResult::Succeed;
+		do
+		{
+			auto config = Initialize(argc, args);
+			if (!config) {
+				cout << "Initialize error." << endl;
+				return -1;
+			}
 
-		Sloong::CSloongBaseService::g_pAppService = ServiceBuilder::Build(config.get());
-		if (!Sloong::CSloongBaseService::g_pAppService) {
-			cout << "Create service object error." << endl;
-			return -2;
-		}
+			Sloong::CSloongBaseService::g_pAppService = ServiceBuilder::Build(config.get());
+			if (!Sloong::CSloongBaseService::g_pAppService) {
+				cout << "Create service object error." << endl;
+				return -2;
+			}
 
-		auto res = Sloong::CSloongBaseService::g_pAppService->Initialize(config);
-		if (!res.IsSucceed()) {
-			cout << "Initialize server error. Message: " << res.Message() << endl;
-			return -3;
-		}
+			auto res = Sloong::CSloongBaseService::g_pAppService->Initialize(config);
+			if (!res.IsSucceed()) {
+				cout << "Initialize server error. Message: " << res.Message() << endl;
+				return -3;
+			}
 
-		Sloong::CSloongBaseService::g_pAppService->Run();
+			code = Sloong::CSloongBaseService::g_pAppService->Run();
+		} while (code.Result() == ResultEnum::Retry);
 		return 0;
 	}
 	catch (string & msg)

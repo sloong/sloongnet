@@ -54,12 +54,12 @@ namespace Protocol {
             "c3MQBRIGCgJEQhAGKjEKClJlc3VsdFR5cGUSCwoHU3VjY2VlZBAAEgkKBUVy",
             "cm9yEAESCwoHV2FybmluZxACKl4KCExvZ0xldmVsEgcKA0FsbBAAEgoKBlZl",
             "cmJvcxABEgkKBURlYnVnEAISCAoESW5mbxADEggKBFdhcm4QBBIHCgNFcnIQ",
-            "BRIKCgZBc3NlcnQQBhIJCgVGYXRhbBAHKtMBCglGdW5jdGlvbnMSEQoNUmVn",
+            "BRIKCgZBc3NlcnQQBhIJCgVGYXRhbBAHKucBCglGdW5jdGlvbnMSEQoNUmVn",
             "aXN0ZVNlcnZlchAAEhUKEUdldFdhaXRDb25maWdMaXN0EAESGQoVR2V0Q29u",
             "ZmlnVGVtcGxhdGVMaXN0EAISGwoXU2V0U2VydmVyQ29uZmlnVGVtcGxhdGUQ",
             "AxIXChNTZXRTZXJ2ZXJUb1RlbXBsYXRlEAQSEwoPU2V0U2VydmVyQ29uZmln",
             "EAUSEwoPR2V0U2VydmVyQ29uZmlnEAYSDQoJVXNlckxvZ2luEAcSEgoOUHJv",
-            "Y2Vzc01lc3NhZ2UQCGIGcHJvdG8z"));
+            "Y2Vzc01lc3NhZ2UQCBISCg5SZXN0YXJ0U2VydmljZRAJYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ModuleType), typeof(global::Protocol.ResultType), typeof(global::Protocol.LogLevel), typeof(global::Protocol.Functions), }, new pbr::GeneratedClrTypeInfo[] {
@@ -192,6 +192,13 @@ namespace Protocol {
     /// Response data: Content - result with JSON string. 
     /// </summary>
     [pbr::OriginalName("ProcessMessage")] ProcessMessage = 8,
+    /// <summary>
+    /// 
+    /// Flow: Control -> All
+    /// Request: 
+    /// Response:
+    /// </summary>
+    [pbr::OriginalName("RestartService")] RestartService = 9,
   }
 
   #endregion

@@ -26,7 +26,7 @@ namespace Sloong
 
 		virtual void AfterInit() {}
 
-		virtual void Run();
+		virtual CResult Run();
 
 		virtual void Exit();
 
@@ -45,7 +45,8 @@ namespace Sloong
 		unique_ptr<CLog>		m_pLog = make_unique<CLog>();;
 		unique_ptr<GLOBAL_CONFIG> m_pServerConfig;
 		shared_ptr<EasyConnect>	m_pSocket;
-		CEasySync				m_oSync;
+		CEasySync				m_oExitSync;
+		CResult					m_oExitResult;
 		u_int64_t				m_nSerialNumber=0;
 		string					m_strUUID;
 		

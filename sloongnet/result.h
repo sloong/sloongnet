@@ -5,7 +5,7 @@
 namespace Sloong
 {
     
-enum NetworkResult
+enum ResultEnum
 {
 	Succeed = 1,
 	Retry = 0,
@@ -18,32 +18,32 @@ enum NetworkResult
     {
     public:
         CResult(bool res){
-            m_emResult = res ? NetworkResult::Succeed : NetworkResult::Error;
+            m_emResult = res ? ResultEnum::Succeed : ResultEnum::Error;
         }
-        CResult(NetworkResult res){
+        CResult(ResultEnum res){
             m_emResult = res;
         }
         CResult(bool res, const string& what){
-            m_emResult = res ? NetworkResult::Succeed : NetworkResult::Error;
+            m_emResult = res ? ResultEnum::Succeed : ResultEnum::Error;
             m_strMessage = what;
         }
-        CResult(NetworkResult res, const string& what){
+        CResult(ResultEnum res, const string& what){
             m_emResult = res;
             m_strMessage = what;
         }
 
-        NetworkResult Result(){
+        ResultEnum Result(){
             return m_emResult;
         }
 
         bool IsSucceed(){
-            return m_emResult == NetworkResult::Succeed ? true : false;
+            return m_emResult == ResultEnum::Succeed ? true : false;
         }
         string Message(){
             return m_strMessage;
         }
     protected:
-        NetworkResult m_emResult; 
+        ResultEnum m_emResult; 
         string m_strMessage;
 
     public: 

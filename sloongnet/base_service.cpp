@@ -36,6 +36,7 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
 CResult CSloongBaseService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
 {
 	m_pServerConfig = move(config);
+    m_oExitResult = CResult::Succeed;
 
     set_terminate(sloong_terminator);
     set_unexpected(sloong_terminator);
@@ -76,16 +77,17 @@ CResult CSloongBaseService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
 }
 
 
-void CSloongBaseService::Run(){
+CResult CSloongBaseService::Run(){
     m_pLog->Info("Application begin running.");
     m_pControl->SendMessage(EVENT_TYPE::ProgramStart);
-    m_oSync.wait();
+    m_oExitSync.wait();
+    return m_oExitResult;
 }
 void CSloongBaseService::Exit(){
     m_pLog->Info("Application will exit.");
     m_pControl->SendMessage(EVENT_TYPE::ProgramExit);
     m_pControl->Exit();
-    m_oSync.notify_one();
+    m_oExitSync.notify_one();
 }
 bool CSloongBaseService::ConnectToControl(string controlAddress){
     m_pSocket = make_shared<EasyConnect>();
