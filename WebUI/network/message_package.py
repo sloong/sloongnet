@@ -17,7 +17,9 @@ class MessagePackage:
         self.pack.Function = func
         self.pack.Content = msg
         self.pack.Extend = extend
-        recv_data = connect_session.session.send(self.pack.SerializeToString())
+        (res,recv_data) = connect_session.session.send(self.pack.SerializeToString())
+        if not res:
+            return (protocol.ResultType.Error, recv_data)
         recv_pack = protocol.DataPackage()
 
         recv_pack.ParseFromString(recv_data)

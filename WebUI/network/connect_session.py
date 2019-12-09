@@ -21,8 +21,13 @@ class ConnectSession(object):
         self.port = port
 
     def _connect(self):
-        self._socket.connect((self._host,self._port))
-        self._isconnect = True
+        try:
+            self._socket.connect((self._host,self._port))
+        except Exception as err :
+            return (False,err.__str__())
+        else:
+            self._isconnect = True
+
 
     def _reconnect_and_sendall( self, data ):
         try:
@@ -38,7 +43,9 @@ class ConnectSession(object):
     '''
     def send(self,senddata):
         if not self._isconnect :
-            self._connect()
+            (res,msg) = self._connect()
+            if not res:
+                return (res,msg)
 
         len_data = len(senddata).to_bytes(4,byteorder="big")
         try:
@@ -51,7 +58,7 @@ class ConnectSession(object):
         self._socket.sendall(senddata)
         len_data = self._recv_ex(4)
         data = self._recv_ex(int.from_bytes(len_data,byteorder="big"))
-        return data
+        return (True,data)
 
     def _recv_ex(self, recv_len):
         data = self._socket.recv(recv_len)
