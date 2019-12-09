@@ -48,6 +48,8 @@ void Sloong::SloongNetProcess::MessagePackageProcesser(SmartPackage pack)
 		}break;
 		case Functions::RestartServcie:
 		{
+			// Restart service. use the Exit Sync object, notify the wait thread and return the ExitResult.
+			// in main function, check the result, if is Retry, do the init loop.
 			m_oExitResult = ResultEnum::Retry;
 			m_oExitSync.notify_all();
 		}break;
