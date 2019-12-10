@@ -8,7 +8,7 @@ typedef unsigned char byte;
 
 namespace Sloong
 {	
-	typedef std::function<NetworkResult(int)> EpollEventHandlerFunc;
+	typedef std::function<ResultEnum(int)> EpollEventHandlerFunc;
 	class CEpollEx : IObject
 	{
 	public:

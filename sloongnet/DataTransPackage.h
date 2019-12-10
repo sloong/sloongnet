@@ -39,14 +39,14 @@ namespace Sloong
          *          if other error happened else return Error 
          *          if md5 check failed, return Invalied.
          */
-        NetworkResult RecvPackage(int,int=1);
+        ResultEnum RecvPackage(int,int=1);
 
         /**
          * @Remarks: send this package
          * @Params: 
          * @Return: if send fialed, return Error.
          */
-        NetworkResult SendPackage();
+        ResultEnum SendPackage();
 
         shared_ptr<DataPackage> GetRecvPackage(){ return m_pTransPackage;}
 

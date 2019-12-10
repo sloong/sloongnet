@@ -93,11 +93,11 @@ void Sloong::CNetworkHub::SendMessageEventHandler(SmartEvent event)
 		return;
 
 	auto res = info->ResponseDataPackage(pack);
-	if (res == NetworkResult::Retry)
+	if (res == ResultEnum::Retry)
 	{
 		m_pEpoll->MonitorSendStatus(socket);
 	}
-	if (res == NetworkResult::Error)
+	if (res == ResultEnum::Error)
 	{
 		SendCloseConnectEvent(socket);
 	}
@@ -244,7 +244,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 
 /// 有新链接到达。
 /// 接收链接之后，需要客户端首先发送客户端校验信息。只有校验成功之后才会进行SSL处理
-NetworkResult Sloong::CNetworkHub::OnNewAccept(int conn_sock)
+ResultEnum Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 {
 	m_pLog->Verbos("Accept function is called.");
 
@@ -259,7 +259,7 @@ NetworkResult Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 		if (nLen != m_nClientCheckKeyLength || 0 != strcmp(pCheckBuf, m_strClientCheckKey.c_str()))
 		{
 			m_pLog->Warn(CUniversal::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nClientCheckKeyLength, nLen, m_strClientCheckKey.c_str(), pCheckBuf));
-			return NetworkResult::Error;
+			return ResultEnum::Error;
 		}
 	}
 
@@ -275,24 +275,24 @@ NetworkResult Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 
 	m_pLog->Info(CUniversal::Format("Accept client:[%s:%d].", info->m_pCon->m_strAddress, info->m_pCon->m_nPort));
 
-	return NetworkResult::Succeed;
+	return ResultEnum::Succeed;
 }
 
 
 
-NetworkResult Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
+ResultEnum Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
 {
 	shared_ptr<CSockInfo> info = m_SockList[nSocket];
 
 	if (info == NULL)
 	{
 		m_pLog->Error("OnDataCanReceive called, but SockInfo is null.");
-		return NetworkResult::Error;
+		return ResultEnum::Error;
 	}
 
 	queue<SmartPackage> readList;
 	auto res = info->OnDataCanReceive(readList);
-	if (res == NetworkResult::Error)
+	if (res == ResultEnum::Error)
 		SendCloseConnectEvent(nSocket);
 
 	if( !readList.empty())
@@ -305,7 +305,7 @@ NetworkResult Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
 	return res;
 }
 
-NetworkResult Sloong::CNetworkHub::OnCanWriteData(int nSocket)
+ResultEnum Sloong::CNetworkHub::OnCanWriteData(int nSocket)
 {
 	// 可以写入事件
 	shared_ptr<CSockInfo> info = m_SockList[nSocket];
@@ -313,17 +313,17 @@ NetworkResult Sloong::CNetworkHub::OnCanWriteData(int nSocket)
 	if (info == NULL)
 	{
 		m_pLog->Error("OnCanWriteData called, but SockInfo is null.");
-		return NetworkResult::Error;
+		return ResultEnum::Error;
 	}
 
 	auto res = info->OnDataCanSend();
-	if (res == NetworkResult::Error)
+	if (res == ResultEnum::Error)
 		SendCloseConnectEvent(nSocket);
 	return res;
 }
 
-NetworkResult Sloong::CNetworkHub::OnOtherEventHappened(int nSocket)
+ResultEnum Sloong::CNetworkHub::OnOtherEventHappened(int nSocket)
 {
 	SendCloseConnectEvent(nSocket);
-	return NetworkResult::Succeed;
+	return ResultEnum::Succeed;
 }
