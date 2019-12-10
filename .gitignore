@@ -41,3 +41,6 @@ servctrl/servctrl/bin/
 obj
 *.pyc
 /sloongnet/bin/
+sloongnet-*.zip
+docker/output
+docker/output.zip

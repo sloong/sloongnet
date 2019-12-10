@@ -160,7 +160,7 @@ void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 		root["WaitConfigList"] = list;
 		pack->ResponsePackage(root.toStyledString());
 	}break;
-	case Functions::RestartServcie:
+	case Functions::RestartService:
 	{
 		m_oExitResult = ResultEnum::Retry;
 		m_oExitSync.notify_all();

@@ -46,7 +46,7 @@ namespace Sloong
 		unique_ptr<GLOBAL_CONFIG> m_pServerConfig;
 		shared_ptr<EasyConnect>	m_pSocket;
 		CEasySync				m_oExitSync;
-		CResult					m_oExitResult;
+		CResult					m_oExitResult = CResult::Succeed;
 		u_int64_t				m_nSerialNumber=0;
 		string					m_strUUID;
 		

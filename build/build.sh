@@ -14,8 +14,8 @@ show_help(){
 operation:
 	-r: to build release version 
 	-d: to build debug version 
-	-rz: build release to tar.gz
-	-dz: build debug to tar.gz"
+	-rz: build release to zip file
+	-dz: build debug to zip file"
 }
 
 
@@ -69,11 +69,12 @@ build_release(){
 	build
 }
 
-zip(){
-	tar -cf $OUTPATH.tar -C $MAKEFLAG/ $PROJECT
-	tar -rf $OUTPATH.tar -C $CMAKE_FILE_PATH/ scripts
-	tar -rf $OUTPATH.tar -C $CMAKE_FILE_PATH/../ default.conf
-	tar -rf $OUTPATH.tar install.sh
+zipfile(){
+	cd $CMAKE_FILE_PATH
+	zip ../$OUTPATH.zip scripts/* 
+	zip -gj ../$OUTPATH.zip include/*.so
+	cd ..
+	zip -gj $OUTPATH.zip $SCRIPTFOLDER/$MAKEFLAG/$PROJECT
 }
 
 
@@ -90,14 +91,22 @@ fi
 
 if [ $# -eq 1 ]; then
 	case $1 in 
-		-r) build_release;;
-		-d) build_debug;;
+		-r) 
+			build_release
+			;;
+		-d) 
+			build_debug
+			;;
 		-rz) 
 			build_release
-			zip;;
+			zipfile
+			;;
 		-dz) 
 			build_debug
-			zip;;
-		* ) show_help;;
+			zipfile
+			;;
+		* ) 
+			show_help
+			;;
 	esac
 fi

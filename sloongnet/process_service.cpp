@@ -46,7 +46,7 @@ void Sloong::SloongNetProcess::MessagePackageProcesser(SmartPackage pack)
 			response_event->SetDataPackage(pack);
 			m_pControl->CallMessage(response_event);
 		}break;
-		case Functions::RestartServcie:
+		case Functions::RestartService:
 		{
 			// Restart service. use the Exit Sync object, notify the wait thread and return the ExitResult.
 			// in main function, check the result, if is Retry, do the init loop.

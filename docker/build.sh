@@ -1,2 +1,14 @@
+SCRIPTFOLDER=$(dirname $(readlink -f $0))
+echo "ScriptFolder: "$SCRIPTFOLDER
+# cd to current file folder
+cd $SCRIPTFOLDER
+
+../build/build.sh -rz
 VERSION_STR=$(cat ../version)
-docker build --build-arg BUILD_BRANCH=next_gen -t sloong/sloongnet:$VERSION_STR -f Dockerfile
+
+PROJECT=sloongnet
+
+mv ../$PROJECT-v$VERSION_STR.zip output.zip
+unzip -o output.zip -d output
+
+docker build -t sloong/sloongnet:$VERSION_STR -f Dockerfile
