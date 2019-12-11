@@ -44,3 +44,5 @@ obj
 sloongnet-*.zip
 docker/output
 docker/output.zip
+WebUI/dist/
+WebUI/Sloongnet_WebUI.egg-info/
