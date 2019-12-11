@@ -73,6 +73,7 @@ zipfile(){
 	cd $CMAKE_FILE_PATH
 	zip ../$OUTPATH.zip scripts/* 
 	zip -gj ../$OUTPATH.zip include/*.so
+	zip -gj ../$OUTPATH.zip ../*.so
 	cd ..
 	zip -gj $OUTPATH.zip $SCRIPTFOLDER/$MAKEFLAG/$PROJECT
 }

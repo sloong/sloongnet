@@ -9,7 +9,8 @@ RUN mkdir /app && mkdir /data
 
 WORKDIR  /app
 
-COPY ./output/* .
+COPY ./output/ /app/
+COPY run.sh /app/
 
 RUN chmod 755 sloongnet
 
@@ -19,5 +20,5 @@ ENV ADDRESS_INFO=127.0.0.1:8001
 
 EXPOSE 8001
 
-ENTRYPOINT ["/app/sloongnet", ${ADDRESS_INFO}]
+CMD ["/app/run.sh"]
 

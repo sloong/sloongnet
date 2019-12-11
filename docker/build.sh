@@ -1,3 +1,5 @@
+#!/bin/bash
+
 SCRIPTFOLDER=$(dirname $(readlink -f $0))
 echo "ScriptFolder: "$SCRIPTFOLDER
 # cd to current file folder
@@ -11,4 +13,4 @@ PROJECT=sloongnet
 mv ../$PROJECT-v$VERSION_STR.zip output.zip
 unzip -o output.zip -d output
 
-docker build -t sloong/sloongnet:$VERSION_STR -f Dockerfile
+sudo docker build -t sloong/sloongnet:$VERSION_STR .
