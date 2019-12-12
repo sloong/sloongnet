@@ -14,6 +14,8 @@ cd $SCRIPTFOLDER
 
 VERSION_STR=$(cat ../version)
 
-ptyhon3 ../setup.py sdist
-cp ../dist/Sloonget-WebUI-$VERSION_STR.tar.gz ./output.tar.gz
+cd ..
+python3 setup.py sdist
+cd docker
+cp ../dist/Sloongnet-WebUI-$VERSION_STR.tar.gz ./output.tar.gz
 sudo docker build -t sloong/sloongnet-webui:$VERSION_STR .
