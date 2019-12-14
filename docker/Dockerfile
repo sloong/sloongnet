@@ -10,7 +10,7 @@ RUN mkdir /app && mkdir /data
 WORKDIR  /app
 
 COPY ./output/ /app/
-COPY run.sh /app/
+COPY ./run.sh /app/
 
 RUN chmod 755 sloongnet
 

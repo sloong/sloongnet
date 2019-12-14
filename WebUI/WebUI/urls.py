@@ -2,7 +2,7 @@
 @Author: WCB
 @Date: 2019-11-14 16:03:08
 @LastEditors: WCB
-@LastEditTime: 2019-11-14 16:03:08
+@LastEditTime: 2019-12-12 14:40:38
 @Description: file content
 '''
 """WebUI URL Configuration
@@ -22,8 +22,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include,path
+from . import views
 
 urlpatterns = [
+    path('', views.home, name='home'),
     path('settings/',include('settings.urls')),
+    path('monitor/',include('monitor.urls')),
+    path('control/',include('control.urls')),
     path('admin/', admin.site.urls),
 ]

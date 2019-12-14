@@ -1,0 +1,50 @@
+<!--
+ * @Author: WCB
+ * @Date: 2019-11-14 14:14:34
+ * @LastEditors: WCB
+ * @LastEditTime: 2019-12-12 10:18:35
+ * @Description: file content
+ -->
+{%extends "base.html" %}
+
+{% block mainbody %}
+
+{% if ErrorMessage %}
+    {{ ErrorMessage }}
+{% else %}
+    {% if NoWaitConfigList %}
+    <p>没有待配置服务</p>
+    {% else %}
+    {% for item in WaitConfigList %}
+
+    <h3 align="center">服务管理</h3>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>UUID</th>
+                <th>IP</th>
+                <th>开始配置</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ item.UUID }}</td>
+                <td>{{ item.IP }}</td>
+                <td><a href="/settings/config/{{item.UUID}}"><button type="button"
+                            class="btn btn-default">Start</button></a></td>
+            </tr>
+        </tbody>
+    </table>
+    {% endfor %}
+    {% endif %}
+{% endif %}
+
+
+{% endblock %}
+
+{% block javascript %}
+function configServer(uuid){
+alera("test");
+}
+
+{% endblock %}

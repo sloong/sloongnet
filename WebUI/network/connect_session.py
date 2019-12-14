@@ -2,7 +2,7 @@
 @Author: WCB
 @Date: 2019-11-14 13:57:27
 @LastEditors: WCB
-@LastEditTime: 2019-11-19 16:12:17
+@LastEditTime: 2019-12-12 17:39:17
 @Description: Manage connect session.
 '''
 import socket
@@ -17,8 +17,8 @@ class ConnectSession(object):
     _host = 'localhost'
     _port = 8002
     def __init__(self,server,port):
-        self.host = server
-        self.port = port
+        self._host = server
+        self._port = port
 
     def _connect(self):
         try:
@@ -27,6 +27,7 @@ class ConnectSession(object):
             return (False,err.__str__())
         else:
             self._isconnect = True
+            return (True,'')
 
 
     def _reconnect_and_sendall( self, data ):
@@ -67,4 +68,4 @@ class ConnectSession(object):
         return data
 
 
-session = ConnectSession('10.0.0.18',8002)
+

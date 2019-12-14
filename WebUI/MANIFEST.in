@@ -3,4 +3,4 @@ include README.rst
 include db.sqlite3
 recursive-include static *
 recursive-include templates *
-recursive-include setttings/templates *
+recursive-include settings/templates *

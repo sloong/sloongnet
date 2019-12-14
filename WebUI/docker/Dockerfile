@@ -1,4 +1,5 @@
-FROM python:3
+FROM python:3-alpine
+
 ENV PYTHONUNBUFFERED 1
 RUN pip3 install django
 RUN mkdir /WebUI
