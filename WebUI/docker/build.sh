@@ -3,7 +3,7 @@
 # @Author: WCB
  # @Date: 2019-12-11 14:28:05
  # @LastEditors: WCB
- # @LastEditTime: 2019-12-11 15:45:21
+ # @LastEditTime: 2019-12-11 15:32:11
  # @Description: file content
  ###
  
@@ -13,6 +13,7 @@ echo "ScriptFolder: "$SCRIPTFOLDER
 cd $SCRIPTFOLDER
 
 VERSION_STR=$(cat ../version)
+
 cd ..
 python3 setup.py sdist
 cd docker
