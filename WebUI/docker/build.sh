@@ -6,7 +6,7 @@
  # @LastEditTime: 2019-12-17 16:00:26
  # @Description: file content
  ###
- 
+sudo pwd
 SCRIPTFOLDER=$(dirname $(readlink -f $0))
 echo "ScriptFolder: "$SCRIPTFOLDER
 # cd to current file folder
@@ -15,8 +15,7 @@ cd $SCRIPTFOLDER
 VERSION_STR=$(cat ../version)
 
 cd ..
-zip output.zip ./* 
-zip -d output.zip "docker"
+tar -zcvf output.tar.gz ./*
+mv output.tar.gz docker/output.tar.gz
 cd docker
-cp ../dist/Sloongnet-WebUI-$VERSION_STR.tar.gz ./output.tar.gz
 sudo docker build -t sloong/sloongnet-webui:$VERSION_STR .

@@ -1,5 +1,5 @@
 #!/bin/bash
-
+sudo pwd
 SCRIPTFOLDER=$(dirname $(readlink -f $0))
 echo "ScriptFolder: "$SCRIPTFOLDER
 # cd to current file folder
