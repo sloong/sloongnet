@@ -3,7 +3,7 @@
 # @Author: WCB
  # @Date: 2019-12-11 14:28:05
  # @LastEditors: WCB
- # @LastEditTime: 2019-12-11 15:32:11
+ # @LastEditTime: 2019-12-17 16:00:26
  # @Description: file content
  ###
  
@@ -15,7 +15,8 @@ cd $SCRIPTFOLDER
 VERSION_STR=$(cat ../version)
 
 cd ..
-python3 setup.py sdist
+zip output.zip ./* 
+zip -d output.zip "docker"
 cd docker
 cp ../dist/Sloongnet-WebUI-$VERSION_STR.tar.gz ./output.tar.gz
 sudo docker build -t sloong/sloongnet-webui:$VERSION_STR .
