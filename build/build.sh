@@ -71,11 +71,11 @@ build_release(){
 
 zipfile(){
 	cd $CMAKE_FILE_PATH
-	zip ../$OUTPATH.zip scripts/* 
-	zip -gj ../$OUTPATH.zip include/*.so
-	zip -gj ../$OUTPATH.zip ../*.so
+	tar -zcvf ../$OUTPATH.tar.gz scripts/* 
+	tar -zavf ../$OUTPATH.tar.gz -C include/*.so
+	tar -zavf ../$OUTPATH.tar.gz -C ../*.so
 	cd ..
-	zip -gj $OUTPATH.zip $SCRIPTFOLDER/$MAKEFLAG/$PROJECT
+	tar -zavf $OUTPATH.tar.gz -C $SCRIPTFOLDER/$MAKEFLAG/$PROJECT
 }
 
 
