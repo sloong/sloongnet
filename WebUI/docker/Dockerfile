@@ -1,10 +1,10 @@
 FROM python:3-alpine
 
 ENV PYTHONUNBUFFERED 1
-RUN pip3 install django
+RUN pip3 install django protobuf
 RUN mkdir /WebUI
-WORKDIR /WebUI
 ADD output.tar.gz /WebUI/
-RUN ls
+RUN chmod +x /WebUI/run.sh
+WORKDIR /WebUI
 EXPOSE 8000
-CMD [ "run.sh"]
+ENTRYPOINT [ "/WebUI/run.sh"]
