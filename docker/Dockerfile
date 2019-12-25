@@ -8,7 +8,7 @@ RUN apt-get update \
     && mkdir /app && mkdir /data
 WORKDIR  /app
 
-ADD output.tar.gz /app/
+ADD output.tar /app/
 ADD ./run.sh /app/
 RUN chmod +x sloongnet run.sh
 

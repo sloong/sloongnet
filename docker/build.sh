@@ -17,6 +17,6 @@ VERSION_STR=$(cat ../version)
 ../build/build.sh -rz
 PROJECT=sloongnet
 
-mv ../$PROJECT-v$VERSION_STR.tar.gz output.tar.gz
+mv ../build/$PROJECT-v$VERSION_STR.tar output.tar
 
 sudo docker build -t sloong/sloongnet:$VERSION_STR .

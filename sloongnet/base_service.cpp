@@ -69,7 +69,7 @@ CResult CSloongBaseService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
 		{
 			AfterInit();
 			return CResult::Succeed;
-		}  
+		}
     }
     
     m_pLog->Fatal(res.Message());

@@ -25,7 +25,7 @@ echo "ScriptFolder: "$SCRIPTFOLDER
 cd $SCRIPTFOLDER
 PROJECT=sloongnet
 MAKEFLAG=debug
-CMAKE_FILE_PATH=$SCRIPTFOLDER/../sloongnet
+CMAKE_FILE_PATH=$SCRIPTFOLDER/../$PROJECT
 
 # default value is debug
 VERSION_STR=$(cat $SCRIPTFOLDER/../version)
@@ -56,14 +56,14 @@ build(){
 }
 
 build_debug(){
-	OUTPATH=$PROJECT-debug-v$VERSION_STR
+	OUTPATH=$SCRIPTFOLDER/$PROJECT-debug-v$VERSION_STR
 	MAKEFLAG=debug
 	clean
 	build
 }
 
 build_release(){
-	OUTPATH=$PROJECT-v$VERSION_STR
+	OUTPATH=$SCRIPTFOLDER/$PROJECT-v$VERSION_STR
 	MAKEFLAG=release
 	clean
 	build
@@ -71,11 +71,13 @@ build_release(){
 
 zipfile(){
 	cd $CMAKE_FILE_PATH
-	tar -zcvf ../$OUTPATH.tar.gz scripts/* 
-	tar -zavf ../$OUTPATH.tar.gz -C include/*.so
-	tar -zavf ../$OUTPATH.tar.gz -C ../*.so
-	cd ..
-	tar -zavf $OUTPATH.tar.gz -C $SCRIPTFOLDER/$MAKEFLAG/$PROJECT
+	tar -cv -f $OUTPATH.tar scripts/* 
+	cd $CMAKE_FILE_PATH/include
+	tar -rv -f $OUTPATH.tar *.so
+	cd $CMAKE_FILE_PATH/..
+	tar -rv -f $OUTPATH.tar *.so
+	tar -rv -f $OUTPATH.tar configuation.db
+	tar -rv -f $OUTPATH.tar -C $SCRIPTFOLDER/$MAKEFLAG $PROJECT
 }
 
 
