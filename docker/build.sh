@@ -2,8 +2,8 @@
 ### 
 # @Author: WCB
  # @Date: 2019-12-11 14:28:05
- # @LastEditors: WCB
- # @LastEditTime: 2019-12-17 16:00:26
+ # @LastEditors  : WCB
+ # @LastEditTime : 2019-12-26 11:22:04
  # @Description: file content
  ###
 sudo pwd
@@ -19,4 +19,5 @@ PROJECT=sloongnet
 
 mv ../build/$PROJECT-v$VERSION_STR.tar output.tar
 
-sudo docker build -t sloong/sloongnet:$VERSION_STR .
+sudo docker build -t sloongnet:$VERSION_STR .
+sudo docker tag sloongnet:$VERSION_STR sloongnet:latest

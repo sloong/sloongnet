@@ -1,8 +1,8 @@
 <!--
  * @Author: WCB
  * @Date: 2019-11-14 14:14:34
- * @LastEditors: WCB
- * @LastEditTime: 2019-11-15 14:51:23
+ * @LastEditors  : WCB
+ * @LastEditTime : 2019-12-26 16:32:58
  * @Description: file content
  -->
 {%extends "base.html" %}
@@ -15,8 +15,6 @@
     {% if NoWaitConfigList %}
     <p>没有待配置服务</p>
     {% else %}
-    {% for item in WaitConfigList %}
-
     <h3 align="center">未配置服务列表</h3>
     <table class="table table-bordered table-hover">
         <thead>
@@ -27,15 +25,19 @@
             </tr>
         </thead>
         <tbody>
+    {% for item in WaitConfigList %}
+
+    
             <tr>
                 <td>{{ item.UUID }}</td>
                 <td>{{ item.IP }}</td>
                 <td><a href="/settings/config/{{item.UUID}}"><button type="button"
                             class="btn btn-default">Start</button></a></td>
             </tr>
-        </tbody>
-    </table>
+       
     {% endfor %}
+</tbody>
+</table>
     {% endif %}
 {% endif %}
 

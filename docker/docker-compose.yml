@@ -1,0 +1,81 @@
+version: '3.2'
+services:
+  controler:
+    image: sloong/sloongnet:latest
+    container_name: controler
+    environment:
+      - ADDRESS_INFO=8000
+    ports:
+      - "8001:8000"
+    volumes:
+      - type: volume
+        source: control_nfs
+        target: /data
+        volume:
+          nocopy: true
+    networks:
+      - sloongnet
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  moduler:
+    image: sloong/sloongnet:latest
+    container_name: moduler
+    environment:
+      - ADDRESS_INFO=10.0.0.18:8001
+    ports:
+      - "8002:8000"
+    volumes:
+      - type: volume
+        source: module_nfs
+        target: /data
+        volume:
+          nocopy: true
+    networks:
+      - sloongnet
+    depends_on:
+      - controler
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  control-ui:
+    image: sloong/sloongnet-webui
+    container_name: control-ui
+    ports:
+      - "8000:8000"
+    volumes:
+      - type: volume
+        source: webui_nfs
+        target: /data
+        volume:
+          nocopy: true
+    networks:
+      - sloongnet
+    deploy:
+      mode: replicated
+      replicas: 1
+       
+volumes:
+  control_nfs:
+    driver: local
+    driver_opts:
+      type: "nfs4"
+      o: "addr=10.0.0.2,nfsvers=4.1,nolock,soft,noatime,rw"
+      device: ":/nfs_share/sloongnet/control"
+  module_nfs:
+    driver: local
+    driver_opts:
+      type: "nfs4"
+      o: "addr=10.0.0.2,nfsvers=4.1,nolock,soft,noatime,rw"
+      device: ":/nfs_share/sloongnet/module"
+  webui_nfs:
+    driver: local
+    driver_opts:
+      type: "nfs4"
+      o: "addr=10.0.0.2,nfsvers=4.1,nolock,soft,noatime,rw"
+      device: ":/nfs_share/sloongnet/webui"
+
+networks:
+  sloongnet:
