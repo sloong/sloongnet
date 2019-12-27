@@ -8,8 +8,9 @@
     #define SLEEP(t) Sleep(t)
 
 #else
-    #define SLEEP(t) usleep(t)
-
+    #define SLEEP(t) sleep((double)t/1000.0)
+    #define INVALID_SOCKET -1
+    #define closesocket close
     #ifndef 	LPCWSTR
     #define		LPCWSTR		const wchar_t*
     #endif
