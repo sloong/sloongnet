@@ -3,12 +3,12 @@ LABEL maintainer="admin@sloong.com"
 
 ENV PYTHONUNBUFFERED 1
 RUN pip3 install django protobuf \
-    && mkdir /WebUI && mkdir /data
-WORKDIR /WebUI
+    && mkdir /app && mkdir /data
+WORKDIR /app
 
-ADD output.tar.gz /WebUI/
-RUN chmod +x /WebUI/run.sh
+ADD output.tar.gz /app/
+RUN chmod +x /app/run.sh
 
 VOLUME /data
 EXPOSE 8000
-ENTRYPOINT [ "/WebUI/run.sh"]
+ENTRYPOINT [ "/app/run.sh"]

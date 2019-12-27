@@ -2,7 +2,7 @@
 @Author: WCB
 @Date: 2019-12-14 10:43:20
 @LastEditors  : WCB
-@LastEditTime : 2019-12-24 15:55:41
+@LastEditTime : 2019-12-27 15:06:37
 @Description: file content
 '''
 from django import forms
@@ -13,31 +13,31 @@ class GlobalConfigForm(forms.Form):
     #module_type = forms.ChoiceField(choices=protocol.ModuleType.items()[2:],initial=2,widget=forms.Select(attrs={'onchange':'OnModuleTypeChange();'}))
     module_type = forms.ChoiceField(
         choices=[(v, k) for k, v in protocol.ModuleType.items()][2:], initial=2)
-    listen_port = forms.IntegerField(max_value=65535, min_value=1000)
+    listen_port = forms.IntegerField( initial=8000, max_value=65535, min_value=1000)
     enable_ssl = forms.BooleanField(required=False)
-    cert_file_path = forms.CharField(required=False)
-    key_file_path = forms.CharField(required=False)
-    cert_passwd = forms.CharField(required=False)
-    connect_time = forms.IntegerField(
+    cert_file_path = forms.CharField(required=False,help_text="config just when ssl is enabled.")
+    key_file_path = forms.CharField(required=False,help_text="config just when ssl is enabled.")
+    cert_passwd = forms.CharField(required=False,help_text="config just when ssl is enabled.")
+    connect_time = forms.IntegerField( initial=5,
         min_value=0, max_value=20, help_text="set 0 to disabled")
-    receive_time = forms.IntegerField(
+    receive_time = forms.IntegerField(initial=5,
         min_value=0, max_value=20, help_text='set 0 to disabled')
-    log_path = forms.CharField()
+    log_path = forms.CharField(initial="/data/log")
     log_level = forms.ChoiceField(
         choices=[(v, k) for k, v in protocol.LogLevel.items()])
     debug_mode = forms.BooleanField()
-    MQ_thread_quantity = forms.IntegerField(min_value=1, max_value=200)
-    process_thread_quantity = forms.IntegerField(min_value=1, max_value=200)
-    priority_size = forms.IntegerField(min_value=0, max_value=10)
+    MQ_thread_quantity = forms.IntegerField(initial=3,min_value=1, max_value=200)
+    process_thread_quantity = forms.IntegerField(initial=3,min_value=1, max_value=200)
+    priority_size = forms.IntegerField(initial=3,min_value=0, max_value=10)
 
 
 class FirewallConfigForm(forms.Form):
-    block_time = forms.IntegerField(min_value=1, max_value=100)
+    block_time = forms.IntegerField(initial=3,min_value=1, max_value=100)
 
 
 class ProcessConfigForm(forms.Form):
-    lua_context_quantity = forms.IntegerField(min_value=1,  max_value=300)
-    lua_script_folder = forms.CharField()
+    lua_context_quantity = forms.IntegerField(initial=10,min_value=1,  max_value=300)
+    lua_script_folder = forms.CharField(initial="/app/scripts/")
     lua_entry_file = forms.CharField(initial='main.lua')
     lua_entry_function = forms.CharField(initial='init')
     lua_process_function = forms.CharField(initial='process')
