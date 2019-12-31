@@ -55,7 +55,7 @@ CResult CSloongBaseService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
     m_pServerConfig->set_loglevel(Protocol::LogLevel::All);
     #endif
     
-    m_pLog->Initialize(m_pServerConfig->logpath(), "",  LOGOPT::WriteToSTDOut, LOGLEVEL(m_pServerConfig->loglevel()), LOGTYPE::DAY);
+    m_pLog->Initialize(m_pServerConfig->logpath(), "", (LOGOPT) (LOGOPT::WriteToSTDOut|LOGOPT::WriteToFile), LOGLEVEL(m_pServerConfig->loglevel()), LOGTYPE::DAY);
 
     auto res = m_pControl->Initialize(m_pServerConfig->mqthreadquantity());
     if( res.IsSucceed() ){

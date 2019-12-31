@@ -57,6 +57,14 @@ typedef enum g_DataCenter_Event_Type
 
 }EVENT_TYPE;
 
+struct CServerItem
+{
+	void Active() { ActiveTime = time(NULL); }
+	string Address;
+	int Port;
+	int ActiveTime;
+	bool Configured;
+};
 
 enum RecvStatus
 {

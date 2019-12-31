@@ -77,16 +77,21 @@ void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 	{
 	case Functions::RegisteServer:
 	{
-		if (sender.size() == 0)
-		{
-			// TODO: 这里需要根据情况增加一个ip显示。
-			string ip = "unspport";
-			m_pLog->Verbos(CUniversal::Format("New module[IP:%s] add to system. wait configuation. ", ip));
+		CServerItem item;
+		item.Address = pack->GetSocketIP();
+		item.Port = pack->GetSocketPort();
+		if (sender.size() == 0){
 			sender = CUtility::GenUUID();
-			m_oWaitConfigList[sender] =ip;
+			m_pLog->Verbos(CUniversal::Format("New module[%s:%d] regist to system. Allocating uuid [%s].", item.Address,item.Port, sender));
 		}
-		// Add to server list
-		m_oServerList[sender] = "";
+		else if (m_pAllConfig->GetConfig(sender).length() == 0){
+			m_pLog->Verbos(CUniversal::Format("Server [%s:%d][%s] is online. but no configuation info.", item.Address, item.Port, sender));
+		}
+		else {
+			item.Configured = true;
+		}
+
+		m_oServerList[sender] = item;
 		pack->ResponsePackage(sender);
 	}break;
 	case Functions::GetConfigTemplateList: 
@@ -110,7 +115,6 @@ void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 		auto res = m_pAllConfig->SaveConfig(target, msgPack->extend());
 		if (res.IsSucceed())
 		{
-			m_oWaitConfigList.erase(target);
 			pack->ResponsePackage("Succeed", "");
 		}
 		else
@@ -134,27 +138,38 @@ void Sloong::SloongControlService::MessagePackageProcesser(SmartPackage pack)
 	case Functions::GetServerConfig:
 	{
 		m_pLog->Verbos(CUniversal::Format("Porcess [GetServerConfig] request: sender[%d]", sender));
-		string config = m_pAllConfig->GetConfig(sender);
-		if (config == "")
-		{
-			// Error
-			string ip = "unspport";
-			m_pLog->Verbos(CUniversal::Format("Module[IP:%s|UUID:%s] is no registe in system. wait admin process.", ip,sender));
-			m_oWaitConfig.SerializeToString(&config);
-			if (m_oWaitConfigList.end() == m_oWaitConfigList.find(sender))
-				m_oWaitConfigList[sender]= ip;
+		auto item = m_oServerList.try_get(sender);
+		if (item == nullptr) {
+			string errmsg = CUniversal::Format("Module [%s] is no registe.", sender);
+			m_pLog->Warn(errmsg);
+			pack->ResponsePackage( ResultType::Error, errmsg);
 		}
-		pack->ResponsePackage("",config);
+		else
+		{
+			string config = m_pAllConfig->GetConfig(sender);
+			if (config == "")
+			{
+				m_pLog->Verbos(CUniversal::Format("Module[%s:%d|UUID:%s] is no configued. wait admin process.", item->Address, item->Port, sender));
+				m_oWaitConfig.SerializeToString(&config);
+			}
+			else
+			{
+				item->Configured = true;
+			}
+			pack->ResponsePackage("", config);
+		}
 	}break;
 	case Functions::GetWaitConfigList:
 	{
 		string list_str = "";
 		Json::Value root;
 		Json::Value list;
-		for (auto& i : m_oWaitConfigList) {
+		for (auto& i : m_oServerList) {
+			if (i.second.Configured)
+				continue;
 			Json::Value item;
 			item["UUID"] = i.first;
-			item["IP"] = i.second;
+			item["IP"] = i.second.Address;
 			list.append(item);
 		}
 		root["WaitConfigList"] = list;

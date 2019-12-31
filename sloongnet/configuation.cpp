@@ -62,15 +62,15 @@ CResult Sloong::CConfiguation::LoadConfigTemplate(string tbName)
  */
 CResult Sloong::CConfiguation::LoadConfig(string uuid)
 {
-	auto config = GetStringConfig(CONFIGS_TBL_NAME, uuid, "");
-	if (config.length() > 0)
+    string config;
+	auto res = GetStringConfig(CONFIGS_TBL_NAME, uuid, config);
+	if (res.IsSucceed())
 		m_oServerConfigList[uuid] = CBase64::Decode(config);
-    return CResult::Succeed;
+    return res;
 }
 
 CResult Sloong::CConfiguation::SaveConfig(string uuid, string config)
 {
-    // TODO: add sqlite write function.
 	map<string, string> kvlist = {
 		{"key",uuid},
 		{"value", CBase64::Encode(config)},
@@ -86,14 +86,26 @@ CResult Sloong::CConfiguation::SaveConfig(string uuid, string config)
 
 CResult Sloong::CConfiguation::SaveTemplate( string id, string config)
 {
-    // TODO: add sqlite write function.
-	return CResult::Succeed;
+    map<string, string> kvlist = {
+        {"key",id},
+        {"value", CBase64::Encode(config)},
+    };
+    auto res = AddOrInsertRecord(CONFIG_TPL_TBL_NAME, kvlist, "");
+    if (res.IsSucceed())
+    {
+        m_oTemplateList[id] = config;
+        return CResult::Succeed;
+    }
+	return res;
 }
 
 CResult Sloong::CConfiguation::ReloadTemplate( string id )
 {
-    m_oTemplateList[id] = GetStringConfig(CONFIG_TPL_TBL_NAME, id, "");
-	return CResult::Succeed;
+    string value = "";
+    auto res = GetStringConfig(CONFIG_TPL_TBL_NAME, id, value);
+    if (res.IsSucceed())
+        m_oTemplateList[id] = value;
+	return res;
 }
 
 CResult Sloong::CConfiguation::AddOrInsertRecord(const string& table_name,const map<string,string>& list, string where_str)
@@ -122,24 +134,29 @@ CResult Sloong::CConfiguation::AddOrInsertRecord(const string& table_name,const 
 	return CResult::Succeed;
 }
 
-string Sloong::CConfiguation::GetStringConfig(string table_name, string key, string def)
+CResult Sloong::CConfiguation::GetStringConfig(string table_name, string key, string& outValue)
 {
     EasyResult dbRes = make_shared<CDBResult>();
     string error;
     string sql = CUniversal::Format("SELECT `value` FROM `%s` WHERE `key`=\"%s\"",
                                     table_name.c_str(), key.c_str());
 
-    if (!m_pDB->Query(sql, dbRes, error) || dbRes->GetLinesNum() == 0)
+    if (!m_pDB->Query(sql, dbRes, error) )
     {
-        return def;
+        return CResult(ResultEnum::Error, m_pDB->GetErrorMessage());
+    }
+    else if (dbRes->GetLinesNum() == 0)
+    {
+        return CResult(ResultEnum::Retry);
     }
     else if( dbRes->GetLinesNum() > 0 ) 
     {
-        return dbRes->GetData(0,"value");
+        outValue = dbRes->GetData(0, "value");
+        return CResult::Succeed;
     }
     else
     {
-        throw normal_except("No support function.");
+        return CResult(ResultEnum::Error, "Unknow error.");
     }
   
 }

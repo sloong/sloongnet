@@ -11,6 +11,7 @@
 
 #include "base_service.h"
 #include "configuation.h"
+#include "map_ex.hpp"
 namespace Sloong
 {
 	class CConfiguation;
@@ -31,8 +32,7 @@ namespace Sloong
 
 	protected:
 		unique_ptr<CConfiguation>	m_pAllConfig = make_unique<CConfiguation>();
-		map<string, string>	m_oServerList;
-		map<string, string> m_oWaitConfigList;
+		map_ex<string, CServerItem>	m_oServerList;
 		CONTROL_CONFIG m_oConfig;
 		GLOBAL_CONFIG m_oWaitConfig;
 	};

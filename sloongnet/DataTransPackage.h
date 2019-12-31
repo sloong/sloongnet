@@ -9,6 +9,7 @@
 #define DATA_TRANS_PACKAGE_H
 
 #include "main.h"
+#include "utility.h"
 namespace Sloong
 {
     class CDataTransPackage
@@ -55,6 +56,10 @@ namespace Sloong
         string GetExtendData() { return m_pTransPackage->extend(); }
 
         inline int GetSocketID(){return m_pCon->GetSocketID(); }
+
+        inline string GetSocketIP() { return CUtility::GetSocketIP(m_pCon->GetSocketID()); }
+
+        inline int GetSocketPort() { return CUtility::GetSocketPort(m_pCon->GetSocketID()); }
 
         /**
          * @Remarks: If have ex data send, this package is big package. need add to send list.

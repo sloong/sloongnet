@@ -218,6 +218,9 @@
     <ClInclude Include="include\univ\version.h">
       <Filter>include\univ</Filter>
     </ClInclude>
+    <ClInclude Include="map_ex.hpp">
+      <Filter>Extend</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ScriptEnging">

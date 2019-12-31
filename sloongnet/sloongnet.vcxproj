@@ -107,6 +107,7 @@
     <ClInclude Include="IObject.h" />
     <ClInclude Include="LuaProcessCenter.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="map_ex.hpp" />
     <ClInclude Include="NetworkEvent.hpp" />
     <ClInclude Include="NetworkExEvent.hpp" />
     <ClInclude Include="NetworkHub.h" />
