@@ -51,15 +51,15 @@ namespace Protocol {
             "bmN0aW9uGAUgASgJEh4KFkx1YVNvY2tldENsb3NlRnVuY3Rpb24YBiABKAkq",
             "ZQoKTW9kdWxlVHlwZRIQCgxVbmNvbmZpZ3VyZWQQABILCgdDb250cm9sEAES",
             "DAoIRmlyZXdhbGwQAhILCgdHYXRld2F5EAMSCAoERGF0YRAEEgsKB1Byb2Nl",
-            "c3MQBRIGCgJEQhAGKjEKClJlc3VsdFR5cGUSCwoHU3VjY2VlZBAAEgkKBUVy",
-            "cm9yEAESCwoHV2FybmluZxACKl4KCExvZ0xldmVsEgcKA0FsbBAAEgoKBlZl",
-            "cmJvcxABEgkKBURlYnVnEAISCAoESW5mbxADEggKBFdhcm4QBBIHCgNFcnIQ",
-            "BRIKCgZBc3NlcnQQBhIJCgVGYXRhbBAHKucBCglGdW5jdGlvbnMSEQoNUmVn",
-            "aXN0ZVNlcnZlchAAEhUKEUdldFdhaXRDb25maWdMaXN0EAESGQoVR2V0Q29u",
-            "ZmlnVGVtcGxhdGVMaXN0EAISGwoXU2V0U2VydmVyQ29uZmlnVGVtcGxhdGUQ",
-            "AxIXChNTZXRTZXJ2ZXJUb1RlbXBsYXRlEAQSEwoPU2V0U2VydmVyQ29uZmln",
-            "EAUSEwoPR2V0U2VydmVyQ29uZmlnEAYSDQoJVXNlckxvZ2luEAcSEgoOUHJv",
-            "Y2Vzc01lc3NhZ2UQCBISCg5SZXN0YXJ0U2VydmljZRAJYgZwcm90bzM="));
+            "c3MQBRIGCgJEQhAGKkkKClJlc3VsdFR5cGUSCwoHU3VjY2VlZBAAEgkKBUVy",
+            "cm9yEAESCwoHV2FybmluZxACEgkKBVJldHJ5EAMSCwoHSW52YWxpZBAEKl4K",
+            "CExvZ0xldmVsEgcKA0FsbBAAEgoKBlZlcmJvcxABEgkKBURlYnVnEAISCAoE",
+            "SW5mbxADEggKBFdhcm4QBBIHCgNFcnIQBRIKCgZBc3NlcnQQBhIJCgVGYXRh",
+            "bBAHKscBCglGdW5jdGlvbnMSEgoOUHJvY2Vzc01lc3NhZ2UQABILCgdQb3N0",
+            "TG9nEAESEQoNUmVnaXN0ZVNlcnZlchACEhIKDlJlc3RhcnRTZXJ2aWNlEAMS",
+            "GAoUR2V0QWxsQ29uZmlnVGVtcGxhdGUQBBIVChFTZXRDb25maWdUZW1wbGF0",
+            "ZRAFEhMKD0dldFNlcnZlckNvbmZpZxAGEhMKD1NldFNlcnZlckNvbmZpZxAH",
+            "EhcKE1NldFNlcnZlclRvVGVtcGxhdGUQCGIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ModuleType), typeof(global::Protocol.ResultType), typeof(global::Protocol.LogLevel), typeof(global::Protocol.Functions), }, new pbr::GeneratedClrTypeInfo[] {
@@ -97,6 +97,8 @@ namespace Protocol {
     [pbr::OriginalName("Succeed")] Succeed = 0,
     [pbr::OriginalName("Error")] Error = 1,
     [pbr::OriginalName("Warning")] Warning = 2,
+    [pbr::OriginalName("Retry")] Retry = 3,
+    [pbr::OriginalName("Invalid")] Invalid = 4,
   }
 
   /// <summary>
@@ -115,24 +117,26 @@ namespace Protocol {
 
   public enum Functions {
     /// <summary>
-    ///  Flow: ContrulUI -> Control
+    ///  Flow: Client -> Process
+    /// Response: Content - result with JSON string. 
+    /// </summary>
+    [pbr::OriginalName("ProcessMessage")] ProcessMessage = 0,
+    /// <summary>
+    ///  Flow: All -> Control
+    /// Response: post log message to control
+    /// </summary>
+    [pbr::OriginalName("PostLog")] PostLog = 1,
+    /// <summary>
+    ///  Flow:  All -> Control
     /// Response: Content(string) - the uuid for sender.
     /// </summary>
-    [pbr::OriginalName("RegisteServer")] RegisteServer = 0,
+    [pbr::OriginalName("RegisteServer")] RegisteServer = 2,
     /// <summary>
-    ///  Flow: ContrulUI -> Control
-    /// Response: Content(JSON) - wait config list. 
-    /// Format: 
-    /// {
-    /// "WaitConfigList": [
-    /// {
-    /// "UUID": "",
-    /// "IP": ""
-    /// }
-    /// ]
-    /// }
+    ///  Flow: Control -> All
+    /// Request: 
+    /// Response: NO
     /// </summary>
-    [pbr::OriginalName("GetWaitConfigList")] GetWaitConfigList = 1,
+    [pbr::OriginalName("RestartService")] RestartService = 3,
     /// <summary>
     ///  Flow: ControlUI -> Control
     /// Response: Content(JSON) - Config template  list.
@@ -146,14 +150,27 @@ namespace Protocol {
     /// ]
     /// }
     /// </summary>
-    [pbr::OriginalName("GetConfigTemplateList")] GetConfigTemplateList = 2,
+    [pbr::OriginalName("GetAllConfigTemplate")] GetAllConfigTemplate = 4,
     /// <summary>
     ///  Flow: ControlUI -> Control
     /// Request: Content - Config template ID
     /// Extend - Target template config
     /// Response: Result
     /// </summary>
-    [pbr::OriginalName("SetServerConfigTemplate")] SetServerConfigTemplate = 3,
+    [pbr::OriginalName("SetConfigTemplate")] SetConfigTemplate = 5,
+    /// <summary>
+    ///  Flow: All -> Control
+    /// Response: ExtendData(bytes) - config data is not UTF8 string. cannot save in context field.
+    /// Note: Get the general server config data. the data type is GLOBAL_CONFIG.
+    /// </summary>
+    [pbr::OriginalName("GetServerConfig")] GetServerConfig = 6,
+    /// <summary>
+    ///  Flow: ControlUI -> Control
+    /// Request: Content - Target server UUID
+    /// Extend - Target server config
+    /// Response: Result
+    /// </summary>
+    [pbr::OriginalName("SetServerConfig")] SetServerConfig = 7,
     /// <summary>
     ///  Flow: ControlUI -> Control
     /// Request: Content(JSON) - config info.
@@ -164,41 +181,7 @@ namespace Protocol {
     /// }
     /// Response: Result
     /// </summary>
-    [pbr::OriginalName("SetServerToTemplate")] SetServerToTemplate = 4,
-    /// <summary>
-    ///  Flow: ControlUI -> Control
-    /// Request: Content - Target server UUID
-    /// Extend - Target server config
-    /// Response: Result
-    /// </summary>
-    [pbr::OriginalName("SetServerConfig")] SetServerConfig = 5,
-    /// <summary>
-    ///  Sender: All 
-    /// Processer: Control
-    /// Response: ExtendData(bytes) - config data is not UTF8 string. cannot save in context field.
-    /// Note: Get the general server config data. the data type is GLOBAL_CONFIG.
-    /// </summary>
-    [pbr::OriginalName("GetServerConfig")] GetServerConfig = 6,
-    /// <summary>
-    ///  Sender: Process 
-    ///  Processer: Control
-    ///  Response: No
-    ///  Note: if the socket uuid is registed, the control will send error message 
-    /// </summary>
-    [pbr::OriginalName("UserLogin")] UserLogin = 7,
-    /// <summary>
-    ///  Sender: Procxy
-    /// Processer : Process 
-    /// Response data: Content - result with JSON string. 
-    /// </summary>
-    [pbr::OriginalName("ProcessMessage")] ProcessMessage = 8,
-    /// <summary>
-    /// 
-    /// Flow: Control -> All
-    /// Request: 
-    /// Response:
-    /// </summary>
-    [pbr::OriginalName("RestartService")] RestartService = 9,
+    [pbr::OriginalName("SetServerToTemplate")] SetServerToTemplate = 8,
   }
 
   #endregion

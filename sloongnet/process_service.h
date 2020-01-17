@@ -14,7 +14,7 @@ namespace Sloong
 
 		void AfterInit();
 
-		void MessagePackageProcesser(SmartPackage);
+		bool ProcessMessageHanlder(Functions func, string sender, SmartPackage pack);
 		void OnSocketClose(SmartEvent evt);
 
 	protected:

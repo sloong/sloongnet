@@ -10,6 +10,7 @@
 #include "NetworkHub.h"
 namespace Sloong
 {
+	typedef std::function<bool(Functions, string, SmartPackage)> FuncHandler;
 	class CSloongBaseService
 	{
 	public:
@@ -32,12 +33,16 @@ namespace Sloong
 
 		virtual bool ConnectToControl(string controlAddress);
 
+		void MessagePackageProcesser(SmartPackage);
+
     protected:
         static void sloong_terminator();
 
         static void on_sigint(int signal);
 
         static void on_SIGINT_Event(int signal);
+
+		void RegistFunctionHandler(Functions func, FuncHandler handler);
 
 	protected:
 		unique_ptr<CNetworkHub> m_pNetwork = make_unique<CNetworkHub>();
@@ -49,6 +54,8 @@ namespace Sloong
 		CResult					m_oExitResult = CResult::Succeed;
 		u_int64_t				m_nSerialNumber=0;
 		string					m_strUUID;
+
+		map_ex<Functions, FuncHandler> m_oFunctionHandles;
 		
     public:
         static unique_ptr<CSloongBaseService> g_pAppService;

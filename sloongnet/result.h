@@ -2,48 +2,44 @@
 #define SLOONGNET_RESULT_H
 
 #include "stdafx.h"
+#include "protocol/protocol.pb.h"
+using namespace Protocol;
 namespace Sloong
 {
-    
-enum ResultEnum
-{
-	Succeed = 1,
-	Retry = 0,
-	Error = -1,
-	Invalid = -2,
-};
-
-
     class CResult
     {
     public:
         CResult(bool res){
-            m_emResult = res ? ResultEnum::Succeed : ResultEnum::Error;
+            m_emResult = res ? ResultType::Succeed : ResultType::Error;
         }
-        CResult(ResultEnum res){
+        CResult(ResultType res){
             m_emResult = res;
         }
         CResult(bool res, const string& what){
-            m_emResult = res ? ResultEnum::Succeed : ResultEnum::Error;
+            m_emResult = res ? ResultType::Succeed : ResultType::Error;
             m_strMessage = what;
         }
-        CResult(ResultEnum res, const string& what){
+        CResult(ResultType res, const string& what){
             m_emResult = res;
             m_strMessage = what;
         }
 
-        ResultEnum Result(){
+        ResultType Result() const {
             return m_emResult;
         }
 
-        bool IsSucceed(){
-            return m_emResult == ResultEnum::Succeed ? true : false;
+        bool IsSucceed() const {
+            return m_emResult == ResultType::Succeed ? true : false;
         }
-        string Message(){
+
+        bool IsFialed() const {
+            return m_emResult == ResultType::Succeed ? false : true;
+        }
+        string Message() const {
             return m_strMessage;
         }
     protected:
-        ResultEnum m_emResult; 
+        ResultType m_emResult;
         string m_strMessage;
 
     public: 

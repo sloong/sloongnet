@@ -20,9 +20,11 @@ namespace Sloong
 		void OnSocketClose(SmartEvent);
 
 		// Network processer
-		void MessagePackageProcesser(SmartPackage);
+		bool ProcessMessageHanlder(Functions func, string sender, SmartPackage pack);
 		void AcceptConnectProcesser(shared_ptr<CSockInfo>);
-		
+	private:
+		void MessageToProcesser(SmartPackage pack);
+		void MessageToClient(SmartPackage pack);
 	protected:
 		// 
 		map<int,int>	m_mapProcessLoadList;

@@ -10,8 +10,7 @@
 
 
 #include "base_service.h"
-#include "configuation.h"
-#include "map_ex.hpp"
+#include "servermanage.h"
 namespace Sloong
 {
 	class CConfiguation;
@@ -28,13 +27,12 @@ namespace Sloong
 
 	protected:
 		void ResetControlConfig(GLOBAL_CONFIG* config);
-		void InitWaitConfig();
+
 
 	protected:
-		unique_ptr<CConfiguation>	m_pAllConfig = make_unique<CConfiguation>();
-		map_ex<string, CServerItem>	m_oServerList;
+		unique_ptr<CServerManage>	m_pServer = make_unique<CServerManage>();
+		
 		CONTROL_CONFIG m_oConfig;
-		GLOBAL_CONFIG m_oWaitConfig;
 	};
 
 }

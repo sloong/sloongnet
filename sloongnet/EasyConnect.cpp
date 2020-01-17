@@ -176,20 +176,20 @@ int Sloong::EasyConnect::SendPackage(string sendData, int index)
 }
 
 
-ResultEnum Sloong::EasyConnect::RecvPackage(string& res, int timeout, int lenTimeout)
+ResultType Sloong::EasyConnect::RecvPackage(string& res, int timeout, int lenTimeout)
 {
     auto len = RecvLengthData(lenTimeout);
 	if( len == 0 )
-		return ResultEnum::Retry;
+		return ResultType::Retry;
 	else if( len < 0 )
-		return ResultEnum::Error;
+		return ResultType::Error;
 	
     res.resize(len);
 	// 一旦成功接收数据之后，就不再关心超时信息，持续接收直到成功或者失败。
 	if( Read( res.data(), (int)len, timeout, true) < 1)
-		return ResultEnum::Error;
+		return ResultType::Error;
 
-	return ResultEnum::Succeed;
+	return ResultType::Succeed;
 }
 
 int Sloong::EasyConnect::Read(char * data, int len, int timeOut, bool bAgage)

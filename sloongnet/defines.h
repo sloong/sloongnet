@@ -63,7 +63,7 @@ struct CServerItem
 	string Address;
 	int Port;
 	int ActiveTime;
-	bool Configured;
+	ModuleType Type;
 };
 
 enum RecvStatus

@@ -23,8 +23,9 @@ namespace Sloong
          * @Params: 
          * @Return: 
          */
-        void ResponsePackage(const string& msg, const string& exdata="");
+        void ResponsePackage(const string& msg, const string& exdata);
 		void ResponsePackage(ResultType result, const string& message);
+        void ResponsePackage(const CResult& result);
 
         void RequestPackage( shared_ptr<DataPackage> pack );
         void ResponsePackage( shared_ptr<DataPackage> pack );
@@ -40,14 +41,14 @@ namespace Sloong
          *          if other error happened else return Error 
          *          if md5 check failed, return Invalied.
          */
-        ResultEnum RecvPackage(int,int=1);
+        ResultType RecvPackage(int,int=1);
 
         /**
          * @Remarks: send this package
          * @Params: 
          * @Return: if send fialed, return Error.
          */
-        ResultEnum SendPackage();
+        ResultType SendPackage();
 
         shared_ptr<DataPackage> GetRecvPackage(){ return m_pTransPackage;}
 

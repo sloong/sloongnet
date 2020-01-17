@@ -36,34 +36,34 @@ void Sloong::CSockInfo::Initialize(IControl* iMsg, int sock, SSL_CTX* ctx)
 	m_pCon->Initialize(sock,ctx);
 }
 
-ResultEnum Sloong::CSockInfo::ResponseDataPackage(SmartPackage pack)
+ResultType Sloong::CSockInfo::ResponseDataPackage(SmartPackage pack)
 {	
 	// if have exdata, directly add to epoll list.
 	if (pack->IsBigPackage()){
 		AddToSendList(pack);
-		return ResultEnum::Retry;
+		return ResultType::Retry;
 	}else{
 		// check the send list size. if all empty, try send message directly.
 		if ((m_bIsSendListEmpty == false && !m_oPrepareSendList.empty()) || m_oSockSendMutex.try_lock() == false){
 			AddToSendList(pack);
-			return ResultEnum::Retry;
+			return ResultType::Retry;
 		}
 	}
 
 	unique_lock<mutex> lck(m_oSockSendMutex, std::adopt_lock);
 	// if code run here. the all list is empty. and no have exdata. try send message
 	auto res = pack->SendPackage();
-	if ( res == ResultEnum::Error ){
+	if ( res == ResultType::Error ){
 		// TODO: 这里应该对错误进行区分处理
 		m_pLog->Warn(CUniversal::Format("Send data failed.[%s]", m_pCon->m_strAddress));//, m_pCon->G_FormatSSLErrorMsg(nMsgSend)));
-		return ResultEnum::Error;
+		return ResultType::Error;
 	}
-	if (res == ResultEnum::Retry ){
+	if (res == ResultType::Retry ){
 		AddToSendList(pack);
-		return ResultEnum::Retry;
+		return ResultType::Retry;
 	}
 	lck.unlock();
-	return ResultEnum::Succeed;
+	return ResultType::Succeed;
 }
 
 
@@ -76,7 +76,7 @@ void Sloong::CSockInfo::AddToSendList(SmartPackage pack)
 }
 
 
-ResultEnum Sloong::CSockInfo::OnDataCanReceive( queue<SmartPackage>& readList )
+ResultType Sloong::CSockInfo::OnDataCanReceive( queue<SmartPackage>& readList )
 {
 	unique_lock<mutex> srlck(m_oSockReadMutex);
 
@@ -90,17 +90,17 @@ ResultEnum Sloong::CSockInfo::OnDataCanReceive( queue<SmartPackage>& readList )
 		// 2：不区分接收包头还是数据，始终按照参数来处理。
 		// 由于是循环接收，所以在第二种情况，在未设置超时时间的情况下会导致接收卡死在这里。所以在没有一个更好的处理办法之前，这里暂时直接修改了DataTrnasPackage中的接收逻辑，在接收长度时，始终忽略参数。
 		auto res = package->RecvPackage(m_ReceiveTimeout);
-		if( res == ResultEnum::Error){
+		if( res == ResultType::Error){
 			// 读取错误,将这个连接从监听中移除并关闭连接
-			return ResultEnum::Error;
-		}else if( res == ResultEnum::Invalid){
+			return ResultType::Error;
+		}else if( res == ResultType::Invalid){
 			auto event = make_shared<CNetworkEvent>(EVENT_TYPE::MonitorSendStatus);
 			event->SetSocketID(m_pCon->GetSocketID());
 			m_iC->SendMessage(event);
 			AddToSendList(package);
-		}else if (res == ResultEnum::Retry){
+		}else if (res == ResultType::Retry){
 			//由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
-			return ResultEnum::Succeed;
+			return ResultType::Succeed;
 		}else{
 			bLoop = true;
 			// update the socket time
@@ -110,11 +110,11 @@ ResultEnum Sloong::CSockInfo::OnDataCanReceive( queue<SmartPackage>& readList )
 	}while (bLoop);
 
 	srlck.unlock();
-	return ResultEnum::Succeed;
+	return ResultType::Succeed;
 }
 
 
-ResultEnum Sloong::CSockInfo::OnDataCanSend()
+ResultType Sloong::CSockInfo::OnDataCanSend()
 {
 	ProcessPrepareSendList();
 	return ProcessSendList();
@@ -147,7 +147,7 @@ void Sloong::CSockInfo::ProcessPrepareSendList()
 
 
 
-ResultEnum Sloong::CSockInfo::ProcessSendList()
+ResultType Sloong::CSockInfo::ProcessSendList()
 {
 	// when prepare list process done, do send operation.
 	bool bTrySend = true;
@@ -174,12 +174,12 @@ ResultEnum Sloong::CSockInfo::ProcessSendList()
 			ssend_lck.unlock();
 			if( res < 0){
 				m_pLog->Error(CUniversal::Format("Send data package error. close connect:[%s:%d]",m_pCon->m_strAddress,m_pCon->m_nPort));
-				return ResultEnum::Error;
+				return ResultType::Error;
 			}else if( res == 0){
 				m_pLog->Verbos("Send data package done. wait next write sign.");
 				bTrySend = false;
 				m_nLastSentTags = sendTags;
-				return ResultEnum::Retry;
+				return ResultType::Retry;
 			}else{
 				list->pop();
 				m_nLastSentTags = -1;
@@ -187,7 +187,7 @@ ResultEnum Sloong::CSockInfo::ProcessSendList()
 			}
 		}
 	}
-	return ResultEnum::Succeed;
+	return ResultType::Succeed;
 }
 
 

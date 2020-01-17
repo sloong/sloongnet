@@ -54,10 +54,10 @@ namespace Sloong
         void MessageProcessWorkLoop(SMARTER params=nullptr);
 
         // Callback function
-        ResultEnum OnNewAccept( int nSocket );
-		ResultEnum OnDataCanReceive( int nSocket );
-		ResultEnum OnCanWriteData( int nSocket );
-        ResultEnum OnOtherEventHappened( int nSocket );
+        ResultType OnNewAccept( int nSocket );
+		ResultType OnDataCanReceive( int nSocket );
+		ResultType OnCanWriteData( int nSocket );
+        ResultType OnOtherEventHappened( int nSocket );
 
     protected:
         void SendCloseConnectEvent(int socket);

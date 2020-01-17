@@ -76,12 +76,14 @@ enum ResultType {
   Succeed = 0,
   Error = 1,
   Warning = 2,
+  Retry = 3,
+  Invalid = 4,
   ResultType_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   ResultType_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool ResultType_IsValid(int value);
 const ResultType ResultType_MIN = Succeed;
-const ResultType ResultType_MAX = Warning;
+const ResultType ResultType_MAX = Invalid;
 const int ResultType_ARRAYSIZE = ResultType_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* ResultType_descriptor();
@@ -122,22 +124,21 @@ inline bool LogLevel_Parse(
     LogLevel_descriptor(), name, value);
 }
 enum Functions {
-  RegisteServer = 0,
-  GetWaitConfigList = 1,
-  GetConfigTemplateList = 2,
-  SetServerConfigTemplate = 3,
-  SetServerToTemplate = 4,
-  SetServerConfig = 5,
+  ProcessMessage = 0,
+  PostLog = 1,
+  RegisteServer = 2,
+  RestartService = 3,
+  GetAllConfigTemplate = 4,
+  SetConfigTemplate = 5,
   GetServerConfig = 6,
-  UserLogin = 7,
-  ProcessMessage = 8,
-  RestartService = 9,
+  SetServerConfig = 7,
+  SetServerToTemplate = 8,
   Functions_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   Functions_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool Functions_IsValid(int value);
-const Functions Functions_MIN = RegisteServer;
-const Functions Functions_MAX = RestartService;
+const Functions Functions_MIN = ProcessMessage;
+const Functions Functions_MAX = SetServerToTemplate;
 const int Functions_ARRAYSIZE = Functions_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Functions_descriptor();

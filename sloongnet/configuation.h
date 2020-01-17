@@ -27,23 +27,27 @@ namespace Sloong
          */
 		CResult Initialize( string dbPath, string uuid );
 
-		CResult LoadConfig( string uuid );
-        CResult SaveConfig( string uuid, string config );
-		CResult SaveTemplate( string id, string config);
-		CResult ReloadTemplate( string id );
-
         string GetConfig(string uuid);
-		map<string, string> GetTemplateList() { return m_oTemplateList; }
-
+        CResult SetConfig( string uuid, string config );
+        CResult SetConfigToTemplate(string uuid, int tpl_id);
+        
+        string GetTemplate(int id);
+        map<int, string> GetTemplateList();
+        CResult AddTemplate(string config, int* out_id);
+		CResult SetTemplate( int id, string config);
 
     protected:
-		CResult LoadConfigTemplate(string tbName);
+		CResult LoadDB();
+        CResult AddConfig(string config, int* out_id);
+        template<typename K, typename V>
+        CResult LoadKeyValueList(string tbName, map<K, V>& out_list);
         CResult GetStringConfig(string table_name, string key, string& outValue);
-		CResult AddOrInsertRecord(const string& table_name, const map<string, string>& list, string where_str);
+		CResult AddOrUpdateRecord(const string& table_name, const map<string, string>& list, string where_str);
 
     protected:
-        map<string,string> m_oServerConfigList;
-        map<string,string> m_oTemplateList;
+        map_ex<string,string> m_oServerList;
+        map_ex<string, string> m_oTemplateList;
+        map_ex<string, string> m_oConfigList;
 
     protected:
         unique_ptr<CSQLiteEx> m_pDB;

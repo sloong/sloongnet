@@ -12,6 +12,8 @@ using namespace Protocol;
 #include "EasySync.h"
 #include "EasyConnect.h"
 #include "queue_ex.hpp"
+#include "map_ex.hpp"
+#include "list_ex.hpp"
 using namespace Sloong;
 
 #endif //SLOONGNET_MAIN_H

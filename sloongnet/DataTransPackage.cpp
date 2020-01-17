@@ -47,17 +47,24 @@ void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string&
 	PrepareSendPackageData();
 }
 
+void Sloong::CDataTransPackage::ResponsePackage(const CResult& result)
+{
+	m_pTransPackage->set_result(result.Result());
+	m_pTransPackage->set_content(result.Message());
+	PrepareSendPackageData();
+}
+
 /**
  * @Remarks: 
  * @Params: 
  * @Return: if send succeed, return true. need listen read message. 
  *          else return false, need listen write message.
  */
-ResultEnum Sloong::CDataTransPackage::SendPackage()
+ResultType Sloong::CDataTransPackage::SendPackage()
 {
 	int nSentSize = m_pCon->SendPackage(m_strPackageData, m_nSent);
 	if (nSentSize < 0){
-		return ResultEnum::Error;
+		return ResultType::Error;
 	}else{
 		m_nSent += nSentSize;
 	}
@@ -66,19 +73,19 @@ ResultEnum Sloong::CDataTransPackage::SendPackage()
 		m_pLog->Verbos(CUniversal::Format("Send Info : AllSize[%d],Sent[%d]", m_nPackageSize, m_nSent));
 
 	if (m_nSent < m_nPackageSize){
-		return ResultEnum::Retry;
+		return ResultType::Retry;
 	}else{
 		if( m_pLog )
 			m_pLog->Verbos(CUniversal::Format("Message package send succeed, remove from send list. All size[%d]", m_nSent));
-		return ResultEnum::Succeed;
+		return ResultType::Succeed;
 	}
 }
 
-ResultEnum Sloong::CDataTransPackage::RecvPackage(int timeout,int lentimeout)
+ResultType Sloong::CDataTransPackage::RecvPackage(int timeout,int lentimeout)
 {
 	string result;
 	auto net_res = m_pCon->RecvPackage(result,timeout, lentimeout);
-	if( net_res != ResultEnum::Succeed )
+	if( net_res != ResultType::Succeed )
 		return net_res;
 
 	m_pTransPackage = make_shared<DataPackage>();
@@ -86,14 +93,14 @@ ResultEnum Sloong::CDataTransPackage::RecvPackage(int timeout,int lentimeout)
 	{
 		if( m_pLog )
 			m_pLog->Error("Parser receive data error.");
-		return ResultEnum::Error;
+		return ResultType::Error;
 	}
 
 	if (m_pTransPackage->prioritylevel() > s_PriorityLevel || m_pTransPackage->prioritylevel() < 0)
 	{
 		if( m_pLog )
 			m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_pTransPackage->prioritylevel(), s_PriorityLevel));
-		return ResultEnum::Error;
+		return ResultType::Error;
 	}
 	
 	if( m_pLog )
@@ -107,11 +114,11 @@ ResultEnum Sloong::CDataTransPackage::RecvPackage(int timeout,int lentimeout)
 			if( m_pLog )
 				m_pLog->Warn(CUniversal::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_pTransPackage->content(), rmd5, m_pTransPackage->checkstring() ));
 			string strSend = CUniversal::Format("{\"errno\": \"-1\",\"errmsg\" : \"package check error\",\"server_md5\":\"%s\",\"client_md5\":\"%s\",\"check_string\":\"%s\"}", rmd5, m_pTransPackage->checkstring(), m_pTransPackage->content());
-			ResponsePackage(strSend);
-			return ResultEnum::Invalid;
+			ResponsePackage(strSend,"");
+			return ResultType::Invalid;
 		}
 	}
 
 
-	return ResultEnum::Succeed;
+	return ResultType::Succeed;
 }

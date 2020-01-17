@@ -15,7 +15,7 @@ void SloongNetDataCenter::AfterInit()
 
 void Sloong::SloongNetDataCenter::MessagePackageProcesser(SmartPackage pack)
 {
-	pack->ResponsePackage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
+	pack->ResponsePackage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}","");
 	auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
 	response_event->SetSocketID(pack->GetSocketID());
 	response_event->SetDataPackage(pack);

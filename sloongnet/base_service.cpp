@@ -8,6 +8,7 @@
 
 #include "base_service.h"
 #include "utility.h"
+#include "NetworkEvent.hpp"
 
 IControl* Sloong::IData::m_iC = nullptr;
 unique_ptr<CSloongBaseService> Sloong::CSloongBaseService::g_pAppService = nullptr;
@@ -65,6 +66,7 @@ CResult CSloongBaseService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
         m_pControl->RegisterEvent(ProgramStart);
         IData::Initialize(m_pControl.get());
         res = m_pNetwork->Initialize(m_pControl.get());
+        m_pNetwork->RegisterMessageProcesser(std::bind(&CSloongBaseService::MessagePackageProcesser, this, std::placeholders::_1));
 		if (res.IsSucceed())
 		{
 			AfterInit();
@@ -93,4 +95,43 @@ bool CSloongBaseService::ConnectToControl(string controlAddress){
     m_pSocket = make_shared<EasyConnect>();
     m_pSocket->Initialize(controlAddress,nullptr);
     return m_pSocket->Connect();
+}
+
+void CSloongBaseService::RegistFunctionHandler(Functions func, FuncHandler handler)
+{
+    m_oFunctionHandles[func] = handler;
+}
+
+void CSloongBaseService::MessagePackageProcesser(SmartPackage pack)
+{
+    auto msgPack = pack->GetRecvPackage();
+    auto sender = msgPack->sender();
+    auto func = msgPack->function();
+    m_pLog->Verbos(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
+    if (m_oFunctionHandles.exist(func))
+    {
+        if (!m_oFunctionHandles[func](func, sender, pack))
+        {
+            return;
+        }
+    }
+    else
+    {
+        switch (func)
+        {
+        case Functions::RestartService:
+        {
+            // Restart service. use the Exit Sync object, notify the wait thread and return the ExitResult.
+            // in main function, check the result, if is Retry, do the init loop.
+            m_oExitResult = ResultType::Retry;
+            m_oExitSync.notify_all();
+            return;
+        }break;
+        }
+    }
+	
+	auto response_event = make_shared<Events::CNetworkEvent>(EVENT_TYPE::SendMessage);
+	response_event->SetSocketID(pack->GetSocketID());
+	response_event->SetDataPackage(pack);
+	m_pControl->SendMessage(response_event);
 }

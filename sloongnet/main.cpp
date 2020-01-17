@@ -11,21 +11,22 @@ void PrintVersion()
 	cout << COPYRIGHT_TEXT << endl;
 }
 
-string RegisteToControl(SmartConnect con, string uuid)
+string RegisteToControl(SmartConnect con, string uuid, ModuleType type)
 {
 	auto req = make_shared<DataPackage>();
 	req->set_function(Functions::RegisteServer);
 	req->set_receiver(Protocol::ModuleType::Control);
 	req->set_sender(uuid);
+	req->set_content(ModuleType_Name(type));
 
 	CDataTransPackage dataPackage;
 	dataPackage.Initialize(con);
 	dataPackage.RequestPackage(req);
-	ResultEnum result = dataPackage.SendPackage();
-	if (result != ResultEnum::Succeed)
+	ResultType result = dataPackage.SendPackage();
+	if (result != ResultType::Succeed)
 		throw string("Send Registe request error.");
 	result = dataPackage.RecvPackage(0,0);
-	if (result != ResultEnum::Succeed)
+	if (result != ResultType::Succeed)
 		throw string("Receive Registe result error.");
 	auto get_config_response_buf = dataPackage.GetRecvPackage();
 	if (!get_config_response_buf)
@@ -44,11 +45,11 @@ string GetConfigFromControl(SmartConnect con,string uuid)
 	CDataTransPackage dataPackage;
 	dataPackage.Initialize(con);
 	dataPackage.RequestPackage(get_config_request_buf);
-	ResultEnum result = dataPackage.SendPackage();
-	if (result != ResultEnum::Succeed)
+	ResultType result = dataPackage.SendPackage();
+	if (result != ResultType::Succeed)
 		throw string("Send get config request error.");
 	result = dataPackage.RecvPackage(0,0);
-	if (result != ResultEnum::Succeed)
+	if (result != ResultType::Succeed)
 		throw string("Receive get config result error.");
 	auto get_config_response_buf = dataPackage.GetRecvPackage();
 	if (!get_config_response_buf)
@@ -59,35 +60,48 @@ string GetConfigFromControl(SmartConnect con,string uuid)
 
 void PrientHelp()
 {
-	cout << "param: address:port" << endl;
+	cout << "sloongnet [<type>] [<address:port>]" << endl;
+	cout << "<type>: control,process,proxy,firewall,gateway,data,db" << endl;
 }
 
 
 unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 {
-	// 这里参数有两种形式。
-	// 1 只有端口。 此时为控制中心模式
-	// 2 地址：端口。此时为非控制中心模式
-	if (argc != 2)
+	// 参数共有2个，类型和地址信息
+	// 1 类型，为指定值
+	// 2 地址信息：格式->地址：端口。如果类型为control，表示为监听地址
+	if (argc != 3)
 	{
 		PrientHelp();
 		return nullptr;
 	}
 
-	vector<string> addr = CUniversal::split(args[1], ":");
-	
-	auto config = make_unique<GLOBAL_CONFIG>();
-	config->set_type(ModuleType::Unconfigured);
-
-	if (addr.size() == 1)
+	ModuleType type = Unconfigured;
+	if (!ModuleType_Parse(args[1], &type))
 	{
-		int port = atoi(args[1]);
+		cout << "Parse module type error." << endl;
+		return nullptr;
+	}
+	cout << "Run application by " << ModuleType_Name(type) << " module" << endl;
+
+	vector<string> addr = CUniversal::split(args[2], ":");
+	if (addr.size() != 2)
+	{
+		cout << "Address info format error. Format [addr]:[port]" << endl;
+		return nullptr;
+	}
+
+	auto config = make_unique<GLOBAL_CONFIG>();
+	config->set_type(type);
+
+	if( type == ModuleType::Control)
+	{
+		int port = atoi(addr[1].c_str());
 		if (port == 0)
 		{
 			cout << "Convert [" << args[1] << "] to int port fialed." << endl;
 			return nullptr;
 		}
-		config->set_type(ModuleType::Control);
 		config->set_listenport(port);
 	}
 	else
@@ -102,29 +116,26 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 		cout << "Connect to control succeed." << endl;
 		string uuid;
 		fstream_ex::read_all("uuid.dat", uuid);
-		string server_uuid = RegisteToControl(con, uuid);
+		string server_uuid = RegisteToControl(con, uuid, type);
 		if (uuid != server_uuid)
 		{
 			fstream_ex::write_all("uuid.dat", server_uuid);
 			uuid = server_uuid;
 		}
-
-		do
+				
+		cout << "Start get configuation." << endl;
+		auto serverConfig = GetConfigFromControl(con,uuid);
+		if (serverConfig.size() == 0)
 		{
-			cout << "Start get configuation." << endl;
-			auto serverConfig = GetConfigFromControl(con,uuid);
-			if (serverConfig.size() == 0)
-			{
-				cout << "Control no return config infomation. wait 500ms and retry." << endl;
-				SLEEP(500);
-				continue;
-			}
-			if (!config->ParseFromString(serverConfig))
-			{
-				cout << "Parse the config struct error. please check." << endl;
-				return nullptr;
-			}
-		} while (config->type() == ModuleType::Unconfigured);
+			cout << "Control no return config infomation. please check." << endl;
+			return nullptr;
+		}
+		if (!config->ParseFromString(serverConfig))
+		{
+			cout << "Parse the config struct error. please check." << endl;
+			return nullptr;
+		}
+		
 		cout << "Get configuation succeed." << endl;
 	}
 	return config;
@@ -157,7 +168,7 @@ int main(int argc, char** args)
 			}
 
 			code = Sloong::CSloongBaseService::g_pAppService->Run();
-		} while (code.Result() == ResultEnum::Retry);
+		} while (code.Result() == ResultType::Retry);
 		return 0;
 	}
 	catch (string & msg)

@@ -53,7 +53,7 @@ void Sloong::CEpollEx::Run(int nPort, int nWorkThreadNum)
 	// 初始化地址结构
 	struct sockaddr_in address;
 	memset(&address, 0, sizeof(address));
-	address.sin_addr.s_addr = htonl(INADDR_ANY);
+	address.sin_addr.s_addr = inet_addr("0.0.0.0");
 	address.sin_port = htons((uint16_t)nPort);
 
 	// 绑定端口
@@ -171,7 +171,7 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 						continue;
 					}
 					auto res = OnNewAccept(conn_sock);
-					if( res  == ResultEnum::Error){
+					if( res  == ResultType::Error){
 						shutdown(conn_sock,SHUT_RDWR);
 						close(conn_sock);
 					}else{
@@ -188,7 +188,7 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 			{
 				m_pLog->Verbos(CUniversal::Format("EPoll EPOLLIN event happened. Socket[%d] Data Can Receive.",fd));
 				auto res = OnDataCanReceive(fd);
-				if( res  != ResultEnum::Error)
+				if( res  != ResultType::Error)
 					MonitorSendStatus(fd);
 			}
 			// EPOLLOUT 可写消息
@@ -197,9 +197,9 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 				m_pLog->Verbos(CUniversal::Format("EPoll EPOLLOUT event happened.Socket[%d] Can Write Data.",fd));
 				auto res = OnCanWriteData(fd);
 				// 所有消息全部发送完毕后只需要监听可读消息就可以了。
-				if( res == ResultEnum::Succeed)
+				if( res == ResultType::Succeed)
 					UnmonitorSendStatus(fd);			
-				else if( res == ResultEnum::Retry )
+				else if( res == ResultType::Retry )
 					MonitorSendStatus(fd);			
 			}
 			else

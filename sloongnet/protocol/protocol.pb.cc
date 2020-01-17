@@ -313,17 +313,17 @@ void protobuf_AddDesc_protocol_2eproto() {
     "aProcessFunction\030\005 \001(\t\022\036\n\026LuaSocketClose"
     "Function\030\006 \001(\t*e\n\nModuleType\022\020\n\014Unconfig"
     "ured\020\000\022\013\n\007Control\020\001\022\014\n\010Firewall\020\002\022\013\n\007Gat"
-    "eway\020\003\022\010\n\004Data\020\004\022\013\n\007Process\020\005\022\006\n\002DB\020\006*1\n"
+    "eway\020\003\022\010\n\004Data\020\004\022\013\n\007Process\020\005\022\006\n\002DB\020\006*I\n"
     "\nResultType\022\013\n\007Succeed\020\000\022\t\n\005Error\020\001\022\013\n\007W"
-    "arning\020\002*^\n\010LogLevel\022\007\n\003All\020\000\022\n\n\006Verbos\020"
-    "\001\022\t\n\005Debug\020\002\022\010\n\004Info\020\003\022\010\n\004Warn\020\004\022\007\n\003Err\020"
-    "\005\022\n\n\006Assert\020\006\022\t\n\005Fatal\020\007*\347\001\n\tFunctions\022\021"
-    "\n\rRegisteServer\020\000\022\025\n\021GetWaitConfigList\020\001"
-    "\022\031\n\025GetConfigTemplateList\020\002\022\033\n\027SetServer"
-    "ConfigTemplate\020\003\022\027\n\023SetServerToTemplate\020"
-    "\004\022\023\n\017SetServerConfig\020\005\022\023\n\017GetServerConfi"
-    "g\020\006\022\r\n\tUserLogin\020\007\022\022\n\016ProcessMessage\020\010\022\022"
-    "\n\016RestartService\020\tb\006proto3", 1706);
+    "arning\020\002\022\t\n\005Retry\020\003\022\013\n\007Invalid\020\004*^\n\010LogL"
+    "evel\022\007\n\003All\020\000\022\n\n\006Verbos\020\001\022\t\n\005Debug\020\002\022\010\n\004"
+    "Info\020\003\022\010\n\004Warn\020\004\022\007\n\003Err\020\005\022\n\n\006Assert\020\006\022\t\n"
+    "\005Fatal\020\007*\307\001\n\tFunctions\022\022\n\016ProcessMessage"
+    "\020\000\022\013\n\007PostLog\020\001\022\021\n\rRegisteServer\020\002\022\022\n\016Re"
+    "startService\020\003\022\030\n\024GetAllConfigTemplate\020\004"
+    "\022\025\n\021SetConfigTemplate\020\005\022\023\n\017GetServerConf"
+    "ig\020\006\022\023\n\017SetServerConfig\020\007\022\027\n\023SetServerTo"
+    "Template\020\010b\006proto3", 1698);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "protocol.proto", &protobuf_RegisterTypes);
   DataPackage::default_instance_ = new DataPackage();
@@ -379,6 +379,8 @@ bool ResultType_IsValid(int value) {
     case 0:
     case 1:
     case 2:
+    case 3:
+    case 4:
       return true;
     default:
       return false;
@@ -420,7 +422,6 @@ bool Functions_IsValid(int value) {
     case 6:
     case 7:
     case 8:
-    case 9:
       return true;
     default:
       return false;

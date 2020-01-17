@@ -25,7 +25,7 @@ namespace Sloong
 		 * 		if happened errors, return Error.
 		 * @Note: It always read all data in one time, so no return Retry.
 		 */
-		ResultEnum OnDataCanReceive( queue<SmartPackage>& readList );
+		ResultType OnDataCanReceive( queue<SmartPackage>& readList );
 
 		/**
 		 * @Remarks: When data can send, should call this function to send the package.
@@ -34,7 +34,7 @@ namespace Sloong
 		 * 			if happened erros, return Error.
 		 * 			if happened EAGAIN signal, return Retry. 
 		 */
-		ResultEnum OnDataCanSend();
+		ResultType OnDataCanSend();
 
 		/**
 		 * @Remarks: When need response data package,call this function. 
@@ -43,11 +43,11 @@ namespace Sloong
 		 * 			if happened erros, return Error.
 		 * 			if have extend data or all data is no send and have EAGAIN sinal , return Retry.
 		 */
-		ResultEnum ResponseDataPackage(SmartPackage pack);
+		ResultType ResponseDataPackage(SmartPackage pack);
 
 	protected:
 		void ProcessPrepareSendList();
-		ResultEnum ProcessSendList();
+		ResultType ProcessSendList();
 		int GetSendInfoList(queue<SmartPackage>*& list );
 		SmartPackage GetSendInfo(queue<SmartPackage>* list);
 		void AddToSendList(SmartPackage pack);

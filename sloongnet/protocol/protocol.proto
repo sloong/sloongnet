@@ -17,6 +17,8 @@ enum ResultType{
 	Succeed = 0;
 	Error = 1;
 	Warning = 2;
+	Retry = 3;
+	Invalid = 4;
 }
 
 // LogLevel
@@ -33,23 +35,26 @@ enum LogLevel{
 
 
 enum Functions{
-	/* Flow: ContrulUI -> Control
+	/* Flow: Client -> Process
+	   Response: Content - result with JSON string. 
+	*/
+	ProcessMessage=0;
+	/*------------------------------------------------
+	      Manage function for module to module
+	-------------------------------------------------*/
+	/* Flow: All -> Control
+	   Response: post log message to control
+	*/
+	PostLog=1;
+	/* Flow:  All -> Control
 	   Response: Content(string) - the uuid for sender.
 	*/
-	RegisteServer=0;
-	/* Flow: ContrulUI -> Control
-	   Response: Content(JSON) - wait config list. 
-					Format: 
-					{
-					  "WaitConfigList": [
-						{
-						  "UUID": "",
-						  "IP": ""
-						}
-					  ]
-					}
+	RegisteServer=2;
+	/* Flow: Control -> All
+	   Request: 
+	   Response: NO
 	*/
-	GetWaitConfigList=1;
+	RestartService=3;
 	/* Flow: ControlUI -> Control
 	   Response: Content(JSON) - Config template  list.
 					Format: 
@@ -62,14 +67,25 @@ enum Functions{
 					  ]
 					}
 	*/
-	GetConfigTemplateList=2;
+	GetAllConfigTemplate=4;
 	/* Flow: ControlUI -> Control
 	   Request: Content - Config template ID
 				Extend - Target template config
 	   Response: Result
 	*/
-	SetServerConfigTemplate=3;
+	SetConfigTemplate=5;
+	/* Flow: All -> Control
+	   Response: ExtendData(bytes) - config data is not UTF8 string. cannot save in context field.
+	   Note: Get the general server config data. the data type is GLOBAL_CONFIG.
+	*/
+	GetServerConfig=6;
 	/* Flow: ControlUI -> Control
+	   Request: Content - Target server UUID
+                Extend - Target server config
+	   Response: Result
+	*/
+	SetServerConfig=7;
+    /* Flow: ControlUI -> Control
 	   Request: Content(JSON) - config info.
 					Format:
 					{
@@ -78,35 +94,7 @@ enum Functions{
 					}
 	   Response: Result
 	*/
-	SetServerToTemplate=4;
-	/* Flow: ControlUI -> Control
-	   Request: Content - Target server UUID
-                Extend - Target server config
-	   Response: Result
-	*/
-	SetServerConfig=5;
-	/* Sender: All 
-	   Processer: Control
-	   Response: ExtendData(bytes) - config data is not UTF8 string. cannot save in context field.
-	   Note: Get the general server config data. the data type is GLOBAL_CONFIG.
-	*/
-	GetServerConfig=6;
-	// Sender: Process 
-	// Processer: Control
-	// Response: No
-	// Note: if the socket uuid is registed, the control will send error message 
-	UserLogin=7;
-	/* Sender: Procxy
-	   Processer : Process 
-	   Response data: Content - result with JSON string. 
-	*/
-	ProcessMessage=8;
-	/*
-	   Flow: Control -> All
-	   Request: 
-	   Response: NO
-	*/
-	RestartService=9;
+	SetServerToTemplate=8;
 }
 
 message DataPackage

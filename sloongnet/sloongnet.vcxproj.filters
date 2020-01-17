@@ -68,6 +68,9 @@
     <ClCompile Include="utility.cpp">
       <Filter>Module</Filter>
     </ClCompile>
+    <ClCompile Include="servermanage.cpp">
+      <Filter>Module</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="defines.h" />
@@ -219,6 +222,12 @@
       <Filter>include\univ</Filter>
     </ClInclude>
     <ClInclude Include="map_ex.hpp">
+      <Filter>Extend</Filter>
+    </ClInclude>
+    <ClInclude Include="servermanage.h">
+      <Filter>Module</Filter>
+    </ClInclude>
+    <ClInclude Include="list_ex.hpp">
       <Filter>Extend</Filter>
     </ClInclude>
   </ItemGroup>
