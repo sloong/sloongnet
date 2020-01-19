@@ -66,9 +66,9 @@ CResult CSloongBaseService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
         m_pControl->RegisterEvent(ProgramStart);
         IData::Initialize(m_pControl.get());
         res = m_pNetwork->Initialize(m_pControl.get());
-        m_pNetwork->RegisterMessageProcesser(std::bind(&CSloongBaseService::MessagePackageProcesser, this, std::placeholders::_1));
 		if (res.IsSucceed())
 		{
+            m_pNetwork->RegisterMessageProcesser(std::bind(&CSloongBaseService::MessagePackageProcesser, this, std::placeholders::_1));
 			AfterInit();
 			return CResult::Succeed;
 		}

@@ -114,16 +114,23 @@ void Sloong::CControlHub::RegisterEventHandler(EVENT_TYPE t, MsgHandlerFunc func
 
 void Sloong::CControlHub::CallMessage(SmartEvent event)
 {
-	auto evt_type = event->GetEvent();
-	auto handler_list = m_oMsgHandlerList[evt_type];
-	auto handler_num = handler_list.size();
-	if ( handler_num == 0 )
-		return;
-
-	for (size_t i = 0; i < handler_num; i++)
+	try
 	{
-		auto func = handler_list[i];
-		func(event);
+		auto evt_type = event->GetEvent();
+		auto handler_list = m_oMsgHandlerList[evt_type];
+		auto handler_num = handler_list.size();
+		if (handler_num == 0)
+			return;
+
+		for_each(handler_list.begin(), handler_list.end(), [&](MsgHandlerFunc& func) {func(event); });
+	}
+	catch (exception ex)
+	{
+		cerr << "Exception happed in CallMessage." << ex.what() << endl;
+	}
+	catch(...)
+	{
+		cerr << "Unhandle exception in CallMessage function." << endl;
 	}
 }
 
@@ -156,7 +163,7 @@ void Sloong::CControlHub::MessageWorkLoop(SMARTER param)
 				CallMessage(p);
 			}
 		}catch (...){
-			cerr << "Unhandle exception in MessageCenter work loop." << endl;
+			cerr << "Unhandle exception in CControlHub work loop." << endl;
 		}
 	}
 }

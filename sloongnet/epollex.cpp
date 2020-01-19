@@ -5,7 +5,7 @@
 #include "sockinfo.h"
 #include "NetworkEvent.hpp"
 
-
+#include "IData.h"
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -35,9 +35,11 @@ Sloong::CEpollEx::~CEpollEx()
 
 
 // Initialize the epoll and the thread pool.
-void Sloong::CEpollEx::Initialize(IControl* iMsg)
+CResult Sloong::CEpollEx::Initialize(IControl* iMsg)
 {
 	IObject::Initialize(iMsg);
+	int nPort = IData::GetGlobalConfig()->listenport();
+	m_pLog->Info(CUniversal::Format("epollex is initialize.license port is %d", nPort));
 
 	// 初始化socket
 	m_ListenSock = socket(AF_INET, SOCK_STREAM, 0);
@@ -45,11 +47,7 @@ void Sloong::CEpollEx::Initialize(IControl* iMsg)
 	// SOL_SOCKET:在socket层面设置
 	// SO_REUSEADDR:允许套接字和一个已在使用中的地址捆绑
 	setsockopt(m_ListenSock, SOL_SOCKET, SO_REUSEADDR, &sock_op, sizeof(sock_op));
-}
 
-void Sloong::CEpollEx::Run(int nPort, int nWorkThreadNum)
-{
-	m_pLog->Info(CUniversal::Format("epollex is initialize.license port is %d", nPort ));
 	// 初始化地址结构
 	struct sockaddr_in address;
 	memset(&address, 0, sizeof(address));
@@ -57,24 +55,34 @@ void Sloong::CEpollEx::Run(int nPort, int nWorkThreadNum)
 	address.sin_port = htons((uint16_t)nPort);
 
 	// 绑定端口
-	errno = bind(m_ListenSock, (struct sockaddr*)&address, sizeof(address));
+	errno = bind(m_ListenSock, (struct sockaddr*) & address, sizeof(address));
 	if (errno == -1)
-		throw normal_except(CUniversal::Format("bind to %d field. errno = %d", nPort, errno));
+		return CResult(false, CUniversal::Format("bind to %d field. errno = %d", nPort, errno));
 
 	// 监听端口,监听队列大小为1024.可修改为SOMAXCONN
 	errno = listen(m_ListenSock, 1024);
 	if (errno == -1)
-		throw normal_except(CUniversal::Format("listen to %d field. errno = %d", nPort, errno));
+		return CResult(false, CUniversal::Format("listen to %d field. errno = %d", nPort, errno));
 
 	// 设置socket为非阻塞模式
 	SetSocketNonblocking(m_ListenSock);
 	// 创建epoll
 	m_EpollHandle = epoll_create(65535);
+
+	return CResult::Succeed;
+}
+
+CResult Sloong::CEpollEx::Run()
+{
+	int workThread = IData::GetGlobalConfig()->epollthreadquantity();
+	m_pLog->Info(CUniversal::Format("epollex is running with %d threads", workThread));
+	
 	// 创建epoll事件对象
 	CtlEpollEvent(EPOLL_CTL_ADD, m_ListenSock, EPOLLIN | EPOLLOUT);
 	m_bIsRunning = true;
 	// Init the thread pool
-	CThreadPool::AddWorkThread( std::bind(&CEpollEx::MainWorkLoop, this, std::placeholders::_1), nullptr, nWorkThreadNum);
+	CThreadPool::AddWorkThread( std::bind(&CEpollEx::MainWorkLoop, this, std::placeholders::_1), nullptr, workThread);
+	return CResult::Succeed;
 }
 
 

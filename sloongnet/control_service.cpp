@@ -32,6 +32,7 @@ CResult SloongControlService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
 	if (res.IsFialed())
 	{
 		cout << "Init server manage fialed. error message:" << res.Message() << endl;
+		return res;
 	}
 	
 	auto port = config->listenport();

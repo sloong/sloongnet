@@ -14,8 +14,8 @@ namespace Sloong
 	public:
         CEpollEx();
 		virtual ~CEpollEx();
-        void Initialize(IControl* iM);
-		void Run(int nPort, int nWorkThreadNum);
+        CResult Initialize(IControl* iM);
+		CResult Run();
 		void Exit();
 
 		void AddMonitorSocket(int socket);

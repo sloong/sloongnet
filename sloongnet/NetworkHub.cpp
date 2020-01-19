@@ -33,7 +33,9 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	IObject::Initialize(iMsg);
 
 	m_pConfig = IData::GetGlobalConfig();
-	m_pEpoll->Initialize(m_iC);
+	auto res = m_pEpoll->Initialize(m_iC);
+	if (res.IsFialed())
+		return res;
 
 	if (m_pConfig->enablessl())
 	{
@@ -60,18 +62,18 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 void Sloong::CNetworkHub::Run(SmartEvent event)
 {
 	m_bIsRunning = true;
-	m_pEpoll->Run(m_pConfig->listenport(), m_pConfig->epollthreadquantity());
-	if( m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0 )
+	m_pEpoll->Run();
+	if (m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0)
 		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this, std::placeholders::_1), nullptr);
 
-	if( m_pProcessFunc == nullptr ){
+	if (m_pProcessFunc == nullptr) {
 		m_pLog->Fatal("Process function is null.");
 	}
 
-	if( m_pConfig->processthreadquantity() < 1 )
-		m_pLog->Fatal("the config value for process work quantity is invalid, please check.");	
-		
-	CThreadPool::AddWorkThread(std::bind(&CNetworkHub::MessageProcessWorkLoop, this, std::placeholders::_1), nullptr, m_pConfig->processthreadquantity() );
+	if (m_pConfig->processthreadquantity() < 1)
+		m_pLog->Fatal("the config value for process work quantity is invalid, please check.");
+
+	CThreadPool::AddWorkThread(std::bind(&CNetworkHub::MessageProcessWorkLoop, this, std::placeholders::_1), nullptr, m_pConfig->processthreadquantity());
 }
 
 void Sloong::CNetworkHub::Exit(SmartEvent event)

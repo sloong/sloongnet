@@ -29,6 +29,9 @@ const int s_PriorityLevel = 5;
 
 typedef enum g_DataCenter_Event_Type
 {
+	/*
+	由 base_service 发送。程序准备完毕可以运行时发送
+	*/
 	ProgramStart,
 	ProgramExit,
 
