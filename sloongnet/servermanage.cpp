@@ -27,7 +27,7 @@ bool Sloong::CServerManage::RegisterServerHandler(Functions func, string sender,
 		{
 			m_pLog->Error(CUniversal::Format("Parser module with Server [%s:%d] error.", item.Address, item.Port));
 			pack->ResponsePackage(ResultType::Error, CUniversal::Format("Parser module error [%s].", content));
-			return false;
+			return true;
 		}
 
 		// check uuid
@@ -35,7 +35,7 @@ bool Sloong::CServerManage::RegisterServerHandler(Functions func, string sender,
 			sender = CUtility::GenUUID();
 			m_pLog->Verbos(CUniversal::Format("New module[%s:%d] regist to system. Allocating uuid [%s].", item.Address, item.Port, sender));
 		}
-
+		item.Type = type;
 		m_oServerTypeList[type].unique_insert(sender);
 		m_oServerList[sender] = item;
 		pack->ResponsePackage(sender,"");
@@ -104,7 +104,7 @@ bool Sloong::CServerManage::GetServerConfigHandler(Functions func, string sender
 		string errmsg = CUniversal::Format("Module [%s] is no registe.", sender);
 		m_pLog->Warn(errmsg);
 		pack->ResponsePackage(ResultType::Error, errmsg);
-		return false;
+		return true;
 	}
 	else
 	{
@@ -145,12 +145,12 @@ bool Sloong::CServerManage::SetServerToTemplate(Functions func, string sender, S
 	if (!reader.parse(jreq, root))
 	{
 		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Parser json[% s] error.", jreq));
-		return false;
+		return true;
 	}
 	if (root["TemplateID"].isNull())
 	{
 		pack->ResponsePackage(ResultType::Error, "JSON no have 'TemplateID' element.");
-		return false;
+		return true;
 	}
 
 	

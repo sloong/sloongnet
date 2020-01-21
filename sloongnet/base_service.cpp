@@ -127,6 +127,9 @@ void CSloongBaseService::MessagePackageProcesser(SmartPackage pack)
             m_oExitSync.notify_all();
             return;
         }break;
+        default:
+            m_pLog->Verbos(CUniversal::Format("No handler for [%s] request: sender[%d]", Functions_Name(func), sender));
+            pack->ResponsePackage(ResultType::Error, "No hanlder to process request.");
         }
     }
 	
