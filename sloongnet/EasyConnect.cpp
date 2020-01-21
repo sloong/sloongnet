@@ -36,7 +36,7 @@ void Sloong::EasyConnect::Initialize(int sock, SSL_CTX* ctx, bool useLongLongSiz
 
 void Sloong::EasyConnect::Initialize( string addressPort, SSL_CTX* ctx, bool useLongLongSize)
 {
-	auto params = CUniversal::split(addressPort, ":");
+	auto params = CUniversal::split(addressPort,':');
     m_strAddress = params[0];
     m_nPort = atoi(params[1].c_str());
 	if (ctx)

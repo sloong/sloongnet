@@ -21,7 +21,7 @@ void SloongNetProxy::AfterInit()
 
 bool SloongNetProxy::ConnectToProcess()
 {
-	auto list = CUniversal::split(m_oConfig.processaddress(),";");
+	auto list = CUniversal::split(m_oConfig.processaddress(),';');
 	for( auto item = list.begin();item!= list.end(); item++ )
 	{
 		auto connect = make_shared<EasyConnect>();

@@ -16,7 +16,7 @@ unique_ptr<CSloongBaseService> Sloong::CSloongBaseService::g_pAppService = nullp
 
 void CSloongBaseService::sloong_terminator()
 {
-    cout << "Unkonw error happened, system will shutdown. " << endl;
+    cout << "terminator function is called, system will shutdown. " << endl;
     CUtility::write_call_stack();
     exit(0);
 }
@@ -24,7 +24,7 @@ void CSloongBaseService::sloong_terminator()
 
 void CSloongBaseService::on_sigint(int signal)
 {
-    cout << "Unhandle signal happened, system will shutdown. signal:" << signal << endl;
+    cout << "SIGSEGV signal happened, system will shutdown. signal:" << signal << endl;
     CUtility::write_call_stack();
     exit(0);
 }

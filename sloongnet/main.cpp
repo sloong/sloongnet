@@ -84,7 +84,7 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 	}
 	cout << "Run application by " << ModuleType_Name(type) << " module" << endl;
 
-	vector<string> addr = CUniversal::split(args[2], ":");
+	vector<string> addr = CUniversal::split(args[2], ':');
 	if (addr.size() != 2)
 	{
 		cout << "Address info format error. Format [addr]:[port]" << endl;

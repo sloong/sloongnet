@@ -51,18 +51,17 @@ CResult Sloong::CEpollEx::Initialize(IControl* iMsg)
 	// 初始化地址结构
 	struct sockaddr_in address;
 	memset(&address, 0, sizeof(address));
+	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = inet_addr("0.0.0.0");
 	address.sin_port = htons((uint16_t)nPort);
 
 	// 绑定端口
-	errno = bind(m_ListenSock, (struct sockaddr*) & address, sizeof(address));
-	if (errno == -1)
-		return CResult(false, CUniversal::Format("bind to %d field. errno = %d", nPort, errno));
+	if( -1 == bind(m_ListenSock, (struct sockaddr*) & address, sizeof(address)))
+		return CResult(false, CUniversal::Format("Bind to %d field. Error info: [%d]%s", nPort, errno, strerror(errno)));
 
-	// 监听端口,监听队列大小为1024.可修改为SOMAXCONN
-	errno = listen(m_ListenSock, 1024);
-	if (errno == -1)
-		return CResult(false, CUniversal::Format("listen to %d field. errno = %d", nPort, errno));
+	// 监听端口,定义的SOMAXCONN大小为128,太小了,这里修改为1024
+	if (-1 == listen(m_ListenSock, 1024))
+		return CResult(false, CUniversal::Format("Listen to %d field. Error info: [%d]%s", nPort, errno, strerror(errno)));
 
 	// 设置socket为非阻塞模式
 	SetSocketNonblocking(m_ListenSock);

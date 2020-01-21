@@ -71,7 +71,7 @@ string Sloong::CConfiguation::GetConfig(string uuid)
     auto type = m_oServerList.try_get(uuid, "");
     if (type == "")
         return "";
-    auto types = CUniversal::split(type, "|");
+    auto types = CUniversal::split(type, '|');
     if (types[0] == "0")
         return GetTemplate(atoi(types[1].c_str()));
     else
@@ -98,7 +98,7 @@ CResult Sloong::CConfiguation::SetConfig(string uuid, string config)
     }
     else
     {
-        config_id = atoi(CUniversal::split(config_value, "|")[1].c_str());
+        config_id = atoi(CUniversal::split(config_value, '|')[1].c_str());
         map<string, string> kvlist = {
            {"key", CUniversal::ntos(config_id)},
            {"value", CBase64::Encode(config)},

@@ -3,9 +3,9 @@
 
 
 // Version
-#define VERSION_NUMBER						2,5,0,251
-#define VERSION_FILEVERSION					L"2.5.0.251"
-#define VERSION_BUILDTIME					L"2019/12/25"
+#define VERSION_NUMBER						2,5,2,255
+#define VERSION_FILEVERSION					L"2.5.2.255"
+#define VERSION_BUILDTIME					L"2020/01/21"
 
 #ifdef _DEBUG
 #define VERSION_PRODUCTVERSION 				L"Ver.2.5 for Debug"
