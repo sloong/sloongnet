@@ -107,7 +107,7 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 	else
 	{
 		auto con = make_shared<EasyConnect>();
-		con->Initialize(args[1], nullptr);
+		con->Initialize(args[2], nullptr);
 		if (!con->Connect())
 		{
 			cout << "Connect to control fialed." << endl;

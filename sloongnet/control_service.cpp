@@ -50,6 +50,7 @@ void Sloong::SloongControlService::AfterInit()
 {
 	m_pControl->Add(DATA_ITEM::ServerConfiguation, &m_oConfig);
 	m_pServer->SetLog(m_pLog.get());
+	RegistFunctionHandler(Functions::RegisteServer, std::bind(&CServerManage::RegisterServerHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	RegistFunctionHandler(Functions::GetAllConfigTemplate, std::bind(&CServerManage::GetConfigTemplateListHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	RegistFunctionHandler(Functions::GetServerConfig , std::bind(&CServerManage::GetServerConfigHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	RegistFunctionHandler(Functions::SetConfigTemplate, std::bind(&CServerManage::SetServerConfigTemplateHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
