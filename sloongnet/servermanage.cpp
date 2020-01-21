@@ -119,7 +119,7 @@ bool Sloong::CServerManage::GetServerConfigHandler(Functions func, string sender
 				string errmsg = CUniversal::Format("Get global module[%s:%d] config error.", ModuleType_Name(item->Type), item->Type);
 				m_pLog->Error(errmsg);
 				pack->ResponsePackage(ResultType::Error, errmsg);
-				return false;
+				return true;
 			}
 		}
 		pack->ResponsePackage("", config);

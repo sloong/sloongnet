@@ -11,7 +11,7 @@ void PrintVersion()
 	cout << COPYRIGHT_TEXT << endl;
 }
 
-string RegisteToControl(SmartConnect con, string uuid, ModuleType type)
+CResult RegisteToControl(SmartConnect con, string uuid, ModuleType type)
 {
 	auto req = make_shared<DataPackage>();
 	req->set_function(Functions::RegisteServer);
@@ -24,18 +24,18 @@ string RegisteToControl(SmartConnect con, string uuid, ModuleType type)
 	dataPackage.RequestPackage(req);
 	ResultType result = dataPackage.SendPackage();
 	if (result != ResultType::Succeed)
-		throw string("Send Registe request error.");
+		return CResult(false, "Send Registe request error.");
 	result = dataPackage.RecvPackage(0,0);
 	if (result != ResultType::Succeed)
-		throw string("Receive Registe result error.");
+		return CResult(false, "Receive Registe result error.");
 	auto get_config_response_buf = dataPackage.GetRecvPackage();
 	if (!get_config_response_buf)
-		throw string("Parse Registe response data error.");
+		return CResult(false, "Parse Registe response data error.");
 
-	return get_config_response_buf->content();
+	return CResult(true, get_config_response_buf->content());
 }
 
-string GetConfigFromControl(SmartConnect con,string uuid)
+CResult GetConfigFromControl(SmartConnect con,string uuid)
 {
 	auto get_config_request_buf = make_shared<DataPackage>();
 	get_config_request_buf->set_function(Functions::GetServerConfig);
@@ -47,15 +47,17 @@ string GetConfigFromControl(SmartConnect con,string uuid)
 	dataPackage.RequestPackage(get_config_request_buf);
 	ResultType result = dataPackage.SendPackage();
 	if (result != ResultType::Succeed)
-		throw string("Send get config request error.");
+		return CResult(false,"Send get config request error.");
 	result = dataPackage.RecvPackage(0,0);
 	if (result != ResultType::Succeed)
-		throw string("Receive get config result error.");
+		return CResult(false, "Receive get config result error.");
 	auto get_config_response_buf = dataPackage.GetRecvPackage();
 	if (!get_config_response_buf)
-		throw string("Parse the get config response data error.");
+		return CResult(false, "Parse the get config response data error.");
+	if (get_config_response_buf->result() != ResultType::Succeed)
+		return CResult(false, get_config_response_buf->content());
 
-	return get_config_response_buf->extend();
+	return CResult(true, get_config_response_buf->extend());
 }
 
 void PrientHelp()
@@ -116,7 +118,14 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 		cout << "Connect to control succeed." << endl;
 		string uuid;
 		fstream_ex::read_all("uuid.dat", uuid);
-		string server_uuid = RegisteToControl(con, uuid, type);
+		auto res = RegisteToControl(con, uuid, type);
+		if (res.IsFialed())
+		{
+			cout << res.Message() << endl;
+			return nullptr;
+		}
+
+		string server_uuid = res.Message();
 		if (uuid != server_uuid)
 		{
 			fstream_ex::write_all("uuid.dat", server_uuid);
@@ -124,7 +133,13 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 		}
 				
 		cout << "Start get configuation." << endl;
-		auto serverConfig = GetConfigFromControl(con,uuid);
+		res = GetConfigFromControl(con, uuid);
+		if (res.IsFialed())
+		{
+			cout << res.Message() << endl;
+			return nullptr;
+		}
+		auto serverConfig = res.Message();
 		if (serverConfig.size() == 0)
 		{
 			cout << "Control no return config infomation. please check." << endl;
