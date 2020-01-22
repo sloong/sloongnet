@@ -123,7 +123,7 @@ void CSloongBaseService::MessagePackageProcesser(SmartPackage pack)
         {
             // Restart service. use the Exit Sync object, notify the wait thread and return the ExitResult.
             // in main function, check the result, if is Retry, do the init loop.
-            m_oExitResult = ResultType::Retry;
+            m_oExitResult = CResult(ResultType::Retry);
             m_oExitSync.notify_all();
             return;
         }break;

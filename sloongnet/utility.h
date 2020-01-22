@@ -22,6 +22,7 @@ namespace Sloong
 
 		static string GetSocketIP(int socket);
 		static int GetSocketPort(int socket);
+		static string GetSocketAddress(int socket);
 
 		static int ReadFile(string filepath, char*& bBuffer);
 		static string GenUUID();

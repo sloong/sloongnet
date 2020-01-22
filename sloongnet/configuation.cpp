@@ -44,7 +44,7 @@ CResult Sloong::CConfiguation::LoadKeyValueList(string tbName, map<K, V>& out_li
 
     if (!m_pDB->Query(sql, dbRes, error))
     {
-        return CResult(false);
+        return CResult::Make_Error(m_pDB->GetErrorMessage());
     }
     else if (dbRes->GetLinesNum() >= 0)
     {
@@ -59,7 +59,7 @@ CResult Sloong::CConfiguation::LoadKeyValueList(string tbName, map<K, V>& out_li
     }
     else
     {
-        return CResult(false, "No support function.");
+        return CResult::Make_Error("No support function.");
     }
 
 }
@@ -236,7 +236,7 @@ CResult Sloong::CConfiguation::AddOrUpdateRecord(const string& table_name,const 
 	string error;
 	if (!m_pDB->Query(sql, dbRes, error))
 	{
-		return CResult(false,error);
+		return CResult::Make_Error(error);
 	}
 
 	return CResult::Succeed;

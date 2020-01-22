@@ -7,11 +7,11 @@ using namespace Sloong::Events;
 CResult Sloong::CControlHub::Initialize(int quantity)
 {
 	if( quantity < 1 )
-		return CResult(false,"CControlHub work quantity must big than 0.");
+		return CResult::Make_Error("CControlHub work quantity must big than 0.");
 	CThreadPool::AddWorkThread(std::bind(&CControlHub::MessageWorkLoop, this, std::placeholders::_1), nullptr, quantity);
 	CThreadPool::Run();
 	Run();
-    return CResult(true);
+    return CResult::Succeed;
 }
 
 void Sloong::CControlHub::Run()

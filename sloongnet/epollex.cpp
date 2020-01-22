@@ -57,11 +57,11 @@ CResult Sloong::CEpollEx::Initialize(IControl* iMsg)
 
 	// 绑定端口
 	if( -1 == bind(m_ListenSock, (struct sockaddr*) & address, sizeof(address)))
-		return CResult(false, CUniversal::Format("Bind to %d field. Error info: [%d]%s", nPort, errno, strerror(errno)));
+		return CResult::Make_Error( CUniversal::Format("Bind to %d field. Error info: [%d]%s", nPort, errno, strerror(errno)));
 
 	// 监听端口,定义的SOMAXCONN大小为128,太小了,这里修改为1024
 	if (-1 == listen(m_ListenSock, 1024))
-		return CResult(false, CUniversal::Format("Listen to %d field. Error info: [%d]%s", nPort, errno, strerror(errno)));
+		return CResult::Make_Error(CUniversal::Format("Listen to %d field. Error info: [%d]%s", nPort, errno, strerror(errno)));
 
 	// 设置socket为非阻塞模式
 	SetSocketNonblocking(m_ListenSock);
@@ -119,7 +119,7 @@ void Sloong::CEpollEx::CtlEpollEvent(int opt, int sock, int events)
 	// ET模式时，事件就绪时，假设对事件没做处理，内核不会反复通知事件就绪  	EPOLLET
 	ent.events = events | EPOLLERR | EPOLLHUP | EPOLLET;
 
-	m_pLog->Verbos(CUniversal::Format("Control epoll opt: Socket[%d] opt[%d]",sock, opt));
+	m_pLog->Verbos(CUniversal::Format("Control epoll opt: Socket [%s] opt[%d]", CUtility::GetSocketAddress(sock), opt));
 	// 设置事件到epoll对象
 	epoll_ctl(m_EpollHandle, opt, sock, &ent);
 }
@@ -193,25 +193,21 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 			// EPOLLIN 可读消息
 			else if (m_Events[i].events&EPOLLIN)
 			{
-				m_pLog->Verbos(CUniversal::Format("EPoll EPOLLIN event happened. Socket[%d] Data Can Receive.",fd));
+				m_pLog->Verbos(CUniversal::Format("EPoll EPOLLIN event happened. Socket [%s] Data Can Receive.", CUtility::GetSocketAddress(fd)));
 				auto res = OnDataCanReceive(fd);
-				if( res  != ResultType::Error)
-					MonitorSendStatus(fd);
 			}
 			// EPOLLOUT 可写消息
 			else if (m_Events[i].events&EPOLLOUT)
 			{
-				m_pLog->Verbos(CUniversal::Format("EPoll EPOLLOUT event happened.Socket[%d] Can Write Data.",fd));
+				m_pLog->Verbos(CUniversal::Format("EPoll EPOLLOUT event happened.Socket [%s] Can Write Data.", CUtility::GetSocketAddress(fd)));
 				auto res = OnCanWriteData(fd);
 				// 所有消息全部发送完毕后只需要监听可读消息就可以了。
 				if( res == ResultType::Succeed)
-					UnmonitorSendStatus(fd);			
-				else if( res == ResultType::Retry )
-					MonitorSendStatus(fd);			
+					UnmonitorSendStatus(fd);
 			}
 			else
 			{
-				m_pLog->Verbos(CUniversal::Format("EPoll unkuown event happened.Socket[%d] close this connnect.",fd));
+				m_pLog->Verbos(CUniversal::Format("EPoll unkuown event happened. Socket [%s] close this connnect.", CUtility::GetSocketAddress(fd)));
 				OnOtherEventHappened(fd);
 			}
 		}

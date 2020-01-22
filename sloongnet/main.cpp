@@ -11,6 +11,27 @@ void PrintVersion()
 	cout << COPYRIGHT_TEXT << endl;
 }
 
+
+TResult<shared_ptr<DataPackage>> SendPackage(SmartConnect con, shared_ptr<DataPackage> pack)
+{
+	CDataTransPackage dataPackage;
+	dataPackage.Initialize(con);
+	dataPackage.RequestPackage(pack);
+	ResultType result = dataPackage.SendPackage();
+	if (result != ResultType::Succeed)
+		return TResult<shared_ptr<DataPackage>>::Make_Error( "Send get config request error.");
+	result = dataPackage.RecvPackage(0, 0);
+	if (result != ResultType::Succeed)
+		return TResult<shared_ptr<DataPackage>>::Make_Error("Receive get config result error.");
+	auto get_config_response_buf = dataPackage.GetRecvPackage();
+	if (!get_config_response_buf)
+		return TResult<shared_ptr<DataPackage>>::Make_Error("Parse the get config response data error.");
+	if (get_config_response_buf->result() != ResultType::Succeed)
+		return TResult<shared_ptr<DataPackage>>::Make_Error(get_config_response_buf->content());
+
+	return TResult<shared_ptr<DataPackage>>::Make_OK(get_config_response_buf);
+}
+
 CResult RegisteToControl(SmartConnect con, string uuid, ModuleType type)
 {
 	auto req = make_shared<DataPackage>();
@@ -19,51 +40,31 @@ CResult RegisteToControl(SmartConnect con, string uuid, ModuleType type)
 	req->set_sender(uuid);
 	req->set_content(ModuleType_Name(type));
 
-	CDataTransPackage dataPackage;
-	dataPackage.Initialize(con);
-	dataPackage.RequestPackage(req);
-	ResultType result = dataPackage.SendPackage();
-	if (result != ResultType::Succeed)
-		return CResult(false, "Send Registe request error.");
-	result = dataPackage.RecvPackage(0,0);
-	if (result != ResultType::Succeed)
-		return CResult(false, "Receive Registe result error.");
-	auto get_config_response_buf = dataPackage.GetRecvPackage();
-	if (!get_config_response_buf)
-		return CResult(false, "Parse Registe response data error.");
+	auto res = SendPackage(con, req);
+	if (res.IsFialed())
+		return CResult::Make_Error(res.Message());
 
-	return CResult(true, get_config_response_buf->content());
+	return CResult::Make_OK(res.ResultObject()->content());
 }
 
 CResult GetConfigFromControl(SmartConnect con,string uuid)
 {
-	auto get_config_request_buf = make_shared<DataPackage>();
-	get_config_request_buf->set_function(Functions::GetServerConfig);
-	get_config_request_buf->set_receiver(Protocol::ModuleType::Control);
-	get_config_request_buf->set_sender(uuid);
+	auto req = make_shared<DataPackage>();
+	req->set_function(Functions::GetServerConfig);
+	req->set_receiver(Protocol::ModuleType::Control);
+	req->set_sender(uuid);
 
-	CDataTransPackage dataPackage;
-	dataPackage.Initialize(con);
-	dataPackage.RequestPackage(get_config_request_buf);
-	ResultType result = dataPackage.SendPackage();
-	if (result != ResultType::Succeed)
-		return CResult(false,"Send get config request error.");
-	result = dataPackage.RecvPackage(0,0);
-	if (result != ResultType::Succeed)
-		return CResult(false, "Receive get config result error.");
-	auto get_config_response_buf = dataPackage.GetRecvPackage();
-	if (!get_config_response_buf)
-		return CResult(false, "Parse the get config response data error.");
-	if (get_config_response_buf->result() != ResultType::Succeed)
-		return CResult(false, get_config_response_buf->content());
+	auto res = SendPackage(con, req);
+	if (res.IsFialed())
+		return CResult::Make_Error(res.Message());
 
-	return CResult(true, get_config_response_buf->extend());
+	return CResult::Make_OK(res.ResultObject()->extend());
 }
 
 void PrientHelp()
 {
 	cout << "sloongnet [<type>] [<address:port>]" << endl;
-	cout << "<type>: control,process,proxy,firewall,gateway,data,db" << endl;
+	cout << "<type>: Control,Process,Gateway,Firewall,data,db" << endl;
 }
 
 

@@ -2,4 +2,4 @@
 
 using namespace Sloong;
 
-CResult CResult::Succeed = CResult(true);
+CResult CResult::Succeed = CResult(ResultType::Succeed);
