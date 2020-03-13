@@ -9,211 +9,175 @@
 #include "configuation.h"
 #include "univ/Base64.h"
 
-const static string SERVER_TBL_NAME = "server_list";
-const static string TEMPLATE_TBL_NAME = "template_list";
-const static string CONFIGS_TBL_NAME = "configuations";
 
 Sloong::CConfiguation::CConfiguation()
 {
-    m_pDB = make_unique<CSQLiteEx>();
 }
 
-
-CResult Sloong::CConfiguation::Initialize(string dbPath, string uuid)
+CResult Sloong::CConfiguation::Initialize(const string& dbPath)
 {
-    m_pDB->Initialize(dbPath);
-    LoadDB();
-    GetConfig(uuid);
+    m_oStorage = make_unique<Storage>(InitStorage(dbPath));
     return CResult::Succeed;
 }
 
-CResult Sloong::CConfiguation::LoadDB()
+CResult Sloong::CConfiguation::GetConfig(const string& uuid)
 {
-    LoadKeyValueList(SERVER_TBL_NAME, m_oServerList);
-    LoadKeyValueList(TEMPLATE_TBL_NAME, m_oTemplateList);
-    LoadKeyValueList(CONFIGS_TBL_NAME, m_oConfigList);
-    return CResult::Succeed;
-}
-
-template<typename K, typename V>
-CResult Sloong::CConfiguation::LoadKeyValueList(string tbName, map<K, V>& out_list)
-{
-    EasyResult dbRes = make_shared<CDBResult>();
-    string error;
-    string sql = CUniversal::Format("SELECT `key`,`value` FROM `%s`", tbName.c_str());
-
-    if (!m_pDB->Query(sql, dbRes, error))
+    try
     {
-        return CResult::Make_Error(m_pDB->GetErrorMessage());
+        auto module_item = m_oStorage->get<ModuleInfo>(uuid);
+        return CResult::Make_OK(CBase64::Decode(m_oStorage->get<ConfigInfo>(module_item.configuation_id).configuation));
     }
-    else if (dbRes->GetLinesNum() >= 0)
+    catch (exception ex)
     {
-        int len = dbRes->GetLinesNum();
-        for (int i = 0; i < len; i++)
+        return CResult::Make_Error(ex.what());
+    }
+}
+
+CResult Sloong::CConfiguation::SetConfig(const string& uuid, string config)
+{
+    try
+    {
+        // Step 1: check the config for uuid is not exist in module_list table.
+        auto item = m_oStorage->get_no_throw<ModuleInfo>(uuid);
+
+        if (item == nullptr)
         {
-            auto key = dbRes->GetData(0, "key");
-            auto value = dbRes->GetData(0, "value");
-            out_list[key] = value;
+            // Step 1.1: no exist , create in configuations table.
+            auto id = m_oStorage->insert<ConfigInfo>(ConfigInfo{ -1,CBase64::Encode(config) });
+            ModuleInfo info;
+            info.uuid = uuid;
+            info.configuation_id = id;
+            m_oStorage->insert<ModuleInfo>(info);
+        }
+        else
+        {
+            auto config_item = m_oStorage->get<ConfigInfo>(item->configuation_id);
+            config_item.configuation = CBase64::Encode(config);
+            m_oStorage->update<ConfigInfo>(config_item);
         }
         return CResult::Succeed;
     }
-    else
+    catch (exception ex)
     {
-        return CResult::Make_Error("No support function.");
+        return CResult::Make_Error(ex.what());
     }
 
 }
 
 
-
-string Sloong::CConfiguation::GetConfig(string uuid)
+CResult Sloong::CConfiguation::SetConfigToTemplate(const string& uuid, int tpl_id)
 {
-    auto type = m_oServerList.try_get(uuid, "");
-    if (type == "")
-        return "";
-    auto types = CUniversal::split(type, '|');
-    if (types[0] == "0")
-        return GetTemplate(atoi(types[1].c_str()));
-    else
-        return m_oConfigList.try_get(types[1], "");
-}
-
-CResult Sloong::CConfiguation::SetConfig(string uuid, string config)
-{
-    int config_id = 0;
-    string config_value = m_oServerList.try_get(uuid, "");
-    if (config_value == "")
+    try
     {
-        auto res = AddConfig(config, &config_id);
-        if (res.IsFialed())
-            return res;
+        auto template_item = m_oStorage->get_pointer<TemplateInfo>(tpl_id);
+        if (template_item == nullptr)
+            return CResult::Make_Error(CUniversal::Format("Template id [%s] is no exist.", tpl_id));
 
-        map<string, string> kvlist = {
-            {"key",uuid},
-            {"value", CUniversal::Format("1|%d",config_id)},
-        };
-        res = AddOrUpdateRecord(SERVER_TBL_NAME, kvlist, "");
-        if (res.IsFialed())
-            return res;
+        auto module_item = m_oStorage->get_no_throw<ModuleInfo>(uuid);
+        if (module_item == nullptr)
+        {
+            ModuleInfo info;
+            info.uuid = uuid;
+            info.template_id = template_item->id;
+            info.configuation_id = template_item->configuation_id;
+            m_oStorage->insert<ModuleInfo>(info);
+            return CResult::Succeed;
+        }
+        else
+        {
+            module_item->template_id = tpl_id;
+            m_oStorage->update(*module_item.get());
+            return CResult::Succeed;
+        }
     }
-    else
+    catch (exception ex)
     {
-        config_id = atoi(CUniversal::split(config_value, '|')[1].c_str());
-        map<string, string> kvlist = {
-           {"key", CUniversal::ntos(config_id)},
-           {"value", CBase64::Encode(config)},
-        };
-        auto res = AddOrUpdateRecord(CONFIGS_TBL_NAME, kvlist, "");
-        if (!res.IsSucceed())
-            return res;
+        return CResult::Make_Error(ex.what());
     }
-    m_oServerList[uuid] = CUniversal::Format("1|%d", config_id);
-    m_oConfigList[CUniversal::ntos(config_id)] = config;
-    return CResult::Succeed;
 }
 
-
-CResult Sloong::CConfiguation::SetConfigToTemplate(string uuid, int tpl_id)
+CResult Sloong::CConfiguation::GetTemplate(int id)
 {
-    if( !m_oServerList.exist(uuid) || !m_oTemplateList.exist(CUniversal::ntos(tpl_id)))
-        return CResult(ResultType::Error, "uuid or tpl_id error.");
-
-    map<string, string> kvlist = {
-        {"key", uuid},
-        {"value", CUniversal::Format("0|%d",tpl_id)},
-    };
-    auto res = AddOrUpdateRecord(CONFIGS_TBL_NAME, kvlist, "");
-    if (!res.IsSucceed())
-        return res;
-
-    m_oServerList[uuid] = CUniversal::Format("0|%d", tpl_id);
-    return CResult::Succeed;
-}
-
-string Sloong::CConfiguation::GetTemplate(int id)
-{
-    auto type = m_oTemplateList.try_get(CUniversal::ntos(id), "-1");
-    if (type == "-1")
-        return "";
-    return m_oConfigList.try_get(type, "");
+    try
+    {
+        auto template_item = m_oStorage->get<TemplateInfo>(id);
+        return CResult::Make_OK(CBase64::Decode(m_oStorage->get<ConfigInfo>(template_item.configuation_id).configuation));
+    }
+    catch (exception ex)
+    {
+        return CResult::Make_Error(ex.what());
+    }
 }
 
 map<int, string> Sloong::CConfiguation::GetTemplateList()
 {
     map<int, string> list;
-    for_each(m_oTemplateList.begin(), m_oTemplateList.end(), [&](const pair<string, string>& it) {
-        list[atoi(it.first.c_str())] = m_oConfigList.try_get(it.second, "");
-        });
-    return list;
+    try
+    {
+        auto all_template = m_oStorage->get_all<TemplateInfo>();
+        
+        for (auto& it : all_template)
+        {
+            list[it.id] = it.name;
+        }
+        return list;
+    }
+    catch (exception ex)
+    {
+        return list;
+    }
 }
 
 
-CResult Sloong::CConfiguation::AddConfig(string config, int* out_id)
+TResult<int> Sloong::CConfiguation::AddConfig(string config)
 {
-    /// Add config to configuations table.
-    int config_id_max = 0;
-    for_each(m_oConfigList.begin(), m_oConfigList.end(), [&](const pair<string, string>& it) {config_id_max = max(atoi(it.first.c_str()), config_id_max); });
-    config_id_max++;
-    map<string, string> kvlist = {
-        {"key", CUniversal::ntos(config_id_max)},
-        {"value", CBase64::Encode(config)},
-    };
-    auto res = AddOrUpdateRecord(CONFIGS_TBL_NAME, kvlist, "");
-    if (!res.IsSucceed())
-        return res;
-
-    m_oConfigList[CUniversal::ntos(config_id_max)] = config;
-    if (out_id != nullptr)
-        *out_id = config_id_max;
-    return CResult::Succeed;
+    try
+    {
+        auto id = m_oStorage->insert<ConfigInfo>(ConfigInfo{ -1,CBase64::Encode(config) });
+        return TResult<int>::Make_OK(id);
+    }
+    catch (exception ex)
+    {
+        return TResult<int>::Make_Error(ex.what());
+    }
 }
 
 
 CResult Sloong::CConfiguation::AddTemplate( string config, int* out_id)
 {
-    int config_id = 0;
-    auto res = AddConfig(config, &config_id);
+    auto res = AddConfig(config);
     if (res.IsFialed())
         return res;
 
-    /// add template map to data table
-    int tpl_id_max = 0;
-    for_each(m_oTemplateList.begin(), m_oTemplateList.end(), [&](const pair<string, string>& it) {tpl_id_max = max(atoi(it.first.c_str()), tpl_id_max); });
-    tpl_id_max++;
-    map<string, string> kvlist = {
-        {"key", CUniversal::ntos(tpl_id_max)},
-        {"value", CUniversal::ntos(config_id)},
-    };
-    res = AddOrUpdateRecord(TEMPLATE_TBL_NAME, kvlist, "");
-    if (!res.IsSucceed())
-        return res;
-
-    
-    m_oTemplateList[CUniversal::ntos(tpl_id_max)] = config_id;
-    if (out_id != nullptr) 
-        *out_id = tpl_id_max;
-    return CResult::Succeed;
+    try
+    {
+        TemplateInfo item;
+        item.configuation_id = res.ResultObject();
+        item.id = -1;
+        auto id = m_oStorage->insert<TemplateInfo>(item);
+        return CResult::Succeed;
+    }
+    catch (exception ex)
+    {
+        return TResult<int>::Make_Error(ex.what());
+    }
 }
 
 
 CResult Sloong::CConfiguation::SetTemplate( int id, string config)
 {
-    auto config_id = m_oTemplateList.try_get(CUniversal::ntos(id), "-1");
-    if (config_id == "-1") 
-        return CResult(ResultType::Error,"No find id in template list.");
-    if( !m_oConfigList.exist(config_id)) 
-        return CResult(ResultType::Error, "No find id in configuations list.");
-    map<string, string> kvlist = {
-        {"key",config_id},
-        {"value", CBase64::Encode(config)},
-    };
-    auto res = AddOrUpdateRecord(CONFIGS_TBL_NAME, kvlist, "");
-    if (res.IsSucceed())
+    try
     {
-        m_oConfigList[config_id] = config;
-        return CResult::Succeed;
+        auto template_item = m_oStorage->get<TemplateInfo>(id);
+        auto config_item = m_oStorage->get<ConfigInfo>(template_item.configuation_id);
+        config_item.configuation = CBase64::Encode(config);
+        m_oStorage->update(config_item);
     }
-	return res;
+    catch (exception ex)
+    {
+        return CResult::Make_Error(ex.what());
+    }
+    return CResult::Succeed;
 }
 
 CResult Sloong::CConfiguation::AddOrUpdateRecord(const string& table_name,const map<string,string>& list, string where_str)
@@ -234,10 +198,7 @@ CResult Sloong::CConfiguation::AddOrUpdateRecord(const string& table_name,const 
 
 	EasyResult dbRes = make_shared<CDBResult>();
 	string error;
-	if (!m_pDB->Query(sql, dbRes, error))
-	{
-		return CResult::Make_Error(error);
-	}
+	
 
 	return CResult::Succeed;
 }
@@ -249,7 +210,7 @@ CResult Sloong::CConfiguation::GetStringConfig(string table_name, string key, st
     string sql = CUniversal::Format("SELECT `value` FROM `%s` WHERE `key`=\"%s\"",
                                     table_name.c_str(), key.c_str());
 
-    if (!m_pDB->Query(sql, dbRes, error) )
+    /*if (!m_pDB->Query(sql, dbRes, error) )
     {
         return CResult(ResultType::Error, m_pDB->GetErrorMessage());
     }
@@ -265,6 +226,6 @@ CResult Sloong::CConfiguation::GetStringConfig(string table_name, string key, st
     else
     {
         return CResult(ResultType::Error, "Unknow error.");
-    }
+    }*/
   
 }

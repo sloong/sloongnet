@@ -7,12 +7,15 @@
 using namespace Sloong::Events;
 
 
-CResult Sloong::CServerManage::Initialize(string uuid, string& out_config)
+CResult Sloong::CServerManage::Initialize( const string& uuid)
 {
-	m_pAllConfig->Initialize("/data/configuation.db", uuid);
-	auto config_str = m_pAllConfig->GetConfig(uuid);
-	out_config = config_str;
-	return CResult::Succeed;
+	auto res = m_pAllConfig->Initialize("/data/configuation.db");
+	if (res.IsFialed()) return res;
+	res = m_pAllConfig->GetConfig(uuid);
+	if (res.IsFialed())
+		return CResult::Succeed;
+	else
+		return res;
 }
 
 bool Sloong::CServerManage::RegisterServerHandler(Functions func, string sender, SmartPackage pack)
@@ -52,7 +55,7 @@ bool Sloong::CServerManage::GetConfigTemplateListHandler(Functions func, string 
 	{
 		Json::Value item;
 		item["ID"] = i.first;
-		item["Config"] = CBase64::Encode(i.second);
+		item["Name"] = i.second;
 		list.append(item);
 	}
 	Json::Value root;
@@ -109,12 +112,12 @@ bool Sloong::CServerManage::GetServerConfigHandler(Functions func, string sender
 	else
 	{
 		// Try get server config with uuid first
-		string config = m_pAllConfig->GetConfig(sender);
-		if (config == "")
+		auto config = m_pAllConfig->GetConfig(sender);
+		if (config.IsFialed())
 		{
 			m_pLog->Verbos(CUniversal::Format("Module[%s:%d|UUID:%s] is no special configued. return global module config.", item->Address, item->Port, sender));
 			config = m_pAllConfig->GetTemplate(item->Type);
-			if (config == "")
+			if (config.IsFialed())
 			{
 				string errmsg = CUniversal::Format("Get global module[%s:%d] config error.", ModuleType_Name(item->Type), item->Type);
 				m_pLog->Error(errmsg);
@@ -122,7 +125,7 @@ bool Sloong::CServerManage::GetServerConfigHandler(Functions func, string sender
 				return true;
 			}
 		}
-		pack->ResponsePackage("", config);
+		pack->ResponsePackage("", config.Message());
 
 		return true;
 	}

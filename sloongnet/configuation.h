@@ -11,9 +11,11 @@
 
 #include "main.h"
 #include "SQLiteEx.h"
+#include "SQLite_ORM.hpp"
 
 namespace Sloong
 {
+    
     class CConfiguation
     {
     public:
@@ -25,32 +27,24 @@ namespace Sloong
          *          uuid : uuid string of the owner.
          * @Return: 
          */
-		CResult Initialize( string dbPath, string uuid );
+		CResult Initialize( const string& dbPath );
 
-        string GetConfig(string uuid);
-        CResult SetConfig( string uuid, string config );
-        CResult SetConfigToTemplate(string uuid, int tpl_id);
+        CResult GetConfig( const string& uuid );
+        CResult SetConfig(const string& uuid, string config );
+        CResult SetConfigToTemplate(const string& uuid, int tpl_id);
         
-        string GetTemplate(int id);
+        CResult GetTemplate(int id);
         map<int, string> GetTemplateList();
         CResult AddTemplate(string config, int* out_id);
 		CResult SetTemplate( int id, string config);
 
     protected:
-		CResult LoadDB();
-        CResult AddConfig(string config, int* out_id);
-        template<typename K, typename V>
-        CResult LoadKeyValueList(string tbName, map<K, V>& out_list);
+        TResult<int> AddConfig(string config);
         CResult GetStringConfig(string table_name, string key, string& outValue);
 		CResult AddOrUpdateRecord(const string& table_name, const map<string, string>& list, string where_str);
 
     protected:
-        map_ex<string,string> m_oServerList;
-        map_ex<string, string> m_oTemplateList;
-        map_ex<string, string> m_oConfigList;
-
-    protected:
-        unique_ptr<CSQLiteEx> m_pDB;
+        unique_ptr<Storage> m_oStorage;
     };
 
 

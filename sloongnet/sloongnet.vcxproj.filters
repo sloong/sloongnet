@@ -230,6 +230,12 @@
     <ClInclude Include="list_ex.hpp">
       <Filter>Extend</Filter>
     </ClInclude>
+    <ClInclude Include="SQLite_ORM.hpp">
+      <Filter>ORM</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sqlite_orm\sqlite_orm.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ScriptEnging">
@@ -264,6 +270,9 @@
     </Filter>
     <Filter Include="include\univ">
       <UniqueIdentifier>{6be119ae-fed4-436c-b51f-533488522096}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ORM">
+      <UniqueIdentifier>{3cfa7194-d5d7-490f-a0fc-70a6e1f1876d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

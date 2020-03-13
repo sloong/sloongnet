@@ -127,6 +127,7 @@ enum Functions {
   ProcessMessage = 0,
   PostLog = 1,
   RegisteServer = 2,
+  GetServerList = 9,
   RestartService = 3,
   GetAllConfigTemplate = 4,
   SetConfigTemplate = 5,
@@ -138,7 +139,7 @@ enum Functions {
 };
 bool Functions_IsValid(int value);
 const Functions Functions_MIN = ProcessMessage;
-const Functions Functions_MAX = SetServerToTemplate;
+const Functions Functions_MAX = GetServerList;
 const int Functions_ARRAYSIZE = Functions_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Functions_descriptor();
@@ -583,9 +584,18 @@ class CONTROL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
 
   // accessors -------------------------------------------------------
 
-  // optional int32 BlockTime = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  bool has_baseconfig() const;
+  void clear_baseconfig();
+  static const int kBaseConfigFieldNumber = 1;
+  const ::Protocol::GLOBAL_CONFIG& baseconfig() const;
+  ::Protocol::GLOBAL_CONFIG* mutable_baseconfig();
+  ::Protocol::GLOBAL_CONFIG* release_baseconfig();
+  void set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig);
+
+  // optional int32 BlockTime = 2;
   void clear_blocktime();
-  static const int kBlockTimeFieldNumber = 1;
+  static const int kBlockTimeFieldNumber = 2;
   ::google::protobuf::int32 blocktime() const;
   void set_blocktime(::google::protobuf::int32 value);
 
@@ -594,6 +604,7 @@ class CONTROL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   bool _is_default_instance_;
+  ::Protocol::GLOBAL_CONFIG* baseconfig_;
   ::google::protobuf::int32 blocktime_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_protocol_2eproto();
@@ -665,9 +676,18 @@ class DB_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point
 
   // accessors -------------------------------------------------------
 
-  // optional string ServerAddress = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  bool has_baseconfig() const;
+  void clear_baseconfig();
+  static const int kBaseConfigFieldNumber = 1;
+  const ::Protocol::GLOBAL_CONFIG& baseconfig() const;
+  ::Protocol::GLOBAL_CONFIG* mutable_baseconfig();
+  ::Protocol::GLOBAL_CONFIG* release_baseconfig();
+  void set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig);
+
+  // optional string ServerAddress = 2;
   void clear_serveraddress();
-  static const int kServerAddressFieldNumber = 1;
+  static const int kServerAddressFieldNumber = 2;
   const ::std::string& serveraddress() const;
   void set_serveraddress(const ::std::string& value);
   void set_serveraddress(const char* value);
@@ -676,15 +696,15 @@ class DB_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point
   ::std::string* release_serveraddress();
   void set_allocated_serveraddress(::std::string* serveraddress);
 
-  // optional int32 ServerPort = 2;
+  // optional int32 ServerPort = 3;
   void clear_serverport();
-  static const int kServerPortFieldNumber = 2;
+  static const int kServerPortFieldNumber = 3;
   ::google::protobuf::int32 serverport() const;
   void set_serverport(::google::protobuf::int32 value);
 
-  // optional string User = 3;
+  // optional string User = 4;
   void clear_user();
-  static const int kUserFieldNumber = 3;
+  static const int kUserFieldNumber = 4;
   const ::std::string& user() const;
   void set_user(const ::std::string& value);
   void set_user(const char* value);
@@ -693,9 +713,9 @@ class DB_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point
   ::std::string* release_user();
   void set_allocated_user(::std::string* user);
 
-  // optional string Passwd = 4;
+  // optional string Passwd = 5;
   void clear_passwd();
-  static const int kPasswdFieldNumber = 4;
+  static const int kPasswdFieldNumber = 5;
   const ::std::string& passwd() const;
   void set_passwd(const ::std::string& value);
   void set_passwd(const char* value);
@@ -704,9 +724,9 @@ class DB_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point
   ::std::string* release_passwd();
   void set_allocated_passwd(::std::string* passwd);
 
-  // optional string Database = 5;
+  // optional string Database = 6;
   void clear_database();
-  static const int kDatabaseFieldNumber = 5;
+  static const int kDatabaseFieldNumber = 6;
   const ::std::string& database() const;
   void set_database(const ::std::string& value);
   void set_database(const char* value);
@@ -720,6 +740,7 @@ class DB_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_point
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   bool _is_default_instance_;
+  ::Protocol::GLOBAL_CONFIG* baseconfig_;
   ::google::protobuf::internal::ArenaStringPtr serveraddress_;
   ::google::protobuf::internal::ArenaStringPtr user_;
   ::google::protobuf::internal::ArenaStringPtr passwd_;
@@ -795,15 +816,24 @@ class DATA_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_poi
 
   // accessors -------------------------------------------------------
 
-  // optional int32 DataReceivePort = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  bool has_baseconfig() const;
+  void clear_baseconfig();
+  static const int kBaseConfigFieldNumber = 1;
+  const ::Protocol::GLOBAL_CONFIG& baseconfig() const;
+  ::Protocol::GLOBAL_CONFIG* mutable_baseconfig();
+  ::Protocol::GLOBAL_CONFIG* release_baseconfig();
+  void set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig);
+
+  // optional int32 DataReceivePort = 2;
   void clear_datareceiveport();
-  static const int kDataReceivePortFieldNumber = 1;
+  static const int kDataReceivePortFieldNumber = 2;
   ::google::protobuf::int32 datareceiveport() const;
   void set_datareceiveport(::google::protobuf::int32 value);
 
-  // optional int32 DataRecvTime = 2;
+  // optional int32 DataRecvTime = 3;
   void clear_datarecvtime();
-  static const int kDataRecvTimeFieldNumber = 2;
+  static const int kDataRecvTimeFieldNumber = 3;
   ::google::protobuf::int32 datarecvtime() const;
   void set_datarecvtime(::google::protobuf::int32 value);
 
@@ -812,6 +842,7 @@ class DATA_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_poi
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   bool _is_default_instance_;
+  ::Protocol::GLOBAL_CONFIG* baseconfig_;
   ::google::protobuf::int32 datareceiveport_;
   ::google::protobuf::int32 datarecvtime_;
   mutable int _cached_size_;
@@ -884,15 +915,24 @@ class GATEWAY_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
 
   // accessors -------------------------------------------------------
 
-  // optional int32 ClientCheckTime = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  bool has_baseconfig() const;
+  void clear_baseconfig();
+  static const int kBaseConfigFieldNumber = 1;
+  const ::Protocol::GLOBAL_CONFIG& baseconfig() const;
+  ::Protocol::GLOBAL_CONFIG* mutable_baseconfig();
+  ::Protocol::GLOBAL_CONFIG* release_baseconfig();
+  void set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig);
+
+  // optional int32 ClientCheckTime = 2;
   void clear_clientchecktime();
-  static const int kClientCheckTimeFieldNumber = 1;
+  static const int kClientCheckTimeFieldNumber = 2;
   ::google::protobuf::int32 clientchecktime() const;
   void set_clientchecktime(::google::protobuf::int32 value);
 
-  // optional string ClientCheckKey = 2;
+  // optional string ClientCheckKey = 3;
   void clear_clientcheckkey();
-  static const int kClientCheckKeyFieldNumber = 2;
+  static const int kClientCheckKeyFieldNumber = 3;
   const ::std::string& clientcheckkey() const;
   void set_clientcheckkey(const ::std::string& value);
   void set_clientcheckkey(const char* value);
@@ -901,21 +941,21 @@ class GATEWAY_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
   ::std::string* release_clientcheckkey();
   void set_allocated_clientcheckkey(::std::string* clientcheckkey);
 
-  // optional int32 TimeoutCheckInterval = 3;
+  // optional int32 TimeoutCheckInterval = 4;
   void clear_timeoutcheckinterval();
-  static const int kTimeoutCheckIntervalFieldNumber = 3;
+  static const int kTimeoutCheckIntervalFieldNumber = 4;
   ::google::protobuf::int32 timeoutcheckinterval() const;
   void set_timeoutcheckinterval(::google::protobuf::int32 value);
 
-  // optional int32 TimeoutTime = 4;
+  // optional int32 TimeoutTime = 5;
   void clear_timeouttime();
-  static const int kTimeoutTimeFieldNumber = 4;
+  static const int kTimeoutTimeFieldNumber = 5;
   ::google::protobuf::int32 timeouttime() const;
   void set_timeouttime(::google::protobuf::int32 value);
 
-  // optional string ProcessAddress = 5;
+  // optional string ProcessAddress = 6;
   void clear_processaddress();
-  static const int kProcessAddressFieldNumber = 5;
+  static const int kProcessAddressFieldNumber = 6;
   const ::std::string& processaddress() const;
   void set_processaddress(const ::std::string& value);
   void set_processaddress(const char* value);
@@ -929,6 +969,7 @@ class GATEWAY_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   bool _is_default_instance_;
+  ::Protocol::GLOBAL_CONFIG* baseconfig_;
   ::google::protobuf::internal::ArenaStringPtr clientcheckkey_;
   ::google::protobuf::int32 clientchecktime_;
   ::google::protobuf::int32 timeoutcheckinterval_;
@@ -1004,9 +1045,18 @@ class FIREWALL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion
 
   // accessors -------------------------------------------------------
 
-  // optional int32 BlockTime = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  bool has_baseconfig() const;
+  void clear_baseconfig();
+  static const int kBaseConfigFieldNumber = 1;
+  const ::Protocol::GLOBAL_CONFIG& baseconfig() const;
+  ::Protocol::GLOBAL_CONFIG* mutable_baseconfig();
+  ::Protocol::GLOBAL_CONFIG* release_baseconfig();
+  void set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig);
+
+  // optional int32 BlockTime = 2;
   void clear_blocktime();
-  static const int kBlockTimeFieldNumber = 1;
+  static const int kBlockTimeFieldNumber = 2;
   ::google::protobuf::int32 blocktime() const;
   void set_blocktime(::google::protobuf::int32 value);
 
@@ -1015,6 +1065,7 @@ class FIREWALL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   bool _is_default_instance_;
+  ::Protocol::GLOBAL_CONFIG* baseconfig_;
   ::google::protobuf::int32 blocktime_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_protocol_2eproto();
@@ -1086,15 +1137,24 @@ class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
 
   // accessors -------------------------------------------------------
 
-  // optional int32 LuaContextQuantity = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  bool has_baseconfig() const;
+  void clear_baseconfig();
+  static const int kBaseConfigFieldNumber = 1;
+  const ::Protocol::GLOBAL_CONFIG& baseconfig() const;
+  ::Protocol::GLOBAL_CONFIG* mutable_baseconfig();
+  ::Protocol::GLOBAL_CONFIG* release_baseconfig();
+  void set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig);
+
+  // optional int32 LuaContextQuantity = 2;
   void clear_luacontextquantity();
-  static const int kLuaContextQuantityFieldNumber = 1;
+  static const int kLuaContextQuantityFieldNumber = 2;
   ::google::protobuf::int32 luacontextquantity() const;
   void set_luacontextquantity(::google::protobuf::int32 value);
 
-  // optional string LuaScriptFolder = 2;
+  // optional string LuaScriptFolder = 3;
   void clear_luascriptfolder();
-  static const int kLuaScriptFolderFieldNumber = 2;
+  static const int kLuaScriptFolderFieldNumber = 3;
   const ::std::string& luascriptfolder() const;
   void set_luascriptfolder(const ::std::string& value);
   void set_luascriptfolder(const char* value);
@@ -1103,9 +1163,9 @@ class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
   ::std::string* release_luascriptfolder();
   void set_allocated_luascriptfolder(::std::string* luascriptfolder);
 
-  // optional string LuaEntryFile = 3;
+  // optional string LuaEntryFile = 4;
   void clear_luaentryfile();
-  static const int kLuaEntryFileFieldNumber = 3;
+  static const int kLuaEntryFileFieldNumber = 4;
   const ::std::string& luaentryfile() const;
   void set_luaentryfile(const ::std::string& value);
   void set_luaentryfile(const char* value);
@@ -1114,9 +1174,9 @@ class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
   ::std::string* release_luaentryfile();
   void set_allocated_luaentryfile(::std::string* luaentryfile);
 
-  // optional string LuaEntryFunction = 4;
+  // optional string LuaEntryFunction = 5;
   void clear_luaentryfunction();
-  static const int kLuaEntryFunctionFieldNumber = 4;
+  static const int kLuaEntryFunctionFieldNumber = 5;
   const ::std::string& luaentryfunction() const;
   void set_luaentryfunction(const ::std::string& value);
   void set_luaentryfunction(const char* value);
@@ -1125,9 +1185,9 @@ class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
   ::std::string* release_luaentryfunction();
   void set_allocated_luaentryfunction(::std::string* luaentryfunction);
 
-  // optional string LuaProcessFunction = 5;
+  // optional string LuaProcessFunction = 6;
   void clear_luaprocessfunction();
-  static const int kLuaProcessFunctionFieldNumber = 5;
+  static const int kLuaProcessFunctionFieldNumber = 6;
   const ::std::string& luaprocessfunction() const;
   void set_luaprocessfunction(const ::std::string& value);
   void set_luaprocessfunction(const char* value);
@@ -1136,9 +1196,9 @@ class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
   ::std::string* release_luaprocessfunction();
   void set_allocated_luaprocessfunction(::std::string* luaprocessfunction);
 
-  // optional string LuaSocketCloseFunction = 6;
+  // optional string LuaSocketCloseFunction = 7;
   void clear_luasocketclosefunction();
-  static const int kLuaSocketCloseFunctionFieldNumber = 6;
+  static const int kLuaSocketCloseFunctionFieldNumber = 7;
   const ::std::string& luasocketclosefunction() const;
   void set_luasocketclosefunction(const ::std::string& value);
   void set_luasocketclosefunction(const char* value);
@@ -1152,6 +1212,7 @@ class PROCESS_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   bool _is_default_instance_;
+  ::Protocol::GLOBAL_CONFIG* baseconfig_;
   ::google::protobuf::internal::ArenaStringPtr luascriptfolder_;
   ::google::protobuf::internal::ArenaStringPtr luaentryfile_;
   ::google::protobuf::internal::ArenaStringPtr luaentryfunction_;
@@ -1802,7 +1863,45 @@ inline void GLOBAL_CONFIG::set_allocated_exconfig(::std::string* exconfig) {
 
 // CONTROL_CONFIG
 
-// optional int32 BlockTime = 1;
+// optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+inline bool CONTROL_CONFIG::has_baseconfig() const {
+  return !_is_default_instance_ && baseconfig_ != NULL;
+}
+inline void CONTROL_CONFIG::clear_baseconfig() {
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
+}
+inline const ::Protocol::GLOBAL_CONFIG& CONTROL_CONFIG::baseconfig() const {
+  // @@protoc_insertion_point(field_get:Protocol.CONTROL_CONFIG.BaseConfig)
+  return baseconfig_ != NULL ? *baseconfig_ : *default_instance_->baseconfig_;
+}
+inline ::Protocol::GLOBAL_CONFIG* CONTROL_CONFIG::mutable_baseconfig() {
+  
+  if (baseconfig_ == NULL) {
+    baseconfig_ = new ::Protocol::GLOBAL_CONFIG;
+  }
+  // @@protoc_insertion_point(field_mutable:Protocol.CONTROL_CONFIG.BaseConfig)
+  return baseconfig_;
+}
+inline ::Protocol::GLOBAL_CONFIG* CONTROL_CONFIG::release_baseconfig() {
+  // @@protoc_insertion_point(field_release:Protocol.CONTROL_CONFIG.BaseConfig)
+  
+  ::Protocol::GLOBAL_CONFIG* temp = baseconfig_;
+  baseconfig_ = NULL;
+  return temp;
+}
+inline void CONTROL_CONFIG::set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig) {
+  delete baseconfig_;
+  baseconfig_ = baseconfig;
+  if (baseconfig) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:Protocol.CONTROL_CONFIG.BaseConfig)
+}
+
+// optional int32 BlockTime = 2;
 inline void CONTROL_CONFIG::clear_blocktime() {
   blocktime_ = 0;
 }
@@ -1820,7 +1919,45 @@ inline void CONTROL_CONFIG::set_blocktime(::google::protobuf::int32 value) {
 
 // DB_CONFIG
 
-// optional string ServerAddress = 1;
+// optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+inline bool DB_CONFIG::has_baseconfig() const {
+  return !_is_default_instance_ && baseconfig_ != NULL;
+}
+inline void DB_CONFIG::clear_baseconfig() {
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
+}
+inline const ::Protocol::GLOBAL_CONFIG& DB_CONFIG::baseconfig() const {
+  // @@protoc_insertion_point(field_get:Protocol.DB_CONFIG.BaseConfig)
+  return baseconfig_ != NULL ? *baseconfig_ : *default_instance_->baseconfig_;
+}
+inline ::Protocol::GLOBAL_CONFIG* DB_CONFIG::mutable_baseconfig() {
+  
+  if (baseconfig_ == NULL) {
+    baseconfig_ = new ::Protocol::GLOBAL_CONFIG;
+  }
+  // @@protoc_insertion_point(field_mutable:Protocol.DB_CONFIG.BaseConfig)
+  return baseconfig_;
+}
+inline ::Protocol::GLOBAL_CONFIG* DB_CONFIG::release_baseconfig() {
+  // @@protoc_insertion_point(field_release:Protocol.DB_CONFIG.BaseConfig)
+  
+  ::Protocol::GLOBAL_CONFIG* temp = baseconfig_;
+  baseconfig_ = NULL;
+  return temp;
+}
+inline void DB_CONFIG::set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig) {
+  delete baseconfig_;
+  baseconfig_ = baseconfig;
+  if (baseconfig) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:Protocol.DB_CONFIG.BaseConfig)
+}
+
+// optional string ServerAddress = 2;
 inline void DB_CONFIG::clear_serveraddress() {
   serveraddress_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1864,7 +2001,7 @@ inline void DB_CONFIG::set_allocated_serveraddress(::std::string* serveraddress)
   // @@protoc_insertion_point(field_set_allocated:Protocol.DB_CONFIG.ServerAddress)
 }
 
-// optional int32 ServerPort = 2;
+// optional int32 ServerPort = 3;
 inline void DB_CONFIG::clear_serverport() {
   serverport_ = 0;
 }
@@ -1878,7 +2015,7 @@ inline void DB_CONFIG::set_serverport(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:Protocol.DB_CONFIG.ServerPort)
 }
 
-// optional string User = 3;
+// optional string User = 4;
 inline void DB_CONFIG::clear_user() {
   user_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1922,7 +2059,7 @@ inline void DB_CONFIG::set_allocated_user(::std::string* user) {
   // @@protoc_insertion_point(field_set_allocated:Protocol.DB_CONFIG.User)
 }
 
-// optional string Passwd = 4;
+// optional string Passwd = 5;
 inline void DB_CONFIG::clear_passwd() {
   passwd_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1966,7 +2103,7 @@ inline void DB_CONFIG::set_allocated_passwd(::std::string* passwd) {
   // @@protoc_insertion_point(field_set_allocated:Protocol.DB_CONFIG.Passwd)
 }
 
-// optional string Database = 5;
+// optional string Database = 6;
 inline void DB_CONFIG::clear_database() {
   database_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -2014,7 +2151,45 @@ inline void DB_CONFIG::set_allocated_database(::std::string* database) {
 
 // DATA_CONFIG
 
-// optional int32 DataReceivePort = 1;
+// optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+inline bool DATA_CONFIG::has_baseconfig() const {
+  return !_is_default_instance_ && baseconfig_ != NULL;
+}
+inline void DATA_CONFIG::clear_baseconfig() {
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
+}
+inline const ::Protocol::GLOBAL_CONFIG& DATA_CONFIG::baseconfig() const {
+  // @@protoc_insertion_point(field_get:Protocol.DATA_CONFIG.BaseConfig)
+  return baseconfig_ != NULL ? *baseconfig_ : *default_instance_->baseconfig_;
+}
+inline ::Protocol::GLOBAL_CONFIG* DATA_CONFIG::mutable_baseconfig() {
+  
+  if (baseconfig_ == NULL) {
+    baseconfig_ = new ::Protocol::GLOBAL_CONFIG;
+  }
+  // @@protoc_insertion_point(field_mutable:Protocol.DATA_CONFIG.BaseConfig)
+  return baseconfig_;
+}
+inline ::Protocol::GLOBAL_CONFIG* DATA_CONFIG::release_baseconfig() {
+  // @@protoc_insertion_point(field_release:Protocol.DATA_CONFIG.BaseConfig)
+  
+  ::Protocol::GLOBAL_CONFIG* temp = baseconfig_;
+  baseconfig_ = NULL;
+  return temp;
+}
+inline void DATA_CONFIG::set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig) {
+  delete baseconfig_;
+  baseconfig_ = baseconfig;
+  if (baseconfig) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:Protocol.DATA_CONFIG.BaseConfig)
+}
+
+// optional int32 DataReceivePort = 2;
 inline void DATA_CONFIG::clear_datareceiveport() {
   datareceiveport_ = 0;
 }
@@ -2028,7 +2203,7 @@ inline void DATA_CONFIG::set_datareceiveport(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:Protocol.DATA_CONFIG.DataReceivePort)
 }
 
-// optional int32 DataRecvTime = 2;
+// optional int32 DataRecvTime = 3;
 inline void DATA_CONFIG::clear_datarecvtime() {
   datarecvtime_ = 0;
 }
@@ -2046,7 +2221,45 @@ inline void DATA_CONFIG::set_datarecvtime(::google::protobuf::int32 value) {
 
 // GATEWAY_CONFIG
 
-// optional int32 ClientCheckTime = 1;
+// optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+inline bool GATEWAY_CONFIG::has_baseconfig() const {
+  return !_is_default_instance_ && baseconfig_ != NULL;
+}
+inline void GATEWAY_CONFIG::clear_baseconfig() {
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
+}
+inline const ::Protocol::GLOBAL_CONFIG& GATEWAY_CONFIG::baseconfig() const {
+  // @@protoc_insertion_point(field_get:Protocol.GATEWAY_CONFIG.BaseConfig)
+  return baseconfig_ != NULL ? *baseconfig_ : *default_instance_->baseconfig_;
+}
+inline ::Protocol::GLOBAL_CONFIG* GATEWAY_CONFIG::mutable_baseconfig() {
+  
+  if (baseconfig_ == NULL) {
+    baseconfig_ = new ::Protocol::GLOBAL_CONFIG;
+  }
+  // @@protoc_insertion_point(field_mutable:Protocol.GATEWAY_CONFIG.BaseConfig)
+  return baseconfig_;
+}
+inline ::Protocol::GLOBAL_CONFIG* GATEWAY_CONFIG::release_baseconfig() {
+  // @@protoc_insertion_point(field_release:Protocol.GATEWAY_CONFIG.BaseConfig)
+  
+  ::Protocol::GLOBAL_CONFIG* temp = baseconfig_;
+  baseconfig_ = NULL;
+  return temp;
+}
+inline void GATEWAY_CONFIG::set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig) {
+  delete baseconfig_;
+  baseconfig_ = baseconfig;
+  if (baseconfig) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:Protocol.GATEWAY_CONFIG.BaseConfig)
+}
+
+// optional int32 ClientCheckTime = 2;
 inline void GATEWAY_CONFIG::clear_clientchecktime() {
   clientchecktime_ = 0;
 }
@@ -2060,7 +2273,7 @@ inline void GATEWAY_CONFIG::set_clientchecktime(::google::protobuf::int32 value)
   // @@protoc_insertion_point(field_set:Protocol.GATEWAY_CONFIG.ClientCheckTime)
 }
 
-// optional string ClientCheckKey = 2;
+// optional string ClientCheckKey = 3;
 inline void GATEWAY_CONFIG::clear_clientcheckkey() {
   clientcheckkey_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -2104,7 +2317,7 @@ inline void GATEWAY_CONFIG::set_allocated_clientcheckkey(::std::string* clientch
   // @@protoc_insertion_point(field_set_allocated:Protocol.GATEWAY_CONFIG.ClientCheckKey)
 }
 
-// optional int32 TimeoutCheckInterval = 3;
+// optional int32 TimeoutCheckInterval = 4;
 inline void GATEWAY_CONFIG::clear_timeoutcheckinterval() {
   timeoutcheckinterval_ = 0;
 }
@@ -2118,7 +2331,7 @@ inline void GATEWAY_CONFIG::set_timeoutcheckinterval(::google::protobuf::int32 v
   // @@protoc_insertion_point(field_set:Protocol.GATEWAY_CONFIG.TimeoutCheckInterval)
 }
 
-// optional int32 TimeoutTime = 4;
+// optional int32 TimeoutTime = 5;
 inline void GATEWAY_CONFIG::clear_timeouttime() {
   timeouttime_ = 0;
 }
@@ -2132,7 +2345,7 @@ inline void GATEWAY_CONFIG::set_timeouttime(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:Protocol.GATEWAY_CONFIG.TimeoutTime)
 }
 
-// optional string ProcessAddress = 5;
+// optional string ProcessAddress = 6;
 inline void GATEWAY_CONFIG::clear_processaddress() {
   processaddress_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -2180,7 +2393,45 @@ inline void GATEWAY_CONFIG::set_allocated_processaddress(::std::string* processa
 
 // FIREWALL_CONFIG
 
-// optional int32 BlockTime = 1;
+// optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+inline bool FIREWALL_CONFIG::has_baseconfig() const {
+  return !_is_default_instance_ && baseconfig_ != NULL;
+}
+inline void FIREWALL_CONFIG::clear_baseconfig() {
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
+}
+inline const ::Protocol::GLOBAL_CONFIG& FIREWALL_CONFIG::baseconfig() const {
+  // @@protoc_insertion_point(field_get:Protocol.FIREWALL_CONFIG.BaseConfig)
+  return baseconfig_ != NULL ? *baseconfig_ : *default_instance_->baseconfig_;
+}
+inline ::Protocol::GLOBAL_CONFIG* FIREWALL_CONFIG::mutable_baseconfig() {
+  
+  if (baseconfig_ == NULL) {
+    baseconfig_ = new ::Protocol::GLOBAL_CONFIG;
+  }
+  // @@protoc_insertion_point(field_mutable:Protocol.FIREWALL_CONFIG.BaseConfig)
+  return baseconfig_;
+}
+inline ::Protocol::GLOBAL_CONFIG* FIREWALL_CONFIG::release_baseconfig() {
+  // @@protoc_insertion_point(field_release:Protocol.FIREWALL_CONFIG.BaseConfig)
+  
+  ::Protocol::GLOBAL_CONFIG* temp = baseconfig_;
+  baseconfig_ = NULL;
+  return temp;
+}
+inline void FIREWALL_CONFIG::set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig) {
+  delete baseconfig_;
+  baseconfig_ = baseconfig;
+  if (baseconfig) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:Protocol.FIREWALL_CONFIG.BaseConfig)
+}
+
+// optional int32 BlockTime = 2;
 inline void FIREWALL_CONFIG::clear_blocktime() {
   blocktime_ = 0;
 }
@@ -2198,7 +2449,45 @@ inline void FIREWALL_CONFIG::set_blocktime(::google::protobuf::int32 value) {
 
 // PROCESS_CONFIG
 
-// optional int32 LuaContextQuantity = 1;
+// optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+inline bool PROCESS_CONFIG::has_baseconfig() const {
+  return !_is_default_instance_ && baseconfig_ != NULL;
+}
+inline void PROCESS_CONFIG::clear_baseconfig() {
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
+}
+inline const ::Protocol::GLOBAL_CONFIG& PROCESS_CONFIG::baseconfig() const {
+  // @@protoc_insertion_point(field_get:Protocol.PROCESS_CONFIG.BaseConfig)
+  return baseconfig_ != NULL ? *baseconfig_ : *default_instance_->baseconfig_;
+}
+inline ::Protocol::GLOBAL_CONFIG* PROCESS_CONFIG::mutable_baseconfig() {
+  
+  if (baseconfig_ == NULL) {
+    baseconfig_ = new ::Protocol::GLOBAL_CONFIG;
+  }
+  // @@protoc_insertion_point(field_mutable:Protocol.PROCESS_CONFIG.BaseConfig)
+  return baseconfig_;
+}
+inline ::Protocol::GLOBAL_CONFIG* PROCESS_CONFIG::release_baseconfig() {
+  // @@protoc_insertion_point(field_release:Protocol.PROCESS_CONFIG.BaseConfig)
+  
+  ::Protocol::GLOBAL_CONFIG* temp = baseconfig_;
+  baseconfig_ = NULL;
+  return temp;
+}
+inline void PROCESS_CONFIG::set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig) {
+  delete baseconfig_;
+  baseconfig_ = baseconfig;
+  if (baseconfig) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:Protocol.PROCESS_CONFIG.BaseConfig)
+}
+
+// optional int32 LuaContextQuantity = 2;
 inline void PROCESS_CONFIG::clear_luacontextquantity() {
   luacontextquantity_ = 0;
 }
@@ -2212,7 +2501,7 @@ inline void PROCESS_CONFIG::set_luacontextquantity(::google::protobuf::int32 val
   // @@protoc_insertion_point(field_set:Protocol.PROCESS_CONFIG.LuaContextQuantity)
 }
 
-// optional string LuaScriptFolder = 2;
+// optional string LuaScriptFolder = 3;
 inline void PROCESS_CONFIG::clear_luascriptfolder() {
   luascriptfolder_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -2256,7 +2545,7 @@ inline void PROCESS_CONFIG::set_allocated_luascriptfolder(::std::string* luascri
   // @@protoc_insertion_point(field_set_allocated:Protocol.PROCESS_CONFIG.LuaScriptFolder)
 }
 
-// optional string LuaEntryFile = 3;
+// optional string LuaEntryFile = 4;
 inline void PROCESS_CONFIG::clear_luaentryfile() {
   luaentryfile_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -2300,7 +2589,7 @@ inline void PROCESS_CONFIG::set_allocated_luaentryfile(::std::string* luaentryfi
   // @@protoc_insertion_point(field_set_allocated:Protocol.PROCESS_CONFIG.LuaEntryFile)
 }
 
-// optional string LuaEntryFunction = 4;
+// optional string LuaEntryFunction = 5;
 inline void PROCESS_CONFIG::clear_luaentryfunction() {
   luaentryfunction_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -2344,7 +2633,7 @@ inline void PROCESS_CONFIG::set_allocated_luaentryfunction(::std::string* luaent
   // @@protoc_insertion_point(field_set_allocated:Protocol.PROCESS_CONFIG.LuaEntryFunction)
 }
 
-// optional string LuaProcessFunction = 5;
+// optional string LuaProcessFunction = 6;
 inline void PROCESS_CONFIG::clear_luaprocessfunction() {
   luaprocessfunction_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -2388,7 +2677,7 @@ inline void PROCESS_CONFIG::set_allocated_luaprocessfunction(::std::string* luap
   // @@protoc_insertion_point(field_set_allocated:Protocol.PROCESS_CONFIG.LuaProcessFunction)
 }
 
-// optional string LuaSocketCloseFunction = 6;
+// optional string LuaSocketCloseFunction = 7;
 inline void PROCESS_CONFIG::clear_luasocketclosefunction() {
   luasocketclosefunction_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }

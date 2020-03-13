@@ -36,41 +36,48 @@ namespace Protocol {
             "aHJlYWRRdWFudGl0eRgLIAEoBRIbChNFUG9sbFRocmVhZFF1YW50aXR5GAwg",
             "ASgFEh0KFVByb2Nlc3NUaHJlYWRRdWFudGl0eRgNIAEoBRIUCgxQcmlvcml0",
             "eVNpemUYDiABKAUSIgoEVHlwZRgPIAEoDjIULlByb3RvY29sLk1vZHVsZVR5",
-            "cGUSEAoIRXhDb25maWcYECABKAwiIwoOQ09OVFJPTF9DT05GSUcSEQoJQmxv",
-            "Y2tUaW1lGAEgASgFImYKCURCX0NPTkZJRxIVCg1TZXJ2ZXJBZGRyZXNzGAEg",
-            "ASgJEhIKClNlcnZlclBvcnQYAiABKAUSDAoEVXNlchgDIAEoCRIOCgZQYXNz",
-            "d2QYBCABKAkSEAoIRGF0YWJhc2UYBSABKAkiPAoLREFUQV9DT05GSUcSFwoP",
-            "RGF0YVJlY2VpdmVQb3J0GAEgASgFEhQKDERhdGFSZWN2VGltZRgCIAEoBSKM",
-            "AQoOR0FURVdBWV9DT05GSUcSFwoPQ2xpZW50Q2hlY2tUaW1lGAEgASgFEhYK",
-            "DkNsaWVudENoZWNrS2V5GAIgASgJEhwKFFRpbWVvdXRDaGVja0ludGVydmFs",
-            "GAMgASgFEhMKC1RpbWVvdXRUaW1lGAQgASgFEhYKDlByb2Nlc3NBZGRyZXNz",
-            "GAUgASgJIiQKD0ZJUkVXQUxMX0NPTkZJRxIRCglCbG9ja1RpbWUYASABKAUi",
-            "sQEKDlBST0NFU1NfQ09ORklHEhoKEkx1YUNvbnRleHRRdWFudGl0eRgBIAEo",
-            "BRIXCg9MdWFTY3JpcHRGb2xkZXIYAiABKAkSFAoMTHVhRW50cnlGaWxlGAMg",
-            "ASgJEhgKEEx1YUVudHJ5RnVuY3Rpb24YBCABKAkSGgoSTHVhUHJvY2Vzc0Z1",
-            "bmN0aW9uGAUgASgJEh4KFkx1YVNvY2tldENsb3NlRnVuY3Rpb24YBiABKAkq",
-            "ZQoKTW9kdWxlVHlwZRIQCgxVbmNvbmZpZ3VyZWQQABILCgdDb250cm9sEAES",
-            "DAoIRmlyZXdhbGwQAhILCgdHYXRld2F5EAMSCAoERGF0YRAEEgsKB1Byb2Nl",
-            "c3MQBRIGCgJEQhAGKkkKClJlc3VsdFR5cGUSCwoHU3VjY2VlZBAAEgkKBUVy",
-            "cm9yEAESCwoHV2FybmluZxACEgkKBVJldHJ5EAMSCwoHSW52YWxpZBAEKl4K",
-            "CExvZ0xldmVsEgcKA0FsbBAAEgoKBlZlcmJvcxABEgkKBURlYnVnEAISCAoE",
-            "SW5mbxADEggKBFdhcm4QBBIHCgNFcnIQBRIKCgZBc3NlcnQQBhIJCgVGYXRh",
-            "bBAHKscBCglGdW5jdGlvbnMSEgoOUHJvY2Vzc01lc3NhZ2UQABILCgdQb3N0",
-            "TG9nEAESEQoNUmVnaXN0ZVNlcnZlchACEhIKDlJlc3RhcnRTZXJ2aWNlEAMS",
-            "GAoUR2V0QWxsQ29uZmlnVGVtcGxhdGUQBBIVChFTZXRDb25maWdUZW1wbGF0",
-            "ZRAFEhMKD0dldFNlcnZlckNvbmZpZxAGEhMKD1NldFNlcnZlckNvbmZpZxAH",
-            "EhcKE1NldFNlcnZlclRvVGVtcGxhdGUQCGIGcHJvdG8z"));
+            "cGUSEAoIRXhDb25maWcYECABKAwiUAoOQ09OVFJPTF9DT05GSUcSKwoKQmFz",
+            "ZUNvbmZpZxgBIAEoCzIXLlByb3RvY29sLkdMT0JBTF9DT05GSUcSEQoJQmxv",
+            "Y2tUaW1lGAIgASgFIpMBCglEQl9DT05GSUcSKwoKQmFzZUNvbmZpZxgBIAEo",
+            "CzIXLlByb3RvY29sLkdMT0JBTF9DT05GSUcSFQoNU2VydmVyQWRkcmVzcxgC",
+            "IAEoCRISCgpTZXJ2ZXJQb3J0GAMgASgFEgwKBFVzZXIYBCABKAkSDgoGUGFz",
+            "c3dkGAUgASgJEhAKCERhdGFiYXNlGAYgASgJImkKC0RBVEFfQ09ORklHEisK",
+            "CkJhc2VDb25maWcYASABKAsyFy5Qcm90b2NvbC5HTE9CQUxfQ09ORklHEhcK",
+            "D0RhdGFSZWNlaXZlUG9ydBgCIAEoBRIUCgxEYXRhUmVjdlRpbWUYAyABKAUi",
+            "uQEKDkdBVEVXQVlfQ09ORklHEisKCkJhc2VDb25maWcYASABKAsyFy5Qcm90",
+            "b2NvbC5HTE9CQUxfQ09ORklHEhcKD0NsaWVudENoZWNrVGltZRgCIAEoBRIW",
+            "Cg5DbGllbnRDaGVja0tleRgDIAEoCRIcChRUaW1lb3V0Q2hlY2tJbnRlcnZh",
+            "bBgEIAEoBRITCgtUaW1lb3V0VGltZRgFIAEoBRIWCg5Qcm9jZXNzQWRkcmVz",
+            "cxgGIAEoCSJRCg9GSVJFV0FMTF9DT05GSUcSKwoKQmFzZUNvbmZpZxgBIAEo",
+            "CzIXLlByb3RvY29sLkdMT0JBTF9DT05GSUcSEQoJQmxvY2tUaW1lGAIgASgF",
+            "It4BCg5QUk9DRVNTX0NPTkZJRxIrCgpCYXNlQ29uZmlnGAEgASgLMhcuUHJv",
+            "dG9jb2wuR0xPQkFMX0NPTkZJRxIaChJMdWFDb250ZXh0UXVhbnRpdHkYAiAB",
+            "KAUSFwoPTHVhU2NyaXB0Rm9sZGVyGAMgASgJEhQKDEx1YUVudHJ5RmlsZRgE",
+            "IAEoCRIYChBMdWFFbnRyeUZ1bmN0aW9uGAUgASgJEhoKEkx1YVByb2Nlc3NG",
+            "dW5jdGlvbhgGIAEoCRIeChZMdWFTb2NrZXRDbG9zZUZ1bmN0aW9uGAcgASgJ",
+            "KmUKCk1vZHVsZVR5cGUSEAoMVW5jb25maWd1cmVkEAASCwoHQ29udHJvbBAB",
+            "EgwKCEZpcmV3YWxsEAISCwoHR2F0ZXdheRADEggKBERhdGEQBBILCgdQcm9j",
+            "ZXNzEAUSBgoCREIQBipJCgpSZXN1bHRUeXBlEgsKB1N1Y2NlZWQQABIJCgVF",
+            "cnJvchABEgsKB1dhcm5pbmcQAhIJCgVSZXRyeRADEgsKB0ludmFsaWQQBCpe",
+            "CghMb2dMZXZlbBIHCgNBbGwQABIKCgZWZXJib3MQARIJCgVEZWJ1ZxACEggK",
+            "BEluZm8QAxIICgRXYXJuEAQSBwoDRXJyEAUSCgoGQXNzZXJ0EAYSCQoFRmF0",
+            "YWwQByraAQoJRnVuY3Rpb25zEhIKDlByb2Nlc3NNZXNzYWdlEAASCwoHUG9z",
+            "dExvZxABEhEKDVJlZ2lzdGVTZXJ2ZXIQAhIRCg1HZXRTZXJ2ZXJMaXN0EAkS",
+            "EgoOUmVzdGFydFNlcnZpY2UQAxIYChRHZXRBbGxDb25maWdUZW1wbGF0ZRAE",
+            "EhUKEVNldENvbmZpZ1RlbXBsYXRlEAUSEwoPR2V0U2VydmVyQ29uZmlnEAYS",
+            "EwoPU2V0U2VydmVyQ29uZmlnEAcSFwoTU2V0U2VydmVyVG9UZW1wbGF0ZRAI",
+            "YgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ModuleType), typeof(global::Protocol.ResultType), typeof(global::Protocol.LogLevel), typeof(global::Protocol.Functions), }, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.DataPackage), global::Protocol.DataPackage.Parser, new[]{ "Function", "PriorityLevel", "SerialNumber", "CheckString", "Sender", "Receiver", "Result", "Content", "Extend" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.GLOBAL_CONFIG), global::Protocol.GLOBAL_CONFIG.Parser, new[]{ "ListenPort", "EnableSSL", "CertFilePath", "KeyFilePath", "CertPasswd", "ConnectTime", "ReceiveTime", "LogPath", "LogLevel", "DebugMode", "MQThreadQuantity", "EPollThreadQuantity", "ProcessThreadQuantity", "PrioritySize", "Type", "ExConfig" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.CONTROL_CONFIG), global::Protocol.CONTROL_CONFIG.Parser, new[]{ "BlockTime" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.DB_CONFIG), global::Protocol.DB_CONFIG.Parser, new[]{ "ServerAddress", "ServerPort", "User", "Passwd", "Database" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.DATA_CONFIG), global::Protocol.DATA_CONFIG.Parser, new[]{ "DataReceivePort", "DataRecvTime" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.GATEWAY_CONFIG), global::Protocol.GATEWAY_CONFIG.Parser, new[]{ "ClientCheckTime", "ClientCheckKey", "TimeoutCheckInterval", "TimeoutTime", "ProcessAddress" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.FIREWALL_CONFIG), global::Protocol.FIREWALL_CONFIG.Parser, new[]{ "BlockTime" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.PROCESS_CONFIG), global::Protocol.PROCESS_CONFIG.Parser, new[]{ "LuaContextQuantity", "LuaScriptFolder", "LuaEntryFile", "LuaEntryFunction", "LuaProcessFunction", "LuaSocketCloseFunction" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.CONTROL_CONFIG), global::Protocol.CONTROL_CONFIG.Parser, new[]{ "BaseConfig", "BlockTime" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.DB_CONFIG), global::Protocol.DB_CONFIG.Parser, new[]{ "BaseConfig", "ServerAddress", "ServerPort", "User", "Passwd", "Database" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.DATA_CONFIG), global::Protocol.DATA_CONFIG.Parser, new[]{ "BaseConfig", "DataReceivePort", "DataRecvTime" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.GATEWAY_CONFIG), global::Protocol.GATEWAY_CONFIG.Parser, new[]{ "BaseConfig", "ClientCheckTime", "ClientCheckKey", "TimeoutCheckInterval", "TimeoutTime", "ProcessAddress" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.FIREWALL_CONFIG), global::Protocol.FIREWALL_CONFIG.Parser, new[]{ "BaseConfig", "BlockTime" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.PROCESS_CONFIG), global::Protocol.PROCESS_CONFIG.Parser, new[]{ "BaseConfig", "LuaContextQuantity", "LuaScriptFolder", "LuaEntryFile", "LuaEntryFunction", "LuaProcessFunction", "LuaSocketCloseFunction" }, null, null, null)
           }));
     }
     #endregion
@@ -132,6 +139,20 @@ namespace Protocol {
     /// </summary>
     [pbr::OriginalName("RegisteServer")] RegisteServer = 2,
     /// <summary>
+    ///  Flow:  ControlUI -> Control
+    /// Response: Content(JSON) - Config template  list.
+    /// Format: 
+    /// {
+    /// "ServerList": [
+    /// {
+    /// "ID": "",
+    /// "Config": "" //Base64
+    /// }
+    /// ]
+    /// }
+    /// </summary>
+    [pbr::OriginalName("GetServerList")] GetServerList = 9,
+    /// <summary>
     ///  Flow: Control -> All
     /// Request: 
     /// Response: NO
@@ -145,7 +166,7 @@ namespace Protocol {
     /// "ConfigTemplateList": [
     /// {
     /// "ID": "",
-    /// "Config": "" //Base64
+    /// "Name":""
     /// }
     /// ]
     /// }
@@ -1134,6 +1155,7 @@ namespace Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public CONTROL_CONFIG(CONTROL_CONFIG other) : this() {
+      BaseConfig = other.baseConfig_ != null ? other.BaseConfig.Clone() : null;
       blockTime_ = other.blockTime_;
     }
 
@@ -1142,8 +1164,19 @@ namespace Protocol {
       return new CONTROL_CONFIG(this);
     }
 
+    /// <summary>Field number for the "BaseConfig" field.</summary>
+    public const int BaseConfigFieldNumber = 1;
+    private global::Protocol.GLOBAL_CONFIG baseConfig_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Protocol.GLOBAL_CONFIG BaseConfig {
+      get { return baseConfig_; }
+      set {
+        baseConfig_ = value;
+      }
+    }
+
     /// <summary>Field number for the "BlockTime" field.</summary>
-    public const int BlockTimeFieldNumber = 1;
+    public const int BlockTimeFieldNumber = 2;
     private int blockTime_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int BlockTime {
@@ -1166,6 +1199,7 @@ namespace Protocol {
       if (ReferenceEquals(other, this)) {
         return true;
       }
+      if (!object.Equals(BaseConfig, other.BaseConfig)) return false;
       if (BlockTime != other.BlockTime) return false;
       return true;
     }
@@ -1173,6 +1207,7 @@ namespace Protocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
+      if (baseConfig_ != null) hash ^= BaseConfig.GetHashCode();
       if (BlockTime != 0) hash ^= BlockTime.GetHashCode();
       return hash;
     }
@@ -1184,8 +1219,12 @@ namespace Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
+      if (baseConfig_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(BaseConfig);
+      }
       if (BlockTime != 0) {
-        output.WriteRawTag(8);
+        output.WriteRawTag(16);
         output.WriteInt32(BlockTime);
       }
     }
@@ -1193,6 +1232,9 @@ namespace Protocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
+      if (baseConfig_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(BaseConfig);
+      }
       if (BlockTime != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(BlockTime);
       }
@@ -1203,6 +1245,12 @@ namespace Protocol {
     public void MergeFrom(CONTROL_CONFIG other) {
       if (other == null) {
         return;
+      }
+      if (other.baseConfig_ != null) {
+        if (baseConfig_ == null) {
+          baseConfig_ = new global::Protocol.GLOBAL_CONFIG();
+        }
+        BaseConfig.MergeFrom(other.BaseConfig);
       }
       if (other.BlockTime != 0) {
         BlockTime = other.BlockTime;
@@ -1217,7 +1265,14 @@ namespace Protocol {
           default:
             input.SkipLastField();
             break;
-          case 8: {
+          case 10: {
+            if (baseConfig_ == null) {
+              baseConfig_ = new global::Protocol.GLOBAL_CONFIG();
+            }
+            input.ReadMessage(baseConfig_);
+            break;
+          }
+          case 16: {
             BlockTime = input.ReadInt32();
             break;
           }
@@ -1251,6 +1306,7 @@ namespace Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public DB_CONFIG(DB_CONFIG other) : this() {
+      BaseConfig = other.baseConfig_ != null ? other.BaseConfig.Clone() : null;
       serverAddress_ = other.serverAddress_;
       serverPort_ = other.serverPort_;
       user_ = other.user_;
@@ -1263,8 +1319,19 @@ namespace Protocol {
       return new DB_CONFIG(this);
     }
 
+    /// <summary>Field number for the "BaseConfig" field.</summary>
+    public const int BaseConfigFieldNumber = 1;
+    private global::Protocol.GLOBAL_CONFIG baseConfig_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Protocol.GLOBAL_CONFIG BaseConfig {
+      get { return baseConfig_; }
+      set {
+        baseConfig_ = value;
+      }
+    }
+
     /// <summary>Field number for the "ServerAddress" field.</summary>
-    public const int ServerAddressFieldNumber = 1;
+    public const int ServerAddressFieldNumber = 2;
     private string serverAddress_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string ServerAddress {
@@ -1275,7 +1342,7 @@ namespace Protocol {
     }
 
     /// <summary>Field number for the "ServerPort" field.</summary>
-    public const int ServerPortFieldNumber = 2;
+    public const int ServerPortFieldNumber = 3;
     private int serverPort_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int ServerPort {
@@ -1286,7 +1353,7 @@ namespace Protocol {
     }
 
     /// <summary>Field number for the "User" field.</summary>
-    public const int UserFieldNumber = 3;
+    public const int UserFieldNumber = 4;
     private string user_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string User {
@@ -1297,7 +1364,7 @@ namespace Protocol {
     }
 
     /// <summary>Field number for the "Passwd" field.</summary>
-    public const int PasswdFieldNumber = 4;
+    public const int PasswdFieldNumber = 5;
     private string passwd_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string Passwd {
@@ -1308,7 +1375,7 @@ namespace Protocol {
     }
 
     /// <summary>Field number for the "Database" field.</summary>
-    public const int DatabaseFieldNumber = 5;
+    public const int DatabaseFieldNumber = 6;
     private string database_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string Database {
@@ -1331,6 +1398,7 @@ namespace Protocol {
       if (ReferenceEquals(other, this)) {
         return true;
       }
+      if (!object.Equals(BaseConfig, other.BaseConfig)) return false;
       if (ServerAddress != other.ServerAddress) return false;
       if (ServerPort != other.ServerPort) return false;
       if (User != other.User) return false;
@@ -1342,6 +1410,7 @@ namespace Protocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
+      if (baseConfig_ != null) hash ^= BaseConfig.GetHashCode();
       if (ServerAddress.Length != 0) hash ^= ServerAddress.GetHashCode();
       if (ServerPort != 0) hash ^= ServerPort.GetHashCode();
       if (User.Length != 0) hash ^= User.GetHashCode();
@@ -1357,24 +1426,28 @@ namespace Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (ServerAddress.Length != 0) {
+      if (baseConfig_ != null) {
         output.WriteRawTag(10);
+        output.WriteMessage(BaseConfig);
+      }
+      if (ServerAddress.Length != 0) {
+        output.WriteRawTag(18);
         output.WriteString(ServerAddress);
       }
       if (ServerPort != 0) {
-        output.WriteRawTag(16);
+        output.WriteRawTag(24);
         output.WriteInt32(ServerPort);
       }
       if (User.Length != 0) {
-        output.WriteRawTag(26);
+        output.WriteRawTag(34);
         output.WriteString(User);
       }
       if (Passwd.Length != 0) {
-        output.WriteRawTag(34);
+        output.WriteRawTag(42);
         output.WriteString(Passwd);
       }
       if (Database.Length != 0) {
-        output.WriteRawTag(42);
+        output.WriteRawTag(50);
         output.WriteString(Database);
       }
     }
@@ -1382,6 +1455,9 @@ namespace Protocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
+      if (baseConfig_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(BaseConfig);
+      }
       if (ServerAddress.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(ServerAddress);
       }
@@ -1404,6 +1480,12 @@ namespace Protocol {
     public void MergeFrom(DB_CONFIG other) {
       if (other == null) {
         return;
+      }
+      if (other.baseConfig_ != null) {
+        if (baseConfig_ == null) {
+          baseConfig_ = new global::Protocol.GLOBAL_CONFIG();
+        }
+        BaseConfig.MergeFrom(other.BaseConfig);
       }
       if (other.ServerAddress.Length != 0) {
         ServerAddress = other.ServerAddress;
@@ -1431,22 +1513,29 @@ namespace Protocol {
             input.SkipLastField();
             break;
           case 10: {
+            if (baseConfig_ == null) {
+              baseConfig_ = new global::Protocol.GLOBAL_CONFIG();
+            }
+            input.ReadMessage(baseConfig_);
+            break;
+          }
+          case 18: {
             ServerAddress = input.ReadString();
             break;
           }
-          case 16: {
+          case 24: {
             ServerPort = input.ReadInt32();
             break;
           }
-          case 26: {
+          case 34: {
             User = input.ReadString();
             break;
           }
-          case 34: {
+          case 42: {
             Passwd = input.ReadString();
             break;
           }
-          case 42: {
+          case 50: {
             Database = input.ReadString();
             break;
           }
@@ -1480,6 +1569,7 @@ namespace Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public DATA_CONFIG(DATA_CONFIG other) : this() {
+      BaseConfig = other.baseConfig_ != null ? other.BaseConfig.Clone() : null;
       dataReceivePort_ = other.dataReceivePort_;
       dataRecvTime_ = other.dataRecvTime_;
     }
@@ -1489,8 +1579,19 @@ namespace Protocol {
       return new DATA_CONFIG(this);
     }
 
+    /// <summary>Field number for the "BaseConfig" field.</summary>
+    public const int BaseConfigFieldNumber = 1;
+    private global::Protocol.GLOBAL_CONFIG baseConfig_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Protocol.GLOBAL_CONFIG BaseConfig {
+      get { return baseConfig_; }
+      set {
+        baseConfig_ = value;
+      }
+    }
+
     /// <summary>Field number for the "DataReceivePort" field.</summary>
-    public const int DataReceivePortFieldNumber = 1;
+    public const int DataReceivePortFieldNumber = 2;
     private int dataReceivePort_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int DataReceivePort {
@@ -1501,7 +1602,7 @@ namespace Protocol {
     }
 
     /// <summary>Field number for the "DataRecvTime" field.</summary>
-    public const int DataRecvTimeFieldNumber = 2;
+    public const int DataRecvTimeFieldNumber = 3;
     private int dataRecvTime_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int DataRecvTime {
@@ -1524,6 +1625,7 @@ namespace Protocol {
       if (ReferenceEquals(other, this)) {
         return true;
       }
+      if (!object.Equals(BaseConfig, other.BaseConfig)) return false;
       if (DataReceivePort != other.DataReceivePort) return false;
       if (DataRecvTime != other.DataRecvTime) return false;
       return true;
@@ -1532,6 +1634,7 @@ namespace Protocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
+      if (baseConfig_ != null) hash ^= BaseConfig.GetHashCode();
       if (DataReceivePort != 0) hash ^= DataReceivePort.GetHashCode();
       if (DataRecvTime != 0) hash ^= DataRecvTime.GetHashCode();
       return hash;
@@ -1544,12 +1647,16 @@ namespace Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
+      if (baseConfig_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(BaseConfig);
+      }
       if (DataReceivePort != 0) {
-        output.WriteRawTag(8);
+        output.WriteRawTag(16);
         output.WriteInt32(DataReceivePort);
       }
       if (DataRecvTime != 0) {
-        output.WriteRawTag(16);
+        output.WriteRawTag(24);
         output.WriteInt32(DataRecvTime);
       }
     }
@@ -1557,6 +1664,9 @@ namespace Protocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
+      if (baseConfig_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(BaseConfig);
+      }
       if (DataReceivePort != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(DataReceivePort);
       }
@@ -1570,6 +1680,12 @@ namespace Protocol {
     public void MergeFrom(DATA_CONFIG other) {
       if (other == null) {
         return;
+      }
+      if (other.baseConfig_ != null) {
+        if (baseConfig_ == null) {
+          baseConfig_ = new global::Protocol.GLOBAL_CONFIG();
+        }
+        BaseConfig.MergeFrom(other.BaseConfig);
       }
       if (other.DataReceivePort != 0) {
         DataReceivePort = other.DataReceivePort;
@@ -1587,11 +1703,18 @@ namespace Protocol {
           default:
             input.SkipLastField();
             break;
-          case 8: {
-            DataReceivePort = input.ReadInt32();
+          case 10: {
+            if (baseConfig_ == null) {
+              baseConfig_ = new global::Protocol.GLOBAL_CONFIG();
+            }
+            input.ReadMessage(baseConfig_);
             break;
           }
           case 16: {
+            DataReceivePort = input.ReadInt32();
+            break;
+          }
+          case 24: {
             DataRecvTime = input.ReadInt32();
             break;
           }
@@ -1625,6 +1748,7 @@ namespace Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public GATEWAY_CONFIG(GATEWAY_CONFIG other) : this() {
+      BaseConfig = other.baseConfig_ != null ? other.BaseConfig.Clone() : null;
       clientCheckTime_ = other.clientCheckTime_;
       clientCheckKey_ = other.clientCheckKey_;
       timeoutCheckInterval_ = other.timeoutCheckInterval_;
@@ -1637,8 +1761,19 @@ namespace Protocol {
       return new GATEWAY_CONFIG(this);
     }
 
+    /// <summary>Field number for the "BaseConfig" field.</summary>
+    public const int BaseConfigFieldNumber = 1;
+    private global::Protocol.GLOBAL_CONFIG baseConfig_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Protocol.GLOBAL_CONFIG BaseConfig {
+      get { return baseConfig_; }
+      set {
+        baseConfig_ = value;
+      }
+    }
+
     /// <summary>Field number for the "ClientCheckTime" field.</summary>
-    public const int ClientCheckTimeFieldNumber = 1;
+    public const int ClientCheckTimeFieldNumber = 2;
     private int clientCheckTime_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int ClientCheckTime {
@@ -1649,7 +1784,7 @@ namespace Protocol {
     }
 
     /// <summary>Field number for the "ClientCheckKey" field.</summary>
-    public const int ClientCheckKeyFieldNumber = 2;
+    public const int ClientCheckKeyFieldNumber = 3;
     private string clientCheckKey_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string ClientCheckKey {
@@ -1660,7 +1795,7 @@ namespace Protocol {
     }
 
     /// <summary>Field number for the "TimeoutCheckInterval" field.</summary>
-    public const int TimeoutCheckIntervalFieldNumber = 3;
+    public const int TimeoutCheckIntervalFieldNumber = 4;
     private int timeoutCheckInterval_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int TimeoutCheckInterval {
@@ -1671,7 +1806,7 @@ namespace Protocol {
     }
 
     /// <summary>Field number for the "TimeoutTime" field.</summary>
-    public const int TimeoutTimeFieldNumber = 4;
+    public const int TimeoutTimeFieldNumber = 5;
     private int timeoutTime_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int TimeoutTime {
@@ -1682,7 +1817,7 @@ namespace Protocol {
     }
 
     /// <summary>Field number for the "ProcessAddress" field.</summary>
-    public const int ProcessAddressFieldNumber = 5;
+    public const int ProcessAddressFieldNumber = 6;
     private string processAddress_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string ProcessAddress {
@@ -1705,6 +1840,7 @@ namespace Protocol {
       if (ReferenceEquals(other, this)) {
         return true;
       }
+      if (!object.Equals(BaseConfig, other.BaseConfig)) return false;
       if (ClientCheckTime != other.ClientCheckTime) return false;
       if (ClientCheckKey != other.ClientCheckKey) return false;
       if (TimeoutCheckInterval != other.TimeoutCheckInterval) return false;
@@ -1716,6 +1852,7 @@ namespace Protocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
+      if (baseConfig_ != null) hash ^= BaseConfig.GetHashCode();
       if (ClientCheckTime != 0) hash ^= ClientCheckTime.GetHashCode();
       if (ClientCheckKey.Length != 0) hash ^= ClientCheckKey.GetHashCode();
       if (TimeoutCheckInterval != 0) hash ^= TimeoutCheckInterval.GetHashCode();
@@ -1731,24 +1868,28 @@ namespace Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
+      if (baseConfig_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(BaseConfig);
+      }
       if (ClientCheckTime != 0) {
-        output.WriteRawTag(8);
+        output.WriteRawTag(16);
         output.WriteInt32(ClientCheckTime);
       }
       if (ClientCheckKey.Length != 0) {
-        output.WriteRawTag(18);
+        output.WriteRawTag(26);
         output.WriteString(ClientCheckKey);
       }
       if (TimeoutCheckInterval != 0) {
-        output.WriteRawTag(24);
+        output.WriteRawTag(32);
         output.WriteInt32(TimeoutCheckInterval);
       }
       if (TimeoutTime != 0) {
-        output.WriteRawTag(32);
+        output.WriteRawTag(40);
         output.WriteInt32(TimeoutTime);
       }
       if (ProcessAddress.Length != 0) {
-        output.WriteRawTag(42);
+        output.WriteRawTag(50);
         output.WriteString(ProcessAddress);
       }
     }
@@ -1756,6 +1897,9 @@ namespace Protocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
+      if (baseConfig_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(BaseConfig);
+      }
       if (ClientCheckTime != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(ClientCheckTime);
       }
@@ -1778,6 +1922,12 @@ namespace Protocol {
     public void MergeFrom(GATEWAY_CONFIG other) {
       if (other == null) {
         return;
+      }
+      if (other.baseConfig_ != null) {
+        if (baseConfig_ == null) {
+          baseConfig_ = new global::Protocol.GLOBAL_CONFIG();
+        }
+        BaseConfig.MergeFrom(other.BaseConfig);
       }
       if (other.ClientCheckTime != 0) {
         ClientCheckTime = other.ClientCheckTime;
@@ -1804,23 +1954,30 @@ namespace Protocol {
           default:
             input.SkipLastField();
             break;
-          case 8: {
+          case 10: {
+            if (baseConfig_ == null) {
+              baseConfig_ = new global::Protocol.GLOBAL_CONFIG();
+            }
+            input.ReadMessage(baseConfig_);
+            break;
+          }
+          case 16: {
             ClientCheckTime = input.ReadInt32();
             break;
           }
-          case 18: {
+          case 26: {
             ClientCheckKey = input.ReadString();
             break;
           }
-          case 24: {
+          case 32: {
             TimeoutCheckInterval = input.ReadInt32();
             break;
           }
-          case 32: {
+          case 40: {
             TimeoutTime = input.ReadInt32();
             break;
           }
-          case 42: {
+          case 50: {
             ProcessAddress = input.ReadString();
             break;
           }
@@ -1854,6 +2011,7 @@ namespace Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public FIREWALL_CONFIG(FIREWALL_CONFIG other) : this() {
+      BaseConfig = other.baseConfig_ != null ? other.BaseConfig.Clone() : null;
       blockTime_ = other.blockTime_;
     }
 
@@ -1862,8 +2020,19 @@ namespace Protocol {
       return new FIREWALL_CONFIG(this);
     }
 
+    /// <summary>Field number for the "BaseConfig" field.</summary>
+    public const int BaseConfigFieldNumber = 1;
+    private global::Protocol.GLOBAL_CONFIG baseConfig_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Protocol.GLOBAL_CONFIG BaseConfig {
+      get { return baseConfig_; }
+      set {
+        baseConfig_ = value;
+      }
+    }
+
     /// <summary>Field number for the "BlockTime" field.</summary>
-    public const int BlockTimeFieldNumber = 1;
+    public const int BlockTimeFieldNumber = 2;
     private int blockTime_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int BlockTime {
@@ -1886,6 +2055,7 @@ namespace Protocol {
       if (ReferenceEquals(other, this)) {
         return true;
       }
+      if (!object.Equals(BaseConfig, other.BaseConfig)) return false;
       if (BlockTime != other.BlockTime) return false;
       return true;
     }
@@ -1893,6 +2063,7 @@ namespace Protocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
+      if (baseConfig_ != null) hash ^= BaseConfig.GetHashCode();
       if (BlockTime != 0) hash ^= BlockTime.GetHashCode();
       return hash;
     }
@@ -1904,8 +2075,12 @@ namespace Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
+      if (baseConfig_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(BaseConfig);
+      }
       if (BlockTime != 0) {
-        output.WriteRawTag(8);
+        output.WriteRawTag(16);
         output.WriteInt32(BlockTime);
       }
     }
@@ -1913,6 +2088,9 @@ namespace Protocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
+      if (baseConfig_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(BaseConfig);
+      }
       if (BlockTime != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(BlockTime);
       }
@@ -1923,6 +2101,12 @@ namespace Protocol {
     public void MergeFrom(FIREWALL_CONFIG other) {
       if (other == null) {
         return;
+      }
+      if (other.baseConfig_ != null) {
+        if (baseConfig_ == null) {
+          baseConfig_ = new global::Protocol.GLOBAL_CONFIG();
+        }
+        BaseConfig.MergeFrom(other.BaseConfig);
       }
       if (other.BlockTime != 0) {
         BlockTime = other.BlockTime;
@@ -1937,7 +2121,14 @@ namespace Protocol {
           default:
             input.SkipLastField();
             break;
-          case 8: {
+          case 10: {
+            if (baseConfig_ == null) {
+              baseConfig_ = new global::Protocol.GLOBAL_CONFIG();
+            }
+            input.ReadMessage(baseConfig_);
+            break;
+          }
+          case 16: {
             BlockTime = input.ReadInt32();
             break;
           }
@@ -1971,6 +2162,7 @@ namespace Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public PROCESS_CONFIG(PROCESS_CONFIG other) : this() {
+      BaseConfig = other.baseConfig_ != null ? other.BaseConfig.Clone() : null;
       luaContextQuantity_ = other.luaContextQuantity_;
       luaScriptFolder_ = other.luaScriptFolder_;
       luaEntryFile_ = other.luaEntryFile_;
@@ -1984,8 +2176,19 @@ namespace Protocol {
       return new PROCESS_CONFIG(this);
     }
 
+    /// <summary>Field number for the "BaseConfig" field.</summary>
+    public const int BaseConfigFieldNumber = 1;
+    private global::Protocol.GLOBAL_CONFIG baseConfig_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Protocol.GLOBAL_CONFIG BaseConfig {
+      get { return baseConfig_; }
+      set {
+        baseConfig_ = value;
+      }
+    }
+
     /// <summary>Field number for the "LuaContextQuantity" field.</summary>
-    public const int LuaContextQuantityFieldNumber = 1;
+    public const int LuaContextQuantityFieldNumber = 2;
     private int luaContextQuantity_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int LuaContextQuantity {
@@ -1996,7 +2199,7 @@ namespace Protocol {
     }
 
     /// <summary>Field number for the "LuaScriptFolder" field.</summary>
-    public const int LuaScriptFolderFieldNumber = 2;
+    public const int LuaScriptFolderFieldNumber = 3;
     private string luaScriptFolder_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string LuaScriptFolder {
@@ -2007,7 +2210,7 @@ namespace Protocol {
     }
 
     /// <summary>Field number for the "LuaEntryFile" field.</summary>
-    public const int LuaEntryFileFieldNumber = 3;
+    public const int LuaEntryFileFieldNumber = 4;
     private string luaEntryFile_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string LuaEntryFile {
@@ -2018,7 +2221,7 @@ namespace Protocol {
     }
 
     /// <summary>Field number for the "LuaEntryFunction" field.</summary>
-    public const int LuaEntryFunctionFieldNumber = 4;
+    public const int LuaEntryFunctionFieldNumber = 5;
     private string luaEntryFunction_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string LuaEntryFunction {
@@ -2029,7 +2232,7 @@ namespace Protocol {
     }
 
     /// <summary>Field number for the "LuaProcessFunction" field.</summary>
-    public const int LuaProcessFunctionFieldNumber = 5;
+    public const int LuaProcessFunctionFieldNumber = 6;
     private string luaProcessFunction_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string LuaProcessFunction {
@@ -2040,7 +2243,7 @@ namespace Protocol {
     }
 
     /// <summary>Field number for the "LuaSocketCloseFunction" field.</summary>
-    public const int LuaSocketCloseFunctionFieldNumber = 6;
+    public const int LuaSocketCloseFunctionFieldNumber = 7;
     private string luaSocketCloseFunction_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string LuaSocketCloseFunction {
@@ -2063,6 +2266,7 @@ namespace Protocol {
       if (ReferenceEquals(other, this)) {
         return true;
       }
+      if (!object.Equals(BaseConfig, other.BaseConfig)) return false;
       if (LuaContextQuantity != other.LuaContextQuantity) return false;
       if (LuaScriptFolder != other.LuaScriptFolder) return false;
       if (LuaEntryFile != other.LuaEntryFile) return false;
@@ -2075,6 +2279,7 @@ namespace Protocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
+      if (baseConfig_ != null) hash ^= BaseConfig.GetHashCode();
       if (LuaContextQuantity != 0) hash ^= LuaContextQuantity.GetHashCode();
       if (LuaScriptFolder.Length != 0) hash ^= LuaScriptFolder.GetHashCode();
       if (LuaEntryFile.Length != 0) hash ^= LuaEntryFile.GetHashCode();
@@ -2091,28 +2296,32 @@ namespace Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
+      if (baseConfig_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(BaseConfig);
+      }
       if (LuaContextQuantity != 0) {
-        output.WriteRawTag(8);
+        output.WriteRawTag(16);
         output.WriteInt32(LuaContextQuantity);
       }
       if (LuaScriptFolder.Length != 0) {
-        output.WriteRawTag(18);
+        output.WriteRawTag(26);
         output.WriteString(LuaScriptFolder);
       }
       if (LuaEntryFile.Length != 0) {
-        output.WriteRawTag(26);
+        output.WriteRawTag(34);
         output.WriteString(LuaEntryFile);
       }
       if (LuaEntryFunction.Length != 0) {
-        output.WriteRawTag(34);
+        output.WriteRawTag(42);
         output.WriteString(LuaEntryFunction);
       }
       if (LuaProcessFunction.Length != 0) {
-        output.WriteRawTag(42);
+        output.WriteRawTag(50);
         output.WriteString(LuaProcessFunction);
       }
       if (LuaSocketCloseFunction.Length != 0) {
-        output.WriteRawTag(50);
+        output.WriteRawTag(58);
         output.WriteString(LuaSocketCloseFunction);
       }
     }
@@ -2120,6 +2329,9 @@ namespace Protocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
+      if (baseConfig_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(BaseConfig);
+      }
       if (LuaContextQuantity != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(LuaContextQuantity);
       }
@@ -2145,6 +2357,12 @@ namespace Protocol {
     public void MergeFrom(PROCESS_CONFIG other) {
       if (other == null) {
         return;
+      }
+      if (other.baseConfig_ != null) {
+        if (baseConfig_ == null) {
+          baseConfig_ = new global::Protocol.GLOBAL_CONFIG();
+        }
+        BaseConfig.MergeFrom(other.BaseConfig);
       }
       if (other.LuaContextQuantity != 0) {
         LuaContextQuantity = other.LuaContextQuantity;
@@ -2174,27 +2392,34 @@ namespace Protocol {
           default:
             input.SkipLastField();
             break;
-          case 8: {
+          case 10: {
+            if (baseConfig_ == null) {
+              baseConfig_ = new global::Protocol.GLOBAL_CONFIG();
+            }
+            input.ReadMessage(baseConfig_);
+            break;
+          }
+          case 16: {
             LuaContextQuantity = input.ReadInt32();
             break;
           }
-          case 18: {
+          case 26: {
             LuaScriptFolder = input.ReadString();
             break;
           }
-          case 26: {
+          case 34: {
             LuaEntryFile = input.ReadString();
             break;
           }
-          case 34: {
+          case 42: {
             LuaEntryFunction = input.ReadString();
             break;
           }
-          case 42: {
+          case 50: {
             LuaProcessFunction = input.ReadString();
             break;
           }
-          case 50: {
+          case 58: {
             LuaSocketCloseFunction = input.ReadString();
             break;
           }

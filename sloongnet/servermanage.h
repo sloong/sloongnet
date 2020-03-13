@@ -11,7 +11,7 @@ namespace Sloong
 	class CServerManage
 	{
 	public:
-		CResult Initialize(string uuid,string& out_config);
+		CResult Initialize( const string& uuid);
 
 		bool RegisterServerHandler(Functions func, string sender, SmartPackage pack);
 		bool GetConfigTemplateListHandler(Functions func, string sender, SmartPackage pack);
@@ -20,10 +20,9 @@ namespace Sloong
 		bool GetServerConfigHandler(Functions func, string sender, SmartPackage pack);
 		bool SetServerToTemplate(Functions func, string sender, SmartPackage pack);
 
-		/// 由于初始化太早，无法在initialize时获取。智能由control_server手动设置
+		/// 由于初始化太早，无法在initialize时获取。只能由control_server手动设置
 		void SetLog(CLog* log) { m_pLog = log; }
 
-	private:
 	private:
 		unique_ptr<CConfiguation>	m_pAllConfig = make_unique<CConfiguation>();
 		CLog* m_pLog = nullptr;

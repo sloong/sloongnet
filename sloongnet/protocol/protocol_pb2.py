@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='protocol.proto',
   package='Protocol',
   syntax='proto3',
-  serialized_pb=_b('\n\x0eprotocol.proto\x12\x08Protocol\"\xdf\x01\n\x0b\x44\x61taPackage\x12%\n\x08\x46unction\x18\x01 \x01(\x0e\x32\x13.Protocol.Functions\x12\x15\n\rPriorityLevel\x18\x02 \x01(\x05\x12\x14\n\x0cSerialNumber\x18\x03 \x01(\x03\x12\x13\n\x0b\x43heckString\x18\x04 \x01(\t\x12\x0e\n\x06Sender\x18\x05 \x01(\t\x12\x10\n\x08Receiver\x18\x06 \x01(\x05\x12$\n\x06Result\x18\x07 \x01(\x0e\x32\x14.Protocol.ResultType\x12\x0f\n\x07\x43ontent\x18\x08 \x01(\t\x12\x0e\n\x06\x45xtend\x18\t \x01(\x0c\"\x8b\x03\n\rGLOBAL_CONFIG\x12\x12\n\nListenPort\x18\x01 \x01(\x05\x12\x11\n\tEnableSSL\x18\x02 \x01(\x08\x12\x14\n\x0c\x43\x65rtFilePath\x18\x03 \x01(\t\x12\x13\n\x0bKeyFilePath\x18\x04 \x01(\t\x12\x12\n\nCertPasswd\x18\x05 \x01(\t\x12\x13\n\x0b\x43onnectTime\x18\x06 \x01(\x05\x12\x13\n\x0bReceiveTime\x18\x07 \x01(\x05\x12\x0f\n\x07LogPath\x18\x08 \x01(\t\x12$\n\x08LogLevel\x18\t \x01(\x0e\x32\x12.Protocol.LogLevel\x12\x11\n\tDebugMode\x18\n \x01(\x08\x12\x18\n\x10MQThreadQuantity\x18\x0b \x01(\x05\x12\x1b\n\x13\x45PollThreadQuantity\x18\x0c \x01(\x05\x12\x1d\n\x15ProcessThreadQuantity\x18\r \x01(\x05\x12\x14\n\x0cPrioritySize\x18\x0e \x01(\x05\x12\"\n\x04Type\x18\x0f \x01(\x0e\x32\x14.Protocol.ModuleType\x12\x10\n\x08\x45xConfig\x18\x10 \x01(\x0c\"#\n\x0e\x43ONTROL_CONFIG\x12\x11\n\tBlockTime\x18\x01 \x01(\x05\"f\n\tDB_CONFIG\x12\x15\n\rServerAddress\x18\x01 \x01(\t\x12\x12\n\nServerPort\x18\x02 \x01(\x05\x12\x0c\n\x04User\x18\x03 \x01(\t\x12\x0e\n\x06Passwd\x18\x04 \x01(\t\x12\x10\n\x08\x44\x61tabase\x18\x05 \x01(\t\"<\n\x0b\x44\x41TA_CONFIG\x12\x17\n\x0f\x44\x61taReceivePort\x18\x01 \x01(\x05\x12\x14\n\x0c\x44\x61taRecvTime\x18\x02 \x01(\x05\"\x8c\x01\n\x0eGATEWAY_CONFIG\x12\x17\n\x0f\x43lientCheckTime\x18\x01 \x01(\x05\x12\x16\n\x0e\x43lientCheckKey\x18\x02 \x01(\t\x12\x1c\n\x14TimeoutCheckInterval\x18\x03 \x01(\x05\x12\x13\n\x0bTimeoutTime\x18\x04 \x01(\x05\x12\x16\n\x0eProcessAddress\x18\x05 \x01(\t\"$\n\x0f\x46IREWALL_CONFIG\x12\x11\n\tBlockTime\x18\x01 \x01(\x05\"\xb1\x01\n\x0ePROCESS_CONFIG\x12\x1a\n\x12LuaContextQuantity\x18\x01 \x01(\x05\x12\x17\n\x0fLuaScriptFolder\x18\x02 \x01(\t\x12\x14\n\x0cLuaEntryFile\x18\x03 \x01(\t\x12\x18\n\x10LuaEntryFunction\x18\x04 \x01(\t\x12\x1a\n\x12LuaProcessFunction\x18\x05 \x01(\t\x12\x1e\n\x16LuaSocketCloseFunction\x18\x06 \x01(\t*e\n\nModuleType\x12\x10\n\x0cUnconfigured\x10\x00\x12\x0b\n\x07\x43ontrol\x10\x01\x12\x0c\n\x08\x46irewall\x10\x02\x12\x0b\n\x07Gateway\x10\x03\x12\x08\n\x04\x44\x61ta\x10\x04\x12\x0b\n\x07Process\x10\x05\x12\x06\n\x02\x44\x42\x10\x06*I\n\nResultType\x12\x0b\n\x07Succeed\x10\x00\x12\t\n\x05\x45rror\x10\x01\x12\x0b\n\x07Warning\x10\x02\x12\t\n\x05Retry\x10\x03\x12\x0b\n\x07Invalid\x10\x04*^\n\x08LogLevel\x12\x07\n\x03\x41ll\x10\x00\x12\n\n\x06Verbos\x10\x01\x12\t\n\x05\x44\x65\x62ug\x10\x02\x12\x08\n\x04Info\x10\x03\x12\x08\n\x04Warn\x10\x04\x12\x07\n\x03\x45rr\x10\x05\x12\n\n\x06\x41ssert\x10\x06\x12\t\n\x05\x46\x61tal\x10\x07*\xc7\x01\n\tFunctions\x12\x12\n\x0eProcessMessage\x10\x00\x12\x0b\n\x07PostLog\x10\x01\x12\x11\n\rRegisteServer\x10\x02\x12\x12\n\x0eRestartService\x10\x03\x12\x18\n\x14GetAllConfigTemplate\x10\x04\x12\x15\n\x11SetConfigTemplate\x10\x05\x12\x13\n\x0fGetServerConfig\x10\x06\x12\x13\n\x0fSetServerConfig\x10\x07\x12\x17\n\x13SetServerToTemplate\x10\x08\x62\x06proto3')
+  serialized_pb=_b('\n\x0eprotocol.proto\x12\x08Protocol\"\xdf\x01\n\x0b\x44\x61taPackage\x12%\n\x08\x46unction\x18\x01 \x01(\x0e\x32\x13.Protocol.Functions\x12\x15\n\rPriorityLevel\x18\x02 \x01(\x05\x12\x14\n\x0cSerialNumber\x18\x03 \x01(\x03\x12\x13\n\x0b\x43heckString\x18\x04 \x01(\t\x12\x0e\n\x06Sender\x18\x05 \x01(\t\x12\x10\n\x08Receiver\x18\x06 \x01(\x05\x12$\n\x06Result\x18\x07 \x01(\x0e\x32\x14.Protocol.ResultType\x12\x0f\n\x07\x43ontent\x18\x08 \x01(\t\x12\x0e\n\x06\x45xtend\x18\t \x01(\x0c\"\x8b\x03\n\rGLOBAL_CONFIG\x12\x12\n\nListenPort\x18\x01 \x01(\x05\x12\x11\n\tEnableSSL\x18\x02 \x01(\x08\x12\x14\n\x0c\x43\x65rtFilePath\x18\x03 \x01(\t\x12\x13\n\x0bKeyFilePath\x18\x04 \x01(\t\x12\x12\n\nCertPasswd\x18\x05 \x01(\t\x12\x13\n\x0b\x43onnectTime\x18\x06 \x01(\x05\x12\x13\n\x0bReceiveTime\x18\x07 \x01(\x05\x12\x0f\n\x07LogPath\x18\x08 \x01(\t\x12$\n\x08LogLevel\x18\t \x01(\x0e\x32\x12.Protocol.LogLevel\x12\x11\n\tDebugMode\x18\n \x01(\x08\x12\x18\n\x10MQThreadQuantity\x18\x0b \x01(\x05\x12\x1b\n\x13\x45PollThreadQuantity\x18\x0c \x01(\x05\x12\x1d\n\x15ProcessThreadQuantity\x18\r \x01(\x05\x12\x14\n\x0cPrioritySize\x18\x0e \x01(\x05\x12\"\n\x04Type\x18\x0f \x01(\x0e\x32\x14.Protocol.ModuleType\x12\x10\n\x08\x45xConfig\x18\x10 \x01(\x0c\"P\n\x0e\x43ONTROL_CONFIG\x12+\n\nBaseConfig\x18\x01 \x01(\x0b\x32\x17.Protocol.GLOBAL_CONFIG\x12\x11\n\tBlockTime\x18\x02 \x01(\x05\"\x93\x01\n\tDB_CONFIG\x12+\n\nBaseConfig\x18\x01 \x01(\x0b\x32\x17.Protocol.GLOBAL_CONFIG\x12\x15\n\rServerAddress\x18\x02 \x01(\t\x12\x12\n\nServerPort\x18\x03 \x01(\x05\x12\x0c\n\x04User\x18\x04 \x01(\t\x12\x0e\n\x06Passwd\x18\x05 \x01(\t\x12\x10\n\x08\x44\x61tabase\x18\x06 \x01(\t\"i\n\x0b\x44\x41TA_CONFIG\x12+\n\nBaseConfig\x18\x01 \x01(\x0b\x32\x17.Protocol.GLOBAL_CONFIG\x12\x17\n\x0f\x44\x61taReceivePort\x18\x02 \x01(\x05\x12\x14\n\x0c\x44\x61taRecvTime\x18\x03 \x01(\x05\"\xb9\x01\n\x0eGATEWAY_CONFIG\x12+\n\nBaseConfig\x18\x01 \x01(\x0b\x32\x17.Protocol.GLOBAL_CONFIG\x12\x17\n\x0f\x43lientCheckTime\x18\x02 \x01(\x05\x12\x16\n\x0e\x43lientCheckKey\x18\x03 \x01(\t\x12\x1c\n\x14TimeoutCheckInterval\x18\x04 \x01(\x05\x12\x13\n\x0bTimeoutTime\x18\x05 \x01(\x05\x12\x16\n\x0eProcessAddress\x18\x06 \x01(\t\"Q\n\x0f\x46IREWALL_CONFIG\x12+\n\nBaseConfig\x18\x01 \x01(\x0b\x32\x17.Protocol.GLOBAL_CONFIG\x12\x11\n\tBlockTime\x18\x02 \x01(\x05\"\xde\x01\n\x0ePROCESS_CONFIG\x12+\n\nBaseConfig\x18\x01 \x01(\x0b\x32\x17.Protocol.GLOBAL_CONFIG\x12\x1a\n\x12LuaContextQuantity\x18\x02 \x01(\x05\x12\x17\n\x0fLuaScriptFolder\x18\x03 \x01(\t\x12\x14\n\x0cLuaEntryFile\x18\x04 \x01(\t\x12\x18\n\x10LuaEntryFunction\x18\x05 \x01(\t\x12\x1a\n\x12LuaProcessFunction\x18\x06 \x01(\t\x12\x1e\n\x16LuaSocketCloseFunction\x18\x07 \x01(\t*e\n\nModuleType\x12\x10\n\x0cUnconfigured\x10\x00\x12\x0b\n\x07\x43ontrol\x10\x01\x12\x0c\n\x08\x46irewall\x10\x02\x12\x0b\n\x07Gateway\x10\x03\x12\x08\n\x04\x44\x61ta\x10\x04\x12\x0b\n\x07Process\x10\x05\x12\x06\n\x02\x44\x42\x10\x06*I\n\nResultType\x12\x0b\n\x07Succeed\x10\x00\x12\t\n\x05\x45rror\x10\x01\x12\x0b\n\x07Warning\x10\x02\x12\t\n\x05Retry\x10\x03\x12\x0b\n\x07Invalid\x10\x04*^\n\x08LogLevel\x12\x07\n\x03\x41ll\x10\x00\x12\n\n\x06Verbos\x10\x01\x12\t\n\x05\x44\x65\x62ug\x10\x02\x12\x08\n\x04Info\x10\x03\x12\x08\n\x04Warn\x10\x04\x12\x07\n\x03\x45rr\x10\x05\x12\n\n\x06\x41ssert\x10\x06\x12\t\n\x05\x46\x61tal\x10\x07*\xda\x01\n\tFunctions\x12\x12\n\x0eProcessMessage\x10\x00\x12\x0b\n\x07PostLog\x10\x01\x12\x11\n\rRegisteServer\x10\x02\x12\x11\n\rGetServerList\x10\t\x12\x12\n\x0eRestartService\x10\x03\x12\x18\n\x14GetAllConfigTemplate\x10\x04\x12\x15\n\x11SetConfigTemplate\x10\x05\x12\x13\n\x0fGetServerConfig\x10\x06\x12\x13\n\x0fSetServerConfig\x10\x07\x12\x17\n\x13SetServerToTemplate\x10\x08\x62\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -61,8 +61,8 @@ _MODULETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1216,
-  serialized_end=1317,
+  serialized_start=1487,
+  serialized_end=1588,
 )
 _sym_db.RegisterEnumDescriptor(_MODULETYPE)
 
@@ -96,8 +96,8 @@ _RESULTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1319,
-  serialized_end=1392,
+  serialized_start=1590,
+  serialized_end=1663,
 )
 _sym_db.RegisterEnumDescriptor(_RESULTTYPE)
 
@@ -143,8 +143,8 @@ _LOGLEVEL = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1394,
-  serialized_end=1488,
+  serialized_start=1665,
+  serialized_end=1759,
 )
 _sym_db.RegisterEnumDescriptor(_LOGLEVEL)
 
@@ -168,34 +168,38 @@ _FUNCTIONS = _descriptor.EnumDescriptor(
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='RestartService', index=3, number=3,
+      name='GetServerList', index=3, number=9,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GetAllConfigTemplate', index=4, number=4,
+      name='RestartService', index=4, number=3,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SetConfigTemplate', index=5, number=5,
+      name='GetAllConfigTemplate', index=5, number=4,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GetServerConfig', index=6, number=6,
+      name='SetConfigTemplate', index=6, number=5,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SetServerConfig', index=7, number=7,
+      name='GetServerConfig', index=7, number=6,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SetServerToTemplate', index=8, number=8,
+      name='SetServerConfig', index=8, number=7,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SetServerToTemplate', index=9, number=8,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=1491,
-  serialized_end=1690,
+  serialized_start=1762,
+  serialized_end=1980,
 )
 _sym_db.RegisterEnumDescriptor(_FUNCTIONS)
 
@@ -223,6 +227,7 @@ Fatal = 7
 ProcessMessage = 0
 PostLog = 1
 RegisteServer = 2
+GetServerList = 9
 RestartService = 3
 GetAllConfigTemplate = 4
 SetConfigTemplate = 5
@@ -463,8 +468,15 @@ _CONTROL_CONFIG = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='BlockTime', full_name='Protocol.CONTROL_CONFIG.BlockTime', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      name='BaseConfig', full_name='Protocol.CONTROL_CONFIG.BaseConfig', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='BlockTime', full_name='Protocol.CONTROL_CONFIG.BlockTime', index=1,
+      number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -482,7 +494,7 @@ _CONTROL_CONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=652,
-  serialized_end=687,
+  serialized_end=732,
 )
 
 
@@ -494,229 +506,42 @@ _DB_CONFIG = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='ServerAddress', full_name='Protocol.DB_CONFIG.ServerAddress', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      name='BaseConfig', full_name='Protocol.DB_CONFIG.BaseConfig', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='ServerPort', full_name='Protocol.DB_CONFIG.ServerPort', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='User', full_name='Protocol.DB_CONFIG.User', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='Passwd', full_name='Protocol.DB_CONFIG.Passwd', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='Database', full_name='Protocol.DB_CONFIG.Database', index=4,
-      number=5, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=689,
-  serialized_end=791,
-)
-
-
-_DATA_CONFIG = _descriptor.Descriptor(
-  name='DATA_CONFIG',
-  full_name='Protocol.DATA_CONFIG',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='DataReceivePort', full_name='Protocol.DATA_CONFIG.DataReceivePort', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='DataRecvTime', full_name='Protocol.DATA_CONFIG.DataRecvTime', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=793,
-  serialized_end=853,
-)
-
-
-_GATEWAY_CONFIG = _descriptor.Descriptor(
-  name='GATEWAY_CONFIG',
-  full_name='Protocol.GATEWAY_CONFIG',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='ClientCheckTime', full_name='Protocol.GATEWAY_CONFIG.ClientCheckTime', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='ClientCheckKey', full_name='Protocol.GATEWAY_CONFIG.ClientCheckKey', index=1,
+      name='ServerAddress', full_name='Protocol.DB_CONFIG.ServerAddress', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='TimeoutCheckInterval', full_name='Protocol.GATEWAY_CONFIG.TimeoutCheckInterval', index=2,
+      name='ServerPort', full_name='Protocol.DB_CONFIG.ServerPort', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='TimeoutTime', full_name='Protocol.GATEWAY_CONFIG.TimeoutTime', index=3,
-      number=4, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='ProcessAddress', full_name='Protocol.GATEWAY_CONFIG.ProcessAddress', index=4,
-      number=5, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=856,
-  serialized_end=996,
-)
-
-
-_FIREWALL_CONFIG = _descriptor.Descriptor(
-  name='FIREWALL_CONFIG',
-  full_name='Protocol.FIREWALL_CONFIG',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='BlockTime', full_name='Protocol.FIREWALL_CONFIG.BlockTime', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=998,
-  serialized_end=1034,
-)
-
-
-_PROCESS_CONFIG = _descriptor.Descriptor(
-  name='PROCESS_CONFIG',
-  full_name='Protocol.PROCESS_CONFIG',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='LuaContextQuantity', full_name='Protocol.PROCESS_CONFIG.LuaContextQuantity', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='LuaScriptFolder', full_name='Protocol.PROCESS_CONFIG.LuaScriptFolder', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='LuaEntryFile', full_name='Protocol.PROCESS_CONFIG.LuaEntryFile', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='LuaEntryFunction', full_name='Protocol.PROCESS_CONFIG.LuaEntryFunction', index=3,
+      name='User', full_name='Protocol.DB_CONFIG.User', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='LuaProcessFunction', full_name='Protocol.PROCESS_CONFIG.LuaProcessFunction', index=4,
+      name='Passwd', full_name='Protocol.DB_CONFIG.Passwd', index=4,
       number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='LuaSocketCloseFunction', full_name='Protocol.PROCESS_CONFIG.LuaSocketCloseFunction', index=5,
+      name='Database', full_name='Protocol.DB_CONFIG.Database', index=5,
       number=6, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -734,14 +559,242 @@ _PROCESS_CONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1037,
-  serialized_end=1214,
+  serialized_start=735,
+  serialized_end=882,
+)
+
+
+_DATA_CONFIG = _descriptor.Descriptor(
+  name='DATA_CONFIG',
+  full_name='Protocol.DATA_CONFIG',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='BaseConfig', full_name='Protocol.DATA_CONFIG.BaseConfig', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='DataReceivePort', full_name='Protocol.DATA_CONFIG.DataReceivePort', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='DataRecvTime', full_name='Protocol.DATA_CONFIG.DataRecvTime', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=884,
+  serialized_end=989,
+)
+
+
+_GATEWAY_CONFIG = _descriptor.Descriptor(
+  name='GATEWAY_CONFIG',
+  full_name='Protocol.GATEWAY_CONFIG',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='BaseConfig', full_name='Protocol.GATEWAY_CONFIG.BaseConfig', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='ClientCheckTime', full_name='Protocol.GATEWAY_CONFIG.ClientCheckTime', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='ClientCheckKey', full_name='Protocol.GATEWAY_CONFIG.ClientCheckKey', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='TimeoutCheckInterval', full_name='Protocol.GATEWAY_CONFIG.TimeoutCheckInterval', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='TimeoutTime', full_name='Protocol.GATEWAY_CONFIG.TimeoutTime', index=4,
+      number=5, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='ProcessAddress', full_name='Protocol.GATEWAY_CONFIG.ProcessAddress', index=5,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=992,
+  serialized_end=1177,
+)
+
+
+_FIREWALL_CONFIG = _descriptor.Descriptor(
+  name='FIREWALL_CONFIG',
+  full_name='Protocol.FIREWALL_CONFIG',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='BaseConfig', full_name='Protocol.FIREWALL_CONFIG.BaseConfig', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='BlockTime', full_name='Protocol.FIREWALL_CONFIG.BlockTime', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1179,
+  serialized_end=1260,
+)
+
+
+_PROCESS_CONFIG = _descriptor.Descriptor(
+  name='PROCESS_CONFIG',
+  full_name='Protocol.PROCESS_CONFIG',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='BaseConfig', full_name='Protocol.PROCESS_CONFIG.BaseConfig', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='LuaContextQuantity', full_name='Protocol.PROCESS_CONFIG.LuaContextQuantity', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='LuaScriptFolder', full_name='Protocol.PROCESS_CONFIG.LuaScriptFolder', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='LuaEntryFile', full_name='Protocol.PROCESS_CONFIG.LuaEntryFile', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='LuaEntryFunction', full_name='Protocol.PROCESS_CONFIG.LuaEntryFunction', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='LuaProcessFunction', full_name='Protocol.PROCESS_CONFIG.LuaProcessFunction', index=5,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='LuaSocketCloseFunction', full_name='Protocol.PROCESS_CONFIG.LuaSocketCloseFunction', index=6,
+      number=7, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1263,
+  serialized_end=1485,
 )
 
 _DATAPACKAGE.fields_by_name['Function'].enum_type = _FUNCTIONS
 _DATAPACKAGE.fields_by_name['Result'].enum_type = _RESULTTYPE
 _GLOBAL_CONFIG.fields_by_name['LogLevel'].enum_type = _LOGLEVEL
 _GLOBAL_CONFIG.fields_by_name['Type'].enum_type = _MODULETYPE
+_CONTROL_CONFIG.fields_by_name['BaseConfig'].message_type = _GLOBAL_CONFIG
+_DB_CONFIG.fields_by_name['BaseConfig'].message_type = _GLOBAL_CONFIG
+_DATA_CONFIG.fields_by_name['BaseConfig'].message_type = _GLOBAL_CONFIG
+_GATEWAY_CONFIG.fields_by_name['BaseConfig'].message_type = _GLOBAL_CONFIG
+_FIREWALL_CONFIG.fields_by_name['BaseConfig'].message_type = _GLOBAL_CONFIG
+_PROCESS_CONFIG.fields_by_name['BaseConfig'].message_type = _GLOBAL_CONFIG
 DESCRIPTOR.message_types_by_name['DataPackage'] = _DATAPACKAGE
 DESCRIPTOR.message_types_by_name['GLOBAL_CONFIG'] = _GLOBAL_CONFIG
 DESCRIPTOR.message_types_by_name['CONTROL_CONFIG'] = _CONTROL_CONFIG

@@ -27,14 +27,16 @@ CResult SloongControlService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
 		uuid = CUtility::GenUUID();
 		fstream_ex::write_all("uuid.dat", uuid);
 	}
-	string config_str;
-	auto res = m_pServer->Initialize(uuid, config_str);
+	auto res = m_pServer->Initialize(uuid);
 	if (res.IsFialed())
 	{
 		cout << "Init server manage fialed. error message:" << res.Message() << endl;
 		return res;
 	}
-	
+
+	auto config_str = res.Message();
+	// Here, this port is came from COMMAND LINE. 
+	// So we need save it before parse other setting.
 	auto port = config->listenport();
 	if (config_str.length() == 0 || !config->ParseFromString(config_str))
 	{
@@ -42,6 +44,7 @@ CResult SloongControlService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
 		cout <<  "Parser server config error. run with default setting." << endl;
 		ResetControlConfig(config.get());
 	}
+	// When config parse done, revert the port setting. Because we always use the command line port.
 	config->set_listenport(port);
 	return CSloongBaseService::Initialize(config);
 }

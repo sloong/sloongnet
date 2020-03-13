@@ -114,7 +114,8 @@ void protobuf_AssignDesc_protocol_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GLOBAL_CONFIG, _is_default_instance_));
   CONTROL_CONFIG_descriptor_ = file->message_type(2);
-  static const int CONTROL_CONFIG_offsets_[1] = {
+  static const int CONTROL_CONFIG_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CONTROL_CONFIG, baseconfig_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CONTROL_CONFIG, blocktime_),
   };
   CONTROL_CONFIG_reflection_ =
@@ -129,7 +130,8 @@ void protobuf_AssignDesc_protocol_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CONTROL_CONFIG, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CONTROL_CONFIG, _is_default_instance_));
   DB_CONFIG_descriptor_ = file->message_type(3);
-  static const int DB_CONFIG_offsets_[5] = {
+  static const int DB_CONFIG_offsets_[6] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DB_CONFIG, baseconfig_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DB_CONFIG, serveraddress_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DB_CONFIG, serverport_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DB_CONFIG, user_),
@@ -148,7 +150,8 @@ void protobuf_AssignDesc_protocol_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DB_CONFIG, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DB_CONFIG, _is_default_instance_));
   DATA_CONFIG_descriptor_ = file->message_type(4);
-  static const int DATA_CONFIG_offsets_[2] = {
+  static const int DATA_CONFIG_offsets_[3] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DATA_CONFIG, baseconfig_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DATA_CONFIG, datareceiveport_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DATA_CONFIG, datarecvtime_),
   };
@@ -164,7 +167,8 @@ void protobuf_AssignDesc_protocol_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DATA_CONFIG, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DATA_CONFIG, _is_default_instance_));
   GATEWAY_CONFIG_descriptor_ = file->message_type(5);
-  static const int GATEWAY_CONFIG_offsets_[5] = {
+  static const int GATEWAY_CONFIG_offsets_[6] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GATEWAY_CONFIG, baseconfig_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GATEWAY_CONFIG, clientchecktime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GATEWAY_CONFIG, clientcheckkey_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GATEWAY_CONFIG, timeoutcheckinterval_),
@@ -183,7 +187,8 @@ void protobuf_AssignDesc_protocol_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GATEWAY_CONFIG, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GATEWAY_CONFIG, _is_default_instance_));
   FIREWALL_CONFIG_descriptor_ = file->message_type(6);
-  static const int FIREWALL_CONFIG_offsets_[1] = {
+  static const int FIREWALL_CONFIG_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FIREWALL_CONFIG, baseconfig_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FIREWALL_CONFIG, blocktime_),
   };
   FIREWALL_CONFIG_reflection_ =
@@ -198,7 +203,8 @@ void protobuf_AssignDesc_protocol_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FIREWALL_CONFIG, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FIREWALL_CONFIG, _is_default_instance_));
   PROCESS_CONFIG_descriptor_ = file->message_type(7);
-  static const int PROCESS_CONFIG_offsets_[6] = {
+  static const int PROCESS_CONFIG_offsets_[7] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROCESS_CONFIG, baseconfig_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROCESS_CONFIG, luacontextquantity_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROCESS_CONFIG, luascriptfolder_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PROCESS_CONFIG, luaentryfile_),
@@ -297,33 +303,40 @@ void protobuf_AddDesc_protocol_2eproto() {
     "ollThreadQuantity\030\014 \001(\005\022\035\n\025ProcessThread"
     "Quantity\030\r \001(\005\022\024\n\014PrioritySize\030\016 \001(\005\022\"\n\004"
     "Type\030\017 \001(\0162\024.Protocol.ModuleType\022\020\n\010ExCo"
-    "nfig\030\020 \001(\014\"#\n\016CONTROL_CONFIG\022\021\n\tBlockTim"
-    "e\030\001 \001(\005\"f\n\tDB_CONFIG\022\025\n\rServerAddress\030\001 "
-    "\001(\t\022\022\n\nServerPort\030\002 \001(\005\022\014\n\004User\030\003 \001(\t\022\016\n"
-    "\006Passwd\030\004 \001(\t\022\020\n\010Database\030\005 \001(\t\"<\n\013DATA_"
-    "CONFIG\022\027\n\017DataReceivePort\030\001 \001(\005\022\024\n\014DataR"
-    "ecvTime\030\002 \001(\005\"\214\001\n\016GATEWAY_CONFIG\022\027\n\017Clie"
-    "ntCheckTime\030\001 \001(\005\022\026\n\016ClientCheckKey\030\002 \001("
-    "\t\022\034\n\024TimeoutCheckInterval\030\003 \001(\005\022\023\n\013Timeo"
-    "utTime\030\004 \001(\005\022\026\n\016ProcessAddress\030\005 \001(\t\"$\n\017"
-    "FIREWALL_CONFIG\022\021\n\tBlockTime\030\001 \001(\005\"\261\001\n\016P"
-    "ROCESS_CONFIG\022\032\n\022LuaContextQuantity\030\001 \001("
-    "\005\022\027\n\017LuaScriptFolder\030\002 \001(\t\022\024\n\014LuaEntryFi"
-    "le\030\003 \001(\t\022\030\n\020LuaEntryFunction\030\004 \001(\t\022\032\n\022Lu"
-    "aProcessFunction\030\005 \001(\t\022\036\n\026LuaSocketClose"
-    "Function\030\006 \001(\t*e\n\nModuleType\022\020\n\014Unconfig"
-    "ured\020\000\022\013\n\007Control\020\001\022\014\n\010Firewall\020\002\022\013\n\007Gat"
-    "eway\020\003\022\010\n\004Data\020\004\022\013\n\007Process\020\005\022\006\n\002DB\020\006*I\n"
-    "\nResultType\022\013\n\007Succeed\020\000\022\t\n\005Error\020\001\022\013\n\007W"
-    "arning\020\002\022\t\n\005Retry\020\003\022\013\n\007Invalid\020\004*^\n\010LogL"
-    "evel\022\007\n\003All\020\000\022\n\n\006Verbos\020\001\022\t\n\005Debug\020\002\022\010\n\004"
-    "Info\020\003\022\010\n\004Warn\020\004\022\007\n\003Err\020\005\022\n\n\006Assert\020\006\022\t\n"
-    "\005Fatal\020\007*\307\001\n\tFunctions\022\022\n\016ProcessMessage"
-    "\020\000\022\013\n\007PostLog\020\001\022\021\n\rRegisteServer\020\002\022\022\n\016Re"
-    "startService\020\003\022\030\n\024GetAllConfigTemplate\020\004"
-    "\022\025\n\021SetConfigTemplate\020\005\022\023\n\017GetServerConf"
-    "ig\020\006\022\023\n\017SetServerConfig\020\007\022\027\n\023SetServerTo"
-    "Template\020\010b\006proto3", 1698);
+    "nfig\030\020 \001(\014\"P\n\016CONTROL_CONFIG\022+\n\nBaseConf"
+    "ig\030\001 \001(\0132\027.Protocol.GLOBAL_CONFIG\022\021\n\tBlo"
+    "ckTime\030\002 \001(\005\"\223\001\n\tDB_CONFIG\022+\n\nBaseConfig"
+    "\030\001 \001(\0132\027.Protocol.GLOBAL_CONFIG\022\025\n\rServe"
+    "rAddress\030\002 \001(\t\022\022\n\nServerPort\030\003 \001(\005\022\014\n\004Us"
+    "er\030\004 \001(\t\022\016\n\006Passwd\030\005 \001(\t\022\020\n\010Database\030\006 \001"
+    "(\t\"i\n\013DATA_CONFIG\022+\n\nBaseConfig\030\001 \001(\0132\027."
+    "Protocol.GLOBAL_CONFIG\022\027\n\017DataReceivePor"
+    "t\030\002 \001(\005\022\024\n\014DataRecvTime\030\003 \001(\005\"\271\001\n\016GATEWA"
+    "Y_CONFIG\022+\n\nBaseConfig\030\001 \001(\0132\027.Protocol."
+    "GLOBAL_CONFIG\022\027\n\017ClientCheckTime\030\002 \001(\005\022\026"
+    "\n\016ClientCheckKey\030\003 \001(\t\022\034\n\024TimeoutCheckIn"
+    "terval\030\004 \001(\005\022\023\n\013TimeoutTime\030\005 \001(\005\022\026\n\016Pro"
+    "cessAddress\030\006 \001(\t\"Q\n\017FIREWALL_CONFIG\022+\n\n"
+    "BaseConfig\030\001 \001(\0132\027.Protocol.GLOBAL_CONFI"
+    "G\022\021\n\tBlockTime\030\002 \001(\005\"\336\001\n\016PROCESS_CONFIG\022"
+    "+\n\nBaseConfig\030\001 \001(\0132\027.Protocol.GLOBAL_CO"
+    "NFIG\022\032\n\022LuaContextQuantity\030\002 \001(\005\022\027\n\017LuaS"
+    "criptFolder\030\003 \001(\t\022\024\n\014LuaEntryFile\030\004 \001(\t\022"
+    "\030\n\020LuaEntryFunction\030\005 \001(\t\022\032\n\022LuaProcessF"
+    "unction\030\006 \001(\t\022\036\n\026LuaSocketCloseFunction\030"
+    "\007 \001(\t*e\n\nModuleType\022\020\n\014Unconfigured\020\000\022\013\n"
+    "\007Control\020\001\022\014\n\010Firewall\020\002\022\013\n\007Gateway\020\003\022\010\n"
+    "\004Data\020\004\022\013\n\007Process\020\005\022\006\n\002DB\020\006*I\n\nResultTy"
+    "pe\022\013\n\007Succeed\020\000\022\t\n\005Error\020\001\022\013\n\007Warning\020\002\022"
+    "\t\n\005Retry\020\003\022\013\n\007Invalid\020\004*^\n\010LogLevel\022\007\n\003A"
+    "ll\020\000\022\n\n\006Verbos\020\001\022\t\n\005Debug\020\002\022\010\n\004Info\020\003\022\010\n"
+    "\004Warn\020\004\022\007\n\003Err\020\005\022\n\n\006Assert\020\006\022\t\n\005Fatal\020\007*"
+    "\332\001\n\tFunctions\022\022\n\016ProcessMessage\020\000\022\013\n\007Pos"
+    "tLog\020\001\022\021\n\rRegisteServer\020\002\022\021\n\rGetServerLi"
+    "st\020\t\022\022\n\016RestartService\020\003\022\030\n\024GetAllConfig"
+    "Template\020\004\022\025\n\021SetConfigTemplate\020\005\022\023\n\017Get"
+    "ServerConfig\020\006\022\023\n\017SetServerConfig\020\007\022\027\n\023S"
+    "etServerToTemplate\020\010b\006proto3", 1988);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "protocol.proto", &protobuf_RegisterTypes);
   DataPackage::default_instance_ = new DataPackage();
@@ -422,6 +435,7 @@ bool Functions_IsValid(int value) {
     case 6:
     case 7:
     case 8:
+    case 9:
       return true;
     default:
       return false;
@@ -2545,6 +2559,7 @@ void GLOBAL_CONFIG::clear_exconfig() {
 // ===================================================================
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int CONTROL_CONFIG::kBaseConfigFieldNumber;
 const int CONTROL_CONFIG::kBlockTimeFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -2556,6 +2571,7 @@ CONTROL_CONFIG::CONTROL_CONFIG()
 
 void CONTROL_CONFIG::InitAsDefaultInstance() {
   _is_default_instance_ = true;
+  baseconfig_ = const_cast< ::Protocol::GLOBAL_CONFIG*>(&::Protocol::GLOBAL_CONFIG::default_instance());
 }
 
 CONTROL_CONFIG::CONTROL_CONFIG(const CONTROL_CONFIG& from)
@@ -2569,6 +2585,7 @@ CONTROL_CONFIG::CONTROL_CONFIG(const CONTROL_CONFIG& from)
 void CONTROL_CONFIG::SharedCtor() {
     _is_default_instance_ = false;
   _cached_size_ = 0;
+  baseconfig_ = NULL;
   blocktime_ = 0;
 }
 
@@ -2579,6 +2596,7 @@ CONTROL_CONFIG::~CONTROL_CONFIG() {
 
 void CONTROL_CONFIG::SharedDtor() {
   if (this != default_instance_) {
+    delete baseconfig_;
   }
 }
 
@@ -2609,6 +2627,8 @@ CONTROL_CONFIG* CONTROL_CONFIG::New(::google::protobuf::Arena* arena) const {
 
 void CONTROL_CONFIG::Clear() {
 // @@protoc_insertion_point(message_clear_start:Protocol.CONTROL_CONFIG)
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
   blocktime_ = 0;
 }
 
@@ -2622,9 +2642,22 @@ bool CONTROL_CONFIG::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional int32 BlockTime = 1;
+      // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
       case 1: {
-        if (tag == 8) {
+        if (tag == 10) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_baseconfig()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_BlockTime;
+        break;
+      }
+
+      // optional int32 BlockTime = 2;
+      case 2: {
+        if (tag == 16) {
+         parse_BlockTime:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &blocktime_)));
@@ -2660,9 +2693,15 @@ failure:
 void CONTROL_CONFIG::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:Protocol.CONTROL_CONFIG)
-  // optional int32 BlockTime = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, *this->baseconfig_, output);
+  }
+
+  // optional int32 BlockTime = 2;
   if (this->blocktime() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->blocktime(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->blocktime(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:Protocol.CONTROL_CONFIG)
@@ -2671,9 +2710,16 @@ void CONTROL_CONFIG::SerializeWithCachedSizes(
 ::google::protobuf::uint8* CONTROL_CONFIG::InternalSerializeWithCachedSizesToArray(
     bool deterministic, ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:Protocol.CONTROL_CONFIG)
-  // optional int32 BlockTime = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      InternalWriteMessageNoVirtualToArray(
+        1, *this->baseconfig_, false, target);
+  }
+
+  // optional int32 BlockTime = 2;
   if (this->blocktime() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->blocktime(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->blocktime(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:Protocol.CONTROL_CONFIG)
@@ -2684,7 +2730,14 @@ int CONTROL_CONFIG::ByteSize() const {
 // @@protoc_insertion_point(message_byte_size_start:Protocol.CONTROL_CONFIG)
   int total_size = 0;
 
-  // optional int32 BlockTime = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        *this->baseconfig_);
+  }
+
+  // optional int32 BlockTime = 2;
   if (this->blocktime() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
@@ -2719,6 +2772,9 @@ void CONTROL_CONFIG::MergeFrom(const CONTROL_CONFIG& from) {
   if (GOOGLE_PREDICT_FALSE(&from == this)) {
     ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
   }
+  if (from.has_baseconfig()) {
+    mutable_baseconfig()->::Protocol::GLOBAL_CONFIG::MergeFrom(from.baseconfig());
+  }
   if (from.blocktime() != 0) {
     set_blocktime(from.blocktime());
   }
@@ -2748,6 +2804,7 @@ void CONTROL_CONFIG::Swap(CONTROL_CONFIG* other) {
   InternalSwap(other);
 }
 void CONTROL_CONFIG::InternalSwap(CONTROL_CONFIG* other) {
+  std::swap(baseconfig_, other->baseconfig_);
   std::swap(blocktime_, other->blocktime_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -2764,7 +2821,45 @@ void CONTROL_CONFIG::InternalSwap(CONTROL_CONFIG* other) {
 #if PROTOBUF_INLINE_NOT_IN_HEADERS
 // CONTROL_CONFIG
 
-// optional int32 BlockTime = 1;
+// optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+bool CONTROL_CONFIG::has_baseconfig() const {
+  return !_is_default_instance_ && baseconfig_ != NULL;
+}
+void CONTROL_CONFIG::clear_baseconfig() {
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
+}
+const ::Protocol::GLOBAL_CONFIG& CONTROL_CONFIG::baseconfig() const {
+  // @@protoc_insertion_point(field_get:Protocol.CONTROL_CONFIG.BaseConfig)
+  return baseconfig_ != NULL ? *baseconfig_ : *default_instance_->baseconfig_;
+}
+::Protocol::GLOBAL_CONFIG* CONTROL_CONFIG::mutable_baseconfig() {
+  
+  if (baseconfig_ == NULL) {
+    baseconfig_ = new ::Protocol::GLOBAL_CONFIG;
+  }
+  // @@protoc_insertion_point(field_mutable:Protocol.CONTROL_CONFIG.BaseConfig)
+  return baseconfig_;
+}
+::Protocol::GLOBAL_CONFIG* CONTROL_CONFIG::release_baseconfig() {
+  // @@protoc_insertion_point(field_release:Protocol.CONTROL_CONFIG.BaseConfig)
+  
+  ::Protocol::GLOBAL_CONFIG* temp = baseconfig_;
+  baseconfig_ = NULL;
+  return temp;
+}
+void CONTROL_CONFIG::set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig) {
+  delete baseconfig_;
+  baseconfig_ = baseconfig;
+  if (baseconfig) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:Protocol.CONTROL_CONFIG.BaseConfig)
+}
+
+// optional int32 BlockTime = 2;
 void CONTROL_CONFIG::clear_blocktime() {
   blocktime_ = 0;
 }
@@ -2783,6 +2878,7 @@ void CONTROL_CONFIG::clear_blocktime() {
 // ===================================================================
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int DB_CONFIG::kBaseConfigFieldNumber;
 const int DB_CONFIG::kServerAddressFieldNumber;
 const int DB_CONFIG::kServerPortFieldNumber;
 const int DB_CONFIG::kUserFieldNumber;
@@ -2798,6 +2894,7 @@ DB_CONFIG::DB_CONFIG()
 
 void DB_CONFIG::InitAsDefaultInstance() {
   _is_default_instance_ = true;
+  baseconfig_ = const_cast< ::Protocol::GLOBAL_CONFIG*>(&::Protocol::GLOBAL_CONFIG::default_instance());
 }
 
 DB_CONFIG::DB_CONFIG(const DB_CONFIG& from)
@@ -2812,6 +2909,7 @@ void DB_CONFIG::SharedCtor() {
     _is_default_instance_ = false;
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
+  baseconfig_ = NULL;
   serveraddress_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   serverport_ = 0;
   user_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
@@ -2830,6 +2928,7 @@ void DB_CONFIG::SharedDtor() {
   passwd_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   database_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != default_instance_) {
+    delete baseconfig_;
   }
 }
 
@@ -2860,6 +2959,8 @@ DB_CONFIG* DB_CONFIG::New(::google::protobuf::Arena* arena) const {
 
 void DB_CONFIG::Clear() {
 // @@protoc_insertion_point(message_clear_start:Protocol.DB_CONFIG)
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
   serveraddress_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   serverport_ = 0;
   user_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
@@ -2877,9 +2978,22 @@ bool DB_CONFIG::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional string ServerAddress = 1;
+      // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
       case 1: {
         if (tag == 10) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_baseconfig()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(18)) goto parse_ServerAddress;
+        break;
+      }
+
+      // optional string ServerAddress = 2;
+      case 2: {
+        if (tag == 18) {
+         parse_ServerAddress:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_serveraddress()));
           DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -2889,13 +3003,13 @@ bool DB_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(16)) goto parse_ServerPort;
+        if (input->ExpectTag(24)) goto parse_ServerPort;
         break;
       }
 
-      // optional int32 ServerPort = 2;
-      case 2: {
-        if (tag == 16) {
+      // optional int32 ServerPort = 3;
+      case 3: {
+        if (tag == 24) {
          parse_ServerPort:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
@@ -2904,13 +3018,13 @@ bool DB_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_User;
+        if (input->ExpectTag(34)) goto parse_User;
         break;
       }
 
-      // optional string User = 3;
-      case 3: {
-        if (tag == 26) {
+      // optional string User = 4;
+      case 4: {
+        if (tag == 34) {
          parse_User:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_user()));
@@ -2921,13 +3035,13 @@ bool DB_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(34)) goto parse_Passwd;
+        if (input->ExpectTag(42)) goto parse_Passwd;
         break;
       }
 
-      // optional string Passwd = 4;
-      case 4: {
-        if (tag == 34) {
+      // optional string Passwd = 5;
+      case 5: {
+        if (tag == 42) {
          parse_Passwd:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_passwd()));
@@ -2938,13 +3052,13 @@ bool DB_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(42)) goto parse_Database;
+        if (input->ExpectTag(50)) goto parse_Database;
         break;
       }
 
-      // optional string Database = 5;
-      case 5: {
-        if (tag == 42) {
+      // optional string Database = 6;
+      case 6: {
+        if (tag == 50) {
          parse_Database:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_database()));
@@ -2983,49 +3097,55 @@ failure:
 void DB_CONFIG::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:Protocol.DB_CONFIG)
-  // optional string ServerAddress = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, *this->baseconfig_, output);
+  }
+
+  // optional string ServerAddress = 2;
   if (this->serveraddress().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->serveraddress().data(), this->serveraddress().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "Protocol.DB_CONFIG.ServerAddress");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      1, this->serveraddress(), output);
+      2, this->serveraddress(), output);
   }
 
-  // optional int32 ServerPort = 2;
+  // optional int32 ServerPort = 3;
   if (this->serverport() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->serverport(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->serverport(), output);
   }
 
-  // optional string User = 3;
+  // optional string User = 4;
   if (this->user().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->user().data(), this->user().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "Protocol.DB_CONFIG.User");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      3, this->user(), output);
+      4, this->user(), output);
   }
 
-  // optional string Passwd = 4;
+  // optional string Passwd = 5;
   if (this->passwd().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->passwd().data(), this->passwd().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "Protocol.DB_CONFIG.Passwd");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      4, this->passwd(), output);
+      5, this->passwd(), output);
   }
 
-  // optional string Database = 5;
+  // optional string Database = 6;
   if (this->database().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->database().data(), this->database().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "Protocol.DB_CONFIG.Database");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      5, this->database(), output);
+      6, this->database(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:Protocol.DB_CONFIG)
@@ -3034,7 +3154,14 @@ void DB_CONFIG::SerializeWithCachedSizes(
 ::google::protobuf::uint8* DB_CONFIG::InternalSerializeWithCachedSizesToArray(
     bool deterministic, ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:Protocol.DB_CONFIG)
-  // optional string ServerAddress = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      InternalWriteMessageNoVirtualToArray(
+        1, *this->baseconfig_, false, target);
+  }
+
+  // optional string ServerAddress = 2;
   if (this->serveraddress().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->serveraddress().data(), this->serveraddress().length(),
@@ -3042,15 +3169,15 @@ void DB_CONFIG::SerializeWithCachedSizes(
       "Protocol.DB_CONFIG.ServerAddress");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        1, this->serveraddress(), target);
+        2, this->serveraddress(), target);
   }
 
-  // optional int32 ServerPort = 2;
+  // optional int32 ServerPort = 3;
   if (this->serverport() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->serverport(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->serverport(), target);
   }
 
-  // optional string User = 3;
+  // optional string User = 4;
   if (this->user().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->user().data(), this->user().length(),
@@ -3058,10 +3185,10 @@ void DB_CONFIG::SerializeWithCachedSizes(
       "Protocol.DB_CONFIG.User");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->user(), target);
+        4, this->user(), target);
   }
 
-  // optional string Passwd = 4;
+  // optional string Passwd = 5;
   if (this->passwd().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->passwd().data(), this->passwd().length(),
@@ -3069,10 +3196,10 @@ void DB_CONFIG::SerializeWithCachedSizes(
       "Protocol.DB_CONFIG.Passwd");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        4, this->passwd(), target);
+        5, this->passwd(), target);
   }
 
-  // optional string Database = 5;
+  // optional string Database = 6;
   if (this->database().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->database().data(), this->database().length(),
@@ -3080,7 +3207,7 @@ void DB_CONFIG::SerializeWithCachedSizes(
       "Protocol.DB_CONFIG.Database");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        5, this->database(), target);
+        6, this->database(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:Protocol.DB_CONFIG)
@@ -3091,35 +3218,42 @@ int DB_CONFIG::ByteSize() const {
 // @@protoc_insertion_point(message_byte_size_start:Protocol.DB_CONFIG)
   int total_size = 0;
 
-  // optional string ServerAddress = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        *this->baseconfig_);
+  }
+
+  // optional string ServerAddress = 2;
   if (this->serveraddress().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->serveraddress());
   }
 
-  // optional int32 ServerPort = 2;
+  // optional int32 ServerPort = 3;
   if (this->serverport() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->serverport());
   }
 
-  // optional string User = 3;
+  // optional string User = 4;
   if (this->user().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->user());
   }
 
-  // optional string Passwd = 4;
+  // optional string Passwd = 5;
   if (this->passwd().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->passwd());
   }
 
-  // optional string Database = 5;
+  // optional string Database = 6;
   if (this->database().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -3153,6 +3287,9 @@ void DB_CONFIG::MergeFrom(const DB_CONFIG& from) {
 // @@protoc_insertion_point(class_specific_merge_from_start:Protocol.DB_CONFIG)
   if (GOOGLE_PREDICT_FALSE(&from == this)) {
     ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  if (from.has_baseconfig()) {
+    mutable_baseconfig()->::Protocol::GLOBAL_CONFIG::MergeFrom(from.baseconfig());
   }
   if (from.serveraddress().size() > 0) {
 
@@ -3199,6 +3336,7 @@ void DB_CONFIG::Swap(DB_CONFIG* other) {
   InternalSwap(other);
 }
 void DB_CONFIG::InternalSwap(DB_CONFIG* other) {
+  std::swap(baseconfig_, other->baseconfig_);
   serveraddress_.Swap(&other->serveraddress_);
   std::swap(serverport_, other->serverport_);
   user_.Swap(&other->user_);
@@ -3219,7 +3357,45 @@ void DB_CONFIG::InternalSwap(DB_CONFIG* other) {
 #if PROTOBUF_INLINE_NOT_IN_HEADERS
 // DB_CONFIG
 
-// optional string ServerAddress = 1;
+// optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+bool DB_CONFIG::has_baseconfig() const {
+  return !_is_default_instance_ && baseconfig_ != NULL;
+}
+void DB_CONFIG::clear_baseconfig() {
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
+}
+const ::Protocol::GLOBAL_CONFIG& DB_CONFIG::baseconfig() const {
+  // @@protoc_insertion_point(field_get:Protocol.DB_CONFIG.BaseConfig)
+  return baseconfig_ != NULL ? *baseconfig_ : *default_instance_->baseconfig_;
+}
+::Protocol::GLOBAL_CONFIG* DB_CONFIG::mutable_baseconfig() {
+  
+  if (baseconfig_ == NULL) {
+    baseconfig_ = new ::Protocol::GLOBAL_CONFIG;
+  }
+  // @@protoc_insertion_point(field_mutable:Protocol.DB_CONFIG.BaseConfig)
+  return baseconfig_;
+}
+::Protocol::GLOBAL_CONFIG* DB_CONFIG::release_baseconfig() {
+  // @@protoc_insertion_point(field_release:Protocol.DB_CONFIG.BaseConfig)
+  
+  ::Protocol::GLOBAL_CONFIG* temp = baseconfig_;
+  baseconfig_ = NULL;
+  return temp;
+}
+void DB_CONFIG::set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig) {
+  delete baseconfig_;
+  baseconfig_ = baseconfig;
+  if (baseconfig) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:Protocol.DB_CONFIG.BaseConfig)
+}
+
+// optional string ServerAddress = 2;
 void DB_CONFIG::clear_serveraddress() {
   serveraddress_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -3263,7 +3439,7 @@ void DB_CONFIG::clear_serveraddress() {
   // @@protoc_insertion_point(field_set_allocated:Protocol.DB_CONFIG.ServerAddress)
 }
 
-// optional int32 ServerPort = 2;
+// optional int32 ServerPort = 3;
 void DB_CONFIG::clear_serverport() {
   serverport_ = 0;
 }
@@ -3277,7 +3453,7 @@ void DB_CONFIG::clear_serverport() {
   // @@protoc_insertion_point(field_set:Protocol.DB_CONFIG.ServerPort)
 }
 
-// optional string User = 3;
+// optional string User = 4;
 void DB_CONFIG::clear_user() {
   user_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -3321,7 +3497,7 @@ void DB_CONFIG::clear_user() {
   // @@protoc_insertion_point(field_set_allocated:Protocol.DB_CONFIG.User)
 }
 
-// optional string Passwd = 4;
+// optional string Passwd = 5;
 void DB_CONFIG::clear_passwd() {
   passwd_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -3365,7 +3541,7 @@ void DB_CONFIG::clear_passwd() {
   // @@protoc_insertion_point(field_set_allocated:Protocol.DB_CONFIG.Passwd)
 }
 
-// optional string Database = 5;
+// optional string Database = 6;
 void DB_CONFIG::clear_database() {
   database_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -3414,6 +3590,7 @@ void DB_CONFIG::clear_database() {
 // ===================================================================
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int DATA_CONFIG::kBaseConfigFieldNumber;
 const int DATA_CONFIG::kDataReceivePortFieldNumber;
 const int DATA_CONFIG::kDataRecvTimeFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
@@ -3426,6 +3603,7 @@ DATA_CONFIG::DATA_CONFIG()
 
 void DATA_CONFIG::InitAsDefaultInstance() {
   _is_default_instance_ = true;
+  baseconfig_ = const_cast< ::Protocol::GLOBAL_CONFIG*>(&::Protocol::GLOBAL_CONFIG::default_instance());
 }
 
 DATA_CONFIG::DATA_CONFIG(const DATA_CONFIG& from)
@@ -3439,6 +3617,7 @@ DATA_CONFIG::DATA_CONFIG(const DATA_CONFIG& from)
 void DATA_CONFIG::SharedCtor() {
     _is_default_instance_ = false;
   _cached_size_ = 0;
+  baseconfig_ = NULL;
   datareceiveport_ = 0;
   datarecvtime_ = 0;
 }
@@ -3450,6 +3629,7 @@ DATA_CONFIG::~DATA_CONFIG() {
 
 void DATA_CONFIG::SharedDtor() {
   if (this != default_instance_) {
+    delete baseconfig_;
   }
 }
 
@@ -3497,6 +3677,8 @@ void DATA_CONFIG::Clear() {
 } while (0)
 
   ZR_(datareceiveport_, datarecvtime_);
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
 
 #undef ZR_HELPER_
 #undef ZR_
@@ -3513,9 +3695,22 @@ bool DATA_CONFIG::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional int32 DataReceivePort = 1;
+      // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
       case 1: {
-        if (tag == 8) {
+        if (tag == 10) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_baseconfig()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_DataReceivePort;
+        break;
+      }
+
+      // optional int32 DataReceivePort = 2;
+      case 2: {
+        if (tag == 16) {
+         parse_DataReceivePort:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &datareceiveport_)));
@@ -3523,13 +3718,13 @@ bool DATA_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(16)) goto parse_DataRecvTime;
+        if (input->ExpectTag(24)) goto parse_DataRecvTime;
         break;
       }
 
-      // optional int32 DataRecvTime = 2;
-      case 2: {
-        if (tag == 16) {
+      // optional int32 DataRecvTime = 3;
+      case 3: {
+        if (tag == 24) {
          parse_DataRecvTime:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
@@ -3566,14 +3761,20 @@ failure:
 void DATA_CONFIG::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:Protocol.DATA_CONFIG)
-  // optional int32 DataReceivePort = 1;
-  if (this->datareceiveport() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->datareceiveport(), output);
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, *this->baseconfig_, output);
   }
 
-  // optional int32 DataRecvTime = 2;
+  // optional int32 DataReceivePort = 2;
+  if (this->datareceiveport() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->datareceiveport(), output);
+  }
+
+  // optional int32 DataRecvTime = 3;
   if (this->datarecvtime() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->datarecvtime(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->datarecvtime(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:Protocol.DATA_CONFIG)
@@ -3582,14 +3783,21 @@ void DATA_CONFIG::SerializeWithCachedSizes(
 ::google::protobuf::uint8* DATA_CONFIG::InternalSerializeWithCachedSizesToArray(
     bool deterministic, ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:Protocol.DATA_CONFIG)
-  // optional int32 DataReceivePort = 1;
-  if (this->datareceiveport() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->datareceiveport(), target);
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      InternalWriteMessageNoVirtualToArray(
+        1, *this->baseconfig_, false, target);
   }
 
-  // optional int32 DataRecvTime = 2;
+  // optional int32 DataReceivePort = 2;
+  if (this->datareceiveport() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->datareceiveport(), target);
+  }
+
+  // optional int32 DataRecvTime = 3;
   if (this->datarecvtime() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->datarecvtime(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->datarecvtime(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:Protocol.DATA_CONFIG)
@@ -3600,14 +3808,21 @@ int DATA_CONFIG::ByteSize() const {
 // @@protoc_insertion_point(message_byte_size_start:Protocol.DATA_CONFIG)
   int total_size = 0;
 
-  // optional int32 DataReceivePort = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        *this->baseconfig_);
+  }
+
+  // optional int32 DataReceivePort = 2;
   if (this->datareceiveport() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->datareceiveport());
   }
 
-  // optional int32 DataRecvTime = 2;
+  // optional int32 DataRecvTime = 3;
   if (this->datarecvtime() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
@@ -3642,6 +3857,9 @@ void DATA_CONFIG::MergeFrom(const DATA_CONFIG& from) {
   if (GOOGLE_PREDICT_FALSE(&from == this)) {
     ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
   }
+  if (from.has_baseconfig()) {
+    mutable_baseconfig()->::Protocol::GLOBAL_CONFIG::MergeFrom(from.baseconfig());
+  }
   if (from.datareceiveport() != 0) {
     set_datareceiveport(from.datareceiveport());
   }
@@ -3674,6 +3892,7 @@ void DATA_CONFIG::Swap(DATA_CONFIG* other) {
   InternalSwap(other);
 }
 void DATA_CONFIG::InternalSwap(DATA_CONFIG* other) {
+  std::swap(baseconfig_, other->baseconfig_);
   std::swap(datareceiveport_, other->datareceiveport_);
   std::swap(datarecvtime_, other->datarecvtime_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
@@ -3691,7 +3910,45 @@ void DATA_CONFIG::InternalSwap(DATA_CONFIG* other) {
 #if PROTOBUF_INLINE_NOT_IN_HEADERS
 // DATA_CONFIG
 
-// optional int32 DataReceivePort = 1;
+// optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+bool DATA_CONFIG::has_baseconfig() const {
+  return !_is_default_instance_ && baseconfig_ != NULL;
+}
+void DATA_CONFIG::clear_baseconfig() {
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
+}
+const ::Protocol::GLOBAL_CONFIG& DATA_CONFIG::baseconfig() const {
+  // @@protoc_insertion_point(field_get:Protocol.DATA_CONFIG.BaseConfig)
+  return baseconfig_ != NULL ? *baseconfig_ : *default_instance_->baseconfig_;
+}
+::Protocol::GLOBAL_CONFIG* DATA_CONFIG::mutable_baseconfig() {
+  
+  if (baseconfig_ == NULL) {
+    baseconfig_ = new ::Protocol::GLOBAL_CONFIG;
+  }
+  // @@protoc_insertion_point(field_mutable:Protocol.DATA_CONFIG.BaseConfig)
+  return baseconfig_;
+}
+::Protocol::GLOBAL_CONFIG* DATA_CONFIG::release_baseconfig() {
+  // @@protoc_insertion_point(field_release:Protocol.DATA_CONFIG.BaseConfig)
+  
+  ::Protocol::GLOBAL_CONFIG* temp = baseconfig_;
+  baseconfig_ = NULL;
+  return temp;
+}
+void DATA_CONFIG::set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig) {
+  delete baseconfig_;
+  baseconfig_ = baseconfig;
+  if (baseconfig) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:Protocol.DATA_CONFIG.BaseConfig)
+}
+
+// optional int32 DataReceivePort = 2;
 void DATA_CONFIG::clear_datareceiveport() {
   datareceiveport_ = 0;
 }
@@ -3705,7 +3962,7 @@ void DATA_CONFIG::clear_datareceiveport() {
   // @@protoc_insertion_point(field_set:Protocol.DATA_CONFIG.DataReceivePort)
 }
 
-// optional int32 DataRecvTime = 2;
+// optional int32 DataRecvTime = 3;
 void DATA_CONFIG::clear_datarecvtime() {
   datarecvtime_ = 0;
 }
@@ -3724,6 +3981,7 @@ void DATA_CONFIG::clear_datarecvtime() {
 // ===================================================================
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int GATEWAY_CONFIG::kBaseConfigFieldNumber;
 const int GATEWAY_CONFIG::kClientCheckTimeFieldNumber;
 const int GATEWAY_CONFIG::kClientCheckKeyFieldNumber;
 const int GATEWAY_CONFIG::kTimeoutCheckIntervalFieldNumber;
@@ -3739,6 +3997,7 @@ GATEWAY_CONFIG::GATEWAY_CONFIG()
 
 void GATEWAY_CONFIG::InitAsDefaultInstance() {
   _is_default_instance_ = true;
+  baseconfig_ = const_cast< ::Protocol::GLOBAL_CONFIG*>(&::Protocol::GLOBAL_CONFIG::default_instance());
 }
 
 GATEWAY_CONFIG::GATEWAY_CONFIG(const GATEWAY_CONFIG& from)
@@ -3753,6 +4012,7 @@ void GATEWAY_CONFIG::SharedCtor() {
     _is_default_instance_ = false;
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
+  baseconfig_ = NULL;
   clientchecktime_ = 0;
   clientcheckkey_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   timeoutcheckinterval_ = 0;
@@ -3769,6 +4029,7 @@ void GATEWAY_CONFIG::SharedDtor() {
   clientcheckkey_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   processaddress_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != default_instance_) {
+    delete baseconfig_;
   }
 }
 
@@ -3816,6 +4077,8 @@ void GATEWAY_CONFIG::Clear() {
 } while (0)
 
   ZR_(clientchecktime_, timeoutcheckinterval_);
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
   clientcheckkey_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   timeouttime_ = 0;
   processaddress_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
@@ -3835,9 +4098,22 @@ bool GATEWAY_CONFIG::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional int32 ClientCheckTime = 1;
+      // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
       case 1: {
-        if (tag == 8) {
+        if (tag == 10) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_baseconfig()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_ClientCheckTime;
+        break;
+      }
+
+      // optional int32 ClientCheckTime = 2;
+      case 2: {
+        if (tag == 16) {
+         parse_ClientCheckTime:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &clientchecktime_)));
@@ -3845,13 +4121,13 @@ bool GATEWAY_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(18)) goto parse_ClientCheckKey;
+        if (input->ExpectTag(26)) goto parse_ClientCheckKey;
         break;
       }
 
-      // optional string ClientCheckKey = 2;
-      case 2: {
-        if (tag == 18) {
+      // optional string ClientCheckKey = 3;
+      case 3: {
+        if (tag == 26) {
          parse_ClientCheckKey:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_clientcheckkey()));
@@ -3862,13 +4138,13 @@ bool GATEWAY_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(24)) goto parse_TimeoutCheckInterval;
+        if (input->ExpectTag(32)) goto parse_TimeoutCheckInterval;
         break;
       }
 
-      // optional int32 TimeoutCheckInterval = 3;
-      case 3: {
-        if (tag == 24) {
+      // optional int32 TimeoutCheckInterval = 4;
+      case 4: {
+        if (tag == 32) {
          parse_TimeoutCheckInterval:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
@@ -3877,13 +4153,13 @@ bool GATEWAY_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(32)) goto parse_TimeoutTime;
+        if (input->ExpectTag(40)) goto parse_TimeoutTime;
         break;
       }
 
-      // optional int32 TimeoutTime = 4;
-      case 4: {
-        if (tag == 32) {
+      // optional int32 TimeoutTime = 5;
+      case 5: {
+        if (tag == 40) {
          parse_TimeoutTime:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
@@ -3892,13 +4168,13 @@ bool GATEWAY_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(42)) goto parse_ProcessAddress;
+        if (input->ExpectTag(50)) goto parse_ProcessAddress;
         break;
       }
 
-      // optional string ProcessAddress = 5;
-      case 5: {
-        if (tag == 42) {
+      // optional string ProcessAddress = 6;
+      case 6: {
+        if (tag == 50) {
          parse_ProcessAddress:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_processaddress()));
@@ -3937,39 +4213,45 @@ failure:
 void GATEWAY_CONFIG::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:Protocol.GATEWAY_CONFIG)
-  // optional int32 ClientCheckTime = 1;
-  if (this->clientchecktime() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->clientchecktime(), output);
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, *this->baseconfig_, output);
   }
 
-  // optional string ClientCheckKey = 2;
+  // optional int32 ClientCheckTime = 2;
+  if (this->clientchecktime() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->clientchecktime(), output);
+  }
+
+  // optional string ClientCheckKey = 3;
   if (this->clientcheckkey().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->clientcheckkey().data(), this->clientcheckkey().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "Protocol.GATEWAY_CONFIG.ClientCheckKey");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      2, this->clientcheckkey(), output);
+      3, this->clientcheckkey(), output);
   }
 
-  // optional int32 TimeoutCheckInterval = 3;
+  // optional int32 TimeoutCheckInterval = 4;
   if (this->timeoutcheckinterval() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->timeoutcheckinterval(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->timeoutcheckinterval(), output);
   }
 
-  // optional int32 TimeoutTime = 4;
+  // optional int32 TimeoutTime = 5;
   if (this->timeouttime() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->timeouttime(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->timeouttime(), output);
   }
 
-  // optional string ProcessAddress = 5;
+  // optional string ProcessAddress = 6;
   if (this->processaddress().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->processaddress().data(), this->processaddress().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "Protocol.GATEWAY_CONFIG.ProcessAddress");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      5, this->processaddress(), output);
+      6, this->processaddress(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:Protocol.GATEWAY_CONFIG)
@@ -3978,12 +4260,19 @@ void GATEWAY_CONFIG::SerializeWithCachedSizes(
 ::google::protobuf::uint8* GATEWAY_CONFIG::InternalSerializeWithCachedSizesToArray(
     bool deterministic, ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:Protocol.GATEWAY_CONFIG)
-  // optional int32 ClientCheckTime = 1;
-  if (this->clientchecktime() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->clientchecktime(), target);
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      InternalWriteMessageNoVirtualToArray(
+        1, *this->baseconfig_, false, target);
   }
 
-  // optional string ClientCheckKey = 2;
+  // optional int32 ClientCheckTime = 2;
+  if (this->clientchecktime() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->clientchecktime(), target);
+  }
+
+  // optional string ClientCheckKey = 3;
   if (this->clientcheckkey().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->clientcheckkey().data(), this->clientcheckkey().length(),
@@ -3991,20 +4280,20 @@ void GATEWAY_CONFIG::SerializeWithCachedSizes(
       "Protocol.GATEWAY_CONFIG.ClientCheckKey");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        2, this->clientcheckkey(), target);
+        3, this->clientcheckkey(), target);
   }
 
-  // optional int32 TimeoutCheckInterval = 3;
+  // optional int32 TimeoutCheckInterval = 4;
   if (this->timeoutcheckinterval() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->timeoutcheckinterval(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->timeoutcheckinterval(), target);
   }
 
-  // optional int32 TimeoutTime = 4;
+  // optional int32 TimeoutTime = 5;
   if (this->timeouttime() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->timeouttime(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->timeouttime(), target);
   }
 
-  // optional string ProcessAddress = 5;
+  // optional string ProcessAddress = 6;
   if (this->processaddress().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->processaddress().data(), this->processaddress().length(),
@@ -4012,7 +4301,7 @@ void GATEWAY_CONFIG::SerializeWithCachedSizes(
       "Protocol.GATEWAY_CONFIG.ProcessAddress");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        5, this->processaddress(), target);
+        6, this->processaddress(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:Protocol.GATEWAY_CONFIG)
@@ -4023,35 +4312,42 @@ int GATEWAY_CONFIG::ByteSize() const {
 // @@protoc_insertion_point(message_byte_size_start:Protocol.GATEWAY_CONFIG)
   int total_size = 0;
 
-  // optional int32 ClientCheckTime = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        *this->baseconfig_);
+  }
+
+  // optional int32 ClientCheckTime = 2;
   if (this->clientchecktime() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->clientchecktime());
   }
 
-  // optional string ClientCheckKey = 2;
+  // optional string ClientCheckKey = 3;
   if (this->clientcheckkey().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->clientcheckkey());
   }
 
-  // optional int32 TimeoutCheckInterval = 3;
+  // optional int32 TimeoutCheckInterval = 4;
   if (this->timeoutcheckinterval() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->timeoutcheckinterval());
   }
 
-  // optional int32 TimeoutTime = 4;
+  // optional int32 TimeoutTime = 5;
   if (this->timeouttime() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->timeouttime());
   }
 
-  // optional string ProcessAddress = 5;
+  // optional string ProcessAddress = 6;
   if (this->processaddress().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -4085,6 +4381,9 @@ void GATEWAY_CONFIG::MergeFrom(const GATEWAY_CONFIG& from) {
 // @@protoc_insertion_point(class_specific_merge_from_start:Protocol.GATEWAY_CONFIG)
   if (GOOGLE_PREDICT_FALSE(&from == this)) {
     ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  if (from.has_baseconfig()) {
+    mutable_baseconfig()->::Protocol::GLOBAL_CONFIG::MergeFrom(from.baseconfig());
   }
   if (from.clientchecktime() != 0) {
     set_clientchecktime(from.clientchecktime());
@@ -4129,6 +4428,7 @@ void GATEWAY_CONFIG::Swap(GATEWAY_CONFIG* other) {
   InternalSwap(other);
 }
 void GATEWAY_CONFIG::InternalSwap(GATEWAY_CONFIG* other) {
+  std::swap(baseconfig_, other->baseconfig_);
   std::swap(clientchecktime_, other->clientchecktime_);
   clientcheckkey_.Swap(&other->clientcheckkey_);
   std::swap(timeoutcheckinterval_, other->timeoutcheckinterval_);
@@ -4149,7 +4449,45 @@ void GATEWAY_CONFIG::InternalSwap(GATEWAY_CONFIG* other) {
 #if PROTOBUF_INLINE_NOT_IN_HEADERS
 // GATEWAY_CONFIG
 
-// optional int32 ClientCheckTime = 1;
+// optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+bool GATEWAY_CONFIG::has_baseconfig() const {
+  return !_is_default_instance_ && baseconfig_ != NULL;
+}
+void GATEWAY_CONFIG::clear_baseconfig() {
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
+}
+const ::Protocol::GLOBAL_CONFIG& GATEWAY_CONFIG::baseconfig() const {
+  // @@protoc_insertion_point(field_get:Protocol.GATEWAY_CONFIG.BaseConfig)
+  return baseconfig_ != NULL ? *baseconfig_ : *default_instance_->baseconfig_;
+}
+::Protocol::GLOBAL_CONFIG* GATEWAY_CONFIG::mutable_baseconfig() {
+  
+  if (baseconfig_ == NULL) {
+    baseconfig_ = new ::Protocol::GLOBAL_CONFIG;
+  }
+  // @@protoc_insertion_point(field_mutable:Protocol.GATEWAY_CONFIG.BaseConfig)
+  return baseconfig_;
+}
+::Protocol::GLOBAL_CONFIG* GATEWAY_CONFIG::release_baseconfig() {
+  // @@protoc_insertion_point(field_release:Protocol.GATEWAY_CONFIG.BaseConfig)
+  
+  ::Protocol::GLOBAL_CONFIG* temp = baseconfig_;
+  baseconfig_ = NULL;
+  return temp;
+}
+void GATEWAY_CONFIG::set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig) {
+  delete baseconfig_;
+  baseconfig_ = baseconfig;
+  if (baseconfig) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:Protocol.GATEWAY_CONFIG.BaseConfig)
+}
+
+// optional int32 ClientCheckTime = 2;
 void GATEWAY_CONFIG::clear_clientchecktime() {
   clientchecktime_ = 0;
 }
@@ -4163,7 +4501,7 @@ void GATEWAY_CONFIG::clear_clientchecktime() {
   // @@protoc_insertion_point(field_set:Protocol.GATEWAY_CONFIG.ClientCheckTime)
 }
 
-// optional string ClientCheckKey = 2;
+// optional string ClientCheckKey = 3;
 void GATEWAY_CONFIG::clear_clientcheckkey() {
   clientcheckkey_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -4207,7 +4545,7 @@ void GATEWAY_CONFIG::clear_clientcheckkey() {
   // @@protoc_insertion_point(field_set_allocated:Protocol.GATEWAY_CONFIG.ClientCheckKey)
 }
 
-// optional int32 TimeoutCheckInterval = 3;
+// optional int32 TimeoutCheckInterval = 4;
 void GATEWAY_CONFIG::clear_timeoutcheckinterval() {
   timeoutcheckinterval_ = 0;
 }
@@ -4221,7 +4559,7 @@ void GATEWAY_CONFIG::clear_timeoutcheckinterval() {
   // @@protoc_insertion_point(field_set:Protocol.GATEWAY_CONFIG.TimeoutCheckInterval)
 }
 
-// optional int32 TimeoutTime = 4;
+// optional int32 TimeoutTime = 5;
 void GATEWAY_CONFIG::clear_timeouttime() {
   timeouttime_ = 0;
 }
@@ -4235,7 +4573,7 @@ void GATEWAY_CONFIG::clear_timeouttime() {
   // @@protoc_insertion_point(field_set:Protocol.GATEWAY_CONFIG.TimeoutTime)
 }
 
-// optional string ProcessAddress = 5;
+// optional string ProcessAddress = 6;
 void GATEWAY_CONFIG::clear_processaddress() {
   processaddress_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -4284,6 +4622,7 @@ void GATEWAY_CONFIG::clear_processaddress() {
 // ===================================================================
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int FIREWALL_CONFIG::kBaseConfigFieldNumber;
 const int FIREWALL_CONFIG::kBlockTimeFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -4295,6 +4634,7 @@ FIREWALL_CONFIG::FIREWALL_CONFIG()
 
 void FIREWALL_CONFIG::InitAsDefaultInstance() {
   _is_default_instance_ = true;
+  baseconfig_ = const_cast< ::Protocol::GLOBAL_CONFIG*>(&::Protocol::GLOBAL_CONFIG::default_instance());
 }
 
 FIREWALL_CONFIG::FIREWALL_CONFIG(const FIREWALL_CONFIG& from)
@@ -4308,6 +4648,7 @@ FIREWALL_CONFIG::FIREWALL_CONFIG(const FIREWALL_CONFIG& from)
 void FIREWALL_CONFIG::SharedCtor() {
     _is_default_instance_ = false;
   _cached_size_ = 0;
+  baseconfig_ = NULL;
   blocktime_ = 0;
 }
 
@@ -4318,6 +4659,7 @@ FIREWALL_CONFIG::~FIREWALL_CONFIG() {
 
 void FIREWALL_CONFIG::SharedDtor() {
   if (this != default_instance_) {
+    delete baseconfig_;
   }
 }
 
@@ -4348,6 +4690,8 @@ FIREWALL_CONFIG* FIREWALL_CONFIG::New(::google::protobuf::Arena* arena) const {
 
 void FIREWALL_CONFIG::Clear() {
 // @@protoc_insertion_point(message_clear_start:Protocol.FIREWALL_CONFIG)
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
   blocktime_ = 0;
 }
 
@@ -4361,9 +4705,22 @@ bool FIREWALL_CONFIG::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional int32 BlockTime = 1;
+      // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
       case 1: {
-        if (tag == 8) {
+        if (tag == 10) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_baseconfig()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_BlockTime;
+        break;
+      }
+
+      // optional int32 BlockTime = 2;
+      case 2: {
+        if (tag == 16) {
+         parse_BlockTime:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &blocktime_)));
@@ -4399,9 +4756,15 @@ failure:
 void FIREWALL_CONFIG::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:Protocol.FIREWALL_CONFIG)
-  // optional int32 BlockTime = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, *this->baseconfig_, output);
+  }
+
+  // optional int32 BlockTime = 2;
   if (this->blocktime() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->blocktime(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->blocktime(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:Protocol.FIREWALL_CONFIG)
@@ -4410,9 +4773,16 @@ void FIREWALL_CONFIG::SerializeWithCachedSizes(
 ::google::protobuf::uint8* FIREWALL_CONFIG::InternalSerializeWithCachedSizesToArray(
     bool deterministic, ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:Protocol.FIREWALL_CONFIG)
-  // optional int32 BlockTime = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      InternalWriteMessageNoVirtualToArray(
+        1, *this->baseconfig_, false, target);
+  }
+
+  // optional int32 BlockTime = 2;
   if (this->blocktime() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->blocktime(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->blocktime(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:Protocol.FIREWALL_CONFIG)
@@ -4423,7 +4793,14 @@ int FIREWALL_CONFIG::ByteSize() const {
 // @@protoc_insertion_point(message_byte_size_start:Protocol.FIREWALL_CONFIG)
   int total_size = 0;
 
-  // optional int32 BlockTime = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        *this->baseconfig_);
+  }
+
+  // optional int32 BlockTime = 2;
   if (this->blocktime() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
@@ -4458,6 +4835,9 @@ void FIREWALL_CONFIG::MergeFrom(const FIREWALL_CONFIG& from) {
   if (GOOGLE_PREDICT_FALSE(&from == this)) {
     ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
   }
+  if (from.has_baseconfig()) {
+    mutable_baseconfig()->::Protocol::GLOBAL_CONFIG::MergeFrom(from.baseconfig());
+  }
   if (from.blocktime() != 0) {
     set_blocktime(from.blocktime());
   }
@@ -4487,6 +4867,7 @@ void FIREWALL_CONFIG::Swap(FIREWALL_CONFIG* other) {
   InternalSwap(other);
 }
 void FIREWALL_CONFIG::InternalSwap(FIREWALL_CONFIG* other) {
+  std::swap(baseconfig_, other->baseconfig_);
   std::swap(blocktime_, other->blocktime_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -4503,7 +4884,45 @@ void FIREWALL_CONFIG::InternalSwap(FIREWALL_CONFIG* other) {
 #if PROTOBUF_INLINE_NOT_IN_HEADERS
 // FIREWALL_CONFIG
 
-// optional int32 BlockTime = 1;
+// optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+bool FIREWALL_CONFIG::has_baseconfig() const {
+  return !_is_default_instance_ && baseconfig_ != NULL;
+}
+void FIREWALL_CONFIG::clear_baseconfig() {
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
+}
+const ::Protocol::GLOBAL_CONFIG& FIREWALL_CONFIG::baseconfig() const {
+  // @@protoc_insertion_point(field_get:Protocol.FIREWALL_CONFIG.BaseConfig)
+  return baseconfig_ != NULL ? *baseconfig_ : *default_instance_->baseconfig_;
+}
+::Protocol::GLOBAL_CONFIG* FIREWALL_CONFIG::mutable_baseconfig() {
+  
+  if (baseconfig_ == NULL) {
+    baseconfig_ = new ::Protocol::GLOBAL_CONFIG;
+  }
+  // @@protoc_insertion_point(field_mutable:Protocol.FIREWALL_CONFIG.BaseConfig)
+  return baseconfig_;
+}
+::Protocol::GLOBAL_CONFIG* FIREWALL_CONFIG::release_baseconfig() {
+  // @@protoc_insertion_point(field_release:Protocol.FIREWALL_CONFIG.BaseConfig)
+  
+  ::Protocol::GLOBAL_CONFIG* temp = baseconfig_;
+  baseconfig_ = NULL;
+  return temp;
+}
+void FIREWALL_CONFIG::set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig) {
+  delete baseconfig_;
+  baseconfig_ = baseconfig;
+  if (baseconfig) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:Protocol.FIREWALL_CONFIG.BaseConfig)
+}
+
+// optional int32 BlockTime = 2;
 void FIREWALL_CONFIG::clear_blocktime() {
   blocktime_ = 0;
 }
@@ -4522,6 +4941,7 @@ void FIREWALL_CONFIG::clear_blocktime() {
 // ===================================================================
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int PROCESS_CONFIG::kBaseConfigFieldNumber;
 const int PROCESS_CONFIG::kLuaContextQuantityFieldNumber;
 const int PROCESS_CONFIG::kLuaScriptFolderFieldNumber;
 const int PROCESS_CONFIG::kLuaEntryFileFieldNumber;
@@ -4538,6 +4958,7 @@ PROCESS_CONFIG::PROCESS_CONFIG()
 
 void PROCESS_CONFIG::InitAsDefaultInstance() {
   _is_default_instance_ = true;
+  baseconfig_ = const_cast< ::Protocol::GLOBAL_CONFIG*>(&::Protocol::GLOBAL_CONFIG::default_instance());
 }
 
 PROCESS_CONFIG::PROCESS_CONFIG(const PROCESS_CONFIG& from)
@@ -4552,6 +4973,7 @@ void PROCESS_CONFIG::SharedCtor() {
     _is_default_instance_ = false;
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
+  baseconfig_ = NULL;
   luacontextquantity_ = 0;
   luascriptfolder_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   luaentryfile_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
@@ -4572,6 +4994,7 @@ void PROCESS_CONFIG::SharedDtor() {
   luaprocessfunction_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   luasocketclosefunction_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != default_instance_) {
+    delete baseconfig_;
   }
 }
 
@@ -4602,6 +5025,8 @@ PROCESS_CONFIG* PROCESS_CONFIG::New(::google::protobuf::Arena* arena) const {
 
 void PROCESS_CONFIG::Clear() {
 // @@protoc_insertion_point(message_clear_start:Protocol.PROCESS_CONFIG)
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
   luacontextquantity_ = 0;
   luascriptfolder_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   luaentryfile_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
@@ -4620,9 +5045,22 @@ bool PROCESS_CONFIG::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional int32 LuaContextQuantity = 1;
+      // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
       case 1: {
-        if (tag == 8) {
+        if (tag == 10) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_baseconfig()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_LuaContextQuantity;
+        break;
+      }
+
+      // optional int32 LuaContextQuantity = 2;
+      case 2: {
+        if (tag == 16) {
+         parse_LuaContextQuantity:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &luacontextquantity_)));
@@ -4630,13 +5068,13 @@ bool PROCESS_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(18)) goto parse_LuaScriptFolder;
+        if (input->ExpectTag(26)) goto parse_LuaScriptFolder;
         break;
       }
 
-      // optional string LuaScriptFolder = 2;
-      case 2: {
-        if (tag == 18) {
+      // optional string LuaScriptFolder = 3;
+      case 3: {
+        if (tag == 26) {
          parse_LuaScriptFolder:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_luascriptfolder()));
@@ -4647,13 +5085,13 @@ bool PROCESS_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_LuaEntryFile;
+        if (input->ExpectTag(34)) goto parse_LuaEntryFile;
         break;
       }
 
-      // optional string LuaEntryFile = 3;
-      case 3: {
-        if (tag == 26) {
+      // optional string LuaEntryFile = 4;
+      case 4: {
+        if (tag == 34) {
          parse_LuaEntryFile:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_luaentryfile()));
@@ -4664,13 +5102,13 @@ bool PROCESS_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(34)) goto parse_LuaEntryFunction;
+        if (input->ExpectTag(42)) goto parse_LuaEntryFunction;
         break;
       }
 
-      // optional string LuaEntryFunction = 4;
-      case 4: {
-        if (tag == 34) {
+      // optional string LuaEntryFunction = 5;
+      case 5: {
+        if (tag == 42) {
          parse_LuaEntryFunction:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_luaentryfunction()));
@@ -4681,13 +5119,13 @@ bool PROCESS_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(42)) goto parse_LuaProcessFunction;
+        if (input->ExpectTag(50)) goto parse_LuaProcessFunction;
         break;
       }
 
-      // optional string LuaProcessFunction = 5;
-      case 5: {
-        if (tag == 42) {
+      // optional string LuaProcessFunction = 6;
+      case 6: {
+        if (tag == 50) {
          parse_LuaProcessFunction:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_luaprocessfunction()));
@@ -4698,13 +5136,13 @@ bool PROCESS_CONFIG::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(50)) goto parse_LuaSocketCloseFunction;
+        if (input->ExpectTag(58)) goto parse_LuaSocketCloseFunction;
         break;
       }
 
-      // optional string LuaSocketCloseFunction = 6;
-      case 6: {
-        if (tag == 50) {
+      // optional string LuaSocketCloseFunction = 7;
+      case 7: {
+        if (tag == 58) {
          parse_LuaSocketCloseFunction:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_luasocketclosefunction()));
@@ -4743,59 +5181,65 @@ failure:
 void PROCESS_CONFIG::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:Protocol.PROCESS_CONFIG)
-  // optional int32 LuaContextQuantity = 1;
-  if (this->luacontextquantity() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->luacontextquantity(), output);
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, *this->baseconfig_, output);
   }
 
-  // optional string LuaScriptFolder = 2;
+  // optional int32 LuaContextQuantity = 2;
+  if (this->luacontextquantity() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->luacontextquantity(), output);
+  }
+
+  // optional string LuaScriptFolder = 3;
   if (this->luascriptfolder().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->luascriptfolder().data(), this->luascriptfolder().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "Protocol.PROCESS_CONFIG.LuaScriptFolder");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      2, this->luascriptfolder(), output);
+      3, this->luascriptfolder(), output);
   }
 
-  // optional string LuaEntryFile = 3;
+  // optional string LuaEntryFile = 4;
   if (this->luaentryfile().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->luaentryfile().data(), this->luaentryfile().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "Protocol.PROCESS_CONFIG.LuaEntryFile");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      3, this->luaentryfile(), output);
+      4, this->luaentryfile(), output);
   }
 
-  // optional string LuaEntryFunction = 4;
+  // optional string LuaEntryFunction = 5;
   if (this->luaentryfunction().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->luaentryfunction().data(), this->luaentryfunction().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "Protocol.PROCESS_CONFIG.LuaEntryFunction");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      4, this->luaentryfunction(), output);
+      5, this->luaentryfunction(), output);
   }
 
-  // optional string LuaProcessFunction = 5;
+  // optional string LuaProcessFunction = 6;
   if (this->luaprocessfunction().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->luaprocessfunction().data(), this->luaprocessfunction().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "Protocol.PROCESS_CONFIG.LuaProcessFunction");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      5, this->luaprocessfunction(), output);
+      6, this->luaprocessfunction(), output);
   }
 
-  // optional string LuaSocketCloseFunction = 6;
+  // optional string LuaSocketCloseFunction = 7;
   if (this->luasocketclosefunction().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->luasocketclosefunction().data(), this->luasocketclosefunction().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "Protocol.PROCESS_CONFIG.LuaSocketCloseFunction");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      6, this->luasocketclosefunction(), output);
+      7, this->luasocketclosefunction(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:Protocol.PROCESS_CONFIG)
@@ -4804,12 +5248,19 @@ void PROCESS_CONFIG::SerializeWithCachedSizes(
 ::google::protobuf::uint8* PROCESS_CONFIG::InternalSerializeWithCachedSizesToArray(
     bool deterministic, ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:Protocol.PROCESS_CONFIG)
-  // optional int32 LuaContextQuantity = 1;
-  if (this->luacontextquantity() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->luacontextquantity(), target);
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      InternalWriteMessageNoVirtualToArray(
+        1, *this->baseconfig_, false, target);
   }
 
-  // optional string LuaScriptFolder = 2;
+  // optional int32 LuaContextQuantity = 2;
+  if (this->luacontextquantity() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->luacontextquantity(), target);
+  }
+
+  // optional string LuaScriptFolder = 3;
   if (this->luascriptfolder().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->luascriptfolder().data(), this->luascriptfolder().length(),
@@ -4817,10 +5268,10 @@ void PROCESS_CONFIG::SerializeWithCachedSizes(
       "Protocol.PROCESS_CONFIG.LuaScriptFolder");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        2, this->luascriptfolder(), target);
+        3, this->luascriptfolder(), target);
   }
 
-  // optional string LuaEntryFile = 3;
+  // optional string LuaEntryFile = 4;
   if (this->luaentryfile().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->luaentryfile().data(), this->luaentryfile().length(),
@@ -4828,10 +5279,10 @@ void PROCESS_CONFIG::SerializeWithCachedSizes(
       "Protocol.PROCESS_CONFIG.LuaEntryFile");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->luaentryfile(), target);
+        4, this->luaentryfile(), target);
   }
 
-  // optional string LuaEntryFunction = 4;
+  // optional string LuaEntryFunction = 5;
   if (this->luaentryfunction().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->luaentryfunction().data(), this->luaentryfunction().length(),
@@ -4839,10 +5290,10 @@ void PROCESS_CONFIG::SerializeWithCachedSizes(
       "Protocol.PROCESS_CONFIG.LuaEntryFunction");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        4, this->luaentryfunction(), target);
+        5, this->luaentryfunction(), target);
   }
 
-  // optional string LuaProcessFunction = 5;
+  // optional string LuaProcessFunction = 6;
   if (this->luaprocessfunction().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->luaprocessfunction().data(), this->luaprocessfunction().length(),
@@ -4850,10 +5301,10 @@ void PROCESS_CONFIG::SerializeWithCachedSizes(
       "Protocol.PROCESS_CONFIG.LuaProcessFunction");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        5, this->luaprocessfunction(), target);
+        6, this->luaprocessfunction(), target);
   }
 
-  // optional string LuaSocketCloseFunction = 6;
+  // optional string LuaSocketCloseFunction = 7;
   if (this->luasocketclosefunction().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->luasocketclosefunction().data(), this->luasocketclosefunction().length(),
@@ -4861,7 +5312,7 @@ void PROCESS_CONFIG::SerializeWithCachedSizes(
       "Protocol.PROCESS_CONFIG.LuaSocketCloseFunction");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        6, this->luasocketclosefunction(), target);
+        7, this->luasocketclosefunction(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:Protocol.PROCESS_CONFIG)
@@ -4872,42 +5323,49 @@ int PROCESS_CONFIG::ByteSize() const {
 // @@protoc_insertion_point(message_byte_size_start:Protocol.PROCESS_CONFIG)
   int total_size = 0;
 
-  // optional int32 LuaContextQuantity = 1;
+  // optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+  if (this->has_baseconfig()) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        *this->baseconfig_);
+  }
+
+  // optional int32 LuaContextQuantity = 2;
   if (this->luacontextquantity() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->luacontextquantity());
   }
 
-  // optional string LuaScriptFolder = 2;
+  // optional string LuaScriptFolder = 3;
   if (this->luascriptfolder().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->luascriptfolder());
   }
 
-  // optional string LuaEntryFile = 3;
+  // optional string LuaEntryFile = 4;
   if (this->luaentryfile().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->luaentryfile());
   }
 
-  // optional string LuaEntryFunction = 4;
+  // optional string LuaEntryFunction = 5;
   if (this->luaentryfunction().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->luaentryfunction());
   }
 
-  // optional string LuaProcessFunction = 5;
+  // optional string LuaProcessFunction = 6;
   if (this->luaprocessfunction().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->luaprocessfunction());
   }
 
-  // optional string LuaSocketCloseFunction = 6;
+  // optional string LuaSocketCloseFunction = 7;
   if (this->luasocketclosefunction().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -4941,6 +5399,9 @@ void PROCESS_CONFIG::MergeFrom(const PROCESS_CONFIG& from) {
 // @@protoc_insertion_point(class_specific_merge_from_start:Protocol.PROCESS_CONFIG)
   if (GOOGLE_PREDICT_FALSE(&from == this)) {
     ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  if (from.has_baseconfig()) {
+    mutable_baseconfig()->::Protocol::GLOBAL_CONFIG::MergeFrom(from.baseconfig());
   }
   if (from.luacontextquantity() != 0) {
     set_luacontextquantity(from.luacontextquantity());
@@ -4991,6 +5452,7 @@ void PROCESS_CONFIG::Swap(PROCESS_CONFIG* other) {
   InternalSwap(other);
 }
 void PROCESS_CONFIG::InternalSwap(PROCESS_CONFIG* other) {
+  std::swap(baseconfig_, other->baseconfig_);
   std::swap(luacontextquantity_, other->luacontextquantity_);
   luascriptfolder_.Swap(&other->luascriptfolder_);
   luaentryfile_.Swap(&other->luaentryfile_);
@@ -5012,7 +5474,45 @@ void PROCESS_CONFIG::InternalSwap(PROCESS_CONFIG* other) {
 #if PROTOBUF_INLINE_NOT_IN_HEADERS
 // PROCESS_CONFIG
 
-// optional int32 LuaContextQuantity = 1;
+// optional .Protocol.GLOBAL_CONFIG BaseConfig = 1;
+bool PROCESS_CONFIG::has_baseconfig() const {
+  return !_is_default_instance_ && baseconfig_ != NULL;
+}
+void PROCESS_CONFIG::clear_baseconfig() {
+  if (GetArenaNoVirtual() == NULL && baseconfig_ != NULL) delete baseconfig_;
+  baseconfig_ = NULL;
+}
+const ::Protocol::GLOBAL_CONFIG& PROCESS_CONFIG::baseconfig() const {
+  // @@protoc_insertion_point(field_get:Protocol.PROCESS_CONFIG.BaseConfig)
+  return baseconfig_ != NULL ? *baseconfig_ : *default_instance_->baseconfig_;
+}
+::Protocol::GLOBAL_CONFIG* PROCESS_CONFIG::mutable_baseconfig() {
+  
+  if (baseconfig_ == NULL) {
+    baseconfig_ = new ::Protocol::GLOBAL_CONFIG;
+  }
+  // @@protoc_insertion_point(field_mutable:Protocol.PROCESS_CONFIG.BaseConfig)
+  return baseconfig_;
+}
+::Protocol::GLOBAL_CONFIG* PROCESS_CONFIG::release_baseconfig() {
+  // @@protoc_insertion_point(field_release:Protocol.PROCESS_CONFIG.BaseConfig)
+  
+  ::Protocol::GLOBAL_CONFIG* temp = baseconfig_;
+  baseconfig_ = NULL;
+  return temp;
+}
+void PROCESS_CONFIG::set_allocated_baseconfig(::Protocol::GLOBAL_CONFIG* baseconfig) {
+  delete baseconfig_;
+  baseconfig_ = baseconfig;
+  if (baseconfig) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_set_allocated:Protocol.PROCESS_CONFIG.BaseConfig)
+}
+
+// optional int32 LuaContextQuantity = 2;
 void PROCESS_CONFIG::clear_luacontextquantity() {
   luacontextquantity_ = 0;
 }
@@ -5026,7 +5526,7 @@ void PROCESS_CONFIG::clear_luacontextquantity() {
   // @@protoc_insertion_point(field_set:Protocol.PROCESS_CONFIG.LuaContextQuantity)
 }
 
-// optional string LuaScriptFolder = 2;
+// optional string LuaScriptFolder = 3;
 void PROCESS_CONFIG::clear_luascriptfolder() {
   luascriptfolder_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -5070,7 +5570,7 @@ void PROCESS_CONFIG::clear_luascriptfolder() {
   // @@protoc_insertion_point(field_set_allocated:Protocol.PROCESS_CONFIG.LuaScriptFolder)
 }
 
-// optional string LuaEntryFile = 3;
+// optional string LuaEntryFile = 4;
 void PROCESS_CONFIG::clear_luaentryfile() {
   luaentryfile_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -5114,7 +5614,7 @@ void PROCESS_CONFIG::clear_luaentryfile() {
   // @@protoc_insertion_point(field_set_allocated:Protocol.PROCESS_CONFIG.LuaEntryFile)
 }
 
-// optional string LuaEntryFunction = 4;
+// optional string LuaEntryFunction = 5;
 void PROCESS_CONFIG::clear_luaentryfunction() {
   luaentryfunction_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -5158,7 +5658,7 @@ void PROCESS_CONFIG::clear_luaentryfunction() {
   // @@protoc_insertion_point(field_set_allocated:Protocol.PROCESS_CONFIG.LuaEntryFunction)
 }
 
-// optional string LuaProcessFunction = 5;
+// optional string LuaProcessFunction = 6;
 void PROCESS_CONFIG::clear_luaprocessfunction() {
   luaprocessfunction_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -5202,7 +5702,7 @@ void PROCESS_CONFIG::clear_luaprocessfunction() {
   // @@protoc_insertion_point(field_set_allocated:Protocol.PROCESS_CONFIG.LuaProcessFunction)
 }
 
-// optional string LuaSocketCloseFunction = 6;
+// optional string LuaSocketCloseFunction = 7;
 void PROCESS_CONFIG::clear_luasocketclosefunction() {
   luasocketclosefunction_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }

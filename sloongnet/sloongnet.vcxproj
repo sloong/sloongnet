@@ -89,6 +89,7 @@
     <ClInclude Include="IControl.h" />
     <ClInclude Include="IData.h" />
     <ClInclude Include="IEvent.h" />
+    <ClInclude Include="include\sqlite_orm\sqlite_orm.h" />
     <ClInclude Include="include\univ\Base64.h" />
     <ClInclude Include="include\univ\blowfish.h" />
     <ClInclude Include="include\univ\defines.h" />
@@ -123,6 +124,7 @@
     <ClInclude Include="ServiceBuilder.h" />
     <ClInclude Include="sockinfo.h" />
     <ClInclude Include="SQLiteEx.h" />
+    <ClInclude Include="SQLite_ORM.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="utility.h" />
     <ClInclude Include="version.h" />
