@@ -32,13 +32,11 @@ TResult<shared_ptr<DataPackage>> SendPackage(SmartConnect con, shared_ptr<DataPa
 	return TResult<shared_ptr<DataPackage>>::Make_OK(get_config_response_buf);
 }
 
-CResult RegisteToControl(SmartConnect con, string uuid, ModuleType type)
+CResult RegisteToControl(SmartConnect con)
 {
 	auto req = make_shared<DataPackage>();
 	req->set_function(Functions::RegisteServer);
 	req->set_receiver(Protocol::ModuleType::Control);
-	req->set_sender(uuid);
-	req->set_content(ModuleType_Name(type));
 
 	auto res = SendPackage(con, req);
 	if (res.IsFialed())
@@ -64,7 +62,7 @@ CResult GetConfigFromControl(SmartConnect con,string uuid)
 void PrientHelp()
 {
 	cout << "sloongnet [<type>] [<address:port>]" << endl;
-	cout << "<type>: Control,Process,Gateway,Firewall,data,db" << endl;
+	cout << "<type>: Manager|Worker" << endl;
 }
 
 
@@ -80,13 +78,22 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 	}
 
 	ModuleType type = Unconfigured;
-	if (!ModuleType_Parse(args[1], &type))
+	if (strcasecmp(args[1], "Worker"))
+	{
+		type = ModuleType::Unconfigured;
+	}
+	else if (strcasecmp(args[1], "Manager"))
+	{
+		type = ModuleType::Control;
+	}
+	else
 	{
 		cout << "Parse module type error." << endl;
+		PrientHelp();
 		return nullptr;
 	}
-	cout << "Run application by " << ModuleType_Name(type) << " module" << endl;
 
+	
 	vector<string> addr = CUniversal::split(args[2], ':');
 	if (addr.size() != 2)
 	{
@@ -117,22 +124,15 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 			return nullptr;
 		}
 		cout << "Connect to control succeed." << endl;
-		string uuid;
-		fstream_ex::read_all("uuid.dat", uuid);
-		auto res = RegisteToControl(con, uuid, type);
+		auto res = RegisteToControl(con);
 		if (res.IsFialed())
 		{
 			cout << res.Message() << endl;
 			return nullptr;
 		}
 
-		string server_uuid = res.Message();
-		if (uuid != server_uuid)
-		{
-			fstream_ex::write_all("uuid.dat", server_uuid);
-			uuid = server_uuid;
-		}
-				
+		string uuid = res.Message();
+
 		cout << "Start get configuation." << endl;
 		res = GetConfigFromControl(con, uuid);
 		if (res.IsFialed())
@@ -141,17 +141,21 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 			return nullptr;
 		}
 		auto serverConfig = res.Message();
-		if (serverConfig.size() == 0)
+
+		do
 		{
-			cout << "Control no return config infomation. please check." << endl;
-			return nullptr;
-		}
-		if (!config->ParseFromString(serverConfig))
-		{
-			cout << "Parse the config struct error. please check." << endl;
-			return nullptr;
-		}
-		
+			if (serverConfig.size() == 0)
+			{
+				cout << "Control no return config infomation. wait 500ms and retry." << endl;
+				SLEEP(500);
+				continue;
+			}
+			if (!config->ParseFromString(serverConfig))
+			{
+				cout << "Parse the config struct error. please check." << endl;
+				return nullptr;
+			}
+		} while (config->type() == ModuleType::Unconfigured);
 		cout << "Get configuation succeed." << endl;
 	}
 	return config;
