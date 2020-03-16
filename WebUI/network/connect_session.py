@@ -2,7 +2,7 @@
 @Author: WCB
 @Date: 2019-11-14 13:57:27
 @LastEditors: WCB
-@LastEditTime: 2019-12-12 17:39:17
+@LastEditTime: 2020-03-14 09:37:48
 @Description: Manage connect session.
 '''
 import socket
@@ -20,6 +20,8 @@ class ConnectSession(object):
         self._host = server
         self._port = port
 
+    # TODO: here should be add a connected event. when connect succeed, call this event handler.
+    # and then, the handler should be send the RegisterServer function message.
     def _connect(self):
         try:
             self._socket.connect((self._host,self._port))
@@ -61,6 +63,7 @@ class ConnectSession(object):
         data = self._recv_ex(int.from_bytes(len_data,byteorder="big"))
         return (True,data)
 
+    # TODO: here should be add the timeout process. and when timeout, disconnect and retry send.
     def _recv_ex(self, recv_len):
         data = self._socket.recv(recv_len)
         while len(data) < recv_len :

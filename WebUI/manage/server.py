@@ -2,15 +2,18 @@
 @Author: WCB
 @Date: 2019-12-12 10:25:43
 @LastEditors: WCB
-@LastEditTime: 2019-12-14 10:30:34
+@LastEditTime: 2020-03-14 09:30:42
 @Description: file content
 '''
 import uuid as GenUUID
 
 from network.connect_session import ConnectSession
+from network.message_package import MessagePackage
+
 from .models import ServerList
+from protocol import protocol_pb2 as protocol
 
-
+# Server manager for all type server.
 class ServerManage:
     SessionList = {}
     
@@ -35,6 +38,25 @@ class ServerManage:
             return None
         return serverInfo
         
+
+    @staticmethod
+    def get_server_config(request,uuid):
+        pack = MessagePackage()
+        cur = ServerManage.get_current_connect(request)
+        result = pack.Request(cur, protocol.Functions.GetServerConfig, msg=uuid)
+        if result.Result == protocol.ResultType.Succeed:
+            return result.Extend
+        else:
+            return None
+
+    @staticmethod
+    def set_server_config(request,uuid,config):
+        config_str = config.SerializeToString()
+        pack = MessagePackage()
+        cur = ServerManage.get_current_connect(request)
+        return pack.Request(cur, protocol.Functions.SetServerConfig, msg=uuid, extend=config_str)
+        
+    
     @staticmethod
     def get_current_connect(request):
         serverInfo = ServerManage.get_current(request)

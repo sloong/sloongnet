@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-14 14:14:34
  * @LastEditors: WCB
- * @LastEditTime: 2019-12-12 22:46:52
+ * @LastEditTime: 2020-03-13 11:11:42
  * @Description: file content
  -->
 {%extends "base.html" %}
@@ -33,7 +33,7 @@
                     <td>{{item.uuid}}</td>
                     <td>
                         <a href="/settings/del_control/{{item.uuid}}/"><button>删除</button></a>
-                        <a href="/settings/modify_control/{{item.uuid}}/"><button>编辑</button></a>
+                        <a href="/settings/config_control/{{item.uuid}}/"><button>编辑</button></a>
                     </td>
                 </tr>
                 {% endfor %}

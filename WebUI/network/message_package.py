@@ -1,8 +1,8 @@
 '''
 @Author: WCB
 @Date: 2019-11-14 13:59:50
-@LastEditors  : WCB
-@LastEditTime : 2019-12-24 16:20:54
+@LastEditors: WCB
+@LastEditTime: 2020-03-13 18:43:10
 @Description: Message package module
 '''
 from protocol import protocol_pb2 as protocol
@@ -24,4 +24,4 @@ class MessagePackage:
         recv_pack = protocol.DataPackage()
 
         recv_pack.ParseFromString(recv_data)
-        return (recv_pack.Result,recv_pack.Content)
+        return recv_pack

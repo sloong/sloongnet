@@ -1,0 +1,38 @@
+<!--
+ * @Author: WCB
+ * @Date: 2019-11-14 14:14:34
+ * @LastEditors  : WCB
+ * @LastEditTime : 2020-01-23 16:01:28
+ * @Description: file content
+ -->
+{%extends "base.html" %}
+
+{% block mainbody %}
+
+{% if ErrorMessage %}
+    {{ ErrorMessage }}
+{% else %}
+    <h3 align="center">模板列表</h3>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>NOTE</th>
+                <th>开始配置</th>
+            </tr>
+        </thead>
+        <tbody>
+    {% for item in ConfigTemplateList %}
+            <tr>
+                <td>{{ item.Name }}</td>
+                <td><a href="/settings/config_template/{{item.ID}}"><button type="button"
+                            class="btn btn-default">Start</button></a></td>
+            </tr>
+       
+    {% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+
+{% endblock %}

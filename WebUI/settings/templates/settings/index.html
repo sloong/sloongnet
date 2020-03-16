@@ -1,52 +1,20 @@
 <!--
  * @Author: WCB
  * @Date: 2019-11-14 14:14:34
- * @LastEditors  : WCB
- * @LastEditTime : 2019-12-26 16:32:58
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-03-13 16:29:33
  * @Description: file content
  -->
 {%extends "base.html" %}
 
 {% block mainbody %}
 
-{% if ErrorMessage %}
-    {{ ErrorMessage }}
-{% else %}
-    {% if NoWaitConfigList %}
-    <p>没有待配置服务</p>
-    {% else %}
-    <h3 align="center">未配置服务列表</h3>
-    <table class="table table-bordered table-hover">
-        <thead>
-            <tr>
-                <th>UUID</th>
-                <th>IP</th>
-                <th>开始配置</th>
-            </tr>
-        </thead>
-        <tbody>
-    {% for item in WaitConfigList %}
-
-    
-            <tr>
-                <td>{{ item.UUID }}</td>
-                <td>{{ item.IP }}</td>
-                <td><a href="/settings/config/{{item.UUID}}"><button type="button"
-                            class="btn btn-default">Start</button></a></td>
-            </tr>
-       
-    {% endfor %}
-</tbody>
-</table>
-    {% endif %}
-{% endif %}
-
-
-{% endblock %}
-
-{% block javascript %}
-function configServer(uuid){
-alera("test");
-}
+    <h3 align="center">选择目标</h3>
+    <a href="/settings/list_modules"><button type="button"
+        class="btn btn-default">模块配置</button></a>
+    <a href="/settings/list_templates"><button type="button"
+        class="btn btn-default">模板配置</button></a>
+    <a href="/settings/list_control"><button type="button"
+        class="btn btn-default">控制中心配置</button></a>
 
 {% endblock %}

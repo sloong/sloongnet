@@ -1,8 +1,8 @@
 '''
 @Author: WCB
 @Date: 2019-11-14 14:05:25
-@LastEditors: WCB
-@LastEditTime: 2019-12-12 22:27:50
+@LastEditors  : WCB
+@LastEditTime : 2020-01-23 16:04:37
 @Description: file conten
 '''
 from django.shortcuts import render
@@ -28,18 +28,7 @@ def index(request):
     if not cur:
         return HttpResponseRedirect('/settings/add_control')
     else:
-        pack = MessagePackage()
-        (code,data) =pack.Request(cur, protocol.Functions.GetWaitConfigList,'')
-        if code != protocol.ResultType.Succeed:
-            c['ErrorMessage'] = data
-        else:
-            jres = json.loads(data)
-            if not jres['WaitConfigList'] :
-                c["NoWaitConfigList"] = True
-            else:
-                c['WaitConfigList'] = jres['WaitConfigList']
-    
-    return render(request, 'index.html', c)
+        return render(request, 'index.html', c)
 
 
 def set_current_control(request, uuid):

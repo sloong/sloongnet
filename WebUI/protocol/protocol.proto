@@ -17,6 +17,8 @@ enum ResultType{
 	Succeed = 0;
 	Error = 1;
 	Warning = 2;
+	Retry = 3;
+	Invalid = 4;
 }
 
 // LogLevel
@@ -33,28 +35,26 @@ enum LogLevel{
 
 
 enum Functions{
-	/* Flow: ContrulUI -> Control
+	/* Flow: Client -> Process
+	   Response: Content - result with JSON string. 
+	*/
+	ProcessMessage=0;
+	/*------------------------------------------------
+	      Manage function for module to module
+	-------------------------------------------------*/
+	/* Flow: All -> Control
+	   Response: post log message to control
+	*/
+	PostLog=1;
+	/* Flow:  All -> Control
 	   Response: Content(string) - the uuid for sender.
 	*/
-	RegisteServer=0;
-	/* Flow: ContrulUI -> Control
-	   Response: Content(JSON) - wait config list. 
-					Format: 
-					{
-					  "WaitConfigList": [
-						{
-						  "UUID": "",
-						  "IP": ""
-						}
-					  ]
-					}
-	*/
-	GetWaitConfigList=1;
-	/* Flow: ControlUI -> Control
+	RegisteServer=2;
+	/* Flow:  ControlUI -> Control
 	   Response: Content(JSON) - Config template  list.
 					Format: 
 					{
-					  "ConfigTemplateList": [
+					  "ServerList": [
 						{
 						  "ID": "",
 						  "Config": "" //Base64
@@ -62,14 +62,43 @@ enum Functions{
 					  ]
 					}
 	*/
-	GetConfigTemplateList=2;
+	GetServerList=9;
+	/* Flow: Control -> All
+	   Request: 
+	   Response: NO
+	*/
+	RestartService=3;
+	/* Flow: ControlUI -> Control
+	   Response: Content(JSON) - Config template  list.
+					Format: 
+					{
+					  "ConfigTemplateList": [
+						{
+						  "ID": "",
+						  "Name":""
+						}
+					  ]
+					}
+	*/
+	GetAllConfigTemplate=4;
 	/* Flow: ControlUI -> Control
 	   Request: Content - Config template ID
 				Extend - Target template config
 	   Response: Result
 	*/
-	SetServerConfigTemplate=3;
+	SetConfigTemplate=5;
+	/* Flow: All -> Control
+	   Response: ExtendData(bytes) - config data is not UTF8 string. cannot save in context field.
+	   Note: Get the general server config data. the data type is GLOBAL_CONFIG.
+	*/
+	GetServerConfig=6;
 	/* Flow: ControlUI -> Control
+	   Request: Content - Target server UUID
+                Extend - Target server config
+	   Response: Result
+	*/
+	SetServerConfig=7;
+    /* Flow: ControlUI -> Control
 	   Request: Content(JSON) - config info.
 					Format:
 					{
@@ -78,29 +107,7 @@ enum Functions{
 					}
 	   Response: Result
 	*/
-	SetServerToTemplate=4;
-	/* Flow: ControlUI -> Control
-	   Request: Content - Target server UUID
-                Extend - Target server config
-	   Response: Result
-	*/
-	SetServerConfig=5;
-	/* Sender: All 
-	   Processer: Control
-	   Response: ExtendData(bytes) - config data is not UTF8 string. cannot save in context field.
-	   Note: Get the general server config data. the data type is GLOBAL_CONFIG.
-	*/
-	GetServerConfig=6;
-	// Sender: Process 
-	// Processer: Control
-	// Response: No
-	// Note: if the socket uuid is registed, the control will send error message 
-	UserLogin=7;
-	/* Sender: Procxy
-	   Processer : Process 
-	   Response data: Content - result with JSON string. 
-	*/
-	ProcessMessage=8;
+	SetServerToTemplate=8;
 }
 
 message DataPackage
@@ -154,41 +161,47 @@ message GLOBAL_CONFIG
 
 message CONTROL_CONFIG
 {
-    int32 BlockTime=1;
+	GLOBAL_CONFIG BaseConfig=1;
+    int32 BlockTime=2;
 }
 
 message DB_CONFIG
 {
-    string  ServerAddress=1;
-    int32   ServerPort=2;
-    string  User=3;
-    string  Passwd=4;
-    string  Database=5;
+	GLOBAL_CONFIG BaseConfig=1;
+    string  ServerAddress=2;
+    int32   ServerPort=3;
+    string  User=4;
+    string  Passwd=5;
+    string  Database=6;
 }
 
 message DATA_CONFIG
 {
-    int32     DataReceivePort=1; 
-    int32     DataRecvTime=2;
+	GLOBAL_CONFIG BaseConfig=1;
+    int32     DataReceivePort=2; 
+    int32     DataRecvTime=3;
 } 
 
 message GATEWAY_CONFIG{
-    int32     ClientCheckTime=1;
-    string  ClientCheckKey=2;
-    int32     TimeoutCheckInterval=3;
-    int32       TimeoutTime=4;
-    string      ProcessAddress=5;
+	GLOBAL_CONFIG BaseConfig=1;
+    int32     ClientCheckTime=2;
+    string  ClientCheckKey=3;
+    int32     TimeoutCheckInterval=4;
+    int32       TimeoutTime=5;
+    string      ProcessAddress=6;
 };
 
 message FIREWALL_CONFIG{
-    int32 BlockTime=1;
+	GLOBAL_CONFIG BaseConfig=1;
+    int32 BlockTime=2;
 }
 
 message PROCESS_CONFIG{
-    int32  LuaContextQuantity=1;
-    string  LuaScriptFolder=2;
-    string  LuaEntryFile=3;
-    string  LuaEntryFunction=4;
-    string  LuaProcessFunction=5;
-    string  LuaSocketCloseFunction=6;
+	GLOBAL_CONFIG BaseConfig=1;
+    int32  LuaContextQuantity=2;
+    string  LuaScriptFolder=3;
+    string  LuaEntryFile=4;
+    string  LuaEntryFunction=5;
+    string  LuaProcessFunction=6;
+    string  LuaSocketCloseFunction=7;
 };
