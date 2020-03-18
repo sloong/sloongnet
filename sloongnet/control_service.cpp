@@ -27,7 +27,7 @@ CResult SloongControlService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
 		uuid = CUtility::GenUUID();
 		fstream_ex::write_all("uuid.dat", uuid);
 	}
-	auto res = m_pServer->Initialize(uuid);
+	auto res = m_pServer->Initialize(0);
 	if (res.IsFialed())
 	{
 		cout << "Init server manage fialed. error message:" << res.Message() << endl;
@@ -54,11 +54,9 @@ void Sloong::SloongControlService::AfterInit()
 	m_pControl->Add(DATA_ITEM::ServerConfiguation, &m_oConfig);
 	m_pServer->SetLog(m_pLog.get());
 	RegistFunctionHandler(Functions::RegisteServer, std::bind(&CServerManage::RegisterServerHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	RegistFunctionHandler(Functions::GetAllConfigTemplate, std::bind(&CServerManage::GetConfigTemplateListHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	RegistFunctionHandler(Functions::GetServerConfig , std::bind(&CServerManage::GetServerConfigHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	RegistFunctionHandler(Functions::SetConfigTemplate, std::bind(&CServerManage::SetServerConfigTemplateHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	RegistFunctionHandler(Functions::SetServerConfig, std::bind(&CServerManage::SetServerConfigHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	RegistFunctionHandler(Functions::SetServerToTemplate, std::bind(&CServerManage::SetServerToTemplate, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	RegistFunctionHandler(Functions::GetTemplateList, std::bind(&CServerManage::GetTemplateListHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	RegistFunctionHandler(Functions::GetServerList , std::bind(&CServerManage::GetServerListHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	RegistFunctionHandler(Functions::SetTemplateConfig, std::bind(&CServerManage::SetTemplateConfigHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)

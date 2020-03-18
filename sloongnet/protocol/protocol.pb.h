@@ -127,19 +127,17 @@ enum Functions {
   ProcessMessage = 0,
   PostLog = 1,
   RegisteServer = 2,
-  GetServerList = 9,
-  RestartService = 3,
-  GetAllConfigTemplate = 4,
-  SetConfigTemplate = 5,
-  GetServerConfig = 6,
-  SetServerConfig = 7,
-  SetServerToTemplate = 8,
+  GetServerList = 3,
+  RestartService = 4,
+  GetTemplateList = 5,
+  SetTemplateConfig = 6,
+  GetServerConfig = 7,
   Functions_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   Functions_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool Functions_IsValid(int value);
 const Functions Functions_MIN = ProcessMessage;
-const Functions Functions_MAX = GetServerList;
+const Functions Functions_MAX = GetServerConfig;
 const int Functions_ARRAYSIZE = Functions_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Functions_descriptor();

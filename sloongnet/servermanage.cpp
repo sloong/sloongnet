@@ -7,55 +7,108 @@
 using namespace Sloong::Events;
 
 
-CResult Sloong::CServerManage::Initialize( const string& uuid)
+CResult Sloong::CServerManage::Initialize( int template_id )
 {
 	auto res = m_pAllConfig->Initialize("/data/configuation.db");
 	if (res.IsFialed()) return res;
-	res = m_pAllConfig->GetConfig(uuid);
+
+	// Initialize template list
+	auto list = m_pAllConfig->GetTemplateList();
+	for (auto item : list)
+	{
+		TemplateItem addItem(item);
+		m_oTemplateList[addItem.ID] = addItem;
+	}
+
+	res = m_pAllConfig->GetTemplate(template_id);
 	if (res.IsFialed())
 		return CResult::Succeed;
 	else
 		return res;
 }
 
-bool Sloong::CServerManage::RegisterServerHandler(Functions func, string sender, SmartPackage pack)
+
+int Sloong::CServerManage::SearchNeedCreateTemplate()
 {
-		CServerItem item;
-		item.Address = pack->GetSocketIP();
-		item.Port = pack->GetSocketPort();
-		auto content = pack->GetRecvPackage()->content();
-		ModuleType type = Unconfigured;
-		/// check module type first.
-		if (!ModuleType_Parse(content, &type))
-		{
-			m_pLog->Error(CUniversal::Format("Parser module with Server [%s:%d] error.", item.Address, item.Port));
-			pack->ResponsePackage(ResultType::Error, CUniversal::Format("Parser module error [%s].", content));
-			return true;
-		}
+	for (auto item : m_oTemplateList)
+	{
+		if (item.second.Replicas == 0)
+			continue;
 
-		// check uuid
-		if (sender.size() == 0) {
-			sender = CUtility::GenUUID();
-			m_pLog->Verbos(CUniversal::Format("New module[%s:%d] regist to system. Allocating uuid [%s].", item.Address, item.Port, sender));
-		}
-		item.Type = type;
-		m_oServerTypeList[type].unique_insert(sender);
-		m_oServerList[sender] = item;
-		pack->ResponsePackage(sender,"");
+		if (item.second.Created.size() == item.second.Replicas)
+			continue;
 
-		return true;
+		if (item.second.Created.size() == 0)
+			return item.first;
+	}
+
+	for (auto item : m_oTemplateList)
+	{
+		if (item.second.Replicas == 0)
+			continue;
+
+		if (item.second.Created.size() == item.second.Replicas)
+			continue;
+
+		if (item.second.Created.size() < item.second.Replicas)
+			return item.first;
+	}
+	return -1;
 }
 
 
-bool Sloong::CServerManage::GetConfigTemplateListHandler(Functions func, string sender, SmartPackage pack)
+bool Sloong::CServerManage::RegisterServerHandler(Functions func, string sender, SmartPackage pack)
 {
-	auto tpl_list = m_pAllConfig->GetTemplateList();
+	ServerItem item;
+	item.Address = pack->GetSocketIP();
+	item.Port = pack->GetSocketPort();
+	item.UUID = CUtility::GenUUID();
+	
+	// Get tamplate list
+	auto index = SearchNeedCreateTemplate();
+	if (index == -1)
+	{
+		item.Type = ModuleType::Unconfigured;
+		item.Template_ID = -1;
+	}
+	else
+	{
+		auto tpl = m_oTemplateList[index];
+		item.Type = tpl.Type;
+		item.Template_ID = tpl.ID;
+	}
+
+	m_pLog->Verbos(CUniversal::Format("New module[%s:%d] regist to system. Allocating uuid [%s].Type[%s]", item.Address, item.Port, item.UUID, ModuleType_Name(item.Type)));
+
+	m_oServerList[item.UUID] = item;
+	pack->ResponsePackage(item.UUID,item.Template_ID==-1?"": CBase64::Decode(m_oTemplateList[item.Template_ID].Configuation));
+
+	return true;
+}
+
+/*
+Response Format:
+{
+  "ConfigTemplateList": [
+	{
+	  "ID": "",
+	  "Name": ""
+	}
+  ]
+}
+*/
+bool Sloong::CServerManage::GetTemplateListHandler(Functions func, string sender, SmartPackage pack)
+{
 	Json::Value list;
-	for (auto& i : tpl_list)
+	for (auto& i : m_oTemplateList)
 	{
 		Json::Value item;
-		item["ID"] = i.first;
-		item["Name"] = i.second;
+		item["ID"] = i.second.ID;
+		item["Name"] = i.second.Name;
+		item["Replicas"] = i.second.Replicas;
+		item["Created"] = (int)i.second.Created.size();
+		item["Note"] = i.second.Note;
+		item["Configuation"] = i.second.Configuation;
 		list.append(item);
 	}
 	Json::Value root;
@@ -66,80 +119,7 @@ bool Sloong::CServerManage::GetConfigTemplateListHandler(Functions func, string 
 }
 
 
-bool Sloong::CServerManage::SetServerConfigHandler(Functions func, string sender, SmartPackage pack)
-{
-	auto msgPack = pack->GetRecvPackage();
-	auto target = msgPack->content();
-	auto res = m_pAllConfig->SetConfig(target, msgPack->extend());
-	if (res.IsSucceed())
-	{
-		pack->ResponsePackage("Succeed", "");
-	}
-	else
-	{
-		pack->ResponsePackage(ResultType::Error, res.Message());
-	}
-
-	return true;
-}
-
-bool Sloong::CServerManage::SetServerConfigTemplateHandler(Functions func, string sender, SmartPackage pack)
-{
-	auto msgPack = pack->GetRecvPackage();
-	auto target = msgPack->content();
-	auto res = m_pAllConfig->SetTemplate(atoi(target.c_str()), msgPack->extend());
-	if (res.IsSucceed())
-	{
-		pack->ResponsePackage("Succeed", "");
-	}
-	else
-	{
-		pack->ResponsePackage(ResultType::Error, res.Message());
-	}
-
-	return true;
-}
-
-bool Sloong::CServerManage::GetServerConfigHandler(Functions func, string sender, SmartPackage pack)
-{
-	auto item = m_oServerList.try_get(sender);
-	if (item == nullptr) {
-		string errmsg = CUniversal::Format("Module [%s] is no registe.", sender);
-		m_pLog->Warn(errmsg);
-		pack->ResponsePackage(ResultType::Error, errmsg);
-		return true;
-	}
-	else
-	{
-		// Try get server config with uuid first
-		auto config = m_pAllConfig->GetConfig(sender);
-		if (config.IsFialed())
-		{
-			m_pLog->Verbos(CUniversal::Format("Module[%s:%d|UUID:%s] is no special configued. return global module config.", item->Address, item->Port, sender));
-			config = m_pAllConfig->GetTemplate(item->Type);
-			if (config.IsFialed())
-			{
-				string errmsg = CUniversal::Format("Get global module[%s:%d] config error.", ModuleType_Name(item->Type), item->Type);
-				m_pLog->Error(errmsg);
-				pack->ResponsePackage(ResultType::Error, errmsg);
-				return true;
-			}
-		}
-		pack->ResponsePackage("", config.Message());
-
-		return true;
-	}
-
-}
-
-/*
-Format:
-{
-	"ServerUUID":"",
-	"TemplateID" : "",
-}
-*/
-bool Sloong::CServerManage::SetServerToTemplate(Functions func, string sender, SmartPackage pack)
+bool Sloong::CServerManage::SetTemplateConfigHandler(Functions func, string sender, SmartPackage pack)
 {
 	auto msgPack = pack->GetRecvPackage();
 	auto jreq = msgPack->content();
@@ -150,17 +130,62 @@ bool Sloong::CServerManage::SetServerToTemplate(Functions func, string sender, S
 		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Parser json[% s] error.", jreq));
 		return true;
 	}
-	if (root["TemplateID"].isNull())
+	if (root["ID"].isNull() || !m_oTemplateList.exist(root["ID"].asInt()))
 	{
-		pack->ResponsePackage(ResultType::Error, "JSON no have 'TemplateID' element.");
+		pack->ResponsePackage(ResultType::Error, "Check the templeate ID error, please check.");
 		return true;
 	}
-
 	
-	auto res = m_pAllConfig->SetConfigToTemplate(sender, root["key"].asInt());
-	if( res.IsFialed())
-		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Parser json[% s] error.", jreq));
-	pack->ResponsePackage(root.toStyledString(),"");
+	auto info = m_oTemplateList[root["ID"].asInt()].ToTemplateInfo();
+	if (!root["Name"].isNull())
+		info.name = root["Name"].asString();
+
+	if (!root["Note"].isNull())
+		info.note = root["Note"].asString();
+
+	if (!root["Replcas"].isNull())
+		info.replicas = root["Replcas"].asInt();
+
+	if (!root["Configuation"].isNull())
+		info.configuation = root["Configuation"].asString();
+
+	auto res = m_pAllConfig->SetTemplate(info.id, info);
+	if (res.IsSucceed())
+	{
+		pack->ResponsePackage(ResultType::Succeed, "success");
+	}
+	else
+	{
+		pack->ResponsePackage(ResultType::Error, res.Message());
+	}
 
 	return true;
+}
+
+/*
+Response Format: 
+{
+  "ServerList": [
+    {
+      "UUID": "",
+	  "Type":"",
+      "TemplateID": ""
+    }
+  ]
+}
+*/
+bool Sloong::CServerManage::GetServerListHandler(Functions func, string sender, SmartPackage pack)
+{
+	Json::Value list;
+	for (auto& i : m_oServerList)
+	{
+		Json::Value item;
+		item["UUID"] = i.first;
+		item['Type'] = i.second.Type;
+		item["TemplateID"] = i.second.Template_ID;
+		list.append(item);
+	}
+	Json::Value root;
+	root["ServerList"] = list;
+	pack->ResponsePackage(root.toStyledString(), "");
 }

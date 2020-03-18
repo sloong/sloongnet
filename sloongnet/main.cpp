@@ -32,7 +32,7 @@ TResult<shared_ptr<DataPackage>> SendPackage(SmartConnect con, shared_ptr<DataPa
 	return TResult<shared_ptr<DataPackage>>::Make_OK(get_config_response_buf);
 }
 
-CResult RegisteToControl(SmartConnect con)
+TResult<tuple<string,string>> RegisteToControl(SmartConnect con)
 {
 	auto req = make_shared<DataPackage>();
 	req->set_function(Functions::RegisteServer);
@@ -40,24 +40,11 @@ CResult RegisteToControl(SmartConnect con)
 
 	auto res = SendPackage(con, req);
 	if (res.IsFialed())
-		return CResult::Make_Error(res.Message());
+		return TResult<tuple<string, string>>::Make_Error(res.Message());
 
-	return CResult::Make_OK(res.ResultObject()->content());
+	return TResult<tuple<string, string>>::Make_OK( tuple<string,string>(res.ResultObject()->content(), res.ResultObject()->extend()));
 }
 
-CResult GetConfigFromControl(SmartConnect con,string uuid)
-{
-	auto req = make_shared<DataPackage>();
-	req->set_function(Functions::GetServerConfig);
-	req->set_receiver(Protocol::ModuleType::Control);
-	req->set_sender(uuid);
-
-	auto res = SendPackage(con, req);
-	if (res.IsFialed())
-		return CResult::Make_Error(res.Message());
-
-	return CResult::Make_OK(res.ResultObject()->extend());
-}
 
 void PrientHelp()
 {
@@ -123,27 +110,20 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 			cout << "Connect to control fialed." << endl;
 			return nullptr;
 		}
-		cout << "Connect to control succeed." << endl;
-		auto res = RegisteToControl(con);
-		if (res.IsFialed())
-		{
-			cout << res.Message() << endl;
-			return nullptr;
-		}
-
-		string uuid = res.Message();
-
-		cout << "Start get configuation." << endl;
-		res = GetConfigFromControl(con, uuid);
-		if (res.IsFialed())
-		{
-			cout << res.Message() << endl;
-			return nullptr;
-		}
-		auto serverConfig = res.Message();
+		cout << "Connect to control succeed. Start registe and get configuation." << endl;
 
 		do
 		{
+			auto res = RegisteToControl(con);
+			if (res.IsFialed())
+			{
+				cout << res.Message() << endl;
+				return nullptr;
+			}
+
+			string uuid = std::get<0>(res.ResultObject());
+			string serverConfig = std::get<1>(res.ResultObject());
+
 			if (serverConfig.size() == 0)
 			{
 				cout << "Control no return config infomation. wait 500ms and retry." << endl;

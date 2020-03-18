@@ -29,19 +29,10 @@ namespace Sloong
          */
 		CResult Initialize( const string& dbPath );
 
-        CResult GetConfig( const string& uuid );
-        CResult SetConfig(const string& uuid, string config );
-        CResult SetConfigToTemplate(const string& uuid, int tpl_id);
-        
-        CResult GetTemplate(int id);
-        map<int, string> GetTemplateList();
-        CResult AddTemplate(string config, int* out_id);
-		CResult SetTemplate( int id, string config);
-
-    protected:
-        TResult<int> AddConfig(string config);
-        CResult GetStringConfig(string table_name, string key, string& outValue);
-		CResult AddOrUpdateRecord(const string& table_name, const map<string, string>& list, string where_str);
+        TResult<TemplateInfo> GetTemplate(int id);
+        vector<TemplateInfo> GetTemplateList();
+        CResult AddTemplate( const TemplateInfo& config, int* out_id);
+		CResult SetTemplate( int id, const TemplateInfo& config);
 
     protected:
         unique_ptr<Storage> m_oStorage;

@@ -331,12 +331,11 @@ void protobuf_AddDesc_protocol_2eproto() {
     "\t\n\005Retry\020\003\022\013\n\007Invalid\020\004*^\n\010LogLevel\022\007\n\003A"
     "ll\020\000\022\n\n\006Verbos\020\001\022\t\n\005Debug\020\002\022\010\n\004Info\020\003\022\010\n"
     "\004Warn\020\004\022\007\n\003Err\020\005\022\n\n\006Assert\020\006\022\t\n\005Fatal\020\007*"
-    "\332\001\n\tFunctions\022\022\n\016ProcessMessage\020\000\022\013\n\007Pos"
+    "\247\001\n\tFunctions\022\022\n\016ProcessMessage\020\000\022\013\n\007Pos"
     "tLog\020\001\022\021\n\rRegisteServer\020\002\022\021\n\rGetServerLi"
-    "st\020\t\022\022\n\016RestartService\020\003\022\030\n\024GetAllConfig"
-    "Template\020\004\022\025\n\021SetConfigTemplate\020\005\022\023\n\017Get"
-    "ServerConfig\020\006\022\023\n\017SetServerConfig\020\007\022\027\n\023S"
-    "etServerToTemplate\020\010b\006proto3", 1988);
+    "st\020\003\022\022\n\016RestartService\020\004\022\023\n\017GetTemplateL"
+    "ist\020\005\022\025\n\021SetTemplateConfig\020\006\022\023\n\017GetServe"
+    "rConfig\020\007b\006proto3", 1937);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "protocol.proto", &protobuf_RegisterTypes);
   DataPackage::default_instance_ = new DataPackage();
@@ -434,8 +433,6 @@ bool Functions_IsValid(int value) {
     case 5:
     case 6:
     case 7:
-    case 8:
-    case 9:
       return true;
     default:
       return false;

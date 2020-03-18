@@ -48,6 +48,7 @@ enum Functions{
     PostLog=1;
     /* Flow:  All -> Control
        Response: Content(string) - the uuid for sender.
+                 Extend: config data
     */
     RegisteServer=2;
     /* Flow:  ControlUI -> Control
@@ -56,59 +57,48 @@ enum Functions{
                     {
                       "ServerList": [
                         {
-                          "ID": "",
-                          "Config": "" //Base64
+                          "UUID": "",
+                          "Type":"",
+                          "TemplateID": ""
                         }
                       ]
                     }
     */
-    GetServerList=9;
+    GetServerList=3;
     /* Flow: Control -> All
        Request: 
        Response: NO
     */
-    RestartService=3;
+    RestartService=4;
     /* Flow: ControlUI -> Control
        Response: Content(JSON) - Config template  list.
                     Format: 
                     {
-                      "ConfigTemplateList": [
+                      "TemplateList": [
                         {
                           "ID": "",
-                          "Name":""
+                          "Name":"",
+                          "Note":"",
+                          "Replicas":"",
+                          "Configuation":""
                         }
                       ]
                     }
     */
-    GetAllConfigTemplate=4;
-    /* Flow: ControlUI -> Control
-       Request: Content - Config template ID
-                Extend - Target template config
-       Response: Result
-    */
-    SetConfigTemplate=5;
-    /* Flow: All -> Control
-       Response: ExtendData(bytes) - config data is not UTF8 string. cannot save in context field.
-       Note: Get the general server config data. the data type is GLOBAL_CONFIG.
-    */
-    GetServerConfig=6;
-    /* Flow: ControlUI -> Control
-       Request: Content - Target server UUID
-                Extend - Target server config
-       Response: Result
-    */
-    SetServerConfig=7;
+    GetTemplateList=5;
     /* Flow: ControlUI -> Control
        Request: Content(JSON) - config info.
                     Format:
                     {
-                      "ServerUUID":"",
-                      "TemplateID":"",
+                      "ID":"",
+                      "Name":"",
+                      "Note":"",
+                      "replicas":"",
+                      "Configuation":"" //base64
                     }
        Response: Result
     */
-    SetServerToTemplate=8;
-    
+    SetTemplateConfig=6; 
 }
 
 message DataPackage

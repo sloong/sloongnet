@@ -61,12 +61,11 @@ namespace Protocol {
             "cnJvchABEgsKB1dhcm5pbmcQAhIJCgVSZXRyeRADEgsKB0ludmFsaWQQBCpe",
             "CghMb2dMZXZlbBIHCgNBbGwQABIKCgZWZXJib3MQARIJCgVEZWJ1ZxACEggK",
             "BEluZm8QAxIICgRXYXJuEAQSBwoDRXJyEAUSCgoGQXNzZXJ0EAYSCQoFRmF0",
-            "YWwQByraAQoJRnVuY3Rpb25zEhIKDlByb2Nlc3NNZXNzYWdlEAASCwoHUG9z",
-            "dExvZxABEhEKDVJlZ2lzdGVTZXJ2ZXIQAhIRCg1HZXRTZXJ2ZXJMaXN0EAkS",
-            "EgoOUmVzdGFydFNlcnZpY2UQAxIYChRHZXRBbGxDb25maWdUZW1wbGF0ZRAE",
-            "EhUKEVNldENvbmZpZ1RlbXBsYXRlEAUSEwoPR2V0U2VydmVyQ29uZmlnEAYS",
-            "EwoPU2V0U2VydmVyQ29uZmlnEAcSFwoTU2V0U2VydmVyVG9UZW1wbGF0ZRAI",
-            "YgZwcm90bzM="));
+            "YWwQByqnAQoJRnVuY3Rpb25zEhIKDlByb2Nlc3NNZXNzYWdlEAASCwoHUG9z",
+            "dExvZxABEhEKDVJlZ2lzdGVTZXJ2ZXIQAhIRCg1HZXRTZXJ2ZXJMaXN0EAMS",
+            "EgoOUmVzdGFydFNlcnZpY2UQBBITCg9HZXRUZW1wbGF0ZUxpc3QQBRIVChFT",
+            "ZXRUZW1wbGF0ZUNvbmZpZxAGEhMKD0dldFNlcnZlckNvbmZpZxAHYgZwcm90",
+            "bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ModuleType), typeof(global::Protocol.ResultType), typeof(global::Protocol.LogLevel), typeof(global::Protocol.Functions), }, new pbr::GeneratedClrTypeInfo[] {
@@ -145,64 +144,57 @@ namespace Protocol {
     /// {
     /// "ServerList": [
     /// {
-    /// "ID": "",
-    /// "Config": "" //Base64
+    /// "UUID": "",
+    /// "Type":"",
+    /// "TemplateID": ""
     /// }
     /// ]
     /// }
     /// </summary>
-    [pbr::OriginalName("GetServerList")] GetServerList = 9,
+    [pbr::OriginalName("GetServerList")] GetServerList = 3,
     /// <summary>
     ///  Flow: Control -> All
     /// Request: 
     /// Response: NO
     /// </summary>
-    [pbr::OriginalName("RestartService")] RestartService = 3,
+    [pbr::OriginalName("RestartService")] RestartService = 4,
     /// <summary>
     ///  Flow: ControlUI -> Control
     /// Response: Content(JSON) - Config template  list.
     /// Format: 
     /// {
-    /// "ConfigTemplateList": [
+    /// "TemplateList": [
     /// {
     /// "ID": "",
-    /// "Name":""
+    /// "Name":"",
+    /// "Note":"",
+    /// "Replicas":"",
+    /// "Configuation":""
     /// }
     /// ]
     /// }
     /// </summary>
-    [pbr::OriginalName("GetAllConfigTemplate")] GetAllConfigTemplate = 4,
-    /// <summary>
-    ///  Flow: ControlUI -> Control
-    /// Request: Content - Config template ID
-    /// Extend - Target template config
-    /// Response: Result
-    /// </summary>
-    [pbr::OriginalName("SetConfigTemplate")] SetConfigTemplate = 5,
-    /// <summary>
-    ///  Flow: All -> Control
-    /// Response: ExtendData(bytes) - config data is not UTF8 string. cannot save in context field.
-    /// Note: Get the general server config data. the data type is GLOBAL_CONFIG.
-    /// </summary>
-    [pbr::OriginalName("GetServerConfig")] GetServerConfig = 6,
-    /// <summary>
-    ///  Flow: ControlUI -> Control
-    /// Request: Content - Target server UUID
-    /// Extend - Target server config
-    /// Response: Result
-    /// </summary>
-    [pbr::OriginalName("SetServerConfig")] SetServerConfig = 7,
+    [pbr::OriginalName("GetTemplateList")] GetTemplateList = 5,
     /// <summary>
     ///  Flow: ControlUI -> Control
     /// Request: Content(JSON) - config info.
     /// Format:
     /// {
-    /// "ServerUUID":"",
-    /// "TemplateID":"",
+    /// "ID":"",
+    /// "Name":"",
+    /// "Note":"",
+    /// "replicas":"",
+    /// "Configuation":"" //base64
     /// }
     /// Response: Result
     /// </summary>
-    [pbr::OriginalName("SetServerToTemplate")] SetServerToTemplate = 8,
+    [pbr::OriginalName("SetTemplateConfig")] SetTemplateConfig = 6,
+    /// <summary>
+    ///  Flow: All -> Control
+    /// Request:
+    /// Response: Extend: config data
+    /// </summary>
+    [pbr::OriginalName("GetServerConfig")] GetServerConfig = 7,
   }
 
   #endregion
