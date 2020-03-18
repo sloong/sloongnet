@@ -59,29 +59,46 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 
 bool Sloong::CServerManage::RegisterServerHandler(Functions func, string sender, SmartPackage pack)
 {
-	ServerItem item;
-	item.Address = pack->GetSocketIP();
-	item.Port = pack->GetSocketPort();
-	item.UUID = CUtility::GenUUID();
+	if( sender.length() == 0 )
+	{
+		sender = CUtility::GenUUID();
+	}
+
+	auto sender_info = m_oServerList.try_get(sender);
+	if( sender_info == nullptr)
+	{
+		ServerItem item;
+		item.Address = pack->GetSocketIP();
+		item.Port = pack->GetSocketPort();
+		item.UUID = sender;
+		m_oServerList[sender] = item;
+		m_pLog->Verbos(CUniversal::Format("Module[%s:%d] regist to system. Allocating uuid [%s].", item.Address, item.Port, item.UUID));
+		sender_info = m_oServerList.try_get(sender);
+	}
+
+	if( sender_info == nullptr)
+	{
+		pack->ResponsePackage(ResultType::Error,"Add server info to ServerList fialed.");
+		return true;
+	}
 	
 	// Get tamplate list
 	auto index = SearchNeedCreateTemplate();
 	if (index == -1)
 	{
-		item.Type = ModuleType::Unconfigured;
-		item.Template_ID = -1;
+		sender_info->Type = ModuleType::Unconfigured;
+		sender_info->Template_ID = -1;
 	}
 	else
 	{
 		auto tpl = m_oTemplateList[index];
-		item.Type = tpl.Type;
-		item.Template_ID = tpl.ID;
+		sender_info->Type = tpl.Type;
+		sender_info->Template_ID = tpl.ID;
+		
+		m_pLog->Verbos(CUniversal::Format("Allocating module[%s] Type to [%s]", sender_info->UUID, ModuleType_Name(sender_info->Type)));
 	}
 
-	m_pLog->Verbos(CUniversal::Format("New module[%s:%d] regist to system. Allocating uuid [%s].Type[%s]", item.Address, item.Port, item.UUID, ModuleType_Name(item.Type)));
-
-	m_oServerList[item.UUID] = item;
-	pack->ResponsePackage(item.UUID,item.Template_ID==-1?"": CBase64::Decode(m_oTemplateList[item.Template_ID].Configuation));
+	pack->ResponsePackage(sender_info->UUID,sender_info->Template_ID==-1?"": CBase64::Decode(m_oTemplateList[sender_info->Template_ID].Configuation));
 
 	return true;
 }

@@ -32,11 +32,12 @@ TResult<shared_ptr<DataPackage>> SendPackage(SmartConnect con, shared_ptr<DataPa
 	return TResult<shared_ptr<DataPackage>>::Make_OK(get_config_response_buf);
 }
 
-TResult<tuple<string,string>> RegisteToControl(SmartConnect con)
+TResult<tuple<string,string>> RegisteToControl(SmartConnect con, const string& uuid)
 {
 	auto req = make_shared<DataPackage>();
 	req->set_function(Functions::RegisteServer);
 	req->set_receiver(Protocol::ModuleType::Control);
+	req->set_sender(uuid);
 
 	auto res = SendPackage(con, req);
 	if (res.IsFialed())
@@ -65,11 +66,11 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 	}
 
 	ModuleType type = Unconfigured;
-	if (strcasecmp(args[1], "Worker"))
+	if (strcasecmp(args[1], "Worker") == 0)
 	{
 		type = ModuleType::Unconfigured;
 	}
-	else if (strcasecmp(args[1], "Manager"))
+	else if (strcasecmp(args[1], "Manager") == 0)
 	{
 		type = ModuleType::Control;
 	}
@@ -112,16 +113,19 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 		}
 		cout << "Connect to control succeed. Start registe and get configuation." << endl;
 
+		string uuid;
 		do
 		{
-			auto res = RegisteToControl(con);
+			auto res = RegisteToControl(con,uuid);
 			if (res.IsFialed())
 			{
 				cout << res.Message() << endl;
 				return nullptr;
 			}
 
-			string uuid = std::get<0>(res.ResultObject());
+			if( uuid.length() == 0 )
+				uuid = std::get<0>(res.ResultObject());
+
 			string serverConfig = std::get<1>(res.ResultObject());
 
 			if (serverConfig.size() == 0)

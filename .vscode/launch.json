@@ -10,7 +10,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
-                    "127.0.0.1:8002"
+                    "Worker",
+                    "10.0.0.18:8002"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -25,7 +26,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
-                    "8002"
+                    "Manager",
+                    "0.0.0.0:8002"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -38,12 +40,13 @@
             "name": "(WSL)Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/mnt/d/Projects/sloongnet/build/debug/sloongnet",
+            "program": "/mnt/d/projects/sloongnet/engine/build/debug/sloongnet",
             "args": [
-                "127.0.0.1:8002"
+                "Worker",
+                "10.0.0.18:8002"
             ],
             "stopAtEntry": false,
-            "cwd": "/mnt/d/Projects/sloongnet/",
+            "cwd": "/mnt/d/projects/sloongnet/engine",
             "environment": [],
             "externalConsole": false,
             "preLaunchTask": "build",
@@ -73,12 +76,13 @@
             "name": "(WSL)Control Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/mnt/d/Projects/sloongnet/build/debug/sloongnet",
+            "program": "/mnt/d/projects/sloongnet/engine/build/debug/sloongnet",
             "args": [
-                "8002"
+                "Manager",
+                "0.0.0.0:8002"
             ],
             "stopAtEntry": false,
-            "cwd": "/mnt/d/Projects/sloongnet/",
+            "cwd": "/mnt/d/projects/sloongnet/engine",
             "environment": [],
             "externalConsole": false,
             "preLaunchTask": "build",
