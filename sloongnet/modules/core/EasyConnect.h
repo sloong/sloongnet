@@ -1,8 +1,7 @@
 #ifndef SLOONGNET_EASY_CONNECT_H
 #define SLOONGNET_EASY_CONNECT_H
 
-#include "stdafx.h"
-#include "result.h"
+#include "core.h"
 namespace Sloong
 {
 	namespace Universal

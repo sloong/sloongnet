@@ -11,7 +11,7 @@ CResult Sloong::CControlHub::Initialize(int quantity)
 	CThreadPool::AddWorkThread(std::bind(&CControlHub::MessageWorkLoop, this, std::placeholders::_1), nullptr, quantity);
 	CThreadPool::Run();
 	Run();
-    return CResult::Succeed;
+    return CResult::Succeed();
 }
 
 void Sloong::CControlHub::Run()

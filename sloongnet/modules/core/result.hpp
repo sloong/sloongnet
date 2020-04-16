@@ -1,8 +1,15 @@
+/*
+ * @Author: WCB
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-16 16:46:54
+ * @Description: file content
+ */
 #ifndef SLOONGNET_RESULT_H
 #define SLOONGNET_RESULT_H
 
-#include "stdafx.h"
 #include "protocol/protocol.pb.h"
+#include "core.h"
 using namespace Protocol;
 namespace Sloong
 {
@@ -36,14 +43,14 @@ namespace Sloong
         static CResult Make_OK(const string& result) {
             return CResult(ResultType::Succeed, result);
         }
+        static CResult Succeed(){
+            return CResult(ResultType::Succeed);
+        }
     protected:
         ResultType m_emResult;
         string m_strMessage;
         
-    public: 
-        static CResult Succeed;
     };
-
 
     template<class T>
     class TResult : public CResult

@@ -1,18 +1,25 @@
 /*
  * @Author: WCB
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-16 20:30:17
+ * @Description: file content
+ */
+/*
+ * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2019-11-06 16:42:27
+ * @LastEditTime: 2020-04-15 20:26:58
  * @Description: file content
  */
 
 #include "base_service.h"
 #include "utility.h"
 #include "NetworkEvent.hpp"
+#include <dlfcn.h>
 
 IControl* Sloong::IData::m_iC = nullptr;
 unique_ptr<CSloongBaseService> Sloong::CSloongBaseService::g_pAppService = nullptr;
-
 
 void CSloongBaseService::sloong_terminator()
 {
@@ -20,7 +27,7 @@ void CSloongBaseService::sloong_terminator()
     CUtility::write_call_stack();
     exit(0);
 }
-
+zhege 
 
 void CSloongBaseService::on_sigint(int signal)
 {
@@ -37,7 +44,7 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
 CResult CSloongBaseService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
 {
 	m_pServerConfig = move(config);
-    m_oExitResult = CResult::Succeed;
+    m_oExitResult = CResult::Succeed();
 
     set_terminate(sloong_terminator);
     set_unexpected(sloong_terminator);
@@ -58,24 +65,65 @@ CResult CSloongBaseService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
     
     m_pLog->Initialize(m_pServerConfig->logpath(), "", (LOGOPT) (LOGOPT::WriteToSTDOut|LOGOPT::WriteToFile), LOGLEVEL(m_pServerConfig->loglevel()), LOGTYPE::DAY);
 
+    // Load the module library
+    string libFullPath = m_pServerConfig->modulepath()+m_pServerConfig->modulename();
+
+
+    m_pModule = dlopen(libFullPath.c_str(),RTLD_LAZY);
+    if(m_pModule == nullptr)
+    {
+        string errMsg = CUniversal::Format("Load library [%s] error[%s].",libFullPath.c_str(),dlerror());
+        m_pLog->Error(errMsg);
+        return CResult::Make_Error(errMsg);
+    }
+    char *errmsg;
+    m_pHandler = (MessagePackageProcesser)dlsym(m_pModule, "MessagePackageProcesser");
+    if ((errmsg = dlerror()) != NULL)  {
+        string errMsg = CUniversal::Format("Load function MessagePackageProcesser error[%s].",error);
+        m_pLog->Error(errMsg);
+        return CResult::Make_Error(errMsg);
+    }
+    m_pAccept = (NewConnectAcceptProcesser)dlsym(m_pModule, "NewConnectAcceptProcesser");
+    if ((errmsg = dlerror()) != NULL)  {
+        string errMsg = CUniversal::Format("Load function NewConnectAcceptProcesser error[%s]. Use default function.",error);
+        m_pLog->Info(errMsg);
+    }
+    auto afterInit = (ModuleInitialize)dlsym(m_pModule, "ModuleInitialize");
+    if ((errmsg = dlerror()) != NULL)  {
+        string errMsg = CUniversal::Format("Load function ModuleInitialize error[%s]. maybe module no need initiliaze.",error);
+        m_pLog->Info(errMsg);
+    }
+
     auto res = m_pControl->Initialize(m_pServerConfig->mqthreadquantity());
     if( res.IsSucceed() ){
         m_pControl->Add(DATA_ITEM::ServerConfiguation, m_pServerConfig.get());
         m_pControl->Add(Logger, m_pLog.get());
         m_pControl->RegisterEvent(ProgramExit);
         m_pControl->RegisterEvent(ProgramStart);
+        m_pControl->RegisterEvent(ProgramRestart);
+        m_pControl->RegisterEventHandler(ProgramRestart,std::bind(&CSloongBaseService::Restart, this, std::placeholders::_1));
         IData::Initialize(m_pControl.get());
         res = m_pNetwork->Initialize(m_pControl.get());
 		if (res.IsSucceed())
 		{
-            m_pNetwork->RegisterMessageProcesser(std::bind(&CSloongBaseService::MessagePackageProcesser, this, std::placeholders::_1));
-			AfterInit();
-			return CResult::Succeed;
+            m_pNetwork->RegisterMessageProcesser(m_pHandler);
+            m_pNetwork->RegisterAccpetConnectProcesser(m_pAccept);
+			res = afterInit(m_pControl.get());
+            if( res.IsSucceed() )
+			    return CResult::Succeed();
 		}
     }
     
     m_pLog->Fatal(res.Message());
     return res;
+}
+
+void CSloongBaseService::Restart(SmartEvent event)
+{
+    // Restart service. use the Exit Sync object, notify the wait thread and return the ExitResult.
+    // in main function, check the result, if is Retry, do the init loop.
+    m_oExitResult = CResult(ResultType::Retry);
+    m_oExitSync.notify_all();
 }
 
 
@@ -90,51 +138,11 @@ void CSloongBaseService::Exit(){
     m_pControl->SendMessage(EVENT_TYPE::ProgramExit);
     m_pControl->Exit();
     m_oExitSync.notify_one();
+    dlclose(m_pModule);
 }
+
 bool CSloongBaseService::ConnectToControl(string controlAddress){
     m_pSocket = make_shared<EasyConnect>();
     m_pSocket->Initialize(controlAddress,nullptr);
     return m_pSocket->Connect();
-}
-
-void CSloongBaseService::RegistFunctionHandler(Functions func, FuncHandler handler)
-{
-    m_oFunctionHandles[func] = handler;
-}
-
-void CSloongBaseService::MessagePackageProcesser(SmartPackage pack)
-{
-    auto msgPack = pack->GetRecvPackage();
-    auto sender = msgPack->sender();
-    auto func = msgPack->function();
-    m_pLog->Verbos(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
-    if (m_oFunctionHandles.exist(func))
-    {
-        if (!m_oFunctionHandles[func](func, sender, pack))
-        {
-            return;
-        }
-    }
-    else
-    {
-        switch (func)
-        {
-        case Functions::RestartService:
-        {
-            // Restart service. use the Exit Sync object, notify the wait thread and return the ExitResult.
-            // in main function, check the result, if is Retry, do the init loop.
-            m_oExitResult = CResult(ResultType::Retry);
-            m_oExitSync.notify_all();
-            return;
-        }break;
-        default:
-            m_pLog->Verbos(CUniversal::Format("No handler for [%s] request: sender[%d]", Functions_Name(func), sender));
-            pack->ResponsePackage(ResultType::Error, "No hanlder to process request.");
-        }
-    }
-	
-	auto response_event = make_shared<Events::CNetworkEvent>(EVENT_TYPE::SendMessage);
-	response_event->SetSocketID(pack->GetSocketID());
-	response_event->SetDataPackage(pack);
-	m_pControl->SendMessage(response_event);
 }

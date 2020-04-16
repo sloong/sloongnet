@@ -56,7 +56,7 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	m_iC->RegisterEventHandler(EVENT_TYPE::SocketClose, std::bind(&CNetworkHub::CloseConnectEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::MonitorSendStatus, std::bind(&CNetworkHub::MonitorSendStatusEventHandler, this, std::placeholders::_1));
 
-	return CResult::Succeed;
+	return CResult::Succeed();
 }
 
 void Sloong::CNetworkHub::Run(SmartEvent event)
@@ -88,6 +88,12 @@ void Sloong::CNetworkHub::SendMessageEventHandler(SmartEvent event)
 {
 	auto send_evt = dynamic_pointer_cast<CNetworkEvent>(event);
 	SmartPackage pack = send_evt->GetDataPackage();
+	AddMessageToSendList(pack);
+}
+
+
+void Sloong::CNetworkHub::AddMessageToSendList(SmartPackage pack)
+{
 	int socket = pack->GetSocketID();
 	shared_ptr<CSockInfo> info = m_SockList[socket];
 
@@ -104,6 +110,7 @@ void Sloong::CNetworkHub::SendMessageEventHandler(SmartEvent event)
 		SendCloseConnectEvent(socket);
 	}
 }
+
 
 void Sloong::CNetworkHub::CloseConnectEventHandler(SmartEvent event)
 {
@@ -234,7 +241,9 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 			SmartPackage pack;
 			while( m_pWaitProcessList[i].TryPop(pack) )
 			{
-				m_pProcessFunc(pack);
+				auto res = m_pProcessFunc(pack.get());
+				if( res.IsSucceed())
+					AddMessageToSendList(pack);
 			}
 			goto MessagePorcessListRetry;
 		}
@@ -272,7 +281,7 @@ ResultType Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 	sockLck.unlock();
 
 	if( m_pAcceptFunc ){
-		m_pAcceptFunc(info);
+		m_pAcceptFunc(info.get());
 	}
 
 	m_pLog->Info(CUniversal::Format("Accept client:[%s:%d].", info->m_pCon->m_strAddress, info->m_pCon->m_nPort));

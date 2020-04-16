@@ -1,3 +1,10 @@
+/*
+ * @Author: WCB
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-16 20:36:30
+ * @Description: file content
+ */
 #ifndef SLOONGNET_DEFINES_H
 #define SLOONGNET_DEFINES_H
 
@@ -34,6 +41,10 @@ typedef enum g_DataCenter_Event_Type
 	*/
 	ProgramStart,
 	ProgramExit,
+	// 重新启用
+	// 程序将会从加载开始，重新执行获取配置，加载模块等操作
+	ProgramRestart,
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// 由 * NetworkHub * 模块提供的消息
@@ -57,7 +68,6 @@ typedef enum g_DataCenter_Event_Type
 	ReloadLuaContext,
 	
 	
-
 }EVENT_TYPE;
 
 

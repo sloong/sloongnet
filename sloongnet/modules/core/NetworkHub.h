@@ -2,13 +2,14 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2019-11-06 17:18:09
+ * @LastEditTime: 2020-04-16 20:50:39
  * @Description: file content
  */
 #pragma once
 
 #include "IObject.h"
 #include "DataTransPackage.h"
+#include "export.h"
 namespace Sloong
 { 
     class CSockInfo;
@@ -35,7 +36,7 @@ namespace Sloong
 		void MonitorSendStatusEventHandler(SmartEvent evt);
 
 
-        void RegisterMessageProcesser(std::function<void(SmartPackage)> value){
+        void RegisterMessageProcesser(MessagePackageProcesser value){
             m_pProcessFunc = value;
         }
 
@@ -45,7 +46,7 @@ namespace Sloong
          * @Params: the function bind for processer
          * @Return: NO
          */
-        void RegisterAccpetConnectProcesser(std::function<void(shared_ptr<CSockInfo>)> value){
+        void RegisterAccpetConnectProcesser(NewConnectAcceptProcesser value){
             m_pAcceptFunc = value;
         }
 
@@ -62,7 +63,7 @@ namespace Sloong
     protected:
         void SendCloseConnectEvent(int socket);
         void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nExSize = 0 );
-
+        void AddMessageToSendList(SmartPackage pack);
         /// 将响应消息加入到epoll发送列表中
 		void AddToSendList(int socket, int nPriority, const char* pBuf, int nSize, int nStart, const char* pExBuf, int nExSize);
         
@@ -85,8 +86,8 @@ namespace Sloong
         int m_nClientCheckTime=0;
         // For message process 
         CEasySync               m_oProcessThreadSync;
-        std::function<void(SmartPackage)>          m_pProcessFunc = nullptr;
-        std::function<void(shared_ptr<CSockInfo>)>  m_pAcceptFunc = nullptr;
+        MessagePackageProcesser          m_pProcessFunc = nullptr;
+        NewConnectAcceptProcesser        m_pAcceptFunc = nullptr;
         queue_ex<SmartPackage>*    m_pWaitProcessList;
     };
 }

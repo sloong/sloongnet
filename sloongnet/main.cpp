@@ -150,7 +150,7 @@ int main(int argc, char** args)
 {
 	try
 	{
-		CResult code = CResult::Succeed;
+		CResult code = CResult::Succeed();
 		do
 		{
 			auto config = Initialize(argc, args);

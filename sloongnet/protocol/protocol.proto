@@ -145,54 +145,10 @@ message GLOBAL_CONFIG
     int32   ProcessThreadQuantity=13;// work thread for DataPackage process quantity
     int32   PrioritySize=14;// Priority Size for the list. the priority level cannot bigger than this value.
 
-
+    // Module
     ModuleType Type = 15;
-    bytes ExConfig = 16;
+    string  ModuleName = 16;
+    string  ModulePath = 17;
+    bytes   ModuleConfig = 18;
 };
 
-message CONTROL_CONFIG
-{
-    GLOBAL_CONFIG BaseConfig=1;
-    int32 BlockTime=2;
-}
-
-message DB_CONFIG
-{
-    GLOBAL_CONFIG BaseConfig=1;
-    string  ServerAddress=2;
-    int32   ServerPort=3;
-    string  User=4;
-    string  Passwd=5;
-    string  Database=6;
-}
-
-message DATA_CONFIG
-{
-    GLOBAL_CONFIG BaseConfig=1;
-    int32     DataReceivePort=2; 
-    int32     DataRecvTime=3;
-} 
-
-message GATEWAY_CONFIG{
-    GLOBAL_CONFIG BaseConfig=1;
-    int32     ClientCheckTime=2;
-    string  ClientCheckKey=3;
-    int32     TimeoutCheckInterval=4;
-    int32       TimeoutTime=5;
-    string      ProcessAddress=6; 
-};
-
-message FIREWALL_CONFIG{
-    GLOBAL_CONFIG BaseConfig=1;
-    int32 BlockTime=2;
-}
-
-message PROCESS_CONFIG{
-    GLOBAL_CONFIG BaseConfig=1;
-    int32  LuaContextQuantity=2;
-    string  LuaScriptFolder=3;
-    string  LuaEntryFile=4;
-    string  LuaEntryFunction=5;
-    string  LuaProcessFunction=6;
-    string  LuaSocketCloseFunction=7;
-};

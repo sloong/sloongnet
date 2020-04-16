@@ -68,7 +68,7 @@ CResult Sloong::CEpollEx::Initialize(IControl* iMsg)
 	// 创建epoll
 	m_EpollHandle = epoll_create(65535);
 
-	return CResult::Succeed;
+	return CResult::Succeed();
 }
 
 CResult Sloong::CEpollEx::Run()
@@ -81,7 +81,7 @@ CResult Sloong::CEpollEx::Run()
 	m_bIsRunning = true;
 	// Init the thread pool
 	CThreadPool::AddWorkThread( std::bind(&CEpollEx::MainWorkLoop, this, std::placeholders::_1), nullptr, workThread);
-	return CResult::Succeed;
+	return CResult::Succeed();
 }
 
 

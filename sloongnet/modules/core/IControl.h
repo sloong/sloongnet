@@ -1,7 +1,13 @@
+/*
+ * @Author: WCB
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-16 15:41:07
+ * @Description: file content
+ */
 #ifndef SLOONGNET_INTERFACE_CONTROL_H
 #define SLOONGNET_INTERFACE_CONTROL_H
 
-#include "main.h"
 #include "IEvent.h"
 namespace Sloong
 {

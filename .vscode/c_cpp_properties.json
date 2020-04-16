@@ -12,7 +12,7 @@
                 "/usr/lib/gcc/x86_64-linux-gnu/7/include/",
                 "/usr/include/lua5.3/",
                 "/usr/include/google/protobuf/",
-                "${workspaceFolder}/sloongnet/interface/",
+                "${workspaceFolder}/sloongnet/modules/core/",
                 "${workspaceFolder}/sloongnet/**"
             ],
             "defines": [],

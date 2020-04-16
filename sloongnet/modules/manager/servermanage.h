@@ -56,10 +56,10 @@ namespace Sloong
 	public:
 		CResult Initialize( int template_id );
 
-		bool RegisterServerHandler(Functions func, string sender, SmartPackage pack);
-		bool GetTemplateListHandler(Functions func, string sender, SmartPackage pack);
-		bool SetTemplateConfigHandler(Functions func, string sender, SmartPackage pack);
-		bool GetServerListHandler(Functions func, string sender, SmartPackage pack);
+		bool RegisterServerHandler(Functions func, string sender, CDataTransPackage* pack);
+		bool GetTemplateListHandler(Functions func, string sender, CDataTransPackage* pack);
+		bool SetTemplateConfigHandler(Functions func, string sender, CDataTransPackage* pack);
+		bool GetServerListHandler(Functions func, string sender, CDataTransPackage* pack);
 
 		/// 由于初始化太早，无法在initialize时获取。只能由control_server手动设置
 		void SetLog(CLog* log) { m_pLog = log; }

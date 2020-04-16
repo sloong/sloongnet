@@ -22,7 +22,7 @@ CResult Sloong::CServerManage::Initialize( int template_id )
 
 	res = m_pAllConfig->GetTemplate(template_id);
 	if (res.IsFialed())
-		return CResult::Succeed;
+		return CResult::Succeed();
 	else
 		return res;
 }
@@ -57,7 +57,7 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 }
 
 
-bool Sloong::CServerManage::RegisterServerHandler(Functions func, string sender, SmartPackage pack)
+bool Sloong::CServerManage::RegisterServerHandler(Functions func, string sender, CDataTransPackage* pack)
 {
 	if( sender.length() == 0 )
 	{
@@ -114,7 +114,7 @@ Response Format:
   ]
 }
 */
-bool Sloong::CServerManage::GetTemplateListHandler(Functions func, string sender, SmartPackage pack)
+bool Sloong::CServerManage::GetTemplateListHandler(Functions func, string sender, CDataTransPackage* pack)
 {
 	Json::Value list;
 	for (auto& i : m_oTemplateList)
@@ -136,7 +136,7 @@ bool Sloong::CServerManage::GetTemplateListHandler(Functions func, string sender
 }
 
 
-bool Sloong::CServerManage::SetTemplateConfigHandler(Functions func, string sender, SmartPackage pack)
+bool Sloong::CServerManage::SetTemplateConfigHandler(Functions func, string sender, CDataTransPackage* pack)
 {
 	auto msgPack = pack->GetRecvPackage();
 	auto jreq = msgPack->content();
@@ -191,7 +191,7 @@ Response Format:
   ]
 }
 */
-bool Sloong::CServerManage::GetServerListHandler(Functions func, string sender, SmartPackage pack)
+bool Sloong::CServerManage::GetServerListHandler(Functions func, string sender, CDataTransPackage* pack)
 {
 	Json::Value list;
 	for (auto& i : m_oServerList)

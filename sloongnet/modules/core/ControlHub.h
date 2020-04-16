@@ -1,9 +1,16 @@
+/*
+ * @Author: WCB
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-16 16:26:29
+ * @Description: file content
+ */
 #ifndef CONTROL_HUB_H
 #define CONTROL_HUB_H
 
 #include "IEvent.h"
 #include "IControl.h"
-
+#include "core.h"
 namespace Sloong
 {
     class CControlHub : public IControl

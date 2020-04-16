@@ -1,3 +1,10 @@
+/*
+ * @Author: WCB
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-16 20:28:16
+ * @Description: file content
+ */
 
 #ifndef SLOONGNET_BASE_SERVICE_H
 #define SLOONGNET_BASE_SERVICE_H
@@ -10,7 +17,6 @@
 #include "NetworkHub.h"
 namespace Sloong
 {
-	typedef std::function<bool(Functions, string, SmartPackage)> FuncHandler;
 	class CSloongBaseService
 	{
 	public:
@@ -25,15 +31,11 @@ namespace Sloong
         // Just call it without Control module.
 		virtual CResult Initialize(unique_ptr<GLOBAL_CONFIG>& config);
 
-		virtual void AfterInit() {}
-
 		virtual CResult Run();
-
+		virtual void Restart(SmartEvent event)
 		virtual void Exit();
 
 		virtual bool ConnectToControl(string controlAddress);
-
-		void MessagePackageProcesser(SmartPackage);
 
     protected:
         static void sloong_terminator();
@@ -42,8 +44,6 @@ namespace Sloong
 
         static void on_SIGINT_Event(int signal);
 
-		void RegistFunctionHandler(Functions func, FuncHandler handler);
-
 	protected:
 		unique_ptr<CNetworkHub> m_pNetwork = make_unique<CNetworkHub>();
 		unique_ptr<CControlHub> m_pControl = make_unique<CControlHub>();
@@ -51,11 +51,13 @@ namespace Sloong
 		unique_ptr<GLOBAL_CONFIG> m_pServerConfig;
 		shared_ptr<EasyConnect>	m_pSocket;
 		CEasySync				m_oExitSync;
-		CResult					m_oExitResult = CResult::Succeed;
+		CResult					m_oExitResult = CResult::Succeed();
 		u_int64_t				m_nSerialNumber=0;
 		string					m_strUUID;
+		void*					m_pModule = nullptr;
 
-		map_ex<Functions, FuncHandler> m_oFunctionHandles;
+		MessagePackageProcesser m_pHandler = nullptr;
+		NewConnectAcceptProcesser m_pAccept = nullptr;
 		
     public:
         static unique_ptr<CSloongBaseService> g_pAppService;

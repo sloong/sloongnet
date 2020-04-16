@@ -17,7 +17,7 @@ Sloong::CConfiguation::CConfiguation()
 CResult Sloong::CConfiguation::Initialize(const string& dbPath)
 {
     m_oStorage = make_unique<Storage>(InitStorage(dbPath));
-    return CResult::Succeed;
+    return CResult::Succeed();
 }
 
 TResult<TemplateInfo> Sloong::CConfiguation::GetTemplate(int id)
@@ -51,7 +51,7 @@ CResult Sloong::CConfiguation::AddTemplate(const TemplateInfo& config, int* out_
     try
     {
         *out_id = m_oStorage->insert<TemplateInfo>(config);
-        return CResult::Succeed;
+        return CResult::Succeed();
     }
     catch (system_error ex)
     {
@@ -70,5 +70,5 @@ CResult Sloong::CConfiguation::SetTemplate( int id, const TemplateInfo& config)
     {
         return CResult::Make_Error(ex.what());
     }
-    return CResult::Succeed;
+    return CResult::Succeed();
 }
