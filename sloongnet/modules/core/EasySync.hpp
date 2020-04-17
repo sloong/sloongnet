@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-16 16:32:46
+ * @LastEditTime: 2020-04-17 15:48:32
  * @Description: file content
  */
 #pragma once
@@ -18,7 +18,7 @@ namespace Sloong
 	class CEasySync
 	{
 	public:
-		CEasySync();
+		CEasySync(){}
 		~CEasySync() {}
 
 		void wait(){

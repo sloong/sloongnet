@@ -1,10 +1,39 @@
+/*
+ * @Author: WCB
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-17 18:28:39
+ * @Description: file content
+ */
 #include "firewall_service.h"
 #include "utility.h"
 #include "NetworkEvent.hpp"
 using namespace Sloong;
 using namespace Sloong::Events;
 
-void SloongNetFirewall::AfterInit()
+
+unique_ptr<SloongNetFirewall> Sloong::SloongNetFirewall::Instance = nullptr;
+
+extern "C" CResult MessagePackageProcesser(CDataTransPackage* pack)
+{
+	return SloongNetFirewall::Instance->MessagePackageProcesser(pack);
+}
+	
+extern "C" CResult NewConnectAcceptProcesser(CSockInfo* info)
+{
+
+}
+	
+extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
+	SloongNetFirewall::Instance = make_unique<SloongNetFirewall>();
+	return CResult::Succeed();
+}
+
+extern "C" CResult ModuleInitialized(IControl* iC){
+	return SloongNetFirewall::Instance->Initialized(iC);
+}
+
+CResult SloongNetFirewall::Initialized(IControl*)
 {
 	m_oConfig.ParseFromString(m_pServerConfig->exconfig());
 	m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetFirewall::MessagePackageProcesser, this, std::placeholders::_1));
@@ -13,15 +42,42 @@ void SloongNetFirewall::AfterInit()
 
 
 
-void Sloong::SloongNetFirewall::MessagePackageProcesser(SmartPackage pack)
+void Sloong::SloongNetFirewall::RegistFunctionHandler(Functions func, FuncHandler handler)
 {
-	pack->ResponsePackage(CResult::Make_Error("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}"));
-	auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
-	response_event->SetSocketID(pack->GetSocketID());
-	response_event->SetDataPackage(pack);
-	m_pControl->CallMessage(response_event);
+    m_oFunctionHandles[func] = handler;
 }
 
+
+CResult Sloong::SloongNetFirewall::MessagePackageProcesser(CDataTransPackage* pack)
+{
+    auto msgPack = pack->GetRecvPackage();
+    auto sender = msgPack->sender();
+    auto func = msgPack->function();
+    m_pLog->Verbos(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
+    if (m_oFunctionHandles.exist(func))
+    {
+        if (!m_oFunctionHandles[func](func, sender, pack))
+        {
+            return CResult::Succeed();
+        }
+    }
+    else
+    {
+        switch (func)
+        {
+        case Functions::RestartService:
+        {
+           
+            return CResult::Succeed();
+        }break;
+        default:
+            m_pLog->Verbos(CUniversal::Format("No handler for [%s] request: sender[%d]", Functions_Name(func), sender));
+            pack->ResponsePackage(ResultType::Error, "No hanlder to process request.");
+        }
+    }
+
+	return CResult::Succeed();
+}
 void Sloong::SloongNetFirewall::OnSocketClose(SmartEvent event)
 {
 	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);

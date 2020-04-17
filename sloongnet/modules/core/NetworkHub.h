@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-16 20:50:39
+ * @LastEditTime: 2020-04-17 16:39:30
  * @Description: file content
  */
 #pragma once
@@ -36,7 +36,7 @@ namespace Sloong
 		void MonitorSendStatusEventHandler(SmartEvent evt);
 
 
-        void RegisterMessageProcesser(MessagePackageProcesser value){
+        void RegisterMessageProcesser(MessagePackageProcesserFunction value){
             m_pProcessFunc = value;
         }
 
@@ -46,7 +46,7 @@ namespace Sloong
          * @Params: the function bind for processer
          * @Return: NO
          */
-        void RegisterAccpetConnectProcesser(NewConnectAcceptProcesser value){
+        void RegisterAccpetConnectProcesser(NewConnectAcceptProcesserFunction value){
             m_pAcceptFunc = value;
         }
 
@@ -86,8 +86,8 @@ namespace Sloong
         int m_nClientCheckTime=0;
         // For message process 
         CEasySync               m_oProcessThreadSync;
-        MessagePackageProcesser          m_pProcessFunc = nullptr;
-        NewConnectAcceptProcesser        m_pAcceptFunc = nullptr;
+        MessagePackageProcesserFunction          m_pProcessFunc = nullptr;
+        NewConnectAcceptProcesserFunction        m_pAcceptFunc = nullptr;
         queue_ex<SmartPackage>*    m_pWaitProcessList;
     };
 }

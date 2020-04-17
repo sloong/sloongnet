@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-04-16 20:45:07
+ * @LastEditTime: 2020-04-17 17:39:20
  */
 
 #include "control_service.h"
@@ -16,19 +16,23 @@ using namespace Sloong::Events;
 
 unique_ptr<SloongControlService> Sloong::SloongControlService::Instance = nullptr;
 
-extern "C" CResult MessagePackageProcesserHandler(CDataTransPackage* pack)
+extern "C" CResult MessagePackageProcesser(CDataTransPackage* pack)
 {
 	return SloongControlService::Instance->MessagePackageProcesser(pack);
 }
 	
-extern "C" CResult NewConnectAcceptProcesserHandler(CSockInfo* info)
+extern "C" CResult NewConnectAcceptProcesser(CSockInfo* info)
 {
 
 }
 	
-extern "C" CResult ModuleInitializeHandler(IControl* iC){
+extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
 	SloongControlService::Instance = make_unique<SloongControlService>();
-	return SloongControlService::Instance->Initialize(iC);
+	return SloongControlService::Instance->Initialization(confiog);
+}
+
+extern "C" CResult ModuleInitialized(IControl* iC){
+	return SloongControlService::Instance->Initialized(iC);
 }
 
 
@@ -40,32 +44,40 @@ extern "C" CResult ModuleInitializeHandler(IControl* iC){
  * 
  * 
  */
-CResult SloongControlService::Initialize(IControl* iC)
+CResult SloongControlService::Initialization(GLOBAL_CONFIG* config)
 {
-	m_pControl = iC;
-	m_pConfig = (GLOBAL_CONFIG*)(iC->Get(DATA_ITEM::ServerConfiguation));
-	m_pLog = (CLog*)(iC->Get(DATA_ITEM::Logger));
-	
+	if( config == nullptr )
+	{
+		return CResult::Make_Error("Config object is nullptr.");
+	}
 	auto res = m_pServer->Initialize(0);
 	if (res.IsFialed())
 	{
-		cout << "Init server manage fialed. error message:" << res.Message() << endl;
-		return res;
+		return CResult::Make_Error(CUniversal::Format("Init server manage fialed. error message:%s",res.Message()));
 	}
 
 	auto config_str = res.Message();
 	// Here, this port is came from COMMAND LINE. 
 	// So we need save it before parse other setting.
-	auto port = m_pConfig->listenport();
-	if (config_str.length() == 0 || !m_pConfig->ParseFromString(config_str))
+	auto port = config->listenport();
+	if (config_str.length() == 0 || !config->ParseFromString(config_str))
 	{
 		// If parse config error, run with default config.
 		cout <<  "Parser server config error. run with default setting." << endl;
-		ResetControlConfig(m_pConfig);
+		ResetControlConfig(config);
 	}
 	// When config parse done, revert the port setting. Because we always use the command line port.
-	m_pConfig->set_listenport(port);
+	config->set_listenport(port);
+	
+	return CResult::Succeed();
+}
 
+CResult SloongControlService::Initialized(IControl* iC)
+{
+	m_pControl = iC;
+	m_pConfig = (GLOBAL_CONFIG*)(iC->Get(DATA_ITEM::ServerConfiguation));
+	m_pLog = (CLog*)(iC->Get(DATA_ITEM::Logger));
+	
 	m_pServer->SetLog(m_pLog);
 	RegistFunctionHandler(Functions::RegisteServer, std::bind(&CServerManage::RegisterServerHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	RegistFunctionHandler(Functions::GetTemplateList, std::bind(&CServerManage::GetTemplateListHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -84,7 +96,6 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
 	config->set_epollthreadquantity(1);
 	config->set_processthreadquantity(1);
 	config->set_receivetime(3);
-	
 }
 
 

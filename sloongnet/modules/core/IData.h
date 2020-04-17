@@ -2,13 +2,14 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-16 16:38:09
+ * @LastEditTime: 2020-04-17 15:33:49
  * @Description: file content
  */
 #ifndef SLOONGNET_INTERFACE_DATA_H
 #define SLOONGNET_INTERFACE_DATA_H
 
 #include "IControl.h"
+
 namespace Sloong
 {
 	class CConfiguation;

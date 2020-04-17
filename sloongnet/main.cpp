@@ -1,6 +1,6 @@
 ﻿#include "main.h"
+#include "base_service.h"
 #include "version.h"
-#include "ServiceBuilder.h"
 #include "utility.h"
 #include "fstream_ex.hpp"
 
@@ -101,6 +101,8 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 			return nullptr;
 		}
 		config->set_listenport(port);
+		config->set_modulepath("/mnt/d/projects/sloongnet/engine/sloongnet/modules/");
+		config->set_modulename("libmanager.so");
 	}
 	else
 	{
@@ -159,19 +161,19 @@ int main(int argc, char** args)
 				return -1;
 			}
 
-			Sloong::CSloongBaseService::g_pAppService = ServiceBuilder::Build(config.get());
-			if (!Sloong::CSloongBaseService::g_pAppService) {
+			Sloong::CSloongBaseService::Instance = make_unique<Sloong::CSloongBaseService>();
+			if (!Sloong::CSloongBaseService::Instance) {
 				cout << "Create service object error." << endl;
 				return -2;
 			}
 
-			auto res = Sloong::CSloongBaseService::g_pAppService->Initialize(config);
+			auto res = Sloong::CSloongBaseService::Instance->Initialize(config);
 			if (!res.IsSucceed()) {
 				cout << "Initialize server error. Message: " << res.Message() << endl;
 				return -3;
 			}
 
-			code = Sloong::CSloongBaseService::g_pAppService->Run();
+			code = Sloong::CSloongBaseService::Instance->Run();
 		} while (code.Result() == ResultType::Retry);
 		return 0;
 	}

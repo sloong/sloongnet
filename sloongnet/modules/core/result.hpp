@@ -2,13 +2,12 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-16 16:46:54
+ * @LastEditTime: 2020-04-17 15:35:30
  * @Description: file content
  */
 #ifndef SLOONGNET_RESULT_H
 #define SLOONGNET_RESULT_H
 
-#include "protocol/protocol.pb.h"
 #include "core.h"
 using namespace Protocol;
 namespace Sloong

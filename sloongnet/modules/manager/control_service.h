@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-16 20:44:15
+ * @LastEditTime: 2020-04-17 18:22:59
  * @Description: file content
  */
 #ifndef SLOONGNET_CONTROL_SERVICE_H
@@ -12,18 +12,18 @@
 #include "core.h"
 #include "export.h"
 #include "servermanage.h"
+
+extern "C" {
+	CResult MessagePackageProcesser(CDataTransPackage*);
+	CResult NewConnectAcceptProcesser(CSockInfo*);
+	CResult ModuleInitialization(GLOBAL_CONFIG*);
+	CResult ModuleInitialized(IControl*);
+}
+
 namespace Sloong
 {
-	/*extern "C" {
-
-	CResult MessagePackageProcesser(CDataTransPackage* pack);
-	//CResult NewConnectAcceptProcesser(CSockInfo* info);
-	CResult ModuleInitialize(IControl* iC);
-	}*/
-
-
+	
 	typedef std::function<bool(Functions, string, CDataTransPackage*)> FuncHandler;
-
 
 	class CConfiguation;
 	class SloongControlService
@@ -32,7 +32,8 @@ namespace Sloong
 		SloongControlService() {}
 		virtual ~SloongControlService() {}
 
-		CResult Initialize(IControl* iC);
+		CResult Initialization(GLOBAL_CONFIG*);
+		CResult Initialized(IControl*);
 
 		CResult MessagePackageProcesser(CDataTransPackage*);
 
@@ -45,7 +46,7 @@ namespace Sloong
 	protected:
 		unique_ptr<CServerManage>	m_pServer = make_unique<CServerManage>();
 		map_ex<Functions, FuncHandler> m_oFunctionHandles;
-		IControl* m_pControl = nullptr;
+		IControl* 	m_pControl = nullptr;
 		CLog*		m_pLog =nullptr;
 		
 		GLOBAL_CONFIG* m_pConfig;

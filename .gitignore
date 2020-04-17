@@ -48,3 +48,8 @@ WebUI/dist/
 WebUI/Sloongnet_WebUI.egg-info/
 WebUI/docker/output.tar.gz
 docker/output.tar
+sloongnet/modules/*.so
+CMakeFiles
+cmake_install.cmake
+CMakeCache.txt
+Makefile

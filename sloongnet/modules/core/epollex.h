@@ -1,9 +1,17 @@
+/*
+ * @Author: WCB
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-17 15:37:41
+ * @Description: file content
+ */
 #ifndef CEPOLLEX_H
 #define CEPOLLEX_H
 
 #include <sys/epoll.h>
 
 #include "IObject.h"
+#include "core.h"
 typedef unsigned char byte;
 
 namespace Sloong

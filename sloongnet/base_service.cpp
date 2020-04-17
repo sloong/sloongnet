@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-16 20:30:17
+ * @LastEditTime: 2020-04-17 17:40:54
  * @Description: file content
  */
 /*
@@ -12,14 +12,13 @@
  * @LastEditTime: 2020-04-15 20:26:58
  * @Description: file content
  */
-
 #include "base_service.h"
 #include "utility.h"
 #include "NetworkEvent.hpp"
 #include <dlfcn.h>
 
 IControl* Sloong::IData::m_iC = nullptr;
-unique_ptr<CSloongBaseService> Sloong::CSloongBaseService::g_pAppService = nullptr;
+unique_ptr<CSloongBaseService> Sloong::CSloongBaseService::Instance = nullptr;
 
 void CSloongBaseService::sloong_terminator()
 {
@@ -27,7 +26,6 @@ void CSloongBaseService::sloong_terminator()
     CUtility::write_call_stack();
     exit(0);
 }
-zhege 
 
 void CSloongBaseService::on_sigint(int signal)
 {
@@ -38,12 +36,12 @@ void CSloongBaseService::on_sigint(int signal)
 
 void CSloongBaseService::on_SIGINT_Event(int signal)
 {
-    g_pAppService->Exit();
+    Instance->Exit();
 }
 
 CResult CSloongBaseService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
 {
-	m_pServerConfig = move(config);
+    m_pServerConfig = move(config);
     m_oExitResult = CResult::Succeed();
 
     set_terminate(sloong_terminator);
@@ -77,44 +75,61 @@ CResult CSloongBaseService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
         return CResult::Make_Error(errMsg);
     }
     char *errmsg;
-    m_pHandler = (MessagePackageProcesser)dlsym(m_pModule, "MessagePackageProcesser");
+    m_pHandler = (MessagePackageProcesserFunction)dlsym(m_pModule, "MessagePackageProcesser");
     if ((errmsg = dlerror()) != NULL)  {
-        string errMsg = CUniversal::Format("Load function MessagePackageProcesser error[%s].",error);
+        string errMsg = CUniversal::Format("Load function MessagePackageProcesser error[%s].",errmsg);
         m_pLog->Error(errMsg);
         return CResult::Make_Error(errMsg);
     }
-    m_pAccept = (NewConnectAcceptProcesser)dlsym(m_pModule, "NewConnectAcceptProcesser");
+    m_pAccept = (NewConnectAcceptProcesserFunction)dlsym(m_pModule, "NewConnectAcceptProcesser");
     if ((errmsg = dlerror()) != NULL)  {
-        string errMsg = CUniversal::Format("Load function NewConnectAcceptProcesser error[%s]. Use default function.",error);
+        string errMsg = CUniversal::Format("Load function NewConnectAcceptProcesser error[%s]. Use default function.",errmsg);
         m_pLog->Info(errMsg);
     }
-    auto afterInit = (ModuleInitialize)dlsym(m_pModule, "ModuleInitialize");
+    auto beforeInit = (ModuleInitializationFunction)dlsym(m_pModule, "ModuleInitialization");
     if ((errmsg = dlerror()) != NULL)  {
-        string errMsg = CUniversal::Format("Load function ModuleInitialize error[%s]. maybe module no need initiliaze.",error);
+        string errMsg = CUniversal::Format("Load function ModuleInitialize error[%s]. maybe module no need initiliaze.",errmsg);
+        m_pLog->Info(errMsg);
+    }
+    auto afterInit = (ModuleInitializedFunction)dlsym(m_pModule, "ModuleInitialized");
+    if ((errmsg = dlerror()) != NULL)  {
+        string errMsg = CUniversal::Format("Load function ModuleInitialize error[%s]. maybe module no need initiliaze.",errmsg);
         m_pLog->Info(errMsg);
     }
 
-    auto res = m_pControl->Initialize(m_pServerConfig->mqthreadquantity());
-    if( res.IsSucceed() ){
-        m_pControl->Add(DATA_ITEM::ServerConfiguation, m_pServerConfig.get());
-        m_pControl->Add(Logger, m_pLog.get());
-        m_pControl->RegisterEvent(ProgramExit);
-        m_pControl->RegisterEvent(ProgramStart);
-        m_pControl->RegisterEvent(ProgramRestart);
-        m_pControl->RegisterEventHandler(ProgramRestart,std::bind(&CSloongBaseService::Restart, this, std::placeholders::_1));
-        IData::Initialize(m_pControl.get());
-        res = m_pNetwork->Initialize(m_pControl.get());
-		if (res.IsSucceed())
-		{
-            m_pNetwork->RegisterMessageProcesser(m_pHandler);
-            m_pNetwork->RegisterAccpetConnectProcesser(m_pAccept);
-			res = afterInit(m_pControl.get());
-            if( res.IsSucceed() )
-			    return CResult::Succeed();
-		}
+    auto res = beforeInit(m_pServerConfig.get());
+    if( res.IsFialed())
+    {
+        m_pLog->Fatal(res.Message());
+        return res;
+    }
+
+    res = m_pControl->Initialize(m_pServerConfig->mqthreadquantity());
+    if( res.IsFialed())
+    {
+        m_pLog->Fatal(res.Message());
+        return res;
     }
     
-    m_pLog->Fatal(res.Message());
+    m_pControl->Add(DATA_ITEM::ServerConfiguation, m_pServerConfig.get());
+    m_pControl->Add(Logger, m_pLog.get());
+    m_pControl->RegisterEvent(ProgramExit);
+    m_pControl->RegisterEvent(ProgramStart);
+    m_pControl->RegisterEvent(ProgramRestart);
+    m_pControl->RegisterEventHandler(ProgramRestart,std::bind(&CSloongBaseService::Restart, this, std::placeholders::_1));
+    IData::Initialize(m_pControl.get());
+    res = m_pNetwork->Initialize(m_pControl.get());
+    if (res.IsFialed())
+    {
+        m_pLog->Fatal(res.Message());
+        return res;
+    }
+    
+    m_pNetwork->RegisterMessageProcesser(m_pHandler);
+    m_pNetwork->RegisterAccpetConnectProcesser(m_pAccept);
+    res = afterInit(m_pControl.get());
+    if( res.IsFialed() )
+        m_pLog->Fatal(res.Message());
     return res;
 }
 

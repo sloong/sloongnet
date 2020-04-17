@@ -1,3 +1,10 @@
+/*
+ * @Author: WCB
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-17 12:30:12
+ * @Description: file content
+ */
 #ifndef SOCKINFO_H
 #define SOCKINFO_H
 
@@ -7,7 +14,7 @@
 #include "DataTransPackage.h"
 
 #include "IObject.h"
-
+#include "IControl.h"
 namespace Sloong
 {
 	class CSockInfo : IObject

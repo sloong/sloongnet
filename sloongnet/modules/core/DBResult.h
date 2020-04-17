@@ -2,14 +2,14 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2019-11-06 17:12:21
+ * @LastEditTime: 2020-04-17 15:32:57
  * @Description: file content
  */
 #ifndef SLOONGNET_DBRESULT_H
 #define SLOONGNET_DBRESULT_H
 
 
-#include "main.h"
+#include "core.h"
 namespace Sloong
 {
     typedef vector<string> DBLine;

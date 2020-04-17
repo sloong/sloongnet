@@ -2,13 +2,14 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-16 20:28:16
+ * @LastEditTime: 2020-04-17 16:40:08
  * @Description: file content
  */
 
 #ifndef SLOONGNET_BASE_SERVICE_H
 #define SLOONGNET_BASE_SERVICE_H
 
+#include "main.h"
 #include "IData.h"
 #include "IEvent.h"
 #include "IControl.h"
@@ -32,7 +33,7 @@ namespace Sloong
 		virtual CResult Initialize(unique_ptr<GLOBAL_CONFIG>& config);
 
 		virtual CResult Run();
-		virtual void Restart(SmartEvent event)
+		virtual void Restart(SmartEvent event);
 		virtual void Exit();
 
 		virtual bool ConnectToControl(string controlAddress);
@@ -56,11 +57,11 @@ namespace Sloong
 		string					m_strUUID;
 		void*					m_pModule = nullptr;
 
-		MessagePackageProcesser m_pHandler = nullptr;
-		NewConnectAcceptProcesser m_pAccept = nullptr;
+		MessagePackageProcesserFunction m_pHandler = nullptr;
+		NewConnectAcceptProcesserFunction m_pAccept = nullptr;
 		
     public:
-        static unique_ptr<CSloongBaseService> g_pAppService;
+        static unique_ptr<CSloongBaseService> Instance;
 	};
 
     

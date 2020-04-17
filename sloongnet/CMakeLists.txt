@@ -8,12 +8,14 @@ include_directories(
     "${CMAKE_CURRENT_LIST_DIR}"
     "${CMAKE_CURRENT_LIST_DIR}/protocol"
 	"${CMAKE_CURRENT_LIST_DIR}/include"
+    "${CMAKE_CURRENT_LIST_DIR}/modules/core"
     "/usr/include/glib-2.0" 
     "/usr/lib/x86_64-linux-gnu/glib-2.0/include"
 )
 
 link_directories(
     "${CMAKE_CURRENT_LIST_DIR}/include"
+    "${CMAKE_CURRENT_LIST_DIR}/modules"
 )
 
 #允许gdb调试
@@ -38,8 +40,9 @@ set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 #当前目录下所有源文件赋给SRC_LIST
 #AUX_SOURCE_DIRECTORY(. SRC_LIST) 
 #file(GLOB_RECURSE MODULE_SRC_LIST "./*/*.c*")
-file(GLOB_RECURSE MODULE_SRC_LIST "${CMAKE_CURRENT_LIST_DIR}/protocol/*.cc")
-file(GLOB_RECURSE SRC_LIST "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
+#file(GLOB_RECURSE SRC_LIST "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
+aux_source_directory("${CMAKE_CURRENT_LIST_DIR}/protocol/" MODULE_SRC_LIST)
+aux_source_directory(. SRC_LIST)
 list(APPEND SRC_LIST ${MODULE_SRC_LIST})
 
 #生成可执行文件
@@ -63,3 +66,4 @@ target_link_libraries(${PROJECT_NAME} sqlite3)
 target_link_libraries(${PROJECT_NAME} protobuf)
 target_link_libraries(${PROJECT_NAME} boost_serialization)
 target_link_libraries(${PROJECT_NAME} jsoncpp)
+target_link_libraries(${PROJECT_NAME} core)

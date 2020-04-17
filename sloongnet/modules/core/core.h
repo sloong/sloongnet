@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-16 16:34:18
+ * @LastEditTime: 2020-04-17 15:38:52
  * @Description: file content
  */
 #ifndef SLOONGNET_MODULE_CORE_CORE_H
@@ -44,6 +44,9 @@
 #include <openssl/err.h>
 
 using namespace std;
+
+#include "protocol/protocol.pb.h"
+using namespace Protocol;
 
 #include "defines.h"
 #include "result.hpp"

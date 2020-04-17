@@ -1,3 +1,10 @@
+/*
+ * @Author: WCB
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-17 18:25:58
+ * @Description: file content
+ */
 #include "data_service.h"
 #include "IData.h"
 #include "utility.h"
@@ -5,21 +12,70 @@
 using namespace Sloong;
 using namespace Sloong::Events;
 
+unique_ptr<SloongNetDataCenter> Sloong::SloongNetDataCenter::Instance = nullptr;
 
-void SloongNetDataCenter::AfterInit()
+extern "C" CResult MessagePackageProcesser(CDataTransPackage* pack)
+{
+	return SloongNetDataCenter::Instance->MessagePackageProcesser(pack);
+}
+	
+extern "C" CResult NewConnectAcceptProcesser(CSockInfo* info)
+{
+
+}
+	
+extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
+	SloongNetDataCenter::Instance = make_unique<SloongNetDataCenter>();
+	return CResult::Succeed();
+}
+
+extern "C" CResult ModuleInitialized(IControl* iC){
+	return SloongNetDataCenter::Instance->Initialized(iC);
+}
+
+CResult SloongNetDataCenter::Initialized(IControl*)
 {
 	m_oConfig.ParseFromString(m_pServerConfig->exconfig());
 	m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetDataCenter::MessagePackageProcesser, this, std::placeholders::_1));
 	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetDataCenter::OnSocketClose, this, std::placeholders::_1));
 }
 
-void Sloong::SloongNetDataCenter::MessagePackageProcesser(SmartPackage pack)
+
+void Sloong::SloongNetDataCenter::RegistFunctionHandler(Functions func, FuncHandler handler)
 {
-	pack->ResponsePackage("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}","");
-	auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
-	response_event->SetSocketID(pack->GetSocketID());
-	response_event->SetDataPackage(pack);
-	m_pControl->CallMessage(response_event);
+    m_oFunctionHandles[func] = handler;
+}
+
+
+CResult Sloong::SloongNetDataCenter::MessagePackageProcesser(CDataTransPackage* pack)
+{
+    auto msgPack = pack->GetRecvPackage();
+    auto sender = msgPack->sender();
+    auto func = msgPack->function();
+    m_pLog->Verbos(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
+    if (m_oFunctionHandles.exist(func))
+    {
+        if (!m_oFunctionHandles[func](func, sender, pack))
+        {
+            return CResult::Succeed();
+        }
+    }
+    else
+    {
+        switch (func)
+        {
+        case Functions::RestartService:
+        {
+           
+            return CResult::Succeed();
+        }break;
+        default:
+            m_pLog->Verbos(CUniversal::Format("No handler for [%s] request: sender[%d]", Functions_Name(func), sender));
+            pack->ResponsePackage(ResultType::Error, "No hanlder to process request.");
+        }
+    }
+
+	return CResult::Succeed();
 }
 
 void Sloong::SloongNetDataCenter::OnSocketClose(SmartEvent event)

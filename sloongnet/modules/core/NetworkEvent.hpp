@@ -1,6 +1,13 @@
+/*
+ * @Author: WCB
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-17 15:33:27
+ * @Description: file content
+ */
 #pragma once
 #include "NormalEvent.hpp"
-#include "main.h"
+#include "core.h"
 namespace Sloong
 {
 	class CDataTransPackage;
