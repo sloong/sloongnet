@@ -9,7 +9,7 @@
 #define SLOONGNET_INTERFACE_DATA_H
 
 #include "IControl.h"
-
+#include "core.h"
 namespace Sloong
 {
 	class CConfiguation;
@@ -22,7 +22,9 @@ namespace Sloong
 		static GLOBAL_CONFIG* GetGlobalConfig(){
 			return TYPE_TRANS<GLOBAL_CONFIG*>(m_iC->Get(DATA_ITEM::ServerConfiguation ));
 		}
-		
+		static Json::Value* GetModuleConfig(){
+			return TYPE_TRANS<Json::Value*>(m_iC->Get(DATA_ITEM::ModuleConfiguation ));
+		}
 		static CLog* GetLog(){
 			return TYPE_TRANS<CLog*>(m_iC->Get(DATA_ITEM::Logger));
 		}

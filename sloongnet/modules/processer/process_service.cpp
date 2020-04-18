@@ -2,20 +2,91 @@
 #include "process_service.h"
 #include "utility.h"
 #include "NetworkEvent.hpp"
+#include "IData.h"
 using namespace Sloong;
 using namespace Sloong::Events;
 
 
-void SloongNetProcess::AfterInit()
+unique_ptr<SloongNetProcess> Sloong::SloongNetProcess::Instance = nullptr;
+
+
+extern "C" CResult MessagePackageProcesser(CDataTransPackage* pack)
 {
-	m_oConfig.ParseFromString(m_pServerConfig->exconfig());
-	m_pControl->Add(DATA_ITEM::ServerConfiguation, &m_oConfig);
-	RegistFunctionHandler(Functions::ProcessMessage, std::bind(&SloongNetProcess::ProcessMessageHanlder, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProcess::OnSocketClose, this, std::placeholders::_1));
-	m_pProcess->Initialize(m_pControl.get());
+	return SloongNetProcess::Instance->MessagePackageProcesser(pack);
+}
+	
+extern "C" CResult NewConnectAcceptProcesser(CSockInfo* info)
+{
+	return CResult::Succeed();
+}
+	
+extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
+	SloongNetProcess::Instance = make_unique<SloongNetProcess>();
+	return CResult::Succeed();
 }
 
-bool Sloong::SloongNetProcess::ProcessMessageHanlder(Functions func, string sender, SmartPackage pack)
+extern "C" CResult ModuleInitialized(IControl* iC){
+	return SloongNetProcess::Instance->Initialized(iC);
+}
+
+
+CResult SloongNetProcess::Initialized(IControl* iC)
+{
+	m_pControl = iC;
+	IData::Initialize(iC);
+	m_pConfig = IData::GetGlobalConfig();
+	Json::Reader reader;
+	if ( m_pConfig->moduleconfig().length() > 0 && reader.parse(m_pConfig->moduleconfig(), m_oExConfig))
+	{
+		
+	}
+	m_pLog = IData::GetLog();
+	
+	RegistFunctionHandler(Functions::ProcessMessage, std::bind(&SloongNetProcess::ProcessMessageHanlder, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProcess::OnSocketClose, this, std::placeholders::_1));
+	m_pProcess->Initialize(m_pControl);
+	return CResult::Succeed();
+}
+
+
+void Sloong::SloongNetProcess::RegistFunctionHandler(Functions func, FuncHandler handler)
+{
+    m_oFunctionHandles[func] = handler;
+}
+
+
+CResult Sloong::SloongNetProcess::MessagePackageProcesser(CDataTransPackage* pack)
+{
+    auto msgPack = pack->GetRecvPackage();
+    auto sender = msgPack->sender();
+    auto func = msgPack->function();
+    m_pLog->Verbos(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
+    if (m_oFunctionHandles.exist(func))
+    {
+        if (!m_oFunctionHandles[func](func, sender, pack))
+        {
+            return CResult::Succeed();
+        }
+    }
+    else
+    {
+        switch (func)
+        {
+        case Functions::RestartService:
+        {
+            m_pControl->SendMessage(EVENT_TYPE::ProgramRestart);
+            return CResult::Succeed();
+        }break;
+        default:
+            m_pLog->Verbos(CUniversal::Format("No handler for [%s] request: sender[%d]", Functions_Name(func), sender));
+            pack->ResponsePackage(ResultType::Error, "No hanlder to process request.");
+        }
+    }
+
+	return CResult::Succeed();
+}
+
+bool Sloong::SloongNetProcess::ProcessMessageHanlder(Functions func, string sender, CDataTransPackage* pack)
 {	
 	string strRes("");
 	char* pExData = nullptr;
@@ -37,10 +108,6 @@ bool Sloong::SloongNetProcess::ProcessMessageHanlder(Functions func, string send
 		msg->set_content("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
 	}
 	pack->ResponsePackage(msg);
-	auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
-	response_event->SetSocketID(pack->GetSocketID());
-	response_event->SetDataPackage(pack);
-	m_pControl->CallMessage(response_event);
 	return true;
 }
 

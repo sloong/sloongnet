@@ -48,6 +48,8 @@ using namespace std;
 #include "protocol/protocol.pb.h"
 using namespace Protocol;
 
+#include <jsoncpp/json/json.h>
+
 #include "defines.h"
 #include "result.hpp"
 #include "EasySync.hpp"

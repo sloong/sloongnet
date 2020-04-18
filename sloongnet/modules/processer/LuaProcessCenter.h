@@ -8,7 +8,8 @@
 #pragma once
 
 #define LUA_INT_TYPE LUA_INT_LONG
-
+#include "EasySync.hpp"
+#include <jsoncpp/json/json.h>
 #include "IObject.h"
 namespace Sloong
 {
@@ -41,8 +42,7 @@ namespace Sloong
 		CEasySync		m_oSSync;
 		mutex			m_oLuaContextMutex;
 		unique_ptr<CGlobalFunction> m_pGFunc;
-		PROCESS_CONFIG* m_pConfig;
-		PROCESS_CONFIG m_oConfig;
+		Json::Value*	m_pConfig;
 	};
 
 }
