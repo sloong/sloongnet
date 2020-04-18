@@ -41,6 +41,7 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	{
 		EnableSSL(m_pConfig->certfilepath(), m_pConfig->keyfilepath(), m_pConfig->certpasswd());
 	}
+	
 
 	m_pEpoll->SetEventHandler(std::bind(&CNetworkHub::OnNewAccept, this, std::placeholders::_1),
 							  std::bind(&CNetworkHub::OnDataCanReceive, this, std::placeholders::_1),

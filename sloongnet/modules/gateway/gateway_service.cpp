@@ -2,7 +2,8 @@
 #include "gateway_service.h"
 #include "utility.h"
 #include "NetworkEvent.hpp"
-
+#include "IData.h"
+#include "NormalEvent.hpp"
 using namespace Sloong;
 using namespace Sloong::Events;
 
@@ -16,7 +17,8 @@ extern "C" CResult MessagePackageProcesser(CDataTransPackage* pack)
 	
 extern "C" CResult NewConnectAcceptProcesser(CSockInfo* info)
 {
-
+	SloongNetGateway::Instance->AcceptConnectProcesser(info);
+	return CResult::Succeed();
 }
 	
 extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
@@ -29,17 +31,29 @@ extern "C" CResult ModuleInitialized(IControl* iC){
 }
 
 
-void SloongNetGateway::Initialized()
+CResult SloongNetGateway::Initialized(IControl* iC)
 {
-	m_oConfig.ParseFromString(m_pServerConfig->exconfig());
-	m_pControl->Add(DATA_ITEM::ServerConfiguation, &m_oConfig);
-	m_pNetwork->EnableClientCheck(m_oConfig.clientcheckkey(),m_oConfig.clientchecktime());
-	m_pNetwork->EnableTimeoutCheck(m_oConfig.timeouttime(), m_oConfig.timeoutcheckinterval());
+	m_pControl = iC;
+	IData::Initialize(iC);
+	m_pConfig = IData::GetGlobalConfig();
+	Json::Reader reader;
+	if ( m_pConfig->moduleconfig().length() > 0 && reader.parse(m_pConfig->moduleconfig(), m_oExConfig))
+	{
+		shared_ptr<CNormalEvent> event = make_shared<CNormalEvent>();
+		event->SetEvent(EVENT_TYPE::EnableTimeoutCheck);
+		event->SetMessage(CUniversal::Format("{\"TimeoutTime\":\"%d\", \"CheckInterval\":\"%d\"}",m_oExConfig["TimeoutTime"].asInt(),m_oExConfig["TimeoutCheckInterval"].asInt()));
+
+		m_pControl->SendMessage(event);
+		//EnableClientCheck(m_pConfig->clientcheckkey(),m_pConfig->clientchecktime());
+	}
+	m_pLog = IData::GetLog();
+
 	
-	RegistFunctionHandler(Functions::ProcessMessage,std::bind(&SloongNetGateway::ProcessMessageHanlder, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	m_pNetwork->RegisterAccpetConnectProcesser(std::bind(&SloongNetGateway::AcceptConnectProcesser, this, std::placeholders::_1));
+	
 	m_pControl->RegisterEventHandler(ProgramStart,std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
 	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetGateway::OnSocketClose, this, std::placeholders::_1));
+	RegistFunctionHandler(Functions::ProcessMessage,std::bind(&SloongNetGateway::ProcessMessageHanlder, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	return CResult::Succeed();
 }
 
 
@@ -82,7 +96,8 @@ CResult Sloong::SloongNetGateway::MessagePackageProcesser(CDataTransPackage* pac
 
 bool SloongNetGateway::ConnectToProcess()
 {
-	auto list = CUniversal::split(m_oConfig.processaddress(),';');
+	// TODO: should be send a query requst to manager.
+	/*auto list = CUniversal::split(m_oConfig.processaddress(),';');
 	for( auto item = list.begin();item!= list.end(); item++ )
 	{
 		auto connect = make_shared<EasyConnect>();
@@ -93,7 +108,7 @@ bool SloongNetGateway::ConnectToProcess()
 		m_mapProcessList[sockID] = connect;
 		m_mapProcessLoadList[sockID] = 0;
 		m_pNetwork->AddMonitorSocket(sockID );
-	}
+	}*/
 	return true;
 }
 
@@ -112,7 +127,7 @@ void SloongNetGateway::OnStart(SmartEvent evt)
 // Case 2:
 //		In this function, just build the uuid, and use it in next request, but no regist to control, because ne login no should have userinfo.
 //		so process server always create new empty UserInfo to run process function. if in this request, the user is logined, so the empty UserInfo isChanged. so we regist it in this time. 
-void Sloong::SloongNetGateway::AcceptConnectProcesser(shared_ptr<CSockInfo> info){
+void Sloong::SloongNetGateway::AcceptConnectProcesser(CSockInfo* info){
 	auto uuid = CUtility::GenUUID();
 	// regist this uuid to control. if succeed, the control do nothing. but if it is registed, the control will send an error message. then retry regist again.
 	m_mapUUIDList[info->m_pCon->GetSocketID()] = uuid;
@@ -120,7 +135,7 @@ void Sloong::SloongNetGateway::AcceptConnectProcesser(shared_ptr<CSockInfo> info
 
 
 
-bool Sloong::SloongNetGateway::ProcessMessageHanlder(Functions func, string sender, SmartPackage pack)
+bool Sloong::SloongNetGateway::ProcessMessageHanlder(Functions func, string sender, CDataTransPackage* pack)
 {
 	auto event_happend_socket = pack->GetSocketID();
 	if( m_mapProcessLoadList.find(event_happend_socket) == m_mapProcessLoadList.end() )
@@ -134,7 +149,7 @@ bool Sloong::SloongNetGateway::ProcessMessageHanlder(Functions func, string send
 	return true;
 }
 
-void Sloong::SloongNetGateway::MessageToProcesser(SmartPackage pack)
+void Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage* pack)
 {
 	// Step 1: 将已经收到的来自客户端的请求内容转换为protobuf格式
 	auto sendMsg = make_shared<DataPackage>();
@@ -153,7 +168,7 @@ void Sloong::SloongNetGateway::MessageToProcesser(SmartPackage pack)
 
 	// Step 4: 创建发送到指定process服务的DataTrans包
 	auto transPack = make_shared<CDataTransPackage>();
-	transPack->Initialize(process_id->second, m_pLog.get());
+	transPack->Initialize(process_id->second, m_pLog);
 
 	transPack->RequestPackage(sendMsg);
 
@@ -165,7 +180,7 @@ void Sloong::SloongNetGateway::MessageToProcesser(SmartPackage pack)
 	m_nSerialNumber++;
 }
 
-void Sloong::SloongNetGateway::MessageToClient(SmartPackage pack)
+void Sloong::SloongNetGateway::MessageToClient(CDataTransPackage* pack)
 {
 	// Step 1: 将Process服务处理完毕的消息转换为正常格式
 	auto recvMsg = pack->GetRecvPackage();
@@ -180,10 +195,10 @@ void Sloong::SloongNetGateway::MessageToClient(SmartPackage pack)
 	client_request_package->ResponsePackage(recvMsg->content(), recvMsg->extend());
 
 	// Step 3: 发送相应数据
-	auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
+	/*auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
 	response_event->SetSocketID(client_request_package->GetSocketID());
 	response_event->SetDataPackage(client_request_package);
-	m_pControl->CallMessage(response_event);
+	m_pControl->CallMessage(response_event);*/
 	
 }
 

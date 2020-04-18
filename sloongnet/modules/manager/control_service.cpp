@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-04-17 17:39:20
+ * @LastEditTime: 2020-04-17 21:48:09
  */
 
 #include "control_service.h"
@@ -75,8 +75,9 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG* config)
 CResult SloongControlService::Initialized(IControl* iC)
 {
 	m_pControl = iC;
-	m_pConfig = (GLOBAL_CONFIG*)(iC->Get(DATA_ITEM::ServerConfiguation));
-	m_pLog = (CLog*)(iC->Get(DATA_ITEM::Logger));
+	IData::Initialize(iC);
+	m_pConfig = IData::GetGlobalConfig();
+	m_pLog = IData::GetLog();
 	
 	m_pServer->SetLog(m_pLog);
 	RegistFunctionHandler(Functions::RegisteServer, std::bind(&CServerManage::RegisterServerHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
