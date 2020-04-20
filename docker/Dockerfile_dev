@@ -1,0 +1,20 @@
+FROM debian:10-slim
+
+LABEL maintainer="admin@sloong.com"
+ENV ADDRESS_INFO=0.0.0.0:8001
+ENV NODE_TYPE=Manager
+
+RUN mkdir /app && mkdir /data && apt update && apt install -y unzip wget cmake gcc g++ gdb libsqlite3-dev libprotobuf-dev protobuf-compiler uuid-dev libglib2.0-dev libssl-dev libboost-dev libboost-serialization-dev liblua5.3-dev libjsoncpp-dev
+WORKDIR  /app
+
+RUN wget -o next_gen.tar.gz https://git.sloong.com:8000/sloongnet/engine/archive/next_gen.zip
+RUN unzip next_gen.zip -d /app/
+RUN ls /app/engine
+RUN /app/engine/build/build.sh -d
+
+RUN chmod +x /app/engine/build/debug/sloongnet /app/engine/docker/run.sh
+
+VOLUME /data
+EXPOSE 8001
+ENTRYPOINT ["/app/engine/docker/run.sh"]
+

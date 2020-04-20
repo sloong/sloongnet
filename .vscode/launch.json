@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
                     "Worker",
-                    "127.0.0.1:8002"
+                    "10.0.0.18:8002"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -30,7 +30,7 @@
                     "0.0.0.0:8002"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/build/debug/",
             "environment": [],
             "externalConsole": false,
             "preLaunchTask": "build",

@@ -15,7 +15,7 @@
 
 extern "C" {
 	CResult MessagePackageProcesser(CDataTransPackage*);
-	CResult NewConnectAcceptProcesser(CSockInfo*);
+	//CResult NewConnectAcceptProcesser(CSockInfo*);
 	CResult ModuleInitialization(GLOBAL_CONFIG*);
 	CResult ModuleInitialized(IControl*);
 }

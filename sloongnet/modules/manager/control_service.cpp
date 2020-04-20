@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-04-17 21:48:09
+ * @LastEditTime: 2020-04-20 16:19:08
  */
 
 #include "control_service.h"
@@ -19,11 +19,6 @@ unique_ptr<SloongControlService> Sloong::SloongControlService::Instance = nullpt
 extern "C" CResult MessagePackageProcesser(CDataTransPackage* pack)
 {
 	return SloongControlService::Instance->MessagePackageProcesser(pack);
-}
-	
-extern "C" CResult NewConnectAcceptProcesser(CSockInfo* info)
-{
-
 }
 	
 extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
