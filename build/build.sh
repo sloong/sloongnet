@@ -70,8 +70,6 @@ build_release(){
 }
 
 zipfile(){
-	cd $CMAKE_FILE_PATH
-	tar -cv -f $OUTPATH.tar scripts/* 
 	cd $CMAKE_FILE_PATH/include
 	tar -rv -f $OUTPATH.tar *.so
 	cd $CMAKE_FILE_PATH/..

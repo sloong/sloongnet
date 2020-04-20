@@ -101,7 +101,7 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 			return nullptr;
 		}
 		config->set_listenport(port);
-		config->set_modulepath("/mnt/d/projects/sloongnet/engine/sloongnet/modules/");
+		config->set_modulepath("./modules/");
 		config->set_modulename("libmanager.so");
 	}
 	else
