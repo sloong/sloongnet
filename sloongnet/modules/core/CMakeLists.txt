@@ -17,7 +17,7 @@ link_directories(
 )
 
 # 设置动态库输出路径
-SET(LIBRARY_OUTPUT_PATH "${CMAKE_CURRENT_LIST_DIR}/../")
+SET(LIBRARY_OUTPUT_PATH "../")
 
 #允许gdb调试
 set(CMAKE_BUILD_TYPE "Debug")

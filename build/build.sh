@@ -78,6 +78,8 @@ zipfile(){
 	tar -rv -f $OUTPATH.tar *.so
 	tar -rv -f $OUTPATH.tar configuation.db
 	tar -rv -f $OUTPATH.tar -C $SCRIPTFOLDER/$MAKEFLAG $PROJECT
+	cd $SCRIPTFOLDER/$MAKEFLAG
+	tar -rv -f $OUTPATH.tar modules/*.so 
 }
 
 

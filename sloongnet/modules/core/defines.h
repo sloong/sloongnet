@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-17 23:04:26
+ * @LastEditTime: 2020-04-19 18:06:42
  * @Description: file content
  */
 #ifndef SLOONGNET_DEFINES_H
@@ -66,6 +66,12 @@ typedef enum g_DataCenter_Event_Type
 	//   实参为JSON，格式
 	// {"TimeoutTime":"", "CheckInterval":""}
 	EnableTimeoutCheck,
+
+	// 启用连接检查
+	// 参数类型为NormalEvent
+	//   实参为JSON，格式
+	// {"ClientCheckKey":"","ClientCheckTime":""}
+	EnableClientCheck,
 	
 	// 请求重新载入Lua环境
 	// 当需要重新载入Lua Context的时候发送该请求。

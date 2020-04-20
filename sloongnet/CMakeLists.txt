@@ -18,6 +18,8 @@ link_directories(
     "${CMAKE_CURRENT_LIST_DIR}/modules"
 )
 
+#set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_LIST_DIR})
+
 add_subdirectory(modules/core)
 add_subdirectory(modules/manager)
 add_subdirectory(modules/gateway)

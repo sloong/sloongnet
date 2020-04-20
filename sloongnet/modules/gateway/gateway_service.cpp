@@ -41,14 +41,14 @@ CResult SloongNetGateway::Initialized(IControl* iC)
 	{
 		shared_ptr<CNormalEvent> event = make_shared<CNormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableTimeoutCheck);
-		event->SetMessage(CUniversal::Format("{\"TimeoutTime\":\"%d\", \"CheckInterval\":\"%d\"}",m_oExConfig["TimeoutTime"].asInt(),m_oExConfig["TimeoutCheckInterval"].asInt()));
-
+		event->SetMessage(CUniversal::Format("{\"TimeoutTime\":\"%d\", \"CheckInterval\":%d}",m_oExConfig["TimeoutTime"].asInt(),m_oExConfig["TimeoutCheckInterval"].asInt()));
 		m_pControl->SendMessage(event);
-		//EnableClientCheck(m_pConfig->clientcheckkey(),m_pConfig->clientchecktime());
+
+		event->SetEvent(EVENT_TYPE::EnableClientCheck);
+		event->SetMessage(CUniversal::Format("{\"ClientCheckKey\":\"%s\", \"ClientCheckTime\":%d}",m_oExConfig["ClientCheckKey"].asString(),m_oExConfig["ClientCheckKey"].asInt()));
+		m_pControl->SendMessage(event);
 	}
 	m_pLog = IData::GetLog();
-
-	
 	
 	m_pControl->RegisterEventHandler(ProgramStart,std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
 	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetGateway::OnSocketClose, this, std::placeholders::_1));

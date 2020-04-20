@@ -5,13 +5,13 @@
     "version": "0.2.0", 
     "configurations": [        
         {
-            "name": "Launch",
+            "name": "Launch Worker",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
                     "Worker",
-                    "10.0.0.18:8002"
+                    "127.0.0.1:8002"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -20,8 +20,8 @@
             "preLaunchTask": "build",
             "MIMode": "gdb",
         },
-       {
-            "name": "Control Launch",
+        {
+            "name": "Launch Manager",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/debug/sloongnet",
@@ -35,78 +35,6 @@
             "externalConsole": false,
             "preLaunchTask": "build",
             "MIMode": "gdb",
-        },
-        {
-            "name": "(WSL)Launch",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "/mnt/d/projects/sloongnet/engine/build/debug/sloongnet",
-            "args": [
-                "Worker",
-                "10.0.0.18:8002"
-            ],
-            "stopAtEntry": false,
-            "cwd": "/mnt/d/projects/sloongnet/engine",
-            "environment": [],
-            "externalConsole": false,
-            "preLaunchTask": "build",
-            "windows": {
-                "MIMode": "gdb",
-                "setupCommands": [
-                    {
-                        "description": "Enable pretty-printing for gdb",
-                        "text": "-enable-pretty-printing",
-                        "ignoreFailures": true
-                    }
-                ]
-            },
-            "pipeTransport": {
-                "pipeCwd": "",
-                "pipeProgram": "${env:windir}\\SysNative\\bash.exe",
-                "pipeArgs": [
-                    "-c"
-                ],
-                "debuggerPath": "/usr/bin/gdb"
-            },
-            "sourceFileMap": {
-                "/mnt/d": "D:\\"
-            }
-        },
-        {
-            "name": "(WSL)Control Launch",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "/mnt/d/projects/sloongnet/engine/build/debug/sloongnet",
-            "args": [
-                "Manager",
-                "0.0.0.0:8002"
-            ],
-            "stopAtEntry": false,
-            "cwd": "/mnt/d/projects/sloongnet/engine",
-            "environment": [],
-            "externalConsole": false,
-            "preLaunchTask": "build",
-            "windows": {
-                "MIMode": "gdb",
-                "setupCommands": [
-                    {
-                        "description": "Enable pretty-printing for gdb",
-                        "text": "-enable-pretty-printing",
-                        "ignoreFailures": true
-                    }
-                ]
-            },
-            "pipeTransport": {
-                "pipeCwd": "",
-                "pipeProgram": "${env:windir}\\SysNative\\bash.exe",
-                "pipeArgs": [
-                    "-c"
-                ],
-                "debuggerPath": "/usr/bin/gdb"
-            },
-            "sourceFileMap": {
-                "/mnt/d": "D:\\"
-            }
-        },
+        }
     ]
 }
