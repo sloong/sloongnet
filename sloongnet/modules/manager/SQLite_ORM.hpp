@@ -1,3 +1,10 @@
+/*
+ * @Author: WCB
+ * @Date: 2020-04-21 19:41:30
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-21 19:42:51
+ * @Description: file content
+ */
 #include <string>
 using namespace std;
 #include "sqlite_orm/sqlite_orm.h"
@@ -11,7 +18,6 @@ namespace Sloong
     {
         int id;
         int replicas;
-        int type;
         string configuation;
         string name;
         string note;
@@ -23,7 +29,6 @@ namespace Sloong
             make_table(TEMPLATE_TBL_NAME,
                 make_column("id", &TemplateInfo::id, autoincrement(), primary_key()),
                 make_column("replicas", &TemplateInfo::replicas),
-                make_column("type", &TemplateInfo::type),
                 make_column("configuation", &TemplateInfo::configuation),
                 make_column("name", &TemplateInfo::name),
                 make_column("note", &TemplateInfo::note))
