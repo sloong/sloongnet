@@ -299,12 +299,6 @@ class DataPackage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   ::google::protobuf::int64 serialnumber() const;
   void set_serialnumber(::google::protobuf::int64 value);
 
-  // int32 Receiver = 6;
-  void clear_receiver();
-  static const int kReceiverFieldNumber = 6;
-  ::google::protobuf::int32 receiver() const;
-  void set_receiver(::google::protobuf::int32 value);
-
   // .Protocol.ResultType Result = 7;
   void clear_result();
   static const int kResultFieldNumber = 7;
@@ -322,7 +316,6 @@ class DataPackage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   int function_;
   ::google::protobuf::int32 prioritylevel_;
   ::google::protobuf::int64 serialnumber_;
-  ::google::protobuf::int32 receiver_;
   int result_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
   friend struct ::protobuf_protocol_2eproto::TableStruct;
@@ -755,20 +748,6 @@ inline void DataPackage::set_allocated_sender(::std::string* sender) {
   }
   sender_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), sender);
   // @@protoc_insertion_point(field_set_allocated:Protocol.DataPackage.Sender)
-}
-
-// int32 Receiver = 6;
-inline void DataPackage::clear_receiver() {
-  receiver_ = 0;
-}
-inline ::google::protobuf::int32 DataPackage::receiver() const {
-  // @@protoc_insertion_point(field_get:Protocol.DataPackage.Receiver)
-  return receiver_;
-}
-inline void DataPackage::set_receiver(::google::protobuf::int32 value) {
-  
-  receiver_ = value;
-  // @@protoc_insertion_point(field_set:Protocol.DataPackage.Receiver)
 }
 
 // .Protocol.ResultType Result = 7;

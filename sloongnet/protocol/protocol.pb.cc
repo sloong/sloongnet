@@ -79,7 +79,6 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::DataPackage, serialnumber_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::DataPackage, checkstring_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::DataPackage, sender_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::DataPackage, receiver_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::DataPackage, result_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::DataPackage, content_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::DataPackage, extend_),
@@ -108,7 +107,7 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
 };
 static const ::google::protobuf::internal::MigrationSchema schemas[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::Protocol::DataPackage)},
-  { 14, -1, sizeof(::Protocol::GLOBAL_CONFIG)},
+  { 13, -1, sizeof(::Protocol::GLOBAL_CONFIG)},
 };
 
 static ::google::protobuf::Message const * const file_default_instances[] = {
@@ -137,33 +136,32 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\016protocol.proto\022\010Protocol\"\337\001\n\013DataPacka"
+      "\n\016protocol.proto\022\010Protocol\"\315\001\n\013DataPacka"
       "ge\022%\n\010Function\030\001 \001(\0162\023.Protocol.Function"
       "s\022\025\n\rPriorityLevel\030\002 \001(\005\022\024\n\014SerialNumber"
       "\030\003 \001(\003\022\023\n\013CheckString\030\004 \001(\t\022\016\n\006Sender\030\005 "
-      "\001(\t\022\020\n\010Receiver\030\006 \001(\005\022$\n\006Result\030\007 \001(\0162\024."
-      "Protocol.ResultType\022\017\n\007Content\030\010 \001(\t\022\016\n\006"
-      "Extend\030\t \001(\014\"\223\003\n\rGLOBAL_CONFIG\022\022\n\nListen"
-      "Port\030\001 \001(\005\022\021\n\tEnableSSL\030\002 \001(\010\022\024\n\014CertFil"
-      "ePath\030\003 \001(\t\022\023\n\013KeyFilePath\030\004 \001(\t\022\022\n\nCert"
-      "Passwd\030\005 \001(\t\022\023\n\013ConnectTime\030\006 \001(\005\022\023\n\013Rec"
-      "eiveTime\030\007 \001(\005\022\017\n\007LogPath\030\010 \001(\t\022$\n\010LogLe"
-      "vel\030\t \001(\0162\022.Protocol.LogLevel\022\021\n\tDebugMo"
-      "de\030\n \001(\010\022\030\n\020MQThreadQuantity\030\013 \001(\005\022\033\n\023EP"
-      "ollThreadQuantity\030\014 \001(\005\022\035\n\025ProcessThread"
-      "Quantity\030\r \001(\005\022\024\n\014PrioritySize\030\016 \001(\005\022\022\n\n"
-      "ModuleName\030\020 \001(\t\022\022\n\nModulePath\030\021 \001(\t\022\024\n\014"
-      "ModuleConfig\030\022 \001(\014*I\n\nResultType\022\013\n\007Succ"
-      "eed\020\000\022\t\n\005Error\020\001\022\013\n\007Warning\020\002\022\t\n\005Retry\020\003"
-      "\022\013\n\007Invalid\020\004*^\n\010LogLevel\022\007\n\003All\020\000\022\n\n\006Ve"
-      "rbos\020\001\022\t\n\005Debug\020\002\022\010\n\004Info\020\003\022\010\n\004Warn\020\004\022\007\n"
-      "\003Err\020\005\022\n\n\006Assert\020\006\022\t\n\005Fatal\020\007*S\n\tFunctio"
-      "ns\022\022\n\016ProcessMessage\020\000\022\013\n\007PostLog\020\001\022\021\n\rR"
-      "egisteServer\020\002\022\022\n\016RestartService\020\004b\006prot"
-      "o3"
+      "\001(\t\022$\n\006Result\030\007 \001(\0162\024.Protocol.ResultTyp"
+      "e\022\017\n\007Content\030\010 \001(\t\022\016\n\006Extend\030\t \001(\014\"\223\003\n\rG"
+      "LOBAL_CONFIG\022\022\n\nListenPort\030\001 \001(\005\022\021\n\tEnab"
+      "leSSL\030\002 \001(\010\022\024\n\014CertFilePath\030\003 \001(\t\022\023\n\013Key"
+      "FilePath\030\004 \001(\t\022\022\n\nCertPasswd\030\005 \001(\t\022\023\n\013Co"
+      "nnectTime\030\006 \001(\005\022\023\n\013ReceiveTime\030\007 \001(\005\022\017\n\007"
+      "LogPath\030\010 \001(\t\022$\n\010LogLevel\030\t \001(\0162\022.Protoc"
+      "ol.LogLevel\022\021\n\tDebugMode\030\n \001(\010\022\030\n\020MQThre"
+      "adQuantity\030\013 \001(\005\022\033\n\023EPollThreadQuantity\030"
+      "\014 \001(\005\022\035\n\025ProcessThreadQuantity\030\r \001(\005\022\024\n\014"
+      "PrioritySize\030\016 \001(\005\022\022\n\nModuleName\030\020 \001(\t\022\022"
+      "\n\nModulePath\030\021 \001(\t\022\024\n\014ModuleConfig\030\022 \001(\014"
+      "*I\n\nResultType\022\013\n\007Succeed\020\000\022\t\n\005Error\020\001\022\013"
+      "\n\007Warning\020\002\022\t\n\005Retry\020\003\022\013\n\007Invalid\020\004*^\n\010L"
+      "ogLevel\022\007\n\003All\020\000\022\n\n\006Verbos\020\001\022\t\n\005Debug\020\002\022"
+      "\010\n\004Info\020\003\022\010\n\004Warn\020\004\022\007\n\003Err\020\005\022\n\n\006Assert\020\006"
+      "\022\t\n\005Fatal\020\007*S\n\tFunctions\022\022\n\016ProcessMessa"
+      "ge\020\000\022\013\n\007PostLog\020\001\022\021\n\rRegisteServer\020\002\022\022\n\016"
+      "RestartService\020\004b\006proto3"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 922);
+      descriptor, 904);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "protocol.proto", &protobuf_RegisterTypes);
 }
@@ -244,7 +242,6 @@ const int DataPackage::kPriorityLevelFieldNumber;
 const int DataPackage::kSerialNumberFieldNumber;
 const int DataPackage::kCheckStringFieldNumber;
 const int DataPackage::kSenderFieldNumber;
-const int DataPackage::kReceiverFieldNumber;
 const int DataPackage::kResultFieldNumber;
 const int DataPackage::kContentFieldNumber;
 const int DataPackage::kExtendFieldNumber;
@@ -420,20 +417,6 @@ bool DataPackage::MergePartialFromCodedStream(
         break;
       }
 
-      // int32 Receiver = 6;
-      case 6: {
-        if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(48u /* 48 & 0xFF */)) {
-
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &receiver_)));
-        } else {
-          goto handle_unusual;
-        }
-        break;
-      }
-
       // .Protocol.ResultType Result = 7;
       case 7: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
@@ -539,11 +522,6 @@ void DataPackage::SerializeWithCachedSizes(
       5, this->sender(), output);
   }
 
-  // int32 Receiver = 6;
-  if (this->receiver() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->receiver(), output);
-  }
-
   // .Protocol.ResultType Result = 7;
   if (this->result() != 0) {
     ::google::protobuf::internal::WireFormatLite::WriteEnum(
@@ -616,11 +594,6 @@ void DataPackage::SerializeWithCachedSizes(
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
         5, this->sender(), target);
-  }
-
-  // int32 Receiver = 6;
-  if (this->receiver() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->receiver(), target);
   }
 
   // .Protocol.ResultType Result = 7;
@@ -712,13 +685,6 @@ size_t DataPackage::ByteSizeLong() const {
         this->serialnumber());
   }
 
-  // int32 Receiver = 6;
-  if (this->receiver() != 0) {
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::Int32Size(
-        this->receiver());
-  }
-
   // .Protocol.ResultType Result = 7;
   if (this->result() != 0) {
     total_size += 1 +
@@ -777,9 +743,6 @@ void DataPackage::MergeFrom(const DataPackage& from) {
   if (from.serialnumber() != 0) {
     set_serialnumber(from.serialnumber());
   }
-  if (from.receiver() != 0) {
-    set_receiver(from.receiver());
-  }
   if (from.result() != 0) {
     set_result(from.result());
   }
@@ -820,7 +783,6 @@ void DataPackage::InternalSwap(DataPackage* other) {
   swap(function_, other->function_);
   swap(prioritylevel_, other->prioritylevel_);
   swap(serialnumber_, other->serialnumber_);
-  swap(receiver_, other->receiver_);
   swap(result_, other->result_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
 }
