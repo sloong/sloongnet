@@ -132,17 +132,18 @@ bool Sloong::CServerManage::ProcessHandler(Functions func, string sender, CDataT
 
 bool Sloong::CServerManage::AddTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
 {
-	if(jRequest["Name"].isNull()||jRequest["Replicas"].isNull()||jRequest["Configuation"].isNull())
+	auto jReq = jRequest["Template"];
+	if(jReq["Name"].isNull()||jReq["Replicas"].isNull()||jReq["Configuation"].isNull())
 	{
 		pack->ResponsePackage(ResultType::Error, "The required parameter is null.");
 		return true;
 	}
 
 	TemplateItem item;
-	item.Name = jRequest["Name"].asString();
-	item.Note = jRequest["Note"].asString();
-	item.Replicas = jRequest["Replicas"].asInt();
-	item.Configuation = jRequest["Configuation"].asString();
+	item.Name = jReq["Name"].asString();
+	item.Note = jReq["Note"].asString();
+	item.Replicas = jReq["Replicas"].asInt();
+	item.Configuation = jReq["Configuation"].asString();
 	int id = 0;
 	auto res = m_pAllConfig->AddTemplate(item.ToTemplateInfo(),&id);
 	if( res.IsFialed() )
@@ -186,24 +187,25 @@ bool Sloong::CServerManage::DeleteTemplateHandler(const Json::Value& jRequest,CD
 
 bool Sloong::CServerManage::SetTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
 {
-	if (jRequest["ID"].isNull() || !m_oTemplateList.exist(jRequest["ID"].asInt()))
+	auto jReq = jRequest["Template"];
+	if (jReq["ID"].isNull() || !m_oTemplateList.exist(jReq["ID"].asInt()))
 	{
 		pack->ResponsePackage(ResultType::Error, "Check the templeate ID error, please check.");
 		return true;
 	}
 	
-	auto info = m_oTemplateList[jRequest["ID"].asInt()];
-	if (!jRequest["Name"].isNull())
-		info.Name = jRequest["Name"].asString();
+	auto info = m_oTemplateList[jReq["ID"].asInt()];
+	if (!jReq["Name"].isNull())
+		info.Name = jReq["Name"].asString();
 
-	if (!jRequest["Note"].isNull())
-		info.Note = jRequest["Note"].asString();
+	if (!jReq["Note"].isNull())
+		info.Note = jReq["Note"].asString();
 
-	if (!jRequest["Replcas"].isNull())
-		info.Replicas = jRequest["Replcas"].asInt();
+	if (!jReq["Replcas"].isNull())
+		info.Replicas = jReq["Replcas"].asInt();
 
-	if (!jRequest["Configuation"].isNull())
-		info.Configuation = jRequest["Configuation"].asString();
+	if (!jReq["Configuation"].isNull())
+		info.Configuation = jReq["Configuation"].asString();
 
 	auto res = m_pAllConfig->SetTemplate(info.ID, info.ToTemplateInfo());
 	if (res.IsFialed())
