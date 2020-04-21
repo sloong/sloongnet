@@ -107,26 +107,26 @@ bool Sloong::CServerManage::RegisterServerHandler(Functions func, string sender,
 bool Sloong::CServerManage::ProcessHandler(Functions func, string sender, CDataTransPackage* pack)
 {
 	Json::Reader reader;
-	Json::Value root;
-	auto jreq = pack->GetRecvMessage();
-	if (!reader.parse(jreq, root))
+	Json::Value jReq;
+	auto str_req = pack->GetRecvMessage();
+	if (!reader.parse(str_req, jReq))
 	{
-		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Parser json[% s] error.", jreq));
+		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Parser json[% s] error.", str_req));
 		return true;
 	}
-	if (root["Function"].isNull())
+	if (jReq["Function"].isNull())
 	{
 		pack->ResponsePackage(ResultType::Error, "Request no set [Function] node.");
 		return true;
 	}
-	auto function = root["Function"].asString();
+	auto function = jReq["Function"].asString();
 	if(!m_listFuncHandler.exist(function))
 	{
 		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Function [%s] no handler.",function));
 		return true;
 	}
 
-	return m_listFuncHandler[function](sender,pack);
+	return m_listFuncHandler[function](jReq,pack);
 }
 
 
