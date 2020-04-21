@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-04-20 16:19:08
+ * @LastEditTime: 2020-04-21 11:37:09
  */
 
 #include "control_service.h"
@@ -75,10 +75,8 @@ CResult SloongControlService::Initialized(IControl* iC)
 	m_pLog = IData::GetLog();
 	
 	m_pServer->SetLog(m_pLog);
+	RegistFunctionHandler(Functions::ProcessMessage,std::bind(&CServerManage::ProcessHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3) );
 	RegistFunctionHandler(Functions::RegisteServer, std::bind(&CServerManage::RegisterServerHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	RegistFunctionHandler(Functions::GetTemplateList, std::bind(&CServerManage::GetTemplateListHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	RegistFunctionHandler(Functions::GetServerList , std::bind(&CServerManage::GetServerListHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-	RegistFunctionHandler(Functions::SetTemplateConfig, std::bind(&CServerManage::SetTemplateConfigHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	return CResult::Succeed();
 }
 

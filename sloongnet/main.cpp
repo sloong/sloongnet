@@ -12,11 +12,14 @@ void PrintVersion()
 }
 
 
-TResult<shared_ptr<DataPackage>> SendPackage(SmartConnect con, shared_ptr<DataPackage> pack)
+TResult<shared_ptr<DataPackage>> RegisteToControl(SmartConnect con)
 {
+	auto req = make_shared<DataPackage>();
+	req->set_function(Functions::RegisteServer);
+
 	CDataTransPackage dataPackage;
 	dataPackage.Initialize(con);
-	dataPackage.RequestPackage(pack);
+	dataPackage.RequestPackage(req);
 	ResultType result = dataPackage.SendPackage();
 	if (result != ResultType::Succeed)
 		return TResult<shared_ptr<DataPackage>>::Make_Error( "Send get config request error.");
@@ -26,24 +29,8 @@ TResult<shared_ptr<DataPackage>> SendPackage(SmartConnect con, shared_ptr<DataPa
 	auto get_config_response_buf = dataPackage.GetRecvPackage();
 	if (!get_config_response_buf)
 		return TResult<shared_ptr<DataPackage>>::Make_Error("Parse the get config response data error.");
-	if (get_config_response_buf->result() != ResultType::Succeed)
-		return TResult<shared_ptr<DataPackage>>::Make_Error(get_config_response_buf->content());
 
 	return TResult<shared_ptr<DataPackage>>::Make_OK(get_config_response_buf);
-}
-
-TResult<tuple<string,string>> RegisteToControl(SmartConnect con, const string& uuid)
-{
-	auto req = make_shared<DataPackage>();
-	req->set_function(Functions::RegisteServer);
-	req->set_receiver(Protocol::ModuleType::Control);
-	req->set_sender(uuid);
-
-	auto res = SendPackage(con, req);
-	if (res.IsFialed())
-		return TResult<tuple<string, string>>::Make_Error(res.Message());
-
-	return TResult<tuple<string, string>>::Make_OK( tuple<string,string>(res.ResultObject()->content(), res.ResultObject()->extend()));
 }
 
 
@@ -65,14 +52,14 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 		return nullptr;
 	}
 
-	ModuleType type = Unconfigured;
+	bool ManagerMode = true;
 	if (strcasecmp(args[1], "Worker") == 0)
 	{
-		type = ModuleType::Unconfigured;
+		ManagerMode = false;
 	}
 	else if (strcasecmp(args[1], "Manager") == 0)
 	{
-		type = ModuleType::Control;
+		ManagerMode = true;
 	}
 	else
 	{
@@ -90,9 +77,7 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 	}
 
 	auto config = make_unique<GLOBAL_CONFIG>();
-	config->set_type(type);
-
-	if( type == ModuleType::Control)
+	if( ManagerMode )
 	{
 		int port = atoi(addr[1].c_str());
 		if (port == 0)
@@ -116,19 +101,28 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 		cout << "Connect to control succeed. Start registe and get configuation." << endl;
 
 		string uuid;
-		do
+		string serverConfig;
+		while(true)
 		{
-			auto res = RegisteToControl(con,uuid);
+			auto res = RegisteToControl(con);
 			if (res.IsFialed())
 			{
 				cout << res.Message() << endl;
 				return nullptr;
 			}
-
-			if( uuid.length() == 0 )
-				uuid = std::get<0>(res.ResultObject());
-
-			string serverConfig = std::get<1>(res.ResultObject());
+			
+			auto response = res.ResultObject();
+			if( response->result() == Protocol::ResultType::Retry )			{
+				cout << "Control return retry package. wait 500ms and retry." << endl;
+				SLEEP(500);
+				continue;
+			}else if(response->result() == Protocol::ResultType::Succeed){
+				uuid = response->content();
+				serverConfig = response->extend();
+			}else{
+				cout << "Control return an unexpected result." << Protocol::ResultType_Name(response->result()) << ".Message: " << response->content() << endl;
+				return nullptr;
+			}
 
 			if (serverConfig.size() == 0)
 			{
@@ -141,7 +135,8 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 				cout << "Parse the config struct error. please check." << endl;
 				return nullptr;
 			}
-		} while (config->type() == ModuleType::Unconfigured);
+			break;
+		};
 		cout << "Get configuation succeed." << endl;
 	}
 	return config;

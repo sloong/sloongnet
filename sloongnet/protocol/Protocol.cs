@@ -29,7 +29,7 @@ namespace Protocol {
             "aXR5TGV2ZWwYAiABKAUSFAoMU2VyaWFsTnVtYmVyGAMgASgDEhMKC0NoZWNr",
             "U3RyaW5nGAQgASgJEg4KBlNlbmRlchgFIAEoCRIQCghSZWNlaXZlchgGIAEo",
             "BRIkCgZSZXN1bHQYByABKA4yFC5Qcm90b2NvbC5SZXN1bHRUeXBlEg8KB0Nv",
-            "bnRlbnQYCCABKAkSDgoGRXh0ZW5kGAkgASgMIrcDCg1HTE9CQUxfQ09ORklH",
+            "bnRlbnQYCCABKAkSDgoGRXh0ZW5kGAkgASgMIpMDCg1HTE9CQUxfQ09ORklH",
             "EhIKCkxpc3RlblBvcnQYASABKAUSEQoJRW5hYmxlU1NMGAIgASgIEhQKDENl",
             "cnRGaWxlUGF0aBgDIAEoCRITCgtLZXlGaWxlUGF0aBgEIAEoCRISCgpDZXJ0",
             "UGFzc3dkGAUgASgJEhMKC0Nvbm5lY3RUaW1lGAYgASgFEhMKC1JlY2VpdmVU",
@@ -37,42 +37,25 @@ namespace Protocol {
             "Ei5Qcm90b2NvbC5Mb2dMZXZlbBIRCglEZWJ1Z01vZGUYCiABKAgSGAoQTVFU",
             "aHJlYWRRdWFudGl0eRgLIAEoBRIbChNFUG9sbFRocmVhZFF1YW50aXR5GAwg",
             "ASgFEh0KFVByb2Nlc3NUaHJlYWRRdWFudGl0eRgNIAEoBRIUCgxQcmlvcml0",
-            "eVNpemUYDiABKAUSIgoEVHlwZRgPIAEoDjIULlByb3RvY29sLk1vZHVsZVR5",
-            "cGUSEgoKTW9kdWxlTmFtZRgQIAEoCRISCgpNb2R1bGVQYXRoGBEgASgJEhQK",
-            "DE1vZHVsZUNvbmZpZxgSIAEoDCplCgpNb2R1bGVUeXBlEhAKDFVuY29uZmln",
-            "dXJlZBAAEgsKB0NvbnRyb2wQARIMCghGaXJld2FsbBACEgsKB0dhdGV3YXkQ",
-            "AxIICgREYXRhEAQSCwoHUHJvY2VzcxAFEgYKAkRCEAYqSQoKUmVzdWx0VHlw",
-            "ZRILCgdTdWNjZWVkEAASCQoFRXJyb3IQARILCgdXYXJuaW5nEAISCQoFUmV0",
-            "cnkQAxILCgdJbnZhbGlkEAQqXgoITG9nTGV2ZWwSBwoDQWxsEAASCgoGVmVy",
-            "Ym9zEAESCQoFRGVidWcQAhIICgRJbmZvEAMSCAoEV2FybhAEEgcKA0VychAF",
-            "EgoKBkFzc2VydBAGEgkKBUZhdGFsEAcqkgEKCUZ1bmN0aW9ucxISCg5Qcm9j",
-            "ZXNzTWVzc2FnZRAAEgsKB1Bvc3RMb2cQARIRCg1SZWdpc3RlU2VydmVyEAIS",
-            "EQoNR2V0U2VydmVyTGlzdBADEhIKDlJlc3RhcnRTZXJ2aWNlEAQSEwoPR2V0",
-            "VGVtcGxhdGVMaXN0EAUSFQoRU2V0VGVtcGxhdGVDb25maWcQBmIGcHJvdG8z"));
+            "eVNpemUYDiABKAUSEgoKTW9kdWxlTmFtZRgQIAEoCRISCgpNb2R1bGVQYXRo",
+            "GBEgASgJEhQKDE1vZHVsZUNvbmZpZxgSIAEoDCpJCgpSZXN1bHRUeXBlEgsK",
+            "B1N1Y2NlZWQQABIJCgVFcnJvchABEgsKB1dhcm5pbmcQAhIJCgVSZXRyeRAD",
+            "EgsKB0ludmFsaWQQBCpeCghMb2dMZXZlbBIHCgNBbGwQABIKCgZWZXJib3MQ",
+            "ARIJCgVEZWJ1ZxACEggKBEluZm8QAxIICgRXYXJuEAQSBwoDRXJyEAUSCgoG",
+            "QXNzZXJ0EAYSCQoFRmF0YWwQBypTCglGdW5jdGlvbnMSEgoOUHJvY2Vzc01l",
+            "c3NhZ2UQABILCgdQb3N0TG9nEAESEQoNUmVnaXN0ZVNlcnZlchACEhIKDlJl",
+            "c3RhcnRTZXJ2aWNlEARiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ModuleType), typeof(global::Protocol.ResultType), typeof(global::Protocol.LogLevel), typeof(global::Protocol.Functions), }, new pbr::GeneratedClrTypeInfo[] {
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ResultType), typeof(global::Protocol.LogLevel), typeof(global::Protocol.Functions), }, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.DataPackage), global::Protocol.DataPackage.Parser, new[]{ "Function", "PriorityLevel", "SerialNumber", "CheckString", "Sender", "Receiver", "Result", "Content", "Extend" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.GLOBAL_CONFIG), global::Protocol.GLOBAL_CONFIG.Parser, new[]{ "ListenPort", "EnableSSL", "CertFilePath", "KeyFilePath", "CertPasswd", "ConnectTime", "ReceiveTime", "LogPath", "LogLevel", "DebugMode", "MQThreadQuantity", "EPollThreadQuantity", "ProcessThreadQuantity", "PrioritySize", "Type", "ModuleName", "ModulePath", "ModuleConfig" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.GLOBAL_CONFIG), global::Protocol.GLOBAL_CONFIG.Parser, new[]{ "ListenPort", "EnableSSL", "CertFilePath", "KeyFilePath", "CertPasswd", "ConnectTime", "ReceiveTime", "LogPath", "LogLevel", "DebugMode", "MQThreadQuantity", "EPollThreadQuantity", "ProcessThreadQuantity", "PrioritySize", "ModuleName", "ModulePath", "ModuleConfig" }, null, null, null)
           }));
     }
     #endregion
 
   }
   #region Enums
-  /// <summary>
-  /// Type
-  /// </summary>
-  public enum ModuleType {
-    [pbr::OriginalName("Unconfigured")] Unconfigured = 0,
-    [pbr::OriginalName("Control")] Control = 1,
-    [pbr::OriginalName("Firewall")] Firewall = 2,
-    [pbr::OriginalName("Gateway")] Gateway = 3,
-    [pbr::OriginalName("Data")] Data = 4,
-    [pbr::OriginalName("Process")] Process = 5,
-    [pbr::OriginalName("DB")] Db = 6,
-  }
-
   /// <summary>
   /// Result
   /// </summary>
@@ -100,7 +83,7 @@ namespace Protocol {
 
   public enum Functions {
     /// <summary>
-    /// Flow: Client -> Process
+    /// Flow: All -> All
     ///Response: Content - result with JSON string. 
     /// </summary>
     [pbr::OriginalName("ProcessMessage")] ProcessMessage = 0,
@@ -116,57 +99,11 @@ namespace Protocol {
     /// </summary>
     [pbr::OriginalName("RegisteServer")] RegisteServer = 2,
     /// <summary>
-    /// Flow:  ControlUI -> Control
-    ///Response: Content(JSON) - Config template  list.
-    ///Format: 
-    ///{
-    ///"ServerList": [
-    ///{
-    ///"UUID": "",
-    ///"Type":"",
-    ///"TemplateID": ""
-    ///}
-    ///]
-    ///}
-    /// </summary>
-    [pbr::OriginalName("GetServerList")] GetServerList = 3,
-    /// <summary>
     /// Flow: Control -> All
     ///Request: 
     ///Response: NO
     /// </summary>
     [pbr::OriginalName("RestartService")] RestartService = 4,
-    /// <summary>
-    /// Flow: ControlUI -> Control
-    ///Response: Content(JSON) - Config template  list.
-    ///Format: 
-    ///{
-    ///"TemplateList": [
-    ///{
-    ///"ID": "",
-    ///"Name":"",
-    ///"Note":"",
-    ///"Replicas":"",
-    ///"Configuation":""
-    ///}
-    ///]
-    ///}
-    /// </summary>
-    [pbr::OriginalName("GetTemplateList")] GetTemplateList = 5,
-    /// <summary>
-    /// Flow: ControlUI -> Control
-    ///Request: Content(JSON) - config info.
-    ///Format:
-    ///{
-    ///"ID":"",
-    ///"Name":"",
-    ///"Note":"",
-    ///"replicas":"",
-    ///"Configuation":"" //base64
-    ///}
-    ///Response: Result
-    /// </summary>
-    [pbr::OriginalName("SetTemplateConfig")] SetTemplateConfig = 6,
   }
 
   #endregion
@@ -591,7 +528,6 @@ namespace Protocol {
       ePollThreadQuantity_ = other.ePollThreadQuantity_;
       processThreadQuantity_ = other.processThreadQuantity_;
       prioritySize_ = other.prioritySize_;
-      type_ = other.type_;
       moduleName_ = other.moduleName_;
       modulePath_ = other.modulePath_;
       moduleConfig_ = other.moduleConfig_;
@@ -775,23 +711,12 @@ namespace Protocol {
       }
     }
 
-    /// <summary>Field number for the "Type" field.</summary>
-    public const int TypeFieldNumber = 15;
-    private global::Protocol.ModuleType type_ = 0;
-    /// <summary>
-    /// Module
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Protocol.ModuleType Type {
-      get { return type_; }
-      set {
-        type_ = value;
-      }
-    }
-
     /// <summary>Field number for the "ModuleName" field.</summary>
     public const int ModuleNameFieldNumber = 16;
     private string moduleName_ = "";
+    /// <summary>
+    /// Module
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string ModuleName {
       get { return moduleName_; }
@@ -849,7 +774,6 @@ namespace Protocol {
       if (EPollThreadQuantity != other.EPollThreadQuantity) return false;
       if (ProcessThreadQuantity != other.ProcessThreadQuantity) return false;
       if (PrioritySize != other.PrioritySize) return false;
-      if (Type != other.Type) return false;
       if (ModuleName != other.ModuleName) return false;
       if (ModulePath != other.ModulePath) return false;
       if (ModuleConfig != other.ModuleConfig) return false;
@@ -873,7 +797,6 @@ namespace Protocol {
       if (EPollThreadQuantity != 0) hash ^= EPollThreadQuantity.GetHashCode();
       if (ProcessThreadQuantity != 0) hash ^= ProcessThreadQuantity.GetHashCode();
       if (PrioritySize != 0) hash ^= PrioritySize.GetHashCode();
-      if (Type != 0) hash ^= Type.GetHashCode();
       if (ModuleName.Length != 0) hash ^= ModuleName.GetHashCode();
       if (ModulePath.Length != 0) hash ^= ModulePath.GetHashCode();
       if (ModuleConfig.Length != 0) hash ^= ModuleConfig.GetHashCode();
@@ -946,10 +869,6 @@ namespace Protocol {
         output.WriteRawTag(112);
         output.WriteInt32(PrioritySize);
       }
-      if (Type != 0) {
-        output.WriteRawTag(120);
-        output.WriteEnum((int) Type);
-      }
       if (ModuleName.Length != 0) {
         output.WriteRawTag(130, 1);
         output.WriteString(ModuleName);
@@ -1012,9 +931,6 @@ namespace Protocol {
       if (PrioritySize != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(PrioritySize);
       }
-      if (Type != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Type);
-      }
       if (ModuleName.Length != 0) {
         size += 2 + pb::CodedOutputStream.ComputeStringSize(ModuleName);
       }
@@ -1076,9 +992,6 @@ namespace Protocol {
       }
       if (other.PrioritySize != 0) {
         PrioritySize = other.PrioritySize;
-      }
-      if (other.Type != 0) {
-        Type = other.Type;
       }
       if (other.ModuleName.Length != 0) {
         ModuleName = other.ModuleName;
@@ -1154,10 +1067,6 @@ namespace Protocol {
           }
           case 112: {
             PrioritySize = input.ReadInt32();
-            break;
-          }
-          case 120: {
-            type_ = (global::Protocol.ModuleType) input.ReadEnum();
             break;
           }
           case 130: {

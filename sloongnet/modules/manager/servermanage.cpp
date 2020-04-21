@@ -9,6 +9,11 @@ using namespace Sloong::Events;
 
 CResult Sloong::CServerManage::Initialize( int template_id )
 {
+	m_listFuncHandler["AddTemplate"]=std::bind(&CServerManage::AddTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
+	m_listFuncHandler["DeleteTemplate"]=std::bind(&CServerManage::DeleteTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
+	m_listFuncHandler["SetTemplate"]=std::bind(&CServerManage::SetTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
+	m_listFuncHandler["QueryTemplate"]=std::bind(&CServerManage::QueryTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
+
 	auto res = m_pAllConfig->Initialize("/data/configuation.db");
 	if (res.IsFialed()) return res;
 
@@ -59,6 +64,13 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 
 bool Sloong::CServerManage::RegisterServerHandler(Functions func, string sender, CDataTransPackage* pack)
 {
+	auto index = SearchNeedCreateTemplate();
+	if (index == -1)
+	{
+		pack->ResponsePackage(ResultType::Retry,"Retry");
+		return true;
+	}
+
 	if( sender.length() == 0 )
 	{
 		sender = CUtility::GenUUID();
@@ -82,127 +94,170 @@ bool Sloong::CServerManage::RegisterServerHandler(Functions func, string sender,
 		return true;
 	}
 	
-	// Get tamplate list
-	auto index = SearchNeedCreateTemplate();
-	if (index == -1)
-	{
-		sender_info->Type = ModuleType::Unconfigured;
-		sender_info->Template_ID = -1;
-	}
-	else
-	{
-		auto tpl = m_oTemplateList[index];
-		sender_info->Type = tpl.Type;
-		sender_info->Template_ID = tpl.ID;
-		
-		m_pLog->Verbos(CUniversal::Format("Allocating module[%s] Type to [%s]", sender_info->UUID, ModuleType_Name(sender_info->Type)));
-	}
-
-	pack->ResponsePackage(sender_info->UUID,sender_info->Template_ID==-1?"": CBase64::Decode(m_oTemplateList[sender_info->Template_ID].Configuation));
-
-	return true;
-}
-
-/*
-Response Format:
-{
-  "ConfigTemplateList": [
-	{
-	  "ID": "",
-	  "Name": ""
-	}
-  ]
-}
-*/
-bool Sloong::CServerManage::GetTemplateListHandler(Functions func, string sender, CDataTransPackage* pack)
-{
-	Json::Value list;
-	for (auto& i : m_oTemplateList)
-	{
-		Json::Value item;
-		item["ID"] = i.second.ID;
-		item["Name"] = i.second.Name;
-		item["Replicas"] = i.second.Replicas;
-		item["Created"] = (int)i.second.Created.size();
-		item["Note"] = i.second.Note;
-		item["Configuation"] = i.second.Configuation;
-		list.append(item);
-	}
-	Json::Value root;
-	root["ConfigTemplateList"] = list;
-	pack->ResponsePackage(root.toStyledString(),"");
-
+	auto tpl = m_oTemplateList[index];
+	sender_info->TemplateName = tpl.Name;
+	sender_info->TemplateID = tpl.ID;
+	m_pLog->Verbos(CUniversal::Format("Allocating module[%s] Type to [%s]", sender_info->UUID, sender_info->TemplateName));
+	pack->ResponsePackage(sender_info->UUID,sender_info->TemplateID==-1?"": CBase64::Decode(m_oTemplateList[sender_info->TemplateID].Configuation));
+	
 	return true;
 }
 
 
-bool Sloong::CServerManage::SetTemplateConfigHandler(Functions func, string sender, CDataTransPackage* pack)
+bool Sloong::CServerManage::ProcessHandler(Functions func, string sender, CDataTransPackage* pack)
 {
-	auto msgPack = pack->GetRecvPackage();
-	auto jreq = msgPack->content();
 	Json::Reader reader;
 	Json::Value root;
+	auto jreq = pack->GetRecvMessage();
 	if (!reader.parse(jreq, root))
 	{
 		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Parser json[% s] error.", jreq));
 		return true;
 	}
-	if (root["ID"].isNull() || !m_oTemplateList.exist(root["ID"].asInt()))
+	if (root["Function"].isNull())
+	{
+		pack->ResponsePackage(ResultType::Error, "Request no set [Function] node.");
+		return true;
+	}
+	auto function = root["Function"].asString();
+	if(!m_listFuncHandler.exist(function))
+	{
+		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Function [%s] no handler.",function));
+		return true;
+	}
+
+	return m_listFuncHandler[function](sender,pack);
+}
+
+
+bool Sloong::CServerManage::AddTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
+{
+	if(jRequest["Name"].isNull()||jRequest["Replicas"].isNull()||jRequest["Configuation"].isNull())
+	{
+		pack->ResponsePackage(ResultType::Error, "The required parameter is null.");
+		return true;
+	}
+
+	TemplateItem item;
+	item.Name = jRequest["Name"].asString();
+	item.Note = jRequest["Note"].asString();
+	item.Replicas = jRequest["Replicas"].asInt();
+	item.Configuation = jRequest["Configuation"].asString();
+	int id = 0;
+	auto res = m_pAllConfig->AddTemplate(item.ToTemplateInfo(),&id);
+	if( res.IsFialed() )
+	{
+		pack->ResponsePackage(ResultType::Error, res.Message());
+		return true;
+	}
+	item.ID = id;
+	m_oTemplateList[id] = item;
+	pack->ResponsePackage(ResultType::Succeed,CUniversal::ntos(id));
+	return true;
+}
+
+
+bool Sloong::CServerManage::DeleteTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
+{
+	if(jRequest["ID"].isNull())
+	{
+		pack->ResponsePackage(ResultType::Error, "The required parameter is null.");
+		return true;
+	}
+
+	int id = jRequest["ID"].asInt();
+	if( !m_oTemplateList.exist(id))
+	{
+		pack->ResponsePackage(ResultType::Error, CUniversal::Format("The template id [%d] is no exist.",id));
+		return true;
+	}
+
+	auto res = m_pAllConfig->DeleteTemplate(id);
+	if( res.IsFialed() )
+	{
+		pack->ResponsePackage(ResultType::Error, res.Message());
+		return true;
+	}
+	m_oTemplateList.erase(id);
+	pack->ResponsePackage(CResult::Succeed());
+	return true;
+}
+
+
+bool Sloong::CServerManage::SetTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
+{
+	if (jRequest["ID"].isNull() || !m_oTemplateList.exist(jRequest["ID"].asInt()))
 	{
 		pack->ResponsePackage(ResultType::Error, "Check the templeate ID error, please check.");
 		return true;
 	}
 	
-	auto info = m_oTemplateList[root["ID"].asInt()].ToTemplateInfo();
-	if (!root["Name"].isNull())
-		info.name = root["Name"].asString();
+	auto info = m_oTemplateList[jRequest["ID"].asInt()];
+	if (!jRequest["Name"].isNull())
+		info.Name = jRequest["Name"].asString();
 
-	if (!root["Note"].isNull())
-		info.note = root["Note"].asString();
+	if (!jRequest["Note"].isNull())
+		info.Note = jRequest["Note"].asString();
 
-	if (!root["Replcas"].isNull())
-		info.replicas = root["Replcas"].asInt();
+	if (!jRequest["Replcas"].isNull())
+		info.Replicas = jRequest["Replcas"].asInt();
 
-	if (!root["Configuation"].isNull())
-		info.configuation = root["Configuation"].asString();
+	if (!jRequest["Configuation"].isNull())
+		info.Configuation = jRequest["Configuation"].asString();
 
-	auto res = m_pAllConfig->SetTemplate(info.id, info);
-	if (res.IsSucceed())
+	auto res = m_pAllConfig->SetTemplate(info.ID, info.ToTemplateInfo());
+	if (res.IsFialed())
 	{
-		pack->ResponsePackage(ResultType::Succeed, "success");
+		pack->ResponsePackage(ResultType::Error, res.Message());
+		return true;
+	}
+
+	pack->ResponsePackage(ResultType::Succeed);
+	m_oTemplateList[info.ID] =  info;
+	return true;
+}
+
+bool Sloong::CServerManage::QueryTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
+{
+	Json::Value list;
+	if( !jRequest["ID"].isNull() )
+	{
+		int id = jRequest["ID"].asInt();
+		if(!m_oTemplateList.exist(id))
+		{
+			pack->ResponsePackage(ResultType::Error, CUniversal::Format("The template id [%d] is no exist.",id));
+			return true;
+		}
+
+		list.append(m_oTemplateList[id].ToJson());
 	}
 	else
 	{
-		pack->ResponsePackage(ResultType::Error, res.Message());
+		for (auto& i : m_oTemplateList)
+		{
+			list.append(i.second.ToJson());
+		}
 	}
+	
+	Json::Value root;
+	root["TemplateList"] = list;
+	pack->ResponsePackage(root.toStyledString(),"");
 
 	return true;
 }
 
-/*
-Response Format: 
-{
-  "ServerList": [
-    {
-      "UUID": "",
-	  "Type":"",
-      "TemplateID": ""
-    }
-  ]
-}
-*/
-bool Sloong::CServerManage::GetServerListHandler(Functions func, string sender, CDataTransPackage* pack)
+bool Sloong::CServerManage::GetServerListHandler(const Json::Value& jRequest,CDataTransPackage* pack)
 {
 	Json::Value list;
 	for (auto& i : m_oServerList)
 	{
 		Json::Value item;
 		item["UUID"] = i.first;
-		item['Type'] = i.second.Type;
-		item["TemplateID"] = i.second.Template_ID;
+		item["TemplateID"] = i.second.TemplateID;
 		list.append(item);
 	}
 	Json::Value root;
 	root["ServerList"] = list;
 	pack->ResponsePackage(root.toStyledString(), "");
+	return true;
 }

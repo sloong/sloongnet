@@ -66,7 +66,7 @@ void InitDefaults() {
 }
 
 ::google::protobuf::Metadata file_level_metadata[2];
-const ::google::protobuf::EnumDescriptor* file_level_enum_descriptors[4];
+const ::google::protobuf::EnumDescriptor* file_level_enum_descriptors[3];
 
 const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
@@ -102,7 +102,6 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::GLOBAL_CONFIG, epollthreadquantity_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::GLOBAL_CONFIG, processthreadquantity_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::GLOBAL_CONFIG, prioritysize_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::GLOBAL_CONFIG, type_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::GLOBAL_CONFIG, modulename_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::GLOBAL_CONFIG, modulepath_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::GLOBAL_CONFIG, moduleconfig_),
@@ -144,7 +143,7 @@ void AddDescriptorsImpl() {
       "\030\003 \001(\003\022\023\n\013CheckString\030\004 \001(\t\022\016\n\006Sender\030\005 "
       "\001(\t\022\020\n\010Receiver\030\006 \001(\005\022$\n\006Result\030\007 \001(\0162\024."
       "Protocol.ResultType\022\017\n\007Content\030\010 \001(\t\022\016\n\006"
-      "Extend\030\t \001(\014\"\267\003\n\rGLOBAL_CONFIG\022\022\n\nListen"
+      "Extend\030\t \001(\014\"\223\003\n\rGLOBAL_CONFIG\022\022\n\nListen"
       "Port\030\001 \001(\005\022\021\n\tEnableSSL\030\002 \001(\010\022\024\n\014CertFil"
       "ePath\030\003 \001(\t\022\023\n\013KeyFilePath\030\004 \001(\t\022\022\n\nCert"
       "Passwd\030\005 \001(\t\022\023\n\013ConnectTime\030\006 \001(\005\022\023\n\013Rec"
@@ -152,24 +151,19 @@ void AddDescriptorsImpl() {
       "vel\030\t \001(\0162\022.Protocol.LogLevel\022\021\n\tDebugMo"
       "de\030\n \001(\010\022\030\n\020MQThreadQuantity\030\013 \001(\005\022\033\n\023EP"
       "ollThreadQuantity\030\014 \001(\005\022\035\n\025ProcessThread"
-      "Quantity\030\r \001(\005\022\024\n\014PrioritySize\030\016 \001(\005\022\"\n\004"
-      "Type\030\017 \001(\0162\024.Protocol.ModuleType\022\022\n\nModu"
-      "leName\030\020 \001(\t\022\022\n\nModulePath\030\021 \001(\t\022\024\n\014Modu"
-      "leConfig\030\022 \001(\014*e\n\nModuleType\022\020\n\014Unconfig"
-      "ured\020\000\022\013\n\007Control\020\001\022\014\n\010Firewall\020\002\022\013\n\007Gat"
-      "eway\020\003\022\010\n\004Data\020\004\022\013\n\007Process\020\005\022\006\n\002DB\020\006*I\n"
-      "\nResultType\022\013\n\007Succeed\020\000\022\t\n\005Error\020\001\022\013\n\007W"
-      "arning\020\002\022\t\n\005Retry\020\003\022\013\n\007Invalid\020\004*^\n\010LogL"
-      "evel\022\007\n\003All\020\000\022\n\n\006Verbos\020\001\022\t\n\005Debug\020\002\022\010\n\004"
-      "Info\020\003\022\010\n\004Warn\020\004\022\007\n\003Err\020\005\022\n\n\006Assert\020\006\022\t\n"
-      "\005Fatal\020\007*\222\001\n\tFunctions\022\022\n\016ProcessMessage"
-      "\020\000\022\013\n\007PostLog\020\001\022\021\n\rRegisteServer\020\002\022\021\n\rGe"
-      "tServerList\020\003\022\022\n\016RestartService\020\004\022\023\n\017Get"
-      "TemplateList\020\005\022\025\n\021SetTemplateConfig\020\006b\006p"
-      "roto3"
+      "Quantity\030\r \001(\005\022\024\n\014PrioritySize\030\016 \001(\005\022\022\n\n"
+      "ModuleName\030\020 \001(\t\022\022\n\nModulePath\030\021 \001(\t\022\024\n\014"
+      "ModuleConfig\030\022 \001(\014*I\n\nResultType\022\013\n\007Succ"
+      "eed\020\000\022\t\n\005Error\020\001\022\013\n\007Warning\020\002\022\t\n\005Retry\020\003"
+      "\022\013\n\007Invalid\020\004*^\n\010LogLevel\022\007\n\003All\020\000\022\n\n\006Ve"
+      "rbos\020\001\022\t\n\005Debug\020\002\022\010\n\004Info\020\003\022\010\n\004Warn\020\004\022\007\n"
+      "\003Err\020\005\022\n\n\006Assert\020\006\022\t\n\005Fatal\020\007*S\n\tFunctio"
+      "ns\022\022\n\016ProcessMessage\020\000\022\013\n\007PostLog\020\001\022\021\n\rR"
+      "egisteServer\020\002\022\022\n\016RestartService\020\004b\006prot"
+      "o3"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 1125);
+      descriptor, 922);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "protocol.proto", &protobuf_RegisterTypes);
 }
@@ -186,28 +180,9 @@ struct StaticDescriptorInitializer {
 } static_descriptor_initializer;
 }  // namespace protobuf_protocol_2eproto
 namespace Protocol {
-const ::google::protobuf::EnumDescriptor* ModuleType_descriptor() {
-  protobuf_protocol_2eproto::protobuf_AssignDescriptorsOnce();
-  return protobuf_protocol_2eproto::file_level_enum_descriptors[0];
-}
-bool ModuleType_IsValid(int value) {
-  switch (value) {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-      return true;
-    default:
-      return false;
-  }
-}
-
 const ::google::protobuf::EnumDescriptor* ResultType_descriptor() {
   protobuf_protocol_2eproto::protobuf_AssignDescriptorsOnce();
-  return protobuf_protocol_2eproto::file_level_enum_descriptors[1];
+  return protobuf_protocol_2eproto::file_level_enum_descriptors[0];
 }
 bool ResultType_IsValid(int value) {
   switch (value) {
@@ -224,7 +199,7 @@ bool ResultType_IsValid(int value) {
 
 const ::google::protobuf::EnumDescriptor* LogLevel_descriptor() {
   protobuf_protocol_2eproto::protobuf_AssignDescriptorsOnce();
-  return protobuf_protocol_2eproto::file_level_enum_descriptors[2];
+  return protobuf_protocol_2eproto::file_level_enum_descriptors[1];
 }
 bool LogLevel_IsValid(int value) {
   switch (value) {
@@ -244,17 +219,14 @@ bool LogLevel_IsValid(int value) {
 
 const ::google::protobuf::EnumDescriptor* Functions_descriptor() {
   protobuf_protocol_2eproto::protobuf_AssignDescriptorsOnce();
-  return protobuf_protocol_2eproto::file_level_enum_descriptors[3];
+  return protobuf_protocol_2eproto::file_level_enum_descriptors[2];
 }
 bool Functions_IsValid(int value) {
   switch (value) {
     case 0:
     case 1:
     case 2:
-    case 3:
     case 4:
-    case 5:
-    case 6:
       return true;
     default:
       return false;
@@ -878,7 +850,6 @@ const int GLOBAL_CONFIG::kMQThreadQuantityFieldNumber;
 const int GLOBAL_CONFIG::kEPollThreadQuantityFieldNumber;
 const int GLOBAL_CONFIG::kProcessThreadQuantityFieldNumber;
 const int GLOBAL_CONFIG::kPrioritySizeFieldNumber;
-const int GLOBAL_CONFIG::kTypeFieldNumber;
 const int GLOBAL_CONFIG::kModuleNameFieldNumber;
 const int GLOBAL_CONFIG::kModulePathFieldNumber;
 const int GLOBAL_CONFIG::kModuleConfigFieldNumber;
@@ -924,8 +895,8 @@ GLOBAL_CONFIG::GLOBAL_CONFIG(const GLOBAL_CONFIG& from)
     moduleconfig_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.moduleconfig_);
   }
   ::memcpy(&listenport_, &from.listenport_,
-    static_cast<size_t>(reinterpret_cast<char*>(&type_) -
-    reinterpret_cast<char*>(&listenport_)) + sizeof(type_));
+    static_cast<size_t>(reinterpret_cast<char*>(&prioritysize_) -
+    reinterpret_cast<char*>(&listenport_)) + sizeof(prioritysize_));
   // @@protoc_insertion_point(copy_constructor:Protocol.GLOBAL_CONFIG)
 }
 
@@ -938,8 +909,8 @@ void GLOBAL_CONFIG::SharedCtor() {
   modulepath_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   moduleconfig_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(&listenport_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&type_) -
-      reinterpret_cast<char*>(&listenport_)) + sizeof(type_));
+      reinterpret_cast<char*>(&prioritysize_) -
+      reinterpret_cast<char*>(&listenport_)) + sizeof(prioritysize_));
 }
 
 GLOBAL_CONFIG::~GLOBAL_CONFIG() {
@@ -985,8 +956,8 @@ void GLOBAL_CONFIG::Clear() {
   modulepath_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   moduleconfig_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(&listenport_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&type_) -
-      reinterpret_cast<char*>(&listenport_)) + sizeof(type_));
+      reinterpret_cast<char*>(&prioritysize_) -
+      reinterpret_cast<char*>(&listenport_)) + sizeof(prioritysize_));
   _internal_metadata_.Clear();
 }
 
@@ -1205,21 +1176,6 @@ bool GLOBAL_CONFIG::MergePartialFromCodedStream(
         break;
       }
 
-      // .Protocol.ModuleType Type = 15;
-      case 15: {
-        if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(120u /* 120 & 0xFF */)) {
-          int value;
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
-                 input, &value)));
-          set_type(static_cast< ::Protocol::ModuleType >(value));
-        } else {
-          goto handle_unusual;
-        }
-        break;
-      }
-
       // string ModuleName = 16;
       case 16: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
@@ -1381,12 +1337,6 @@ void GLOBAL_CONFIG::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(14, this->prioritysize(), output);
   }
 
-  // .Protocol.ModuleType Type = 15;
-  if (this->type() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteEnum(
-      15, this->type(), output);
-  }
-
   // string ModuleName = 16;
   if (this->modulename().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -1520,12 +1470,6 @@ void GLOBAL_CONFIG::SerializeWithCachedSizes(
   // int32 PrioritySize = 14;
   if (this->prioritysize() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(14, this->prioritysize(), target);
-  }
-
-  // .Protocol.ModuleType Type = 15;
-  if (this->type() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
-      15, this->type(), target);
   }
 
   // string ModuleName = 16;
@@ -1688,12 +1632,6 @@ size_t GLOBAL_CONFIG::ByteSizeLong() const {
         this->prioritysize());
   }
 
-  // .Protocol.ModuleType Type = 15;
-  if (this->type() != 0) {
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
-  }
-
   int cached_size = ::google::protobuf::internal::ToCachedSize(total_size);
   SetCachedSize(cached_size);
   return total_size;
@@ -1779,9 +1717,6 @@ void GLOBAL_CONFIG::MergeFrom(const GLOBAL_CONFIG& from) {
   if (from.prioritysize() != 0) {
     set_prioritysize(from.prioritysize());
   }
-  if (from.type() != 0) {
-    set_type(from.type());
-  }
 }
 
 void GLOBAL_CONFIG::CopyFrom(const ::google::protobuf::Message& from) {
@@ -1832,7 +1767,6 @@ void GLOBAL_CONFIG::InternalSwap(GLOBAL_CONFIG* other) {
   swap(epollthreadquantity_, other->epollthreadquantity_);
   swap(processthreadquantity_, other->processthreadquantity_);
   swap(prioritysize_, other->prioritysize_);
-  swap(type_, other->type_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
 }
 

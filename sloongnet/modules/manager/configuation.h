@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2019-11-06 17:12:59
+ * @LastEditTime: 2020-04-21 12:06:15
  * @Description: file content
  */
 
@@ -33,6 +33,7 @@ namespace Sloong
         vector<TemplateInfo> GetTemplateList();
         CResult AddTemplate( const TemplateInfo& config, int* out_id);
 		CResult SetTemplate( int id, const TemplateInfo& config);
+        CResult DeleteTemplate( int id );
 
     protected:
         unique_ptr<Storage> m_oStorage;

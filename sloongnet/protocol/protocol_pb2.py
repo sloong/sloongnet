@@ -20,52 +20,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='Protocol',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0eprotocol.proto\x12\x08Protocol\"\xdf\x01\n\x0b\x44\x61taPackage\x12%\n\x08\x46unction\x18\x01 \x01(\x0e\x32\x13.Protocol.Functions\x12\x15\n\rPriorityLevel\x18\x02 \x01(\x05\x12\x14\n\x0cSerialNumber\x18\x03 \x01(\x03\x12\x13\n\x0b\x43heckString\x18\x04 \x01(\t\x12\x0e\n\x06Sender\x18\x05 \x01(\t\x12\x10\n\x08Receiver\x18\x06 \x01(\x05\x12$\n\x06Result\x18\x07 \x01(\x0e\x32\x14.Protocol.ResultType\x12\x0f\n\x07\x43ontent\x18\x08 \x01(\t\x12\x0e\n\x06\x45xtend\x18\t \x01(\x0c\"\xb7\x03\n\rGLOBAL_CONFIG\x12\x12\n\nListenPort\x18\x01 \x01(\x05\x12\x11\n\tEnableSSL\x18\x02 \x01(\x08\x12\x14\n\x0c\x43\x65rtFilePath\x18\x03 \x01(\t\x12\x13\n\x0bKeyFilePath\x18\x04 \x01(\t\x12\x12\n\nCertPasswd\x18\x05 \x01(\t\x12\x13\n\x0b\x43onnectTime\x18\x06 \x01(\x05\x12\x13\n\x0bReceiveTime\x18\x07 \x01(\x05\x12\x0f\n\x07LogPath\x18\x08 \x01(\t\x12$\n\x08LogLevel\x18\t \x01(\x0e\x32\x12.Protocol.LogLevel\x12\x11\n\tDebugMode\x18\n \x01(\x08\x12\x18\n\x10MQThreadQuantity\x18\x0b \x01(\x05\x12\x1b\n\x13\x45PollThreadQuantity\x18\x0c \x01(\x05\x12\x1d\n\x15ProcessThreadQuantity\x18\r \x01(\x05\x12\x14\n\x0cPrioritySize\x18\x0e \x01(\x05\x12\"\n\x04Type\x18\x0f \x01(\x0e\x32\x14.Protocol.ModuleType\x12\x12\n\nModuleName\x18\x10 \x01(\t\x12\x12\n\nModulePath\x18\x11 \x01(\t\x12\x14\n\x0cModuleConfig\x18\x12 \x01(\x0c*e\n\nModuleType\x12\x10\n\x0cUnconfigured\x10\x00\x12\x0b\n\x07\x43ontrol\x10\x01\x12\x0c\n\x08\x46irewall\x10\x02\x12\x0b\n\x07Gateway\x10\x03\x12\x08\n\x04\x44\x61ta\x10\x04\x12\x0b\n\x07Process\x10\x05\x12\x06\n\x02\x44\x42\x10\x06*I\n\nResultType\x12\x0b\n\x07Succeed\x10\x00\x12\t\n\x05\x45rror\x10\x01\x12\x0b\n\x07Warning\x10\x02\x12\t\n\x05Retry\x10\x03\x12\x0b\n\x07Invalid\x10\x04*^\n\x08LogLevel\x12\x07\n\x03\x41ll\x10\x00\x12\n\n\x06Verbos\x10\x01\x12\t\n\x05\x44\x65\x62ug\x10\x02\x12\x08\n\x04Info\x10\x03\x12\x08\n\x04Warn\x10\x04\x12\x07\n\x03\x45rr\x10\x05\x12\n\n\x06\x41ssert\x10\x06\x12\t\n\x05\x46\x61tal\x10\x07*\x92\x01\n\tFunctions\x12\x12\n\x0eProcessMessage\x10\x00\x12\x0b\n\x07PostLog\x10\x01\x12\x11\n\rRegisteServer\x10\x02\x12\x11\n\rGetServerList\x10\x03\x12\x12\n\x0eRestartService\x10\x04\x12\x13\n\x0fGetTemplateList\x10\x05\x12\x15\n\x11SetTemplateConfig\x10\x06\x62\x06proto3')
+  serialized_pb=_b('\n\x0eprotocol.proto\x12\x08Protocol\"\xdf\x01\n\x0b\x44\x61taPackage\x12%\n\x08\x46unction\x18\x01 \x01(\x0e\x32\x13.Protocol.Functions\x12\x15\n\rPriorityLevel\x18\x02 \x01(\x05\x12\x14\n\x0cSerialNumber\x18\x03 \x01(\x03\x12\x13\n\x0b\x43heckString\x18\x04 \x01(\t\x12\x0e\n\x06Sender\x18\x05 \x01(\t\x12\x10\n\x08Receiver\x18\x06 \x01(\x05\x12$\n\x06Result\x18\x07 \x01(\x0e\x32\x14.Protocol.ResultType\x12\x0f\n\x07\x43ontent\x18\x08 \x01(\t\x12\x0e\n\x06\x45xtend\x18\t \x01(\x0c\"\x93\x03\n\rGLOBAL_CONFIG\x12\x12\n\nListenPort\x18\x01 \x01(\x05\x12\x11\n\tEnableSSL\x18\x02 \x01(\x08\x12\x14\n\x0c\x43\x65rtFilePath\x18\x03 \x01(\t\x12\x13\n\x0bKeyFilePath\x18\x04 \x01(\t\x12\x12\n\nCertPasswd\x18\x05 \x01(\t\x12\x13\n\x0b\x43onnectTime\x18\x06 \x01(\x05\x12\x13\n\x0bReceiveTime\x18\x07 \x01(\x05\x12\x0f\n\x07LogPath\x18\x08 \x01(\t\x12$\n\x08LogLevel\x18\t \x01(\x0e\x32\x12.Protocol.LogLevel\x12\x11\n\tDebugMode\x18\n \x01(\x08\x12\x18\n\x10MQThreadQuantity\x18\x0b \x01(\x05\x12\x1b\n\x13\x45PollThreadQuantity\x18\x0c \x01(\x05\x12\x1d\n\x15ProcessThreadQuantity\x18\r \x01(\x05\x12\x14\n\x0cPrioritySize\x18\x0e \x01(\x05\x12\x12\n\nModuleName\x18\x10 \x01(\t\x12\x12\n\nModulePath\x18\x11 \x01(\t\x12\x14\n\x0cModuleConfig\x18\x12 \x01(\x0c*I\n\nResultType\x12\x0b\n\x07Succeed\x10\x00\x12\t\n\x05\x45rror\x10\x01\x12\x0b\n\x07Warning\x10\x02\x12\t\n\x05Retry\x10\x03\x12\x0b\n\x07Invalid\x10\x04*^\n\x08LogLevel\x12\x07\n\x03\x41ll\x10\x00\x12\n\n\x06Verbos\x10\x01\x12\t\n\x05\x44\x65\x62ug\x10\x02\x12\x08\n\x04Info\x10\x03\x12\x08\n\x04Warn\x10\x04\x12\x07\n\x03\x45rr\x10\x05\x12\n\n\x06\x41ssert\x10\x06\x12\t\n\x05\x46\x61tal\x10\x07*S\n\tFunctions\x12\x12\n\x0eProcessMessage\x10\x00\x12\x0b\n\x07PostLog\x10\x01\x12\x11\n\rRegisteServer\x10\x02\x12\x12\n\x0eRestartService\x10\x04\x62\x06proto3')
 )
 
-_MODULETYPE = _descriptor.EnumDescriptor(
-  name='ModuleType',
-  full_name='Protocol.ModuleType',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='Unconfigured', index=0, number=0,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='Control', index=1, number=1,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='Firewall', index=2, number=2,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='Gateway', index=3, number=3,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='Data', index=4, number=4,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='Process', index=5, number=5,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='DB', index=6, number=6,
-      serialized_options=None,
-      type=None),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=696,
-  serialized_end=797,
-)
-_sym_db.RegisterEnumDescriptor(_MODULETYPE)
-
-ModuleType = enum_type_wrapper.EnumTypeWrapper(_MODULETYPE)
 _RESULTTYPE = _descriptor.EnumDescriptor(
   name='ResultType',
   full_name='Protocol.ResultType',
@@ -95,8 +52,8 @@ _RESULTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=799,
-  serialized_end=872,
+  serialized_start=660,
+  serialized_end=733,
 )
 _sym_db.RegisterEnumDescriptor(_RESULTTYPE)
 
@@ -142,8 +99,8 @@ _LOGLEVEL = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=874,
-  serialized_end=968,
+  serialized_start=735,
+  serialized_end=829,
 )
 _sym_db.RegisterEnumDescriptor(_LOGLEVEL)
 
@@ -167,37 +124,18 @@ _FUNCTIONS = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GetServerList', index=3, number=3,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='RestartService', index=4, number=4,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='GetTemplateList', index=5, number=5,
-      serialized_options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='SetTemplateConfig', index=6, number=6,
+      name='RestartService', index=3, number=4,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=971,
-  serialized_end=1117,
+  serialized_start=831,
+  serialized_end=914,
 )
 _sym_db.RegisterEnumDescriptor(_FUNCTIONS)
 
 Functions = enum_type_wrapper.EnumTypeWrapper(_FUNCTIONS)
-Unconfigured = 0
-Control = 1
-Firewall = 2
-Gateway = 3
-Data = 4
-Process = 5
-DB = 6
 Succeed = 0
 Error = 1
 Warning = 2
@@ -214,10 +152,7 @@ Fatal = 7
 ProcessMessage = 0
 PostLog = 1
 RegisteServer = 2
-GetServerList = 3
 RestartService = 4
-GetTemplateList = 5
-SetTemplateConfig = 6
 
 
 
@@ -414,28 +349,21 @@ _GLOBAL_CONFIG = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='Type', full_name='Protocol.GLOBAL_CONFIG.Type', index=14,
-      number=15, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='ModuleName', full_name='Protocol.GLOBAL_CONFIG.ModuleName', index=15,
+      name='ModuleName', full_name='Protocol.GLOBAL_CONFIG.ModuleName', index=14,
       number=16, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='ModulePath', full_name='Protocol.GLOBAL_CONFIG.ModulePath', index=16,
+      name='ModulePath', full_name='Protocol.GLOBAL_CONFIG.ModulePath', index=15,
       number=17, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='ModuleConfig', full_name='Protocol.GLOBAL_CONFIG.ModuleConfig', index=17,
+      name='ModuleConfig', full_name='Protocol.GLOBAL_CONFIG.ModuleConfig', index=16,
       number=18, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
@@ -454,16 +382,14 @@ _GLOBAL_CONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=255,
-  serialized_end=694,
+  serialized_end=658,
 )
 
 _DATAPACKAGE.fields_by_name['Function'].enum_type = _FUNCTIONS
 _DATAPACKAGE.fields_by_name['Result'].enum_type = _RESULTTYPE
 _GLOBAL_CONFIG.fields_by_name['LogLevel'].enum_type = _LOGLEVEL
-_GLOBAL_CONFIG.fields_by_name['Type'].enum_type = _MODULETYPE
 DESCRIPTOR.message_types_by_name['DataPackage'] = _DATAPACKAGE
 DESCRIPTOR.message_types_by_name['GLOBAL_CONFIG'] = _GLOBAL_CONFIG
-DESCRIPTOR.enum_types_by_name['ModuleType'] = _MODULETYPE
 DESCRIPTOR.enum_types_by_name['ResultType'] = _RESULTTYPE
 DESCRIPTOR.enum_types_by_name['LogLevel'] = _LOGLEVEL
 DESCRIPTOR.enum_types_by_name['Functions'] = _FUNCTIONS

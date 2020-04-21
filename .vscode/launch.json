@@ -14,7 +14,7 @@
                     "10.0.0.18:8002"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/build/debug/",
             "environment": [],
             "externalConsole": false,
             "preLaunchTask": "build",

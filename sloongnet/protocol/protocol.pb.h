@@ -62,32 +62,6 @@ template<> ::Protocol::GLOBAL_CONFIG* Arena::CreateMaybeMessage<::Protocol::GLOB
 }  // namespace google
 namespace Protocol {
 
-enum ModuleType {
-  Unconfigured = 0,
-  Control = 1,
-  Firewall = 2,
-  Gateway = 3,
-  Data = 4,
-  Process = 5,
-  DB = 6,
-  ModuleType_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
-  ModuleType_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
-};
-bool ModuleType_IsValid(int value);
-const ModuleType ModuleType_MIN = Unconfigured;
-const ModuleType ModuleType_MAX = DB;
-const int ModuleType_ARRAYSIZE = ModuleType_MAX + 1;
-
-const ::google::protobuf::EnumDescriptor* ModuleType_descriptor();
-inline const ::std::string& ModuleType_Name(ModuleType value) {
-  return ::google::protobuf::internal::NameOfEnum(
-    ModuleType_descriptor(), value);
-}
-inline bool ModuleType_Parse(
-    const ::std::string& name, ModuleType* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<ModuleType>(
-    ModuleType_descriptor(), name, value);
-}
 enum ResultType {
   Succeed = 0,
   Error = 1,
@@ -143,16 +117,13 @@ enum Functions {
   ProcessMessage = 0,
   PostLog = 1,
   RegisteServer = 2,
-  GetServerList = 3,
   RestartService = 4,
-  GetTemplateList = 5,
-  SetTemplateConfig = 6,
   Functions_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   Functions_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool Functions_IsValid(int value);
 const Functions Functions_MIN = ProcessMessage;
-const Functions Functions_MAX = SetTemplateConfig;
+const Functions Functions_MAX = RestartService;
 const int Functions_ARRAYSIZE = Functions_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Functions_descriptor();
@@ -603,12 +574,6 @@ class GLOBAL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_p
   ::google::protobuf::int32 prioritysize() const;
   void set_prioritysize(::google::protobuf::int32 value);
 
-  // .Protocol.ModuleType Type = 15;
-  void clear_type();
-  static const int kTypeFieldNumber = 15;
-  ::Protocol::ModuleType type() const;
-  void set_type(::Protocol::ModuleType value);
-
   // @@protoc_insertion_point(class_scope:Protocol.GLOBAL_CONFIG)
  private:
 
@@ -630,7 +595,6 @@ class GLOBAL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_p
   ::google::protobuf::int32 epollthreadquantity_;
   ::google::protobuf::int32 processthreadquantity_;
   ::google::protobuf::int32 prioritysize_;
-  int type_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
   friend struct ::protobuf_protocol_2eproto::TableStruct;
 };
@@ -1283,20 +1247,6 @@ inline void GLOBAL_CONFIG::set_prioritysize(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:Protocol.GLOBAL_CONFIG.PrioritySize)
 }
 
-// .Protocol.ModuleType Type = 15;
-inline void GLOBAL_CONFIG::clear_type() {
-  type_ = 0;
-}
-inline ::Protocol::ModuleType GLOBAL_CONFIG::type() const {
-  // @@protoc_insertion_point(field_get:Protocol.GLOBAL_CONFIG.Type)
-  return static_cast< ::Protocol::ModuleType >(type_);
-}
-inline void GLOBAL_CONFIG::set_type(::Protocol::ModuleType value) {
-  
-  type_ = value;
-  // @@protoc_insertion_point(field_set:Protocol.GLOBAL_CONFIG.Type)
-}
-
 // string ModuleName = 16;
 inline void GLOBAL_CONFIG::clear_modulename() {
   modulename_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
@@ -1469,11 +1419,6 @@ inline void GLOBAL_CONFIG::set_allocated_moduleconfig(::std::string* moduleconfi
 namespace google {
 namespace protobuf {
 
-template <> struct is_proto_enum< ::Protocol::ModuleType> : ::std::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::Protocol::ModuleType>() {
-  return ::Protocol::ModuleType_descriptor();
-}
 template <> struct is_proto_enum< ::Protocol::ResultType> : ::std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::Protocol::ResultType>() {

@@ -1,17 +1,6 @@
 syntax = "proto3";
 package Protocol;
 
-// Type
-enum ModuleType{
-    Unconfigured = 0;
-    Control = 1;
-    Firewall = 2;
-    Gateway = 3;
-    Data = 4;
-    Process = 5;
-    DB = 6;
-}
-
 // Result
 enum ResultType{    
     Succeed = 0;
@@ -35,13 +24,10 @@ enum LogLevel{
 
 
 enum Functions{
-    /* Flow: Client -> Process
+    /* Flow: All -> All
        Response: Content - result with JSON string. 
     */
     ProcessMessage=0;
-    /*------------------------------------------------
-          Manage function for module to module
-    -------------------------------------------------*/
     /* Flow: All -> Control
        Response: post log message to control
     */
@@ -51,54 +37,11 @@ enum Functions{
                  Extend: config data
     */
     RegisteServer=2;
-    /* Flow:  ControlUI -> Control
-       Response: Content(JSON) - Config template  list.
-                    Format: 
-                    {
-                      "ServerList": [
-                        {
-                          "UUID": "",
-                          "Type":"",
-                          "TemplateID": ""
-                        }
-                      ]
-                    }
-    */
-    GetServerList=3;
     /* Flow: Control -> All
        Request: 
        Response: NO
     */
     RestartService=4;
-    /* Flow: ControlUI -> Control
-       Response: Content(JSON) - Config template  list.
-                    Format: 
-                    {
-                      "TemplateList": [
-                        {
-                          "ID": "",
-                          "Name":"",
-                          "Note":"",
-                          "Replicas":"",
-                          "Configuation":""
-                        }
-                      ]
-                    }
-    */
-    GetTemplateList=5;
-    /* Flow: ControlUI -> Control
-       Request: Content(JSON) - config info.
-                    Format:
-                    {
-                      "ID":"",
-                      "Name":"",
-                      "Note":"",
-                      "replicas":"",
-                      "Configuation":"" //base64
-                    }
-       Response: Result
-    */
-    SetTemplateConfig=6; 
 }
 
 message DataPackage
@@ -113,8 +56,6 @@ message DataPackage
     string CheckString = 4;
     // 发送者的唯一标识符
     string Sender = 5;
-    // 指定接收者为指定类型的所有成员
-    int32 Receiver = 6;
     // 结果代码
     ResultType Result = 7;
     // 消息内容
@@ -146,7 +87,6 @@ message GLOBAL_CONFIG
     int32   PrioritySize=14;// Priority Size for the list. the priority level cannot bigger than this value.
 
     // Module
-    ModuleType Type = 15;
     string  ModuleName = 16;
     string  ModulePath = 17;
     bytes   ModuleConfig = 18;

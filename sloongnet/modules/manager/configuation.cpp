@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2019-11-06 17:13:29
+ * @LastEditTime: 2020-04-21 12:19:56
  * @Description: file content
  */
 
@@ -51,6 +51,20 @@ CResult Sloong::CConfiguation::AddTemplate(const TemplateInfo& config, int* out_
     try
     {
         *out_id = m_oStorage->insert<TemplateInfo>(config);
+        return CResult::Succeed();
+    }
+    catch (system_error ex)
+    {
+        return TResult<int>::Make_Error(ex.what());
+    }
+}
+
+
+CResult Sloong::CConfiguation::DeleteTemplate(int id)
+{
+    try
+    {
+        m_oStorage->remove<TemplateInfo>(id);
         return CResult::Succeed();
     }
     catch (system_error ex)

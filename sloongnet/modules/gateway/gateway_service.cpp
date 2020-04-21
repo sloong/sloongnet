@@ -153,7 +153,6 @@ void Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage* pack)
 {
 	// Step 1: 将已经收到的来自客户端的请求内容转换为protobuf格式
 	auto sendMsg = make_shared<DataPackage>();
-	sendMsg->set_receiver(ModuleType::Process);
 	sendMsg->set_function(Functions::ProcessMessage);
 	sendMsg->set_content(pack->GetRecvMessage());
 	sendMsg->set_prioritylevel(pack->GetPriority());
