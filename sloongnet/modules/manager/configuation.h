@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-21 12:06:15
+ * @LastEditTime: 2020-04-22 20:28:04
  * @Description: file content
  */
 
@@ -30,6 +30,7 @@ namespace Sloong
 		CResult Initialize( const string& dbPath );
 
         TResult<TemplateInfo> GetTemplate(int id);
+        bool CheckTemplateExist(int id);
         vector<TemplateInfo> GetTemplateList();
         CResult AddTemplate( const TemplateInfo& config, int* out_id);
 		CResult SetTemplate( int id, const TemplateInfo& config);

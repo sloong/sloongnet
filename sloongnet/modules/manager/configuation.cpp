@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-21 12:19:56
+ * @LastEditTime: 2020-04-22 20:38:27
  * @Description: file content
  */
 
@@ -33,6 +33,21 @@ TResult<TemplateInfo> Sloong::CConfiguation::GetTemplate(int id)
     }
 }
 
+bool Sloong::CConfiguation::CheckTemplateExist(int id)
+{
+    try
+    {
+        if( m_oStorage->count<TemplateInfo>(where(c(&TemplateInfo::id) == id)) > 0 )
+            return true;
+        else
+            return false;
+    }
+    catch (system_error ex)
+    {
+        return false;
+    }
+}
+
 vector<TemplateInfo> Sloong::CConfiguation::GetTemplateList()
 {
     try
@@ -50,7 +65,7 @@ CResult Sloong::CConfiguation::AddTemplate(const TemplateInfo& config, int* out_
 {
     try
     {
-        id = m_oStorage->insert<TemplateInfo>(config);
+        int id = m_oStorage->insert<TemplateInfo>(config);
         if( out_id) *out_id = id;
         return CResult::Succeed();
     }

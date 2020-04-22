@@ -7,7 +7,7 @@
 using namespace Sloong::Events;
 
 
-CResult Sloong::CServerManage::Initialize( int template_id )
+CResult Sloong::CServerManage::Initialize()
 {
 	m_listFuncHandler["AddTemplate"]=std::bind(&CServerManage::AddTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
 	m_listFuncHandler["DeleteTemplate"]=std::bind(&CServerManage::DeleteTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
@@ -25,7 +25,7 @@ CResult Sloong::CServerManage::Initialize( int template_id )
 		m_oTemplateList[addItem.ID] = addItem;
 	}
 
-	res = m_pAllConfig->GetTemplate(template_id);
+	res = m_pAllConfig->GetTemplate(1);
 	if (res.IsFialed())
 		return CResult::Succeed();
 	else
@@ -33,11 +33,25 @@ CResult Sloong::CServerManage::Initialize( int template_id )
 }
 
 
-void Sloong::CServerManage::ResetManagerTemplate(const TemplateInfo& config)
+CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG* config)
 {
-	m_pAllConfig->SetTemplate(0,config);
-	if (res.IsFialed())
-		res = m_pAllConfig->AddTemplate(config,nullptr);
+	string config_str;
+	if(!config->SerializeToString(&config_str))
+	{
+		return CResult::Make_Error("Config SerializeToString error.");
+	}
+	TemplateInfo info;
+	info.id = 1;
+	info.name = "Manager";
+	info.note = "This template just for the manager node.";
+	info.replicas = 1;
+	info.configuation = CBase64::Encode(config_str);
+	CResult res(ResultType::Succeed);
+	if( m_pAllConfig->CheckTemplateExist(1))
+		res = m_pAllConfig->SetTemplate(1,info);
+	else
+		res = m_pAllConfig->AddTemplate(info,nullptr);
+	return res;
 }
 
 int Sloong::CServerManage::SearchNeedCreateTemplate()

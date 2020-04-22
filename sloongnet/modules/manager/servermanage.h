@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 11:17:32
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-21 16:16:08
+ * @LastEditTime: 2020-04-22 20:33:49
  * @Description: file content
  */
 #ifndef SERVERMANAGE_H
@@ -67,7 +67,7 @@ namespace Sloong
     class CServerManage
     {
     public:
-        CResult Initialize( int template_id );
+        CResult Initialize();
 
         bool ProcessHandler(Functions func, string sender, CDataTransPackage* pack);
 
@@ -150,7 +150,7 @@ namespace Sloong
         /// 由于初始化太早，无法在initialize时获取。只能由control_server手动设置
         void SetLog(CLog* log) { m_pLog = log; }
 
-        void ResetManagerTemplate(const TemplateInfo&);
+        CResult ResetManagerTemplate(GLOBAL_CONFIG* config);
 
     private:
         int SearchNeedCreateTemplate();

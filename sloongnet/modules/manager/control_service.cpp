@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-04-21 11:37:09
+ * @LastEditTime: 2020-04-22 20:43:44
  */
 
 #include "control_service.h"
@@ -45,7 +45,7 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG* config)
 	{
 		return CResult::Make_Error("Config object is nullptr.");
 	}
-	auto res = m_pServer->Initialize(0);
+	auto res = m_pServer->Initialize();
 	if (res.IsFialed())
 	{
 		return CResult::Make_Error(CUniversal::Format("Init server manage fialed. error message:%s",res.Message()));
@@ -60,7 +60,12 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG* config)
 		// If parse config error, run with default config.
 		cout <<  "Parser server config error. run with default setting." << endl;
 		ResetControlConfig(config);
-		m_pServer->
+		res = m_pServer->ResetManagerTemplate(config);
+		if( res.IsFialed())
+		{
+			cout << "Save defualt template error. message:" << res.Message() << endl;
+			return res;
+		}
 	}
 	// When config parse done, revert the port setting. Because we always use the command line port.
 	config->set_listenport(port);
