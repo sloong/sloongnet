@@ -33,6 +33,13 @@ CResult Sloong::CServerManage::Initialize( int template_id )
 }
 
 
+void Sloong::CServerManage::ResetManagerTemplate(const TemplateInfo& config)
+{
+	m_pAllConfig->SetTemplate(0,config);
+	if (res.IsFialed())
+		res = m_pAllConfig->AddTemplate(config,nullptr);
+}
+
 int Sloong::CServerManage::SearchNeedCreateTemplate()
 {
 	for (auto item : m_oTemplateList)

@@ -60,6 +60,7 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG* config)
 		// If parse config error, run with default config.
 		cout <<  "Parser server config error. run with default setting." << endl;
 		ResetControlConfig(config);
+		m_pServer->
 	}
 	// When config parse done, revert the port setting. Because we always use the command line port.
 	config->set_listenport(port);

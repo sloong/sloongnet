@@ -50,7 +50,8 @@ CResult Sloong::CConfiguation::AddTemplate(const TemplateInfo& config, int* out_
 {
     try
     {
-        *out_id = m_oStorage->insert<TemplateInfo>(config);
+        id = m_oStorage->insert<TemplateInfo>(config);
+        if( out_id) *out_id = id;
         return CResult::Succeed();
     }
     catch (system_error ex)

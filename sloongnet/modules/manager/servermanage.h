@@ -150,6 +150,8 @@ namespace Sloong
         /// 由于初始化太早，无法在initialize时获取。只能由control_server手动设置
         void SetLog(CLog* log) { m_pLog = log; }
 
+        void ResetManagerTemplate(const TemplateInfo&);
+
     private:
         int SearchNeedCreateTemplate();
 
