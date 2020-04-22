@@ -37,7 +37,7 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 {
 	for (auto item : m_oTemplateList)
 	{
-		if (item.second.Replicas == 0)
+		if (item.second.Replicas == 0 || item.second.ID == 0 )
 			continue;
 
 		if (item.second.Created.size() == item.second.Replicas)
@@ -160,13 +160,13 @@ bool Sloong::CServerManage::AddTemplateHandler(const Json::Value& jRequest,CData
 
 bool Sloong::CServerManage::DeleteTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
 {
-	if(jRequest["ID"].isNull())
+	if(jRequest["TemplateID"].isNull())
 	{
 		pack->ResponsePackage(ResultType::Error, "The required parameter is null.");
 		return true;
 	}
 
-	int id = jRequest["ID"].asInt();
+	int id = jRequest["TemplateID"].asInt();
 	if( !m_oTemplateList.exist(id))
 	{
 		pack->ResponsePackage(ResultType::Error, CUniversal::Format("The template id [%d] is no exist.",id));
