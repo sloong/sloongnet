@@ -133,9 +133,9 @@ bool Sloong::CServerManage::ProcessHandler(Functions func, string sender, CDataT
 bool Sloong::CServerManage::AddTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
 {
 	auto jReq = jRequest["Template"];
-	if(jReq["Name"].isNull()||jReq["Replicas"].isNull()||jReq["Configuation"].isNull())
+	if(!jReq["Name"].isString()&&!jReq["Replicas"].isInt()&&!jReq["Configuation"].isString())
 	{
-		pack->ResponsePackage(ResultType::Error, "The required parameter is null.");
+		pack->ResponsePackage(ResultType::Error, "The required parameter check error.");
 		return true;
 	}
 
@@ -160,9 +160,9 @@ bool Sloong::CServerManage::AddTemplateHandler(const Json::Value& jRequest,CData
 
 bool Sloong::CServerManage::DeleteTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
 {
-	if(jRequest["TemplateID"].isNull())
+	if(!jRequest["TemplateID"].isInt())
 	{
-		pack->ResponsePackage(ResultType::Error, "The required parameter is null.");
+		pack->ResponsePackage(ResultType::Error, "The required parameter check error.");
 		return true;
 	}
 
@@ -188,7 +188,7 @@ bool Sloong::CServerManage::DeleteTemplateHandler(const Json::Value& jRequest,CD
 bool Sloong::CServerManage::SetTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
 {
 	auto jReq = jRequest["Template"];
-	if (jReq["ID"].isNull() || !m_oTemplateList.exist(jReq["ID"].asInt()))
+	if (!jReq["ID"].isInt() || !m_oTemplateList.exist(jReq["ID"].asInt()))
 	{
 		pack->ResponsePackage(ResultType::Error, "Check the templeate ID error, please check.");
 		return true;
@@ -222,9 +222,9 @@ bool Sloong::CServerManage::SetTemplateHandler(const Json::Value& jRequest,CData
 bool Sloong::CServerManage::QueryTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
 {
 	Json::Value list;
-	if( !jRequest["ID"].isNull() )
+	if( !jRequest["TemplateID"].isInt() )
 	{
-		int id = jRequest["ID"].asInt();
+		int id = jRequest["TemplateID"].asInt();
 		if(!m_oTemplateList.exist(id))
 		{
 			pack->ResponsePackage(ResultType::Error, CUniversal::Format("The template id [%d] is no exist.",id));
