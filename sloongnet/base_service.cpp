@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-17 17:40:54
+ * @LastEditTime: 2020-04-24 20:04:53
  * @Description: file content
  */
 /*
@@ -39,11 +39,8 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
     Instance->Exit();
 }
 
-CResult CSloongBaseService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
+void CSloongBaseService::InitSystemEventHandler()
 {
-    m_pServerConfig = move(config);
-    m_oExitResult = CResult::Succeed();
-
     set_terminate(sloong_terminator);
     set_unexpected(sloong_terminator);
     //SIG_IGN:忽略信号的处理程序
@@ -55,18 +52,68 @@ CResult CSloongBaseService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
     signal(SIGINT, &on_SIGINT_Event);
     // SIGSEGV:当一个进程执行了一个无效的内存引用，或发生段错误时发送给它的信号
     signal(SIGSEGV, &on_sigint);
-    
+}
+
+CResult CSloongBaseService::Initialize(unique_ptr<RunTimeData>& config)
+{
+    m_pServerConfig = move(config);
+    m_oExitResult = CResult::Succeed();
+
+    InitSystemEventHandler();
     #ifdef DEBUG
-    m_pServerConfig->set_debugmode(true);
-    m_pServerConfig->set_loglevel(Protocol::LogLevel::All);
+    m_pServerConfig->TemplateConfig.set_debugmode(true);
+    m_pServerConfig->TemplateConfig.set_loglevel(Protocol::LogLevel::All);
     #endif
     
-    m_pLog->Initialize(m_pServerConfig->logpath(), "", (LOGOPT) (LOGOPT::WriteToSTDOut|LOGOPT::WriteToFile), LOGLEVEL(m_pServerConfig->loglevel()), LOGTYPE::DAY);
+    m_pLog->Initialize(m_pServerConfig->TemplateConfig.logpath(), "", (LOGOPT) (LOGOPT::WriteToSTDOut|LOGOPT::WriteToFile), LOGLEVEL(m_pServerConfig->TemplateConfig.loglevel()), LOGTYPE::DAY);
 
+    auto res = InitModule();
+    if( res.IsFialed() ) return res;
+
+
+    res = m_pModuleInitializationFunc(&m_pServerConfig->TemplateConfig);
+    if( res.IsFialed())
+    {
+        m_pLog->Fatal(res.Message());
+        return res;
+    }
+
+    res = m_pControl->Initialize(m_pServerConfig->TemplateConfig.mqthreadquantity());
+    if( res.IsFialed())
+    {
+        m_pLog->Fatal(res.Message());
+        return res;
+    }
+    
+    m_pControl->Add(DATA_ITEM::ServerConfiguation, &m_pServerConfig->TemplateConfig);
+    m_pControl->Add(Logger, m_pLog.get());
+    m_pControl->RegisterEvent(ProgramExit);
+    m_pControl->RegisterEvent(ProgramStart);
+    m_pControl->RegisterEvent(ProgramRestart);
+    m_pControl->RegisterEventHandler(ProgramRestart,std::bind(&CSloongBaseService::Restart, this, std::placeholders::_1));
+    IData::Initialize(m_pControl.get());
+    res = m_pNetwork->Initialize(m_pControl.get());
+    if (res.IsFialed())
+    {
+        m_pLog->Fatal(res.Message());
+        return res;
+    }
+    
+    m_pNetwork->RegisterMessageProcesser(m_pHandler);
+    m_pNetwork->RegisterAccpetConnectProcesser(m_pAccept);
+    res = m_pModuleInitializedFunc(m_pControl.get());
+    if( res.IsFialed() )
+        m_pLog->Fatal(res.Message());
+
+    return RegisteNode();
+}
+
+CResult CSloongBaseService::InitModule()
+{
     // Load the module library
-    string libFullPath = m_pServerConfig->modulepath()+m_pServerConfig->modulename();
+    string libFullPath = m_pServerConfig->TemplateConfig.modulepath()+m_pServerConfig->TemplateConfig.modulename();
 
-
+    m_pLog->Verbos(CUniversal::Format("Start init module[%s] and load module functions",libFullPath));
     m_pModule = dlopen(libFullPath.c_str(),RTLD_LAZY);
     if(m_pModule == nullptr)
     {
@@ -84,54 +131,40 @@ CResult CSloongBaseService::Initialize(unique_ptr<GLOBAL_CONFIG>& config)
     m_pAccept = (NewConnectAcceptProcesserFunction)dlsym(m_pModule, "NewConnectAcceptProcesser");
     if ((errmsg = dlerror()) != NULL)  {
         string errMsg = CUniversal::Format("Load function NewConnectAcceptProcesser error[%s]. Use default function.",errmsg);
-        m_pLog->Info(errMsg);
+        m_pLog->Warn(errMsg);
     }
-    auto beforeInit = (ModuleInitializationFunction)dlsym(m_pModule, "ModuleInitialization");
+    m_pModuleInitializationFunc = (ModuleInitializationFunction)dlsym(m_pModule, "ModuleInitialization");
     if ((errmsg = dlerror()) != NULL)  {
         string errMsg = CUniversal::Format("Load function ModuleInitialize error[%s]. maybe module no need initiliaze.",errmsg);
-        m_pLog->Info(errMsg);
+        m_pLog->Warn(errMsg);
     }
-    auto afterInit = (ModuleInitializedFunction)dlsym(m_pModule, "ModuleInitialized");
+    m_pModuleInitializedFunc = (ModuleInitializedFunction)dlsym(m_pModule, "ModuleInitialized");
     if ((errmsg = dlerror()) != NULL)  {
         string errMsg = CUniversal::Format("Load function ModuleInitialize error[%s]. maybe module no need initiliaze.",errmsg);
-        m_pLog->Info(errMsg);
+        m_pLog->Warn(errMsg);
     }
-
-    auto res = beforeInit(m_pServerConfig.get());
-    if( res.IsFialed())
-    {
-        m_pLog->Fatal(res.Message());
-        return res;
-    }
-
-    res = m_pControl->Initialize(m_pServerConfig->mqthreadquantity());
-    if( res.IsFialed())
-    {
-        m_pLog->Fatal(res.Message());
-        return res;
-    }
-    
-    m_pControl->Add(DATA_ITEM::ServerConfiguation, m_pServerConfig.get());
-    m_pControl->Add(Logger, m_pLog.get());
-    m_pControl->RegisterEvent(ProgramExit);
-    m_pControl->RegisterEvent(ProgramStart);
-    m_pControl->RegisterEvent(ProgramRestart);
-    m_pControl->RegisterEventHandler(ProgramRestart,std::bind(&CSloongBaseService::Restart, this, std::placeholders::_1));
-    IData::Initialize(m_pControl.get());
-    res = m_pNetwork->Initialize(m_pControl.get());
-    if (res.IsFialed())
-    {
-        m_pLog->Fatal(res.Message());
-        return res;
-    }
-    
-    m_pNetwork->RegisterMessageProcesser(m_pHandler);
-    m_pNetwork->RegisterAccpetConnectProcesser(m_pAccept);
-    res = afterInit(m_pControl.get());
-    if( res.IsFialed() )
-        m_pLog->Fatal(res.Message());
-    return res;
+    m_pLog->Verbos("load module functions done.");
 }
+
+CResult CSloongBaseService::RegisteNode()
+{
+     Json::Value jReq;
+    jReq["Function"] = "RegisteNode";
+    jReq["TemplateID"] = m_pServerConfig->TemplateID;
+
+    auto req = make_shared<DataPackage>();
+	req->set_function(Functions::ProcessMessage);
+	req->set_sender( m_pServerConfig->NodeUUID );
+	req->set_content(jReq.toStyledString());
+
+	CDataTransPackage dataPackage;
+	dataPackage.Initialize( m_pServerConfig->ManagerConnect );
+	dataPackage.RequestPackage(req);
+	ResultType result = dataPackage.SendPackage();
+    return CResult::Succeed();
+}
+
+
 
 void CSloongBaseService::Restart(SmartEvent event)
 {

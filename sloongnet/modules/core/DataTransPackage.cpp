@@ -31,19 +31,11 @@ void Sloong::CDataTransPackage::ResponsePackage( shared_ptr<DataPackage> pack )
 }
 
 
-void Sloong::CDataTransPackage::ResponsePackage(const string &msg, const string& exdata)
-{
-	m_pTransPackage->set_content(msg);
-	m_pTransPackage->set_extend(exdata);
-	m_pTransPackage->set_result(ResultType::Succeed);
-	PrepareSendPackageData();
-}
-
-
-void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string& message)
+void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string& message,const string* exdata /*=nullptr*/)
 {
 	m_pTransPackage->set_result(result);
 	m_pTransPackage->set_content(message);
+	if( exdata ) m_pTransPackage->set_extend(*exdata);
 	PrepareSendPackageData();
 }
 
@@ -69,14 +61,12 @@ ResultType Sloong::CDataTransPackage::SendPackage()
 		m_nSent += nSentSize;
 	}
 
-	if( m_pLog )
-		m_pLog->Verbos(CUniversal::Format("Send Info : AllSize[%d],Sent[%d]", m_nPackageSize, m_nSent));
+	if( m_pLog ) m_pLog->Verbos(CUniversal::Format("Send Info : AllSize[%d],Sent[%d]", m_nPackageSize, m_nSent));
 
 	if (m_nSent < m_nPackageSize){
 		return ResultType::Retry;
 	}else{
-		if( m_pLog )
-			m_pLog->Verbos(CUniversal::Format("Message package send succeed, remove from send list. All size[%d]", m_nSent));
+		if( m_pLog ) m_pLog->Verbos(CUniversal::Format("Message package send succeed, remove from send list. All size[%d]", m_nSent));
 		return ResultType::Succeed;
 	}
 }
@@ -91,30 +81,26 @@ ResultType Sloong::CDataTransPackage::RecvPackage(int timeout,int lentimeout)
 	m_pTransPackage = make_shared<DataPackage>();
 	if(!m_pTransPackage->ParseFromString(result))
 	{
-		if( m_pLog )
-			m_pLog->Error("Parser receive data error.");
+		if( m_pLog ) m_pLog->Error("Parser receive data error.");
 		return ResultType::Error;
 	}
 
 	if (m_pTransPackage->prioritylevel() > s_PriorityLevel || m_pTransPackage->prioritylevel() < 0)
 	{
-		if( m_pLog )
-			m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_pTransPackage->prioritylevel(), s_PriorityLevel));
+		if( m_pLog ) m_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_pTransPackage->prioritylevel(), s_PriorityLevel));
 		return ResultType::Error;
 	}
 	
-	if( m_pLog )
-		m_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%d]<<<%s",m_pTransPackage->prioritylevel(),m_pTransPackage->serialnumber(),m_pTransPackage->content()));
+	if( m_pLog ) m_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%d]<<<%s",m_pTransPackage->prioritylevel(),m_pTransPackage->serialnumber(),m_pTransPackage->content()));
 
 	if( m_pTransPackage->checkstring().length() > 0 ){
 		string rmd5 = CMD5::Encode(m_pTransPackage->content());
 		if ( strcasecmp(m_pTransPackage->checkstring().c_str(),rmd5.c_str()) != 0)
 		{
 			// handle error.
-			if( m_pLog )
-				m_pLog->Warn(CUniversal::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_pTransPackage->content(), rmd5, m_pTransPackage->checkstring() ));
-			string strSend = CUniversal::Format("{\"errno\": \"-1\",\"errmsg\" : \"package check error\",\"server_md5\":\"%s\",\"client_md5\":\"%s\",\"check_string\":\"%s\"}", rmd5, m_pTransPackage->checkstring(), m_pTransPackage->content());
-			ResponsePackage(strSend,"");
+			string msg = CUniversal::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_pTransPackage->content(), rmd5, m_pTransPackage->checkstring() );
+			if( m_pLog )m_pLog->Warn(msg);
+			ResponsePackage(ResultType::Error,msg);
 			return ResultType::Invalid;
 		}
 	}

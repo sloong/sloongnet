@@ -42,9 +42,8 @@ namespace Protocol {
             "chABEgsKB1dhcm5pbmcQAhIJCgVSZXRyeRADEgsKB0ludmFsaWQQBCpeCghM",
             "b2dMZXZlbBIHCgNBbGwQABIKCgZWZXJib3MQARIJCgVEZWJ1ZxACEggKBElu",
             "Zm8QAxIICgRXYXJuEAQSBwoDRXJyEAUSCgoGQXNzZXJ0EAYSCQoFRmF0YWwQ",
-            "BypTCglGdW5jdGlvbnMSEgoOUHJvY2Vzc01lc3NhZ2UQABILCgdQb3N0TG9n",
-            "EAESEQoNUmVnaXN0ZVNlcnZlchACEhIKDlJlc3RhcnRTZXJ2aWNlEARiBnBy",
-            "b3RvMw=="));
+            "ByowCglGdW5jdGlvbnMSEgoOUHJvY2Vzc01lc3NhZ2UQABIPCgtSZXN0YXJ0",
+            "Tm9kZRACYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ResultType), typeof(global::Protocol.LogLevel), typeof(global::Protocol.Functions), }, new pbr::GeneratedClrTypeInfo[] {
@@ -82,28 +81,8 @@ namespace Protocol {
   }
 
   public enum Functions {
-    /// <summary>
-    /// Flow: All -> All
-    ///Response: Content - result with JSON string. 
-    /// </summary>
     [pbr::OriginalName("ProcessMessage")] ProcessMessage = 0,
-    /// <summary>
-    /// Flow: All -> Control
-    ///Response: post log message to control
-    /// </summary>
-    [pbr::OriginalName("PostLog")] PostLog = 1,
-    /// <summary>
-    /// Flow:  All -> Control
-    ///Response: Content(string) - the uuid for sender.
-    ///Extend: config data
-    /// </summary>
-    [pbr::OriginalName("RegisteServer")] RegisteServer = 2,
-    /// <summary>
-    /// Flow: Control -> All
-    ///Request: 
-    ///Response: NO
-    /// </summary>
-    [pbr::OriginalName("RestartService")] RestartService = 4,
+    [pbr::OriginalName("RestartNode")] RestartNode = 2,
   }
 
   #endregion

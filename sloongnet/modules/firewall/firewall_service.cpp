@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-17 18:28:39
+ * @LastEditTime: 2020-04-24 17:53:06
  * @Description: file content
  */
 #include "firewall_service.h"
@@ -54,27 +54,6 @@ CResult Sloong::SloongNetFirewall::MessagePackageProcesser(CDataTransPackage* pa
     auto sender = msgPack->sender();
     auto func = msgPack->function();
     m_pLog->Verbos(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
-    if (m_oFunctionHandles.exist(func))
-    {
-        if (!m_oFunctionHandles[func](func, sender, pack))
-        {
-            return CResult::Succeed();
-        }
-    }
-    else
-    {
-        switch (func)
-        {
-        case Functions::RestartService:
-        {
-           
-            return CResult::Succeed();
-        }break;
-        default:
-            m_pLog->Verbos(CUniversal::Format("No handler for [%s] request: sender[%d]", Functions_Name(func), sender));
-            pack->ResponsePackage(ResultType::Error, "No hanlder to process request.");
-        }
-    }
 
 	return CResult::Succeed();
 }

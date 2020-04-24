@@ -52,45 +52,21 @@ CResult SloongNetGateway::Initialized(IControl* iC)
 	
 	m_pControl->RegisterEventHandler(ProgramStart,std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
 	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetGateway::OnSocketClose, this, std::placeholders::_1));
-	RegistFunctionHandler(Functions::ProcessMessage,std::bind(&SloongNetGateway::ProcessMessageHanlder, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	return CResult::Succeed();
-}
-
-
-void Sloong::SloongNetGateway::RegistFunctionHandler(Functions func, FuncHandler handler)
-{
-    m_oFunctionHandles[func] = handler;
 }
 
 
 CResult Sloong::SloongNetGateway::MessagePackageProcesser(CDataTransPackage* pack)
 {
-    auto msgPack = pack->GetRecvPackage();
-    auto sender = msgPack->sender();
-    auto func = msgPack->function();
-    m_pLog->Verbos(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
-    if (m_oFunctionHandles.exist(func))
-    {
-        if (!m_oFunctionHandles[func](func, sender, pack))
-        {
-            return CResult::Succeed();
-        }
-    }
-    else
-    {
-        switch (func)
-        {
-        case Functions::RestartService:
-        {
-            m_pControl->SendMessage(EVENT_TYPE::ProgramRestart);
-            return CResult::Succeed();
-        }break;
-        default:
-            m_pLog->Verbos(CUniversal::Format("No handler for [%s] request: sender[%d]", Functions_Name(func), sender));
-            pack->ResponsePackage(ResultType::Error, "No hanlder to process request.");
-        }
-    }
-
+	auto event_happend_socket = pack->GetSocketID();
+	if( m_mapProcessLoadList.find(event_happend_socket) == m_mapProcessLoadList.end() )
+	{
+		MessageToProcesser(pack);
+	}
+	else
+	{
+		MessageToClient(pack);
+	}
 	return CResult::Succeed();
 }
 
@@ -131,22 +107,6 @@ void Sloong::SloongNetGateway::AcceptConnectProcesser(CSockInfo* info){
 	auto uuid = CUtility::GenUUID();
 	// regist this uuid to control. if succeed, the control do nothing. but if it is registed, the control will send an error message. then retry regist again.
 	m_mapUUIDList[info->m_pCon->GetSocketID()] = uuid;
-}
-
-
-
-bool Sloong::SloongNetGateway::ProcessMessageHanlder(Functions func, string sender, CDataTransPackage* pack)
-{
-	auto event_happend_socket = pack->GetSocketID();
-	if( m_mapProcessLoadList.find(event_happend_socket) == m_mapProcessLoadList.end() )
-	{
-		MessageToProcesser(pack);
-	}
-	else
-	{
-		MessageToClient(pack);
-	}
-	return true;
 }
 
 void Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage* pack)
@@ -191,7 +151,7 @@ void Sloong::SloongNetGateway::MessageToClient(CDataTransPackage* pack)
 		return;
 	}
 	auto client_request_package = event_obj->second;
-	client_request_package->ResponsePackage(recvMsg->content(), recvMsg->extend());
+	client_request_package->ResponsePackage( ResultType::Succeed, recvMsg->content(), &recvMsg->extend());
 
 	// Step 3: 发送相应数据
 	/*auto response_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);

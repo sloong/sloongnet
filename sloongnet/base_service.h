@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-17 16:40:08
+ * @LastEditTime: 2020-04-24 20:04:02
  * @Description: file content
  */
 
@@ -30,26 +30,28 @@ namespace Sloong
         }
 
         // Just call it without Control module.
-		virtual CResult Initialize(unique_ptr<GLOBAL_CONFIG>& config);
+		virtual CResult Initialize(unique_ptr<RunTimeData>& config);
 
 		virtual CResult Run();
 		virtual void Restart(SmartEvent event);
 		virtual void Exit();
 
 		virtual bool ConnectToControl(string controlAddress);
+	protected:
+		CResult RegisteNode();
+		CResult	InitModule();
+		void	InitSystemEventHandler();
 
     protected:
         static void sloong_terminator();
-
         static void on_sigint(int signal);
-
         static void on_SIGINT_Event(int signal);
 
 	protected:
 		unique_ptr<CNetworkHub> m_pNetwork = make_unique<CNetworkHub>();
 		unique_ptr<CControlHub> m_pControl = make_unique<CControlHub>();
 		unique_ptr<CLog>		m_pLog = make_unique<CLog>();;
-		unique_ptr<GLOBAL_CONFIG> m_pServerConfig;
+		unique_ptr<RunTimeData> m_pServerConfig;
 		shared_ptr<EasyConnect>	m_pSocket;
 		CEasySync				m_oExitSync;
 		CResult					m_oExitResult = CResult::Succeed();
@@ -59,7 +61,8 @@ namespace Sloong
 
 		MessagePackageProcesserFunction m_pHandler = nullptr;
 		NewConnectAcceptProcesserFunction m_pAccept = nullptr;
-		
+		ModuleInitializationFunction	m_pModuleInitializationFunc = nullptr;
+		ModuleInitializedFunction		m_pModuleInitializedFunc = nullptr;
     public:
         static unique_ptr<CSloongBaseService> Instance;
 	};

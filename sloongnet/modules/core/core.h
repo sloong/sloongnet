@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-17 15:38:52
+ * @LastEditTime: 2020-04-24 19:39:18
  * @Description: file content
  */
 #ifndef SLOONGNET_MODULE_CORE_CORE_H
@@ -58,6 +58,5 @@ using namespace Protocol;
 #include "list_ex.hpp"
 
 using namespace Sloong;
-
 
 #endif //SLOONGNET_MODULE_CORE_CORE_H

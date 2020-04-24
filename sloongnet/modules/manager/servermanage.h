@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 11:17:32
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-22 20:33:49
+ * @LastEditTime: 2020-04-24 18:49:52
  * @Description: file content
  */
 #ifndef SERVERMANAGE_H
@@ -63,15 +63,37 @@ namespace Sloong
         list_ex<string> Created;
     };
 
-    typedef std::function<bool(const Json::Value&,CDataTransPackage*)> FunctionHandler;
+    typedef std::function<CResult(const Json::Value&,CDataTransPackage*)> FunctionHandler;
     class CServerManage
     {
     public:
         CResult Initialize();
 
-        bool ProcessHandler(Functions func, string sender, CDataTransPackage* pack);
+        bool ProcessHandler(CDataTransPackage*);
 
-        bool RegisterServerHandler(Functions func,string sender, CDataTransPackage* pack);
+        /* When worker start, send this request to registe a worker, and wait manage assigning template.
+        Request(JSON):
+                    {
+                        "Function":"RegisteWorker",
+                    }
+        Response: Result    -> Succeed      Content(JSON)
+                                            {
+                                                "TemplateID":"",
+                                                "Configuation":""//base64
+                                            }
+                            -> Retry        Wait assign, wait some time and retry again.
+        */
+        CResult RegisteWorkerHandler(const Json::Value&,CDataTransPackage*);
+
+        /* When assigning tamplate, and node is ready to work, send this requst.
+        Request(JSON):
+                    {
+                        "Function":"RegisteNode",
+                        "TemplateID":""
+                    }
+        Response: Result
+        */
+        CResult RegisteNodeHandler(const Json::Value&,CDataTransPackage*);
 
         /* 
         Request(JSON):
@@ -84,9 +106,9 @@ namespace Sloong
                             "Configuation":""//base64
                         }
                     }
-        Response: Content -> ID
+        Response: Result
         */
-        bool AddTemplateHandler(const Json::Value&,CDataTransPackage*);
+        CResult AddTemplateHandler(const Json::Value&,CDataTransPackage*);
         /* 
         Request(JSON):
                     {
@@ -95,7 +117,7 @@ namespace Sloong
                     }
         Response: Result
         */
-        bool DeleteTemplateHandler(const Json::Value&,CDataTransPackage*);
+        CResult DeleteTemplateHandler(const Json::Value&,CDataTransPackage*);
         /* 
         Request(JSON):
                     {
@@ -110,7 +132,7 @@ namespace Sloong
                     }
         Response: Result
         */
-        bool SetTemplateHandler(const Json::Value&,CDataTransPackage*);
+        CResult SetTemplateHandler(const Json::Value&,CDataTransPackage*);
         /* 
         Request(JSON):
                     {
@@ -130,7 +152,7 @@ namespace Sloong
                       ]
                     }
         */
-        bool QueryTemplateHandler(const Json::Value&,CDataTransPackage*);
+        CResult QueryTemplateHandler(const Json::Value&,CDataTransPackage*);
         
         /* Flow:  ControlUI -> Control
        Response: Content(JSON) - Config template  list.
@@ -145,7 +167,7 @@ namespace Sloong
                       ]
                     }
     */
-        bool GetServerListHandler(const Json::Value&,CDataTransPackage*);
+        CResult GetServerListHandler(const Json::Value&,CDataTransPackage*);
 
         /// 由于初始化太早，无法在initialize时获取。只能由control_server手动设置
         void SetLog(CLog* log) { m_pLog = log; }
@@ -159,8 +181,9 @@ namespace Sloong
         unique_ptr<CConfiguation>	m_pAllConfig = make_unique<CConfiguation>();
         map_ex<string, FunctionHandler> m_listFuncHandler;
         CLog* m_pLog = nullptr;
-        map_ex<string, ServerItem>	m_oServerList;
+        map_ex<string, ServerItem>	m_oWorkerList;
         map_ex<int, TemplateItem>	m_oTemplateList;
+        map_ex<int,string>          m_oNodeList;
     };
 }
 #endif

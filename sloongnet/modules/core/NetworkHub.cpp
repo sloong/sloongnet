@@ -242,9 +242,16 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 			SmartPackage pack;
 			while( m_pWaitProcessList[i].TryPop(pack) )
 			{
-				auto res = m_pProcessFunc(pack.get());
-				if( res.IsSucceed())
-					AddMessageToSendList(pack);
+				if(pack->GetRecvPackage()->function() == Functions::RestartNode)
+				{
+					m_iC->SendMessage(EVENT_TYPE::ProgramRestart);
+				}
+				else
+				{
+					auto res = m_pProcessFunc(pack.get());
+					if( res.IsSucceed())
+						AddMessageToSendList(pack);
+				}
 			}
 			goto MessagePorcessListRetry;
 		}

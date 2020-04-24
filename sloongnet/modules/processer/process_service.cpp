@@ -1,3 +1,10 @@
+/*
+ * @Author: WCB
+ * @Date: 2020-04-24 20:39:19
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-24 20:39:50
+ * @Description: file content
+ */
 /* File Name: server.c */
 #include "process_service.h"
 #include "utility.h"
@@ -42,53 +49,14 @@ CResult SloongNetProcess::Initialized(IControl* iC)
 	}
 	m_pLog = IData::GetLog();
 	
-	RegistFunctionHandler(Functions::ProcessMessage, std::bind(&SloongNetProcess::ProcessMessageHanlder, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProcess::OnSocketClose, this, std::placeholders::_1));
 	m_pProcess->Initialize(m_pControl);
 	return CResult::Succeed();
 }
 
-
-void Sloong::SloongNetProcess::RegistFunctionHandler(Functions func, FuncHandler handler)
-{
-    m_oFunctionHandles[func] = handler;
-}
-
-
 CResult Sloong::SloongNetProcess::MessagePackageProcesser(CDataTransPackage* pack)
 {
-    auto msgPack = pack->GetRecvPackage();
-    auto sender = msgPack->sender();
-    auto func = msgPack->function();
-    m_pLog->Verbos(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
-    if (m_oFunctionHandles.exist(func))
-    {
-        if (!m_oFunctionHandles[func](func, sender, pack))
-        {
-            return CResult::Succeed();
-        }
-    }
-    else
-    {
-        switch (func)
-        {
-        case Functions::RestartService:
-        {
-            m_pControl->SendMessage(EVENT_TYPE::ProgramRestart);
-            return CResult::Succeed();
-        }break;
-        default:
-            m_pLog->Verbos(CUniversal::Format("No handler for [%s] request: sender[%d]", Functions_Name(func), sender));
-            pack->ResponsePackage(ResultType::Error, "No hanlder to process request.");
-        }
-    }
-
-	return CResult::Succeed();
-}
-
-bool Sloong::SloongNetProcess::ProcessMessageHanlder(Functions func, string sender, CDataTransPackage* pack)
-{	
-	string strRes("");
+    string strRes("");
 	char* pExData = nullptr;
 	int nExSize;
 
@@ -108,7 +76,7 @@ bool Sloong::SloongNetProcess::ProcessMessageHanlder(Functions func, string send
 		msg->set_content("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
 	}
 	pack->ResponsePackage(msg);
-	return true;
+	return CResult::Succeed();
 }
 
 void Sloong::SloongNetProcess::OnSocketClose(SmartEvent event)

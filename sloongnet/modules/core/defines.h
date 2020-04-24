@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-19 18:06:42
+ * @LastEditTime: 2020-04-24 20:08:00
  * @Description: file content
  */
 #ifndef SLOONGNET_DEFINES_H
@@ -17,6 +17,7 @@
 #include "univ/hash.h"
 #include "univ/lua.h"
 #include "univ/luapacket.h"
+#include "univ/base64.h"
 using namespace Sloong;
 using namespace Sloong::Universal;
 

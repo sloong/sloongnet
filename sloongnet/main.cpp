@@ -12,10 +12,12 @@ void PrintVersion()
 }
 
 
-TResult<shared_ptr<DataPackage>> RegisteToControl(SmartConnect con)
+TResult<shared_ptr<DataPackage>> RegisteToControl(SmartConnect con, string uuid)
 {
 	auto req = make_shared<DataPackage>();
-	req->set_function(Functions::RegisteServer);
+	req->set_function(Functions::ProcessMessage);
+	req->set_sender(uuid);
+	req->set_content("{\"Function\":\"RegisteWorkder\"}");
 
 	CDataTransPackage dataPackage;
 	dataPackage.Initialize(con);
@@ -41,7 +43,7 @@ void PrientHelp()
 }
 
 
-unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
+unique_ptr<RunTimeData> Initialize(int argc, char** args)
 {
 	// 参数共有2个，类型和地址信息
 	// 1 类型，为指定值
@@ -76,7 +78,7 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 		return nullptr;
 	}
 
-	auto config = make_unique<GLOBAL_CONFIG>();
+	unique_ptr<RunTimeData> data = make_unique<RunTimeData>();
 	if( ManagerMode )
 	{
 		int port = atoi(addr[1].c_str());
@@ -85,40 +87,42 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 			cout << "Convert [" << args[1] << "] to int port fialed." << endl;
 			return nullptr;
 		}
-		config->set_listenport(port);
-		config->set_modulepath("./modules/");
-		config->set_modulename("libmanager.so");
+		data->TemplateConfig.set_listenport(port);
+		data->TemplateConfig.set_modulepath("./modules/");
+		data->TemplateConfig.set_modulename("libmanager.so");
 	}
 	else
 	{
-		auto con = make_shared<EasyConnect>();
-		con->Initialize(args[2], nullptr);
-		if (!con->Connect())
+		data->ManagerAddressPort = args[2];
+		data->ManagerConnect = make_shared<EasyConnect>();
+		data->ManagerConnect->Initialize(args[2], nullptr);
+		if (!data->ManagerConnect->Connect())
 		{
 			cout << "Connect to control fialed." << endl;
 			return nullptr;
 		}
 		cout << "Connect to control succeed. Start registe and get configuation." << endl;
-
+		
 		string uuid;
 		string serverConfig;
 		while(true)
 		{
-			auto res = RegisteToControl(con);
+			auto res = RegisteToControl(data->ManagerConnect,uuid);
 			if (res.IsFialed())
 			{
 				cout << res.Message() << endl;
 				return nullptr;
 			}
 			
+
 			auto response = res.ResultObject();
-			if( response->result() == Protocol::ResultType::Retry )			{
+			if( response->result() == Protocol::ResultType::Retry ){
 				cout << "Control return retry package. wait 500ms and retry." << endl;
+				uuid = response->content();
 				SLEEP(500);
 				continue;
 			}else if(response->result() == Protocol::ResultType::Succeed){
-				uuid = response->content();
-				serverConfig = response->extend();
+				serverConfig = response->content();
 			}else{
 				cout << "Control return an unexpected result." << Protocol::ResultType_Name(response->result()) << ".Message: " << response->content() << endl;
 				return nullptr;
@@ -130,16 +134,27 @@ unique_ptr<GLOBAL_CONFIG> Initialize(int argc, char** args)
 				SLEEP(500);
 				continue;
 			}
-			if (!config->ParseFromString(serverConfig))
+
+			data->NodeUUID = uuid;
+			Json::Reader reader;
+			Json::Value jConfig;
+			if( !reader.parse(serverConfig, jConfig) || !jConfig["TemplateID"].isInt() || !jConfig["Configuation"].isString())
+			{
+				cout << "Parse the config error. response data:" << serverConfig << endl;
+				return nullptr;
+			}
+			
+			if (!data->TemplateConfig.ParseFromString(CBase64::Decode(jConfig["Configuation"].asString()) ))
 			{
 				cout << "Parse the config struct error. please check." << endl;
 				return nullptr;
 			}
+			data->TemplateID = jConfig["TemplateID"].asInt();
 			break;
 		};
 		cout << "Get configuation succeed." << endl;
 	}
-	return config;
+	return data;
 }
 
 
@@ -150,8 +165,8 @@ int main(int argc, char** args)
 		CResult code = CResult::Succeed();
 		do
 		{
-			auto config = Initialize(argc, args);
-			if (!config) {
+			auto data = Initialize(argc, args);
+			if (!data) {
 				cout << "Initialize error." << endl;
 				return -1;
 			}
@@ -162,7 +177,7 @@ int main(int argc, char** args)
 				return -2;
 			}
 
-			auto res = Sloong::CSloongBaseService::Instance->Initialize(config);
+			auto res = Sloong::CSloongBaseService::Instance->Initialize(data);
 			if (!res.IsSucceed()) {
 				cout << "Initialize server error. Message: " << res.Message() << endl;
 				return -3;

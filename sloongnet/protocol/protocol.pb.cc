@@ -156,12 +156,11 @@ void AddDescriptorsImpl() {
       "\n\007Warning\020\002\022\t\n\005Retry\020\003\022\013\n\007Invalid\020\004*^\n\010L"
       "ogLevel\022\007\n\003All\020\000\022\n\n\006Verbos\020\001\022\t\n\005Debug\020\002\022"
       "\010\n\004Info\020\003\022\010\n\004Warn\020\004\022\007\n\003Err\020\005\022\n\n\006Assert\020\006"
-      "\022\t\n\005Fatal\020\007*S\n\tFunctions\022\022\n\016ProcessMessa"
-      "ge\020\000\022\013\n\007PostLog\020\001\022\021\n\rRegisteServer\020\002\022\022\n\016"
-      "RestartService\020\004b\006proto3"
+      "\022\t\n\005Fatal\020\007*0\n\tFunctions\022\022\n\016ProcessMessa"
+      "ge\020\000\022\017\n\013RestartNode\020\002b\006proto3"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 904);
+      descriptor, 869);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "protocol.proto", &protobuf_RegisterTypes);
 }
@@ -222,9 +221,7 @@ const ::google::protobuf::EnumDescriptor* Functions_descriptor() {
 bool Functions_IsValid(int value) {
   switch (value) {
     case 0:
-    case 1:
     case 2:
-    case 4:
       return true;
     default:
       return false;

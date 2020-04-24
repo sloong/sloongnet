@@ -115,15 +115,13 @@ inline bool LogLevel_Parse(
 }
 enum Functions {
   ProcessMessage = 0,
-  PostLog = 1,
-  RegisteServer = 2,
-  RestartService = 4,
+  RestartNode = 2,
   Functions_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   Functions_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool Functions_IsValid(int value);
 const Functions Functions_MIN = ProcessMessage;
-const Functions Functions_MAX = RestartService;
+const Functions Functions_MAX = RestartNode;
 const int Functions_ARRAYSIZE = Functions_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Functions_descriptor();

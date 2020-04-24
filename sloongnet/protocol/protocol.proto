@@ -24,24 +24,8 @@ enum LogLevel{
 
 
 enum Functions{
-    /* Flow: All -> All
-       Response: Content - result with JSON string. 
-    */
     ProcessMessage=0;
-    /* Flow: All -> Control
-       Response: post log message to control
-    */
-    PostLog=1;
-    /* Flow:  All -> Control
-       Response: Content(string) - the uuid for sender.
-                 Extend: config data
-    */
-    RegisteServer=2;
-    /* Flow: Control -> All
-       Request: 
-       Response: NO
-    */
-    RestartService=4;
+    RestartNode=2;
 }
 
 message DataPackage

@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-04-22 20:43:44
+ * @LastEditTime: 2020-04-24 18:25:18
  */
 
 #include "control_service.h"
@@ -81,8 +81,6 @@ CResult SloongControlService::Initialized(IControl* iC)
 	m_pLog = IData::GetLog();
 	
 	m_pServer->SetLog(m_pLog);
-	RegistFunctionHandler(Functions::ProcessMessage,std::bind(&CServerManage::ProcessHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3) );
-	RegistFunctionHandler(Functions::RegisteServer, std::bind(&CServerManage::RegisterServerHandler, m_pServer.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	return CResult::Succeed();
 }
 
@@ -99,39 +97,8 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
 }
 
 
-void Sloong::SloongControlService::RegistFunctionHandler(Functions func, FuncHandler handler)
+inline CResult Sloong::SloongControlService::MessagePackageProcesser(CDataTransPackage* pack)
 {
-    m_oFunctionHandles[func] = handler;
-}
-
-
-CResult Sloong::SloongControlService::MessagePackageProcesser(CDataTransPackage* pack)
-{
-    auto msgPack = pack->GetRecvPackage();
-    auto sender = msgPack->sender();
-    auto func = msgPack->function();
-    m_pLog->Verbos(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
-    if (m_oFunctionHandles.exist(func))
-    {
-        if (!m_oFunctionHandles[func](func, sender, pack))
-        {
-            return CResult::Succeed();
-        }
-    }
-    else
-    {
-        switch (func)
-        {
-        case Functions::RestartService:
-        {
-           
-            return CResult::Succeed();
-        }break;
-        default:
-            m_pLog->Verbos(CUniversal::Format("No handler for [%s] request: sender[%d]", Functions_Name(func), sender));
-            pack->ResponsePackage(ResultType::Error, "No hanlder to process request.");
-        }
-    }
-
+	m_pServer->ProcessHandler(pack);
 	return CResult::Succeed();
 }

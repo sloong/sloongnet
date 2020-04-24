@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-16 16:35:02
+ * @LastEditTime: 2020-04-24 18:32:19
  * @Description: file content
  */
 #ifndef DATA_TRANS_PACKAGE_H
@@ -18,14 +18,7 @@ namespace Sloong
 	public:
         void Initialize(SmartConnect conn, CLog* log= nullptr);
 
-
-        /**
-         * @Remarks: When process done, should call this function to response this package.
-         * @Params: 
-         * @Return: 
-         */
-        void ResponsePackage(const string& msg, const string& exdata);
-		void ResponsePackage(ResultType result, const string& message);
+		void ResponsePackage(ResultType result, const string& message, const string* exdata =nullptr);
         void ResponsePackage(const CResult& result);
 
         void RequestPackage( shared_ptr<DataPackage> pack );

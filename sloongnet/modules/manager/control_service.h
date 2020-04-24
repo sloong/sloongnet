@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-17 18:22:59
+ * @LastEditTime: 2020-04-24 17:21:16
  * @Description: file content
  */
 #ifndef SLOONGNET_CONTROL_SERVICE_H
@@ -35,22 +35,16 @@ namespace Sloong
 		CResult Initialization(GLOBAL_CONFIG*);
 		CResult Initialized(IControl*);
 
-		CResult MessagePackageProcesser(CDataTransPackage*);
+		inline CResult MessagePackageProcesser(CDataTransPackage*);
 
 	protected:
 		void ResetControlConfig(GLOBAL_CONFIG* config);
 		
-		void RegistFunctionHandler(Functions func, FuncHandler handler);
-
-
 	protected:
 		unique_ptr<CServerManage>	m_pServer = make_unique<CServerManage>();
-		map_ex<Functions, FuncHandler> m_oFunctionHandles;
 		IControl* 	m_pControl = nullptr;
 		CLog*		m_pLog =nullptr;
-		
 		GLOBAL_CONFIG* m_pConfig;
-
 	public:
 		static unique_ptr<SloongControlService> Instance;
 	};

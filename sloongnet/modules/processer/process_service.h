@@ -1,3 +1,10 @@
+/*
+ * @Author: WCB
+ * @Date: 2020-04-24 20:40:22
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-24 20:40:22
+ * @Description: file content
+ */
 #ifndef SLOONGNET_PROCESS_SERVICE_H
 #define SLOONGNET_PROCESS_SERVICE_H
 
@@ -30,15 +37,12 @@ namespace Sloong
 
 		CResult MessagePackageProcesser(CDataTransPackage*);
 
-		bool ProcessMessageHanlder(Functions func, string sender, CDataTransPackage* pack);
 		void OnSocketClose(SmartEvent evt);
 		
-		void RegistFunctionHandler(Functions func, FuncHandler handler);
 	protected:
 		unique_ptr<CLuaProcessCenter> m_pProcess = make_unique<CLuaProcessCenter>();
 		map<string, unique_ptr<CLuaPacket>> m_mapUserInfoList;
 
-		map_ex<Functions, FuncHandler> m_oFunctionHandles;
 		IControl* 	m_pControl = nullptr;
 		CLog*		m_pLog =nullptr;
 

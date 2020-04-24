@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-17 12:18:24
+ * @LastEditTime: 2020-04-24 20:06:46
  * @Description: file conten
  */
 // mian.h files
@@ -15,5 +15,17 @@ using namespace Protocol;
 #include "core.h"
 #include "export.h"
 using namespace Sloong;
+
+
+struct RunTimeData
+{
+	string ManagerAddressPort;
+	SmartConnect ManagerConnect;
+	int TemplateID;
+    string NodeUUID;
+	GLOBAL_CONFIG TemplateConfig;
+	bool ManagerMode;
+};
+
 
 #endif //SLOONGNET_MAIN_H

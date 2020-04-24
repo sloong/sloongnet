@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-17 15:35:30
+ * @LastEditTime: 2020-04-24 17:43:15
  * @Description: file content
  */
 #ifndef SLOONGNET_RESULT_H
@@ -36,13 +36,13 @@ namespace Sloong
         }
         
     public:
-        static CResult Make_Error(const string& what) {
+        static inline CResult Make_Error(const string& what) {
             return CResult(ResultType::Error, what);
         }
-        static CResult Make_OK(const string& result) {
+        static inline CResult Make_OK(const string& result) {
             return CResult(ResultType::Succeed, result);
         }
-        static CResult Succeed(){
+        static inline CResult Succeed(){
             return CResult(ResultType::Succeed);
         }
     protected:
@@ -62,10 +62,10 @@ namespace Sloong
         T ResultObject() const {
             return m_tResultObject;
         }
-        static TResult Make_Error(const string& what) {
+        static inline TResult Make_Error(const string& what) {
             return TResult(ResultType::Error, what );
         }
-        static TResult Make_OK(T result) {
+        static inline TResult Make_OK(T result) {
             return TResult(ResultType::Succeed, "", result);
         }
     protected:
