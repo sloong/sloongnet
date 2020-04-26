@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-26 14:27:51
+ * @LastEditTime: 2020-04-26 18:15:13
  * @Description: Main instance for sloongnet application.
  */
 
@@ -33,6 +33,94 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
     Instance->Exit();
 }
 
+
+
+TResult<shared_ptr<DataPackage>> CSloongBaseService::RegisteToControl(SmartConnect con, string uuid)
+{
+	auto req = make_shared<DataPackage>();
+	req->set_function(Functions::ProcessMessage);
+	req->set_sender(uuid);
+	req->set_content("{\"Function\":\"RegisteWorker\"}");
+
+	CDataTransPackage dataPackage;
+	dataPackage.Initialize(con);
+	dataPackage.RequestPackage(req);
+	ResultType result = dataPackage.SendPackage();
+	if (result != ResultType::Succeed)
+		return TResult<shared_ptr<DataPackage>>::Make_Error( "Send get config request error.");
+	result = dataPackage.RecvPackage(0, 0);
+	if (result != ResultType::Succeed)
+		return TResult<shared_ptr<DataPackage>>::Make_Error("Receive get config result error.");
+	auto get_config_response_buf = dataPackage.GetRecvPackage();
+	if (!get_config_response_buf)
+		return TResult<shared_ptr<DataPackage>>::Make_Error("Parse the get config response data error.");
+
+	return TResult<shared_ptr<DataPackage>>::Make_OK(get_config_response_buf);
+}
+
+CResult CSloongBaseService::InitlializeForWorker(RunTimeData* data)
+{
+	data->ManagerConnect = make_shared<EasyConnect>();
+	data->ManagerConnect->Initialize(data->ManagerAddress, data->ManagerPort, nullptr);
+	if (!data->ManagerConnect->Connect())
+	{
+        return CResult::Make_Error("Connect to control fialed.");
+	}
+	cout << "Connect to control succeed. Start registe and get configuation." << endl;
+	
+	string uuid;
+	string serverConfig;
+	while(true)
+	{
+		auto res = RegisteToControl(data->ManagerConnect,uuid);
+		if (res.IsFialed()) return res;	
+
+		auto response = res.ResultObject();
+		if( response->result() == Protocol::ResultType::Retry ){
+			cout << "Control return retry package. wait 500ms and retry." << endl;
+			uuid = response->content();
+			SLEEP(500);
+			continue;
+		}else if(response->result() == Protocol::ResultType::Succeed){
+			serverConfig = response->content();
+		}else{
+            return CResult::Make_Error(CUniversal::Format("Control return an unexpected result [%s]. Message [%s].",Protocol::ResultType_Name(response->result()),response->content()));
+		}
+
+		if (serverConfig.size() == 0)
+		{
+			cout << "Control no return config infomation. wait 500ms and retry." << endl;
+			SLEEP(500);
+			continue;
+		}
+
+		data->NodeUUID = uuid;
+		Json::Reader reader;
+		Json::Value jConfig;
+		if( !reader.parse(serverConfig, jConfig) || !jConfig["TemplateID"].isInt() || !jConfig["Configuation"].isString())
+		{
+			return CResult::Make_Error(CUniversal::Format("Parse the config error. response data: %s" ,serverConfig));
+		}
+		
+		if (!data->TemplateConfig.ParseFromString(CBase64::Decode(jConfig["Configuation"].asString()) ))
+		{
+			return CResult::Make_Error("Parse the config struct error. please check.");
+		}
+		data->TemplateID = jConfig["TemplateID"].asInt();
+		break;
+	};
+	cout << "Get configuation succeed." << endl;
+    return CResult::Succeed();
+}
+
+CResult CSloongBaseService::InitlializeForManager(RunTimeData* data)
+{
+	data->TemplateConfig.set_listenport( data->ManagerPort );
+	data->TemplateConfig.set_modulepath("./modules/");
+	data->TemplateConfig.set_modulename("libmanager.so");
+}
+
+
 void CSloongBaseService::InitSystemEventHandler()
 {
     set_terminate(sloong_terminator);
@@ -48,9 +136,9 @@ void CSloongBaseService::InitSystemEventHandler()
     signal(SIGSEGV, &on_sigint);
 }
 
-CResult CSloongBaseService::Initialize(unique_ptr<RunTimeData>& config)
+CResult CSloongBaseService::Initialize(RunTimeData* config)
 {
-    m_pServerConfig = move(config);
+    m_pServerConfig = config;
     m_oExitResult = CResult::Succeed();
 
     InitSystemEventHandler();
@@ -59,11 +147,21 @@ CResult CSloongBaseService::Initialize(unique_ptr<RunTimeData>& config)
     m_pServerConfig->TemplateConfig.set_loglevel(Protocol::LogLevel::All);
     #endif
     
+    CResult res = CResult::Succeed();
+    if( m_pServerConfig->ManagerMode )
+	{
+		res = InitlializeForManager(m_pServerConfig);
+	}
+	else
+	{
+		res = InitlializeForWorker(m_pServerConfig);
+	}
+    if (res.IsFialed()) return res;
+    
     m_pLog->Initialize(m_pServerConfig->TemplateConfig.logpath(), "", (LOGOPT) (LOGOPT::WriteToSTDOut|LOGOPT::WriteToFile), LOGLEVEL(m_pServerConfig->TemplateConfig.loglevel()), LOGTYPE::DAY);
 
-    auto res = InitModule();
+    res = InitModule();
     if( res.IsFialed() ) return res;
-
 
     res = m_pModuleInitializationFunc(&m_pServerConfig->TemplateConfig);
     if( res.IsFialed())
@@ -194,8 +292,3 @@ void CSloongBaseService::Exit(){
     dlclose(m_pModule);
 }
 
-bool CSloongBaseService::ConnectToControl(string controlAddress){
-    m_pSocket = make_shared<EasyConnect>();
-    m_pSocket->Initialize(controlAddress,nullptr);
-    return m_pSocket->Connect();
-}

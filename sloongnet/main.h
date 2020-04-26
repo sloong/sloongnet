@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-24 20:06:46
+ * @LastEditTime: 2020-04-26 18:09:50
  * @Description: file conten
  */
 // mian.h files
@@ -19,7 +19,8 @@ using namespace Sloong;
 
 struct RunTimeData
 {
-	string ManagerAddressPort;
+	string ManagerAddress;
+	int ManagerPort;
 	SmartConnect ManagerConnect;
 	int TemplateID;
     string NodeUUID;

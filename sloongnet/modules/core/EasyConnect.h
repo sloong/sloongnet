@@ -34,7 +34,7 @@ namespace Sloong
 
 		// 以发起方的方式初始化
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
-		void Initialize( string addressPort, SSL_CTX* ctx= nullptr, bool useLongLongSize = false);
+		void Initialize( string address, int port, SSL_CTX* ctx= nullptr, bool useLongLongSize = false);
 
 		bool Connect();
 

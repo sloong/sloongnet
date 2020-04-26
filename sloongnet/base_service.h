@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-26 10:47:20
+ * @LastEditTime: 2020-04-26 18:18:18
  * @Description: file content
  */
 
@@ -30,14 +30,17 @@ namespace Sloong
         }
 
         // Just call it without Control module.
-		virtual CResult Initialize(unique_ptr<RunTimeData>& config);
+		virtual CResult Initialize(RunTimeData* config);
 
 		virtual CResult Run();
 		virtual void Restart(SmartEvent event);
 		virtual void Exit();
 
-		virtual bool ConnectToControl(string controlAddress);
+		TResult<shared_ptr<DataPackage>> RegisteToControl(SmartConnect con, string uuid);
 	protected:
+		virtual CResult InitlializeForWorker(RunTimeData*);
+		virtual CResult InitlializeForManager(RunTimeData*);
+		
 		CResult RegisteNode();
 		CResult	InitModule();
 		void	InitSystemEventHandler();
@@ -51,7 +54,7 @@ namespace Sloong
 		unique_ptr<CNetworkHub> m_pNetwork = make_unique<CNetworkHub>();
 		unique_ptr<CControlHub> m_pControl = make_unique<CControlHub>();
 		unique_ptr<CLog>		m_pLog = make_unique<CLog>();;
-		unique_ptr<RunTimeData> m_pServerConfig;
+		RunTimeData*			m_pServerConfig = nullptr;
 		shared_ptr<EasyConnect>	m_pSocket;
 		CEasySync				m_oExitSync;
 		CResult					m_oExitResult = CResult::Succeed();
@@ -68,10 +71,5 @@ namespace Sloong
     public:
         static unique_ptr<CSloongBaseService> Instance;
 	};
-
-    
 }
-
-
-
 #endif
