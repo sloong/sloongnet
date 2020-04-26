@@ -3,7 +3,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 // univ
-#include <univ/Base64.h>
 
 #include "utility.h"
 #include "version.h"

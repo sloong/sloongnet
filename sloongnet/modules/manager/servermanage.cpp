@@ -2,13 +2,14 @@
 
 #include "utility.h"
 #include "NetworkEvent.hpp"
-#include "univ/Base64.h"
 #include <jsoncpp/json/json.h>
 using namespace Sloong::Events;
 
 
 CResult Sloong::CServerManage::Initialize()
 {
+	m_listFuncHandler["RegisteWorker"]=std::bind(&CServerManage::RegisteWorkerHandler, this, std::placeholders::_1,std::placeholders::_2);
+	m_listFuncHandler["RegisteNode"]=std::bind(&CServerManage::RegisteNodeHandler, this, std::placeholders::_1,std::placeholders::_2);
 	m_listFuncHandler["AddTemplate"]=std::bind(&CServerManage::AddTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
 	m_listFuncHandler["DeleteTemplate"]=std::bind(&CServerManage::DeleteTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
 	m_listFuncHandler["SetTemplate"]=std::bind(&CServerManage::SetTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
@@ -63,7 +64,7 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 	// First time find the no created
 	for (auto item : m_oTemplateList)
 	{
-		if (item.second.Replicas == 0 || item.second.ID == 0 )
+		if (item.second.Replicas == 0 || item.second.ID == 1 )
 			continue;
 
 		if (item.second.Created.size() == item.second.Replicas)
@@ -76,7 +77,7 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 	// Sencond time find the created < replicas
 	for (auto item : m_oTemplateList)
 	{
-		if (item.second.Replicas == 0)
+		if (item.second.Replicas == 0 || item.second.ID == 1 )
 			continue;
 
 		if (item.second.Created.size() == item.second.Replicas)

@@ -7,7 +7,6 @@
  */
 
 #include "configuation.h"
-#include "univ/Base64.h"
 
 unique_ptr<CConfiguation> Sloong::CConfiguation::Instance = make_unique<CConfiguation>();
 
