@@ -230,6 +230,21 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop(SMARTER param)
 void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 {
 	m_pLog->Verbos("MessageProcessWorkLoop thread is running.");
+	void* pEnv;
+	auto res = m_pCreateEnvFunc(&pEnv);
+	if( res.IsFialed() )
+	{
+		m_pLog->Fatal(res.Message());
+		m_iC->SendMessage(EVENT_TYPE::ProgramExit );
+		return;
+	} 
+	if( pEnv == nullptr )
+	{
+		m_pLog->Fatal("Create called succeed, but the evnironment value is null.");
+		m_iC->SendMessage(EVENT_TYPE::ProgramExit);
+		return;
+	} 
+	
 	while (m_bIsRunning)
 	{
 		MessagePorcessListRetry:
@@ -248,7 +263,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 				}
 				else
 				{
-					auto res = m_pProcessFunc(pack.get());
+					res = m_pProcessFunc(pEnv,pack.get());
 					if( res.IsSucceed())
 						AddMessageToSendList(pack);
 				}

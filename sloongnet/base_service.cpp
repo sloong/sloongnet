@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-24 20:04:53
+ * @LastEditTime: 2020-04-26 10:48:37
  * @Description: file content
  */
 /*
@@ -122,6 +122,12 @@ CResult CSloongBaseService::InitModule()
         return CResult::Make_Error(errMsg);
     }
     char *errmsg;
+    m_pCreateEvnFunc = (CreateProcessEnvironmentFunction)dlsym(m_pModule, "CreateProcessEnvironment");
+    if ((errmsg = dlerror()) != NULL)  {
+        string errMsg = CUniversal::Format("Load function CreateProcessEnvironment error[%s].",errmsg);
+        m_pLog->Error(errMsg);
+        return CResult::Make_Error(errMsg);
+    }
     m_pHandler = (MessagePackageProcesserFunction)dlsym(m_pModule, "MessagePackageProcesser");
     if ((errmsg = dlerror()) != NULL)  {
         string errMsg = CUniversal::Format("Load function MessagePackageProcesser error[%s].",errmsg);

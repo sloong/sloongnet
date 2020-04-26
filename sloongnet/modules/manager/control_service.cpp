@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-04-24 18:25:18
+ * @LastEditTime: 2020-04-26 11:58:35
  */
 
 #include "control_service.h"
@@ -16,11 +16,15 @@ using namespace Sloong::Events;
 
 unique_ptr<SloongControlService> Sloong::SloongControlService::Instance = nullptr;
 
-extern "C" CResult MessagePackageProcesser(CDataTransPackage* pack)
+extern "C" CResult MessagePackageProcesser(void* pEnv, CDataTransPackage* pack)
 {
-	return SloongControlService::Instance->MessagePackageProcesser(pack);
+	auto pServer = TYPE_TRANS<CServerManage*>(pEnv);
+	if( pServer)
+		return pServer->ProcessHandler(pack);
+	else
+		return CResult::Make_Error("Environment convert error. cannot process message.");
 }
-	
+
 extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
 	SloongControlService::Instance = make_unique<SloongControlService>();
 	return SloongControlService::Instance->Initialization(confiog);
@@ -28,6 +32,11 @@ extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
 
 extern "C" CResult ModuleInitialized(IControl* iC){
 	return SloongControlService::Instance->Initialized(iC);
+}
+
+extern "C" CResult CreateProcessEnvironment(void** out_env)
+{
+	return SloongControlService::Instance->CreateProcessEnvironmentHandler(out_env);
 }
 
 
@@ -97,8 +106,14 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
 }
 
 
-inline CResult Sloong::SloongControlService::MessagePackageProcesser(CDataTransPackage* pack)
+inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(void** out_env)
 {
-	m_pServer->ProcessHandler(pack);
+	auto item = make_shared<CServerManage>();
+	item->SetLog(m_pLog);
+	auto res = m_pServer->Initialize();
+	if (res.IsFialed())
+		return res;
+	m_listServerManage.push_back(item);
+	(*out_env) = item.get();
 	return CResult::Succeed();
 }

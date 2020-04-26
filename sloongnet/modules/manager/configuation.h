@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-22 20:28:04
+ * @LastEditTime: 2020-04-26 12:09:48
  * @Description: file content
  */
 
@@ -28,6 +28,7 @@ namespace Sloong
          * @Return: 
          */
 		CResult Initialize( const string& dbPath );
+        bool IsInituialized(){return m_bInitialized;}
 
         TResult<TemplateInfo> GetTemplate(int id);
         bool CheckTemplateExist(int id);
@@ -37,7 +38,12 @@ namespace Sloong
         CResult DeleteTemplate( int id );
 
     protected:
+        mutex m_oMutex;
         unique_ptr<Storage> m_oStorage;
+        bool    m_bInitialized = false;
+
+    public:
+        static unique_ptr<CConfiguation> Instance;
     };
 
 

@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-17 16:39:30
+ * @LastEditTime: 2020-04-26 11:17:46
  * @Description: file content
  */
 #pragma once
@@ -36,9 +36,13 @@ namespace Sloong
 		void MonitorSendStatusEventHandler(SmartEvent evt);
 
 
-        void RegisterMessageProcesser(MessagePackageProcesserFunction value){
+        inline void RegisterMessageProcesser(MessagePackageProcesserFunction value){
             m_pProcessFunc = value;
         }
+        inline void RegisterEnvCreateProcesser(CreateProcessEnvironmentFunction value){
+            m_pCreateEnvFunc = value;
+        }
+
 
         /**
          * @Remarks: In default case, the connect just accept and add to epoll watch list. 
@@ -86,6 +90,7 @@ namespace Sloong
         int m_nClientCheckTime=0;
         // For message process 
         CEasySync               m_oProcessThreadSync;
+        CreateProcessEnvironmentFunction         m_pCreateEnvFunc = nullptr;
         MessagePackageProcesserFunction          m_pProcessFunc = nullptr;
         NewConnectAcceptProcesserFunction        m_pAcceptFunc = nullptr;
         queue_ex<SmartPackage>*    m_pWaitProcessList;

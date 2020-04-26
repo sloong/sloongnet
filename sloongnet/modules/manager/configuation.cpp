@@ -2,13 +2,14 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-22 20:38:27
+ * @LastEditTime: 2020-04-26 12:08:56
  * @Description: file content
  */
 
 #include "configuation.h"
 #include "univ/Base64.h"
 
+unique_ptr<CConfiguation> Sloong::CConfiguation::Instance = make_unique<CConfiguation>();
 
 Sloong::CConfiguation::CConfiguation()
 {
@@ -16,12 +17,15 @@ Sloong::CConfiguation::CConfiguation()
 
 CResult Sloong::CConfiguation::Initialize(const string& dbPath)
 {
+    unique_lock<mutex> lck(m_oMutex);
     m_oStorage = make_unique<Storage>(InitStorage(dbPath));
+    m_bInitialized = true;
     return CResult::Succeed();
 }
 
 TResult<TemplateInfo> Sloong::CConfiguation::GetTemplate(int id)
 {
+    unique_lock<mutex> lck(m_oMutex);
     try
     {
         auto template_item = m_oStorage->get<TemplateInfo>(id);
@@ -35,6 +39,7 @@ TResult<TemplateInfo> Sloong::CConfiguation::GetTemplate(int id)
 
 bool Sloong::CConfiguation::CheckTemplateExist(int id)
 {
+    unique_lock<mutex> lck(m_oMutex);
     try
     {
         if( m_oStorage->count<TemplateInfo>(where(c(&TemplateInfo::id) == id)) > 0 )
@@ -50,6 +55,7 @@ bool Sloong::CConfiguation::CheckTemplateExist(int id)
 
 vector<TemplateInfo> Sloong::CConfiguation::GetTemplateList()
 {
+    unique_lock<mutex> lck(m_oMutex);
     try
     {
         return m_oStorage->get_all<TemplateInfo>();
@@ -63,6 +69,7 @@ vector<TemplateInfo> Sloong::CConfiguation::GetTemplateList()
 
 CResult Sloong::CConfiguation::AddTemplate(const TemplateInfo& config, int* out_id)
 {
+    unique_lock<mutex> lck(m_oMutex);
     try
     {
         int id = m_oStorage->insert<TemplateInfo>(config);
@@ -78,6 +85,7 @@ CResult Sloong::CConfiguation::AddTemplate(const TemplateInfo& config, int* out_
 
 CResult Sloong::CConfiguation::DeleteTemplate(int id)
 {
+    unique_lock<mutex> lck(m_oMutex);
     try
     {
         m_oStorage->remove<TemplateInfo>(id);
@@ -92,6 +100,7 @@ CResult Sloong::CConfiguation::DeleteTemplate(int id)
 
 CResult Sloong::CConfiguation::SetTemplate( int id, const TemplateInfo& config)
 {
+    unique_lock<mutex> lck(m_oMutex);
     try
     {
         m_oStorage->update(config);

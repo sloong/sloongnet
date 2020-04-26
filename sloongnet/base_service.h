@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-24 20:04:02
+ * @LastEditTime: 2020-04-26 10:47:20
  * @Description: file content
  */
 
@@ -59,10 +59,12 @@ namespace Sloong
 		string					m_strUUID;
 		void*					m_pModule = nullptr;
 
+		CreateProcessEnvironmentFunction	m_pCreateEvnFunc = nullptr;
 		MessagePackageProcesserFunction m_pHandler = nullptr;
 		NewConnectAcceptProcesserFunction m_pAccept = nullptr;
 		ModuleInitializationFunction	m_pModuleInitializationFunc = nullptr;
 		ModuleInitializedFunction		m_pModuleInitializedFunc = nullptr;
+		
     public:
         static unique_ptr<CSloongBaseService> Instance;
 	};

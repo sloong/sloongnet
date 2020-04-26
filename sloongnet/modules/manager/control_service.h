@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-24 17:21:16
+ * @LastEditTime: 2020-04-26 11:58:22
  * @Description: file content
  */
 #ifndef SLOONGNET_CONTROL_SERVICE_H
@@ -14,10 +14,11 @@
 #include "servermanage.h"
 
 extern "C" {
-	CResult MessagePackageProcesser(CDataTransPackage*);
+	CResult MessagePackageProcesser(void*,CDataTransPackage*);
 	//CResult NewConnectAcceptProcesser(CSockInfo*);
 	CResult ModuleInitialization(GLOBAL_CONFIG*);
 	CResult ModuleInitialized(IControl*);
+	CResult CreateProcessEnvironment(void**);
 }
 
 namespace Sloong
@@ -35,12 +36,13 @@ namespace Sloong
 		CResult Initialization(GLOBAL_CONFIG*);
 		CResult Initialized(IControl*);
 
-		inline CResult MessagePackageProcesser(CDataTransPackage*);
+		inline CResult CreateProcessEnvironmentHandler(void**);
 
 	protected:
 		void ResetControlConfig(GLOBAL_CONFIG* config);
 		
 	protected:
+		list<shared_ptr<CServerManage>> m_listServerManage;
 		unique_ptr<CServerManage>	m_pServer = make_unique<CServerManage>();
 		IControl* 	m_pControl = nullptr;
 		CLog*		m_pLog =nullptr;

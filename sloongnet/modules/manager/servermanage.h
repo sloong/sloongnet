@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 11:17:32
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-24 18:49:52
+ * @LastEditTime: 2020-04-26 12:08:12
  * @Description: file content
  */
 #ifndef SERVERMANAGE_H
@@ -69,7 +69,7 @@ namespace Sloong
     public:
         CResult Initialize();
 
-        bool ProcessHandler(CDataTransPackage*);
+        CResult ProcessHandler(CDataTransPackage*);
 
         /* When worker start, send this request to registe a worker, and wait manage assigning template.
         Request(JSON):
@@ -178,7 +178,6 @@ namespace Sloong
         int SearchNeedCreateTemplate();
 
     private:
-        unique_ptr<CConfiguation>	m_pAllConfig = make_unique<CConfiguation>();
         map_ex<string, FunctionHandler> m_listFuncHandler;
         CLog* m_pLog = nullptr;
         map_ex<string, ServerItem>	m_oWorkerList;

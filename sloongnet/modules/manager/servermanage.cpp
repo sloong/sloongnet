@@ -14,18 +14,21 @@ CResult Sloong::CServerManage::Initialize()
 	m_listFuncHandler["SetTemplate"]=std::bind(&CServerManage::SetTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
 	m_listFuncHandler["QueryTemplate"]=std::bind(&CServerManage::QueryTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
 
-	auto res = m_pAllConfig->Initialize("/data/configuation.db");
-	if (res.IsFialed()) return res;
+	if(!CConfiguation::Instance->IsInituialized())
+	{
+		auto res = CConfiguation::Instance->Initialize("/data/configuation.db");
+		if (res.IsFialed()) return res;
+	}
 
 	// Initialize template list
-	auto list = m_pAllConfig->GetTemplateList();
+	auto list = CConfiguation::Instance->GetTemplateList();
 	for (auto item : list)
 	{
 		TemplateItem addItem(item);
 		m_oTemplateList[addItem.ID] = addItem;
 	}
 
-	res = m_pAllConfig->GetTemplate(1);
+	auto res = CConfiguation::Instance->GetTemplate(1);
 	if (res.IsFialed())
 		return CResult::Succeed();
 	else
@@ -47,10 +50,10 @@ CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG* config)
 	info.replicas = 1;
 	info.configuation = CBase64::Encode(config_str);
 	CResult res(ResultType::Succeed);
-	if( m_pAllConfig->CheckTemplateExist(1))
-		res = m_pAllConfig->SetTemplate(1,info);
+	if( CConfiguation::Instance->CheckTemplateExist(1))
+		res = CConfiguation::Instance->SetTemplate(1,info);
 	else
-		res = m_pAllConfig->AddTemplate(info,nullptr);
+		res = CConfiguation::Instance->AddTemplate(info,nullptr);
 	m_oTemplateList[1] = info;
 	return res;
 }
@@ -86,7 +89,7 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 }
 
 
-bool Sloong::CServerManage::ProcessHandler(CDataTransPackage* pack)
+CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage* pack)
 {
 	Json::Reader reader;
 	Json::Value jReq;
@@ -94,26 +97,26 @@ bool Sloong::CServerManage::ProcessHandler(CDataTransPackage* pack)
 	if (!reader.parse(str_req, jReq))
 	{
 		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Parser json [%s] error.", str_req));
-		return true;
+		return CResult::Succeed();
 	}
 	if (jReq["Function"].isNull())
 	{
 		pack->ResponsePackage(ResultType::Error, "Request no set [Function] node.");
-		return true;
+		return CResult::Succeed();
 	}
 	auto function = jReq["Function"].asString();
 	m_pLog->Verbos(CUniversal::Format("Request [%s]:[%s]", function, str_req));
 	if(!m_listFuncHandler.exist(function))
 	{
 		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Function [%s] no handler.",function));
-		return true;
+		return CResult::Succeed();
 	}
 
 	auto res = m_listFuncHandler[function](jReq,pack);
 
 	m_pLog->Verbos(CUniversal::Format("Response [%s]:[%s][%s].", function, Protocol::ResultType_Name(res.Result()), res.Message() ));
 	pack->ResponsePackage(res);
-	return true;
+	return CResult::Succeed();
 }
 
 
@@ -192,7 +195,7 @@ CResult Sloong::CServerManage::AddTemplateHandler(const Json::Value& jRequest,CD
 	item.Replicas = jReq["Replicas"].asInt();
 	item.Configuation = jReq["Configuation"].asString();
 	int id = 0;
-	auto res = m_pAllConfig->AddTemplate(item.ToTemplateInfo(),&id);
+	auto res = CConfiguation::Instance->AddTemplate(item.ToTemplateInfo(),&id);
 	if( res.IsFialed() )
 	{
 		return res;
@@ -220,7 +223,7 @@ CResult Sloong::CServerManage::DeleteTemplateHandler(const Json::Value& jRequest
 		return CResult::Make_Error("Cannot delete this template.");
 	}
 
-	auto res = m_pAllConfig->DeleteTemplate(id);
+	auto res = CConfiguation::Instance->DeleteTemplate(id);
 	if( res.IsFialed() )
 	{
 		return res;
@@ -251,7 +254,7 @@ CResult Sloong::CServerManage::SetTemplateHandler(const Json::Value& jRequest,CD
 	if (!jReq["Configuation"].isNull())
 		info.Configuation = jReq["Configuation"].asString();
 
-	auto res = m_pAllConfig->SetTemplate(info.ID, info.ToTemplateInfo());
+	auto res = CConfiguation::Instance->SetTemplate(info.ID, info.ToTemplateInfo());
 	if (res.IsFialed())
 	{
 		return res;
