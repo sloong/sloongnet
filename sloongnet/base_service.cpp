@@ -1,17 +1,11 @@
 /*
  * @Author: WCB
- * @Date: 1970-01-01 08:00:00
- * @LastEditors: WCB
- * @LastEditTime: 2020-04-26 10:48:37
- * @Description: file content
- */
-/*
- * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-15 20:26:58
- * @Description: file content
+ * @LastEditTime: 2020-04-26 14:27:51
+ * @Description: Main instance for sloongnet application.
  */
+
 #include "base_service.h"
 #include "utility.h"
 #include "NetworkEvent.hpp"
@@ -99,6 +93,7 @@ CResult CSloongBaseService::Initialize(unique_ptr<RunTimeData>& config)
         return res;
     }
     
+    m_pNetwork->RegisterEnvCreateProcesser(m_pCreateEvnFunc);
     m_pNetwork->RegisterMessageProcesser(m_pHandler);
     m_pNetwork->RegisterAccpetConnectProcesser(m_pAccept);
     res = m_pModuleInitializedFunc(m_pControl.get());
@@ -150,11 +145,14 @@ CResult CSloongBaseService::InitModule()
         m_pLog->Warn(errMsg);
     }
     m_pLog->Verbos("load module functions done.");
+    return CResult::Succeed();
 }
 
 CResult CSloongBaseService::RegisteNode()
 {
-     Json::Value jReq;
+    if( m_pServerConfig->ManagerMode )
+        return CResult::Succeed();
+    Json::Value jReq;
     jReq["Function"] = "RegisteNode";
     jReq["TemplateID"] = m_pServerConfig->TemplateID;
 
@@ -166,6 +164,7 @@ CResult CSloongBaseService::RegisteNode()
 	CDataTransPackage dataPackage;
 	dataPackage.Initialize( m_pServerConfig->ManagerConnect );
 	dataPackage.RequestPackage(req);
+    // TODO:
 	ResultType result = dataPackage.SendPackage();
     return CResult::Succeed();
 }

@@ -54,14 +54,15 @@ unique_ptr<RunTimeData> Initialize(int argc, char** args)
 		return nullptr;
 	}
 
-	bool ManagerMode = true;
+	unique_ptr<RunTimeData> data = make_unique<RunTimeData>();
+	data->ManagerMode = true;
 	if (strcasecmp(args[1], "Worker") == 0)
 	{
-		ManagerMode = false;
+		data->ManagerMode = false;
 	}
 	else if (strcasecmp(args[1], "Manager") == 0)
 	{
-		ManagerMode = true;
+		data->ManagerMode = true;
 	}
 	else
 	{
@@ -78,8 +79,7 @@ unique_ptr<RunTimeData> Initialize(int argc, char** args)
 		return nullptr;
 	}
 
-	unique_ptr<RunTimeData> data = make_unique<RunTimeData>();
-	if( ManagerMode )
+	if( data->ManagerMode )
 	{
 		int port = atoi(addr[1].c_str());
 		if (port == 0)

@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-04-26 11:58:35
+ * @LastEditTime: 2020-04-26 13:37:09
  */
 
 #include "control_service.h"
@@ -110,7 +110,7 @@ inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(voi
 {
 	auto item = make_shared<CServerManage>();
 	item->SetLog(m_pLog);
-	auto res = m_pServer->Initialize();
+	auto res = item->Initialize();
 	if (res.IsFialed())
 		return res;
 	m_listServerManage.push_back(item);
