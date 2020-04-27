@@ -7,13 +7,13 @@ message(WorkDir:${CMAKE_CURRENT_LIST_DIR})
 include_directories(
     "${CMAKE_CURRENT_LIST_DIR}"
     "${CMAKE_CURRENT_LIST_DIR}/../../"
-	"${CMAKE_CURRENT_LIST_DIR}/../../include"
+	"${CMAKE_CURRENT_LIST_DIR}/../../referenced/libuniv"
     "/usr/include/glib-2.0" 
     "/usr/lib/x86_64-linux-gnu/glib-2.0/include"
 )
 
 link_directories(
-    "${CMAKE_CURRENT_LIST_DIR}/include"
+    "${CMAKE_CURRENT_LIST_DIR}/referenced/libuniv"
 )
 
 # 设置动态库输出路径

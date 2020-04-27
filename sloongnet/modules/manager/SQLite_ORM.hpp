@@ -2,12 +2,12 @@
  * @Author: WCB
  * @Date: 2020-04-21 19:41:30
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-21 19:42:51
+ * @LastEditTime: 2020-04-27 10:40:15
  * @Description: file content
  */
 #include <string>
 using namespace std;
-#include "sqlite_orm/sqlite_orm.h"
+#include <sqlite_orm.h>
 using namespace sqlite_orm;
 
 namespace Sloong
