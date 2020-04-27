@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-26 18:15:13
+ * @LastEditTime: 2020-04-27 16:31:49
  * @Description: Main instance for sloongnet application.
  */
 
@@ -48,7 +48,7 @@ TResult<shared_ptr<DataPackage>> CSloongBaseService::RegisteToControl(SmartConne
 	ResultType result = dataPackage.SendPackage();
 	if (result != ResultType::Succeed)
 		return TResult<shared_ptr<DataPackage>>::Make_Error( "Send get config request error.");
-	result = dataPackage.RecvPackage(0, 0);
+	result = dataPackage.RecvPackage(0);
 	if (result != ResultType::Succeed)
 		return TResult<shared_ptr<DataPackage>>::Make_Error("Receive get config result error.");
 	auto get_config_response_buf = dataPackage.GetRecvPackage();
@@ -118,6 +118,7 @@ CResult CSloongBaseService::InitlializeForManager(RunTimeData* data)
 	data->TemplateConfig.set_listenport( data->ManagerPort );
 	data->TemplateConfig.set_modulepath("./modules/");
 	data->TemplateConfig.set_modulename("libmanager.so");
+    return CResult::Succeed();
 }
 
 

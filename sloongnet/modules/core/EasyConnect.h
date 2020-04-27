@@ -44,10 +44,6 @@ namespace Sloong
 		//	  -1 - 读取发生错误。且无法恢复。需要关闭连接。
 		//    >= 0 - 读取到的数据长度
 		int Read(char* data, int len, int timeOut, bool bAgage );
-
-		// 读取对端发送的数据，以string格式返回读取到的内容
-		// 汉书并不保证数据会全部读取完成才返回。只会尝试尽可能多的读取，直到发生错误或者都去完成。所以需要检查期望读取的长度和实际读取的长度
-		string Read(int len, int timeOut, bool bAgage );
 		
 		// 接收一个数据包
 		// 如果接收到了所有的数据，那么返回succeed.
@@ -56,9 +52,9 @@ namespace Sloong
 		// 如果接收到了部分数据，并且超时时间大于0，那么将会在发生超时之后，返回Timeout
 		// 如果没有接收到数据，并且发生了错误，返回Error
 		// 没有接收到数据，发生了超时，返回Timeout
-		ResultType RecvPackage(string& res, int timeOut = 0, int lenTimeout = 1);
+		ResultType RecvPackage(string& res, int timeOut = 0);
 
-		long long RecvLengthData(int timeout);
+		long long RecvLengthData();
 
 		// 向对端发送数据，返回实际发送的长度
 		// 函数并不保证数据会全部发送完成才返回。只能尝试尽可能多的发送，直到发生错误或者全部发送完成。需要检查期望发送的长度和实际发送的长度

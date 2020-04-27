@@ -104,22 +104,19 @@ int Sloong::EasyConnect::SSL_Write_Ex(SSL * ssl, char * buf, int len)
 // 成功返回数据包长度
 // 超时返回0
 // 错误返回-1
-long long Sloong::EasyConnect::RecvLengthData(int timeout)
+long long Sloong::EasyConnect::RecvLengthData()
 {
 	int bRes=0;
-	int nTimeout = timeout;
-	if( nTimeout != 0 )
-		nTimeout = 1;
     if( m_bUseLongLongSize ) {
         char nLen[s_llLen] = {0};
-		bRes = Read(nLen, s_llLen, nTimeout, false);
+		bRes = Read(nLen, s_llLen, 0, false);
         if(bRes>1){
 			auto len = CUniversal::BytesToInt64(nLen);
         	return len;
 		}
     }else{
         char nLen[s_lLen] = {0};
-        bRes = Read(nLen, s_lLen, nTimeout, false);
+        bRes = Read(nLen, s_lLen, 0, false);
 		if (bRes>1){
 			auto len = CUniversal::BytesToInt32(nLen);
         	return len;
@@ -153,16 +150,6 @@ int Sloong::EasyConnect::Write(string sendData, int index)
 	return Write(sendData.c_str(),(int)sendData.length(),index);
 }
 
-string Sloong::EasyConnect::Read(int len, int timeOut, bool bAgage)
-{
-    string buf;
-    buf.resize(len);
-	int realLen = Read(buf.data(),len,timeOut,bAgage);
-	buf.resize(realLen);
-    return buf;
-}
-
-
 int Sloong::EasyConnect::SendPackage(string sendData, int index)
 {
 	if( index == 0 )
@@ -175,28 +162,33 @@ int Sloong::EasyConnect::SendPackage(string sendData, int index)
 }
 
 
-ResultType Sloong::EasyConnect::RecvPackage(string& res, int timeout, int lenTimeout)
+ResultType Sloong::EasyConnect::RecvPackage(string& res,int timeOut)
 {
-    auto len = RecvLengthData(lenTimeout);
+    auto len = RecvLengthData();
 	if( len == 0 )
 		return ResultType::Retry;
 	else if( len < 0 )
 		return ResultType::Error;
 	
     res.resize(len);
-	// 一旦成功接收数据之后，就不再关心超时信息，持续接收直到成功或者失败。
-	if( Read( res.data(), (int)len, timeout, true) < 1)
+
+	if( Read( res.data(), (int)len, timeOut, true) < 1)
 		return ResultType::Error;
 
 	return ResultType::Succeed;
 }
 
+// timeout == 0, recv error is return direct now.
 int Sloong::EasyConnect::Read(char * data, int len, int timeOut, bool bAgage)
 {
 	// 未启用SSL时直接发送数据
 	if (!m_pSSL)
 	{
-		auto  recvSize = CUniversal::RecvEx(m_nSocket, data, len, timeOut, bAgage);
+		auto  recvSize = 0;
+		if( timeOut > 0 )
+			recvSize = CUniversal::RecvTimeout(m_nSocket, data, len, timeOut, bAgage);
+		else
+			recvSize = CUniversal::RecvEx(m_nSocket, data, len, bAgage);
 		if( recvSize < 0 )
 			m_nErrno = recvSize;
 		

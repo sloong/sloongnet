@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-24 18:32:19
+ * @LastEditTime: 2020-04-27 16:30:17
  * @Description: file content
  */
 #ifndef DATA_TRANS_PACKAGE_H
@@ -35,7 +35,7 @@ namespace Sloong
          *          if other error happened else return Error 
          *          if md5 check failed, return Invalied.
          */
-        ResultType RecvPackage(int,int=1);
+        ResultType RecvPackage(int);
 
         /**
          * @Remarks: send this package

@@ -72,10 +72,10 @@ ResultType Sloong::CDataTransPackage::SendPackage()
 	}
 }
 
-ResultType Sloong::CDataTransPackage::RecvPackage(int timeout,int lentimeout)
+ResultType Sloong::CDataTransPackage::RecvPackage(int timeout)
 {
 	string result;
-	auto net_res = m_pCon->RecvPackage(result,timeout, lentimeout);
+	auto net_res = m_pCon->RecvPackage(result,timeout);
 	if( net_res != ResultType::Succeed )
 	{
 		if( m_pLog ) m_pLog->Warn(CUniversal::Format("Error when receive data. Socket[%s:%d].Errno[%d].", m_pCon->m_strAddress, m_pCon->m_nPort, m_pCon->GetErrno() ));
@@ -108,7 +108,6 @@ ResultType Sloong::CDataTransPackage::RecvPackage(int timeout,int lentimeout)
 			return ResultType::Invalid;
 		}
 	}
-
 
 	return ResultType::Succeed;
 }

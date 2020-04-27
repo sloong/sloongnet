@@ -138,22 +138,42 @@ namespace Sloong
 				sock	-> the socket handle
 				buf		-> the data buffer
 				nSize	-> the receive size
+				bAgagin	-> continue when the EINTR,EAGAIN error if value is true.
+							else return direct. in default is false.    *Only LinuxOS
+			Return:
+				> 0 & = nSize : Send succeed, return value is the recv data length.
+				> 0 & < nSize : Receive partial success. return received data length. it less than nSize and bigger than 0.
+				= 0 : socket is closed. (recv function return 0)
+				-1 - -199 : recv function return an error. the value is Negative of the errno.
+			
+			Note:
+				If 'bAgain' as true, recved some data, and in next time happened EINTR\EAGAIN error, function will into a loop until all data received or other error happened.
+			*/
+			/************************************************************************/
+			static int RecvEx(SOCKET sock, char* buf, int nSize, bool bAgain = false );
+
+			/************************************************************************/
+			/*		ReceTimout function.
+			Params:
+				sock	-> the socket handle
+				buf		-> the data buffer
+				nSize	-> the receive size
 				nTimeout-> timeout time, default is 0. no need timeout
 				bAgagin	-> continue when the EINTR,EAGAIN error if value is true.
 							else return direct. in default is false.    *Only LinuxOS
 			Return:
 				> 0 & = nSize : Send succeed, return value is the recv data length.
 				> 0 & < nSize : Receive partial success. return received data length. it less than nSize and bigger than 0.
-				= 0 : Timeout.(select function return 0)
+				= 0 : socket is closed. (recv function return 0)
 				-1 - -199 : recv function return an error. the value is Negative of the errno.
-				-200 : socket is closed. (recv function return 0)
+				-200 : Timeout.(select function return 0)
 				-201 - -400: select function return an error. the value is (-200-errno).
 			
 			Note:
 				If 'bAgain' as true, recved some data, and in next time happened EINTR\EAGAIN error, function will into a loop until all data received or other error happened.
 			*/
 			/************************************************************************/
-			static int RecvEx(int sock, char* buf, int nSize, int nTimeout, bool bAgain = false );
+			static int RecvTimeout(SOCKET sock, char* buf, int nSize, int nTimeout, bool bAgain = false );
 
             template<typename T>
             static string ntos(T n)
