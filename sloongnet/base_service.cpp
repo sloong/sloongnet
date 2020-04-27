@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-27 16:31:49
+ * @LastEditTime: 2020-04-27 17:26:12
  * @Description: Main instance for sloongnet application.
  */
 
@@ -77,9 +77,9 @@ CResult CSloongBaseService::InitlializeForWorker(RunTimeData* data)
 
 		auto response = res.ResultObject();
 		if( response->result() == Protocol::ResultType::Retry ){
-			cout << "Control return retry package. wait 500ms and retry." << endl;
+			cout << "Control return retry package. wait 1s and retry." << endl;
 			uuid = response->content();
-			SLEEP(500);
+			sleep(1);
 			continue;
 		}else if(response->result() == Protocol::ResultType::Succeed){
 			serverConfig = response->content();
@@ -89,8 +89,8 @@ CResult CSloongBaseService::InitlializeForWorker(RunTimeData* data)
 
 		if (serverConfig.size() == 0)
 		{
-			cout << "Control no return config infomation. wait 500ms and retry." << endl;
-			SLEEP(500);
+			cout << "Control no return config infomation. wait 1s and retry." << endl;
+			sleep(1);
 			continue;
 		}
 
@@ -290,6 +290,7 @@ void CSloongBaseService::Exit(){
     m_pControl->SendMessage(EVENT_TYPE::ProgramExit);
     m_pControl->Exit();
     m_oExitSync.notify_one();
-    dlclose(m_pModule);
+    if( m_pModule)
+        dlclose(m_pModule);
 }
 
