@@ -43,7 +43,8 @@ namespace Sloong
 		// Return：
 		//	  -1 - 读取发生错误。且无法恢复。需要关闭连接。
 		//    >= 0 - 读取到的数据长度
-		int Read(char* data, int len, int timeOut, bool bAgage );
+		int Read(char* data, int len, bool bAgage );
+		int ReadTimeout(char* data, int len, int timeOut, bool bAgage );
 		
 		// 接收一个数据包
 		// 如果接收到了所有的数据，那么返回succeed.
