@@ -90,22 +90,23 @@ ResultType Sloong::CSockInfo::OnDataCanReceive( queue<SmartPackage>& readList )
 		// 2：不区分接收包头还是数据，始终按照参数来处理。
 		// 由于是循环接收，所以在第二种情况，在未设置超时时间的情况下会导致接收卡死在这里。所以在没有一个更好的处理办法之前，这里暂时直接修改了DataTrnasPackage中的接收逻辑，在接收长度时，始终忽略参数。
 		auto res = package->RecvPackage(m_ReceiveTimeout);
-		if( res == ResultType::Error){
+		if( !bLoop && res == ResultType::Error){
 			// 读取错误,将这个连接从监听中移除并关闭连接
 			return ResultType::Error;
-		}else if( res == ResultType::Invalid){
+		}else if( !bLoop && res == ResultType::Invalid){
 			auto event = make_shared<CNetworkEvent>(EVENT_TYPE::MonitorSendStatus);
 			event->SetSocketID(m_pCon->GetSocketID());
 			m_iC->SendMessage(event);
 			AddToSendList(package);
-		}else if (res == ResultType::Retry){
-			//由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
-			return ResultType::Succeed;
-		}else{
+		}else if ( res == ResultType::Succeed ){
 			bLoop = true;
 			// update the socket time
 			m_ActiveTime = time(NULL);
 			readList.push(package);
+		}else{
+			//由于是非阻塞的模式,所以当errno为EAGAIN时,表示当前缓冲区已无数据可读在这里就当作是该次事件已处理过。
+			// 或者是在第二次读取的时候，发生了错误，仍视为成功
+			return ResultType::Succeed;
 		}
 	}while (bLoop);
 
