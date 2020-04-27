@@ -5,10 +5,7 @@
 #ifdef _WINDOWS
     #pragma warning( disable:4251 )
     #pragma warning(disable:4996)
-    #define SLEEP(t) Sleep(t)
-
 #else
-    #define SLEEP(t) sleep((double)t/1000.0)
     #define INVALID_SOCKET -1
     #define closesocket close
     #ifndef 	LPCWSTR
