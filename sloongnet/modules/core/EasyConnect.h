@@ -79,6 +79,10 @@ namespace Sloong
 		int GetSocketID(){
 			return m_nSocket;
 		}
+
+		int GetErrno(){
+			return m_nErrno;
+		}
 	public:
 		static unsigned long G_InitializeSSL(SSL_CTX*& ctx, string certFile, string keyFile, string passwd);
 		static string G_FormatSSLErrorMsg(int code);
@@ -93,6 +97,7 @@ namespace Sloong
 		string m_strAddress;
 		int m_nPort;
 	private:
+		int m_nErrno;
 		int m_nSocket;
 		SSL* m_pSSL = nullptr;
 		bool m_bSupportReconnect = false;

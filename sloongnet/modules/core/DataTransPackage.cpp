@@ -56,6 +56,7 @@ ResultType Sloong::CDataTransPackage::SendPackage()
 {
 	int nSentSize = m_pCon->SendPackage(m_strPackageData, m_nSent);
 	if (nSentSize < 0){
+		if( m_pLog) m_pLog->Warn(CUniversal::Format("Error when send data. Socket[%s:%d].Errno[%d].", m_pCon->m_strAddress, m_pCon->m_nPort, m_pCon->GetErrno()));
 		return ResultType::Error;
 	}else{
 		m_nSent += nSentSize;
@@ -76,7 +77,10 @@ ResultType Sloong::CDataTransPackage::RecvPackage(int timeout,int lentimeout)
 	string result;
 	auto net_res = m_pCon->RecvPackage(result,timeout, lentimeout);
 	if( net_res != ResultType::Succeed )
+	{
+		if( m_pLog ) m_pLog->Warn(CUniversal::Format("Error when receive data. Socket[%s:%d].Errno[%d].", m_pCon->m_strAddress, m_pCon->m_nPort, m_pCon->GetErrno() ));
 		return net_res;
+	}
 
 	m_pTransPackage = make_shared<DataPackage>();
 	if(!m_pTransPackage->ParseFromString(result))

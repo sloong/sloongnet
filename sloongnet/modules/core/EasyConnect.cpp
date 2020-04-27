@@ -195,7 +195,13 @@ int Sloong::EasyConnect::Read(char * data, int len, int timeOut, bool bAgage)
 {
 	// 未启用SSL时直接发送数据
 	if (!m_pSSL)
-		return CUniversal::RecvEx(m_nSocket, data, len, timeOut, bAgage);
+	{
+		auto  recvSize = CUniversal::RecvEx(m_nSocket, data, len, timeOut, bAgage);
+		if( recvSize < 0 )
+			m_nErrno = recvSize;
+		
+		return recvSize;
+	}
 
 	if (!CheckSSLStatus(true))
 	{
@@ -241,8 +247,12 @@ int Sloong::EasyConnect::Write(const char* data, int len, int index)
 {
 	// 未启用SSL时直接发送数据
 	if (!m_pSSL)	
-		return CUniversal::SendEx(m_nSocket, data, len, index);
-
+	{
+		auto sendSize =  CUniversal::SendEx(m_nSocket, data, len, index);
+		if( sendSize < 0 )
+			m_nErrno = sendSize;
+		return sendSize;
+	}
 	
 	if (!CheckSSLStatus(false))
 	{
