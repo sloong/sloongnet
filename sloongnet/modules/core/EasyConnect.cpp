@@ -104,19 +104,19 @@ int Sloong::EasyConnect::SSL_Write_Ex(SSL * ssl, char * buf, int len)
 // 成功返回数据包长度
 // 超时返回0
 // 错误返回-1
-long long Sloong::EasyConnect::RecvLengthData()
+long long Sloong::EasyConnect::RecvLengthData(bool block)
 {
 	int bRes=0;
     if( m_bUseLongLongSize ) {
         char nLen[s_llLen] = {0};
-		bRes = Read(nLen, s_llLen, false);
+		bRes = Read(nLen, s_llLen, block,0 ,false);
         if(bRes>1){
 			auto len = CUniversal::BytesToInt64(nLen);
         	return len;
 		}
     }else{
         char nLen[s_lLen] = {0};
-        bRes = Read(nLen, s_lLen, false);
+        bRes = Read(nLen, s_lLen, block,0, false);
 		if (bRes>1){
 			auto len = CUniversal::BytesToInt32(nLen);
         	return len;
@@ -164,7 +164,7 @@ int Sloong::EasyConnect::SendPackage(string sendData, int index)
 
 ResultType Sloong::EasyConnect::RecvPackage(string& res,int timeOut)
 {
-    auto len = RecvLengthData();
+    auto len = RecvLengthData(timeOut==0?true:false);
 	if( len == 0 )
 		return ResultType::Retry;
 	else if( len < 0 )
@@ -172,75 +172,27 @@ ResultType Sloong::EasyConnect::RecvPackage(string& res,int timeOut)
 	
     res.resize(len);
 
-	if( ReadTimeout( res.data(), (int)len, timeOut, true) < 1)
+	if( Read( res.data(), (int)len, false, timeOut, true) < 1)
 		return ResultType::Error;
 
 	return ResultType::Succeed;
 }
 
-// timeout == 0, recv error is return direct now.
-int Sloong::EasyConnect::ReadTimeout(char * data, int len, int timeOut,  bool bAgage)
+int Sloong::EasyConnect::Read(char * data, int len, bool block, int timeout, bool bagain)
 {
 	// 未启用SSL时直接发送数据
 	if (!m_pSSL)
 	{
-		auto  recvSize =  CUniversal::RecvTimeout(m_nSocket, data, len, timeOut, bAgage);
+		int recvSize=0;
+		if( block )
+			recvSize = CUniversal::RecvTimeout(m_nSocket, data, len, 0, bagain);
+		else if( timeout > 0 )
+			recvSize = CUniversal::RecvTimeout(m_nSocket, data, len, timeout, bagain);
+		else
+			recvSize = CUniversal::RecvEx(m_nSocket, data, len, bagain);
+		
 		if( recvSize < 0 )
 			m_nErrno = recvSize;
-		
-		return recvSize;
-	}
-
-	if (!CheckSSLStatus(true))
-	{
-		return 0;
-	}
-
-	// SSL发送数据
-	// 这里可能会有以下几种情况。
-	// 1.正常全部读取完成。
-	// 2.读取后发生错误，错误信息为SSL_ERROR_WANT_READ，需等待下次可读事件，并根据已读的部分进行组合。
-	// 3.读取后发生错误，错误信息为其他，认为连接发生问题需要重连。
-	int ret = SSL_Read_Ex(m_pSSL, data, len, 0, true);
-	if (ret != len)
-	{
-		int err = SSL_get_error(m_pSSL, ret);
-		switch (err)
-		{
-		case SSL_ERROR_WANT_READ:
-			m_stStatus = ConnectStatus::WaitRead;
-			break;
-		case SSL_ERROR_WANT_WRITE:
-			if (support_ssl_reconnect)
-			{
-				m_stStatus = ConnectStatus::WaitWrite;
-			}
-			else
-			{
-				m_stStatus = ConnectStatus::ConnectError;
-			}
-			break;
-		default:
-			m_stStatus = ConnectStatus::ConnectError;
-			break;
-		}
-	}
-	if (m_stStatus == ConnectStatus::ConnectError)
-		return -1;
-	else
-		return ret;
-}
-
-
-int Sloong::EasyConnect::Read(char * data, int len, bool bAgage)
-{
-	// 未启用SSL时直接发送数据
-	if (!m_pSSL)
-	{
-		auto  recvSize = CUniversal::RecvEx(m_nSocket, data, len, bAgage);
-		if( recvSize < 0 )
-			m_nErrno = recvSize;
-		
 		return recvSize;
 	}
 
