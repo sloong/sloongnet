@@ -198,7 +198,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
         {
             char *pLongBuffer = new char[g_data_pack_len + 1](); //dataLeng;
             memset(pLongBuffer, 0, g_data_pack_len + 1);
-            int nRecvSize = CUniversal::RecvEx(conn_sock, pLongBuffer, g_data_pack_len, pThis->m_nRecvDataTimeoutTime);
+            int nRecvSize = CUniversal::RecvTimeout(conn_sock, pLongBuffer, g_data_pack_len, pThis->m_nRecvDataTimeoutTime);
             if (nRecvSize <= 0)
             {
                 // 读取错误,将这个连接从监听中移除并关闭连接
@@ -221,7 +221,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
 
                 char *szMD5 = new char[g_md5_len + 1];
                 memset(szMD5, 0, g_md5_len + 1);
-                nRecvSize = CUniversal::RecvEx(conn_sock, szMD5, g_md5_len, pThis->m_nRecvDataTimeoutTime, true);
+                nRecvSize = CUniversal::RecvTimeout(conn_sock, szMD5, g_md5_len, pThis->m_nRecvDataTimeoutTime, true);
                 if (nRecvSize <= 0)
                 {
                     pLog->Error("Receive data package md5 error.");
@@ -253,7 +253,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
                     int nOnceRecvLen = 10240;
                     if (dtlen - nRecvdLen < 10240)
                         nOnceRecvLen = dtlen - nRecvdLen;
-                    nRecvSize = CUniversal::RecvEx(conn_sock, pData, nOnceRecvLen, pThis->m_nRecvDataTimeoutTime, true);
+                    nRecvSize = CUniversal::RecvTimeout(conn_sock, pData, nOnceRecvLen, pThis->m_nRecvDataTimeoutTime, true);
                     if (nRecvSize < 0)
                     {
                         pLog->Error("Receive data error.");
