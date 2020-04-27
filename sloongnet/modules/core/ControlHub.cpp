@@ -141,7 +141,7 @@ void Sloong::CControlHub::MessageWorkLoop(SMARTER param)
 		try
 		{
 			if (m_emStatus == RUN_STATUS::Created){
-				SLEEP(100);
+				usleep(990000);
 				continue;
 			}
 			if (m_oMsgList.empty())	{

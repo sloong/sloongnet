@@ -101,7 +101,7 @@ int CUtility::GetCpuUsed(double nWaitTime)
 	int cpu;
 
 	get_cpuoccupy((CPU_OCCUPY *)&cpu_stat1);
-	SLEEP(nWaitTime);
+	sleep(nWaitTime);
 
 	get_cpuoccupy((CPU_OCCUPY *)&cpu_stat2);
 
