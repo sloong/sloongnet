@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 11:17:32
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-26 12:08:12
+ * @LastEditTime: 2020-04-28 09:25:34
  * @Description: file content
  */
 #ifndef SERVERMANAGE_H
@@ -182,7 +182,6 @@ namespace Sloong
         CLog* m_pLog = nullptr;
         map_ex<string, ServerItem>	m_oWorkerList;
         map_ex<int, TemplateItem>	m_oTemplateList;
-        map_ex<int,string>          m_oNodeList;
     };
 }
 #endif

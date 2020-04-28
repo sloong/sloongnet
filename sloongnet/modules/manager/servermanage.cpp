@@ -137,7 +137,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const Json::Value& jRequest,
 		item.UUID = sender;
 		m_oWorkerList[sender] = item;
 		m_pLog->Verbos(CUniversal::Format("Module[%s:%d] regist to system. Allocating uuid [%s].", item.Address, item.Port, item.UUID));
-		sender_info = m_oWorkerList.try_get(sender);
+		return CResult(ResultType::Retry,sender);
 	}
 
 	auto index = SearchNeedCreateTemplate();
@@ -178,7 +178,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const Json::Value& jRequest,CD
 	if( id == 1)
 		return CResult::Make_Error("Template id error.");
 
-	m_oNodeList[id] = sender;
+	m_oTemplateList[id].Created.unique_insert(sender);
 	return CResult::Succeed();
 }
 
