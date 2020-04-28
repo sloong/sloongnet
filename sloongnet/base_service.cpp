@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-27 17:26:12
+ * @LastEditTime: 2020-04-28 17:42:39
  * @Description: Main instance for sloongnet application.
  */
 
@@ -76,11 +76,17 @@ CResult CSloongBaseService::InitlializeForWorker(RunTimeData* data)
 		if (res.IsFialed()) return res;	
 
 		auto response = res.ResultObject();
+
 		if( response->result() == Protocol::ResultType::Retry ){
-			cout << "Control return retry package. wait 1s and retry." << endl;
-			uuid = response->content();
-			sleep(1);
-			continue;
+            if( uuid.length() == 0 ){
+                uuid = response->content();
+                cout << "Control assigen uuid ."<< uuid << endl;
+			    continue;
+            }else{
+                sleep(1);
+                cout << "Control return retry package. wait 1s and retry." << endl;
+			    continue;
+            }
 		}else if(response->result() == Protocol::ResultType::Succeed){
 			serverConfig = response->content();
 		}else{
@@ -265,9 +271,18 @@ CResult CSloongBaseService::RegisteNode()
 	dataPackage.RequestPackage(req);
     // TODO:
 	ResultType result = dataPackage.SendPackage();
+    if (result != ResultType::Succeed)
+		return CResult::Make_Error( "Send RegisteNode request error.");
+	result = dataPackage.RecvPackage(0);
+	if (result != ResultType::Succeed)
+		return CResult::Make_Error(" Get RegisteNode result error.");
+	auto response = dataPackage.GetRecvPackage();
+	if (!response)
+		return CResult::Make_Error("Parse the get config response data error.");
+    if(response->result() != ResultType::Succeed)
+        return CResult::Make_Error(CUniversal::Format("RegisteNode request return error. message: %s", response->content()));
     return CResult::Succeed();
 }
-
 
 
 void CSloongBaseService::Restart(SmartEvent event)

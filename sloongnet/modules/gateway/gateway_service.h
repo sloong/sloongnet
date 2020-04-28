@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-24 17:52:39
+ * @LastEditTime: 2020-04-28 14:59:30
  * @Description: file content
  */
 #ifndef SLOONGNET_GATEWAY_SERVICE_H
@@ -13,13 +13,15 @@
 #include "core.h"
 #include "export.h"
 
+#include "transpond.h"
 #include <jsoncpp/json/json.h>
 
 extern "C" {
-	CResult MessagePackageProcesser(CDataTransPackage*);
+	CResult MessagePackageProcesser(void*,CDataTransPackage*);
 	CResult NewConnectAcceptProcesser(CSockInfo*);
 	CResult ModuleInitialization(GLOBAL_CONFIG*);
 	CResult ModuleInitialized(IControl*);
+	CResult CreateProcessEnvironment(void**);
 }
 
 namespace Sloong
@@ -35,28 +37,17 @@ namespace Sloong
 		
 		bool ConnectToProcess();
 
-		CResult MessagePackageProcesser(CDataTransPackage*);
+		inline CResult CreateProcessEnvironmentHandler(void**);
 
 		// Event handler
 		void OnStart(SmartEvent);
 		void OnSocketClose(SmartEvent);
-
-		void AcceptConnectProcesser(CSockInfo* info);
-	private:
-		void MessageToProcesser(CDataTransPackage* pack);
-		void MessageToClient(CDataTransPackage* pack);
+	protected:
+		list<shared_ptr<GatewayTranspond>> m_listTranspond;
 
 	protected:
-		// 
-		map<int,int>	m_mapProcessLoadList;
-		map<int,SmartConnect> 	m_mapProcessList;
-		map<int,string>		m_mapUUIDList;
-		map<u_int64_t,CDataTransPackage*> m_mapPackageList;
 		IControl* 	m_pControl = nullptr;
 		CLog*		m_pLog =nullptr;
-
-		int m_nSerialNumber = 0;
-		
 		GLOBAL_CONFIG* m_pConfig;
 		Json::Value    m_oExConfig;
 	public:
