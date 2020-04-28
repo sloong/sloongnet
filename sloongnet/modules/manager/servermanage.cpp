@@ -14,6 +14,7 @@ CResult Sloong::CServerManage::Initialize()
 	m_listFuncHandler["DeleteTemplate"]=std::bind(&CServerManage::DeleteTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
 	m_listFuncHandler["SetTemplate"]=std::bind(&CServerManage::SetTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
 	m_listFuncHandler["QueryTemplate"]=std::bind(&CServerManage::QueryTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
+	m_listFuncHandler["QueryNode"]=std::bind(&CServerManage::QueryNodeHandler, this, std::placeholders::_1,std::placeholders::_2);
 
 	if(!CConfiguation::Instance->IsInituialized())
 	{
@@ -145,19 +146,18 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const Json::Value& jRequest,
 	{
 		return CResult(ResultType::Retry,sender);
 	}
-
+	
 	if( sender_info == nullptr)
 	{
 		return CResult::Make_Error("Add server info to ServerList fialed.");
 	}
 	
 	auto tpl = m_oTemplateList[index];
-	sender_info->TemplateName = tpl.Name;
-	sender_info->TemplateID = tpl.ID;
+	
 	Json::Value root;
-	root["TemplateID"] = sender_info->TemplateID;
-	root["Configuation"] = m_oTemplateList[sender_info->TemplateID].Configuation;
-	m_pLog->Verbos(CUniversal::Format("Allocating module[%s] Type to [%s]", sender_info->UUID, sender_info->TemplateName));
+	root["TemplateID"] = tpl.ID ;
+	root["Configuation"] = m_oTemplateList[tpl.ID].Configuation;
+	m_pLog->Verbos(CUniversal::Format("Allocating module[%s] Type to [%s]", sender_info->UUID, tpl.Name));
 	return CResult::Make_OK(root.toStyledString());
 }
 
@@ -178,6 +178,8 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const Json::Value& jRequest,CD
 	if( id == 1)
 		return CResult::Make_Error("Template id error.");
 
+	m_oWorkerList[sender].TemplateName = m_oTemplateList[id].Name;
+	m_oWorkerList[sender].TemplateID = m_oTemplateList[id].ID;
 	m_oTemplateList[id].Created.unique_insert(sender);
 	return CResult::Succeed();
 }
@@ -291,17 +293,14 @@ CResult Sloong::CServerManage::QueryTemplateHandler(const Json::Value& jRequest,
 	return CResult::Make_OK(root.toStyledString());
 }
 
-CResult Sloong::CServerManage::GetServerListHandler(const Json::Value& jRequest,CDataTransPackage* pack)
+CResult Sloong::CServerManage::QueryNodeHandler(const Json::Value& jRequest,CDataTransPackage* pack)
 {
 	Json::Value list;
 	for (auto& i : m_oWorkerList)
 	{
-		Json::Value item;
-		item["UUID"] = i.first;
-		item["TemplateID"] = i.second.TemplateID;
-		list.append(item);
+		list.append(i.second.ToJson());
 	}
 	Json::Value root;
-	root["ServerList"] = list;
+	root["NodeList"] = list;
 	return CResult::Make_OK(root.toStyledString());
 }

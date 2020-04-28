@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 11:17:32
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-28 09:25:34
+ * @LastEditTime: 2020-04-28 12:09:02
  * @Description: file content
  */
 #ifndef SERVERMANAGE_H
@@ -20,10 +20,22 @@ namespace Sloong
         void Active() { ActiveTime = time(NULL); }
         string Address;
         int Port;
-        int ActiveTime;
+        time_t ActiveTime;
         string UUID;
         string TemplateName;
         int TemplateID;
+        Json::Value ToJson(){
+            Json::Value item;
+            item["Address"] = this->Address;
+            item["Port"] = this->Port;
+            char buffer [80];
+            strftime (buffer,80,"%c", std::localtime(&ActiveTime));
+            item["ActiveTime"] = string(buffer);
+            item["UUID"] = this->UUID;
+            item["TemplateName"] = this->TemplateName;
+            item["TemplateID"] = this->TemplateID;
+            return item;
+        }
     };
 
     struct TemplateItem
@@ -154,20 +166,28 @@ namespace Sloong
         */
         CResult QueryTemplateHandler(const Json::Value&,CDataTransPackage*);
         
-        /* Flow:  ControlUI -> Control
-       Response: Content(JSON) - Config template  list.
-                    Format: 
+        /* 
+        Request(JSON):
                     {
-                      "ServerList": [
+                        "Function":"QueryNode",
+                    }
+        Response(JSON):
+                    {
+                      "NodeList": [
                         {
                           "UUID": "",
-                          "Type":"",
-                          "TemplateID": ""
+                          "TemplateName":"",
+                          "TemplateID": "",
+                          "Address":"",
+                          "Port":"",
+                          "ActiveTime":"",
                         }
                       ]
                     }
     */
-        CResult GetServerListHandler(const Json::Value&,CDataTransPackage*);
+        CResult QueryNodeHandler(const Json::Value&,CDataTransPackage*);
+
+        CResult Regise
 
         /// 由于初始化太早，无法在initialize时获取。只能由control_server手动设置
         void SetLog(CLog* log) { m_pLog = log; }
