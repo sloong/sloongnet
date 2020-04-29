@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-24 20:40:22
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-24 20:40:22
+ * @LastEditTime: 2020-04-29 15:17:48
  * @Description: file content
  */
 #ifndef SLOONGNET_PROCESS_SERVICE_H
@@ -16,10 +16,11 @@
 #include "LuaProcessCenter.h"
 
 extern "C" {
-	CResult MessagePackageProcesser(CDataTransPackage*);
+	CResult MessagePackageProcesser(void*,CDataTransPackage*);
 	CResult NewConnectAcceptProcesser(CSockInfo*);
 	CResult ModuleInitialization(GLOBAL_CONFIG*);
 	CResult ModuleInitialized(IControl*);
+	CResult CreateProcessEnvironment(void**);
 }
 
 
@@ -34,15 +35,16 @@ namespace Sloong
 
 		CResult Initialization(GLOBAL_CONFIG*);
 		CResult Initialized(IControl*);
-
-		CResult MessagePackageProcesser(CDataTransPackage*);
-
+		
+		CResult MessagePackageProcesser(CLuaProcessCenter*,CDataTransPackage*);
+		inline CResult CreateProcessEnvironmentHandler(void**);
+		
 		void OnSocketClose(SmartEvent evt);
 		
 	protected:
-		unique_ptr<CLuaProcessCenter> m_pProcess = make_unique<CLuaProcessCenter>();
+		list<shared_ptr<CLuaProcessCenter>> m_listProcess;
 		map<string, unique_ptr<CLuaPacket>> m_mapUserInfoList;
-
+		
 		IControl* 	m_pControl = nullptr;
 		CLog*		m_pLog =nullptr;
 

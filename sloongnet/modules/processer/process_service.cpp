@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-24 20:39:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-24 20:39:50
+ * @LastEditTime: 2020-04-29 15:18:18
  * @Description: file content
  */
 /* File Name: server.c */
@@ -17,9 +17,13 @@ using namespace Sloong::Events;
 unique_ptr<SloongNetProcess> Sloong::SloongNetProcess::Instance = nullptr;
 
 
-extern "C" CResult MessagePackageProcesser(CDataTransPackage* pack)
+extern "C" CResult MessagePackageProcesser(void* pEnv, CDataTransPackage* pack)
 {
-	return SloongNetProcess::Instance->MessagePackageProcesser(pack);
+	auto pProcess = TYPE_TRANS<CLuaProcessCenter*>(pEnv);
+	if( pProcess)
+		return SloongNetProcess::Instance->MessagePackageProcesser(pProcess,pack);
+	else
+		return CResult::Make_Error("Environment convert error. cannot process message.");
 }
 	
 extern "C" CResult NewConnectAcceptProcesser(CSockInfo* info)
@@ -36,6 +40,11 @@ extern "C" CResult ModuleInitialized(IControl* iC){
 	return SloongNetProcess::Instance->Initialized(iC);
 }
 
+extern "C" CResult CreateProcessEnvironment(void** out_env)
+{
+	return SloongNetProcess::Instance->CreateProcessEnvironmentHandler(out_env);
+}
+
 
 CResult SloongNetProcess::Initialized(IControl* iC)
 {
@@ -50,11 +59,10 @@ CResult SloongNetProcess::Initialized(IControl* iC)
 	m_pLog = IData::GetLog();
 	
 	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProcess::OnSocketClose, this, std::placeholders::_1));
-	m_pProcess->Initialize(m_pControl);
 	return CResult::Succeed();
 }
 
-CResult Sloong::SloongNetProcess::MessagePackageProcesser(CDataTransPackage* pack)
+CResult Sloong::SloongNetProcess::MessagePackageProcesser(CLuaProcessCenter* pProcess,CDataTransPackage* pack)
 {
     string strRes("");
 	char* pExData = nullptr;
@@ -68,7 +76,7 @@ CResult Sloong::SloongNetProcess::MessagePackageProcesser(CDataTransPackage* pac
 		m_mapUserInfoList[uuid] = make_unique<CLuaPacket>();
 		infoItem = m_mapUserInfoList.find(uuid);
 	}
-	if (m_pProcess->MsgProcess(infoItem->second.get(), msg->content(), strRes, pExData, nExSize)) {
+	if (pProcess->MsgProcess(infoItem->second.get(), msg->content(), strRes, pExData, nExSize)) {
 		msg->set_content(strRes);
 	}
 	else {
@@ -91,4 +99,15 @@ void Sloong::SloongNetProcess::OnSocketClose(SmartEvent event)
 	// call close function.
 	//m_pProcess->CloseSocket(info);
 	//net_evt->CallCallbackFunc(net_evt);
+}
+
+
+
+inline CResult Sloong::SloongNetProcess::CreateProcessEnvironmentHandler(void** out_env)
+{
+	auto item = make_shared<CLuaProcessCenter>();
+	item->Initialize(m_pControl);
+	m_listProcess.push_back(item);
+	(*out_env) = item.get();
+	return CResult::Succeed();
 }
