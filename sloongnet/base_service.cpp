@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-29 17:23:06
+ * @LastEditTime: 2020-04-29 09:30:18
  * @Description: Main instance for sloongnet application.
  */
 
@@ -205,13 +205,16 @@ CResult CSloongBaseService::Initialize(RunTimeData* config)
     if( res.IsFialed() )
         m_pLog->Fatal(res.Message());
 
-    res = RegisteNode();
-    if (res.IsFialed())
+    if(!m_pServerConfig->ManagerMode )
     {
-        m_pLog->Fatal(res.Message());
-        return res;
+        res = RegisteNode();
+        if (res.IsFialed())
+        {
+            m_pLog->Fatal(res.Message());
+            return res;
+        }
+        m_pNetwork->RegisteConnection(m_pServerConfig->ManagerConnect->GetSocketID());
     }
-    m_pNetwork->RegisteConnection(m_pServerConfig->ManagerConnect->GetSocketID());
 
     return CResult::Succeed();
 }

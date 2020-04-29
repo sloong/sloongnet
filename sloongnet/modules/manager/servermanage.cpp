@@ -1,3 +1,10 @@
+/*
+ * @Author: WCB
+ * @Date: 2020-04-29 09:27:21
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-04-29 10:30:15
+ * @Description: file content
+ */
 #include "servermanage.h"
 
 #include "utility.h"
@@ -207,6 +214,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const Json::Value& jRequest,CD
 	m_oWorkerList[sender].TemplateID = m_oTemplateList[id].ID;
 	m_oWorkerList[sender].Connection = pack->GetConnection();
 	m_oTemplateList[id].Created.unique_insert(sender);
+	m_oSocketList[pack->GetConnection()->GetSocketID()] = sender;
 
 	// Find reference node and notify them
 	list<string> notifyList;
@@ -359,4 +367,40 @@ CResult Sloong::CServerManage::QueryNodeHandler(const Json::Value& jRequest,CDat
 	Json::Value root;
 	root["NodeList"] = list;
 	return CResult::Make_OK(root.toStyledString());
+}
+
+
+void Sloong::CServerManage::OnSocketClosed(SOCKET sock)
+{
+	if( !m_oSocketList.exist(sock)) return;
+
+	auto target = m_oSocketList[sock];
+	auto id = m_oWorkerList[target].TemplateID;
+	m_oWorkerList.erase(target);
+	m_oTemplateList[id].Created.remove(target);
+
+	// Find reference node and notify them
+	list<string> notifyList;
+	for( auto item : m_oTemplateList)
+	{
+		if( item.second.Reference.exist(id))
+		{
+			for( auto i : item.second.Created) notifyList.push_back(i);
+		}
+	}
+
+	if( notifyList.size() > 0 )
+	{
+		GLOBAL_CONFIG config;
+		config.ParseFromString(CBase64::Decode(m_oTemplateList[id].Configuation));
+		Json::Value notify;
+		notify["Function"]="ReferenceNodeOffline";
+		string req_str = notify.toStyledString();
+		for( auto item : notifyList)
+		{
+			auto event = make_shared<CSendMessageEvent>();
+			event->SetRequest(m_oWorkerList[item].Connection->GetSocketID(),req_str,m_nSerialNumber);
+			m_pControl->SendMessage(event);
+		}
+	}
 }

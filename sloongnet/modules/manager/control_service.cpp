@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-04-29 06:14:54
+ * @LastEditTime: 2020-04-29 10:32:49
  */
 
 #include "control_service.h"
@@ -88,6 +88,7 @@ CResult SloongControlService::Initialized(IControl* iC)
 	IData::Initialize(iC);
 	m_pConfig = IData::GetGlobalConfig();
 	m_pLog = IData::GetLog();
+	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongControlService::OnSocketClose, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
@@ -103,6 +104,13 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
 	config->set_receivetime(3);
 }
 
+
+void Sloong::SloongControlService::OnSocketClose(SmartEvent event)
+{
+	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
+	auto sock = net_evt->GetSocketID();
+	for( auto item : m_listServerManage ) item->OnSocketClosed(sock);
+}
 
 inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(void** out_env)
 {

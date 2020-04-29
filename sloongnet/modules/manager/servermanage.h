@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 11:17:32
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-29 06:34:14
+ * @LastEditTime: 2020-04-29 10:17:12
  * @Description: file content
  */
 #ifndef SERVERMANAGE_H
@@ -206,6 +206,9 @@ namespace Sloong
 
         CResult ResetManagerTemplate(GLOBAL_CONFIG* config);
 
+
+        void OnSocketClosed(SOCKET);
+
     private:
         int SearchNeedCreateTemplate();
         void RefreshModuleReference(int id);
@@ -215,6 +218,7 @@ namespace Sloong
         map_ex<string, FunctionHandler> m_listFuncHandler;
         map_ex<string, ServerItem>	m_oWorkerList;
         map_ex<int, TemplateItem>	m_oTemplateList;
+        map_ex<SOCKET, string>      m_oSocketList;
         
     private:
         CLog* m_pLog = nullptr;

@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-29 17:01:57
+ * @LastEditTime: 2020-04-29 09:46:16
  * @Description: file content
  */
 #pragma once
@@ -35,8 +35,6 @@ namespace Sloong
 			}
 		
 		protected:
-			int m_nSocketID;
-			CLuaPacket* m_pInfo;
 			shared_ptr<DataPackage> m_pData;
 		};
 
