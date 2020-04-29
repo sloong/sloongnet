@@ -74,5 +74,6 @@ message GLOBAL_CONFIG
     string  ModuleName = 16;
     string  ModulePath = 17;
     bytes   ModuleConfig = 18;
+    string  ModuleReference = 19;
 };
 

@@ -6,8 +6,12 @@
 using namespace Sloong::Events;
 
 
-CResult Sloong::CServerManage::Initialize()
+CResult Sloong::CServerManage::Initialize(IControl* ic)
 {
+	m_pControl = ic;
+	m_pLog = IData::GetLog();
+
+	m_listFuncHandler["EventRecorder"]=std::bind(&CServerManage::EventRecorderHandler, this, std::placeholders::_1,std::placeholders::_2);
 	m_listFuncHandler["RegisteWorker"]=std::bind(&CServerManage::RegisteWorkerHandler, this, std::placeholders::_1,std::placeholders::_2);
 	m_listFuncHandler["RegisteNode"]=std::bind(&CServerManage::RegisteNodeHandler, this, std::placeholders::_1,std::placeholders::_2);
 	m_listFuncHandler["AddTemplate"]=std::bind(&CServerManage::AddTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
@@ -122,6 +126,11 @@ CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage* pack)
 }
 
 
+CResult Sloong::CServerManage::EventRecorderHandler(const Json::Value& jRequest,CDataTransPackage* pack)
+{
+	return CResult::Succeed();
+}
+
 CResult Sloong::CServerManage::RegisteWorkerHandler(const Json::Value& jRequest,CDataTransPackage* pack)
 {
 	auto sender = pack->GetRecvPackage()->sender();
@@ -178,9 +187,53 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const Json::Value& jRequest,CD
 	if( id == 1)
 		return CResult::Make_Error("Template id error.");
 
+	// Save node info.
 	m_oWorkerList[sender].TemplateName = m_oTemplateList[id].Name;
 	m_oWorkerList[sender].TemplateID = m_oTemplateList[id].ID;
+	m_oWorkerList[sender].Connection = pack->GetConnection();
 	m_oTemplateList[id].Created.unique_insert(sender);
+
+	// Find reference node and notify them
+	list<string> notifyList;
+	for( auto item : m_oTemplateList)
+	{
+		if( item.second.Reference.exist(id))
+		{
+			for( auto i : item.second.Created) notifyList.push_back(i);
+		}
+	}
+
+	if( notifyList.size() > 0 )
+	{
+		GLOBAL_CONFIG config;
+		config.ParseFromString(CBase64::Decode(m_oTemplateList[id].Configuation));
+		Json::Value notify;
+		notify["Function"]="ReferenceNodeOnline";
+		notify["Address"]= pack->GetSocketIP();
+		notify["Port"]= config.listenport();
+		string req_str = notify.toStyledString();
+		for( auto item : notifyList)
+		{
+			// Create data package
+			auto sendMsg = make_shared<DataPackage>();
+			sendMsg->set_function(Functions::ProcessMessage);
+			sendMsg->set_content(req_str);
+			sendMsg->set_prioritylevel(1);
+			sendMsg->set_serialnumber(m_nSerialNumber);
+
+			// Get the item connect and send message.
+			auto transPack = make_shared<CDataTransPackage>();
+			transPack->Initialize(m_oWorkerList[item].Connection, nullptr);
+			transPack->RequestPackage(sendMsg);
+
+			// Step 5: 新建一个NetworkEx类型的事件，将上面准备完毕的数据发送出去。
+			auto process_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
+			process_event->SetSocketID(m_oWorkerList[item].Connection->GetSocketID());
+			process_event->SetDataPackage(transPack);
+			m_pControl->SendMessage(process_event);
+		}
+	}
+	
 	return CResult::Succeed();
 }
 

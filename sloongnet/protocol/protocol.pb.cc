@@ -104,6 +104,7 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::GLOBAL_CONFIG, modulename_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::GLOBAL_CONFIG, modulepath_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::GLOBAL_CONFIG, moduleconfig_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::Protocol::GLOBAL_CONFIG, modulereference_),
 };
 static const ::google::protobuf::internal::MigrationSchema schemas[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::Protocol::DataPackage)},
@@ -141,7 +142,7 @@ void AddDescriptorsImpl() {
       "s\022\025\n\rPriorityLevel\030\002 \001(\005\022\024\n\014SerialNumber"
       "\030\003 \001(\003\022\023\n\013CheckString\030\004 \001(\t\022\016\n\006Sender\030\005 "
       "\001(\t\022$\n\006Result\030\007 \001(\0162\024.Protocol.ResultTyp"
-      "e\022\017\n\007Content\030\010 \001(\t\022\016\n\006Extend\030\t \001(\014\"\223\003\n\rG"
+      "e\022\017\n\007Content\030\010 \001(\t\022\016\n\006Extend\030\t \001(\014\"\254\003\n\rG"
       "LOBAL_CONFIG\022\022\n\nListenPort\030\001 \001(\005\022\021\n\tEnab"
       "leSSL\030\002 \001(\010\022\024\n\014CertFilePath\030\003 \001(\t\022\023\n\013Key"
       "FilePath\030\004 \001(\t\022\022\n\nCertPasswd\030\005 \001(\t\022\023\n\013Co"
@@ -152,15 +153,16 @@ void AddDescriptorsImpl() {
       "\014 \001(\005\022\035\n\025ProcessThreadQuantity\030\r \001(\005\022\024\n\014"
       "PrioritySize\030\016 \001(\005\022\022\n\nModuleName\030\020 \001(\t\022\022"
       "\n\nModulePath\030\021 \001(\t\022\024\n\014ModuleConfig\030\022 \001(\014"
-      "*I\n\nResultType\022\013\n\007Succeed\020\000\022\t\n\005Error\020\001\022\013"
-      "\n\007Warning\020\002\022\t\n\005Retry\020\003\022\013\n\007Invalid\020\004*^\n\010L"
-      "ogLevel\022\007\n\003All\020\000\022\n\n\006Verbos\020\001\022\t\n\005Debug\020\002\022"
-      "\010\n\004Info\020\003\022\010\n\004Warn\020\004\022\007\n\003Err\020\005\022\n\n\006Assert\020\006"
-      "\022\t\n\005Fatal\020\007*0\n\tFunctions\022\022\n\016ProcessMessa"
-      "ge\020\000\022\017\n\013RestartNode\020\002b\006proto3"
+      "\022\027\n\017ModuleReference\030\023 \001(\t*I\n\nResultType\022"
+      "\013\n\007Succeed\020\000\022\t\n\005Error\020\001\022\013\n\007Warning\020\002\022\t\n\005"
+      "Retry\020\003\022\013\n\007Invalid\020\004*^\n\010LogLevel\022\007\n\003All\020"
+      "\000\022\n\n\006Verbos\020\001\022\t\n\005Debug\020\002\022\010\n\004Info\020\003\022\010\n\004Wa"
+      "rn\020\004\022\007\n\003Err\020\005\022\n\n\006Assert\020\006\022\t\n\005Fatal\020\007*0\n\t"
+      "Functions\022\022\n\016ProcessMessage\020\000\022\017\n\013Restart"
+      "Node\020\002b\006proto3"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 869);
+      descriptor, 894);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "protocol.proto", &protobuf_RegisterTypes);
 }
@@ -812,6 +814,7 @@ const int GLOBAL_CONFIG::kPrioritySizeFieldNumber;
 const int GLOBAL_CONFIG::kModuleNameFieldNumber;
 const int GLOBAL_CONFIG::kModulePathFieldNumber;
 const int GLOBAL_CONFIG::kModuleConfigFieldNumber;
+const int GLOBAL_CONFIG::kModuleReferenceFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 GLOBAL_CONFIG::GLOBAL_CONFIG()
@@ -853,6 +856,10 @@ GLOBAL_CONFIG::GLOBAL_CONFIG(const GLOBAL_CONFIG& from)
   if (from.moduleconfig().size() > 0) {
     moduleconfig_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.moduleconfig_);
   }
+  modulereference_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  if (from.modulereference().size() > 0) {
+    modulereference_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.modulereference_);
+  }
   ::memcpy(&listenport_, &from.listenport_,
     static_cast<size_t>(reinterpret_cast<char*>(&prioritysize_) -
     reinterpret_cast<char*>(&listenport_)) + sizeof(prioritysize_));
@@ -867,6 +874,7 @@ void GLOBAL_CONFIG::SharedCtor() {
   modulename_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   modulepath_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   moduleconfig_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  modulereference_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(&listenport_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&prioritysize_) -
       reinterpret_cast<char*>(&listenport_)) + sizeof(prioritysize_));
@@ -885,6 +893,7 @@ void GLOBAL_CONFIG::SharedDtor() {
   modulename_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   modulepath_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   moduleconfig_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  modulereference_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
 void GLOBAL_CONFIG::SetCachedSize(int size) const {
@@ -914,6 +923,7 @@ void GLOBAL_CONFIG::Clear() {
   modulename_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   modulepath_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   moduleconfig_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  modulereference_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(&listenport_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&prioritysize_) -
       reinterpret_cast<char*>(&listenport_)) + sizeof(prioritysize_));
@@ -1179,6 +1189,22 @@ bool GLOBAL_CONFIG::MergePartialFromCodedStream(
         break;
       }
 
+      // string ModuleReference = 19;
+      case 19: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(154u /* 154 & 0xFF */)) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_modulereference()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->modulereference().data(), static_cast<int>(this->modulereference().length()),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "Protocol.GLOBAL_CONFIG.ModuleReference"));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
       default: {
       handle_unusual:
         if (tag == 0) {
@@ -1322,6 +1348,16 @@ void GLOBAL_CONFIG::SerializeWithCachedSizes(
       18, this->moduleconfig(), output);
   }
 
+  // string ModuleReference = 19;
+  if (this->modulereference().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->modulereference().data(), static_cast<int>(this->modulereference().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "Protocol.GLOBAL_CONFIG.ModuleReference");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      19, this->modulereference(), output);
+  }
+
   if ((_internal_metadata_.have_unknown_fields() &&  ::google::protobuf::internal::GetProto3PreserveUnknownsDefault())) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()), output);
@@ -1460,6 +1496,17 @@ void GLOBAL_CONFIG::SerializeWithCachedSizes(
         18, this->moduleconfig(), target);
   }
 
+  // string ModuleReference = 19;
+  if (this->modulereference().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->modulereference().data(), static_cast<int>(this->modulereference().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "Protocol.GLOBAL_CONFIG.ModuleReference");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        19, this->modulereference(), target);
+  }
+
   if ((_internal_metadata_.have_unknown_fields() &&  ::google::protobuf::internal::GetProto3PreserveUnknownsDefault())) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()), target);
@@ -1524,6 +1571,13 @@ size_t GLOBAL_CONFIG::ByteSizeLong() const {
     total_size += 2 +
       ::google::protobuf::internal::WireFormatLite::BytesSize(
         this->moduleconfig());
+  }
+
+  // string ModuleReference = 19;
+  if (this->modulereference().size() > 0) {
+    total_size += 2 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->modulereference());
   }
 
   // int32 ListenPort = 1;
@@ -1646,6 +1700,10 @@ void GLOBAL_CONFIG::MergeFrom(const GLOBAL_CONFIG& from) {
 
     moduleconfig_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.moduleconfig_);
   }
+  if (from.modulereference().size() > 0) {
+
+    modulereference_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.modulereference_);
+  }
   if (from.listenport() != 0) {
     set_listenport(from.listenport());
   }
@@ -1715,6 +1773,8 @@ void GLOBAL_CONFIG::InternalSwap(GLOBAL_CONFIG* other) {
   modulepath_.Swap(&other->modulepath_, &::google::protobuf::internal::GetEmptyStringAlreadyInited(),
     GetArenaNoVirtual());
   moduleconfig_.Swap(&other->moduleconfig_, &::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+    GetArenaNoVirtual());
+  modulereference_.Swap(&other->modulereference_, &::google::protobuf::internal::GetEmptyStringAlreadyInited(),
     GetArenaNoVirtual());
   swap(listenport_, other->listenport_);
   swap(connecttime_, other->connecttime_);

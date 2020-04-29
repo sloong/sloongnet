@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-04-26 13:37:09
+ * @LastEditTime: 2020-04-29 10:49:50
  */
 
 #include "control_service.h"
@@ -54,7 +54,7 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG* config)
 	{
 		return CResult::Make_Error("Config object is nullptr.");
 	}
-	auto res = m_pServer->Initialize();
+	auto res = m_pServer->Initialize(m_pControl);
 	if (res.IsFialed())
 	{
 		return CResult::Make_Error(CUniversal::Format("Init server manage fialed. error message:%s",res.Message()));
@@ -88,8 +88,6 @@ CResult SloongControlService::Initialized(IControl* iC)
 	IData::Initialize(iC);
 	m_pConfig = IData::GetGlobalConfig();
 	m_pLog = IData::GetLog();
-	
-	m_pServer->SetLog(m_pLog);
 	return CResult::Succeed();
 }
 
@@ -109,8 +107,7 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
 inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(void** out_env)
 {
 	auto item = make_shared<CServerManage>();
-	item->SetLog(m_pLog);
-	auto res = item->Initialize();
+	auto res = item->Initialize(m_pControl);
 	if (res.IsFialed())
 		return res;
 	m_listServerManage.push_back(item);

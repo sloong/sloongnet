@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-27 16:30:17
+ * @LastEditTime: 2020-04-28 20:44:54
  * @Description: file content
  */
 #ifndef DATA_TRANS_PACKAGE_H
@@ -49,6 +49,8 @@ namespace Sloong
         inline string GetRecvMessage(){ return m_pTransPackage->content(); }
 
         string GetExtendData() { return m_pTransPackage->extend(); }
+
+        inline SmartConnect GetConnection() { return m_pCon; }
 
         inline int GetSocketID(){return m_pCon->GetSocketID(); }
 

@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 19:41:30
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-27 10:40:15
+ * @LastEditTime: 2020-04-28 20:23:39
  * @Description: file content
  */
 #include <string>
@@ -21,6 +21,7 @@ namespace Sloong
         string configuation;
         string name;
         string note;
+        string reference;
     };
 
     inline auto InitStorage(const string& path) {
@@ -31,7 +32,8 @@ namespace Sloong
                 make_column("replicas", &TemplateInfo::replicas),
                 make_column("configuation", &TemplateInfo::configuation),
                 make_column("name", &TemplateInfo::name),
-                make_column("note", &TemplateInfo::note))
+                make_column("note", &TemplateInfo::note),
+                make_column("reference", &TemplateInfo::reference))
         );
     }
 

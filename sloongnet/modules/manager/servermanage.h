@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 11:17:32
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-28 12:09:02
+ * @LastEditTime: 2020-04-29 10:59:02
  * @Description: file content
  */
 #ifndef SERVERMANAGE_H
@@ -24,6 +24,7 @@ namespace Sloong
         string UUID;
         string TemplateName;
         int TemplateID;
+        SmartConnect Connection;
         Json::Value ToJson(){
             Json::Value item;
             item["Address"] = this->Address;
@@ -72,6 +73,7 @@ namespace Sloong
         string Note;
         int Replicas;
         string Configuation;
+        list_ex<int> Reference;
         list_ex<string> Created;
     };
 
@@ -79,9 +81,24 @@ namespace Sloong
     class CServerManage
     {
     public:
-        CResult Initialize();
+        CResult Initialize( IControl* ic );
 
         CResult ProcessHandler(CDataTransPackage*);
+
+        /*
+        Request(JSON):
+                    {
+                        "Function":"EventRecorder",
+                        "Type":"",// Request or Response
+                        "Result":"",// Succeed or Error
+                        "Sender":"",// Message sender
+                        "Receiver":"",// Message receiver
+                        "Time":"",// Current time
+                        "Content":""// For succeed is message content; For other is message
+                    }
+        Response:Result
+        */
+        CResult EventRecorderHandler(const Json::Value&,CDataTransPackage*);
 
         /* When worker start, send this request to registe a worker, and wait manage assigning template.
         Request(JSON):
@@ -187,21 +204,20 @@ namespace Sloong
     */
         CResult QueryNodeHandler(const Json::Value&,CDataTransPackage*);
 
-        CResult Regise
-
-        /// 由于初始化太早，无法在initialize时获取。只能由control_server手动设置
-        void SetLog(CLog* log) { m_pLog = log; }
-
         CResult ResetManagerTemplate(GLOBAL_CONFIG* config);
 
     private:
         int SearchNeedCreateTemplate();
 
-    private:
+    protected:
+        int m_nSerialNumber = 0;
         map_ex<string, FunctionHandler> m_listFuncHandler;
-        CLog* m_pLog = nullptr;
         map_ex<string, ServerItem>	m_oWorkerList;
         map_ex<int, TemplateItem>	m_oTemplateList;
+        
+    private:
+        CLog* m_pLog = nullptr;
+        IControl*   m_pControl = nullptr;
     };
 }
 #endif

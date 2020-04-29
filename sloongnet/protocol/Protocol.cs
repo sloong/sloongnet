@@ -29,7 +29,7 @@ namespace Protocol {
             "aXR5TGV2ZWwYAiABKAUSFAoMU2VyaWFsTnVtYmVyGAMgASgDEhMKC0NoZWNr",
             "U3RyaW5nGAQgASgJEg4KBlNlbmRlchgFIAEoCRIkCgZSZXN1bHQYByABKA4y",
             "FC5Qcm90b2NvbC5SZXN1bHRUeXBlEg8KB0NvbnRlbnQYCCABKAkSDgoGRXh0",
-            "ZW5kGAkgASgMIpMDCg1HTE9CQUxfQ09ORklHEhIKCkxpc3RlblBvcnQYASAB",
+            "ZW5kGAkgASgMIqwDCg1HTE9CQUxfQ09ORklHEhIKCkxpc3RlblBvcnQYASAB",
             "KAUSEQoJRW5hYmxlU1NMGAIgASgIEhQKDENlcnRGaWxlUGF0aBgDIAEoCRIT",
             "CgtLZXlGaWxlUGF0aBgEIAEoCRISCgpDZXJ0UGFzc3dkGAUgASgJEhMKC0Nv",
             "bm5lY3RUaW1lGAYgASgFEhMKC1JlY2VpdmVUaW1lGAcgASgFEg8KB0xvZ1Bh",
@@ -38,17 +38,17 @@ namespace Protocol {
             "BRIbChNFUG9sbFRocmVhZFF1YW50aXR5GAwgASgFEh0KFVByb2Nlc3NUaHJl",
             "YWRRdWFudGl0eRgNIAEoBRIUCgxQcmlvcml0eVNpemUYDiABKAUSEgoKTW9k",
             "dWxlTmFtZRgQIAEoCRISCgpNb2R1bGVQYXRoGBEgASgJEhQKDE1vZHVsZUNv",
-            "bmZpZxgSIAEoDCpJCgpSZXN1bHRUeXBlEgsKB1N1Y2NlZWQQABIJCgVFcnJv",
-            "chABEgsKB1dhcm5pbmcQAhIJCgVSZXRyeRADEgsKB0ludmFsaWQQBCpeCghM",
-            "b2dMZXZlbBIHCgNBbGwQABIKCgZWZXJib3MQARIJCgVEZWJ1ZxACEggKBElu",
-            "Zm8QAxIICgRXYXJuEAQSBwoDRXJyEAUSCgoGQXNzZXJ0EAYSCQoFRmF0YWwQ",
-            "ByowCglGdW5jdGlvbnMSEgoOUHJvY2Vzc01lc3NhZ2UQABIPCgtSZXN0YXJ0",
-            "Tm9kZRACYgZwcm90bzM="));
+            "bmZpZxgSIAEoDBIXCg9Nb2R1bGVSZWZlcmVuY2UYEyABKAkqSQoKUmVzdWx0",
+            "VHlwZRILCgdTdWNjZWVkEAASCQoFRXJyb3IQARILCgdXYXJuaW5nEAISCQoF",
+            "UmV0cnkQAxILCgdJbnZhbGlkEAQqXgoITG9nTGV2ZWwSBwoDQWxsEAASCgoG",
+            "VmVyYm9zEAESCQoFRGVidWcQAhIICgRJbmZvEAMSCAoEV2FybhAEEgcKA0Vy",
+            "chAFEgoKBkFzc2VydBAGEgkKBUZhdGFsEAcqMAoJRnVuY3Rpb25zEhIKDlBy",
+            "b2Nlc3NNZXNzYWdlEAASDwoLUmVzdGFydE5vZGUQAmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Protocol.ResultType), typeof(global::Protocol.LogLevel), typeof(global::Protocol.Functions), }, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.DataPackage), global::Protocol.DataPackage.Parser, new[]{ "Function", "PriorityLevel", "SerialNumber", "CheckString", "Sender", "Result", "Content", "Extend" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.GLOBAL_CONFIG), global::Protocol.GLOBAL_CONFIG.Parser, new[]{ "ListenPort", "EnableSSL", "CertFilePath", "KeyFilePath", "CertPasswd", "ConnectTime", "ReceiveTime", "LogPath", "LogLevel", "DebugMode", "MQThreadQuantity", "EPollThreadQuantity", "ProcessThreadQuantity", "PrioritySize", "ModuleName", "ModulePath", "ModuleConfig" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Protocol.GLOBAL_CONFIG), global::Protocol.GLOBAL_CONFIG.Parser, new[]{ "ListenPort", "EnableSSL", "CertFilePath", "KeyFilePath", "CertPasswd", "ConnectTime", "ReceiveTime", "LogPath", "LogLevel", "DebugMode", "MQThreadQuantity", "EPollThreadQuantity", "ProcessThreadQuantity", "PrioritySize", "ModuleName", "ModulePath", "ModuleConfig", "ModuleReference" }, null, null, null)
           }));
     }
     #endregion
@@ -479,6 +479,7 @@ namespace Protocol {
       moduleName_ = other.moduleName_;
       modulePath_ = other.modulePath_;
       moduleConfig_ = other.moduleConfig_;
+      moduleReference_ = other.moduleReference_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -695,6 +696,17 @@ namespace Protocol {
       }
     }
 
+    /// <summary>Field number for the "ModuleReference" field.</summary>
+    public const int ModuleReferenceFieldNumber = 19;
+    private string moduleReference_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string ModuleReference {
+      get { return moduleReference_; }
+      set {
+        moduleReference_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as GLOBAL_CONFIG);
@@ -725,6 +737,7 @@ namespace Protocol {
       if (ModuleName != other.ModuleName) return false;
       if (ModulePath != other.ModulePath) return false;
       if (ModuleConfig != other.ModuleConfig) return false;
+      if (ModuleReference != other.ModuleReference) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -748,6 +761,7 @@ namespace Protocol {
       if (ModuleName.Length != 0) hash ^= ModuleName.GetHashCode();
       if (ModulePath.Length != 0) hash ^= ModulePath.GetHashCode();
       if (ModuleConfig.Length != 0) hash ^= ModuleConfig.GetHashCode();
+      if (ModuleReference.Length != 0) hash ^= ModuleReference.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -829,6 +843,10 @@ namespace Protocol {
         output.WriteRawTag(146, 1);
         output.WriteBytes(ModuleConfig);
       }
+      if (ModuleReference.Length != 0) {
+        output.WriteRawTag(154, 1);
+        output.WriteString(ModuleReference);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -887,6 +905,9 @@ namespace Protocol {
       }
       if (ModuleConfig.Length != 0) {
         size += 2 + pb::CodedOutputStream.ComputeBytesSize(ModuleConfig);
+      }
+      if (ModuleReference.Length != 0) {
+        size += 2 + pb::CodedOutputStream.ComputeStringSize(ModuleReference);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -949,6 +970,9 @@ namespace Protocol {
       }
       if (other.ModuleConfig.Length != 0) {
         ModuleConfig = other.ModuleConfig;
+      }
+      if (other.ModuleReference.Length != 0) {
+        ModuleReference = other.ModuleReference;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1027,6 +1051,10 @@ namespace Protocol {
           }
           case 146: {
             ModuleConfig = input.ReadBytes();
+            break;
+          }
+          case 154: {
+            ModuleReference = input.ReadString();
             break;
           }
         }

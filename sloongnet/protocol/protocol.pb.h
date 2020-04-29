@@ -505,6 +505,20 @@ class GLOBAL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_p
   ::std::string* release_moduleconfig();
   void set_allocated_moduleconfig(::std::string* moduleconfig);
 
+  // string ModuleReference = 19;
+  void clear_modulereference();
+  static const int kModuleReferenceFieldNumber = 19;
+  const ::std::string& modulereference() const;
+  void set_modulereference(const ::std::string& value);
+  #if LANG_CXX11
+  void set_modulereference(::std::string&& value);
+  #endif
+  void set_modulereference(const char* value);
+  void set_modulereference(const char* value, size_t size);
+  ::std::string* mutable_modulereference();
+  ::std::string* release_modulereference();
+  void set_allocated_modulereference(::std::string* modulereference);
+
   // int32 ListenPort = 1;
   void clear_listenport();
   static const int kListenPortFieldNumber = 1;
@@ -576,6 +590,7 @@ class GLOBAL_CONFIG : public ::google::protobuf::Message /* @@protoc_insertion_p
   ::google::protobuf::internal::ArenaStringPtr modulename_;
   ::google::protobuf::internal::ArenaStringPtr modulepath_;
   ::google::protobuf::internal::ArenaStringPtr moduleconfig_;
+  ::google::protobuf::internal::ArenaStringPtr modulereference_;
   ::google::protobuf::int32 listenport_;
   ::google::protobuf::int32 connecttime_;
   bool enablessl_;
@@ -1381,6 +1396,59 @@ inline void GLOBAL_CONFIG::set_allocated_moduleconfig(::std::string* moduleconfi
   }
   moduleconfig_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), moduleconfig);
   // @@protoc_insertion_point(field_set_allocated:Protocol.GLOBAL_CONFIG.ModuleConfig)
+}
+
+// string ModuleReference = 19;
+inline void GLOBAL_CONFIG::clear_modulereference() {
+  modulereference_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& GLOBAL_CONFIG::modulereference() const {
+  // @@protoc_insertion_point(field_get:Protocol.GLOBAL_CONFIG.ModuleReference)
+  return modulereference_.GetNoArena();
+}
+inline void GLOBAL_CONFIG::set_modulereference(const ::std::string& value) {
+  
+  modulereference_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:Protocol.GLOBAL_CONFIG.ModuleReference)
+}
+#if LANG_CXX11
+inline void GLOBAL_CONFIG::set_modulereference(::std::string&& value) {
+  
+  modulereference_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:Protocol.GLOBAL_CONFIG.ModuleReference)
+}
+#endif
+inline void GLOBAL_CONFIG::set_modulereference(const char* value) {
+  GOOGLE_DCHECK(value != NULL);
+  
+  modulereference_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:Protocol.GLOBAL_CONFIG.ModuleReference)
+}
+inline void GLOBAL_CONFIG::set_modulereference(const char* value, size_t size) {
+  
+  modulereference_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:Protocol.GLOBAL_CONFIG.ModuleReference)
+}
+inline ::std::string* GLOBAL_CONFIG::mutable_modulereference() {
+  
+  // @@protoc_insertion_point(field_mutable:Protocol.GLOBAL_CONFIG.ModuleReference)
+  return modulereference_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* GLOBAL_CONFIG::release_modulereference() {
+  // @@protoc_insertion_point(field_release:Protocol.GLOBAL_CONFIG.ModuleReference)
+  
+  return modulereference_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void GLOBAL_CONFIG::set_allocated_modulereference(::std::string* modulereference) {
+  if (modulereference != NULL) {
+    
+  } else {
+    
+  }
+  modulereference_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), modulereference);
+  // @@protoc_insertion_point(field_set_allocated:Protocol.GLOBAL_CONFIG.ModuleReference)
 }
 
 #ifdef __GNUC__
