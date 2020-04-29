@@ -2,6 +2,7 @@
 #include "epollex.h"
 #include "sockinfo.h"
 #include "NetworkEvent.hpp"
+#include "SendMessageEvent.hpp"
 #include "IData.h"
 
 using namespace Sloong::Events;
@@ -87,9 +88,22 @@ void Sloong::CNetworkHub::Exit(SmartEvent event)
 
 void Sloong::CNetworkHub::SendMessageEventHandler(SmartEvent event)
 {
-	auto send_evt = dynamic_pointer_cast<CNetworkEvent>(event);
-	SmartPackage pack = send_evt->GetDataPackage();
-	AddMessageToSendList(pack);
+	auto send_evt = dynamic_pointer_cast<CSendMessageEvent>(event);
+	auto pack = send_evt->GetDataPackage();
+	auto socket = send_evt->GetSocketID();
+	shared_ptr<CSockInfo> info = m_SockList[socket];
+
+	if (info == nullptr)
+	{
+		m_pLog->Warn("AddMessageToSendList function called, but the socket is no regiestd in NetworkHub.");
+		return;
+	}
+
+	auto transPack = make_shared<CDataTransPackage>();
+	transPack->Initialize(info->m_pCon, nullptr);
+	transPack->RequestPackage(pack);
+
+	AddMessageToSendList(transPack);
 }
 
 
@@ -99,7 +113,10 @@ void Sloong::CNetworkHub::AddMessageToSendList(SmartPackage pack)
 	shared_ptr<CSockInfo> info = m_SockList[socket];
 
 	if (info == nullptr)
+	{
+		m_pLog->Warn("AddMessageToSendList function called, but the socket is no regiestd in NetworkHub.");
 		return;
+	}
 
 	auto res = info->ResponseDataPackage(pack);
 	if (res == ResultType::Retry)
@@ -177,7 +194,7 @@ void Sloong::CNetworkHub::EnableSSL(string certFile, string keyFile, string pass
 	}
 }
 
-void Sloong::CNetworkHub::AddMonitorSocket( int nSocket )
+void Sloong::CNetworkHub::RegisteConnection(SOCKET nSocket)
 {
 	auto info = make_shared<CSockInfo>();
 	info->Initialize(m_iC, nSocket, m_pCTX);
@@ -185,7 +202,10 @@ void Sloong::CNetworkHub::AddMonitorSocket( int nSocket )
 	m_SockList[nSocket] = info;
 	sockLck.unlock();
 	m_pEpoll->AddMonitorSocket(nSocket);
+
+	m_pLog->Info(CUniversal::Format("Registe connection:[%s:%d].", info->m_pCon->m_strAddress, info->m_pCon->m_nPort));
 }
+
 
 /*************************************************
 * Function: * check_connect_timeout
