@@ -1,7 +1,7 @@
 #include "servermanage.h"
 
 #include "utility.h"
-#include "NetworkEvent.hpp"
+#include "SendMessageEvent.hpp"
 #include <jsoncpp/json/json.h>
 using namespace Sloong::Events;
 
@@ -214,23 +214,9 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const Json::Value& jRequest,CD
 		string req_str = notify.toStyledString();
 		for( auto item : notifyList)
 		{
-			// Create data package
-			auto sendMsg = make_shared<DataPackage>();
-			sendMsg->set_function(Functions::ProcessMessage);
-			sendMsg->set_content(req_str);
-			sendMsg->set_prioritylevel(1);
-			sendMsg->set_serialnumber(m_nSerialNumber);
-
-			// Get the item connect and send message.
-			auto transPack = make_shared<CDataTransPackage>();
-			transPack->Initialize(m_oWorkerList[item].Connection, nullptr);
-			transPack->RequestPackage(sendMsg);
-
-			// Step 5: 新建一个NetworkEx类型的事件，将上面准备完毕的数据发送出去。
-			auto process_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
-			process_event->SetSocketID(m_oWorkerList[item].Connection->GetSocketID());
-			process_event->SetDataPackage(transPack);
-			m_pControl->SendMessage(process_event);
+			auto event = make_shared<CSendMessageEvent>();
+			event->SetRequest(m_oWorkerList[item].Connection->GetSocketID(),req_str,m_nSerialNumber);
+			m_pControl->SendMessage(event);
 		}
 	}
 	

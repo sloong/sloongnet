@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-26 11:17:46
+ * @LastEditTime: 2020-04-29 17:24:28
  * @Description: file content
  */
 #pragma once
@@ -25,8 +25,6 @@ namespace Sloong
         void EnableClientCheck(const string& clientCheckKey, int clientCheckTime);
         void EnableTimeoutCheck(int timeoutTime, int checkInterval);
         void EnableSSL(string certFile, string keyFile, string passwd);
-
-        void AddMonitorSocket(int socket );
 
         // event handler
         void Run(SmartEvent event);
@@ -57,6 +55,8 @@ namespace Sloong
         // Work thread.
 		void CheckTimeoutWorkLoop(SMARTER params=nullptr);
         void MessageProcessWorkLoop(SMARTER params=nullptr);
+
+        void RegisteConnection(SOCKET);
 
         // Callback function
         ResultType OnNewAccept( int nSocket );

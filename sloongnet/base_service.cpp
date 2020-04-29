@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-28 17:42:39
+ * @LastEditTime: 2020-04-29 17:23:06
  * @Description: Main instance for sloongnet application.
  */
 
@@ -205,7 +205,15 @@ CResult CSloongBaseService::Initialize(RunTimeData* config)
     if( res.IsFialed() )
         m_pLog->Fatal(res.Message());
 
-    return RegisteNode();
+    res = RegisteNode();
+    if (res.IsFialed())
+    {
+        m_pLog->Fatal(res.Message());
+        return res;
+    }
+    m_pNetwork->RegisteConnection(m_pServerConfig->ManagerConnect->GetSocketID());
+
+    return CResult::Succeed();
 }
 
 CResult CSloongBaseService::InitModule()
@@ -269,7 +277,7 @@ CResult CSloongBaseService::RegisteNode()
 	CDataTransPackage dataPackage;
 	dataPackage.Initialize( m_pServerConfig->ManagerConnect );
 	dataPackage.RequestPackage(req);
-    // TODO:
+
 	ResultType result = dataPackage.SendPackage();
     if (result != ResultType::Succeed)
 		return CResult::Make_Error( "Send RegisteNode request error.");
