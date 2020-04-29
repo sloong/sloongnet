@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 11:17:32
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-29 10:59:02
+ * @LastEditTime: 2020-04-29 06:34:14
  * @Description: file content
  */
 #ifndef SERVERMANAGE_H
@@ -208,6 +208,7 @@ namespace Sloong
 
     private:
         int SearchNeedCreateTemplate();
+        void RefreshModuleReference(int id);
 
     protected:
         int m_nSerialNumber = 0;

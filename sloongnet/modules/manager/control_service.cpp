@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-04-29 10:49:50
+ * @LastEditTime: 2020-04-29 06:14:54
  */
 
 #include "control_service.h"
@@ -54,7 +54,7 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG* config)
 	{
 		return CResult::Make_Error("Config object is nullptr.");
 	}
-	auto res = m_pServer->Initialize(m_pControl);
+	auto res = m_pServer->Initialize(nullptr);
 	if (res.IsFialed())
 	{
 		return CResult::Make_Error(CUniversal::Format("Init server manage fialed. error message:%s",res.Message()));

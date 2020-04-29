@@ -8,8 +8,11 @@ using namespace Sloong::Events;
 
 CResult Sloong::CServerManage::Initialize(IControl* ic)
 {
-	m_pControl = ic;
-	m_pLog = IData::GetLog();
+	if( ic )
+	{
+		m_pControl = ic;
+		m_pLog = IData::GetLog();
+	}
 
 	m_listFuncHandler["EventRecorder"]=std::bind(&CServerManage::EventRecorderHandler, this, std::placeholders::_1,std::placeholders::_2);
 	m_listFuncHandler["RegisteWorker"]=std::bind(&CServerManage::RegisteWorkerHandler, this, std::placeholders::_1,std::placeholders::_2);
@@ -32,6 +35,7 @@ CResult Sloong::CServerManage::Initialize(IControl* ic)
 	{
 		TemplateItem addItem(item);
 		m_oTemplateList[addItem.ID] = addItem;
+		RefreshModuleReference(addItem.ID);
 	}
 
 	auto res = CConfiguation::Instance->GetTemplate(1);
@@ -171,6 +175,17 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const Json::Value& jRequest,
 }
 
 
+void Sloong::CServerManage::RefreshModuleReference(int id)
+{
+	m_oTemplateList[id].Reference.clear();
+	GLOBAL_CONFIG config;
+	config.ParseFromString(CBase64::Decode(m_oTemplateList[id].Configuation));
+	auto references = CUniversal::split(config.modulereference(),';');
+	for( auto item : references) m_oTemplateList[id].Reference.push_back( atoi(item.c_str()));
+}
+
+
+
 CResult Sloong::CServerManage::RegisteNodeHandler(const Json::Value& jRequest,CDataTransPackage* pack)
 {
 	auto sender = pack->GetRecvPackage()->sender();
@@ -258,6 +273,7 @@ CResult Sloong::CServerManage::AddTemplateHandler(const Json::Value& jRequest,CD
 	}
 	item.ID = id;
 	m_oTemplateList[id] = item;
+	RefreshModuleReference(id);
 	return CResult::Make_OK(CUniversal::ntos(id));
 }
 
@@ -317,6 +333,7 @@ CResult Sloong::CServerManage::SetTemplateHandler(const Json::Value& jRequest,CD
 	}
 
 	m_oTemplateList[info.ID] =  info;
+	RefreshModuleReference(info.ID);
 	return CResult::Succeed();
 }
 
