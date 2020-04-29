@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-24 17:53:06
+ * @LastEditTime: 2020-04-29 15:52:18
  * @Description: file content
  */
 #include "firewall_service.h"
@@ -14,7 +14,7 @@ using namespace Sloong::Events;
 
 unique_ptr<SloongNetFirewall> Sloong::SloongNetFirewall::Instance = nullptr;
 
-extern "C" CResult MessagePackageProcesser(CDataTransPackage* pack)
+extern "C" CResult MessagePackageProcesser(void* pEnv,CDataTransPackage* pack)
 {
 	return SloongNetFirewall::Instance->MessagePackageProcesser(pack);
 }
@@ -33,18 +33,18 @@ extern "C" CResult ModuleInitialized(IControl* iC){
 	return SloongNetFirewall::Instance->Initialized(iC);
 }
 
-CResult SloongNetFirewall::Initialized(IControl*)
+
+extern "C" CResult CreateProcessEnvironment(void** out_env)
 {
-	m_oConfig.ParseFromString(m_pServerConfig->exconfig());
-	m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetFirewall::MessagePackageProcesser, this, std::placeholders::_1));
-	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetFirewall::OnSocketClose, this, std::placeholders::_1));
+	return SloongNetFirewall::Instance->CreateProcessEnvironmentHandler(out_env);
 }
 
 
-
-void Sloong::SloongNetFirewall::RegistFunctionHandler(Functions func, FuncHandler handler)
+CResult SloongNetFirewall::Initialized(IControl* ic)
 {
-    m_oFunctionHandles[func] = handler;
+	m_pControl = ic;
+	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetFirewall::OnSocketClose, this, std::placeholders::_1));
+	return CResult::Succeed();
 }
 
 
@@ -69,4 +69,10 @@ void Sloong::SloongNetFirewall::OnSocketClose(SmartEvent event)
 	// call close function.
 	//m_pProcess->CloseSocket(info);
 	//net_evt->CallCallbackFunc(net_evt);
+}
+
+
+inline CResult Sloong::SloongNetFirewall::CreateProcessEnvironmentHandler(void** out_env)
+{
+	return CResult::Succeed();
 }
