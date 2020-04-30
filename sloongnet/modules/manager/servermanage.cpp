@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-29 09:27:21
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-29 10:30:15
+ * @LastEditTime: 2020-04-29 20:37:39
  * @Description: file content
  */
 #include "servermanage.h"
@@ -231,14 +231,14 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const Json::Value& jRequest,CD
 		GLOBAL_CONFIG config;
 		config.ParseFromString(CBase64::Decode(m_oTemplateList[id].Configuation));
 		Json::Value notify;
-		notify["Function"]="ReferenceNodeOnline";
+		notify["Event"]="ReferenceNodeOnline";
 		notify["Address"]= pack->GetSocketIP();
 		notify["Port"]= config.listenport();
 		string req_str = notify.toStyledString();
 		for( auto item : notifyList)
 		{
 			auto event = make_shared<CSendMessageEvent>();
-			event->SetRequest(m_oWorkerList[item].Connection->GetSocketID(),req_str,m_nSerialNumber);
+			event->SetRequest(m_oWorkerList[item].Connection->GetSocketID(),req_str,m_nSerialNumber,1,Functions::ProcessEvent);
 			m_pControl->SendMessage(event);
 		}
 	}
@@ -394,12 +394,12 @@ void Sloong::CServerManage::OnSocketClosed(SOCKET sock)
 		GLOBAL_CONFIG config;
 		config.ParseFromString(CBase64::Decode(m_oTemplateList[id].Configuation));
 		Json::Value notify;
-		notify["Function"]="ReferenceNodeOffline";
+		notify["Event"]="ReferenceNodeOffline";
 		string req_str = notify.toStyledString();
 		for( auto item : notifyList)
 		{
 			auto event = make_shared<CSendMessageEvent>();
-			event->SetRequest(m_oWorkerList[item].Connection->GetSocketID(),req_str,m_nSerialNumber);
+			event->SetRequest(m_oWorkerList[item].Connection->GetSocketID(),req_str,m_nSerialNumber,1,Functions::ProcessEvent);
 			m_pControl->SendMessage(event);
 		}
 	}

@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-26 11:58:22
+ * @LastEditTime: 2020-04-29 20:33:56
  * @Description: file content
  */
 #ifndef SLOONGNET_CONTROL_SERVICE_H
@@ -15,7 +15,8 @@
 
 extern "C" {
 	CResult MessagePackageProcesser(void*,CDataTransPackage*);
-	//CResult NewConnectAcceptProcesser(CSockInfo*);
+	CResult EventPackageProcesser(CDataTransPackage*);
+	CResult NewConnectAcceptProcesser(CSockInfo*);
 	CResult ModuleInitialization(GLOBAL_CONFIG*);
 	CResult ModuleInitialized(IControl*);
 	CResult CreateProcessEnvironment(void**);
@@ -37,6 +38,7 @@ namespace Sloong
 		CResult Initialized(IControl*);
 
 		inline CResult CreateProcessEnvironmentHandler(void**);
+		void EventPackageProcesser(CDataTransPackage*);
 
 	protected:
 		void ResetControlConfig(GLOBAL_CONFIG* config);

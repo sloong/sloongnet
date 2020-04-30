@@ -25,6 +25,7 @@ enum LogLevel{
 
 enum Functions{
     ProcessMessage=0;
+    ProcessEvent=1;
     RestartNode=2;
 }
 

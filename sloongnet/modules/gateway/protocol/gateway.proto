@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package Gateway;
+
+message test{
+    string Request=1;
+}

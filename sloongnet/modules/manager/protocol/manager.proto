@@ -1,6 +1,22 @@
 syntax = "proto3";
-package Protocol;
+package Manager;
 
+
+
+enum Events{
+   ReferenceModuleOnline=0;
+   ReferenceModuleOffline=1;
+}
+
+message ReferenceModuleOnlineEvent{
+   string Address=1;
+   int32 Port=2;
+}
+
+message ReferenceModuleOfflineEvent{
+   string Address=1;
+   int32 Port=2;
+}
 
 enum Functions{
     /* Flow: All -> All

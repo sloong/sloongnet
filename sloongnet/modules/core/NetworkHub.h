@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-29 17:24:28
+ * @LastEditTime: 2020-04-29 20:30:20
  * @Description: file content
  */
 #pragma once
@@ -36,6 +36,9 @@ namespace Sloong
 
         inline void RegisterMessageProcesser(MessagePackageProcesserFunction value){
             m_pProcessFunc = value;
+        }
+        inline void RegisterEventProcesser(EventPackageProcesserFunction value){
+            m_pEventFunc = value;
         }
         inline void RegisterEnvCreateProcesser(CreateProcessEnvironmentFunction value){
             m_pCreateEnvFunc = value;
@@ -92,6 +95,7 @@ namespace Sloong
         CEasySync               m_oProcessThreadSync;
         CreateProcessEnvironmentFunction         m_pCreateEnvFunc = nullptr;
         MessagePackageProcesserFunction          m_pProcessFunc = nullptr;
+        EventPackageProcesserFunction            m_pEventFunc = nullptr;
         NewConnectAcceptProcesserFunction        m_pAcceptFunc = nullptr;
         queue_ex<SmartPackage>*    m_pWaitProcessList;
     };

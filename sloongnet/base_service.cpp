@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-29 09:30:18
+ * @LastEditTime: 2020-04-29 20:31:31
  * @Description: Main instance for sloongnet application.
  */
 
@@ -200,6 +200,7 @@ CResult CSloongBaseService::Initialize(RunTimeData* config)
     
     m_pNetwork->RegisterEnvCreateProcesser(m_pCreateEvnFunc);
     m_pNetwork->RegisterMessageProcesser(m_pHandler);
+    m_pNetwork->RegisterEventProcesser(m_pEventHandler);
     m_pNetwork->RegisterAccpetConnectProcesser(m_pAccept);
     res = m_pModuleInitializedFunc(m_pControl.get());
     if( res.IsFialed() )
@@ -242,6 +243,12 @@ CResult CSloongBaseService::InitModule()
     m_pHandler = (MessagePackageProcesserFunction)dlsym(m_pModule, "MessagePackageProcesser");
     if ((errmsg = dlerror()) != NULL)  {
         string errMsg = CUniversal::Format("Load function MessagePackageProcesser error[%s].",errmsg);
+        m_pLog->Error(errMsg);
+        return CResult::Make_Error(errMsg);
+    }
+    m_pEventHandler = (EventPackageProcesserFunction)dlsym(m_pModule, "EventPackageProcesser");
+    if ((errmsg = dlerror()) != NULL)  {
+        string errMsg = CUniversal::Format("Load function EventPackageProcesserFunction error[%s].",errmsg);
         m_pLog->Error(errMsg);
         return CResult::Make_Error(errMsg);
     }

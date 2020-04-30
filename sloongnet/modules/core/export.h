@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-26 11:45:02
+ * @LastEditTime: 2020-04-29 20:22:02
  * @Description: file content
  */
 
@@ -15,6 +15,7 @@ using namespace Protocol;
 #include "sockinfo.h"
 typedef CResult (*CreateProcessEnvironmentFunction)(void**);
 typedef CResult (*MessagePackageProcesserFunction)(void*,CDataTransPackage*);
+typedef CResult (*EventPackageProcesserFunction)(CDataTransPackage*);
 typedef CResult (*NewConnectAcceptProcesserFunction)(CSockInfo*);
 typedef CResult (*ModuleInitializationFunction)(GLOBAL_CONFIG*);
 typedef CResult (*ModuleInitializedFunction)(IControl*);

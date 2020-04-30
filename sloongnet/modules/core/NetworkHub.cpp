@@ -277,15 +277,21 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 			SmartPackage pack;
 			while( m_pWaitProcessList[i].TryPop(pack) )
 			{
-				if(pack->GetRecvPackage()->function() == Functions::RestartNode)
-				{
-					m_iC->SendMessage(EVENT_TYPE::ProgramRestart);
-				}
-				else
-				{
-					res = m_pProcessFunc(pEnv,pack.get());
-					if( res.IsSucceed())
-						AddMessageToSendList(pack);
+				auto func = pack->GetRecvPackage()->function();
+				switch(func){
+					case Functions::RestartNode:
+						m_iC->SendMessage(EVENT_TYPE::ProgramRestart);
+					break;
+					case Functions::ProcessEvent:{
+						m_pEventFunc(pack.get());
+					}break;
+					case Functions::ProcessMessage:{
+						res = m_pProcessFunc(pEnv,pack.get());
+						if( res.IsSucceed())
+							AddMessageToSendList(pack);
+						}break;
+					default:
+						m_pLog->Warn("Data package check functions error. cannot process.");
 				}
 			}
 			goto MessagePorcessListRetry;

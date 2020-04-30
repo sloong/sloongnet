@@ -64,6 +64,7 @@ namespace Sloong
 
 		CreateProcessEnvironmentFunction	m_pCreateEvnFunc = nullptr;
 		MessagePackageProcesserFunction m_pHandler = nullptr;
+		EventPackageProcesserFunction m_pEventHandler = nullptr;
 		NewConnectAcceptProcesserFunction m_pAccept = nullptr;
 		ModuleInitializationFunction	m_pModuleInitializationFunc = nullptr;
 		ModuleInitializedFunction		m_pModuleInitializedFunc = nullptr;
