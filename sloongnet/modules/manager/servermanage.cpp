@@ -2,38 +2,41 @@
  * @Author: WCB
  * @Date: 2020-04-29 09:27:21
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-29 20:37:39
+ * @LastEditTime: 2020-05-06 16:38:25
  * @Description: file content
  */
 #include "servermanage.h"
 
 #include "utility.h"
 #include "SendMessageEvent.hpp"
+#include "protocol/manager.pb.h"
+using namespace Manager;
+
 #include <jsoncpp/json/json.h>
 using namespace Sloong::Events;
 
-
-CResult Sloong::CServerManage::Initialize(IControl* ic)
+CResult Sloong::CServerManage::Initialize(IControl *ic)
 {
-	if( ic )
+	if (ic)
 	{
 		m_pControl = ic;
 		m_pLog = IData::GetLog();
 	}
 
-	m_listFuncHandler["EventRecorder"]=std::bind(&CServerManage::EventRecorderHandler, this, std::placeholders::_1,std::placeholders::_2);
-	m_listFuncHandler["RegisteWorker"]=std::bind(&CServerManage::RegisteWorkerHandler, this, std::placeholders::_1,std::placeholders::_2);
-	m_listFuncHandler["RegisteNode"]=std::bind(&CServerManage::RegisteNodeHandler, this, std::placeholders::_1,std::placeholders::_2);
-	m_listFuncHandler["AddTemplate"]=std::bind(&CServerManage::AddTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
-	m_listFuncHandler["DeleteTemplate"]=std::bind(&CServerManage::DeleteTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
-	m_listFuncHandler["SetTemplate"]=std::bind(&CServerManage::SetTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
-	m_listFuncHandler["QueryTemplate"]=std::bind(&CServerManage::QueryTemplateHandler, this, std::placeholders::_1,std::placeholders::_2);
-	m_listFuncHandler["QueryNode"]=std::bind(&CServerManage::QueryNodeHandler, this, std::placeholders::_1,std::placeholders::_2);
+	m_listFuncHandler["EventRecorder"] = std::bind(&CServerManage::EventRecorderHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler["RegisteWorker"] = std::bind(&CServerManage::RegisteWorkerHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler["RegisteNode"] = std::bind(&CServerManage::RegisteNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler["AddTemplate"] = std::bind(&CServerManage::AddTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler["DeleteTemplate"] = std::bind(&CServerManage::DeleteTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler["SetTemplate"] = std::bind(&CServerManage::SetTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler["QueryTemplate"] = std::bind(&CServerManage::QueryTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler["QueryNode"] = std::bind(&CServerManage::QueryNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
 
-	if(!CConfiguation::Instance->IsInituialized())
+	if (!CConfiguation::Instance->IsInituialized())
 	{
 		auto res = CConfiguation::Instance->Initialize("/data/configuation.db");
-		if (res.IsFialed()) return res;
+		if (res.IsFialed())
+			return res;
 	}
 
 	// Initialize template list
@@ -52,11 +55,10 @@ CResult Sloong::CServerManage::Initialize(IControl* ic)
 		return res;
 }
 
-
-CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG* config)
+CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG *config)
 {
 	string config_str;
-	if(!config->SerializeToString(&config_str))
+	if (!config->SerializeToString(&config_str))
 	{
 		return CResult::Make_Error("Config SerializeToString error.");
 	}
@@ -67,10 +69,10 @@ CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG* config)
 	info.replicas = 1;
 	info.configuation = CBase64::Encode(config_str);
 	CResult res(ResultType::Succeed);
-	if( CConfiguation::Instance->CheckTemplateExist(1))
-		res = CConfiguation::Instance->SetTemplate(1,info);
+	if (CConfiguation::Instance->CheckTemplateExist(1))
+		res = CConfiguation::Instance->SetTemplate(1, info);
 	else
-		res = CConfiguation::Instance->AddTemplate(info,nullptr);
+		res = CConfiguation::Instance->AddTemplate(info, nullptr);
 	m_oTemplateList[1] = info;
 	return res;
 }
@@ -80,7 +82,7 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 	// First time find the no created
 	for (auto item : m_oTemplateList)
 	{
-		if (item.second.Replicas == 0 || item.second.ID == 1 )
+		if (item.second.Replicas == 0 || item.second.ID == 1)
 			continue;
 
 		if (item.second.Created.size() == item.second.Replicas)
@@ -93,7 +95,7 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 	// Sencond time find the created < replicas
 	for (auto item : m_oTemplateList)
 	{
-		if (item.second.Replicas == 0 || item.second.ID == 1 )
+		if (item.second.Replicas == 0 || item.second.ID == 1)
 			continue;
 
 		if (item.second.Created.size() == item.second.Replicas)
@@ -105,8 +107,7 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 	return -1;
 }
 
-
-CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage* pack)
+CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 {
 	Json::Reader reader;
 	Json::Value jReq;
@@ -123,34 +124,33 @@ CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage* pack)
 	}
 	auto function = jReq["Function"].asString();
 	m_pLog->Verbos(CUniversal::Format("Request [%s]:[%s]", function, str_req));
-	if(!m_listFuncHandler.exist(function))
+	if (!m_listFuncHandler.exist(function))
 	{
-		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Function [%s] no handler.",function));
+		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Function [%s] no handler.", function));
 		return CResult::Succeed();
 	}
 
-	auto res = m_listFuncHandler[function](jReq,pack);
+	auto res = m_listFuncHandler[function](jReq, pack);
 
-	m_pLog->Verbos(CUniversal::Format("Response [%s]:[%s][%s].", function, Protocol::ResultType_Name(res.Result()), res.Message() ));
+	m_pLog->Verbos(CUniversal::Format("Response [%s]:[%s][%s].", function, Protocol::ResultType_Name(res.Result()), res.Message()));
 	pack->ResponsePackage(res);
 	return CResult::Succeed();
 }
 
-
-CResult Sloong::CServerManage::EventRecorderHandler(const Json::Value& jRequest,CDataTransPackage* pack)
+CResult Sloong::CServerManage::EventRecorderHandler(const Json::Value &jRequest, CDataTransPackage *pack)
 {
 	return CResult::Succeed();
 }
 
-CResult Sloong::CServerManage::RegisteWorkerHandler(const Json::Value& jRequest,CDataTransPackage* pack)
+CResult Sloong::CServerManage::RegisteWorkerHandler(const Json::Value &jRequest, CDataTransPackage *pack)
 {
 	auto sender = pack->GetRecvPackage()->sender();
-	if( sender.length() == 0 )
+	if (sender.length() == 0)
 	{
 		sender = CUtility::GenUUID();
 	}
 	auto sender_info = m_oWorkerList.try_get(sender);
-	if( sender_info == nullptr)
+	if (sender_info == nullptr)
 	{
 		ServerItem item;
 		item.Address = pack->GetSocketIP();
@@ -158,55 +158,53 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const Json::Value& jRequest,
 		item.UUID = sender;
 		m_oWorkerList[sender] = item;
 		m_pLog->Verbos(CUniversal::Format("Module[%s:%d] regist to system. Allocating uuid [%s].", item.Address, item.Port, item.UUID));
-		return CResult(ResultType::Retry,sender);
+		return CResult(ResultType::Retry, sender);
 	}
 
 	auto index = SearchNeedCreateTemplate();
 	if (index == -1)
 	{
-		return CResult(ResultType::Retry,sender);
+		return CResult(ResultType::Retry, sender);
 	}
-	
-	if( sender_info == nullptr)
+
+	if (sender_info == nullptr)
 	{
 		return CResult::Make_Error("Add server info to ServerList fialed.");
 	}
-	
+
 	auto tpl = m_oTemplateList[index];
-	
+
 	Json::Value root;
-	root["TemplateID"] = tpl.ID ;
+	root["TemplateID"] = tpl.ID;
 	root["Configuation"] = m_oTemplateList[tpl.ID].Configuation;
 	m_pLog->Verbos(CUniversal::Format("Allocating module[%s] Type to [%s]", sender_info->UUID, tpl.Name));
 	return CResult::Make_OK(root.toStyledString());
 }
-
 
 void Sloong::CServerManage::RefreshModuleReference(int id)
 {
 	m_oTemplateList[id].Reference.clear();
 	GLOBAL_CONFIG config;
 	config.ParseFromString(CBase64::Decode(m_oTemplateList[id].Configuation));
-	auto references = CUniversal::split(config.modulereference(),';');
-	for( auto item : references) m_oTemplateList[id].Reference.push_back( atoi(item.c_str()));
+	auto references = CUniversal::split(config.modulereference(), ';');
+	for (auto item : references)
+		m_oTemplateList[id].Reference.push_back(atoi(item.c_str()));
 }
 
-
-
-CResult Sloong::CServerManage::RegisteNodeHandler(const Json::Value& jRequest,CDataTransPackage* pack)
+CResult Sloong::CServerManage::RegisteNodeHandler(const Json::Value &jRequest, CDataTransPackage *pack)
 {
 	auto sender = pack->GetRecvPackage()->sender();
-	if( !jRequest["TemplateID"].isInt() || sender.length() == 0)
+	if (!jRequest["TemplateID"].isInt() || sender.length() == 0)
 		return CResult::Make_Error("The required parameter check error.");
-	
-	int id = jRequest["TemplateID"].asInt();
-	if(!m_oTemplateList.exist(id))
-		return CResult::Make_Error(CUniversal::Format("The template id [%d] is no exist.",id));
-	
-	if( !m_oWorkerList.exist(sender))
-		return CResult::Make_Error(CUniversal::Format("The sender [%d] is no regitser.",sender));
 
-	if( id == 1)
+	int id = jRequest["TemplateID"].asInt();
+	if (!m_oTemplateList.exist(id))
+		return CResult::Make_Error(CUniversal::Format("The template id [%d] is no exist.", id));
+
+	if (!m_oWorkerList.exist(sender))
+		return CResult::Make_Error(CUniversal::Format("The sender [%d] is no regitser.", sender));
+
+	if (id == 1)
 		return CResult::Make_Error("Template id error.");
 
 	// Save node info.
@@ -218,38 +216,32 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const Json::Value& jRequest,CD
 
 	// Find reference node and notify them
 	list<string> notifyList;
-	for( auto item : m_oTemplateList)
+	for (auto item : m_oTemplateList)
 	{
-		if( item.second.Reference.exist(id))
+		if (item.second.Reference.exist(id))
 		{
-			for( auto i : item.second.Created) notifyList.push_back(i);
+			for (auto i : item.second.Created)
+				notifyList.push_back(i);
 		}
 	}
 
-	if( notifyList.size() > 0 )
+	if (notifyList.size() > 0)
 	{
 		GLOBAL_CONFIG config;
 		config.ParseFromString(CBase64::Decode(m_oTemplateList[id].Configuation));
-		Json::Value notify;
-		notify["Event"]="ReferenceNodeOnline";
-		notify["Address"]= pack->GetSocketIP();
-		notify["Port"]= config.listenport();
-		string req_str = notify.toStyledString();
-		for( auto item : notifyList)
-		{
-			auto event = make_shared<CSendMessageEvent>();
-			event->SetRequest(m_oWorkerList[item].Connection->GetSocketID(),req_str,m_nSerialNumber,1,Functions::ProcessEvent);
-			m_pControl->SendMessage(event);
-		}
+		EventReferenceModuleOnline online_event;
+		offline_event->set_address(pack->GetSocketIP());
+		offline_event->set_port(config.listenport());
+		SendEvent(notifyList, Events::ReferenceModuleOnline, &online_event);
 	}
-	
+
 	return CResult::Succeed();
 }
 
-CResult Sloong::CServerManage::AddTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
+CResult Sloong::CServerManage::AddTemplateHandler(const Json::Value &jRequest, CDataTransPackage *pack)
 {
 	auto jReq = jRequest["Template"];
-	if(!jReq["Name"].isString()&&!jReq["Replicas"].isInt()&&!jReq["Configuation"].isString())
+	if (!jReq["Name"].isString() && !jReq["Replicas"].isInt() && !jReq["Configuation"].isString())
 	{
 		return CResult::Make_Error("The required parameter check error.");
 	}
@@ -260,8 +252,8 @@ CResult Sloong::CServerManage::AddTemplateHandler(const Json::Value& jRequest,CD
 	item.Replicas = jReq["Replicas"].asInt();
 	item.Configuation = jReq["Configuation"].asString();
 	int id = 0;
-	auto res = CConfiguation::Instance->AddTemplate(item.ToTemplateInfo(),&id);
-	if( res.IsFialed() )
+	auto res = CConfiguation::Instance->AddTemplate(item.ToTemplateInfo(), &id);
+	if (res.IsFialed())
 	{
 		return res;
 	}
@@ -271,26 +263,25 @@ CResult Sloong::CServerManage::AddTemplateHandler(const Json::Value& jRequest,CD
 	return CResult::Make_OK(CUniversal::ntos(id));
 }
 
-
-CResult Sloong::CServerManage::DeleteTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
+CResult Sloong::CServerManage::DeleteTemplateHandler(const Json::Value &jRequest, CDataTransPackage *pack)
 {
-	if(!jRequest["TemplateID"].isInt())
+	if (!jRequest["TemplateID"].isInt())
 	{
 		return CResult::Make_Error("The required parameter check error.");
 	}
 
 	int id = jRequest["TemplateID"].asInt();
-	if( !m_oTemplateList.exist(id))
+	if (!m_oTemplateList.exist(id))
 	{
-		return CResult::Make_Error(CUniversal::Format("The template id [%d] is no exist.",id));
+		return CResult::Make_Error(CUniversal::Format("The template id [%d] is no exist.", id));
 	}
-	if( id == 1)
+	if (id == 1)
 	{
 		return CResult::Make_Error("Cannot delete this template.");
 	}
 
 	auto res = CConfiguation::Instance->DeleteTemplate(id);
-	if( res.IsFialed() )
+	if (res.IsFialed())
 	{
 		return res;
 	}
@@ -298,15 +289,15 @@ CResult Sloong::CServerManage::DeleteTemplateHandler(const Json::Value& jRequest
 	return CResult::Succeed();
 }
 
-
-CResult Sloong::CServerManage::SetTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
+CResult Sloong::CServerManage::SetTemplateHandler(const Json::Value &jRequest, CDataTransPackage *pack)
 {
 	auto jReq = jRequest["Template"];
 	if (!jReq["ID"].isInt() || !m_oTemplateList.exist(jReq["ID"].asInt()))
 	{
-		return CResult::Make_Error("Check the templeate ID error, please check.");;
+		return CResult::Make_Error("Check the templeate ID error, please check.");
+		;
 	}
-	
+
 	auto info = m_oTemplateList[jReq["ID"].asInt()];
 	if (!jReq["Name"].isNull())
 		info.Name = jReq["Name"].asString();
@@ -326,41 +317,41 @@ CResult Sloong::CServerManage::SetTemplateHandler(const Json::Value& jRequest,CD
 		return res;
 	}
 
-	m_oTemplateList[info.ID] =  info;
+	m_oTemplateList[info.ID] = info;
 	RefreshModuleReference(info.ID);
 	return CResult::Succeed();
 }
 
-CResult Sloong::CServerManage::QueryTemplateHandler(const Json::Value& jRequest,CDataTransPackage* pack)
+CResult Sloong::CServerManage::QueryTemplateHandler(const Json::Value &jRequest, CDataTransPackage *pack)
 {
 	Json::Value list;
-	if( jRequest["TemplateID"].isInt() )
+	if (jRequest["TemplateID"].isInt())
 	{
 		int id = jRequest["TemplateID"].asInt();
-		if(!m_oTemplateList.exist(id))
+		if (!m_oTemplateList.exist(id))
 		{
-			return CResult::Make_Error(CUniversal::Format("The template id [%d] is no exist.",id));
+			return CResult::Make_Error(CUniversal::Format("The template id [%d] is no exist.", id));
 		}
 
 		list.append(m_oTemplateList[id].ToJson());
 	}
 	else
 	{
-		for (auto& i : m_oTemplateList)
+		for (auto &i : m_oTemplateList)
 		{
 			list.append(i.second.ToJson());
 		}
 	}
-	
+
 	Json::Value root;
 	root["TemplateList"] = list;
 	return CResult::Make_OK(root.toStyledString());
 }
 
-CResult Sloong::CServerManage::QueryNodeHandler(const Json::Value& jRequest,CDataTransPackage* pack)
+CResult Sloong::CServerManage::QueryNodeHandler(const Json::Value &jRequest, CDataTransPackage *pack)
 {
 	Json::Value list;
-	for (auto& i : m_oWorkerList)
+	for (auto &i : m_oWorkerList)
 	{
 		list.append(i.second.ToJson());
 	}
@@ -369,10 +360,23 @@ CResult Sloong::CServerManage::QueryNodeHandler(const Json::Value& jRequest,CDat
 	return CResult::Make_OK(root.toStyledString());
 }
 
+void Sloong::CServerManage::SendEvent(list<string> notifyList, int event, ::google::protobuf::Message *msg)
+{
+	for (auto item : notifyList)
+	{
+		string msg_str;
+		msg->SerializeToString(&msg_str);
+		SetRequest(target, event.ToString(), msg_str);
+		auto event = make_shared<CSendMessageEvent>();
+		event->SetRequest(m_oWorkerList[item].Connection->GetSocketID(), CUniversal::ntos(event), msg_str, m_nSerialNumber, 1, Functions::ProcessEvent);
+		m_pControl->SendMessage(event);
+	}
+}
 
 void Sloong::CServerManage::OnSocketClosed(SOCKET sock)
 {
-	if( !m_oSocketList.exist(sock)) return;
+	if (!m_oSocketList.exist(sock))
+		return;
 
 	auto target = m_oSocketList[sock];
 	auto id = m_oWorkerList[target].TemplateID;
@@ -381,26 +385,22 @@ void Sloong::CServerManage::OnSocketClosed(SOCKET sock)
 
 	// Find reference node and notify them
 	list<string> notifyList;
-	for( auto item : m_oTemplateList)
+	for (auto item : m_oTemplateList)
 	{
-		if( item.second.Reference.exist(id))
+		if (item.second.Reference.exist(id))
 		{
-			for( auto i : item.second.Created) notifyList.push_back(i);
+			for (auto i : item.second.Created)
+				notifyList.push_back(i);
 		}
 	}
 
-	if( notifyList.size() > 0 )
+	if (notifyList.size() > 0)
 	{
 		GLOBAL_CONFIG config;
 		config.ParseFromString(CBase64::Decode(m_oTemplateList[id].Configuation));
-		Json::Value notify;
-		notify["Event"]="ReferenceNodeOffline";
-		string req_str = notify.toStyledString();
-		for( auto item : notifyList)
-		{
-			auto event = make_shared<CSendMessageEvent>();
-			event->SetRequest(m_oWorkerList[item].Connection->GetSocketID(),req_str,m_nSerialNumber,1,Functions::ProcessEvent);
-			m_pControl->SendMessage(event);
-		}
+		EventReferenceModuleOffline offline_event;
+		offline_event->set_address("");
+		offline_event->set_port(0);
+		SendEvent(notifyList, Events::ReferenceModuleOffline, &offline_event);
 	}
 }

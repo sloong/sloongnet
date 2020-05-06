@@ -2,15 +2,15 @@
 # @Author: WCB
  # @Date: 2019-11-05 08:59:19
  # @LastEditors: WCB
- # @LastEditTime: 2019-11-06 17:06:01
+ # @LastEditTime: 2020-04-30 11:21:22
  # @Description: file content
  ###
 SCRIPTFOLDER=$(dirname $(readlink -f $0))
 #echo "ScriptFolder: "$SCRIPTFOLDER
 # cd to current file folder
 cd $SCRIPTFOLDER
-protoc --cpp_out=./ ./core.proto
-#protoc --csharp_out=./ ./core.proto
+protoc --cpp_out=./ ./*.proto
+#protoc --csharp_out=./ ./protocol.proto
 #pip3 install protobuf
 #protoc --python_out=./ ./protocol.proto
 #protoc --python3_out=./ ./protocol.proto

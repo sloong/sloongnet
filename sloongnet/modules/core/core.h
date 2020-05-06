@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-24 19:39:18
+ * @LastEditTime: 2020-04-30 11:34:56
  * @Description: file content
  */
 #ifndef SLOONGNET_MODULE_CORE_CORE_H
@@ -45,7 +45,7 @@
 
 using namespace std;
 
-#include "protocol/protocol.pb.h"
+#include "protocol/core.pb.h"
 using namespace Protocol;
 
 #include <jsoncpp/json/json.h>

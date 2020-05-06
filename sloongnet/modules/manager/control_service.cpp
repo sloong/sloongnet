@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-04-29 20:39:22
+ * @LastEditTime: 2020-05-06 16:44:26
  */
 
 #include "control_service.h"
@@ -133,26 +133,5 @@ inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(voi
 
 void Sloong::SloongControlService::EventPackageProcesser(CDataTransPackage* pack)
 {
-	Json::Reader reader;
-	Json::Value jReq;
-	auto str_req = pack->GetRecvMessage();
-	if (!reader.parse(str_req, jReq))
-	{
-		m_pLog->Error(CUniversal::Format("EventPackageProcesser is called but parser json [%s] error.", str_req));
-		return;
-	}
-	if (jReq["Event"].isNull())
-	{
-		m_pLog->Error("EventPackageProcesser is called but no set [Event] node.");
-		return;
-	}
-	auto event = jReq["Event"].asString();
-	m_pLog->Verbos(CUniversal::Format("Event happened [%s]:[%s]", event, str_req));
-	if(!m_listFuncHandler.exist(function))
-	{
-		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Function [%s] no handler.",function));
-		return CResult::Succeed();
-	}
-
-	auto res = m_listFuncHandler[function](jReq,pack);
+	m_pLog->Info("EventPackageProcesser is called.");
 }

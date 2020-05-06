@@ -5,6 +5,9 @@
 #include "IData.h"
 #include "NormalEvent.hpp"
 #include "transpond.h"
+
+#include "protocol/manager.pb.h"
+using namespace Manager;
 using namespace Sloong;
 using namespace Sloong::Events;
 
@@ -19,7 +22,12 @@ extern "C" CResult MessagePackageProcesser(void* env,CDataTransPackage* pack)
 	else
 		return CResult::Make_Error("Environment convert error. cannot process message.");
 }
-	
+
+extern "C" CResult EventPackageProcesser(CDataTransPackage* pack)
+{
+	return SloongNetGateway::Instance->EventPackageProcesser(pack);
+}
+
 extern "C" CResult NewConnectAcceptProcesser(CSockInfo* info)
 {
 	return CResult::Succeed();
@@ -114,4 +122,30 @@ void Sloong::SloongNetGateway::OnSocketClose(SmartEvent event)
 	//m_pProcess->CloseSocket(info);
 	//net_evt->CallCallbackFunc(net_evt);
 }
+
+
+
+
+void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage* pack)
+{
+	auto event = Events_MIN;
+	if(!Manager::Events_Parse(pack->content(),&event))
+	{
+		m_pLog->Error(CUniversal::Format("Receive event but parse error. content:[%s]",pack->content());
+		return;
+	}
+
+	switch (event)
+	{
+	case Events::ReferenceModuleOnline:{
+		m_pLog->Info("Receive ReferenceModuleOnline event");
+		}break;
+	case Events::ReferenceModuleOffline:{
+		m_pLog->Info("Receive ReferenceModuleOffline event");
+		}break;
+	default:{
+		}break;
+	}
+}
+
 

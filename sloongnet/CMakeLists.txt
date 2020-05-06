@@ -6,7 +6,6 @@ message(WorkDir:${CMAKE_CURRENT_LIST_DIR})
 
 include_directories(
     "${CMAKE_CURRENT_LIST_DIR}"
-    "${CMAKE_CURRENT_LIST_DIR}/protocol"
 	"${CMAKE_CURRENT_LIST_DIR}/referenced/libuniv"
     "${CMAKE_CURRENT_LIST_DIR}/modules/core"
     "/usr/include/glib-2.0" 
@@ -49,7 +48,7 @@ set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 #AUX_SOURCE_DIRECTORY(. SRC_LIST) 
 #file(GLOB_RECURSE MODULE_SRC_LIST "./*/*.c*")
 #file(GLOB_RECURSE SRC_LIST "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
-aux_source_directory("${CMAKE_CURRENT_LIST_DIR}/protocol/" MODULE_SRC_LIST)
+aux_source_directory("${CMAKE_CURRENT_LIST_DIR}/modules/core/protocol/" MODULE_SRC_LIST)
 aux_source_directory(. SRC_LIST)
 list(APPEND SRC_LIST ${MODULE_SRC_LIST})
 

@@ -8,17 +8,22 @@ enum Events{
    ReferenceModuleOffline=1;
 }
 
-message ReferenceModuleOnlineEvent{
+message EventReferenceModuleOnline{
    string Address=1;
    int32 Port=2;
 }
 
-message ReferenceModuleOfflineEvent{
+message EventReferenceModuleOffline{
    string Address=1;
    int32 Port=2;
 }
 
-enum Functions{
+message EventPackage{
+   Events Event=1;
+   bytes EventObject=2;
+}
+
+enum RequestType{
     /* Flow: All -> All
        Response: Content - result with JSON string. 
     */
@@ -37,6 +42,12 @@ enum Functions{
        Response: NO
     */
     RestartService=4;
+}
+
+message RequestPackage
+{
+   RequestType RequestType=1;
+   bytes RequestObject=2;
 }
 
 message RegisteWorkerMessage

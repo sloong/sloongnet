@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 11:17:32
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-29 10:17:12
+ * @LastEditTime: 2020-05-03 21:59:35
  * @Description: file content
  */
 #ifndef SERVERMANAGE_H
@@ -212,6 +212,7 @@ namespace Sloong
     private:
         int SearchNeedCreateTemplate();
         void RefreshModuleReference(int id);
+        void SendEvent(list<string>, int, ::google::protobuf::Message*);
 
     protected:
         int m_nSerialNumber = 0;
