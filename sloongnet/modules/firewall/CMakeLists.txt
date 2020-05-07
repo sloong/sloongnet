@@ -41,10 +41,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-switch -Wno-return-type -Wno-
 set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 
 #当前目录下所有源文件赋给SRC_LIST
-#AUX_SOURCE_DIRECTORY(. SRC_LIST) 
-#file(GLOB_RECURSE MODULE_SRC_LIST "./*/*.c*")
-#file(GLOB_RECURSE MODULE_SRC_LIST "${CMAKE_CURRENT_LIST_DIR}/protocol/*.cc")
-#file(GLOB_RECURSE SRC_LIST "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 aux_source_directory(. SRC_LIST)
 list(APPEND SRC_LIST ${MODULE_SRC_LIST})
 

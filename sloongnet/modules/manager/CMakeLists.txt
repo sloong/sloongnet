@@ -42,26 +42,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-switch -Wno-return-type -Wno-
 set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 
 #当前目录下所有源文件赋给SRC_LIST
-#AUX_SOURCE_DIRECTORY(. SRC_LIST) 
-#file(GLOB_RECURSE MODULE_SRC_LIST "./*/*.c*")
-#file(GLOB_RECURSE MODULE_SRC_LIST "${CMAKE_CURRENT_LIST_DIR}/protocol/*.cc")
-#file(GLOB_RECURSE SRC_LIST "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 aux_source_directory(. SRC_LIST)
 list(APPEND SRC_LIST ${MODULE_SRC_LIST})
 
 # 编译Protobuf
-file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/protocol/*.proto")
-foreach(PROTO_FILE in ${PROTO_FILES})
-    string(REGEX REPLACE "[.]proto$" ".pb.cc" OUTPUT_SOURCE ${PROTO_FILE})
-    list(APPEND PROTOBUF_LIST ${OUTPUT_SOURCE}) 
-endforeach()
-add_custom_command( OUTPUT ${PROTOBUF_LIST}
-                    PRE_BUILD 
-                    COMMAND protoc --cpp_out=./ ./*.proto 
-                    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/protocol/
-                    DEPENDS ${PROTO_FILES}
-                    COMMENT "Building ${PROJECT_NAME} Protobuf files")
-list(APPEND SRC_LIST ${PROTOBUF_LIST})
+find_package(Protobuf REQUIRED)
+FILE(GLOB protofiles "${CMAKE_CURRENT_LIST_DIR}/protocol/*.proto")
+protobuf_generate_cpp_ex(${CMAKE_CURRENT_LIST_DIR}/protocol PROTOSRCS PROTOHDRS ${protofiles})
+list(APPEND SRC_LIST ${PROTOSRCS})
 
 #生成可执行文件
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRC_LIST})
