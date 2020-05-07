@@ -56,6 +56,9 @@ ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRC_LIST})
 #target_compile_features(mmseg PRIVATE cxx_range_for)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,./")
 
+# 编译Protobuf
+add_custom_command(TARGET ${PROJECT_NAME} PRE_LINK COMMAND ${CMAKE_CURRENT_LIST_DIR}/protocol/rebuild.sh VERBATIM)
+
 #添加链接库
 target_link_libraries(${PROJECT_NAME} m)
 target_link_libraries(${PROJECT_NAME} dl)
