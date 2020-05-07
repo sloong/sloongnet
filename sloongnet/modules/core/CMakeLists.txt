@@ -46,6 +46,19 @@ set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 aux_source_directory(. SRC_LIST)
 list(APPEND SRC_LIST ${MODULE_SRC_LIST})
 
+# 编译Protobuf
+file(GLOB PROTO_FILES "${CMAKE_CURRENT_LIST_DIR}/protocol/*.proto")
+foreach(PROTO_FILE in ${PROTO_FILES})
+    string(REGEX REPLACE "[.]proto$" ".pb.cc" OUTPUT_SOURCE ${PROTO_FILE})
+    list(APPEND PROTOBUF_LIST ${OUTPUT_SOURCE}) 
+endforeach()
+add_custom_command( OUTPUT ${PROTOBUF_LIST}
+                    PRE_BUILD 
+                    COMMAND protoc --cpp_out=./ ./*.proto 
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/protocol/
+                    DEPENDS ${PROTO_FILES}
+                    COMMENT "Building ${PROJECT_NAME} Protobuf files")
+list(APPEND SRC_LIST ${PROTOBUF_LIST})
 
 #生成动态链接库
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRC_LIST})
@@ -54,8 +67,7 @@ ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRC_LIST})
 #target_compile_features(mmseg PRIVATE cxx_range_for)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,./")
 
-# 编译Protobuf
-add_custom_command(TARGET ${PROJECT_NAME} PRE_LINK COMMAND ${CMAKE_CURRENT_LIST_DIR}/protocol/rebuild.sh VERBATIM)
+
 
 #添加链接库
 target_link_libraries(${PROJECT_NAME} m)
