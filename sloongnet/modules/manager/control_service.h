@@ -24,9 +24,6 @@ extern "C" {
 
 namespace Sloong
 {
-	
-	typedef std::function<bool(Functions, string, CDataTransPackage*)> FuncHandler;
-
 	class CConfiguation;
 	class SloongControlService
 	{

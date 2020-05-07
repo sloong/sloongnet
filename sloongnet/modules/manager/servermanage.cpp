@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-29 09:27:21
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-06 16:38:25
+ * @LastEditTime: 2020-05-07 16:45:51
  * @Description: file content
  */
 #include "servermanage.h"
@@ -230,9 +230,9 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const Json::Value &jRequest, C
 		GLOBAL_CONFIG config;
 		config.ParseFromString(CBase64::Decode(m_oTemplateList[id].Configuation));
 		EventReferenceModuleOnline online_event;
-		offline_event->set_address(pack->GetSocketIP());
-		offline_event->set_port(config.listenport());
-		SendEvent(notifyList, Events::ReferenceModuleOnline, &online_event);
+		online_event.set_address(pack->GetSocketIP());
+		online_event.set_port(config.listenport());
+		SendEvent(notifyList, Manager::Events::ReferenceModuleOnline, &online_event);
 	}
 
 	return CResult::Succeed();
@@ -366,7 +366,6 @@ void Sloong::CServerManage::SendEvent(list<string> notifyList, int event, ::goog
 	{
 		string msg_str;
 		msg->SerializeToString(&msg_str);
-		SetRequest(target, event.ToString(), msg_str);
 		auto event = make_shared<CSendMessageEvent>();
 		event->SetRequest(m_oWorkerList[item].Connection->GetSocketID(), CUniversal::ntos(event), msg_str, m_nSerialNumber, 1, Functions::ProcessEvent);
 		m_pControl->SendMessage(event);
@@ -399,8 +398,8 @@ void Sloong::CServerManage::OnSocketClosed(SOCKET sock)
 		GLOBAL_CONFIG config;
 		config.ParseFromString(CBase64::Decode(m_oTemplateList[id].Configuation));
 		EventReferenceModuleOffline offline_event;
-		offline_event->set_address("");
-		offline_event->set_port(0);
-		SendEvent(notifyList, Events::ReferenceModuleOffline, &offline_event);
+		offline_event.set_address("");
+		offline_event.set_port(0);
+		SendEvent(notifyList, Manager::Events::ReferenceModuleOffline, &offline_event);
 	}
 }

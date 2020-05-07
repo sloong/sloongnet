@@ -25,7 +25,8 @@ extern "C" CResult MessagePackageProcesser(void* env,CDataTransPackage* pack)
 
 extern "C" CResult EventPackageProcesser(CDataTransPackage* pack)
 {
-	return SloongNetGateway::Instance->EventPackageProcesser(pack);
+	SloongNetGateway::Instance->EventPackageProcesser(pack);
+	return CResult::Succeed();
 }
 
 extern "C" CResult NewConnectAcceptProcesser(CSockInfo* info)
@@ -126,21 +127,22 @@ void Sloong::SloongNetGateway::OnSocketClose(SmartEvent event)
 
 
 
-void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage* pack)
+void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage* trans_pack)
 {
 	auto event = Events_MIN;
-	if(!Manager::Events_Parse(pack->content(),&event))
+	auto data_pack = trans_pack->GetRecvPackage();
+	if(!Manager::Events_Parse(data_pack->content(),&event))
 	{
-		m_pLog->Error(CUniversal::Format("Receive event but parse error. content:[%s]",pack->content());
+		m_pLog->Error(CUniversal::Format("Receive event but parse error. content:[%s]",data_pack->content()));
 		return;
 	}
 
 	switch (event)
 	{
-	case Events::ReferenceModuleOnline:{
+	case Manager::Events::ReferenceModuleOnline:{
 		m_pLog->Info("Receive ReferenceModuleOnline event");
 		}break;
-	case Events::ReferenceModuleOffline:{
+	case Manager::Events::ReferenceModuleOffline:{
 		m_pLog->Info("Receive ReferenceModuleOffline event");
 		}break;
 	default:{

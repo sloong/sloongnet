@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-30 11:51:47
+ * @LastEditTime: 2020-05-07 16:54:57
  * @Description: file content
  */
 #ifndef SLOONGNET_GATEWAY_SERVICE_H
@@ -15,8 +15,6 @@
 
 #include "protocol/manager.pb.h"
 using namespace Manager;
-#include "protocol/gateway.pb.h"
-using namespace Gateway;
 
 #include "transpond.h"
 #include <jsoncpp/json/json.h>
@@ -32,7 +30,6 @@ extern "C" {
 
 namespace Sloong
 {
-	typedef std::function<bool(Functions, string, CDataTransPackage*)> FuncHandler;
 	class SloongNetGateway
 	{
 	public:
@@ -44,7 +41,7 @@ namespace Sloong
 		bool ConnectToProcess();
 
 		inline CResult CreateProcessEnvironmentHandler(void**);
-		CResult EventPackageProcesser(CDataTransPackage*);
+		void EventPackageProcesser(CDataTransPackage*);
 
 		// Event handler
 		void OnStart(SmartEvent);

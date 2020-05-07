@@ -41,12 +41,6 @@ CResult SloongNetDataCenter::Initialized(IControl*)
 }
 
 
-void Sloong::SloongNetDataCenter::RegistFunctionHandler(Functions func, FuncHandler handler)
-{
-    m_oFunctionHandles[func] = handler;
-}
-
-
 CResult Sloong::SloongNetDataCenter::MessagePackageProcesser(CDataTransPackage* pack)
 {
     auto msgPack = pack->GetRecvPackage();

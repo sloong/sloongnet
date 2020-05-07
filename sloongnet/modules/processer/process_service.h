@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-24 20:40:22
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-29 15:17:48
+ * @LastEditTime: 2020-05-07 16:57:48
  * @Description: file content
  */
 #ifndef SLOONGNET_PROCESS_SERVICE_H
@@ -15,8 +15,12 @@
 #include <jsoncpp/json/json.h>
 #include "LuaProcessCenter.h"
 
+#include "protocol/manager.pb.h"
+using namespace Manager;
+
 extern "C" {
 	CResult MessagePackageProcesser(void*,CDataTransPackage*);
+	CResult EventPackageProcesser(CDataTransPackage*);
 	CResult NewConnectAcceptProcesser(CSockInfo*);
 	CResult ModuleInitialization(GLOBAL_CONFIG*);
 	CResult ModuleInitialized(IControl*);
@@ -26,7 +30,6 @@ extern "C" {
 
 namespace Sloong
 {
-	typedef std::function<bool(Functions, string, CDataTransPackage*)> FuncHandler;
 	class SloongNetProcess
 	{
 	public:
@@ -39,6 +42,8 @@ namespace Sloong
 		CResult MessagePackageProcesser(CLuaProcessCenter*,CDataTransPackage*);
 		inline CResult CreateProcessEnvironmentHandler(void**);
 		
+		void EventPackageProcesser(CDataTransPackage*);
+
 		void OnSocketClose(SmartEvent evt);
 		
 	protected:

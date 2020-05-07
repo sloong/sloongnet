@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-24 20:39:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-29 15:18:18
+ * @LastEditTime: 2020-05-07 17:00:03
  * @Description: file content
  */
 /* File Name: server.c */
@@ -111,3 +111,31 @@ inline CResult Sloong::SloongNetProcess::CreateProcessEnvironmentHandler(void** 
 	(*out_env) = item.get();
 	return CResult::Succeed();
 }
+
+
+
+
+void Sloong::SloongNetProcess::EventPackageProcesser(CDataTransPackage* trans_pack)
+{
+	auto event = Events_MIN;
+	auto data_pack = trans_pack->GetRecvPackage();
+	if(!Manager::Events_Parse(data_pack->content(),&event))
+	{
+		m_pLog->Error(CUniversal::Format("Receive event but parse error. content:[%s]",data_pack->content()));
+		return;
+	}
+
+	switch (event)
+	{
+	case Manager::Events::ReferenceModuleOnline:{
+		m_pLog->Info("Receive ReferenceModuleOnline event");
+		}break;
+	case Manager::Events::ReferenceModuleOffline:{
+		m_pLog->Info("Receive ReferenceModuleOffline event");
+		}break;
+	default:{
+		}break;
+	}
+}
+
+

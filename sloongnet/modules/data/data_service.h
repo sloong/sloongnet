@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-17 18:26:58
+ * @LastEditTime: 2020-05-07 16:56:33
  * @Description: file content
  */
 #ifndef SLOONGNET_DATA_SERVICE_H
@@ -20,9 +20,7 @@ extern "C" {
 }
 
 namespace Sloong
-{
-	typedef std::function<bool(Functions, string, CDataTransPackage*)> FuncHandler;
-	
+{	
 	class SloongNetDataCenter
 	{
 	public:
@@ -34,10 +32,8 @@ namespace Sloong
 		
 		void OnSocketClose(SmartEvent evt);
 	protected:
-		void RegistFunctionHandler(Functions func, FuncHandler handler);
 
 	protected:
-		map_ex<Functions, FuncHandler> m_oFunctionHandles;
 		IControl* 	m_pControl = nullptr;
 		CLog*		m_pLog =nullptr;
 		GLOBAL_CONFIG* m_pConfig;
