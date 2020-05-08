@@ -6,17 +6,8 @@
 #include "NetworkEvent.hpp"
 
 #include "IData.h"
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <fcntl.h>
-#include <sys/select.h> 
-
-
-#define MAXRECVBUF 4096
-#define MAXBUF MAXRECVBUF+10
 
 using namespace Sloong;
 using namespace Sloong::Universal;
@@ -34,7 +25,7 @@ Sloong::CEpollEx::~CEpollEx()
 }
 
 
-TResult<int> Sloong::CEpollEx::CreateListenSocket(int port)
+TResult<int> Sloong::CEpollEx::CreateListenSocket(string addr, int port)
 {
 	// 初始化socket
 	auto listen_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -53,7 +44,7 @@ TResult<int> Sloong::CEpollEx::CreateListenSocket(int port)
 	struct sockaddr_in address;
 	memset(&address, 0, sizeof(address));
 	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = inet_addr("0.0.0.0");
+	address.sin_addr.s_addr = inet_addr(addr.c_str());
 	address.sin_port = htons((uint16_t)port);
 
 	// 设置socket为非阻塞模式
@@ -164,7 +155,7 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 	string spid = CUniversal::ntos(pid);
 	m_pLog->Info("epoll work thread is running." + spid);
 	int port = IData::GetGlobalConfig()->listenport();
-	auto res = CreateListenSocket(port);
+	auto res = CreateListenSocket("0.0.0.0",port);
 	if( res.IsFialed() )
 	{
 		m_pLog->Fatal(res.Message());

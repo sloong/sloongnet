@@ -35,7 +35,7 @@ namespace Sloong
 	protected:
 		/// 设置socket到非阻塞模式
 		int SetSocketNonblocking(int socket);
-		TResult<int> CreateListenSocket(int port);
+		TResult<int> CreateListenSocket(string addr, int port);
 
 		/// 修改socket的epoll监听事件
 		void CtlEpollEvent(int opt, int sock, int events);
