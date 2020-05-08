@@ -18,8 +18,6 @@ link_directories(
     "${CMAKE_CURRENT_LIST_DIR}/modules"
 )
 
-#set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_LIST_DIR})
-
 add_subdirectory(modules/core)
 add_subdirectory(modules/manager)
 add_subdirectory(modules/firewall)
@@ -52,9 +50,6 @@ list(APPEND SRC_LIST ${MODULE_SRC_LIST})
 
 #生成可执行文件
 add_executable(${PROJECT_NAME} ${SRC_LIST}) 
-
-#添加C++11编译选项,但是只有CMAKE 3.1支持
-#target_compile_features(mmseg PRIVATE cxx_range_for)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,./")
 
 #添加链接库

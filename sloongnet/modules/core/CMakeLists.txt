@@ -51,10 +51,6 @@ list(APPEND SRC_LIST ${PROTOSRCS})
 #生成动态链接库
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRC_LIST})
 
-#添加C++11编译选项,但是只有CMAKE 3.1支持
-#target_compile_features(mmseg PRIVATE cxx_range_for)
-set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,./")
-
 #添加链接库
 target_link_libraries(${PROJECT_NAME} m)
 target_link_libraries(${PROJECT_NAME} dl)
