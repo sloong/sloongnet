@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-29 15:49:07
+ * @LastEditTime: 2020-05-08 11:29:40
  * @Description: file content
  */
 #ifndef SLOONGNET_FIREWALL_SERVICE_H
@@ -14,6 +14,7 @@
 
 extern "C" {
 	CResult MessagePackageProcesser(void*,CDataTransPackage*);
+	CResult EventPackageProcesser(CDataTransPackage*);
 	CResult NewConnectAcceptProcesser(CSockInfo*);
 	CResult ModuleInitialization(GLOBAL_CONFIG*);
 	CResult ModuleInitialized(IControl*);
@@ -31,6 +32,8 @@ namespace Sloong
 
 		CResult MessagePackageProcesser(CDataTransPackage*);
 		inline CResult CreateProcessEnvironmentHandler(void**);
+
+		void EventPackageProcesser(CDataTransPackage*);
 
 		void OnSocketClose(SmartEvent evt);
 	protected:

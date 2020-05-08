@@ -125,7 +125,7 @@ void Sloong::CEpollEx::CtlEpollEvent(int opt, int sock, int events)
 	// ET模式时，事件就绪时，假设对事件没做处理，内核不会反复通知事件就绪  	EPOLLET
 	ent.events = events | EPOLLERR | EPOLLHUP | EPOLLET;
 
-	m_pLog->Verbos(CUniversal::Format("Control epoll opt: Socket [%s] opt[%d]", CUtility::GetSocketAddress(sock), opt));
+	m_pLog->Verbos(CUniversal::Format("Control epoll opt: Socket[%d] [%s] opt[%d]",sock, CUtility::GetSocketAddress(sock), opt));
 	// 设置事件到epoll对象
 	epoll_ctl(m_EpollHandle, opt, sock, &ent);
 }
@@ -153,7 +153,7 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 {
 	auto pid = this_thread::get_id();
 	string spid = CUniversal::ntos(pid);
-	m_pLog->Info("epoll work thread is running." + spid);
+	m_pLog->Info("epoll work thread is running. PID:" + spid);
 	int port = IData::GetGlobalConfig()->listenport();
 	auto res = CreateListenSocket("0.0.0.0",port);
 	if( res.IsFialed() )
