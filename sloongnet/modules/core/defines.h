@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-24 20:08:00
+ * @LastEditTime: 2020-05-11 18:45:28
  * @Description: file content
  */
 #ifndef SLOONGNET_DEFINES_H
@@ -21,6 +21,9 @@
 using namespace Sloong;
 using namespace Sloong::Universal;
 
+
+#include "protocol/core.pb.h"
+using namespace Protocol;
 
 template<typename T> inline
 T TYPE_TRANS(LPVOID p)
@@ -109,13 +112,5 @@ enum HashType
 	SHA_256 = 2,
 	SHA_512 = 3,
 };
-
-typedef enum g_em_DataItem
-{
-	ServerConfiguation,
-	ModuleConfiguation,
-	Logger,
-}DATA_ITEM;
-
 
 #endif

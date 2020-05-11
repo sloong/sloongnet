@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-03 16:37:06
+ * @LastEditTime: 2020-05-11 18:24:37
  * @Description: file content
  */
 
@@ -18,5 +18,5 @@ typedef CResult (*MessagePackageProcesserFunction)(void*,CDataTransPackage*);
 typedef CResult (*EventPackageProcesserFunction)(CDataTransPackage*);
 typedef CResult (*NewConnectAcceptProcesserFunction)(CSockInfo*);
 typedef CResult (*ModuleInitializationFunction)(GLOBAL_CONFIG*);
-typedef CResult (*ModuleInitializedFunction)(IControl*);
+typedef CResult (*ModuleInitializedFunction)(SOCKET,IControl*);
 #endif //SLOONGNET_MODULE_CORE_EXPORT_H

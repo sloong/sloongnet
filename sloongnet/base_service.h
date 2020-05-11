@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-26 18:18:18
+ * @LastEditTime: 2020-05-11 18:43:43
  * @Description: file content
  */
 
@@ -30,7 +30,7 @@ namespace Sloong
         }
 
         // Just call it without Control module.
-		virtual CResult Initialize(RunTimeData* config);
+		virtual CResult Initialize(bool, string, int);
 
 		virtual CResult Run();
 		virtual void Restart(SmartEvent event);
@@ -38,8 +38,8 @@ namespace Sloong
 
 		TResult<shared_ptr<DataPackage>> RegisteToControl(SmartConnect con, string uuid);
 	protected:
-		virtual CResult InitlializeForWorker(RunTimeData*);
-		virtual CResult InitlializeForManager(RunTimeData*);
+		virtual CResult InitlializeForWorker(RuntimeDataPackage*);
+		virtual CResult InitlializeForManager(RuntimeDataPackage*);
 		
 		CResult RegisteNode();
 		CResult	InitModule();
@@ -54,7 +54,8 @@ namespace Sloong
 		unique_ptr<CNetworkHub> m_pNetwork = make_unique<CNetworkHub>();
 		unique_ptr<CControlHub> m_pControl = make_unique<CControlHub>();
 		unique_ptr<CLog>		m_pLog = make_unique<CLog>();;
-		RunTimeData*			m_pServerConfig = nullptr;
+		RuntimeDataPackage		m_oServerConfig;
+		SmartConnect 			m_pManagerConnect;
 		shared_ptr<EasyConnect>	m_pSocket;
 		CEasySync				m_oExitSync;
 		CResult					m_oExitResult = CResult::Succeed();

@@ -4,6 +4,7 @@
 #include "NetworkEvent.hpp"
 #include "IData.h"
 #include "NormalEvent.hpp"
+#include "SendMessageEvent.hpp"
 #include "transpond.h"
 
 #include "protocol/manager.pb.h"
@@ -39,8 +40,8 @@ extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
 	return CResult::Succeed();
 }
 
-extern "C" CResult ModuleInitialized(IControl* iC){
-	return SloongNetGateway::Instance->Initialized(iC);
+extern "C" CResult ModuleInitialized(SOCKET sock,IControl* iC){
+	return SloongNetGateway::Instance->Initialized(sock,iC);
 }
 
 extern "C" CResult CreateProcessEnvironment(void** out_env)
@@ -49,7 +50,7 @@ extern "C" CResult CreateProcessEnvironment(void** out_env)
 }
 
 
-CResult SloongNetGateway::Initialized(IControl* iC)
+CResult SloongNetGateway::Initialized(SOCKET sock,IControl* iC)
 {
 	m_pControl = iC;
 	IData::Initialize(iC);
@@ -67,29 +68,30 @@ CResult SloongNetGateway::Initialized(IControl* iC)
 		m_pControl->SendMessage(event);
 	}
 	m_pLog = IData::GetLog();
-	
+	m_pManagerConnection = sock;
 	m_pControl->RegisterEventHandler(ProgramStart,std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
 	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetGateway::OnSocketClose, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
 
-bool SloongNetGateway::ConnectToProcess()
+void SloongNetGateway::QueryProcessList()
 {
-	// TODO: should be send a query requst to manager.
-	/*auto list = CUniversal::split(m_oConfig.processaddress(),';');
-	for( auto item = list.begin();item!= list.end(); item++ )
-	{
-		auto connect = make_shared<EasyConnect>();
+	auto references = CUniversal::split(m_pConfig->modulereference(), ';');
+	if( references.size() == 0 )
+		return;
 
-		connect->Initialize(*item,nullptr); 
-		connect->Connect();
-		int sockID = connect->GetSocketID();
-		m_mapProcessList[sockID] = connect;
-		m_mapProcessLoadList[sockID] = 0;
-		m_pNetwork->AddMonitorSocket(sockID );
-	}*/
-	return true;
+	Manager::QueryNodeMessageRequest req;
+	for (auto item : references)
+		req.add_templateid(atoi(item.c_str()));
+	
+	string msg_str;
+	req.SerializeToString(&msg_str);
+	auto event = make_shared<CSendMessageEvent>();
+	event->SetRequest( m_pManagerConnection , CUniversal::ntos(event), msg_str, m_nSerialNumber, 1, Functions::ProcessEvent);
+	m_nSerialNumber++;
+	m_pControl->SendMessage(event);
+
 }
 
 inline CResult SloongNetGateway::CreateProcessEnvironmentHandler(void** out_env)
@@ -105,8 +107,8 @@ inline CResult SloongNetGateway::CreateProcessEnvironmentHandler(void** out_env)
 
 
 void SloongNetGateway::OnStart(SmartEvent evt)
-{
-	ConnectToProcess();
+{	
+	QueryProcessList();
 }
 
 
@@ -119,12 +121,7 @@ void Sloong::SloongNetGateway::OnSocketClose(SmartEvent event)
 		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
 		return;
 	}
-	// call close function.
-	//m_pProcess->CloseSocket(info);
-	//net_evt->CallCallbackFunc(net_evt);
 }
-
-
 
 
 void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage* trans_pack)

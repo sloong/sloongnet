@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-07 16:54:57
+ * @LastEditTime: 2020-05-11 19:14:27
  * @Description: file content
  */
 #ifndef SLOONGNET_GATEWAY_SERVICE_H
@@ -24,7 +24,7 @@ extern "C" {
 	CResult EventPackageProcesser(CDataTransPackage*);
 	CResult NewConnectAcceptProcesser(CSockInfo*);
 	CResult ModuleInitialization(GLOBAL_CONFIG*);
-	CResult ModuleInitialized(IControl*);
+	CResult ModuleInitialized(SOCKET,IControl*);
 	CResult CreateProcessEnvironment(void**);
 }
 
@@ -36,9 +36,9 @@ namespace Sloong
 		SloongNetGateway(){}
 
 		CResult Initialization(GLOBAL_CONFIG*);
-		CResult Initialized(IControl*);
+		CResult Initialized(SOCKET,IControl*);
 		
-		bool ConnectToProcess();
+		void QueryProcessList();
 
 		inline CResult CreateProcessEnvironmentHandler(void**);
 		void EventPackageProcesser(CDataTransPackage*);
@@ -55,6 +55,8 @@ namespace Sloong
 		CLog*		m_pLog =nullptr;
 		GLOBAL_CONFIG* m_pConfig;
 		Json::Value    m_oExConfig;
+		SOCKET   m_pManagerConnection = -1;
+		int		 m_nSerialNumber = 0;
 	public:
 		static unique_ptr<SloongNetGateway> Instance;
 	};

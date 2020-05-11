@@ -2,13 +2,12 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-29 20:30:20
+ * @LastEditTime: 2020-05-11 18:39:54
  * @Description: file content
  */
 #pragma once
 
 #include "IObject.h"
-#include "DataTransPackage.h"
 #include "export.h"
 namespace Sloong
 { 

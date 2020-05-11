@@ -35,7 +35,7 @@ extern "C" CResult ModuleInitialized(IControl* iC){
 
 CResult SloongNetDataCenter::Initialized(IControl*)
 {
-	m_oConfig.ParseFromString(m_pServerConfig->exconfig());
+	m_oConfig.ParseFromString(m_oServerConfig->exconfig());
 	m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetDataCenter::MessagePackageProcesser, this, std::placeholders::_1));
 	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetDataCenter::OnSocketClose, this, std::placeholders::_1));
 }

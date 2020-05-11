@@ -23,7 +23,7 @@ message EventPackage{
    bytes EventObject=2;
 }
 
-enum RequestType{
+enum FunctionType{
     /* Flow: All -> All
        Response: Content - result with JSON string. 
     */
@@ -37,17 +37,21 @@ enum RequestType{
                  Extend: config data
     */
     RegisteServer=2;
-    /* Flow: Control -> All
-       Request: 
-       Response: NO
-    */
-    RestartService=4;
+
+    QueryNode=3;
+
 }
 
 message RequestPackage
 {
-   RequestType RequestType=1;
+   FunctionType Function=1;
    bytes RequestObject=2;
+}
+
+message ResponsePackage
+{
+   FunctionType Function=1;
+   bytes ResponseObject=2;
 }
 
 message RegisteWorkerMessage
@@ -58,6 +62,21 @@ message RegisteWorkerMessage
 message PostLogMessage
 {
 
+}
+
+message QueryNodeMessageRequest
+{
+   repeated int32 TemplateID=1;
+}
+
+message NodeInfoItem{
+   string Address = 1;
+   int32 Port=2;
+}
+
+message QueryNodeMessageResponse
+{
+   repeated NodeInfoItem NodeInfoList=1;
 }
 
 

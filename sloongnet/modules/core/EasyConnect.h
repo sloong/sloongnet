@@ -30,7 +30,7 @@ namespace Sloong
 
 		// 以接受方的方式初始化
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
-		void Initialize( int sock, SSL_CTX* ctx= nullptr, bool useLongLongSize = false);
+		void Initialize( SOCKET sock, SSL_CTX* ctx= nullptr, bool useLongLongSize = false);
 
 		// 以发起方的方式初始化
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
@@ -72,7 +72,7 @@ namespace Sloong
 
 		void Close();
 
-		int GetSocketID(){
+		SOCKET GetSocketID(){
 			return m_nSocket;
 		}
 
@@ -94,7 +94,7 @@ namespace Sloong
 		int m_nPort;
 	private:
 		int m_nErrno;
-		int m_nSocket;
+		SOCKET m_nSocket=INVALID_SOCKET;
 		SSL* m_pSSL = nullptr;
 		bool m_bSupportReconnect = false;
 		string m_strErrorMsg;

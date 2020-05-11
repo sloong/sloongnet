@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-05-06 16:44:26
+ * @LastEditTime: 2020-05-11 18:31:08
  */
 
 #include "control_service.h"
@@ -36,7 +36,7 @@ extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
 	return SloongControlService::Instance->Initialization(confiog);
 }
 
-extern "C" CResult ModuleInitialized(IControl* iC){
+extern "C" CResult ModuleInitialized(SOCKET sock,IControl* iC){
 	return SloongControlService::Instance->Initialized(iC);
 }
 

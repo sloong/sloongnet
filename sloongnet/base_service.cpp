@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-29 20:31:31
+ * @LastEditTime: 2020-05-11 18:57:42
  * @Description: Main instance for sloongnet application.
  */
 
@@ -58,11 +58,11 @@ TResult<shared_ptr<DataPackage>> CSloongBaseService::RegisteToControl(SmartConne
 	return TResult<shared_ptr<DataPackage>>::Make_OK(get_config_response_buf);
 }
 
-CResult CSloongBaseService::InitlializeForWorker(RunTimeData* data)
+CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
 {
-	data->ManagerConnect = make_shared<EasyConnect>();
-	data->ManagerConnect->Initialize(data->ManagerAddress, data->ManagerPort, nullptr);
-	if (!data->ManagerConnect->Connect())
+	m_pManagerConnect = make_shared<EasyConnect>();
+	m_pManagerConnect->Initialize(data->manageraddress(), data->managerport(), nullptr);
+	if (!m_pManagerConnect->Connect())
 	{
         return CResult::Make_Error("Connect to control fialed.");
 	}
@@ -72,7 +72,7 @@ CResult CSloongBaseService::InitlializeForWorker(RunTimeData* data)
 	string serverConfig;
 	while(true)
 	{
-		auto res = RegisteToControl(data->ManagerConnect,uuid);
+		auto res = RegisteToControl(m_pManagerConnect,uuid);
 		if (res.IsFialed()) return res;	
 
 		auto response = res.ResultObject();
@@ -100,7 +100,7 @@ CResult CSloongBaseService::InitlializeForWorker(RunTimeData* data)
 			continue;
 		}
 
-		data->NodeUUID = uuid;
+		data->set_nodeuuid(uuid);
 		Json::Reader reader;
 		Json::Value jConfig;
 		if( !reader.parse(serverConfig, jConfig) || !jConfig["TemplateID"].isInt() || !jConfig["Configuation"].isString())
@@ -108,22 +108,23 @@ CResult CSloongBaseService::InitlializeForWorker(RunTimeData* data)
 			return CResult::Make_Error(CUniversal::Format("Parse the config error. response data: %s" ,serverConfig));
 		}
 		
-		if (!data->TemplateConfig.ParseFromString(CBase64::Decode(jConfig["Configuation"].asString()) ))
+		if (!data->mutable_templateconfig()->ParseFromString(CBase64::Decode(jConfig["Configuation"].asString()) ))
 		{
 			return CResult::Make_Error("Parse the config struct error. please check.");
 		}
-		data->TemplateID = jConfig["TemplateID"].asInt();
+		data->set_templateid(jConfig["TemplateID"].asInt());
 		break;
 	};
 	cout << "Get configuation succeed." << endl;
     return CResult::Succeed();
 }
 
-CResult CSloongBaseService::InitlializeForManager(RunTimeData* data)
+CResult CSloongBaseService::InitlializeForManager(RuntimeDataPackage* data)
 {
-	data->TemplateConfig.set_listenport( data->ManagerPort );
-	data->TemplateConfig.set_modulepath("./modules/");
-	data->TemplateConfig.set_modulename("libmanager.so");
+    auto config = data->mutable_templateconfig();
+	config->set_listenport( data->managerport() );
+	config->set_modulepath("./modules/");
+	config->set_modulename("libmanager.so");
     return CResult::Succeed();
 }
 
@@ -143,49 +144,52 @@ void CSloongBaseService::InitSystemEventHandler()
     signal(SIGSEGV, &on_sigint);
 }
 
-CResult CSloongBaseService::Initialize(RunTimeData* config)
+CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int port)
 {
-    m_pServerConfig = config;
+    m_oServerConfig.set_manageraddress(address);
+    m_oServerConfig.set_managerport(port);
     m_oExitResult = CResult::Succeed();
 
     InitSystemEventHandler();
     #ifdef DEBUG
-    m_pServerConfig->TemplateConfig.set_debugmode(true);
-    m_pServerConfig->TemplateConfig.set_loglevel(Protocol::LogLevel::All);
+    m_oServerConfig.mutable_templateconfig()->set_debugmode(true);
+    m_oServerConfig.mutable_templateconfig()->set_loglevel(Protocol::LogLevel::All);
     #endif
     
     CResult res = CResult::Succeed();
-    if( m_pServerConfig->ManagerMode )
+    if( ManagerMode )
 	{
-		res = InitlializeForManager(m_pServerConfig);
+		res = InitlializeForManager(&m_oServerConfig);
 	}
 	else
 	{
-		res = InitlializeForWorker(m_pServerConfig);
+		res = InitlializeForWorker(&m_oServerConfig);
 	}
     if (res.IsFialed()) return res;
     
-    m_pLog->Initialize(m_pServerConfig->TemplateConfig.logpath(), "", (LOGOPT) (LOGOPT::WriteToSTDOut|LOGOPT::WriteToFile), LOGLEVEL(m_pServerConfig->TemplateConfig.loglevel()), LOGTYPE::DAY);
+    m_pLog->Initialize(m_oServerConfig.templateconfig().logpath(), "", (LOGOPT) (LOGOPT::WriteToSTDOut|LOGOPT::WriteToFile), LOGLEVEL(m_oServerConfig.templateconfig().loglevel()), LOGTYPE::DAY);
 
     res = InitModule();
     if( res.IsFialed() ) return res;
 
-    res = m_pModuleInitializationFunc(&m_pServerConfig->TemplateConfig);
+    res = m_pModuleInitializationFunc(m_oServerConfig.mutable_templateconfig());
     if( res.IsFialed())
     {
         m_pLog->Fatal(res.Message());
         return res;
     }
 
-    res = m_pControl->Initialize(m_pServerConfig->TemplateConfig.mqthreadquantity());
+    res = m_pControl->Initialize(m_oServerConfig.templateconfig().mqthreadquantity());
     if( res.IsFialed())
     {
         m_pLog->Fatal(res.Message());
         return res;
     }
     
-    m_pControl->Add(DATA_ITEM::ServerConfiguation, &m_pServerConfig->TemplateConfig);
+    m_pControl->Add(DATA_ITEM::ServerConfiguation, m_oServerConfig.mutable_templateconfig());
     m_pControl->Add(Logger, m_pLog.get());
+    m_pControl->Add(DATA_ITEM::RuntimeData, &m_oServerConfig );
+
     m_pControl->RegisterEvent(ProgramExit);
     m_pControl->RegisterEvent(ProgramStart);
     m_pControl->RegisterEvent(ProgramRestart);
@@ -202,11 +206,11 @@ CResult CSloongBaseService::Initialize(RunTimeData* config)
     m_pNetwork->RegisterMessageProcesser(m_pHandler);
     m_pNetwork->RegisterEventProcesser(m_pEventHandler);
     m_pNetwork->RegisterAccpetConnectProcesser(m_pAccept);
-    res = m_pModuleInitializedFunc(m_pControl.get());
+    res = m_pModuleInitializedFunc( m_pManagerConnect->GetSocketID(), m_pControl.get());
     if( res.IsFialed() )
         m_pLog->Fatal(res.Message());
 
-    if(!m_pServerConfig->ManagerMode )
+    if(!ManagerMode )
     {
         res = RegisteNode();
         if (res.IsFialed())
@@ -214,7 +218,7 @@ CResult CSloongBaseService::Initialize(RunTimeData* config)
             m_pLog->Fatal(res.Message());
             return res;
         }
-        m_pNetwork->RegisteConnection(m_pServerConfig->ManagerConnect->GetSocketID());
+        m_pNetwork->RegisteConnection(m_pManagerConnect->GetSocketID());
     }
 
     return CResult::Succeed();
@@ -223,7 +227,7 @@ CResult CSloongBaseService::Initialize(RunTimeData* config)
 CResult CSloongBaseService::InitModule()
 {
     // Load the module library
-    string libFullPath = m_pServerConfig->TemplateConfig.modulepath()+m_pServerConfig->TemplateConfig.modulename();
+    string libFullPath = m_oServerConfig.templateconfig().modulepath()+m_oServerConfig.templateconfig().modulename();
 
     m_pLog->Verbos(CUniversal::Format("Start init module[%s] and load module functions",libFullPath));
     m_pModule = dlopen(libFullPath.c_str(),RTLD_LAZY);
@@ -273,19 +277,17 @@ CResult CSloongBaseService::InitModule()
 
 CResult CSloongBaseService::RegisteNode()
 {
-    if( m_pServerConfig->ManagerMode )
-        return CResult::Succeed();
     Json::Value jReq;
     jReq["Function"] = "RegisteNode";
-    jReq["TemplateID"] = m_pServerConfig->TemplateID;
+    jReq["TemplateID"] = m_oServerConfig.templateid();
 
     auto req = make_shared<DataPackage>();
 	req->set_function(Functions::ProcessMessage);
-	req->set_sender( m_pServerConfig->NodeUUID );
+	req->set_sender( m_oServerConfig.nodeuuid() );
 	req->set_content(jReq.toStyledString());
 
 	CDataTransPackage dataPackage;
-	dataPackage.Initialize( m_pServerConfig->ManagerConnect );
+	dataPackage.Initialize( m_pManagerConnect );
 	dataPackage.RequestPackage(req);
 
 	ResultType result = dataPackage.SendPackage();

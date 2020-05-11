@@ -37,7 +37,7 @@ TResult<int> Sloong::CEpollEx::CreateListenSocket(string addr, int port)
 
 #ifdef SO_REUSEPORT
 	if( 0 != setsockopt(listen_sock, SOL_SOCKET, SO_REUSEPORT, &sock_op, sizeof(sock_op)))
-		return TResult<int>::Make_Error( CUniversal::Format("Set socket property to [SO_REUSEPORT] field. Error info: [%d]%s", errno, strerror(errno)));
+		return TResult<int>::Make_Error( CUniversal::Format("Set socket property to [SO_REUSEPORT] field. Error info: [%d]%s", errno, strerror(errno)));		
 #endif
 
 	// 初始化地址结构
@@ -75,6 +75,9 @@ CResult Sloong::CEpollEx::Initialize(IControl* iMsg)
 	
 	m_pLog->Info(CUniversal::Format("epollex is running with %d threads", workThread));
 
+#ifdef SO_REUSEPORT
+	m_pLog->Debug("System support SO_REUSEPORT. epoll will run with SO_REUSEPORT mode.");
+#endif
 	// 创建epoll
 	m_EpollHandle = epoll_create(65535);
 

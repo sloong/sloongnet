@@ -16,7 +16,7 @@ Sloong::EasyConnect::~EasyConnect()
 	Close();
 }
 
-void Sloong::EasyConnect::Initialize(int sock, SSL_CTX* ctx, bool useLongLongSize)
+void Sloong::EasyConnect::Initialize(SOCKET sock, SSL_CTX* ctx, bool useLongLongSize)
 {
 	m_nSocket = sock;
 	m_strAddress = CUtility::GetSocketIP(m_nSocket);

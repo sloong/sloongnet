@@ -29,6 +29,14 @@ enum Functions{
     RestartNode=2;
 }
 
+enum DATA_ITEM
+{
+    ServerConfiguation=0;
+	ModuleConfiguation=1;
+	Logger=2;
+	RuntimeData=3;
+}
+
 message DataPackage
 {
     // 功能
@@ -78,3 +86,11 @@ message GLOBAL_CONFIG
     string  ModuleReference = 19;
 };
 
+message RuntimeDataPackage
+{
+    string ManagerAddress=1;
+	int32 ManagerPort=2;
+	int32 TemplateID=3;
+    string NodeUUID=4;
+	GLOBAL_CONFIG TemplateConfig=5;
+}

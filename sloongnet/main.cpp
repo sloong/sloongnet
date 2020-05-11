@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-26 17:33:59
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-26 18:15:45
+ * @LastEditTime: 2020-05-11 18:58:12
  * @Description: Main function for apps. just for create and run gloabl apps.
  */
 #include "main.h"
@@ -38,15 +38,16 @@ int main(int argc, char** args)
 			return -2;
 		}
 
-		unique_ptr<RunTimeData> data = make_unique<RunTimeData>();
-		data->ManagerMode = true;
+
+		
+		auto ManagerMode = true;
 		if (strcasecmp(args[1], "Worker") == 0)
 		{
-			data->ManagerMode = false;
+			ManagerMode = false;
 		}
 		else if (strcasecmp(args[1], "Manager") == 0)
 		{
-			data->ManagerMode = true;
+			ManagerMode = true;
 		}
 		else if (strcasecmp(args[1], "version") == 0)
 		{
@@ -67,20 +68,19 @@ int main(int argc, char** args)
 			return -3;
 		}
 
-		data->ManagerAddress = addr[0];
-		int port = atoi(addr[1].c_str());
-		if (port == 0)
+		auto ManagerAddress = addr[0];
+		auto ManagerPort = atoi(addr[1].c_str());
+		if (ManagerPort == 0)
 		{
 			cout << "Convert [" << addr[1] << "] to int port fialed." << endl;
 			return -3;
 		}
-		data->ManagerPort = port;
 	
 		CResult res = CResult::Succeed();
 		Sloong::CSloongBaseService::Instance = make_unique<Sloong::CSloongBaseService>();
 		do
 		{
-			res = Sloong::CSloongBaseService::Instance->Initialize(data.get());
+			res = Sloong::CSloongBaseService::Instance->Initialize(ManagerMode,ManagerAddress,ManagerPort);
 			if (!res.IsSucceed()) {
 				cout << "Initialize server error. Message: " << res.Message() << endl;
 				return -5;
