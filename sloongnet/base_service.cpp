@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-11 18:57:42
+ * @LastEditTime: 2020-05-12 07:39:18
  * @Description: Main instance for sloongnet application.
  */
 
@@ -206,7 +206,9 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     m_pNetwork->RegisterMessageProcesser(m_pHandler);
     m_pNetwork->RegisterEventProcesser(m_pEventHandler);
     m_pNetwork->RegisterAccpetConnectProcesser(m_pAccept);
-    res = m_pModuleInitializedFunc( m_pManagerConnect->GetSocketID(), m_pControl.get());
+    auto sock = INVALID_SOCKET;
+    if( m_pManagerConnect ) sock= m_pManagerConnect->GetSocketID();
+    res = m_pModuleInitializedFunc( sock, m_pControl.get());
     if( res.IsFialed() )
         m_pLog->Fatal(res.Message());
 
@@ -218,7 +220,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
             m_pLog->Fatal(res.Message());
             return res;
         }
-        m_pNetwork->RegisteConnection(m_pManagerConnect->GetSocketID());
+        m_pNetwork->RegisteConnection(sock);
     }
 
     return CResult::Succeed();
