@@ -81,7 +81,7 @@ void SloongNetGateway::QueryProcessList()
 	if( references.size() == 0 )
 		return;
 
-	Manager::QueryNodeMessageRequest req;
+	Manager::QueryNodeRequest req;
 	for (auto item : references)
 		req.add_templateid(atoi(item.c_str()));
 	

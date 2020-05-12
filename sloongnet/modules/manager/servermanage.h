@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 11:17:32
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-03 21:59:35
+ * @LastEditTime: 2020-05-12 11:44:45
  * @Description: file content
  */
 #ifndef SERVERMANAGE_H
@@ -11,6 +11,9 @@
 #include "main.h"
 #include "configuation.h"
 #include "DataTransPackage.h"
+#include "protocol/manager.pb.h"
+using namespace Manager;
+
 #include "IData.h"
 namespace Sloong
 {
@@ -68,6 +71,14 @@ namespace Sloong
             item["Configuation"] = this->Configuation;
             return item;
         }
+        void ToProtobuf(Manager::TemplateItem* item){
+            item->set_id(this->ID);
+            item->set_name( this->Name);
+            item->set_replicas(this->Replicas);
+            item->set_created(this->Created.size());
+            item->set_note(this->Note);
+            item->set_configuation(this->Configuation);
+        }
         int ID;
         string Name;
         string Note;
@@ -77,7 +88,7 @@ namespace Sloong
         list_ex<string> Created;
     };
 
-    typedef std::function<CResult(const Json::Value&,CDataTransPackage*)> FunctionHandler;
+    typedef std::function<CResult(const string&,CDataTransPackage*)> FunctionHandler;
     class CServerManage
     {
     public:
@@ -86,126 +97,52 @@ namespace Sloong
         CResult ProcessHandler(CDataTransPackage*);
 
         /*
-        Request(JSON):
-                    {
-                        "Function":"EventRecorder",
-                        "Type":"",// Request or Response
-                        "Result":"",// Succeed or Error
-                        "Sender":"",// Message sender
-                        "Receiver":"",// Message receiver
-                        "Time":"",// Current time
-                        "Content":""// For succeed is message content; For other is message
-                    }
+        Request:PostLogMessageRequest
         Response:Result
         */
-        CResult EventRecorderHandler(const Json::Value&,CDataTransPackage*);
+        CResult EventRecorderHandler(const string&,CDataTransPackage*);
 
         /* When worker start, send this request to registe a worker, and wait manage assigning template.
-        Request(JSON):
-                    {
-                        "Function":"RegisteWorker",
-                    }
-        Response: Result    -> Succeed      Content(JSON)
-                                            {
-                                                "TemplateID":"",
-                                                "Configuation":""//base64
-                                            }
+        Request: Function
+        Response: Result    -> Succeed      RegisteWorkerMessageResponse
                             -> Retry        Wait assign, wait some time and retry again.
         */
-        CResult RegisteWorkerHandler(const Json::Value&,CDataTransPackage*);
+        CResult RegisteWorkerHandler(const string&,CDataTransPackage*);
 
         /* When assigning tamplate, and node is ready to work, send this requst.
-        Request(JSON):
-                    {
-                        "Function":"RegisteNode",
-                        "TemplateID":""
-                    }
+        Request : RegisteNodeRequest
         Response: Result
         */
-        CResult RegisteNodeHandler(const Json::Value&,CDataTransPackage*);
+        CResult RegisteNodeHandler(const string&,CDataTransPackage*);
 
         /* 
-        Request(JSON):
-                    {
-                        "Function":"AddTemplate",
-                        "Template":{
-                            "Name":"",
-                            "Note":"",
-                            "Replicas":"",
-                            "Configuation":""//base64
-                        }
-                    }
+        Request:AddTemplateRequest
         Response: Result
         */
-        CResult AddTemplateHandler(const Json::Value&,CDataTransPackage*);
+        CResult AddTemplateHandler(const string&,CDataTransPackage*);
         /* 
-        Request(JSON):
-                    {
-                        "Function":"DeleteTemplate",
-                        "TemplateID":""
-                    }
+        Request:DeleteTemplateRequest
         Response: Result
         */
-        CResult DeleteTemplateHandler(const Json::Value&,CDataTransPackage*);
+        CResult DeleteTemplateHandler(const string&,CDataTransPackage*);
         /* 
-        Request(JSON):
-                    {
-                        "Function":"SetTemplate",
-                        "Template":{
-                            "ID":"",
-                            "Name":"",
-                            "Note":"",
-                            "Replicas":"",
-                            "Configuation":"" //base64
-                        }
-                    }
+        Request :SetTemplateRequest
         Response: Result
         */
-        CResult SetTemplateHandler(const Json::Value&,CDataTransPackage*);
+        CResult SetTemplateHandler(const string&,CDataTransPackage*);
         /* 
-        Request(JSON):
-                    {
-                        "Function":"QueryTemplate",
-                        "TemplateID":"" // Empty for query all.
-                    }
-        Response(JSON):
-                    {
-                        "TemplateList": [
-                        {
-                          "ID": "",
-                          "Name":"",
-                          "Note":"",
-                          "Replicas":"",
-                          "Configuation":""
-                        }
-                      ]
-                    }
+        Request:QueryTemplateRequest
+        Response:QueryTemplateResponse
         */
-        CResult QueryTemplateHandler(const Json::Value&,CDataTransPackage*);
+        CResult QueryTemplateHandler(const string&,CDataTransPackage*);
         
         /* 
-        Request(JSON):
-                    {
-                        "Function":"QueryNode",
-                    }
-        Response(JSON):
-                    {
-                      "NodeList": [
-                        {
-                          "UUID": "",
-                          "TemplateName":"",
-                          "TemplateID": "",
-                          "Address":"",
-                          "Port":"",
-                          "ActiveTime":"",
-                        }
-                      ]
-                    }
-    */
-        CResult QueryNodeHandler(const Json::Value&,CDataTransPackage*);
+        Request:QueryNodeRequest
+        Response:QueryNodeResponse
+        */
+        CResult QueryNodeHandler(const string&,CDataTransPackage*);
 
         CResult ResetManagerTemplate(GLOBAL_CONFIG* config);
-
 
         void OnSocketClosed(SOCKET);
 
@@ -216,7 +153,7 @@ namespace Sloong
 
     protected:
         int m_nSerialNumber = 0;
-        map_ex<string, FunctionHandler> m_listFuncHandler;
+        map_ex< Manager::FunctionType , FunctionHandler> m_listFuncHandler;
         map_ex<string, ServerItem>	m_oWorkerList;
         map_ex<int, TemplateItem>	m_oTemplateList;
         map_ex<SOCKET, string>      m_oSocketList;

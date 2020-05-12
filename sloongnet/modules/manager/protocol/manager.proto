@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "core.proto";
 package Manager;
 
 
@@ -36,10 +37,14 @@ enum FunctionType{
        Response: Content(string) - the uuid for sender.
                  Extend: config data
     */
-    RegisteServer=2;
+    RegisteNode=2;
 
     QueryNode=3;
 
+    AddTemplate=4;
+    DeleteTemplate=5;
+    SetTemplate =6;
+    QueryTemplate=7;
 }
 
 message RequestPackage
@@ -54,29 +59,81 @@ message ResponsePackage
    bytes ResponseObject=2;
 }
 
-message RegisteWorkerMessage
-{
 
+
+message PostLogMessageRequest
+{
+   enum PostLogType
+   {
+      Request=0;
+      Response=1;
+   }
+   PostLogType Type=1;// Request or Response
+   Protocol.ResultType Result=2;// Succeed or Error
+   string Sender=3;// Message sender
+   string Receiver=4;// Message receiver
+   string Function=5;
+   int32 Time=6;// Current time
+   bytes Content =7;// For succeed is message content; For other is message
+}
+message RegisteWorkerRequest
+{
+   int32 TemplateID=1;
 }
 
-message PostLogMessage
+message RegisteWorkerResponse
 {
-
+   int32 TemplateID=1;
+   bytes Configuation=2;
 }
 
-message QueryNodeMessageRequest
+message RegisteNodeRequest{
+   int32 TemplateID=1;
+}
+
+message AddTemplateRequest{
+   TemplateItem AddInfo=1;
+}
+message DeleteTemplateRequest{
+   int32 TemplateID=1;
+}
+message SetTemplateRequest{
+   TemplateItem SetInfo=1;
+}
+message QueryTemplateRequest{
+   // No set for query all
+   repeated int32 TemplateID=1;
+}
+
+message TemplateItem{
+   int32 ID=1;
+   string Name=2;
+   string Note=3;
+   int32 Replicas=4;
+   int32 Created=5;
+   bytes Configuation=6;
+}
+message QueryTemplateResponse{
+   repeated TemplateItem TemplateInfos=1;
+}
+
+message QueryNodeRequest
 {
    repeated int32 TemplateID=1;
 }
 
 message NodeInfoItem{
-   string Address = 1;
-   int32 Port=2;
+   string UUID=1;
+   string TemplateName=2;
+   int32 TemplateID=3;
+   string Address = 4;
+   int32 Port=5;
+   int32 ActiveTime=6;
 }
 
-message QueryNodeMessageResponse
+message QueryNodeResponse
 {
-   repeated NodeInfoItem NodeInfoList=1;
+   repeated NodeInfoItem NodeInfos=1;
 }
 
 
