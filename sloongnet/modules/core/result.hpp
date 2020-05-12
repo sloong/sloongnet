@@ -9,7 +9,7 @@
 #define SLOONGNET_RESULT_H
 
 #include "core.h"
-using namespace Protocol;
+using namespace Core;
 namespace Sloong
 {
     class CResult

@@ -2,8 +2,6 @@ syntax = "proto3";
 import "core.proto";
 package Manager;
 
-
-
 enum Events{
    ReferenceModuleOnline=0;
    ReferenceModuleOffline=1;
@@ -59,8 +57,6 @@ message ResponsePackage
    bytes ResponseObject=2;
 }
 
-
-
 message PostLogMessageRequest
 {
    enum PostLogType
@@ -69,7 +65,7 @@ message PostLogMessageRequest
       Response=1;
    }
    PostLogType Type=1;// Request or Response
-   Protocol.ResultType Result=2;// Succeed or Error
+   Core.ResultType Result=2;// Succeed or Error
    string Sender=3;// Message sender
    string Receiver=4;// Message receiver
    string Function=5;

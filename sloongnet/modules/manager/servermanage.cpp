@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-29 09:27:21
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-12 11:49:31
+ * @LastEditTime: 2020-05-12 18:37:39
  * @Description: file content
  */
 #include "servermanage.h"
@@ -140,7 +140,7 @@ CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 	}
 
 	auto res = m_listFuncHandler[function](req_obj, pack);
-	m_pLog->Verbos(CUniversal::Format("Response [%s]:[%s][%s].", func_name, Protocol::ResultType_Name(res.Result()), res.Message()));
+	m_pLog->Verbos(CUniversal::Format("Response [%s]:[%s][%s].", func_name, Core::ResultType_Name(res.Result()), res.Message()));
 	ResponsePackage res_pack;
 	res_pack.set_function(function);
 	res_pack.set_responseobject(res.Message());

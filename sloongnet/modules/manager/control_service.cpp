@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-05-11 18:31:08
+ * @LastEditTime: 2020-05-12 18:37:15
  */
 
 #include "control_service.h"
@@ -101,7 +101,7 @@ CResult SloongControlService::Initialized(IControl* iC)
 void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
 {
 	config->set_logpath("/data/log");
-	config->set_loglevel(Protocol::LogLevel::Info);
+	config->set_loglevel(Core::LogLevel::Info);
 	config->set_debugmode(false);
 	config->set_mqthreadquantity(1);
 	config->set_enablessl(false);

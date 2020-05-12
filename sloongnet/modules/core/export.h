@@ -10,7 +10,7 @@
 #define SLOONGNET_MODULE_CORE_EXPORT_H
 
 #include "protocol/core.pb.h"
-using namespace Protocol;
+using namespace Core;
 #include "DataTransPackage.h"
 #include "sockinfo.h"
 typedef CResult (*CreateProcessEnvironmentFunction)(void**);

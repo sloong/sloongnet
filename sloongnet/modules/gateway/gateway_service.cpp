@@ -87,6 +87,12 @@ void SloongNetGateway::QueryProcessList()
 	
 	string msg_str;
 	req.SerializeToString(&msg_str);
+
+	Manager::RequestPackage req_pack;
+	req_pack.set_function(QueryNode);
+	req_pack.set_requestobject(msg_str);
+
+	req_pack.SerializeToString(&msg_str);
 	auto event = make_shared<CSendMessageEvent>();
 	event->SetRequest( m_pManagerConnection , CUniversal::ntos(event), msg_str, m_nSerialNumber, 1, Functions::ProcessEvent);
 	m_nSerialNumber++;

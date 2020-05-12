@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-12 07:39:18
+ * @LastEditTime: 2020-05-12 18:36:06
  * @Description: Main instance for sloongnet application.
  */
 
@@ -77,7 +77,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
 
 		auto response = res.ResultObject();
 
-		if( response->result() == Protocol::ResultType::Retry ){
+		if( response->result() == Core::ResultType::Retry ){
             if( uuid.length() == 0 ){
                 uuid = response->content();
                 cout << "Control assigen uuid ."<< uuid << endl;
@@ -87,10 +87,10 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
                 cout << "Control return retry package. wait 1s and retry." << endl;
 			    continue;
             }
-		}else if(response->result() == Protocol::ResultType::Succeed){
+		}else if(response->result() == Core::ResultType::Succeed){
 			serverConfig = response->content();
 		}else{
-            return CResult::Make_Error(CUniversal::Format("Control return an unexpected result [%s]. Message [%s].",Protocol::ResultType_Name(response->result()),response->content()));
+            return CResult::Make_Error(CUniversal::Format("Control return an unexpected result [%s]. Message [%s].",Core::ResultType_Name(response->result()),response->content()));
 		}
 
 		if (serverConfig.size() == 0)
@@ -153,7 +153,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     InitSystemEventHandler();
     #ifdef DEBUG
     m_oServerConfig.mutable_templateconfig()->set_debugmode(true);
-    m_oServerConfig.mutable_templateconfig()->set_loglevel(Protocol::LogLevel::All);
+    m_oServerConfig.mutable_templateconfig()->set_loglevel(Core::LogLevel::All);
     #endif
     
     CResult res = CResult::Succeed();

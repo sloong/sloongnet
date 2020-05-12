@@ -46,7 +46,7 @@
 using namespace std;
 
 #include "protocol/core.pb.h"
-using namespace Protocol;
+using namespace Core;
 
 #include <jsoncpp/json/json.h>
 

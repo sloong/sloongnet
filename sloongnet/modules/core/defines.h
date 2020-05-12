@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-11 18:45:28
+ * @LastEditTime: 2020-05-12 18:34:01
  * @Description: file content
  */
 #ifndef SLOONGNET_DEFINES_H
@@ -23,7 +23,7 @@ using namespace Sloong::Universal;
 
 
 #include "protocol/core.pb.h"
-using namespace Protocol;
+using namespace Core;
 
 template<typename T> inline
 T TYPE_TRANS(LPVOID p)
