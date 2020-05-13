@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-28 20:44:54
+ * @LastEditTime: 2020-05-13 11:39:19
  * @Description: file content
  */
 #ifndef DATA_TRANS_PACKAGE_H
@@ -44,11 +44,13 @@ namespace Sloong
          */
         ResultType SendPackage();
 
-        shared_ptr<DataPackage> GetRecvPackage(){ return m_pTransPackage;}
+        inline int GetFunction() { return m_pTransPackage->function();}
+
+        inline shared_ptr<DataPackage> GetRecvPackage(){ return m_pTransPackage;}
 
         inline string GetRecvMessage(){ return m_pTransPackage->content(); }
 
-        string GetExtendData() { return m_pTransPackage->extend(); }
+        inline string GetExtendData() { return m_pTransPackage->extend(); }
 
         inline SmartConnect GetConnection() { return m_pCon; }
 

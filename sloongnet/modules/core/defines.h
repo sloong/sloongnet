@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 15:41:37
+ * @LastEditTime: 2020-05-13 11:43:20
  * @Description: file content
  */
 #ifndef SLOONGNET_DEFINES_H
@@ -123,7 +123,7 @@ unique_ptr<T> ConvertStrToObj(string obj){
 
 inline string ConvertObjToStr(::google::protobuf::Message* obj){
 	string str_res;
-	if(obj->SerializeToString(&str_res))
+	if(!obj->SerializeToString(&str_res))
 		return "";
 	return str_res;
 }

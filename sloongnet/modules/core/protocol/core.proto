@@ -51,7 +51,7 @@ message DataPackage
     // 结果代码
     ResultType Result = 7;
     // 消息内容
-    string Content = 8;
+    bytes Content = 8;
     // 扩展数据，通常没用。但是一旦设置了这个字段则认为该包是BigPackage，直接进入队列而不是直接发送
     bytes Extend = 9;
 }

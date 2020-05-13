@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-29 09:27:21
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 16:25:31
+ * @LastEditTime: 2020-05-13 11:38:44
  * @Description: file content
  */
 #include "servermanage.h"
@@ -112,7 +112,7 @@ inline Functions ConvertStrToFunc(string str){
 
 CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 {
-	auto function = ConvertStrToFunc(pack->GetRecvMessage());
+	auto function = (Functions)pack->GetFunction();
 	if (!Manager::Functions_IsValid(function))
 	{
 		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Parser request package function[%s] error.", pack->GetRecvMessage()));
