@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 11:17:32
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-12 11:44:45
+ * @LastEditTime: 2020-05-13 12:12:53
  * @Description: file content
  */
 #ifndef SERVERMANAGE_H
@@ -49,12 +49,12 @@ namespace Sloong
             ID = info.id;
             Name = info.name;
             Note = info.note;
-            Configuation = info.configuation;
+            Configuation = string(info.configuation.begin(),info.configuation.end());
             Replicas = info.replicas;
         }
         TemplateInfo ToTemplateInfo() {
             TemplateInfo info;
-            info.configuation = this->Configuation;
+            info.configuation = vector<char>(this->Configuation.begin(),this->Configuation.end());
             info.id = this->ID;
             info.name = this->Name;
             info.note = this->Note;
