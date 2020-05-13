@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 19:41:30
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-28 20:23:39
+ * @LastEditTime: 2020-05-13 12:10:10
  * @Description: file content
  */
 #include <string>
@@ -18,7 +18,7 @@ namespace Sloong
     {
         int id;
         int replicas;
-        string configuation;
+        vector<char> configuation;
         string name;
         string note;
         string reference;

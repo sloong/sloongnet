@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-29 09:27:21
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 11:38:44
+ * @LastEditTime: 2020-05-13 12:13:45
  * @Description: file content
  */
 #include "servermanage.h"
@@ -65,7 +65,7 @@ CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG *config)
 	info.name = "Manager";
 	info.note = "This template just for the manager node.";
 	info.replicas = 1;
-	info.configuation = CBase64::Encode(config_str);
+	info.configuation = config_str;
 	CResult res(ResultType::Succeed);
 	if (CConfiguation::Instance->CheckTemplateExist(1))
 		res = CConfiguation::Instance->SetTemplate(1, info);
@@ -182,7 +182,7 @@ void Sloong::CServerManage::RefreshModuleReference(int id)
 {
 	m_oTemplateList[id].Reference.clear();
 	GLOBAL_CONFIG config;
-	config.ParseFromString(CBase64::Decode(m_oTemplateList[id].Configuation));
+	config.ParseFromString(m_oTemplateList[id].Configuation);
 	auto references = CUniversal::split(config.modulereference(), ';');
 	for (auto item : references)
 		m_oTemplateList[id].Reference.push_back(atoi(item.c_str()));
@@ -226,7 +226,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTr
 	if (notifyList.size() > 0)
 	{
 		GLOBAL_CONFIG config;
-		config.ParseFromString(CBase64::Decode(m_oTemplateList[id].Configuation));
+		config.ParseFromString(m_oTemplateList[id].Configuation);
 		EventReferenceModuleOnline online_event;
 		online_event.set_address(pack->GetSocketIP());
 		online_event.set_port(config.listenport());
@@ -409,7 +409,7 @@ void Sloong::CServerManage::OnSocketClosed(SOCKET sock)
 	if (notifyList.size() > 0)
 	{
 		GLOBAL_CONFIG config;
-		config.ParseFromString(CBase64::Decode(m_oTemplateList[id].Configuation));
+		config.ParseFromString(m_oTemplateList[id].Configuation);
 		EventReferenceModuleOffline offline_event;
 		offline_event.set_address("");
 		offline_event.set_port(0);
