@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-29 09:27:21
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 12:13:45
+ * @LastEditTime: 2020-05-13 12:39:43
  * @Description: file content
  */
 #include "servermanage.h"
@@ -60,18 +60,19 @@ CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG *config)
 	{
 		return CResult::Make_Error("Config SerializeToString error.");
 	}
-	TemplateInfo info;
-	info.id = 1;
-	info.name = "Manager";
-	info.note = "This template just for the manager node.";
-	info.replicas = 1;
-	info.configuation = config_str;
+	TemplateItem item;
+	item.ID = 1;
+	item.Name = "Manager";
+	item.Note = "This template just for the manager node.";
+	item.Replicas = 1;
+	item.Configuation = config_str;
 	CResult res(ResultType::Succeed);
+	auto info = item.ToTemplateInfo();
 	if (CConfiguation::Instance->CheckTemplateExist(1))
 		res = CConfiguation::Instance->SetTemplate(1, info);
 	else
 		res = CConfiguation::Instance->AddTemplate(info, nullptr);
-	m_oTemplateList[1] = info;
+	m_oTemplateList[1] = item;
 	return res;
 }
 
@@ -119,7 +120,7 @@ CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 		return CResult::Succeed();
 	}
 	
-	auto req_obj = pack->GetExtendData();
+	auto req_obj = pack->GetRecvMessage();
 	auto func_name = Functions_Name(function);
 	m_pLog->Verbos(CUniversal::Format("Request [%d][%s]:[%s]", function, func_name, req_obj));
 	if (!m_listFuncHandler.exist(function))
@@ -241,10 +242,14 @@ CResult Sloong::CServerManage::AddTemplateHandler(const string& req_obj, CDataTr
 	auto req = ConvertStrToObj<AddTemplateRequest>(req_obj);
 	auto info = req->addinfo();
 	TemplateItem item;
+	item.ID = 0;
 	item.Name = info.name();
 	item.Note = info.note();;
 	item.Replicas = info.replicas();
 	item.Configuation = info.configuation();
+	if( !item.IsValid() )
+		return CResult::Make_Error("Param is valid.");
+
 	int id = 0;
 	auto res = CConfiguation::Instance->AddTemplate(item.ToTemplateInfo(), &id);
 	if (res.IsFialed())

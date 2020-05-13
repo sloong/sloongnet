@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 11:17:32
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 12:12:53
+ * @LastEditTime: 2020-05-13 12:27:21
  * @Description: file content
  */
 #ifndef SERVERMANAGE_H
@@ -78,6 +78,11 @@ namespace Sloong
             item->set_created(this->Created.size());
             item->set_note(this->Note);
             item->set_configuation(this->Configuation);
+        }
+        bool IsValid(){
+            if( ID < 0 || Name.length() ==0 || Replicas < 0 || Configuation.length() == 0)
+                return false;
+            return true;
         }
         int ID;
         string Name;
