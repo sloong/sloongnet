@@ -22,13 +22,6 @@ enum LogLevel{
     Fatal = 7;  
 }
 
-
-enum Functions{
-    ProcessMessage=0;
-    ProcessEvent=1;
-    RestartNode=2;
-}
-
 enum DATA_ITEM
 {
     ServerConfiguation=0;
@@ -39,21 +32,27 @@ enum DATA_ITEM
 
 message DataPackage
 {
-    // 功能
-    Functions Function = 1;
+    enum PackageType{
+        RequestPackage=0;
+        EventPackage=1;
+    }
+    int32 Type = 1;
+    // In request pacakge, it's function id.
+    // In event package, it's event id
+    int32 Function = 2;
     // 优先级
-    int32 PriorityLevel = 2;
+    int32 PriorityLevel = 3;
     // 流水号
-    int64 SerialNumber = 3;
+    int64 SerialNumber = 4;
     // 校验串
-    string CheckString = 4;
+    string CheckString = 5;
     // 发送者的唯一标识符
-    string Sender = 5;
+    string Sender = 6;
     // 结果代码
     ResultType Result = 7;
     // 消息内容
     string Content = 8;
-    // 扩展数据
+    // 扩展数据，通常没用。但是一旦设置了这个字段则认为该包是BigPackage，直接进入队列而不是直接发送
     bytes Extend = 9;
 }
 

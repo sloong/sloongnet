@@ -2,12 +2,14 @@
  * @Author: WCB
  * @Date: 2020-04-28 14:43:16
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-28 14:58:46
+ * @LastEditTime: 2020-05-13 16:29:41
  * @Description: file content
  */
 #include "NetworkEvent.hpp"
 #include "transpond.h"
 #include "IData.h"
+
+#include "protocol/processer.pb.h"
 
 using namespace Sloong::Events;
 
@@ -50,7 +52,7 @@ void Sloong::GatewayTranspond::MessageToProcesser(CDataTransPackage* pack)
 {
 	// Step 1: 将已经收到的来自客户端的请求内容转换为protobuf格式
 	auto sendMsg = make_shared<DataPackage>();
-	sendMsg->set_function(Functions::ProcessMessage);
+	sendMsg->set_function(Processer::Functions::ProcessMessage);
 	sendMsg->set_content(pack->GetRecvMessage());
 	sendMsg->set_prioritylevel(pack->GetPriority());
 	sendMsg->set_serialnumber(m_nSerialNumber);

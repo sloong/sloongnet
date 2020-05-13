@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-12 18:36:06
+ * @LastEditTime: 2020-05-13 16:07:28
  * @Description: Main instance for sloongnet application.
  */
 
@@ -10,6 +10,9 @@
 #include "utility.h"
 #include "NetworkEvent.hpp"
 #include <dlfcn.h>
+
+#include "protocol/manager.pb.h"
+using namespace Manager;
 
 IControl* Sloong::IData::m_iC = nullptr;
 unique_ptr<CSloongBaseService> Sloong::CSloongBaseService::Instance = nullptr;
@@ -38,9 +41,9 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
 TResult<shared_ptr<DataPackage>> CSloongBaseService::RegisteToControl(SmartConnect con, string uuid)
 {
 	auto req = make_shared<DataPackage>();
-	req->set_function(Functions::ProcessMessage);
+    req->set_type(DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+	req->set_function(Manager::Functions::RegisteWorker);
 	req->set_sender(uuid);
-	req->set_content("{\"Function\":\"RegisteWorker\"}");
 
 	CDataTransPackage dataPackage;
 	dataPackage.Initialize(con);
@@ -69,7 +72,6 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
 	cout << "Connect to control succeed. Start registe and get configuation." << endl;
 	
 	string uuid;
-	string serverConfig;
 	while(true)
 	{
 		auto res = RegisteToControl(m_pManagerConnect,uuid);
@@ -81,39 +83,25 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
             if( uuid.length() == 0 ){
                 uuid = response->content();
                 cout << "Control assigen uuid ."<< uuid << endl;
-			    continue;
             }else{
                 sleep(1);
                 cout << "Control return retry package. wait 1s and retry." << endl;
-			    continue;
             }
+            continue;
 		}else if(response->result() == Core::ResultType::Succeed){
-			serverConfig = response->content();
+            auto res_pack = ConvertStrToObj<RegisteWorkerResponse>(response->content());
+	        string serverConfig = res_pack->configuation();
+            if (serverConfig.size() == 0)
+                return CResult::Make_Error("Control no return config infomation.");
+            if (!data->mutable_templateconfig()->ParseFromString(serverConfig))
+                return CResult::Make_Error("Parse the config struct error.");
+
+            data->set_templateid(res_pack->templateid());
+            data->set_nodeuuid(uuid);
+            break;
 		}else{
             return CResult::Make_Error(CUniversal::Format("Control return an unexpected result [%s]. Message [%s].",Core::ResultType_Name(response->result()),response->content()));
 		}
-
-		if (serverConfig.size() == 0)
-		{
-			cout << "Control no return config infomation. wait 1s and retry." << endl;
-			sleep(1);
-			continue;
-		}
-
-		data->set_nodeuuid(uuid);
-		Json::Reader reader;
-		Json::Value jConfig;
-		if( !reader.parse(serverConfig, jConfig) || !jConfig["TemplateID"].isInt() || !jConfig["Configuation"].isString())
-		{
-			return CResult::Make_Error(CUniversal::Format("Parse the config error. response data: %s" ,serverConfig));
-		}
-		
-		if (!data->mutable_templateconfig()->ParseFromString(CBase64::Decode(jConfig["Configuation"].asString()) ))
-		{
-			return CResult::Make_Error("Parse the config struct error. please check.");
-		}
-		data->set_templateid(jConfig["TemplateID"].asInt());
-		break;
 	};
 	cout << "Get configuation succeed." << endl;
     return CResult::Succeed();
@@ -279,14 +267,14 @@ CResult CSloongBaseService::InitModule()
 
 CResult CSloongBaseService::RegisteNode()
 {
-    Json::Value jReq;
-    jReq["Function"] = "RegisteNode";
-    jReq["TemplateID"] = m_oServerConfig.templateid();
-
+    RegisteNodeRequest req_pack;
+    req_pack.set_templateid(m_oServerConfig.templateid());
+    
     auto req = make_shared<DataPackage>();
-	req->set_function(Functions::ProcessMessage);
+    req->set_type(DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+	req->set_function(Manager::Functions::RegisteNode);
 	req->set_sender( m_oServerConfig.nodeuuid() );
-	req->set_content(jReq.toStyledString());
+	req->set_content(ConvertObjToStr(&req_pack));
 
 	CDataTransPackage dataPackage;
 	dataPackage.Initialize( m_pManagerConnect );

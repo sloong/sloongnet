@@ -153,7 +153,7 @@ namespace Sloong
 
     protected:
         int m_nSerialNumber = 0;
-        map_ex< Manager::FunctionType , FunctionHandler> m_listFuncHandler;
+        map_ex< Manager::Functions , FunctionHandler> m_listFuncHandler;
         map_ex<string, ServerItem>	m_oWorkerList;
         map_ex<int, TemplateItem>	m_oTemplateList;
         map_ex<SOCKET, string>      m_oSocketList;

@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-12 18:34:01
+ * @LastEditTime: 2020-05-13 15:41:37
  * @Description: file content
  */
 #ifndef SLOONGNET_DEFINES_H
@@ -112,5 +112,20 @@ enum HashType
 	SHA_256 = 2,
 	SHA_512 = 3,
 };
+
+template<class T> inline
+unique_ptr<T> ConvertStrToObj(string obj){
+	unique_ptr<T> item = make_unique<T>();
+	if(!item->ParseFromString(obj))
+		return nullptr;
+	return item;
+}
+
+inline string ConvertObjToStr(::google::protobuf::Message* obj){
+	string str_res;
+	if(obj->SerializeToString(&str_res))
+		return "";
+	return str_res;
+}
 
 #endif

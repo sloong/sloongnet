@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-08 11:30:49
+ * @LastEditTime: 2020-05-13 16:19:42
  * @Description: file content
  */
 #include "firewall_service.h"
@@ -62,7 +62,7 @@ CResult Sloong::SloongNetFirewall::MessagePackageProcesser(CDataTransPackage* pa
 {
     auto msgPack = pack->GetRecvPackage();
     auto sender = msgPack->sender();
-    auto func = msgPack->function();
+    auto func = (Functions)msgPack->function();
     m_pLog->Verbos(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
 
 	return CResult::Succeed();

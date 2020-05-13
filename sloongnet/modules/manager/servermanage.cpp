@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-29 09:27:21
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-12 18:37:39
+ * @LastEditTime: 2020-05-13 16:25:31
  * @Description: file content
  */
 #include "servermanage.h"
@@ -21,14 +21,14 @@ CResult Sloong::CServerManage::Initialize(IControl *ic)
 		m_pLog = IData::GetLog();
 	}
 
-	m_listFuncHandler[FunctionType::PostLog] = std::bind(&CServerManage::EventRecorderHandler, this, std::placeholders::_1, std::placeholders::_2);
-	m_listFuncHandler[FunctionType::RegisteWorker] = std::bind(&CServerManage::RegisteWorkerHandler, this, std::placeholders::_1, std::placeholders::_2);
-	m_listFuncHandler[FunctionType::RegisteNode] = std::bind(&CServerManage::RegisteNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
-	m_listFuncHandler[FunctionType::AddTemplate] = std::bind(&CServerManage::AddTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
-	m_listFuncHandler[FunctionType::DeleteTemplate] = std::bind(&CServerManage::DeleteTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
-	m_listFuncHandler[FunctionType::SetTemplate] = std::bind(&CServerManage::SetTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
-	m_listFuncHandler[FunctionType::QueryTemplate] = std::bind(&CServerManage::QueryTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
-	m_listFuncHandler[FunctionType::QueryNode] = std::bind(&CServerManage::QueryNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler[Functions::PostLog] = std::bind(&CServerManage::EventRecorderHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler[Functions::RegisteWorker] = std::bind(&CServerManage::RegisteWorkerHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler[Functions::RegisteNode] = std::bind(&CServerManage::RegisteNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler[Functions::AddTemplate] = std::bind(&CServerManage::AddTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler[Functions::DeleteTemplate] = std::bind(&CServerManage::DeleteTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler[Functions::SetTemplate] = std::bind(&CServerManage::SetTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler[Functions::QueryTemplate] = std::bind(&CServerManage::QueryTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_listFuncHandler[Functions::QueryNode] = std::bind(&CServerManage::QueryNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
 
 	if (!CConfiguation::Instance->IsInituialized())
 	{
@@ -105,34 +105,23 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 	return -1;
 }
 
-template<class T> inline
-unique_ptr<T> ConvertStrToObj(string obj){
-	unique_ptr<T> item = make_unique<T>();
-	if(!item->ParseFromString(obj))
-		return nullptr;
-	return item;
-}
 
-inline string ConvertObjToStr(::google::protobuf::Message* obj){
-	string str_res;
-	if(obj->SerializeToString(&str_res))
-		return "";
-	return str_res;
+inline Functions ConvertStrToFunc(string str){
+	return (Functions)atoi(str.c_str());
 }
 
 CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 {
-	auto str_req = pack->GetRecvMessage();
-	auto req_pack = ConvertStrToObj<RequestPackage>(str_req);
-	if (!req_pack)
+	auto function = ConvertStrToFunc(pack->GetRecvMessage());
+	if (!Manager::Functions_IsValid(function))
 	{
-		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Parser request package [%s] error.", str_req));
+		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Parser request package function[%s] error.", pack->GetRecvMessage()));
 		return CResult::Succeed();
 	}
-	auto function = req_pack->function();
-	auto req_obj = req_pack->requestobject();
-	auto func_name = FunctionType_Name(function);
-	m_pLog->Verbos(CUniversal::Format("Request [%d][%s]:[%s]", function, func_name, str_req));
+	
+	auto req_obj = pack->GetExtendData();
+	auto func_name = Functions_Name(function);
+	m_pLog->Verbos(CUniversal::Format("Request [%d][%s]:[%s]", function, func_name, req_obj));
 	if (!m_listFuncHandler.exist(function))
 	{
 		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Function [%s] no handler.",func_name));
@@ -141,10 +130,7 @@ CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 
 	auto res = m_listFuncHandler[function](req_obj, pack);
 	m_pLog->Verbos(CUniversal::Format("Response [%s]:[%s][%s].", func_name, Core::ResultType_Name(res.Result()), res.Message()));
-	ResponsePackage res_pack;
-	res_pack.set_function(function);
-	res_pack.set_responseobject(res.Message());
-	pack->ResponsePackage(res.Result(), ConvertObjToStr(&res_pack));
+	pack->ResponsePackage(res);
 	return CResult::Succeed();
 }
 
@@ -393,9 +379,9 @@ void Sloong::CServerManage::SendEvent(list<string> notifyList, int event, ::goog
 	{
 		string msg_str;
 		msg->SerializeToString(&msg_str);
-		auto event = make_shared<CSendMessageEvent>();
-		event->SetRequest(m_oWorkerList[item].Connection->GetSocketID(), CUniversal::ntos(event), msg_str, m_nSerialNumber, 1, Functions::ProcessEvent);
-		m_pControl->SendMessage(event);
+		auto req = make_shared<CSendMessageEvent>();
+		req->SetRequest(m_oWorkerList[item].Connection->GetSocketID(),m_nSerialNumber, 1, event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
+		m_pControl->SendMessage(req);
 	}
 }
 

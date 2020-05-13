@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-24 20:39:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-07 17:00:03
+ * @LastEditTime: 2020-05-13 16:31:16
  * @Description: file content
  */
 /* File Name: server.c */
@@ -127,6 +127,9 @@ void Sloong::SloongNetProcess::EventPackageProcesser(CDataTransPackage* trans_pa
 
 	switch (event)
 	{
+	case Manager::Events::RestartNode:{
+		m_pControl->SendMessage(EVENT_TYPE::ProgramRestart);
+		}break;
 	case Manager::Events::ReferenceModuleOnline:{
 		m_pLog->Info("Receive ReferenceModuleOnline event");
 		}break;

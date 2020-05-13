@@ -68,7 +68,7 @@ CResult SloongNetGateway::Initialized(SOCKET sock,IControl* iC)
 		m_pControl->SendMessage(event);
 	}
 	m_pLog = IData::GetLog();
-	m_pManagerConnection = sock;
+	m_nManagerConnection = sock;
 	m_pControl->RegisterEventHandler(ProgramStart,std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
 	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetGateway::OnSocketClose, this, std::placeholders::_1));
 	return CResult::Succeed();
@@ -84,17 +84,9 @@ void SloongNetGateway::QueryProcessList()
 	Manager::QueryNodeRequest req;
 	for (auto item : references)
 		req.add_templateid(atoi(item.c_str()));
-	
-	string msg_str;
-	req.SerializeToString(&msg_str);
 
-	Manager::RequestPackage req_pack;
-	req_pack.set_function(QueryNode);
-	req_pack.set_requestobject(msg_str);
-
-	req_pack.SerializeToString(&msg_str);
 	auto event = make_shared<CSendMessageEvent>();
-	event->SetRequest( m_pManagerConnection , CUniversal::ntos(event), msg_str, m_nSerialNumber, 1, Functions::ProcessEvent);
+	event->SetRequest( m_nManagerConnection,  m_nSerialNumber, 1, (int)Functions::QueryNode, ConvertObjToStr(&req));
 	m_nSerialNumber++;
 	m_pControl->SendMessage(event);
 

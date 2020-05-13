@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-11 19:14:27
+ * @LastEditTime: 2020-05-13 16:23:51
  * @Description: file content
  */
 #ifndef SLOONGNET_GATEWAY_SERVICE_H
@@ -55,7 +55,7 @@ namespace Sloong
 		CLog*		m_pLog =nullptr;
 		GLOBAL_CONFIG* m_pConfig;
 		Json::Value    m_oExConfig;
-		SOCKET   m_pManagerConnection = -1;
+		SOCKET   m_nManagerConnection = -1;
 		int		 m_nSerialNumber = 0;
 	public:
 		static unique_ptr<SloongNetGateway> Instance;

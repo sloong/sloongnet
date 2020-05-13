@@ -3,8 +3,10 @@ import "core.proto";
 package Manager;
 
 enum Events{
-   ReferenceModuleOnline=0;
-   ReferenceModuleOffline=1;
+   RestartNode=0;
+   StopNode=1;
+   ReferenceModuleOnline=2;
+   ReferenceModuleOffline=3;
 }
 
 message EventReferenceModuleOnline{
@@ -22,7 +24,7 @@ message EventPackage{
    bytes EventObject=2;
 }
 
-enum FunctionType{
+enum Functions{
     /* Flow: All -> All
        Response: Content - result with JSON string. 
     */
@@ -45,18 +47,6 @@ enum FunctionType{
     QueryTemplate=7;
 }
 
-message RequestPackage
-{
-   FunctionType Function=1;
-   bytes RequestObject=2;
-}
-
-message ResponsePackage
-{
-   FunctionType Function=1;
-   bytes ResponseObject=2;
-}
-
 message PostLogMessageRequest
 {
    enum PostLogType
@@ -71,10 +61,6 @@ message PostLogMessageRequest
    string Function=5;
    int32 Time=6;// Current time
    bytes Content =7;// For succeed is message content; For other is message
-}
-message RegisteWorkerRequest
-{
-   int32 TemplateID=1;
 }
 
 message RegisteWorkerResponse
