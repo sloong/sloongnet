@@ -53,7 +53,7 @@ enum EVENT_TYPE
 	SocketClose=3;
 
 	// 需要发送数据给客户端时，使用该消息
-	SendMessage=4;
+	SendPackage=4;
 
 	// 需要监听socket的可写状态时，使用该消息
 	// 类型为CNetworkEvent.

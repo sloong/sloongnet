@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 16:26:13
+ * @LastEditTime: 2020-05-14 18:43:42
  * @Description: file content
  */
 #pragma once
@@ -13,11 +13,15 @@ namespace Sloong
 	class CDataTransPackage;
 	namespace Events
 	{
-		class CSendMessageEvent : public CNetworkEvent
+		typedef std::function<void(DataPackage*,CDataTransPackage*)> CallbackFunc;
+		class CSendPackageEvent : public CNetworkEvent
 		{
 		public:
-			CSendMessageEvent(){m_emType = EVENT_TYPE::SendMessage; }
-			virtual	~CSendMessageEvent(){}
+			CSendPackageEvent():CNetworkEvent(EVENT_TYPE::SendPackage){}
+			virtual	~CSendPackageEvent(){}
+
+			inline void SetCallbackFunc(CallbackFunc p){ m_pCallback = p; }
+			inline void CallCallbackFunc(CDataTransPackage* p){ if(m_pCallback) m_pCallback(m_pData.get(),p); }
 			
 			void SetRequest( SOCKET target, int serialnumber, int priority, int func, string content,  string extend = "", DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_RequestPackage)
 			{
@@ -38,6 +42,7 @@ namespace Sloong
 			}
 		protected:
 			shared_ptr<DataPackage> m_pData;
+			CallbackFunc		m_pCallback = nullptr;
 		};
 
 	}

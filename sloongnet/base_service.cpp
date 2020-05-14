@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 14:10:18
+ * @LastEditTime: 2020-05-14 14:38:07
  * @Description: Main instance for sloongnet application.
  */
 
@@ -190,7 +190,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     }
     
     m_pNetwork->RegisterEnvCreateProcesser(m_pModuleCreateProcessEvnFunc);
-    m_pNetwork->RegisterProcesser(m_pModuleRequestHandler,m_pModuleRequestHandler,m_pModuleEventHandler);
+    m_pNetwork->RegisterProcesser(m_pModuleRequestHandler,m_pModuleResponseHandler,m_pModuleEventHandler);
     m_pNetwork->RegisterAccpetConnectProcesser(m_pModuleAcceptHandler);
     auto sock = INVALID_SOCKET;
     if( m_pManagerConnect ) sock= m_pManagerConnect->GetSocketID();

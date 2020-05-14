@@ -26,11 +26,9 @@ extern "C" CResult RequestPackageProcesser(void* env,CDataTransPackage* pack)
 
 extern "C" CResult ResponsePackageProcesser(void* env,CDataTransPackage* pack)
 {
-	auto pTranspond = TYPE_TRANS<GatewayTranspond*>(env);
-	if( pTranspond)
-		return pTranspond->PackageProcesser(pack);
-	else
-		return CResult::Make_Error("Environment convert error. cannot process message.");
+	//auto pTranspond = TYPE_TRANS<GatewayTranspond*>(env);
+	SloongNetGateway::Instance->ResponsePackageProcesser(pack);
+	return CResult::Succeed();
 }
 
 extern "C" CResult EventPackageProcesser(CDataTransPackage* pack)
@@ -78,13 +76,26 @@ CResult SloongNetGateway::Initialized(SOCKET sock,IControl* iC)
 	}
 	m_pLog = IData::GetLog();
 	m_nManagerConnection = sock;
-	m_pControl->RegisterEventHandler(ProgramStart,std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
-	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetGateway::OnSocketClose, this, std::placeholders::_1));
+	m_pControl->RegisterEventHandler(EVENT_TYPE::ProgramStart,std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
+	m_pControl->RegisterEventHandler(EVENT_TYPE::SocketClose, std::bind(&SloongNetGateway::OnSocketClose, this, std::placeholders::_1));
+	m_pControl->RegisterEventHandler(EVENT_TYPE::SendPackage,std::bind(&SloongNetGateway::SendPackageHook, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
 
-void SloongNetGateway::QueryProcessList()
+void SloongNetGateway::ResponsePackageProcesser(CDataTransPackage* trans_pack)
+{
+	auto num = trans_pack->GetSerialNumber();
+	if( !m_listSendEvent.exist(num))
+		m_pLog->Error("ResponsePackageProcesser no find the package");
+
+	auto send_evt = dynamic_pointer_cast<CSendPackageEvent>(m_listSendEvent[num]);
+	send_evt->CallCallbackFunc(trans_pack);
+}
+
+
+
+void SloongNetGateway::QueryProcessListRequest()
 {
 	auto references = CUniversal::split(m_pConfig->modulereference(), ';');
 	if( references.size() == 0 )
@@ -94,14 +105,29 @@ void SloongNetGateway::QueryProcessList()
 	for (auto item : references)
 		req.add_templateid(atoi(item.c_str()));
 
-	auto event = make_shared<CSendMessageEvent>();
+	auto event = make_shared<CSendPackageEvent>();
+	event->SetCallbackFunc(std::bind(&SloongNetGateway::QueryProcessListResponse,this,std::placeholders::_1,std::placeholders::_2));
 	event->SetRequest( m_nManagerConnection,  m_nSerialNumber, 1, (int)Functions::QueryNode, ConvertObjToStr(&req));
 	m_nSerialNumber++;
 	m_pControl->SendMessage(event);
-
 }
 
-inline CResult SloongNetGateway::CreateProcessEnvironmentHandler(void** out_env)
+
+void SloongNetGateway::QueryProcessListResponse(DataPackage* send_pack,CDataTransPackage* res_pack)
+{
+	auto str_res = res_pack->GetRecvMessage();
+	auto res = ConvertStrToObj<QueryNodeResponse>(str_res);
+	if( res == nullptr) return;
+
+	auto nodes = res->nodeinfos();
+	for(auto node: nodes)
+	{
+		m_pLog->Info(CUniversal::Format("Node:[%s][%d]",node.address(),node.port()));
+	}
+}
+
+
+CResult SloongNetGateway::CreateProcessEnvironmentHandler(void** out_env)
 {
 	auto item = make_shared<GatewayTranspond>();
 	auto res = item->Initialize(m_pControl);
@@ -112,10 +138,17 @@ inline CResult SloongNetGateway::CreateProcessEnvironmentHandler(void** out_env)
 	return CResult::Succeed();
 }
 
+void SloongNetGateway::SendPackageHook(SmartEvent event)
+{	
+	auto send_evt = dynamic_pointer_cast<CSendPackageEvent>(event);
+	auto pack = send_evt->GetDataPackage();
+	auto socket = send_evt->GetSocketID();
+	m_listSendEvent[pack->serialnumber()] = event;
+}
 
 void SloongNetGateway::OnStart(SmartEvent evt)
 {	
-	QueryProcessList();
+	QueryProcessListRequest();
 }
 
 

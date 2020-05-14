@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-28 14:43:16
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 11:44:16
+ * @LastEditTime: 2020-05-14 17:10:46
  * @Description: file content
  */
 #include "NetworkEvent.hpp"
@@ -70,7 +70,7 @@ void Sloong::GatewayTranspond::MessageToProcesser(CDataTransPackage* pack)
 	transPack->RequestPackage(sendMsg);
 
 	// Step 5: 新建一个NetworkEx类型的事件，将上面准备完毕的数据发送出去。
-	auto process_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendMessage);
+	auto process_event = make_shared<CNetworkEvent>(EVENT_TYPE::SendPackage);
 	process_event->SetSocketID(process_id->second->GetSocketID());
 	process_event->SetDataPackage(transPack);
 	m_pControl->CallMessage(process_event);

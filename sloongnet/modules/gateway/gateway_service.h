@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 14:15:09
+ * @LastEditTime: 2020-05-14 18:03:13
  * @Description: file content
  */
 #ifndef SLOONGNET_GATEWAY_SERVICE_H
@@ -39,18 +39,22 @@ namespace Sloong
 		CResult Initialization(GLOBAL_CONFIG*);
 		CResult Initialized(SOCKET,IControl*);
 		
-		void QueryProcessList();
+		void QueryProcessListRequest();
+		void QueryProcessListResponse(DataPackage*,CDataTransPackage*);
 
 		inline CResult CreateProcessEnvironmentHandler(void**);
 		void EventPackageProcesser(CDataTransPackage*);
+		void ResponsePackageProcesser(CDataTransPackage*);
 
 		// Event handler
 		void OnStart(SmartEvent);
 		void OnSocketClose(SmartEvent);
+		void SendPackageHook(SmartEvent);
 	protected:
 		list<shared_ptr<GatewayTranspond>> m_listTranspond;
 
 	protected:
+		map_ex<int,SmartEvent>	m_listSendEvent;
 		map<int,string> m_mapEventType;
 		IControl* 	m_pControl = nullptr;
 		CLog*		m_pLog =nullptr;

@@ -50,11 +50,11 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 							  std::bind(&CNetworkHub::OnOtherEventHappened, this, std::placeholders::_1));
 
 	m_iC->RegisterEvent(EVENT_TYPE::SocketClose);
-	m_iC->RegisterEvent(EVENT_TYPE::SendMessage);
+	m_iC->RegisterEvent(EVENT_TYPE::SendPackage);
 	m_iC->RegisterEvent(EVENT_TYPE::MonitorSendStatus);
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&CNetworkHub::Run, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramExit, std::bind(&CNetworkHub::Exit, this, std::placeholders::_1));
-	m_iC->RegisterEventHandler(EVENT_TYPE::SendMessage, std::bind(&CNetworkHub::SendMessageEventHandler, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::SendPackage, std::bind(&CNetworkHub::SendPackageEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::SocketClose, std::bind(&CNetworkHub::CloseConnectEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::MonitorSendStatus, std::bind(&CNetworkHub::MonitorSendStatusEventHandler, this, std::placeholders::_1));
 
@@ -87,9 +87,9 @@ void Sloong::CNetworkHub::Exit(SmartEvent event)
 	m_pEpoll->Exit();
 }
 
-void Sloong::CNetworkHub::SendMessageEventHandler(SmartEvent event)
+void Sloong::CNetworkHub::SendPackageEventHandler(SmartEvent event)
 {
-	auto send_evt = dynamic_pointer_cast<CSendMessageEvent>(event);
+	auto send_evt = dynamic_pointer_cast<CSendPackageEvent>(event);
 	auto pack = send_evt->GetDataPackage();
 	auto socket = send_evt->GetSocketID();
 	shared_ptr<CSockInfo> info = m_SockList[socket];

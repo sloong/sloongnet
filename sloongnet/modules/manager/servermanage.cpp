@@ -384,7 +384,7 @@ void Sloong::CServerManage::SendEvent(list<string> notifyList, int event, ::goog
 	{
 		string msg_str;
 		msg->SerializeToString(&msg_str);
-		auto req = make_shared<CSendMessageEvent>();
+		auto req = make_shared<CSendPackageEvent>();
 		req->SetRequest(m_oWorkerList[item].Connection->GetSocketID(),m_nSerialNumber, 1, event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
 		m_pControl->SendMessage(req);
 	}

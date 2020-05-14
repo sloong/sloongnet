@@ -1,3 +1,10 @@
+/*
+ * @Author: WCB
+ * @Date: 2020-05-14 17:12:29
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-05-14 17:12:30
+ * @Description: file content
+ */
 #pragma once
 #include "NormalEvent.hpp"
 #include "ExtendEvent.h"
@@ -10,7 +17,7 @@ namespace Sloong
 		class CNetworkExEvent : public CNormalEvent, public CExtendEvent
 		{
 		public:
-			CNetworkExEvent(EVENT_TYPE t){ m_emType = t; }
+			CNetworkExEvent(EVENT_TYPE t):m_emType(t){}
 			virtual	~CNetworkExEvent(){}
 
 			inline int GetSocketID() { return m_nSocketID; }

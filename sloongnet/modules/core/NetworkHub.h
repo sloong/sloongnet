@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 14:10:01
+ * @LastEditTime: 2020-05-14 16:58:54
  * @Description: file content
  */
 #pragma once
@@ -28,7 +28,7 @@ namespace Sloong
         // event handler
         void Run(SmartEvent event);
 		void Exit(SmartEvent event);
-        void SendMessageEventHandler(SmartEvent event);
+        void SendPackageEventHandler(SmartEvent event);
         void CloseConnectEventHandler(SmartEvent event);
 		void MonitorSendStatusEventHandler(SmartEvent evt);
 

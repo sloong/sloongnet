@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-17 15:33:27
+ * @LastEditTime: 2020-05-14 17:44:45
  * @Description: file content
  */
 #pragma once
@@ -16,8 +16,7 @@ namespace Sloong
 		class CNetworkEvent : public CNormalEvent
 		{
 		public:
-			CNetworkEvent(){}
-			CNetworkEvent(EVENT_TYPE t){ m_emType = t; }
+			CNetworkEvent(EVENT_TYPE t):CNormalEvent(t){}
 			virtual	~CNetworkEvent(){}
 
 			inline int GetSocketID() { return m_nSocketID; }
