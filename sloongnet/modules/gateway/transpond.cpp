@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-28 14:43:16
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 16:29:41
+ * @LastEditTime: 2020-05-14 11:44:16
  * @Description: file content
  */
 #include "NetworkEvent.hpp"
@@ -65,8 +65,7 @@ void Sloong::GatewayTranspond::MessageToProcesser(CDataTransPackage* pack)
 	m_mapPackageList[m_nSerialNumber] = pack;
 
 	// Step 4: 创建发送到指定process服务的DataTrans包
-	auto transPack = make_shared<CDataTransPackage>();
-	transPack->Initialize(process_id->second, m_pLog);
+	auto transPack = make_shared<CDataTransPackage>(process_id->second);
 
 	transPack->RequestPackage(sendMsg);
 

@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 11:39:19
+ * @LastEditTime: 2020-05-14 11:43:34
  * @Description: file content
  */
 #ifndef DATA_TRANS_PACKAGE_H
@@ -16,7 +16,7 @@ namespace Sloong
     class CDataTransPackage
     {
 	public:
-        void Initialize(SmartConnect conn, CLog* log= nullptr);
+        CDataTransPackage(SmartConnect conn):m_pCon(conn){}
 
 		void ResponsePackage(ResultType result, const string& message, const string* exdata =nullptr);
         void ResponsePackage(const CResult& result);
@@ -67,23 +67,15 @@ namespace Sloong
          */
         inline bool IsBigPackage(){ return m_pTransPackage->extend().length() > 0 ? true : false; }
 
-        int GetPriority(){
-            return m_pTransPackage->prioritylevel();
-        }
+        inline int GetPriority(){ return m_pTransPackage->prioritylevel(); }
 
-        void SetPriority(int value){
-            m_pTransPackage->set_prioritylevel(value);
-        }
+        inline void SetPriority(int value){ m_pTransPackage->set_prioritylevel(value); }
 
-        u_int64_t GetSerialNumber(){
-            return m_pTransPackage->serialnumber();
-        }
+        inline u_int64_t GetSerialNumber(){ return m_pTransPackage->serialnumber(); }
 
-        void SetSerialNumber(u_int64_t value){
-            m_pTransPackage->set_serialnumber(value);
-        }
+        inline void SetSerialNumber(u_int64_t value){ m_pTransPackage->set_serialnumber(value); }
 
-        void AddSerialNumber( u_int64_t& value ){
+        inline void AddSerialNumber( u_int64_t& value ){
             m_pTransPackage->set_serialnumber(value);
             value++;
         }
@@ -95,7 +87,9 @@ namespace Sloong
         shared_ptr<DataPackage> m_pTransPackage;
     protected:
         SmartConnect    m_pCon;
-        CLog*           m_pLog = nullptr;
+    public:
+        static inline void InitializeLog(CLog* log){ g_pLog = log; }
+        static CLog*    g_pLog;
     };
 
     typedef shared_ptr<CDataTransPackage> SmartPackage;

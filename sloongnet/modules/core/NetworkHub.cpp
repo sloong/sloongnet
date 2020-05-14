@@ -99,8 +99,7 @@ void Sloong::CNetworkHub::SendMessageEventHandler(SmartEvent event)
 		return;
 	}
 
-	auto transPack = make_shared<CDataTransPackage>();
-	transPack->Initialize(info->m_pCon, nullptr);
+	auto transPack = make_shared<CDataTransPackage>(info->m_pCon);
 	transPack->RequestPackage(pack);
 
 	AddMessageToSendList(transPack);

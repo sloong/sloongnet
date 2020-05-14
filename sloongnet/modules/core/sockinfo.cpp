@@ -83,8 +83,7 @@ ResultType Sloong::CSockInfo::OnDataCanReceive( queue<SmartPackage>& readList )
 	// 已经连接的用户,收到数据,可以开始读入
 	bool bLoop = false;
 	do {
-		auto package = make_shared<CDataTransPackage>();
-		package->Initialize(m_pCon,nullptr);
+		auto package = make_shared<CDataTransPackage>(m_pCon);
 		// TODO: 这里需要做一些扩展，有两种情况。
 		// 1：接收包头失败则返回，如果长度接收成功那么数据部分是按照超时时间参数来处理。
 		// 2：不区分接收包头还是数据，始终按照参数来处理。

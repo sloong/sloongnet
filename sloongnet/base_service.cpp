@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 16:07:28
+ * @LastEditTime: 2020-05-14 11:45:51
  * @Description: Main instance for sloongnet application.
  */
 
@@ -45,8 +45,7 @@ TResult<shared_ptr<DataPackage>> CSloongBaseService::RegisteToControl(SmartConne
 	req->set_function(Manager::Functions::RegisteWorker);
 	req->set_sender(uuid);
 
-	CDataTransPackage dataPackage;
-	dataPackage.Initialize(con);
+	CDataTransPackage dataPackage(con);
 	dataPackage.RequestPackage(req);
 	ResultType result = dataPackage.SendPackage();
 	if (result != ResultType::Succeed)
@@ -156,7 +155,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     if (res.IsFialed()) return res;
     
     m_pLog->Initialize(m_oServerConfig.templateconfig().logpath(), "", (LOGOPT) (LOGOPT::WriteToSTDOut|LOGOPT::WriteToFile), LOGLEVEL(m_oServerConfig.templateconfig().loglevel()), LOGTYPE::DAY);
-
+    CDataTransPackage::InitializeLog(m_pLog.get());
     res = InitModule();
     if( res.IsFialed() ) return res;
 
@@ -276,8 +275,7 @@ CResult CSloongBaseService::RegisteNode()
 	req->set_sender( m_oServerConfig.nodeuuid() );
 	req->set_content(ConvertObjToStr(&req_pack));
 
-	CDataTransPackage dataPackage;
-	dataPackage.Initialize( m_pManagerConnect );
+	CDataTransPackage dataPackage(m_pManagerConnect);
 	dataPackage.RequestPackage(req);
 
 	ResultType result = dataPackage.SendPackage();

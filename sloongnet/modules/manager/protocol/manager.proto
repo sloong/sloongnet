@@ -25,14 +25,14 @@ message EventPackage{
 }
 
 enum Functions{
-    /* Flow: All -> All
-       Response: Content - result with JSON string. 
-    */
-    RegisteWorker=0;
     /* Flow: All -> Control
        Response: post log message to control
     */
-    PostLog=1;
+    PostLog=0;
+    /* Flow: All -> All
+       Response: Content - result with JSON string. 
+    */
+    RegisteWorker=1;
     /* Flow:  All -> Control
        Response: Content(string) - the uuid for sender.
                  Extend: config data
