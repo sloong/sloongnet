@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-24 20:39:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 14:12:34
+ * @LastEditTime: 2020-05-14 19:10:19
  * @Description: file content
  */
 /* File Name: server.c */
@@ -34,6 +34,12 @@ extern "C" CResult ResponsePackageProcesser(void* pEnv, CDataTransPackage* pack)
 	else
 		return CResult::Make_Error("Environment convert error. cannot process message.");
 }
+
+extern "C" CResult EventPackageProcesser(CDataTransPackage* pack)
+{
+	SloongNetProcess::Instance->EventPackageProcesser(pack);
+	return CResult::Succeed();
+}
 	
 extern "C" CResult NewConnectAcceptProcesser(CSockInfo* info)
 {
@@ -45,8 +51,8 @@ extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
 	return CResult::Succeed();
 }
 
-extern "C" CResult ModuleInitialized(IControl* iC){
-	return SloongNetProcess::Instance->Initialized(iC);
+extern "C" CResult ModuleInitialized(SOCKET sock,IControl* iC){
+	return SloongNetProcess::Instance->Initialized(sock,iC);
 }
 
 extern "C" CResult CreateProcessEnvironment(void** out_env)
@@ -55,7 +61,7 @@ extern "C" CResult CreateProcessEnvironment(void** out_env)
 }
 
 
-CResult SloongNetProcess::Initialized(IControl* iC)
+CResult SloongNetProcess::Initialized(SOCKET sock,IControl* iC)
 {
 	m_pControl = iC;
 	IData::Initialize(iC);
@@ -66,7 +72,7 @@ CResult SloongNetProcess::Initialized(IControl* iC)
 		
 	}
 	m_pLog = IData::GetLog();
-	
+	m_nManagerConnection = sock;
 	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProcess::OnSocketClose, this, std::placeholders::_1));
 	return CResult::Succeed();
 }

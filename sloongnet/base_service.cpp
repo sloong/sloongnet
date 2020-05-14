@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 14:38:07
+ * @LastEditTime: 2020-05-14 19:46:04
  * @Description: Main instance for sloongnet application.
  */
 
@@ -138,10 +138,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     m_oExitResult = CResult::Succeed();
 
     InitSystemEventHandler();
-    #ifdef DEBUG
-    m_oServerConfig.mutable_templateconfig()->set_debugmode(true);
-    m_oServerConfig.mutable_templateconfig()->set_loglevel(Core::LogLevel::All);
-    #endif
+
     
     CResult res = CResult::Succeed();
     if( ManagerMode )
@@ -153,20 +150,25 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
 		res = InitlializeForWorker(&m_oServerConfig);
 	}
     if (res.IsFialed()) return res;
-    
-    m_pLog->Initialize(m_oServerConfig.templateconfig().logpath(), "", (LOGOPT) (LOGOPT::WriteToSTDOut|LOGOPT::WriteToFile), LOGLEVEL(m_oServerConfig.templateconfig().loglevel()), LOGTYPE::DAY);
+#ifdef DEBUG
+    m_oServerConfig.mutable_templateconfig()->set_debugmode(true);
+    m_oServerConfig.mutable_templateconfig()->set_loglevel(Core::LogLevel::All);
+#endif
+    auto pConfig = m_oServerConfig.mutable_templateconfig();
+    m_pLog->Initialize(pConfig->logpath(), "", (LOGOPT) (LOGOPT::WriteToSTDOut|LOGOPT::WriteToFile), LOGLEVEL(pConfig->loglevel()), LOGTYPE::DAY);
+
     CDataTransPackage::InitializeLog(m_pLog.get());
     res = InitModule();
     if( res.IsFialed() ) return res;
 
-    res = m_pModuleInitializationFunc(m_oServerConfig.mutable_templateconfig());
+    res = m_pModuleInitializationFunc(pConfig);
     if( res.IsFialed())
     {
         m_pLog->Fatal(res.Message());
         return res;
     }
 
-    res = m_pControl->Initialize(m_oServerConfig.templateconfig().mqthreadquantity());
+    res = m_pControl->Initialize(pConfig->mqthreadquantity());
     if( res.IsFialed())
     {
         m_pLog->Fatal(res.Message());
@@ -176,6 +178,12 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     m_pControl->Add(DATA_ITEM::ServerConfiguation, m_oServerConfig.mutable_templateconfig());
     m_pControl->Add(Logger, m_pLog.get());
     m_pControl->Add(DATA_ITEM::RuntimeData, &m_oServerConfig );
+    if( pConfig->moduleconfig().length() > 0)
+    {
+        Json::Reader reader;
+        reader.parse(pConfig->moduleconfig(), m_oModuleConfig);
+        m_pControl->Add(DATA_ITEM::ModuleConfiguation, &m_oModuleConfig );
+    }
 
     m_pControl->RegisterEvent(ProgramExit);
     m_pControl->RegisterEvent(ProgramStart);

@@ -166,11 +166,11 @@ void Sloong::SloongNetGateway::OnSocketClose(SmartEvent event)
 
 void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage* trans_pack)
 {
-	auto event = Events_MIN;
 	auto data_pack = trans_pack->GetRecvPackage();
-	if(!Manager::Events_Parse(data_pack->content(),&event))
+	auto event = (Manager::Events)data_pack->function();
+	if(!Manager::Events_IsValid(event))
 	{
-		m_pLog->Error(CUniversal::Format("Receive event but parse error. content:[%s]",data_pack->content()));
+		m_pLog->Error(CUniversal::Format("EventPackageProcesser is called.but the fucntion[%d] check error.", event));
 		return;
 	}
 
@@ -183,6 +183,7 @@ void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage* trans_pa
 		m_pLog->Info("Receive ReferenceModuleOffline event");
 		}break;
 	default:{
+		m_pLog->Error(CUniversal::Format("Event is no processed. [%s][%d].", Manager::Events_Name(event),event ));
 		}break;
 	}
 }

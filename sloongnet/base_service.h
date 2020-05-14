@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 14:07:07
+ * @LastEditTime: 2020-05-14 19:40:31
  * @Description: file content
  */
 
@@ -56,6 +56,7 @@ namespace Sloong
 		unique_ptr<CLog>		m_pLog = make_unique<CLog>();;
 		RuntimeDataPackage		m_oServerConfig;
 		SmartConnect 			m_pManagerConnect = nullptr;
+		Json::Value 			m_oModuleConfig;
 		shared_ptr<EasyConnect>	m_pSocket;
 		CEasySync				m_oExitSync;
 		CResult					m_oExitResult = CResult::Succeed();
