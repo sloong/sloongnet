@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-12 07:37:45
+ * @LastEditTime: 2020-05-14 14:07:07
  * @Description: file content
  */
 
@@ -63,10 +63,11 @@ namespace Sloong
 		string					m_strUUID;
 		void*					m_pModule = nullptr;
 
-		CreateProcessEnvironmentFunction	m_pCreateEvnFunc = nullptr;
-		MessagePackageProcesserFunction m_pHandler = nullptr;
-		EventPackageProcesserFunction m_pEventHandler = nullptr;
-		NewConnectAcceptProcesserFunction m_pAccept = nullptr;
+		CreateProcessEnvironmentFunction	m_pModuleCreateProcessEvnFunc = nullptr;
+		RequestPackageProcessFunction 	m_pModuleRequestHandler = nullptr;
+		ResponsePackageProcessFunction 	m_pModuleResponseHandler = nullptr;
+		EventPackageProcessFunction 	m_pModuleEventHandler = nullptr;
+		NewConnectAcceptProcessFunction m_pModuleAcceptHandler = nullptr;
 		ModuleInitializationFunction	m_pModuleInitializationFunc = nullptr;
 		ModuleInitializedFunction		m_pModuleInitializedFunc = nullptr;
 		

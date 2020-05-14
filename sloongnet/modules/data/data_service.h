@@ -13,7 +13,7 @@
 #include "export.h"
 
 extern "C" {
-	CResult MessagePackageProcesser(CDataTransPackage*);
+	CResult RequestPackageProcesser(CDataTransPackage*);
 	CResult NewConnectAcceptProcesser(CSockInfo*);
 	CResult ModuleInitialization(GLOBAL_CONFIG*);
 	CResult ModuleInitialized(IControl*);
@@ -28,7 +28,7 @@ namespace Sloong
 
 		CResult Initialized(IControl*);
 
-		CResult MessagePackageProcesser(CDataTransPackage*);
+		CResult RequestPackageProcesser(CDataTransPackage*);
 		
 		void OnSocketClose(SmartEvent evt);
 	protected:

@@ -30,30 +30,83 @@ enum DATA_ITEM
 	RuntimeData=3;
 }
 
+enum EVENT_TYPE
+{
+    option allow_alias = true;
+	/*
+	由 base_service 发送。程序准备完毕可以运行时发送
+	*/
+	ProgramStart=0;
+    ProgramExit=1;
+    ProgramStop=1;
+	// 重新启用
+	// 程序将会从加载开始，重新执行获取配置，加载模块等操作
+	ProgramRestart=2;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// 由 * NetworkHub * 模块提供的消息
+	//////////////////////////////////////////////////////////////////////////
+	// 当连接关闭时会发送该消息
+	// 需要在处理完成后调用回调函数以清除连接信息。
+	// 参数类型为CNetworkEvent
+	SocketClose=3;
+
+	// 需要发送数据给客户端时，使用该消息
+	SendMessage=4;
+
+	// 需要监听socket的可写状态时，使用该消息
+	// 类型为CNetworkEvent.
+	MonitorSendStatus=5;
+
+	// 启用超时检查
+	// 参数类型为NormalEvent, 
+	//   实参为JSON，格式
+	// {"TimeoutTime":"", "CheckInterval":""}
+	EnableTimeoutCheck=6;
+
+	// 启用连接检查
+	// 参数类型为NormalEvent
+	//   实参为JSON，格式
+	// {"ClientCheckKey":"","ClientCheckTime":""}
+	EnableClientCheck=7;
+	
+	// 请求重新载入Lua环境
+	// 当需要重新载入Lua Context的时候发送该请求。
+	// 请求类型为CNormalEvent
+	ReloadLuaContext=8;
+	
+}
+
 message DataPackage
 {
     enum PackageType{
         RequestPackage=0;
         EventPackage=1;
     }
-    int32 Type = 1;
+    PackageType Type = 1;
+    enum StatusType{
+        Request=0;
+        Response=1;
+    }
+    StatusType Status=2;
     // In request pacakge, it's function id.
     // In event package, it's event id
-    int32 Function = 2;
+    int32 Function = 3;
     // 优先级
-    int32 PriorityLevel = 3;
+    int32 PriorityLevel = 4;
     // 流水号
-    int64 SerialNumber = 4;
+    int64 SerialNumber = 5;
     // 校验串
-    string CheckString = 5;
+    string CheckString = 6;
     // 发送者的唯一标识符
-    string Sender = 6;
+    string Sender = 7;
     // 结果代码
-    ResultType Result = 7;
+    ResultType Result = 8;
     // 消息内容
-    bytes Content = 8;
+    bytes Content = 9;
     // 扩展数据，通常没用。但是一旦设置了这个字段则认为该包是BigPackage，直接进入队列而不是直接发送
-    bytes Extend = 9;
+    bytes Extend = 10;
 }
 
 message GLOBAL_CONFIG

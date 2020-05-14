@@ -16,6 +16,7 @@ void Sloong::CDataTransPackage::PrepareSendPackageData()
 void Sloong::CDataTransPackage::RequestPackage( shared_ptr<DataPackage> pack )
 {
 	m_pTransPackage = pack;
+	m_pTransPackage->set_status( DataPackage_StatusType::DataPackage_StatusType_Request );
 	PrepareSendPackageData();
 }
 
@@ -23,6 +24,7 @@ void Sloong::CDataTransPackage::RequestPackage( shared_ptr<DataPackage> pack )
 void Sloong::CDataTransPackage::ResponsePackage( shared_ptr<DataPackage> pack )
 {
 	m_pTransPackage = pack;
+	m_pTransPackage->set_status( DataPackage_StatusType::DataPackage_StatusType_Response );
 	PrepareSendPackageData();
 }
 
@@ -31,6 +33,7 @@ void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string&
 {
 	m_pTransPackage->set_result(result);
 	m_pTransPackage->set_content(message);
+	m_pTransPackage->set_status( DataPackage_StatusType::DataPackage_StatusType_Response );
 	if( exdata ) m_pTransPackage->set_extend(*exdata);
 	PrepareSendPackageData();
 }
@@ -39,6 +42,7 @@ void Sloong::CDataTransPackage::ResponsePackage(const CResult& result)
 {
 	m_pTransPackage->set_result(result.Result());
 	m_pTransPackage->set_content(result.Message());
+	m_pTransPackage->set_status( DataPackage_StatusType::DataPackage_StatusType_Response );
 	PrepareSendPackageData();
 }
 

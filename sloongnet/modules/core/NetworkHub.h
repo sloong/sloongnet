@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-11 18:39:54
+ * @LastEditTime: 2020-05-14 14:10:01
  * @Description: file content
  */
 #pragma once
@@ -33,11 +33,10 @@ namespace Sloong
 		void MonitorSendStatusEventHandler(SmartEvent evt);
 
 
-        inline void RegisterMessageProcesser(MessagePackageProcesserFunction value){
-            m_pProcessFunc = value;
-        }
-        inline void RegisterEventProcesser(EventPackageProcesserFunction value){
-            m_pEventFunc = value;
+        inline void RegisterProcesser(RequestPackageProcessFunction req,ResponsePackageProcessFunction res,EventPackageProcessFunction event){
+            m_pRequestFunc = req;
+            m_pResponseFunc = res;
+            m_pEventFunc = event;
         }
         inline void RegisterEnvCreateProcesser(CreateProcessEnvironmentFunction value){
             m_pCreateEnvFunc = value;
@@ -50,7 +49,7 @@ namespace Sloong
          * @Params: the function bind for processer
          * @Return: NO
          */
-        void RegisterAccpetConnectProcesser(NewConnectAcceptProcesserFunction value){
+        void RegisterAccpetConnectProcesser(NewConnectAcceptProcessFunction value){
             m_pAcceptFunc = value;
         }
 
@@ -93,9 +92,10 @@ namespace Sloong
         // For message process 
         CEasySync               m_oProcessThreadSync;
         CreateProcessEnvironmentFunction         m_pCreateEnvFunc = nullptr;
-        MessagePackageProcesserFunction          m_pProcessFunc = nullptr;
-        EventPackageProcesserFunction            m_pEventFunc = nullptr;
-        NewConnectAcceptProcesserFunction        m_pAcceptFunc = nullptr;
+        RequestPackageProcessFunction          m_pRequestFunc = nullptr;
+        ResponsePackageProcessFunction          m_pResponseFunc = nullptr;
+        EventPackageProcessFunction            m_pEventFunc = nullptr;
+        NewConnectAcceptProcessFunction        m_pAcceptFunc = nullptr;
         queue_ex<SmartPackage>*    m_pWaitProcessList;
     };
 }

@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-11 18:30:55
+ * @LastEditTime: 2020-05-14 14:13:35
  * @Description: file content
  */
 #ifndef SLOONGNET_CONTROL_SERVICE_H
@@ -14,7 +14,8 @@
 #include "servermanage.h"
 
 extern "C" {
-	CResult MessagePackageProcesser(void*,CDataTransPackage*);
+	CResult RequestPackageProcesser(void*,CDataTransPackage*);
+	CResult ResponsePackageProcesser(void*,CDataTransPackage*);
 	CResult EventPackageProcesser(CDataTransPackage*);
 	CResult NewConnectAcceptProcesser(CSockInfo*);
 	CResult ModuleInitialization(GLOBAL_CONFIG*);
@@ -57,3 +58,4 @@ namespace Sloong
 
 
 #endif //SLOONGNET_CONTROL_SERVICE_H
+

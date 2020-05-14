@@ -68,8 +68,9 @@ void Sloong::CNetworkHub::Run(SmartEvent event)
 	if (m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0)
 		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this, std::placeholders::_1), nullptr);
 
-	if (m_pProcessFunc == nullptr) {
+	if (m_pRequestFunc == nullptr) {
 		m_pLog->Fatal("Process function is null.");
+		m_iC->SendMessage(EVENT_TYPE::ProgramStop);
 	}
 
 	if (m_pConfig->processthreadquantity() < 1)
@@ -281,10 +282,13 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 						m_pEventFunc(pack.get());
 						}break;
 					case DataPackage_PackageType::DataPackage_PackageType_RequestPackage:{
-						res = m_pProcessFunc(pEnv,pack.get());
-						if( res.IsSucceed())
-							AddMessageToSendList(pack);
-						}break;
+						if(pack->GetRecvPackage()->status()==DataPackage_StatusType::DataPackage_StatusType_Request) {
+							res = m_pRequestFunc(pEnv,pack.get());
+							if( res.IsSucceed())
+								AddMessageToSendList(pack);
+						}else{
+							m_pResponseFunc(pEnv,pack.get());
+						}}break;
 					default:
 						m_pLog->Warn("Data package check type error. cannot process.");
 				}

@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 11:45:51
+ * @LastEditTime: 2020-05-14 14:10:18
  * @Description: Main instance for sloongnet application.
  */
 
@@ -189,10 +189,9 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
         return res;
     }
     
-    m_pNetwork->RegisterEnvCreateProcesser(m_pCreateEvnFunc);
-    m_pNetwork->RegisterMessageProcesser(m_pHandler);
-    m_pNetwork->RegisterEventProcesser(m_pEventHandler);
-    m_pNetwork->RegisterAccpetConnectProcesser(m_pAccept);
+    m_pNetwork->RegisterEnvCreateProcesser(m_pModuleCreateProcessEvnFunc);
+    m_pNetwork->RegisterProcesser(m_pModuleRequestHandler,m_pModuleRequestHandler,m_pModuleEventHandler);
+    m_pNetwork->RegisterAccpetConnectProcesser(m_pModuleAcceptHandler);
     auto sock = INVALID_SOCKET;
     if( m_pManagerConnect ) sock= m_pManagerConnect->GetSocketID();
     res = m_pModuleInitializedFunc( sock, m_pControl.get());
@@ -227,25 +226,31 @@ CResult CSloongBaseService::InitModule()
         return CResult::Make_Error(errMsg);
     }
     char *errmsg;
-    m_pCreateEvnFunc = (CreateProcessEnvironmentFunction)dlsym(m_pModule, "CreateProcessEnvironment");
+    m_pModuleCreateProcessEvnFunc = (CreateProcessEnvironmentFunction)dlsym(m_pModule, "CreateProcessEnvironment");
     if ((errmsg = dlerror()) != NULL)  {
         string errMsg = CUniversal::Format("Load function CreateProcessEnvironment error[%s].",errmsg);
         m_pLog->Error(errMsg);
         return CResult::Make_Error(errMsg);
     }
-    m_pHandler = (MessagePackageProcesserFunction)dlsym(m_pModule, "MessagePackageProcesser");
+    m_pModuleRequestHandler = (RequestPackageProcessFunction)dlsym(m_pModule, "RequestPackageProcesser");
     if ((errmsg = dlerror()) != NULL)  {
-        string errMsg = CUniversal::Format("Load function MessagePackageProcesser error[%s].",errmsg);
+        string errMsg = CUniversal::Format("Load function RequestPackageProcesser error[%s].",errmsg);
         m_pLog->Error(errMsg);
         return CResult::Make_Error(errMsg);
     }
-    m_pEventHandler = (EventPackageProcesserFunction)dlsym(m_pModule, "EventPackageProcesser");
+    m_pModuleResponseHandler = (ResponsePackageProcessFunction)dlsym(m_pModule, "ResponsePackageProcesser");
     if ((errmsg = dlerror()) != NULL)  {
-        string errMsg = CUniversal::Format("Load function EventPackageProcesserFunction error[%s].",errmsg);
+        string errMsg = CUniversal::Format("Load function ResponsePackageProcesser error[%s].",errmsg);
         m_pLog->Error(errMsg);
         return CResult::Make_Error(errMsg);
     }
-    m_pAccept = (NewConnectAcceptProcesserFunction)dlsym(m_pModule, "NewConnectAcceptProcesser");
+    m_pModuleEventHandler = (EventPackageProcessFunction)dlsym(m_pModule, "EventPackageProcesser");
+    if ((errmsg = dlerror()) != NULL)  {
+        string errMsg = CUniversal::Format("Load function EventPackageProcessFunction error[%s].",errmsg);
+        m_pLog->Error(errMsg);
+        return CResult::Make_Error(errMsg);
+    }
+    m_pModuleAcceptHandler = (NewConnectAcceptProcessFunction)dlsym(m_pModule, "NewConnectAcceptProcesser");
     if ((errmsg = dlerror()) != NULL)  {
         string errMsg = CUniversal::Format("Load function NewConnectAcceptProcesser error[%s]. Use default function.",errmsg);
         m_pLog->Warn(errMsg);

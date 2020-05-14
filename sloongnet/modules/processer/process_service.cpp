@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-24 20:39:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 16:31:16
+ * @LastEditTime: 2020-05-14 14:12:34
  * @Description: file content
  */
 /* File Name: server.c */
@@ -17,11 +17,20 @@ using namespace Sloong::Events;
 unique_ptr<SloongNetProcess> Sloong::SloongNetProcess::Instance = nullptr;
 
 
-extern "C" CResult MessagePackageProcesser(void* pEnv, CDataTransPackage* pack)
+extern "C" CResult RequestPackageProcesser(void* pEnv, CDataTransPackage* pack)
 {
 	auto pProcess = TYPE_TRANS<CLuaProcessCenter*>(pEnv);
 	if( pProcess)
-		return SloongNetProcess::Instance->MessagePackageProcesser(pProcess,pack);
+		return SloongNetProcess::Instance->RequestPackageProcesser(pProcess,pack);
+	else
+		return CResult::Make_Error("Environment convert error. cannot process message.");
+}
+
+extern "C" CResult ResponsePackageProcesser(void* pEnv, CDataTransPackage* pack)
+{
+	auto pProcess = TYPE_TRANS<CLuaProcessCenter*>(pEnv);
+	if( pProcess)
+		return SloongNetProcess::Instance->ResponsePackageProcesser(pProcess,pack);
 	else
 		return CResult::Make_Error("Environment convert error. cannot process message.");
 }
@@ -62,7 +71,7 @@ CResult SloongNetProcess::Initialized(IControl* iC)
 	return CResult::Succeed();
 }
 
-CResult Sloong::SloongNetProcess::MessagePackageProcesser(CLuaProcessCenter* pProcess,CDataTransPackage* pack)
+CResult Sloong::SloongNetProcess::RequestPackageProcesser(CLuaProcessCenter* pProcess,CDataTransPackage* pack)
 {
     string strRes("");
 	char* pExData = nullptr;
@@ -84,6 +93,14 @@ CResult Sloong::SloongNetProcess::MessagePackageProcesser(CLuaProcessCenter* pPr
 		msg->set_content("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
 	}
 	pack->ResponsePackage(msg);
+	return CResult::Succeed();
+}
+
+
+CResult Sloong::SloongNetProcess::ResponsePackageProcesser(CLuaProcessCenter* pProcess,CDataTransPackage* pack)
+{
+	m_pLog->Info("ResponsePackageProcesser event");
+	
 	return CResult::Succeed();
 }
 

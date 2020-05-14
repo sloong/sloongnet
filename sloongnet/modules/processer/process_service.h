@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-24 20:40:22
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-07 16:57:48
+ * @LastEditTime: 2020-05-14 14:11:28
  * @Description: file content
  */
 #ifndef SLOONGNET_PROCESS_SERVICE_H
@@ -19,7 +19,8 @@
 using namespace Manager;
 
 extern "C" {
-	CResult MessagePackageProcesser(void*,CDataTransPackage*);
+	CResult RequestPackageProcesser(void*,CDataTransPackage*);
+	CResult ResponsePackageProcesser(void*,CDataTransPackage*);
 	CResult EventPackageProcesser(CDataTransPackage*);
 	CResult NewConnectAcceptProcesser(CSockInfo*);
 	CResult ModuleInitialization(GLOBAL_CONFIG*);
@@ -39,7 +40,8 @@ namespace Sloong
 		CResult Initialization(GLOBAL_CONFIG*);
 		CResult Initialized(IControl*);
 		
-		CResult MessagePackageProcesser(CLuaProcessCenter*,CDataTransPackage*);
+		CResult RequestPackageProcesser(CLuaProcessCenter*,CDataTransPackage*);
+		CResult ResponsePackageProcesser(CLuaProcessCenter*,CDataTransPackage*);
 		inline CResult CreateProcessEnvironmentHandler(void**);
 		
 		void EventPackageProcesser(CDataTransPackage*);

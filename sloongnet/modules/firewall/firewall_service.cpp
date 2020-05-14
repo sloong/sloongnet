@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 16:19:42
+ * @LastEditTime: 2020-05-14 14:16:47
  * @Description: file content
  */
 #include "firewall_service.h"
@@ -18,9 +18,14 @@ using namespace Sloong::Events;
 
 unique_ptr<SloongNetFirewall> Sloong::SloongNetFirewall::Instance = nullptr;
 
-extern "C" CResult MessagePackageProcesser(void* pEnv,CDataTransPackage* pack)
+extern "C" CResult RequestPackageProcesser(void* pEnv,CDataTransPackage* pack)
 {
-	return SloongNetFirewall::Instance->MessagePackageProcesser(pack);
+	return SloongNetFirewall::Instance->RequestPackageProcesser(pack);
+}
+
+extern "C" CResult ResponsePackageProcesser(void* pEnv,CDataTransPackage* pack)
+{
+	return SloongNetFirewall::Instance->ResponsePackageProcesser(pack);
 }
 	
 extern "C" CResult EventPackageProcesser(CDataTransPackage* pack)
@@ -58,7 +63,7 @@ CResult SloongNetFirewall::Initialized(IControl* ic)
 }
 
 
-CResult Sloong::SloongNetFirewall::MessagePackageProcesser(CDataTransPackage* pack)
+CResult Sloong::SloongNetFirewall::RequestPackageProcesser(CDataTransPackage* pack)
 {
     auto msgPack = pack->GetRecvPackage();
     auto sender = msgPack->sender();
@@ -67,6 +72,17 @@ CResult Sloong::SloongNetFirewall::MessagePackageProcesser(CDataTransPackage* pa
 
 	return CResult::Succeed();
 }
+
+CResult Sloong::SloongNetFirewall::ResponsePackageProcesser(CDataTransPackage* pack)
+{
+    auto msgPack = pack->GetRecvPackage();
+    auto sender = msgPack->sender();
+    auto func = (Functions)msgPack->function();
+    m_pLog->Verbos(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
+
+	return CResult::Succeed();
+}
+
 void Sloong::SloongNetFirewall::OnSocketClose(SmartEvent event)
 {
 	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);

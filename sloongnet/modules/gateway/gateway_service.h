@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 16:23:51
+ * @LastEditTime: 2020-05-14 14:15:09
  * @Description: file content
  */
 #ifndef SLOONGNET_GATEWAY_SERVICE_H
@@ -20,7 +20,8 @@ using namespace Manager;
 #include <jsoncpp/json/json.h>
 
 extern "C" {
-	CResult MessagePackageProcesser(void*,CDataTransPackage*);
+	CResult RequestPackageProcesser(void*,CDataTransPackage*);
+	CResult ResponsePackageProcesser(void*,CDataTransPackage*);
 	CResult EventPackageProcesser(CDataTransPackage*);
 	CResult NewConnectAcceptProcesser(CSockInfo*);
 	CResult ModuleInitialization(GLOBAL_CONFIG*);

@@ -3,7 +3,7 @@
  * @LastEditors: WCB
  * @Description: Control center service 
  * @Date: 2019-04-14 14:41:59
- * @LastEditTime: 2020-05-12 18:37:15
+ * @LastEditTime: 2020-05-14 14:14:01
  */
 
 #include "control_service.h"
@@ -16,7 +16,7 @@ using namespace Sloong::Events;
 
 unique_ptr<SloongControlService> Sloong::SloongControlService::Instance = nullptr;
 
-extern "C" CResult MessagePackageProcesser(void* pEnv, CDataTransPackage* pack)
+extern "C" CResult RequestPackageProcesser(void* pEnv, CDataTransPackage* pack)
 {
 	auto pServer = TYPE_TRANS<CServerManage*>(pEnv);
 	if( pServer)
@@ -24,6 +24,16 @@ extern "C" CResult MessagePackageProcesser(void* pEnv, CDataTransPackage* pack)
 	else
 		return CResult::Make_Error("Environment convert error. cannot process message.");
 }
+
+extern "C" CResult ResponsePackageProcesser(void* pEnv, CDataTransPackage* pack)
+{
+	auto pServer = TYPE_TRANS<CServerManage*>(pEnv);
+	if( pServer)
+		return pServer->ProcessHandler(pack);
+	else
+		return CResult::Make_Error("Environment convert error. cannot process message.");
+}
+
 
 extern "C" CResult EventPackageProcesser(CDataTransPackage* pack){
 	SloongControlService::Instance->EventPackageProcesser(pack);

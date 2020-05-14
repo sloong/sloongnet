@@ -14,9 +14,9 @@ using namespace Sloong::Events;
 
 unique_ptr<SloongNetDataCenter> Sloong::SloongNetDataCenter::Instance = nullptr;
 
-extern "C" CResult MessagePackageProcesser(CDataTransPackage* pack)
+extern "C" CResult RequestPackageProcesser(CDataTransPackage* pack)
 {
-	return SloongNetDataCenter::Instance->MessagePackageProcesser(pack);
+	return SloongNetDataCenter::Instance->RequestPackageProcesser(pack);
 }
 	
 extern "C" CResult NewConnectAcceptProcesser(CSockInfo* info)
@@ -36,12 +36,12 @@ extern "C" CResult ModuleInitialized(IControl* iC){
 CResult SloongNetDataCenter::Initialized(IControl*)
 {
 	m_oConfig.ParseFromString(m_oServerConfig->exconfig());
-	m_pNetwork->RegisterMessageProcesser(std::bind(&SloongNetDataCenter::MessagePackageProcesser, this, std::placeholders::_1));
+	m_pNetwork->RegisterRequestProcesser(std::bind(&SloongNetDataCenter::RequestPackageProcesser, this, std::placeholders::_1));
 	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetDataCenter::OnSocketClose, this, std::placeholders::_1));
 }
 
 
-CResult Sloong::SloongNetDataCenter::MessagePackageProcesser(CDataTransPackage* pack)
+CResult Sloong::SloongNetDataCenter::RequestPackageProcesser(CDataTransPackage* pack)
 {
     auto msgPack = pack->GetRecvPackage();
     auto sender = msgPack->sender();

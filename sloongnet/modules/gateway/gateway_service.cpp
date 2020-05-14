@@ -15,7 +15,16 @@ using namespace Sloong::Events;
 
 unique_ptr<SloongNetGateway> Sloong::SloongNetGateway::Instance = nullptr;
 
-extern "C" CResult MessagePackageProcesser(void* env,CDataTransPackage* pack)
+extern "C" CResult RequestPackageProcesser(void* env,CDataTransPackage* pack)
+{
+	auto pTranspond = TYPE_TRANS<GatewayTranspond*>(env);
+	if( pTranspond)
+		return pTranspond->PackageProcesser(pack);
+	else
+		return CResult::Make_Error("Environment convert error. cannot process message.");
+}
+
+extern "C" CResult ResponsePackageProcesser(void* env,CDataTransPackage* pack)
 {
 	auto pTranspond = TYPE_TRANS<GatewayTranspond*>(env);
 	if( pTranspond)
