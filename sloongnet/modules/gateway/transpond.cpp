@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-28 14:43:16
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 17:10:46
+ * @LastEditTime: 2020-05-14 20:39:20
  * @Description: file content
  */
 #include "NetworkEvent.hpp"
@@ -22,6 +22,7 @@ CResult Sloong::GatewayTranspond::Initialize(IControl* ic)
 
 CResult Sloong::GatewayTranspond::PackageProcesser(CDataTransPackage* pack)
 {
+	m_pLog->Info("Receive new request package.");
 	auto event_happend_socket = pack->GetSocketID();
 	if( m_mapProcessLoadList.find(event_happend_socket) == m_mapProcessLoadList.end() )
 	{

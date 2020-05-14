@@ -168,7 +168,7 @@ ResultType Sloong::EasyConnect::RecvPackage(string& res,int timeOut)
 	// If no data can read. the res is -11. ( 0-EAGEAIN -> -11 )
 	if( len == -11 )
 		return ResultType::Retry;
-	else if( len < 0 )
+	else if( len <= 0 )
 		return ResultType::Error;
 	
     res.resize(len);

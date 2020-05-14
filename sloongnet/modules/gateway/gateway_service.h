@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 18:03:13
+ * @LastEditTime: 2020-05-14 20:38:24
  * @Description: file content
  */
 #ifndef SLOONGNET_GATEWAY_SERVICE_H
@@ -44,6 +44,7 @@ namespace Sloong
 
 		inline CResult CreateProcessEnvironmentHandler(void**);
 		void EventPackageProcesser(CDataTransPackage*);
+		CResult RequestPackageProcesser(void*,CDataTransPackage*);
 		void ResponsePackageProcesser(CDataTransPackage*);
 
 		// Event handler

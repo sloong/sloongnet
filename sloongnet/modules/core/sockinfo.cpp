@@ -84,10 +84,6 @@ ResultType Sloong::CSockInfo::OnDataCanReceive( queue<SmartPackage>& readList )
 	bool bLoop = false;
 	do {
 		auto package = make_shared<CDataTransPackage>(m_pCon);
-		// TODO: 这里需要做一些扩展，有两种情况。
-		// 1：接收包头失败则返回，如果长度接收成功那么数据部分是按照超时时间参数来处理。
-		// 2：不区分接收包头还是数据，始终按照参数来处理。
-		// 由于是循环接收，所以在第二种情况，在未设置超时时间的情况下会导致接收卡死在这里。所以在没有一个更好的处理办法之前，这里暂时直接修改了DataTrnasPackage中的接收逻辑，在接收长度时，始终忽略参数。
 		auto res = package->RecvPackage(m_ReceiveTimeout);
 		if( !bLoop && res == ResultType::Error){
 			// 读取错误,将这个连接从监听中移除并关闭连接

@@ -17,11 +17,7 @@ unique_ptr<SloongNetGateway> Sloong::SloongNetGateway::Instance = nullptr;
 
 extern "C" CResult RequestPackageProcesser(void* env,CDataTransPackage* pack)
 {
-	auto pTranspond = TYPE_TRANS<GatewayTranspond*>(env);
-	if( pTranspond)
-		return pTranspond->PackageProcesser(pack);
-	else
-		return CResult::Make_Error("Environment convert error. cannot process message.");
+	return SloongNetGateway::Instance->RequestPackageProcesser(env,pack);
 }
 
 extern "C" CResult ResponsePackageProcesser(void* env,CDataTransPackage* pack)
@@ -81,6 +77,17 @@ CResult SloongNetGateway::Initialized(SOCKET sock,IControl* iC)
 	m_pControl->RegisterEventHandler(EVENT_TYPE::SendPackage,std::bind(&SloongNetGateway::SendPackageHook, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
+
+
+CResult SloongNetGateway::RequestPackageProcesser(void* env,CDataTransPackage* trans_pack)
+{
+	auto pTranspond = TYPE_TRANS<GatewayTranspond*>(env);
+	if( !pTranspond)
+		return CResult::Make_Error("Environment convert error. cannot process message.");
+
+	return pTranspond->PackageProcesser(trans_pack);
+}
+
 
 
 void SloongNetGateway::ResponsePackageProcesser(CDataTransPackage* trans_pack)
