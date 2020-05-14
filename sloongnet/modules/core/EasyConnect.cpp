@@ -165,7 +165,8 @@ int Sloong::EasyConnect::SendPackage(string sendData, int index)
 ResultType Sloong::EasyConnect::RecvPackage(string& res,int timeOut)
 {
     auto len = RecvLengthData(timeOut==0?true:false);
-	if( len == 0 )
+	// If no data can read. the res is -11. ( 0-EAGEAIN -> -11 )
+	if( len == -11 )
 		return ResultType::Retry;
 	else if( len < 0 )
 		return ResultType::Error;
