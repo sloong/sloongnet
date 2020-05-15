@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-24 20:40:22
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 19:10:09
+ * @LastEditTime: 2020-05-15 15:50:23
  * @Description: file content
  */
 #ifndef SLOONGNET_PROCESS_SERVICE_H
@@ -58,7 +58,7 @@ namespace Sloong
 		int 		m_nSerialNumber = 0;
 		SOCKET   m_nManagerConnection = -1;
 		GLOBAL_CONFIG* m_pConfig;
-		Json::Value    m_oExConfig;
+		Json::Value*   m_pModuleConfig;
 	public:
 		static unique_ptr<SloongNetProcess> Instance;
 	};

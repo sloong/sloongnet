@@ -60,7 +60,7 @@ namespace Sloong
 		IControl* 	m_pControl = nullptr;
 		CLog*		m_pLog =nullptr;
 		GLOBAL_CONFIG* m_pConfig;
-		Json::Value    m_oExConfig;
+		Json::Value*   m_pModuleConfig;
 		SOCKET   m_nManagerConnection = -1;
 		int		 m_nSerialNumber = 0;
 	public:

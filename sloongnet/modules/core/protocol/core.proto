@@ -105,8 +105,10 @@ message DataPackage
     ResultType Result = 8;
     // 消息内容
     bytes Content = 9;
+    // 错误信息
+    string Message = 10;
     // 扩展数据，通常没用。但是一旦设置了这个字段则认为该包是BigPackage，直接进入队列而不是直接发送
-    bytes Extend = 10;
+    bytes Extend = 11;
 }
 
 message GLOBAL_CONFIG

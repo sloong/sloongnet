@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 19:46:04
+ * @LastEditTime: 2020-05-15 15:47:47
  * @Description: Main instance for sloongnet application.
  */
 
@@ -183,6 +183,8 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
         Json::Reader reader;
         reader.parse(pConfig->moduleconfig(), m_oModuleConfig);
         m_pControl->Add(DATA_ITEM::ModuleConfiguation, &m_oModuleConfig );
+    }else{
+        m_pControl->Add(DATA_ITEM::ModuleConfiguation, nullptr );
     }
 
     m_pControl->RegisterEvent(ProgramExit);

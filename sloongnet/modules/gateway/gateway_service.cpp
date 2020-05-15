@@ -58,16 +58,16 @@ CResult SloongNetGateway::Initialized(SOCKET sock,IControl* iC)
 	m_pControl = iC;
 	IData::Initialize(iC);
 	m_pConfig = IData::GetGlobalConfig();
-	Json::Reader reader;
-	if ( m_pConfig->moduleconfig().length() > 0 && reader.parse(m_pConfig->moduleconfig(), m_oExConfig))
+	m_pModuleConfig = IData::GetModuleConfig();
+	if ( m_pModuleConfig )
 	{
 		shared_ptr<CNormalEvent> event = make_shared<CNormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableTimeoutCheck);
-		event->SetMessage(CUniversal::Format("{\"TimeoutTime\":\"%d\", \"CheckInterval\":%d}",m_oExConfig["TimeoutTime"].asInt(),m_oExConfig["TimeoutCheckInterval"].asInt()));
+		event->SetMessage(CUniversal::Format("{\"TimeoutTime\":\"%d\", \"CheckInterval\":%d}",(*m_pModuleConfig)["TimeoutTime"].asInt(),(*m_pModuleConfig)["TimeoutCheckInterval"].asInt()));
 		m_pControl->SendMessage(event);
 
 		event->SetEvent(EVENT_TYPE::EnableClientCheck);
-		event->SetMessage(CUniversal::Format("{\"ClientCheckKey\":\"%s\", \"ClientCheckTime\":%d}",m_oExConfig["ClientCheckKey"].asString(),m_oExConfig["ClientCheckKey"].asInt()));
+		event->SetMessage(CUniversal::Format("{\"ClientCheckKey\":\"%s\", \"ClientCheckTime\":%d}",(*m_pModuleConfig)["ClientCheckKey"].asString(),(*m_pModuleConfig)["ClientCheckKey"].asInt()));
 		m_pControl->SendMessage(event);
 	}
 	m_pLog = IData::GetLog();

@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-24 20:39:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 19:10:19
+ * @LastEditTime: 2020-05-15 15:51:28
  * @Description: file content
  */
 /* File Name: server.c */
@@ -66,10 +66,10 @@ CResult SloongNetProcess::Initialized(SOCKET sock,IControl* iC)
 	m_pControl = iC;
 	IData::Initialize(iC);
 	m_pConfig = IData::GetGlobalConfig();
-	Json::Reader reader;
-	if ( m_pConfig->moduleconfig().length() > 0 && reader.parse(m_pConfig->moduleconfig(), m_oExConfig))
+	m_pModuleConfig = IData::GetModuleConfig();
+	if ( m_pModuleConfig == nullptr )
 	{
-		
+		return CResult::Make_Error("No set module config. cannot go on.");
 	}
 	m_pLog = IData::GetLog();
 	m_nManagerConnection = sock;
