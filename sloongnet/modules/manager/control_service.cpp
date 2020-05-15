@@ -112,7 +112,6 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
 {
 	config->set_logpath("/data/log");
 	config->set_loglevel(Core::LogLevel::Info);
-	config->set_debugmode(false);
 	config->set_mqthreadquantity(1);
 	config->set_enablessl(false);
 	config->set_epollthreadquantity(1);

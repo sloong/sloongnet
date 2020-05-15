@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-15 15:47:47
+ * @LastEditTime: 2020-05-15 16:39:04
  * @Description: Main instance for sloongnet application.
  */
 
@@ -150,12 +150,16 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
 		res = InitlializeForWorker(&m_oServerConfig);
 	}
     if (res.IsFialed()) return res;
-#ifdef DEBUG
-    m_oServerConfig.mutable_templateconfig()->set_debugmode(true);
-    m_oServerConfig.mutable_templateconfig()->set_loglevel(Core::LogLevel::All);
-#endif
     auto pConfig = m_oServerConfig.mutable_templateconfig();
-    m_pLog->Initialize(pConfig->logpath(), "", (LOGOPT) (LOGOPT::WriteToSTDOut|LOGOPT::WriteToFile), LOGLEVEL(pConfig->loglevel()), LOGTYPE::DAY);
+    if( pConfig->logoperation() == 0 )
+        pConfig->set_logoperation(LOGOPT::WriteToSTDOut);
+    
+#ifdef DEBUG
+    pConfig->set_loglevel(Core::LogLevel::All);
+    pConfig->set_logoperation( pConfig->logoperation() | LOGOPT::WriteToSTDOut);
+#endif
+    
+    m_pLog->Initialize(pConfig->logpath(), "", LOGOPT(pConfig->logoperation()) , LOGLEVEL(pConfig->loglevel()), LOGTYPE::DAY);
 
     CDataTransPackage::InitializeLog(m_pLog.get());
     res = InitModule();

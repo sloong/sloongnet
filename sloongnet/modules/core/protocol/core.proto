@@ -125,7 +125,7 @@ message GLOBAL_CONFIG
     // Log 
     string  LogPath = 8;
     LogLevel   LogLevel =9 ;
-    bool    DebugMode = 10;
+    int32    LogOperation = 10;
 
     // Performance
     int32   MQThreadQuantity =11;// Message queue work thread quantity 
