@@ -104,18 +104,18 @@ message QueryNodeRequest
    repeated int32 TemplateID=1;
 }
 
-message NodeInfoItem{
+message NodeItem{
    string UUID=1;
    string TemplateName=2;
    int32 TemplateID=3;
    string Address = 4;
    int32 Port=5;
-   int32 ActiveTime=6;
+   string ActiveTime=6;
 }
 
 message QueryNodeResponse
 {
-   repeated NodeInfoItem NodeInfos=1;
+   repeated NodeItem NodeInfos=1;
 }
 
 

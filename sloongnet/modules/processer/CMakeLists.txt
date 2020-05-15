@@ -22,7 +22,7 @@ link_directories(
 SET(LIBRARY_OUTPUT_PATH "../")
 
 #允许gdb调试
-set(CMAKE_BUILD_TYPE "Debug")
+#set(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -g -pg -ggdb -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -DNODEBUG -DRELASE")
 

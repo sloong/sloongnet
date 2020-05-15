@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-29 09:27:21
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 12:39:43
+ * @LastEditTime: 2020-05-15 09:28:36
  * @Description: file content
  */
 #include "servermanage.h"
@@ -353,28 +353,25 @@ CResult Sloong::CServerManage::QueryNodeHandler(const string& req_obj, CDataTran
 		return CResult::Make_Error("Parser message object fialed.");
 
 	QueryNodeResponse res;
-	auto id_list = req->templateid();
-	for( auto id: id_list)
+	if( req->templateid_size() == 0 )
 	{
-		for( auto servID:m_oTemplateList[id].Created)
+		for( auto node:m_oWorkerList)
 		{
-			auto nodeItem = m_oWorkerList[servID];
-			auto item = res.add_nodeinfos();
-			item->set_address(nodeItem.Address);
-			item->set_port(nodeItem.Port);
+			node.second.ToProtobuf(res.add_nodeinfos());
 		}
 	}
-
-	/*for_each(id_list.begin(),id_list.end(),[](int id){
-		for( auto servID:m_oTemplateList[id].Created)
+	else
+	{
+		auto id_list = req->templateid();
+		for( auto id: id_list)
 		{
-			auto nodeItem = m_oWorkerList[servID];
-			NodeInfoItem item;
-			item.set_address(nodeItem.Address);
-			item.set_port(nodeItem.Port);
-			res.add_nodeinfo(item);
+			for( auto servID : m_oTemplateList[id].Created)
+			{
+				m_oWorkerList[servID].ToProtobuf(res.add_nodeinfos());
+			}
 		}
-	});*/
+	}
+	
 	return CResult::Make_OK( ConvertObjToStr(&res) );
 }
 

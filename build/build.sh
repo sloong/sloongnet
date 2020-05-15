@@ -25,6 +25,7 @@ echo "ScriptFolder: "$SCRIPTFOLDER
 cd $SCRIPTFOLDER
 PROJECT=sloongnet
 MAKEFLAG=debug
+CMAKEFLAG=Debug
 CMAKE_FILE_PATH=$SCRIPTFOLDER/../$PROJECT
 
 # default value is debug
@@ -41,7 +42,7 @@ build(){
 		mkdir $MAKEFLAG
 	fi
 	cd $MAKEFLAG
-	cmake -DCMAKE_BUILD_TYPE=$MAKEFLAG $CMAKE_FILE_PATH
+	cmake -DCMAKE_BUILD_TYPE=$CMAKEFLAG $CMAKE_FILE_PATH
 	if [ $? -ne 0 ];then
 		echo "Run cmake cmd return error. build stop."
 		exit 1
@@ -58,6 +59,7 @@ build(){
 build_debug(){
 	OUTPATH=$SCRIPTFOLDER/$PROJECT-debug-v$VERSION_STR
 	MAKEFLAG=debug
+	CMAKEFLAG=Debug
 	clean
 	build
 }
@@ -65,6 +67,7 @@ build_debug(){
 build_release(){
 	OUTPATH=$SCRIPTFOLDER/$PROJECT-v$VERSION_STR
 	MAKEFLAG=release
+	CMAKEFLAG=Release
 	clean
 	build
 }
