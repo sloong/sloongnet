@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 11:17:32
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 12:27:21
+ * @LastEditTime: 2020-05-15 09:31:58
  * @Description: file content
  */
 #ifndef SERVERMANAGE_H
@@ -39,6 +39,17 @@ namespace Sloong
             item["TemplateName"] = this->TemplateName;
             item["TemplateID"] = this->TemplateID;
             return item;
+        }
+        void ToProtobuf(Manager::NodeItem* item)
+        {
+            item->set_address(this->Address);
+            item->set_port(this->Port);
+            char buffer [80];
+            strftime (buffer,80,"%c", std::localtime(&ActiveTime));
+            item->set_activetime(string(buffer));
+            item->set_uuid(this->UUID);
+            item->set_templatename(this->TemplateName);
+            item->set_templateid(this->TemplateID);
         }
     };
 
