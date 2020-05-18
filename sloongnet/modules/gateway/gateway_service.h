@@ -2,31 +2,28 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-17 11:40:04
+ * @LastEditTime: 2020-05-18 20:34:21
  * @Description: file content
  */
 #ifndef SLOONGNET_GATEWAY_SERVICE_H
 #define SLOONGNET_GATEWAY_SERVICE_H
 
-
-#include "sockinfo.h"
+#include "EasyConnect.h"
 #include "core.h"
 #include "export.h"
 
 #include "protocol/manager.pb.h"
 using namespace Manager;
 
-#include "transpond.h"
-#include <jsoncpp/json/json.h>
-
-extern "C" {
-	CResult RequestPackageProcesser(void*,CDataTransPackage*);
-	CResult ResponsePackageProcesser(void*,CDataTransPackage*);
-	CResult EventPackageProcesser(CDataTransPackage*);
-	CResult NewConnectAcceptProcesser(CSockInfo*);
-	CResult ModuleInitialization(GLOBAL_CONFIG*);
-	CResult ModuleInitialized(SOCKET,IControl*);
-	CResult CreateProcessEnvironment(void**);
+extern "C"
+{
+	CResult RequestPackageProcesser(void *, CDataTransPackage *);
+	CResult ResponsePackageProcesser(void *, CDataTransPackage *);
+	CResult EventPackageProcesser(CDataTransPackage *);
+	CResult NewConnectAcceptProcesser(CSockInfo *);
+	CResult ModuleInitialization(GLOBAL_CONFIG *);
+	CResult ModuleInitialized(SOCKET, IControl *);
+	CResult CreateProcessEnvironment(void **);
 }
 
 namespace Sloong
@@ -34,44 +31,54 @@ namespace Sloong
 	class SloongNetGateway
 	{
 	public:
-		SloongNetGateway(){}
+		SloongNetGateway() {}
 
-		CResult Initialization(GLOBAL_CONFIG*);
-		CResult Initialized(SOCKET,IControl*);
-		
-		void QueryProcessListRequest();
-		void QueryProcessListResponse(DataPackage*,CDataTransPackage*);
+		CResult Initialization(GLOBAL_CONFIG *);
+		CResult Initialized(SOCKET, IControl *);
 
-		void QueryTemplateFunctionRequest();
-		void QueryTemplateFunctionResponse(DataPackage*,CDataTransPackage*);
+		void QueryReferenceInfo();
+		CResult QueryReferenceInfoResponseHandler(IEvent *, CDataTransPackage *);
 
-		inline CResult CreateProcessEnvironmentHandler(void**);
-		void EventPackageProcesser(CDataTransPackage*);
-		CResult RequestPackageProcesser(void*,CDataTransPackage*);
-		void ResponsePackageProcesser(CDataTransPackage*);
+		inline CResult CreateProcessEnvironmentHandler(void **);
+		void EventPackageProcesser(CDataTransPackage *);
+		CResult RequestPackageProcesser(void *, CDataTransPackage *);
+		CResult ResponsePackageProcesser(CDataTransPackage *);
 
 		// Event handler
 		void OnStart(SmartEvent);
 		void OnSocketClose(SmartEvent);
 		void SendPackageHook(SmartEvent);
-	protected:
-		list<shared_ptr<GatewayTranspond>> m_listTranspond;
+
+		CResult PackageProcesser(CDataTransPackage *);
+
+	private:
+		CResult MessageToProcesser(CDataTransPackage *);
+		CResult MessageToClient(IEvent *, CDataTransPackage *);
+
+		inline int ParseFunctionValue(const string&);
+		list<int> ProcessProviedFunction(const string&);
 
 	protected:
-		map_ex<int,SmartEvent>	m_listSendEvent;
-		map_ex<int,int> m_listFunctionTemplate;
-		map_ex<int,list<string>> m_listTemplateNodes;
-		map<int,string> m_mapEventType;
-		IControl* 	m_pControl = nullptr;
-		CLog*		m_pLog =nullptr;
-		GLOBAL_CONFIG* m_pConfig;
-		Json::Value*   m_pModuleConfig;
-		SOCKET   m_nManagerConnection = -1;
-		int		 m_nSerialNumber = 0;
+		//list<shared_ptr<GatewayTranspond>> m_listTranspond;
+
+	protected:
+		map_ex<int, SmartEvent> m_listSendEvent;
+		map_ex<int, list_ex<int>> m_mapFuncToTemplateIDs;
+		map_ex<int, list_ex<string>> m_mapTempteIDToUUIDs;
+		map_ex<string, NodeItem> m_mapUUIDToNode;
+		map_ex<string, SmartConnect> m_mapUUIDToConnect;
+		IControl *m_pControl = nullptr;
+		CLog *m_pLog = nullptr;
+		GLOBAL_CONFIG *m_pConfig;
+		Json::Value *m_pModuleConfig;
+		RuntimeDataPackage *m_pRuntimeData = nullptr;
+		SOCKET m_nManagerConnection = -1;
+		int m_nSerialNumber = 0;
+
 	public:
 		static unique_ptr<SloongNetGateway> Instance;
 	};
 
-}
+} // namespace Sloong
 
 #endif

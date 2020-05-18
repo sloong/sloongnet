@@ -28,6 +28,7 @@ enum DATA_ITEM
 	ModuleConfiguation=1;
 	Logger=2;
 	RuntimeData=3;
+    ReferenceTemplateInfo=4;
 }
 
 enum EVENT_TYPE
@@ -105,10 +106,8 @@ message DataPackage
     ResultType Result = 8;
     // 消息内容
     bytes Content = 9;
-    // 错误信息
-    string Message = 10;
     // 扩展数据，通常没用。但是一旦设置了这个字段则认为该包是BigPackage，直接进入队列而不是直接发送
-    bytes Extend = 11;
+    bytes Extend = 10;
 }
 
 message GLOBAL_CONFIG
@@ -139,7 +138,7 @@ message GLOBAL_CONFIG
     bytes   ModuleConfig = 18;
     // 引用的其他模板，即本节点可能由数据流向引用节点，并且在目标模板节点产生变动的时候会通知引用者。
     string  ModuleReference = 19;
-    // 模板提供的功能，可以是多种形式：单功能，多功能（分号分隔），功能区（xx-xx），全功能（*）
+    // 模板提供的功能，可以是多种形式：单功能，功能区（xx-xx），全功能（*）。各种形式之间使用逗号分隔
     string  ModuleFunctoins = 20;
 };
 

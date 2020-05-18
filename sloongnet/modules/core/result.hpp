@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-24 17:43:15
+ * @LastEditTime: 2020-05-18 20:00:37
  * @Description: file content
  */
 #ifndef SLOONGNET_RESULT_H
@@ -22,17 +22,20 @@ namespace Sloong
             m_emResult = res;
             m_strMessage = what;
         }
-        ResultType Result() const {
+        inline ResultType Result() const {
             return m_emResult;
         }
-        bool IsSucceed() const {
+        inline bool IsSucceed() const {
             return m_emResult == ResultType::Succeed ? true : false;
         }
-        bool IsFialed() const {
+        inline bool IsFialed() const {
             return m_emResult == ResultType::Succeed ? false : true;
         }
-        string Message() const {
+        inline string Message() const {
             return m_strMessage;
+        }
+        inline void SetResult(ResultType res){
+            m_emResult = res;
         }
         
     public:
@@ -44,6 +47,9 @@ namespace Sloong
         }
         static inline CResult Succeed(){
             return CResult(ResultType::Succeed);
+        }
+        static inline CResult Invalid(){
+            return CResult(ResultType::Invalid);
         }
     protected:
         ResultType m_emResult;

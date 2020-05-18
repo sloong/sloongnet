@@ -275,8 +275,12 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 				continue;
 			}
 			SmartPackage pack;
+			
 			while( m_pWaitProcessList[i].TryPop(pack) )
 			{
+				// In here, the result no the result for this request.
+				// it just for is need add the pack obj to send list.
+				res.SetResult(ResultType::Invalid);
 				switch(pack->GetRecvPackage()->type()){
 					case DataPackage_PackageType::DataPackage_PackageType_EventPackage:{
 						m_pEventFunc(pack.get());
@@ -284,14 +288,14 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 					case DataPackage_PackageType::DataPackage_PackageType_RequestPackage:{
 						if(pack->GetRecvPackage()->status()==DataPackage_StatusType::DataPackage_StatusType_Request) {
 							res = m_pRequestFunc(pEnv,pack.get());
-							if( res.IsSucceed())
-								AddMessageToSendList(pack);
 						}else{
-							m_pResponseFunc(pEnv,pack.get());
+							res = m_pResponseFunc(pEnv,pack.get());
 						}}break;
 					default:
 						m_pLog->Warn("Data package check type error. cannot process.");
 				}
+				if( res.IsSucceed())
+					AddMessageToSendList(pack);
 			}
 			goto MessagePorcessListRetry;
 		}

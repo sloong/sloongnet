@@ -32,10 +32,7 @@ void Sloong::CDataTransPackage::ResponsePackage( shared_ptr<DataPackage> pack )
 void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string& message,const string* exdata /*=nullptr*/)
 {
 	m_pTransPackage->set_result(result);
-	if( result == ResultType::Succeed )
-		m_pTransPackage->set_content(message);
-	else
-		m_pTransPackage->set_message(message);
+	m_pTransPackage->set_content(message);
 	m_pTransPackage->set_status( DataPackage_StatusType::DataPackage_StatusType_Response );
 	if( exdata ) m_pTransPackage->set_extend(*exdata);
 	PrepareSendPackageData();
@@ -44,10 +41,7 @@ void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string&
 void Sloong::CDataTransPackage::ResponsePackage(const CResult& result)
 {
 	m_pTransPackage->set_result(result.Result());
-	if( result.IsSucceed())
-		m_pTransPackage->set_content(result.Message());
-	else
-		m_pTransPackage->set_message(result.Message());
+	m_pTransPackage->set_content(result.Message());
 	m_pTransPackage->set_status( DataPackage_StatusType::DataPackage_StatusType_Response );
 	PrepareSendPackageData();
 }

@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 11:43:34
+ * @LastEditTime: 2020-05-18 19:10:52
  * @Description: file content
  */
 #ifndef DATA_TRANS_PACKAGE_H
@@ -51,6 +51,8 @@ namespace Sloong
         inline string GetRecvMessage(){ return m_pTransPackage->content(); }
 
         inline string GetExtendData() { return m_pTransPackage->extend(); }
+
+        inline void SetConnection(SmartConnect conn){ m_pCon = conn; }
 
         inline SmartConnect GetConnection() { return m_pCon; }
 

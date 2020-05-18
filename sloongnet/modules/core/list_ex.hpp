@@ -1,3 +1,10 @@
+/*
+ * @Author: WCB
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditors: WCB
+ * @LastEditTime: 2020-05-18 18:44:07
+ * @Description: file content
+ */ 
 #include <list>
 
 namespace Sloong
@@ -22,6 +29,11 @@ namespace Sloong
 				return false;
 			else
 				return true;
+		}
+
+		void copyfrom(const list_ex<T>& src){
+			for( auto i:src)
+				this->push_back(i);
 		}
 	};
 }

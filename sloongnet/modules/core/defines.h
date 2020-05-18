@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 14:24:10
+ * @LastEditTime: 2020-05-18 20:07:11
  * @Description: file content
  */
 #ifndef SLOONGNET_DEFINES_H
@@ -79,6 +79,27 @@ inline string ConvertObjToStr(::google::protobuf::Message* obj){
 	if(!obj->SerializeToString(&str_res))
 		return "";
 	return str_res;
+}
+
+
+inline int ConvertStrToInt(string str, int def = 0, int* out_res = nullptr){
+	if(out_res) (*out_res) = 0;
+	try
+	{
+		return stoi(str);
+	}
+	catch(invalid_argument e){
+		if(out_res) (*out_res) = -1;
+		return def;
+	}
+	catch(out_of_range e){
+		if(out_res) (*out_res) = -2;
+		return def;
+	}
+	catch(...){
+		if(out_res) (*out_res) = -3;
+		return def;
+	}
 }
 
 #endif

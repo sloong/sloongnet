@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-21 11:17:32
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-15 09:31:58
+ * @LastEditTime: 2020-05-18 10:27:12
  * @Description: file content
  */
 #ifndef SERVERMANAGE_H
@@ -18,7 +18,7 @@ using namespace Manager;
 namespace Sloong
 {
 
-    struct ServerItem
+    struct NodeItem
     {
         void Active() { ActiveTime = time(NULL); }
         string Address;
@@ -158,6 +158,12 @@ namespace Sloong
         */
         CResult QueryNodeHandler(const string&,CDataTransPackage*);
 
+        /*
+        Request: None
+        Response: QueryReferenceInfoResponse
+        */
+        CResult QueryReferenceInfoHandler(const string&,CDataTransPackage*);
+
         CResult ResetManagerTemplate(GLOBAL_CONFIG* config);
 
         void OnSocketClosed(SOCKET);
@@ -169,10 +175,10 @@ namespace Sloong
 
     protected:
         int m_nSerialNumber = 0;
-        map_ex< Manager::Functions , FunctionHandler> m_listFuncHandler;
-        map_ex<string, ServerItem>	m_oWorkerList;
-        map_ex<int, TemplateItem>	m_oTemplateList;
-        map_ex<SOCKET, string>      m_oSocketList;
+        map_ex< Manager::Functions , FunctionHandler> m_mapFuncToHandler;
+        map_ex<string, NodeItem>	m_mapUUIDToNodeItem;
+        map_ex<int, TemplateItem>	m_mapIDToTemplateItem;
+        map_ex<SOCKET, string>      m_mapSocketToUUID;
         
     private:
         CLog* m_pLog = nullptr;

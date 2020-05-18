@@ -38,13 +38,12 @@ enum Functions{
                  Extend: config data
     */
     RegisteNode=2;
-
     QueryNode=3;
-
     AddTemplate=4;
     DeleteTemplate=5;
     SetTemplate =6;
     QueryTemplate=7;
+    QueryReferenceInfo=8;
 }
 
 message PostLogMessageRequest
@@ -77,10 +76,10 @@ message ReferenceTemplateInfo
 {
    int32 TemplateID=1;
    string ProvideFunctions=2;
-   repeated NodeInfoItem NodeInfs=3;
+   repeated NodeItem NodeInfos=3;
 }
 
-message RegisteNodeResponse{
+message QueryReferenceInfoResponse{
    repeated ReferenceTemplateInfo TemplateInfos=1;
 }
 

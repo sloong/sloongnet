@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 18:43:42
+ * @LastEditTime: 2020-05-18 20:03:43
  * @Description: file content
  */
 #pragma once
@@ -13,7 +13,7 @@ namespace Sloong
 	class CDataTransPackage;
 	namespace Events
 	{
-		typedef std::function<void(DataPackage*,CDataTransPackage*)> CallbackFunc;
+		typedef std::function<CResult(IEvent*,CDataTransPackage*)> CallbackFunc;
 		class CSendPackageEvent : public CNetworkEvent
 		{
 		public:
@@ -21,11 +21,16 @@ namespace Sloong
 			virtual	~CSendPackageEvent(){}
 
 			inline void SetCallbackFunc(CallbackFunc p){ m_pCallback = p; }
-			inline void CallCallbackFunc(CDataTransPackage* p){ if(m_pCallback) m_pCallback(m_pData.get(),p); }
+			inline CResult CallCallbackFunc(CDataTransPackage* p){ 
+				if(m_pCallback) 
+					return m_pCallback(this,p); 
+				return CResult::Invalid();
+			}
 			
-			void SetRequest( SOCKET target, int serialnumber, int priority, int func, string content,  string extend = "", DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_RequestPackage)
+			void SetRequest( SOCKET target, string sender, int serialnumber, int priority, int func, string content,  string extend = "", DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_RequestPackage)
 			{
 				m_pData = make_shared<DataPackage>();
+				m_pData->set_sender(sender);
 				m_pData->set_type(type);
 				m_pData->set_function(func);
 				m_pData->set_content(content);
