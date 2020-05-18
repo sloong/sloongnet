@@ -73,6 +73,17 @@ message RegisteNodeRequest{
    int32 TemplateID=1;
 }
 
+message ReferenceTemplateInfo
+{
+   int32 TemplateID=1;
+   string ProvideFunctions=2;
+   repeated NodeInfoItem NodeInfs=3;
+}
+
+message RegisteNodeResponse{
+   repeated ReferenceTemplateInfo TemplateInfos=1;
+}
+
 message AddTemplateRequest{
    TemplateItem AddInfo=1;
 }

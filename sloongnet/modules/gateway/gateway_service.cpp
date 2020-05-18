@@ -110,7 +110,7 @@ void SloongNetGateway::QueryProcessListRequest()
 
 	Manager::QueryNodeRequest req;
 	for (auto item : references)
-		req.add_templateid(atoi(item.c_str()));
+		req.add_templateid(stoi(item));
 
 	auto event = make_shared<CSendPackageEvent>();
 	event->SetCallbackFunc(std::bind(&SloongNetGateway::QueryProcessListResponse,this,std::placeholders::_1,std::placeholders::_2));
@@ -130,6 +130,37 @@ void SloongNetGateway::QueryProcessListResponse(DataPackage* send_pack,CDataTran
 	for(auto node: nodes)
 	{
 		m_pLog->Info(CUniversal::Format("Node:[%s][%d]",node.address(),node.port()));
+	}
+}
+
+void SloongNetGateway::QueryTemplateFunctionRequest()
+{
+	auto references = CUniversal::split(m_pConfig->modulereference(), ';');
+	if( references.size() == 0 )
+		return;
+
+	Manager::QueryTemplateRequest req;
+	for (auto item : references)
+		req.add_templateid(stoi(item));
+
+	auto event = make_shared<CSendPackageEvent>();
+	event->SetCallbackFunc(std::bind(&SloongNetGateway::QueryTemplateFunctionResponse,this,std::placeholders::_1,std::placeholders::_2));
+	event->SetRequest( m_nManagerConnection,  m_nSerialNumber, 1, (int)Functions::QueryTemplate, ConvertObjToStr(&req));
+	m_nSerialNumber++;
+	m_pControl->SendMessage(event);
+}
+
+
+void SloongNetGateway::QueryTemplateFunctionResponse(DataPackage* send_pack,CDataTransPackage* res_pack)
+{
+	auto str_res = res_pack->GetRecvMessage();
+	auto res = ConvertStrToObj<QueryTemplateResponse>(str_res);
+	if( res == nullptr) return;
+
+	auto infos = res->templateinfos();
+	for(auto info: infos)
+	{
+		
 	}
 }
 
@@ -155,6 +186,7 @@ void SloongNetGateway::SendPackageHook(SmartEvent event)
 
 void SloongNetGateway::OnStart(SmartEvent evt)
 {	
+	QueryTemplateFunctionRequest();
 	QueryProcessListRequest();
 }
 

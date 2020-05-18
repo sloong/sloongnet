@@ -137,7 +137,10 @@ message GLOBAL_CONFIG
     string  ModuleName = 16;
     string  ModulePath = 17;
     bytes   ModuleConfig = 18;
+    // 引用的其他模板，即本节点可能由数据流向引用节点，并且在目标模板节点产生变动的时候会通知引用者。
     string  ModuleReference = 19;
+    // 模板提供的功能，可以是多种形式：单功能，多功能（分号分隔），功能区（xx-xx），全功能（*）
+    string  ModuleFunctoins = 20;
 };
 
 message RuntimeDataPackage

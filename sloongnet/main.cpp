@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-26 17:33:59
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-11 18:58:12
+ * @LastEditTime: 2020-05-17 15:55:00
  * @Description: Main function for apps. just for create and run gloabl apps.
  */
 #include "main.h"
@@ -69,7 +69,7 @@ int main(int argc, char** args)
 		}
 
 		auto ManagerAddress = addr[0];
-		auto ManagerPort = atoi(addr[1].c_str());
+		auto ManagerPort = stoi(addr[1]);
 		if (ManagerPort == 0)
 		{
 			cout << "Convert [" << addr[1] << "] to int port fialed." << endl;

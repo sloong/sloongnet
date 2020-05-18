@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 20:38:24
+ * @LastEditTime: 2020-05-17 11:40:04
  * @Description: file content
  */
 #ifndef SLOONGNET_GATEWAY_SERVICE_H
@@ -42,6 +42,9 @@ namespace Sloong
 		void QueryProcessListRequest();
 		void QueryProcessListResponse(DataPackage*,CDataTransPackage*);
 
+		void QueryTemplateFunctionRequest();
+		void QueryTemplateFunctionResponse(DataPackage*,CDataTransPackage*);
+
 		inline CResult CreateProcessEnvironmentHandler(void**);
 		void EventPackageProcesser(CDataTransPackage*);
 		CResult RequestPackageProcesser(void*,CDataTransPackage*);
@@ -56,6 +59,8 @@ namespace Sloong
 
 	protected:
 		map_ex<int,SmartEvent>	m_listSendEvent;
+		map_ex<int,int> m_listFunctionTemplate;
+		map_ex<int,list<string>> m_listTemplateNodes;
 		map<int,string> m_mapEventType;
 		IControl* 	m_pControl = nullptr;
 		CLog*		m_pLog =nullptr;

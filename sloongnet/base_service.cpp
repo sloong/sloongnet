@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-10-15 10:41:43
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-15 16:39:04
+ * @LastEditTime: 2020-05-17 19:35:39
  * @Description: Main instance for sloongnet application.
  */
 
@@ -138,7 +138,6 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     m_oExitResult = CResult::Succeed();
 
     InitSystemEventHandler();
-
     
     CResult res = CResult::Succeed();
     if( ManagerMode )
@@ -307,7 +306,7 @@ CResult CSloongBaseService::RegisteNode()
 	if (!response)
 		return CResult::Make_Error("Parse the get config response data error.");
     if(response->result() != ResultType::Succeed)
-        return CResult::Make_Error(CUniversal::Format("RegisteNode request return error. message: %s", response->content()));
+        return CResult::Make_Error(CUniversal::Format("RegisteNode request return error. message: %s", response->message()));
     return CResult::Succeed();
 }
 

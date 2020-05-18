@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2019-11-05 08:59:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-04-17 15:32:57
+ * @LastEditTime: 2020-05-17 15:55:13
  * @Description: file content
  */
 #ifndef SLOONGNET_DBRESULT_H
@@ -36,7 +36,7 @@ namespace Sloong
         }
         inline int GetInt( const string& columeName, int def, int lineIndex = 0 ){
             if( GetLinesNum() == 0 ) return def;
-            return atoi(GetData(lineIndex,columeName).c_str());
+            return stoi(GetData(lineIndex,columeName));
         }
         inline bool GetBoolean( const string& columeName, bool def, int lineIndex = 0){
             if( GetLinesNum() == 0 ) return def;

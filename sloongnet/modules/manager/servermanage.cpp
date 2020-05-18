@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-29 09:27:21
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 12:39:43
+ * @LastEditTime: 2020-05-17 20:01:29
  * @Description: file content
  */
 #include "servermanage.h"
@@ -108,7 +108,7 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 
 
 inline Functions ConvertStrToFunc(string str){
-	return (Functions)atoi(str.c_str());
+	return (Functions)stoi(str);
 }
 
 CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
@@ -186,7 +186,7 @@ void Sloong::CServerManage::RefreshModuleReference(int id)
 	config.ParseFromString(m_oTemplateList[id].Configuation);
 	auto references = CUniversal::split(config.modulereference(), ';');
 	for (auto item : references)
-		m_oTemplateList[id].Reference.push_back(atoi(item.c_str()));
+		m_oTemplateList[id].Reference.push_back(stoi(item));
 }
 
 CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTransPackage *pack)
@@ -213,6 +213,23 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTr
 	m_oTemplateList[id].Created.unique_insert(sender);
 	m_oSocketList[pack->GetConnection()->GetSocketID()] = sender;
 
+	
+	RegisteNodeResponse res;
+	auto config = ConvertStrToObj<GLOBAL_CONFIG>(m_oTemplateList[id].Configuation);
+	auto references = CUniversal::split(config->modulereference(),',');
+	for (  auto ref: references )
+	{
+		auto item = res.add_templateinfos();
+		auto tpl = m_oTemplateList[stoi(ref)];
+		auto tpl_config = ConvertStrToObj<GLOBAL_CONFIG>(tpl.Configuation);
+		item->set_templateid(tpl.ID);
+		item->set_providefunctions(tpl_config->modulefunctoins());
+		for( auto node: tpl.Created)
+		{
+			m_oWorkerList[node].ToProtobuf(item->add_nodeinfs());
+		}
+	}
+
 	// Find reference node and notify them
 	list<string> notifyList;
 	for (auto item : m_oTemplateList)
@@ -234,7 +251,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTr
 		SendEvent(notifyList, Manager::Events::ReferenceModuleOnline, &online_event);
 	}
 
-	return CResult::Succeed();
+	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
 CResult Sloong::CServerManage::AddTemplateHandler(const string& req_obj, CDataTransPackage *pack)

@@ -154,7 +154,7 @@ bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo,const string & ms
 			{
 				char* pBuf = TYPE_TRANS<char*>(pData);
 				exData = pBuf;
-				exSize = atoi(len.c_str());
+				exSize = stoi(len);
 			}
 		}
 		return true;
