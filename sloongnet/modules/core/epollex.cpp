@@ -121,8 +121,11 @@ void Sloong::CEpollEx::CtlEpollEvent(int opt, int sock, int events)
 	// LT模式时，事件就绪时，假设对事件没做处理，内核会反复通知事件就绪	  	EPOLLLT
 	// ET模式时，事件就绪时，假设对事件没做处理，内核不会反复通知事件就绪  	EPOLLET
 	ent.events = events | EPOLLERR | EPOLLHUP | EPOLLET;
+	string opt_str;
+	if(opt&EPOLLIN) opt_str+="EPOLLIN";
+	if(opt&EPOLLOUT) opt_str+="|EPOLLOUT";
 
-	m_pLog->Verbos(CUniversal::Format("Control epoll opt: Socket[%d] [%s] opt[%d]", sock, CUtility::GetSocketAddress(sock), opt));
+	m_pLog->Debug(CUniversal::Format("Control epoll opt: Socket[%d] [%s] opt[%s]", sock, CUtility::GetSocketAddress(sock), opt_str));
 	// 设置事件到epoll对象
 	epoll_ctl(m_EpollHandle, opt, sock, &ent);
 }
@@ -155,8 +158,13 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 	if (res.IsFialed())
 	{
 		m_pLog->Fatal(res.Message());
+		m_iC->SendMessage(EVENT_TYPE::ProgramExit );
+		return;
 	}
 	int sock = res.ResultObject();
+	unique_lock<mutex> lock(m_acceptMutex);
+	m_mapAcceptSocketToPID[sock] = pid;
+	lock.unlock();
 
 	// 创建epoll事件对象
 	CtlEpollEvent(EPOLL_CTL_ADD, sock, EPOLLIN | EPOLLOUT);
@@ -181,19 +189,19 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 			for (i = 0; i < n; ++i)
 			{
 				int fd = m_Events[i].data.fd;
-				if (fd == sock)
+				if ( m_mapAcceptSocketToPID.exist(fd))
 				{
-					m_pLog->Verbos("EPoll Accept event happened.");
+					m_pLog->Debug("EPoll Accept event happened.");
 					// accept the connect and add it to the list
 					int conn_sock = -1;
 					do
 					{
-						conn_sock = accept(sock, NULL, NULL);
+						conn_sock = accept(fd, NULL, NULL);
 						if (conn_sock == -1)
 						{
 							if (errno == EAGAIN)
 							{
-								m_pLog->Verbos("Accept end.");
+								m_pLog->Debug("Accept end.");
 							}
 							else
 							{
@@ -220,13 +228,13 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 				// EPOLLIN 可读消息
 				else if (m_Events[i].events & EPOLLIN)
 				{
-					m_pLog->Verbos(CUniversal::Format("EPoll EPOLLIN event happened. Socket [%s] Data Can Receive.", CUtility::GetSocketAddress(fd)));
+					m_pLog->Debug(CUniversal::Format("EPoll EPOLLIN event happened. Socket[%d][%s] Data Can Receive.",fd, CUtility::GetSocketAddress(fd)));
 					auto res = OnDataCanReceive(fd);
 				}
 				// EPOLLOUT 可写消息
 				else if (m_Events[i].events & EPOLLOUT)
 				{
-					m_pLog->Verbos(CUniversal::Format("EPoll EPOLLOUT event happened.Socket [%s] Can Write Data.", CUtility::GetSocketAddress(fd)));
+					m_pLog->Debug(CUniversal::Format("EPoll EPOLLOUT event happened.Socket[%d][%s] Can Write Data.", fd,CUtility::GetSocketAddress(fd)));
 					auto res = OnCanWriteData(fd);
 					// 所有消息全部发送完毕后只需要监听可读消息就可以了。
 					if (res == ResultType::Succeed)
@@ -234,7 +242,7 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 				}
 				else
 				{
-					m_pLog->Verbos(CUniversal::Format("EPoll unkuown event happened. Socket [%s] close this connnect.", CUtility::GetSocketAddress(fd)));
+					m_pLog->Debug(CUniversal::Format("EPoll unkuown event happened. Socket[%d][%s] close this connnect.",fd, CUtility::GetSocketAddress(fd)));
 					OnOtherEventHappened(fd);
 				}
 			}

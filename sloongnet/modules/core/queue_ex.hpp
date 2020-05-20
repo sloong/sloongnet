@@ -10,7 +10,7 @@ namespace Sloong
     class queue_ex
     {
     private:
-        mutable mutex m_mut;
+        mutex m_mut;
         queue<T> m_queue;
         condition_variable m_data_cond;
     public:
@@ -77,6 +77,11 @@ namespace Sloong
         {
             lock_guard<mutex> lg(m_mut);
             return m_queue.empty();
+        }
+
+        int size(){
+            lock_guard<mutex> lg(m_mut);
+            return m_queue.size();
         }
     };
 }

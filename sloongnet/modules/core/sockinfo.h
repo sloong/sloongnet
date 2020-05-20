@@ -50,18 +50,17 @@ namespace Sloong
 		 * 			if happened erros, return Error.
 		 * 			if have extend data or all data is no send and have EAGAIN sinal , return Retry.
 		 */
-		ResultType ResponseDataPackage(SmartPackage pack);
+		ResultType SendDataPackage(SmartPackage pack);
 
 	protected:
 		void ProcessPrepareSendList();
 		ResultType ProcessSendList();
-		int GetSendInfoList(queue<SmartPackage>*& list );
-		SmartPackage GetSendInfo(queue<SmartPackage>* list);
+		SmartPackage GetSendPackage();
 		void AddToSendList(SmartPackage pack);
 
 	public:
-        queue<SmartPackage>* m_pSendList; // the send list of the bytes.
-        queue<SmartPackage> m_oPrepareSendList;
+        queue_ex<SmartPackage>* m_pSendList; // the send list of the bytes.
+        queue_ex<SmartPackage> m_oPrepareSendList;
 
 		time_t m_ActiveTime;
 		shared_ptr<EasyConnect> m_pCon;
@@ -70,7 +69,7 @@ namespace Sloong
         mutex m_oSockSendMutex; 
 		mutex m_oSendListMutex;
         mutex m_oPreSendMutex;
-		int m_nLastSentTags = -1;
+		SmartPackage m_pSendingPackage = nullptr;
         bool m_bIsSendListEmpty = true;
 		int m_ReceiveTimeout = 0;
 	};

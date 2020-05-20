@@ -31,6 +31,7 @@ namespace Sloong
         void SendPackageEventHandler(SmartEvent event);
         void CloseConnectEventHandler(SmartEvent event);
 		void MonitorSendStatusEventHandler(SmartEvent evt);
+        void RegisteConnectionEventHandler(SmartEvent evt);
 
 
         inline void RegisterProcesser(RequestPackageProcessFunction req,ResponsePackageProcessFunction res,EventPackageProcessFunction event){
@@ -56,8 +57,6 @@ namespace Sloong
         // Work thread.
 		void CheckTimeoutWorkLoop(SMARTER params=nullptr);
         void MessageProcessWorkLoop(SMARTER params=nullptr);
-
-        void RegisteConnection(SOCKET);
 
         // Callback function
         ResultType OnNewAccept( int nSocket );

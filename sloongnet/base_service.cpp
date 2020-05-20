@@ -220,7 +220,9 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
             m_pLog->Fatal(res.Message());
             return res;
         }
-        m_pNetwork->RegisteConnection(sock);
+        auto event = make_shared<Events::CNetworkEvent>(EVENT_TYPE::RegisteConnection);
+        event->SetSocketID(sock);
+        m_pControl->SendMessage(event);
     }
 
     return CResult::Succeed();
@@ -231,7 +233,7 @@ CResult CSloongBaseService::InitModule()
     // Load the module library
     string libFullPath = m_oServerConfig.templateconfig().modulepath()+m_oServerConfig.templateconfig().modulename();
 
-    m_pLog->Verbos(CUniversal::Format("Start init module[%s] and load module functions",libFullPath));
+    m_pLog->Debug(CUniversal::Format("Start init module[%s] and load module functions",libFullPath));
     m_pModule = dlopen(libFullPath.c_str(),RTLD_LAZY);
     if(m_pModule == nullptr)
     {
@@ -279,7 +281,7 @@ CResult CSloongBaseService::InitModule()
         string errMsg = CUniversal::Format("Load function ModuleInitialize error[%s]. maybe module no need initiliaze.",errmsg);
         m_pLog->Warn(errMsg);
     }
-    m_pLog->Verbos("load module functions done.");
+    m_pLog->Debug("load module functions done.");
     return CResult::Succeed();
 }
 

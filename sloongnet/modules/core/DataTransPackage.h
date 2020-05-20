@@ -81,6 +81,8 @@ namespace Sloong
             m_pTransPackage->set_serialnumber(value);
             value++;
         }
+        inline int GetSentSize(){ return m_nSent; }
+        inline int GetPackageSize(){return m_nPackageSize;}
     protected:
         // Send data info
         string m_strPackageData;

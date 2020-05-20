@@ -8,7 +8,7 @@ using namespace Sloong::Universal;
 using namespace Sloong::Events;
 Sloong::CSockInfo::CSockInfo()
 {
-	m_pSendList = new queue<SmartPackage>[s_PriorityLevel]();
+	m_pSendList = new queue_ex<SmartPackage>[s_PriorityLevel]();
 	m_pCon = make_shared<EasyConnect>();
 }
 
@@ -36,7 +36,7 @@ void Sloong::CSockInfo::Initialize(IControl* iMsg, int sock, SSL_CTX* ctx)
 	m_pCon->Initialize(sock,ctx);
 }
 
-ResultType Sloong::CSockInfo::ResponseDataPackage(SmartPackage pack)
+ResultType Sloong::CSockInfo::SendDataPackage(SmartPackage pack)
 {	
 	// if have exdata, directly add to epoll list.
 	if (pack->IsBigPackage()){
@@ -121,23 +121,12 @@ ResultType Sloong::CSockInfo::OnDataCanSend()
 void Sloong::CSockInfo::ProcessPrepareSendList()
 {
 	// progress the prepare send list first
-	if (!m_oPrepareSendList.empty()){
-		unique_lock<mutex> prelck(m_oPreSendMutex);
-		if (m_oPrepareSendList.empty())
-			return;
-		
-		unique_lock<mutex> sendListlck(m_oSendListMutex);
-		
-		while (!m_oPrepareSendList.empty()){
-			auto pack = m_oPrepareSendList.front();
-			m_oPrepareSendList.pop();
-			auto priority = pack->GetPriority();
-			m_pSendList[priority].push(pack);
-			m_pLog->Debug(CUniversal::Format("Add send package to send list[%d]. send list size[%d], prepare send list size[%d]",
+	SmartPackage pack = nullptr;
+	while ( m_oPrepareSendList.TryPop(pack) ){
+		auto priority = pack->GetPriority();
+		m_pSendList[priority].push(pack);
+		m_pLog->Debug(CUniversal::Format("Add package to send list[%d]. send list size[%d], prepare send list size[%d]",
 								priority,m_pSendList[priority].size(),m_oPrepareSendList.size()));
-		}
-		prelck.unlock();
-		sendListlck.unlock();
 	}
 }
 
@@ -145,114 +134,53 @@ void Sloong::CSockInfo::ProcessPrepareSendList()
 
 ResultType Sloong::CSockInfo::ProcessSendList()
 {
-	// when prepare list process done, do send operation.
 	bool bTrySend = true;
-
-	// 这里始终从list开始循环，保证高优先级的信息先被处理
-	while (bTrySend)
+	unique_lock<mutex> send_lck(m_oSockSendMutex);
+	while(bTrySend)
 	{
-		unique_lock<mutex> lck(m_oSendListMutex);
-
-		queue<shared_ptr<CDataTransPackage>>* list = nullptr;
-		int sendTags = GetSendInfoList(list);
-		if (list == nullptr){
-			m_pLog->Error("Send info list empty, no need send.");
-			break;
-		}
-
-		// if no find send info, is no need send anything , remove this sock from epoll.'
-		auto si = GetSendInfo(list);
-		if ( si != nullptr )
+		if( m_pSendingPackage == nullptr )
 		{
-			lck.unlock();
-			unique_lock<mutex> ssend_lck(m_oSockSendMutex);
-			int res =si->SendPackage();
-			ssend_lck.unlock();
-			if( res < 0){
-				m_pLog->Error(CUniversal::Format("Send data package error. close connect:[%s:%d]",m_pCon->m_strAddress,m_pCon->m_nPort));
-				return ResultType::Error;
-			}else if( res == 0){
-				m_pLog->Verbos("Send data package done. wait next write sign.");
-				bTrySend = false;
-				m_nLastSentTags = sendTags;
-				return ResultType::Retry;
-			}else{
-				list->pop();
-				m_nLastSentTags = -1;
-				bTrySend = true;
+			unique_lock<mutex> lck(m_oSendListMutex);
+			m_pSendingPackage = GetSendPackage();
+			if (m_pSendingPackage == nullptr){
+				m_pLog->Debug("All data is sent, the send info list is empty.");
+				m_bIsSendListEmpty = true;
+				return ResultType::Succeed;
 			}
 		}
+		
+		auto res =m_pSendingPackage->SendPackage();
+		if( res == ResultType::Error ){
+			m_pLog->Error(CUniversal::Format("Send data package error. close connect:[%s:%d]",m_pCon->m_strAddress,m_pCon->m_nPort));
+			return ResultType::Error;
+		}else if( res == ResultType::Retry ){
+			m_pLog->Debug(CUniversal::Format("Send data package done but not all data is send All[%d]:Sent[%d]. wait next write sign.", m_pSendingPackage->GetPackageSize(),m_pSendingPackage->GetSentSize()));
+			bTrySend = false;
+			return ResultType::Retry;
+		}else{
+			m_pSendingPackage = nullptr;
+			bTrySend = true;
+		}
 	}
-	return ResultType::Succeed;
 }
 
 
 /// 获取发送信息列表
 // 首先判断上次发送标志，如果不为-1，表示上次的发送列表没有发送完成。直接返回指定的列表
 // 如果为-1，表示需要发送新的列表。按照优先级逐级的进行寻找。
-int Sloong::CSockInfo::GetSendInfoList( queue<shared_ptr<CDataTransPackage>>*& list )
+SmartPackage Sloong::CSockInfo::GetSendPackage()
 {
-	list = nullptr;
-	// prev package no send end. find and try send it again.
-	if (-1 != m_nLastSentTags)
-	{
-		m_pLog->Verbos(CUniversal::Format("Send prev time list, Priority level:%d", m_nLastSentTags));
-		list = &m_pSendList[m_nLastSentTags];
-		if( list->empty() )
-			m_nLastSentTags = -1;
-		else
-			return m_nLastSentTags;
-	}
-	
 	for (int i = 0; i < s_PriorityLevel; i++)
 	{
 		if (m_pSendList[i].empty())
 			continue;
 		else
 		{
-			list = &m_pSendList[i];
-			m_pLog->Verbos(CUniversal::Format("Send list, Priority level:%d", i));
-			return i;
+			m_pLog->Debug(CUniversal::Format("Send list, Priority level:%d", i));
+			SmartPackage pack;
+			if( m_pSendList[i].TryPop(pack) )
+				return pack;
 		}
 	}
-	return -1;
-}
-
-
-shared_ptr<CDataTransPackage> Sloong::CSockInfo::GetSendInfo(queue<shared_ptr<CDataTransPackage>>* list)
-{
-	shared_ptr<CDataTransPackage> si = nullptr;
-	while (si == nullptr)
-	{
-		if (!list->empty())
-		{
-			m_pLog->Verbos(CUniversal::Format("Get send info from list, list size[%d].", list->size()));
-			si = list->front();
-			if (si == nullptr)
-			{
-				m_pLog->Verbos("The list front is NULL, pop it and get next.");
-				list->pop();
-			}
-		}
-		else
-		{
-			// the send list is empty, so no need loop.
-			m_pLog->Verbos("Send list is empty list. no need send message");
-			break;
-		}
-	}
-	if (si == nullptr)
-	{
-		if (m_nLastSentTags != -1)
-		{
-			m_pLog->Verbos("Current list no send message, clear the LastSentTags flag.");
-			m_nLastSentTags = -1;
-		}
-		else
-		{
-			m_pLog->Verbos(CUniversal::Format("No message need send, remove socket[%d] from Epoll", m_pCon->GetSocketID()));
-			m_bIsSendListEmpty = true;
-		}
-	}
-	return si;
+	return nullptr;
 }

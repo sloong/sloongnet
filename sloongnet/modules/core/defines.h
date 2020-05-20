@@ -64,9 +64,9 @@ enum HashType
 };
 
 template <class T>
-inline unique_ptr<T> ConvertStrToObj(string obj)
+inline shared_ptr<T> ConvertStrToObj(string obj)
 {
-	unique_ptr<T> item = make_unique<T>();
+	shared_ptr<T> item = make_shared<T>();
 	if (!item->ParseFromString(obj))
 		return nullptr;
 	return item;

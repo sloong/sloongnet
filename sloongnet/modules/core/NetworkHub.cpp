@@ -52,12 +52,13 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	m_iC->RegisterEvent(EVENT_TYPE::SocketClose);
 	m_iC->RegisterEvent(EVENT_TYPE::SendPackage);
 	m_iC->RegisterEvent(EVENT_TYPE::MonitorSendStatus);
+	m_iC->RegisterEvent(EVENT_TYPE::RegisteConnection);
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&CNetworkHub::Run, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramExit, std::bind(&CNetworkHub::Exit, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::SendPackage, std::bind(&CNetworkHub::SendPackageEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::SocketClose, std::bind(&CNetworkHub::CloseConnectEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::MonitorSendStatus, std::bind(&CNetworkHub::MonitorSendStatusEventHandler, this, std::placeholders::_1));
-
+	m_iC->RegisterEventHandler(EVENT_TYPE::RegisteConnection, std::bind(&CNetworkHub::RegisteConnectionEventHandler, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
@@ -118,7 +119,7 @@ void Sloong::CNetworkHub::AddMessageToSendList(SmartPackage pack)
 		return;
 	}
 
-	auto res = info->ResponseDataPackage(pack);
+	auto res = info->SendDataPackage(pack);
 	if (res == ResultType::Retry)
 	{
 		m_pEpoll->MonitorSendStatus(socket);
@@ -155,6 +156,21 @@ void Sloong::CNetworkHub::MonitorSendStatusEventHandler(SmartEvent event)
 {
 	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
 	m_pEpoll->MonitorSendStatus(net_evt->GetSocketID());
+}
+
+void Sloong::CNetworkHub::RegisteConnectionEventHandler(SmartEvent event)
+{
+	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
+	auto nSocket = net_evt->GetSocketID();
+
+	auto info = make_shared<CSockInfo>();
+	info->Initialize(m_iC, nSocket, m_pCTX);
+	unique_lock<mutex> sockLck(m_oSockListMutex);
+	m_SockList[nSocket] = info;
+	sockLck.unlock();
+	m_pEpoll->AddMonitorSocket(nSocket);
+
+	m_pLog->Info(CUniversal::Format("Registe connection:[%s:%d].", info->m_pCon->m_strAddress, info->m_pCon->m_nPort));
 }
 
 void Sloong::CNetworkHub::SendCloseConnectEvent(int socket)
@@ -194,18 +210,6 @@ void Sloong::CNetworkHub::EnableSSL(string certFile, string keyFile, string pass
 	}
 }
 
-void Sloong::CNetworkHub::RegisteConnection(SOCKET nSocket)
-{
-	auto info = make_shared<CSockInfo>();
-	info->Initialize(m_iC, nSocket, m_pCTX);
-	unique_lock<mutex> sockLck(m_oSockListMutex);
-	m_SockList[nSocket] = info;
-	sockLck.unlock();
-	m_pEpoll->AddMonitorSocket(nSocket);
-
-	m_pLog->Info(CUniversal::Format("Registe connection:[%s:%d].", info->m_pCon->m_strAddress, info->m_pCon->m_nPort));
-}
-
 
 /*************************************************
 * Function: * check_connect_timeout
@@ -219,10 +223,10 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop(SMARTER param)
 	int tout = m_nConnectTimeoutTime * 60;
 	int tinterval = m_nCheckTimeoutInterval * 60;
 
-	m_pLog->Verbos("Check connect timeout thread is running.");
+	m_pLog->Debug("Check connect timeout thread is running.");
 	while (m_bIsRunning)
 	{
-		m_pLog->Verbos("Check connect timeout start.");
+		m_pLog->Debug("Check connect timeout start.");
 	RecheckTimeout:
 		unique_lock<mutex> sockLck(m_oSockListMutex);
 		for (map<int, shared_ptr<CSockInfo>>::iterator it = m_SockList.begin(); it != m_SockList.end(); ++it)
@@ -236,7 +240,7 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop(SMARTER param)
 			}
 		}
 		sockLck.unlock();
-		m_pLog->Verbos(CUniversal::Format("Check connect timeout done. wait [%d] seconds.", tinterval));
+		m_pLog->Debug(CUniversal::Format("Check connect timeout done. wait [%d] seconds.", tinterval));
 		m_oCheckTimeoutThreadSync.wait_for(tinterval);
 	}
 	m_pLog->Info("check timeout connect thread is exit ");
@@ -249,7 +253,7 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop(SMARTER param)
 // 为了避免影响接收时的效率，将队列操作放松到最低。以每次一定数量的处理来逐级加锁。
 void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 {
-	m_pLog->Verbos("MessageProcessWorkLoop thread is running.");
+	m_pLog->Debug("MessageProcessWorkLoop thread is running.");
 	void* pEnv;
 	auto res = m_pCreateEnvFunc(&pEnv);
 	if( res.IsFialed() )
@@ -263,6 +267,8 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 		m_pLog->Warn("Create called succeed, but the evnironment value is null.");
 	} 
 	
+	
+	SmartPackage pack;
 	while (m_bIsRunning)
 	{
 		MessagePorcessListRetry:
@@ -272,7 +278,6 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 			{
 				continue;
 			}
-			SmartPackage pack;
 			
 			while( m_pWaitProcessList[i].TryPop(pack) )
 			{
@@ -307,7 +312,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 /// 接收链接之后，需要客户端首先发送客户端校验信息。只有校验成功之后才会进行SSL处理
 ResultType Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 {
-	m_pLog->Verbos("Accept function is called.");
+	m_pLog->Debug("Accept function is called.");
 
 	// start client check when acdept
 	if (m_nClientCheckKeyLength > 0)
@@ -356,7 +361,7 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
 	if (res == ResultType::Error)
 		SendCloseConnectEvent(nSocket);
 
-	if( !readList.empty())
+	while( !readList.empty())
 	{
 		auto item = readList.front();
 		readList.pop();

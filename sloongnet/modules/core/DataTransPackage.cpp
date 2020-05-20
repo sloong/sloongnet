@@ -6,7 +6,7 @@ void Sloong::CDataTransPackage::PrepareSendPackageData()
 {
 	if (g_pLog!= nullptr)
 	{
-		g_pLog->Verbos(CUniversal::Format("SEND<<<[%d][%d]<<<%s&&&EXDATA<<<[%d]",m_pTransPackage->prioritylevel(),
+		g_pLog->Debug(CUniversal::Format("SEND<<<[%d][%d]<<<%s&&&EXDATA<<<[%d]",m_pTransPackage->prioritylevel(),
 										m_pTransPackage->serialnumber(),m_pTransPackage->content(), m_pTransPackage->extend().length()));
 	}
 	m_pTransPackage->SerializeToString(&m_strPackageData);
@@ -58,6 +58,7 @@ ResultType Sloong::CDataTransPackage::SendPackage()
 		if( g_pLog) g_pLog->Error("Cannot send message. the send data is zero");
 		return ResultType::Invalid;
 	}
+	if( g_pLog ) g_pLog->Debug(CUniversal::Format("Start send package : AllSize[%d],Sent[%d]", m_nPackageSize, m_nSent));
 		
 	int nSentSize = m_pCon->SendPackage(m_strPackageData, m_nSent);
 	if (nSentSize < 0){
@@ -67,12 +68,11 @@ ResultType Sloong::CDataTransPackage::SendPackage()
 		m_nSent += nSentSize;
 	}
 
-	if( g_pLog ) g_pLog->Verbos(CUniversal::Format("Send Info : AllSize[%d],Sent[%d]", m_nPackageSize, m_nSent));
+	if( g_pLog ) g_pLog->Debug(CUniversal::Format("Send package end: AllSize[%d],Sent[%d]", m_nPackageSize, m_nSent));
 
 	if (m_nSent < m_nPackageSize){
 		return ResultType::Retry;
 	}else{
-		if( g_pLog ) g_pLog->Verbos(CUniversal::Format("Message package send succeed, remove from send list. All size[%d]", m_nSent));
 		return ResultType::Succeed;
 	}
 }
@@ -101,7 +101,7 @@ ResultType Sloong::CDataTransPackage::RecvPackage(int timeout)
 		return ResultType::Error;
 	}
 	
-	if( g_pLog ) g_pLog->Verbos(CUniversal::Format("RECV<<<[%d][%d]<<<%s",m_pTransPackage->prioritylevel(),m_pTransPackage->serialnumber(),m_pTransPackage->content()));
+	if( g_pLog ) g_pLog->Debug(CUniversal::Format("RECV<<<[%d][%d]<<<%s",m_pTransPackage->prioritylevel(),m_pTransPackage->serialnumber(),m_pTransPackage->content()));
 
 	if( m_pTransPackage->checkstring().length() > 0 ){
 		string rmd5 = CMD5::Encode(m_pTransPackage->content());

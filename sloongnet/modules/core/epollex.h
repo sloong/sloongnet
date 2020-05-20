@@ -53,6 +53,8 @@ namespace Sloong
 		
 	protected:
 		int 	m_EpollHandle;
+		map_ex<int,thread::id> m_mapAcceptSocketToPID;
+		mutex	m_acceptMutex;
 		//struct epoll_event m_Event;
 		epoll_event m_Events[1024];
 	public:

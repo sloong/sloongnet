@@ -83,7 +83,8 @@
         "regex": "cpp",
         "set": "cpp",
         "cfenv": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "shared_mutex": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "terminal.integrated.shell.windows": "C:\\WINDOWS\\System32\\wsl.exe"
