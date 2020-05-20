@@ -62,6 +62,7 @@ namespace Sloong
             Note = info.note;
             Configuation = string(info.configuation.begin(),info.configuation.end());
             Replicas = info.replicas;
+            BuildCache();
         }
         TemplateInfo ToTemplateInfo() {
             TemplateInfo info;
@@ -95,11 +96,15 @@ namespace Sloong
                 return false;
             return true;
         }
+        void BuildCache(){
+            ConfiguationObj = ConvertStrToObj<GLOBAL_CONFIG>(this->Configuation);
+        }
         int ID;
         string Name;
         string Note;
         int Replicas;
         string Configuation;
+        shared_ptr<GLOBAL_CONFIG> ConfiguationObj;
         list_ex<int> Reference;
         list_ex<string> Created;
     };

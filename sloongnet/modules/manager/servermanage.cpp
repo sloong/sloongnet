@@ -67,6 +67,7 @@ CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG *config)
 	item.Note = "This template just for the manager node.";
 	item.Replicas = 1;
 	item.Configuation = config_str;
+	item.BuildCache();
 	CResult res(ResultType::Succeed);
 	auto info = item.ToTemplateInfo();
 	if (CConfiguation::Instance->CheckTemplateExist(1))
@@ -123,7 +124,7 @@ CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 	
 	auto req_obj = pack->GetRecvMessage();
 	auto func_name = Functions_Name(function);
-	m_pLog->Verbos(CUniversal::Format("Request [%d][%s]:[%s]", function, func_name, req_obj));
+	m_pLog->Debug(CUniversal::Format("Request [%d][%s]:[%s]", function, func_name, req_obj));
 	if (!m_mapFuncToHandler.exist(function))
 	{
 		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Function [%s] no handler.",func_name));
@@ -131,7 +132,7 @@ CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 	}
 
 	auto res = m_mapFuncToHandler[function](req_obj, pack);
-	m_pLog->Verbos(CUniversal::Format("Response [%s]:[%s][%s].", func_name, Core::ResultType_Name(res.Result()), res.Message()));
+	m_pLog->Debug(CUniversal::Format("Response [%s]:[%s][%s].", func_name, Core::ResultType_Name(res.Result()), res.Message()));
 	pack->ResponsePackage(res);
 	return CResult::Succeed();
 }
@@ -153,10 +154,9 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string& req_obj, CData
 	{
 		NodeItem item;
 		item.Address = pack->GetSocketIP();
-		item.Port = pack->GetSocketPort();
 		item.UUID = sender;
 		m_mapUUIDToNodeItem[sender] = item;
-		m_pLog->Verbos(CUniversal::Format("Module[%s:%d] regist to system. Allocating uuid [%s].", item.Address, item.Port, item.UUID));
+		m_pLog->Debug(CUniversal::Format("Module[%s:%d] regist to system. Allocating uuid [%s].", item.Address, item.Port, item.UUID));
 		return CResult(ResultType::Retry, sender);
 	}
 
@@ -176,16 +176,14 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string& req_obj, CData
 	res.set_templateid(tpl.ID);
 	res.set_configuation(m_mapIDToTemplateItem[tpl.ID].Configuation);
 
-	m_pLog->Verbos(CUniversal::Format("Allocating module[%s] Type to [%s]", sender_info->UUID, tpl.Name));
+	m_pLog->Debug(CUniversal::Format("Allocating module[%s] Type to [%s]", sender_info->UUID, tpl.Name));
 	return CResult::Make_OK( ConvertObjToStr(&res) );
 }
 
 void Sloong::CServerManage::RefreshModuleReference(int id)
 {
 	m_mapIDToTemplateItem[id].Reference.clear();
-	GLOBAL_CONFIG config;
-	config.ParseFromString(m_mapIDToTemplateItem[id].Configuation);
-	auto references = CUniversal::split(config.modulereference(), ';');
+	auto references = CUniversal::split(m_mapIDToTemplateItem[id].ConfiguationObj->modulereference(), ';');
 	for (auto item : references)
 		m_mapIDToTemplateItem[id].Reference.push_back(stoi(item));
 }
@@ -208,9 +206,12 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTr
 		return CResult::Make_Error("Template id error.");
 
 	// Save node info.
-	m_mapUUIDToNodeItem[sender].TemplateName = m_mapIDToTemplateItem[id].Name;
-	m_mapUUIDToNodeItem[sender].TemplateID = m_mapIDToTemplateItem[id].ID;
-	m_mapUUIDToNodeItem[sender].Connection = pack->GetConnection();
+	auto& item = m_mapUUIDToNodeItem[sender];
+	auto& tpl = m_mapIDToTemplateItem[id];
+	item.TemplateName = m_mapIDToTemplateItem[id].Name;
+	item.TemplateID = m_mapIDToTemplateItem[id].ID;
+	item.Port = m_mapIDToTemplateItem[id].ConfiguationObj->listenport();
+	item.Connection = pack->GetConnection();
 	m_mapIDToTemplateItem[id].Created.unique_insert(sender);
 	m_mapSocketToUUID[pack->GetConnection()->GetSocketID()] = sender;
 
@@ -227,8 +228,6 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTr
 
 	if (notifyList.size() > 0)
 	{
-		GLOBAL_CONFIG config;
-		config.ParseFromString(m_mapIDToTemplateItem[id].Configuation);
 		EventReferenceModuleOnline online_event;
 		m_mapUUIDToNodeItem[sender].ToProtobuf(online_event.mutable_item());
 		SendEvent(notifyList, Manager::Events::ReferenceModuleOnline, &online_event);
@@ -247,6 +246,7 @@ CResult Sloong::CServerManage::AddTemplateHandler(const string& req_obj, CDataTr
 	item.Note = info.note();;
 	item.Replicas = info.replicas();
 	item.Configuation = info.configuation();
+	item.BuildCache();
 	if( !item.IsValid() )
 		return CResult::Make_Error("Param is valid.");
 
@@ -306,7 +306,8 @@ CResult Sloong::CServerManage::SetTemplateHandler(const string& req_obj, CDataTr
 
 	if (info.configuation().size() > 0)
 		tplInfo.Configuation = info.configuation();
-		
+
+	tplInfo.BuildCache();		
 	auto res = CConfiguation::Instance->SetTemplate(tplInfo.ID, tplInfo.ToTemplateInfo());
 	if (res.IsFialed())
 	{
@@ -386,20 +387,16 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string& req_obj, 
 	auto id = m_mapUUIDToNodeItem[uuid].TemplateID;
 
 	QueryReferenceInfoResponse res;
-	auto config = ConvertStrToObj<GLOBAL_CONFIG>(m_mapIDToTemplateItem[id].Configuation);
-	auto references = CUniversal::split(config->modulereference(),',');
+	auto references = CUniversal::split(m_mapIDToTemplateItem[id].ConfiguationObj->modulereference(),',');
 	for (  auto ref: references )
 	{
 		auto item = res.add_templateinfos();
 		auto tpl = m_mapIDToTemplateItem[stoi(ref)];
-		auto tpl_config = ConvertStrToObj<GLOBAL_CONFIG>(tpl.Configuation);
 		item->set_templateid(tpl.ID);
-		item->set_providefunctions(tpl_config->modulefunctoins());
+		item->set_providefunctions(tpl.ConfiguationObj->modulefunctoins());
 		for( auto node: tpl.Created)
 		{
-			auto t = item->add_nodeinfos();
-			m_mapUUIDToNodeItem[node].ToProtobuf(t);
-			t->set_port(tpl_config->listenport());
+			m_mapUUIDToNodeItem[node].ToProtobuf(item->add_nodeinfos());
 		}
 	}
 	
@@ -439,8 +436,6 @@ void Sloong::CServerManage::OnSocketClosed(SOCKET sock)
 
 	if (notifyList.size() > 0)
 	{
-		GLOBAL_CONFIG config;
-		config.ParseFromString(m_mapIDToTemplateItem[id].Configuation);
 		EventReferenceModuleOffline offline_event;
 		offline_event.set_uuid(target);
 		SendEvent(notifyList, Manager::Events::ReferenceModuleOffline, &offline_event);

@@ -60,6 +60,8 @@ namespace Sloong
 		inline int ParseFunctionValue(const string&);
 		list<int> ProcessProviedFunction(const string&);
 
+		void AddConnection(const string&, const string&, int);
+
 	protected:
 		//list<shared_ptr<GatewayTranspond>> m_listTranspond;
 

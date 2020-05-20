@@ -12,14 +12,17 @@ using namespace Sloong;
 using namespace Sloong::Events;
 
 unique_ptr<SloongNetGateway> Sloong::SloongNetGateway::Instance = nullptr;
+mutex processmutex;
 
 extern "C" CResult RequestPackageProcesser(void *env, CDataTransPackage *pack)
 {
+	unique_lock<mutex> lock(processmutex);
 	return SloongNetGateway::Instance->RequestPackageProcesser(env, pack);
 }
 
 extern "C" CResult ResponsePackageProcesser(void *env, CDataTransPackage *pack)
 {
+	unique_lock<mutex> lock(processmutex);
 	return SloongNetGateway::Instance->ResponsePackageProcesser(pack);
 }
 
@@ -27,7 +30,7 @@ extern "C" CResult EventPackageProcesser(CDataTransPackage *pack)
 {
 	SloongNetGateway::Instance->EventPackageProcesser(pack);
 	return CResult::Succeed();
-}
+} 
 
 extern "C" CResult NewConnectAcceptProcesser(CSockInfo *info)
 {
@@ -78,10 +81,10 @@ CResult SloongNetGateway::Initialized(SOCKET sock, IControl *iC)
 
 CResult SloongNetGateway::RequestPackageProcesser(void *env, CDataTransPackage *trans_pack)
 {
-	m_pLog->Verbos("Receive new request package.");
+	m_pLog->Debug("Receive new request package.");
 	auto res = MessageToProcesser(trans_pack);
-	m_pLog->Verbos(CUniversal::Format("Response [%s][%s].", Core::ResultType_Name(res.Result()), res.Message()));
-	if( res.Result() == ResultType::Invalid )
+	m_pLog->Debug(CUniversal::Format("Response [%s][%s].", Core::ResultType_Name(res.Result()), res.Message()));
+	if (res.Result() == ResultType::Invalid)
 		return res;
 	trans_pack->ResponsePackage(res);
 	return CResult::Succeed();
@@ -108,7 +111,7 @@ void SloongNetGateway::QueryReferenceInfo()
 	m_pControl->SendMessage(event);
 }
 
-inline int SloongNetGateway::ParseFunctionValue(const string& s)
+inline int SloongNetGateway::ParseFunctionValue(const string &s)
 {
 	int res = 0;
 	auto nFunc = ConvertStrToInt(s, -1, &res);
@@ -118,7 +121,7 @@ inline int SloongNetGateway::ParseFunctionValue(const string& s)
 }
 
 // process the provied function string to list.
-list<int> SloongNetGateway::ProcessProviedFunction(const string& prov_func)
+list<int> SloongNetGateway::ProcessProviedFunction(const string &prov_func)
 {
 	list<int> res_list;
 	auto funcs = CUniversal::split(prov_func, ',');
@@ -168,13 +171,22 @@ CResult SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent *send_pack, C
 		{
 			m_mapUUIDToNode[item.uuid()] = item;
 			m_mapTempteIDToUUIDs[info.templateid()].push_back(item.uuid());
-			auto conn = make_shared<EasyConnect>();
-			conn->Initialize(item.address(), item.port());
-			conn->Connect();
-			m_mapUUIDToConnect[item.uuid()] = conn;
+
+			AddConnection(item.uuid(), item.address(), item.port());
 		}
 	}
 	return CResult::Invalid();
+}
+
+void SloongNetGateway::AddConnection(const string &uuid, const string &addr, int port)
+{
+	auto conn = make_shared<EasyConnect>();
+	conn->Initialize(addr, port);
+	conn->Connect();
+	auto event = make_shared<CNetworkEvent>(EVENT_TYPE::RegisteConnection);
+	event->SetSocketID(conn->GetSocketID());
+	m_pControl->SendMessage(event);
+	m_mapUUIDToConnect[uuid] = conn;
 }
 
 CResult SloongNetGateway::CreateProcessEnvironmentHandler(void **out_env)
@@ -211,20 +223,19 @@ void Sloong::SloongNetGateway::OnSocketClose(SmartEvent event)
 	}
 }
 
-void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string& str_req, CDataTransPackage *trans_pack)
+void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_req, CDataTransPackage *trans_pack)
 {
 	m_pLog->Info("Receive ReferenceModuleOnline event");
 	auto req = ConvertStrToObj<Manager::EventReferenceModuleOnline>(str_req);
 	auto item = req->item();
 	m_mapUUIDToNode[item.uuid()] = item;
 	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
-	auto conn = make_shared<EasyConnect>();
-	conn->Initialize(item.address(), item.port());
-	conn->Connect();
-	m_mapUUIDToConnect[item.uuid()] = conn;
+	m_pLog->Debug(CUniversal::Format("New module is online:[%s][%s:%d]", item.uuid(), item.address(), item.port()));
+
+	AddConnection(item.uuid(), item.address(), item.port());
 }
 
-void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string& str_req, CDataTransPackage *trans_pack)
+void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_req, CDataTransPackage *trans_pack)
 {
 	m_pLog->Info("Receive ReferenceModuleOffline event");
 	auto req = ConvertStrToObj<Manager::EventReferenceModuleOffline>(str_req);
@@ -250,12 +261,12 @@ void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pa
 	{
 	case Manager::Events::ReferenceModuleOnline:
 	{
-		OnReferenceModuleOnlineEvent( data_pack->content(), trans_pack );
+		OnReferenceModuleOnlineEvent(data_pack->content(), trans_pack);
 	}
 	break;
 	case Manager::Events::ReferenceModuleOffline:
 	{
-		OnReferenceModuleOfflineEvent( data_pack->content(), trans_pack );
+		OnReferenceModuleOfflineEvent(data_pack->content(), trans_pack);
 	}
 	break;
 	default:
@@ -266,24 +277,25 @@ void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pa
 	}
 }
 
-CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage* pack)
+CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage *pack)
 {
 	auto data_pack = pack->GetRecvPackage();
-	if(!m_mapFuncToTemplateIDs.exist(data_pack->function()) && !m_mapFuncToTemplateIDs.exist(-1))
+	if (!m_mapFuncToTemplateIDs.exist(data_pack->function()) && !m_mapFuncToTemplateIDs.exist(-1))
 	{
-		return CResult::Make_Error(CUniversal::Format("No service can process for [%s].",data_pack->function()));
+		return CResult::Make_Error(CUniversal::Format("No service can process for [%s].", data_pack->function()));
 	}
 
 	auto tpl_list = m_mapFuncToTemplateIDs[data_pack->function()];
 	tpl_list.copyfrom(m_mapFuncToTemplateIDs[-1]);
 
 	SmartConnect target = nullptr;
-	for( auto tpl: tpl_list)
+	for (auto tpl : tpl_list)
 	{
-		if(m_mapTempteIDToUUIDs[tpl].size() ==0)
+		if (m_mapTempteIDToUUIDs[tpl].size() == 0)
 			continue;
 
-		for( auto node: m_mapTempteIDToUUIDs[tpl]){
+		for (auto node : m_mapTempteIDToUUIDs[tpl])
+		{
 			target = m_mapUUIDToConnect[node];
 			break;
 		}
@@ -291,8 +303,8 @@ CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage* pack)
 
 	auto event = make_shared<CSendPackageExEvent>();
 	event->SetCallbackFunc(std::bind(&SloongNetGateway::MessageToClient, this, std::placeholders::_1, std::placeholders::_2));
-	event->SetRequestInfo(pack->GetConnection(),data_pack);
-	event->SetRequest(target->GetSocketID(), m_pRuntimeData->nodeuuid(), m_nSerialNumber, pack->GetPriority() , (int)Processer::Functions::ProcessMessage , pack->GetRecvMessage());
+	event->SetRequestInfo(pack->GetConnection(), data_pack);
+	event->SetRequest(target->GetSocketID(), m_pRuntimeData->nodeuuid(), m_nSerialNumber, pack->GetPriority(), (int)Processer::Functions::ProcessMessage, pack->GetRecvMessage());
 	m_nSerialNumber++;
 	m_pControl->SendMessage(event);
 	return CResult::Invalid();
@@ -300,14 +312,14 @@ CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage* pack)
 
 CResult Sloong::SloongNetGateway::MessageToClient(IEvent *send_event, CDataTransPackage *res_pack)
 {
-	auto req_event = TYPE_TRANS<CSendPackageExEvent*>(send_event);
+	auto req_event = TYPE_TRANS<CSendPackageExEvent *>(send_event);
 	auto req_info = req_event->GetRequestInfo();
 	auto req_pack = req_info->RequestDataPackage;
 
 	auto res_data = res_pack->GetRecvPackage();
 	req_pack->set_content(res_data->content());
 	req_pack->set_result(res_data->result());
-	if( res_data->extend().size()>0)
+	if (res_data->extend().size() > 0)
 		req_pack->set_extend(res_data->extend());
 
 	res_pack->ResponsePackage(req_pack);

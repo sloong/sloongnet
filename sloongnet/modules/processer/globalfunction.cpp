@@ -132,7 +132,7 @@ void *Sloong::CGlobalFunction::RecvDataConnFunc(void *pParam)
         int conn_sock = -1;
         if ((conn_sock = accept(pThis->m_ListenSock, NULL, NULL)) > 0)
         {
-            pLog->Verbos(CUniversal::Format("Accept data connect :[%s][%d]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
+            pLog->Debug(CUniversal::Format("Accept data connect :[%s][%d]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
             // When accept the connect , receive the uuid data. and
             char *pCheckBuf = new char[g_uuid_len + 1];
             memset(pCheckBuf, 0, g_uuid_len + 1);
@@ -314,7 +314,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
             }
         } while (bLoop);
 
-        pLog->Verbos(CUniversal::Format("Receive connect done. close:[%s:%d]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
+        pLog->Debug(CUniversal::Format("Receive connect done. close:[%s:%d]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
         close(conn_sock);
         return nullptr;
     }
