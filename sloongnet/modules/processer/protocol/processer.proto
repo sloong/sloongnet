@@ -4,3 +4,7 @@ package Processer;
 enum Functions{
     ProcessMessage=0;
 }
+
+message ProcesserMessage{
+    string content=1;
+}

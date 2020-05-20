@@ -51,6 +51,8 @@ namespace Sloong
 
 		CResult PackageProcesser(CDataTransPackage *);
 
+		void OnReferenceModuleOnlineEvent(const string&,CDataTransPackage *);
+		void OnReferenceModuleOfflineEvent(const string&,CDataTransPackage *);
 	private:
 		CResult MessageToProcesser(CDataTransPackage *);
 		CResult MessageToClient(IEvent *, CDataTransPackage *);

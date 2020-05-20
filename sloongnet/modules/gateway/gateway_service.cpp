@@ -211,6 +211,31 @@ void Sloong::SloongNetGateway::OnSocketClose(SmartEvent event)
 	}
 }
 
+void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string& str_req, CDataTransPackage *trans_pack)
+{
+	m_pLog->Info("Receive ReferenceModuleOnline event");
+	auto req = ConvertStrToObj<Manager::EventReferenceModuleOnline>(str_req);
+	auto item = req->item();
+	m_mapUUIDToNode[item.uuid()] = item;
+	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
+	auto conn = make_shared<EasyConnect>();
+	conn->Initialize(item.address(), item.port());
+	conn->Connect();
+	m_mapUUIDToConnect[item.uuid()] = conn;
+}
+
+void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string& str_req, CDataTransPackage *trans_pack)
+{
+	m_pLog->Info("Receive ReferenceModuleOffline event");
+	auto req = ConvertStrToObj<Manager::EventReferenceModuleOffline>(str_req);
+	auto uuid = req->uuid();
+	auto item = m_mapUUIDToNode[uuid];
+	m_mapTempteIDToUUIDs[item.templateid()].erase(item.uuid());
+	m_mapUUIDToConnect[uuid]->Close();
+	m_mapUUIDToConnect.erase(uuid);
+	m_mapUUIDToNode.erase(uuid);
+}
+
 void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pack)
 {
 	auto data_pack = trans_pack->GetRecvPackage();
@@ -225,12 +250,12 @@ void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pa
 	{
 	case Manager::Events::ReferenceModuleOnline:
 	{
-		m_pLog->Info("Receive ReferenceModuleOnline event");
+		OnReferenceModuleOnlineEvent( data_pack->content(), trans_pack );
 	}
 	break;
 	case Manager::Events::ReferenceModuleOffline:
 	{
-		m_pLog->Info("Receive ReferenceModuleOffline event");
+		OnReferenceModuleOfflineEvent( data_pack->content(), trans_pack );
 	}
 	break;
 	default:

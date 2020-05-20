@@ -22,6 +22,12 @@ namespace Sloong
 			return false;
 		}
 
+		void erase(const T& v){
+			auto it = std::find(this->begin(), this->end(), v);
+			if (it != this->end())
+				list<T>::erase(it);
+		}
+
 		bool exist(const T& v) {
 			auto it = std::find(this->begin(), this->end(), v);
 			// Check if iterator points to end or not

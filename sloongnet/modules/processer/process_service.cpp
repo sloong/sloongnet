@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-24 20:39:19
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-15 15:51:28
+ * @LastEditTime: 2020-05-19 18:54:46
  * @Description: file content
  */
 /* File Name: server.c */
@@ -20,19 +20,23 @@ unique_ptr<SloongNetProcess> Sloong::SloongNetProcess::Instance = nullptr;
 extern "C" CResult RequestPackageProcesser(void* pEnv, CDataTransPackage* pack)
 {
 	auto pProcess = TYPE_TRANS<CLuaProcessCenter*>(pEnv);
-	if( pProcess)
-		return SloongNetProcess::Instance->RequestPackageProcesser(pProcess,pack);
-	else
-		return CResult::Make_Error("Environment convert error. cannot process message.");
+	if( !pProcess)
+	{
+		SloongNetProcess::Instance->m_pLog->Error("Environment convert error. cannot process message.");
+		return CResult::Invalid();
+	}
+	return SloongNetProcess::Instance->RequestPackageProcesser(pProcess,pack);
 }
 
 extern "C" CResult ResponsePackageProcesser(void* pEnv, CDataTransPackage* pack)
 {
 	auto pProcess = TYPE_TRANS<CLuaProcessCenter*>(pEnv);
-	if( pProcess)
-		return SloongNetProcess::Instance->ResponsePackageProcesser(pProcess,pack);
-	else
-		return CResult::Make_Error("Environment convert error. cannot process message.");
+	if( !pProcess)
+	{
+		SloongNetProcess::Instance->m_pLog->Error("Environment convert error. cannot process message.");
+		return CResult::Invalid();
+	}
+	return SloongNetProcess::Instance->ResponsePackageProcesser(pProcess,pack);
 }
 
 extern "C" CResult EventPackageProcesser(CDataTransPackage* pack)

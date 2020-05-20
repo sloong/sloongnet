@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-18 20:07:11
+ * @LastEditTime: 2020-05-19 17:40:15
  * @Description: file content
  */
 #ifndef SLOONGNET_DEFINES_H
@@ -21,32 +21,29 @@
 using namespace Sloong;
 using namespace Sloong::Universal;
 
-
 #include "protocol/core.pb.h"
 using namespace Core;
 
-template<typename T> inline
-T TYPE_TRANS(LPVOID p)
+template <typename T>
+inline T TYPE_TRANS(LPVOID p)
 {
 	T tmp = static_cast<T>(p);
 	assert(tmp);
 	return tmp;
 }
 
-
 const int s_llLen = 8;
 const int s_lLen = 4;
 const int s_PriorityLevel = 5;
 
-
 enum RecvStatus
 {
-	Wait=0,
-	Receiving=1,
-	Saveing=2,
-	Done=3,
-	VerificationError=4,
-	OtherError=5,
+	Wait = 0,
+	Receiving = 1,
+	Saveing = 2,
+	Done = 3,
+	VerificationError = 4,
+	OtherError = 5,
 };
 
 // Receive file struce for GFunc
@@ -66,38 +63,47 @@ enum HashType
 	SHA_512 = 3,
 };
 
-template<class T> inline
-unique_ptr<T> ConvertStrToObj(string obj){
+template <class T>
+inline unique_ptr<T> ConvertStrToObj(string obj)
+{
 	unique_ptr<T> item = make_unique<T>();
-	if(!item->ParseFromString(obj))
+	if (!item->ParseFromString(obj))
 		return nullptr;
 	return item;
 }
 
-inline string ConvertObjToStr(::google::protobuf::Message* obj){
+inline string ConvertObjToStr(::google::protobuf::Message *obj)
+{
 	string str_res;
-	if(!obj->SerializeToString(&str_res))
+	if (!obj->SerializeToString(&str_res))
 		return "";
 	return str_res;
 }
 
-
-inline int ConvertStrToInt(string str, int def = 0, int* out_res = nullptr){
-	if(out_res) (*out_res) = 0;
+inline int ConvertStrToInt(string str, int def = 0, int *out_res = nullptr)
+{
+	if (out_res)
+		(*out_res) = 0;
 	try
 	{
 		return stoi(str);
 	}
-	catch(invalid_argument e){
-		if(out_res) (*out_res) = -1;
+	catch (const invalid_argument &e)
+	{
+		if (out_res)
+			(*out_res) = -1;
 		return def;
 	}
-	catch(out_of_range e){
-		if(out_res) (*out_res) = -2;
+	catch (const out_of_range &e)
+	{
+		if (out_res)
+			(*out_res) = -2;
 		return def;
 	}
-	catch(...){
-		if(out_res) (*out_res) = -3;
+	catch (...)
+	{
+		if (out_res)
+			(*out_res) = -3;
 		return def;
 	}
 }

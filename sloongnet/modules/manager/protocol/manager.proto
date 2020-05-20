@@ -10,18 +10,11 @@ enum Events{
 }
 
 message EventReferenceModuleOnline{
-   string Address=1;
-   int32 Port=2;
+   NodeItem item=1;
 }
 
 message EventReferenceModuleOffline{
-   string Address=1;
-   int32 Port=2;
-}
-
-message EventPackage{
-   Events Event=1;
-   bytes EventObject=2;
+   string uuid=1;
 }
 
 enum Functions{

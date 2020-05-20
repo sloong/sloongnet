@@ -2,7 +2,7 @@
  * @Author: WCB
  * @Date: 2020-04-24 20:40:22
  * @LastEditors: WCB
- * @LastEditTime: 2020-05-15 15:50:23
+ * @LastEditTime: 2020-05-19 19:28:21
  * @Description: file content
  */
 #ifndef SLOONGNET_PROCESS_SERVICE_H
@@ -53,13 +53,14 @@ namespace Sloong
 		map<string, unique_ptr<CLuaPacket>> m_mapUserInfoList;
 		
 		IControl* 	m_pControl = nullptr;
-		CLog*		m_pLog =nullptr;
+		
 
 		int 		m_nSerialNumber = 0;
 		SOCKET   m_nManagerConnection = -1;
 		GLOBAL_CONFIG* m_pConfig;
 		Json::Value*   m_pModuleConfig;
 	public:
+		CLog*		m_pLog =nullptr;
 		static unique_ptr<SloongNetProcess> Instance;
 	};
 

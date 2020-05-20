@@ -18,7 +18,7 @@ using namespace Sloong;
 using namespace Sloong::Universal;
 using namespace Sloong::Events;
 
-CGlobalFunction* CGlobalFunction::g_pThis = NULL;
+CGlobalFunction *CGlobalFunction::g_pThis = NULL;
 mutex g_SQLMutex;
 map<int, string> g_RecvDataConnList;
 map<string, map<string, RecvDataPackage *>> g_RecvDataInfoList;
@@ -26,7 +26,7 @@ map<string, map<string, RecvDataPackage *>> g_RecvDataInfoList;
 static int g_data_pack_len = 8;
 static int g_uuid_len = 36;
 static int g_md5_len = 32;
-static int FILE_TRANS_MAX_SIZE = 20 * 1024 * 1024;//20mb
+static int FILE_TRANS_MAX_SIZE = 20 * 1024 * 1024; //20mb
 static string g_temp_file_path = "/tmp/sloong/receivefile/temp.tmp";
 
 LuaFunctionRegistr g_LuaFunc[] =
@@ -84,8 +84,6 @@ void Sloong::CGlobalFunction::Initialize(IControl *iMsg)
 {
     IObject::Initialize(iMsg);
 }
-
-
 
 void Sloong::CGlobalFunction::Exit()
 {
@@ -163,7 +161,7 @@ void *Sloong::CGlobalFunction::RecvDataConnFunc(void *pParam)
             CThreadPool::AddWorkThread(RecvFileFunc, pSock);
         }
     }
-	return nullptr;
+    return nullptr;
 }
 
 void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
@@ -217,7 +215,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
                     pLog->Error("Receive data length error.");
                     throw normal_except();
                 }
-				int dtlen = (int)dlen;
+                int dtlen = (int)dlen;
 
                 char *szMD5 = new char[g_md5_len + 1];
                 memset(szMD5, 0, g_md5_len + 1);
@@ -364,7 +362,7 @@ int Sloong::CGlobalFunction::Lua_Hash_Encode(lua_State *l)
     bool file_mode = CLua::GetBoolen(l, 3);
     string result("");
 
-    switch (  hash_type)
+    switch (hash_type)
     {
     case HashType::MD5:
         result = CMD5::Encode(data, file_mode);
@@ -477,14 +475,13 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State *l)
         if (!CUniversal::MoveFile(orgName, newName))
         {
             // Move file need write access. so if move file error, try copy .
-            if(!CUniversal::RunSystemCmd( CUniversal::Format("cp \"%s\" \"%s\"",orgName,newName)))
+            if (!CUniversal::RunSystemCmd(CUniversal::Format("cp \"%s\" \"%s\"", orgName, newName)))
             {
                 nRes = -3;
                 throw normal_except("Move File and try copy file error.");
             }
             nRes = 1;
         }
-
     }
     catch (normal_except &e)
     {
@@ -599,12 +596,12 @@ int CGlobalFunction::Lua_ShowLog(lua_State *l)
 
 int CGlobalFunction::Lua_SetCommData(lua_State *l)
 {
-	return 0;
+    return 0;
 }
 
 int CGlobalFunction::Lua_GetCommData(lua_State *l)
 {
-	return 0;
+    return 0;
 }
 
 int CGlobalFunction::Lua_GetLogObject(lua_State *l)

@@ -230,8 +230,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTr
 		GLOBAL_CONFIG config;
 		config.ParseFromString(m_mapIDToTemplateItem[id].Configuation);
 		EventReferenceModuleOnline online_event;
-		online_event.set_address(pack->GetSocketIP());
-		online_event.set_port(config.listenport());
+		m_mapUUIDToNodeItem[sender].ToProtobuf(online_event.mutable_item());
 		SendEvent(notifyList, Manager::Events::ReferenceModuleOnline, &online_event);
 	}
 
@@ -398,7 +397,9 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string& req_obj, 
 		item->set_providefunctions(tpl_config->modulefunctoins());
 		for( auto node: tpl.Created)
 		{
-			m_mapUUIDToNodeItem[node].ToProtobuf(item->add_nodeinfos());
+			auto t = item->add_nodeinfos();
+			m_mapUUIDToNodeItem[node].ToProtobuf(t);
+			t->set_port(tpl_config->listenport());
 		}
 	}
 	
@@ -424,8 +425,6 @@ void Sloong::CServerManage::OnSocketClosed(SOCKET sock)
 
 	auto target = m_mapSocketToUUID[sock];
 	auto id = m_mapUUIDToNodeItem[target].TemplateID;
-	m_mapUUIDToNodeItem.erase(target);
-	m_mapIDToTemplateItem[id].Created.remove(target);
 
 	// Find reference node and notify them
 	list<string> notifyList;
@@ -443,8 +442,9 @@ void Sloong::CServerManage::OnSocketClosed(SOCKET sock)
 		GLOBAL_CONFIG config;
 		config.ParseFromString(m_mapIDToTemplateItem[id].Configuation);
 		EventReferenceModuleOffline offline_event;
-		offline_event.set_address("");
-		offline_event.set_port(0);
+		offline_event.set_uuid(target);
 		SendEvent(notifyList, Manager::Events::ReferenceModuleOffline, &offline_event);
 	}
+	m_mapUUIDToNodeItem.erase(target);
+	m_mapIDToTemplateItem[id].Created.remove(target);
 }

@@ -113,33 +113,38 @@ message DataPackage
 message GLOBAL_CONFIG
 {
     // Network 
-    int32   ListenPort = 1;
-    bool    EnableSSL=2;
-    string  CertFilePath=3;
-    string  KeyFilePath=4;
-    string  CertPasswd=5;
-    int32   ConnectTime=6;
-    int32   ReceiveTime=7;
+    string  ListenAddress = 1;
+    int32   ListenPort = 2;
 
     // Log 
-    string  LogPath = 8;
-    LogLevel   LogLevel =9 ;
-    int32    LogOperation = 10;
+    string  LogPath = 3;
+    LogLevel   LogLevel =4 ;
+    int32    LogOperation = 5;
 
     // Performance
-    int32   MQThreadQuantity =11;// Message queue work thread quantity 
-    int32   EPollThreadQuantity=12;// EPoll event process thread quantity
-    int32   ProcessThreadQuantity=13;// work thread for DataPackage process quantity
-    int32   PrioritySize=14;// Priority Size for the list. the priority level cannot bigger than this value.
+    int32   MQThreadQuantity =6;// Message queue work thread quantity 
+    int32   EPollThreadQuantity=7;// EPoll event process thread quantity
+    int32   ProcessThreadQuantity=8;// work thread for DataPackage process quantity
+    int32   PrioritySize=9;// Priority Size for the list. the priority level cannot bigger than this value.
+
+    // Timeout
+    int32   ConnectTime=10;
+    int32   ReceiveTime=11;
 
     // Module
-    string  ModuleName = 16;
-    string  ModulePath = 17;
-    bytes   ModuleConfig = 18;
+    string  ModuleName = 12;
+    string  ModulePath = 13;
+    bytes   ModuleConfig = 14;
     // 引用的其他模板，即本节点可能由数据流向引用节点，并且在目标模板节点产生变动的时候会通知引用者。
-    string  ModuleReference = 19;
+    string  ModuleReference = 15;
     // 模板提供的功能，可以是多种形式：单功能，功能区（xx-xx），全功能（*）。各种形式之间使用逗号分隔
-    string  ModuleFunctoins = 20;
+    string  ModuleFunctoins = 16;
+
+    // SSL
+    bool    EnableSSL=17;
+    string  CertFilePath=18;
+    string  KeyFilePath=19;
+    string  CertPasswd=20;
 };
 
 message RuntimeDataPackage

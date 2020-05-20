@@ -260,9 +260,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 	} 
 	if( pEnv == nullptr )
 	{
-		m_pLog->Fatal("Create called succeed, but the evnironment value is null.");
-		m_iC->SendMessage(EVENT_TYPE::ProgramExit);
-		return;
+		m_pLog->Warn("Create called succeed, but the evnironment value is null.");
 	} 
 	
 	while (m_bIsRunning)
