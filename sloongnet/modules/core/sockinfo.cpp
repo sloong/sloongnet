@@ -9,11 +9,12 @@ using namespace Sloong::Events;
 Sloong::CSockInfo::CSockInfo()
 {
 	m_pSendList = new queue_ex<SmartPackage>[s_PriorityLevel]();
-	m_pCon = make_shared<EasyConnect>();
+	m_pCon = make_unique<EasyConnect>();
 }
 
 CSockInfo::~CSockInfo()
 {
+	m_pCon->Close();
 	for (int i = 0; i < s_PriorityLevel;i++){
 		while (!m_pSendList[i].empty()){
 			m_pSendList[i].pop();
@@ -84,7 +85,7 @@ ResultType Sloong::CSockInfo::OnDataCanReceive( queue<SmartPackage>& readList )
 	// 已经连接的用户,收到数据,可以开始读入
 	bool bLoop = false;
 	do {
-		auto package = make_shared<CDataTransPackage>(m_pCon);
+		auto package = make_shared<CDataTransPackage>(m_pCon.get());
 		auto res = package->RecvPackage(m_ReceiveTimeout);
 		if( !bLoop && res == ResultType::Error){
 			// 读取错误,将这个连接从监听中移除并关闭连接

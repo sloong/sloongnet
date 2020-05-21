@@ -180,13 +180,13 @@ CResult SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent *send_pack, C
 
 void SloongNetGateway::AddConnection(const string &uuid, const string &addr, int port)
 {
-	auto conn = make_shared<EasyConnect>();
-	conn->Initialize(addr, port);
-	conn->Connect();
+	EasyConnect conn;
+	conn.Initialize(addr, port);
+	conn.Connect();
 	auto event = make_shared<CNetworkEvent>(EVENT_TYPE::RegisteConnection);
-	event->SetSocketID(conn->GetSocketID());
+	event->SetSocketID(conn.GetSocketID());
 	m_pControl->SendMessage(event);
-	m_mapUUIDToConnect[uuid] = conn;
+	m_mapUUIDToConnect[uuid] = conn.GetSocketID();
 }
 
 CResult SloongNetGateway::CreateProcessEnvironmentHandler(void **out_env)
@@ -242,7 +242,9 @@ void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_r
 	auto uuid = req->uuid();
 	auto item = m_mapUUIDToNode[uuid];
 	m_mapTempteIDToUUIDs[item.templateid()].erase(item.uuid());
-	m_mapUUIDToConnect[uuid]->Close();
+	auto event = make_shared<CNetworkEvent>(EVENT_TYPE::SocketClose);
+	event->SetSocketID(m_mapUUIDToConnect[uuid]);
+	m_pControl->SendMessage(event);
 	m_mapUUIDToConnect.erase(uuid);
 	m_mapUUIDToNode.erase(uuid);
 }
@@ -288,7 +290,7 @@ CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage *pack)
 	auto tpl_list = m_mapFuncToTemplateIDs[data_pack->function()];
 	tpl_list.copyfrom(m_mapFuncToTemplateIDs[-1]);
 
-	SmartConnect target = nullptr;
+	SOCKET target = INVALID_SOCKET;
 	for (auto tpl : tpl_list)
 	{
 		if (m_mapTempteIDToUUIDs[tpl].size() == 0)
@@ -301,10 +303,15 @@ CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage *pack)
 		}
 	}
 
+	if( target == INVALID_SOCKET )
+	{
+		return CResult::Make_Error("No process service online .");
+	}
+
 	auto event = make_shared<CSendPackageExEvent>();
 	event->SetCallbackFunc(std::bind(&SloongNetGateway::MessageToClient, this, std::placeholders::_1, std::placeholders::_2));
 	event->SetRequestInfo(pack->GetConnection(), data_pack);
-	event->SetRequest(target->GetSocketID(), m_pRuntimeData->nodeuuid(), m_nSerialNumber, pack->GetPriority(), (int)Processer::Functions::ProcessMessage, pack->GetRecvMessage());
+	event->SetRequest(target, m_pRuntimeData->nodeuuid(), m_nSerialNumber, pack->GetPriority(), (int)Processer::Functions::ProcessMessage, pack->GetRecvMessage());
 	m_nSerialNumber++;
 	m_pControl->CallMessage(event);
 	return CResult::Invalid();

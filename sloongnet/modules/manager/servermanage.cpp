@@ -211,9 +211,9 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTr
 	item.TemplateName = m_mapIDToTemplateItem[id].Name;
 	item.TemplateID = m_mapIDToTemplateItem[id].ID;
 	item.Port = m_mapIDToTemplateItem[id].ConfiguationObj->listenport();
-	item.Connection = pack->GetConnection();
+	item.ConnectionID = pack->GetSocketID();
 	m_mapIDToTemplateItem[id].Created.unique_insert(sender);
-	m_mapSocketToUUID[pack->GetConnection()->GetSocketID()] = sender;
+	m_mapSocketToUUID[pack->GetSocketID()] = sender;
 
 	// Find reference node and notify them
 	list<string> notifyList;
@@ -410,7 +410,7 @@ void Sloong::CServerManage::SendEvent(list<string> notifyList, int event, ::goog
 		string msg_str;
 		msg->SerializeToString(&msg_str);
 		auto req = make_shared<CSendPackageEvent>();
-		req->SetRequest(m_mapUUIDToNodeItem[item].Connection->GetSocketID(),"0" ,m_nSerialNumber, 1, event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
+		req->SetRequest(m_mapUUIDToNodeItem[item].ConnectionID,"0" ,m_nSerialNumber, 1, event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
 		m_pControl->SendMessage(req);
 	}
 }

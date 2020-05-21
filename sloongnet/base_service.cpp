@@ -38,7 +38,7 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
 
 
 
-TResult<shared_ptr<DataPackage>> CSloongBaseService::RegisteToControl(SmartConnect con, string uuid)
+TResult<shared_ptr<DataPackage>> CSloongBaseService::RegisteToControl(EasyConnect* con, string uuid)
 {
 	auto req = make_shared<DataPackage>();
     req->set_type(DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
@@ -62,7 +62,7 @@ TResult<shared_ptr<DataPackage>> CSloongBaseService::RegisteToControl(SmartConne
 
 CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
 {
-	m_pManagerConnect = make_shared<EasyConnect>();
+	m_pManagerConnect = make_unique<EasyConnect>();
 	m_pManagerConnect->Initialize(data->manageraddress(), data->managerport(), nullptr);
 	if (!m_pManagerConnect->Connect())
 	{
@@ -73,7 +73,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
 	string uuid;
 	while(true)
 	{
-		auto res = RegisteToControl(m_pManagerConnect,uuid);
+		auto res = RegisteToControl(m_pManagerConnect.get(),uuid);
 		if (res.IsFialed()) return res;	
 
 		auto response = res.ResultObject();
@@ -296,7 +296,7 @@ CResult CSloongBaseService::RegisteNode()
 	req->set_sender( m_oServerConfig.nodeuuid() );
 	req->set_content(ConvertObjToStr(&req_pack));
 
-	CDataTransPackage dataPackage(m_pManagerConnect);
+	CDataTransPackage dataPackage(m_pManagerConnect.get());
 	dataPackage.RequestPackage(req);
 
 	ResultType result = dataPackage.SendPackage();

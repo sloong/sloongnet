@@ -70,7 +70,7 @@ namespace Sloong
 		map_ex<int, list_ex<int>> m_mapFuncToTemplateIDs;
 		map_ex<int, list_ex<string>> m_mapTempteIDToUUIDs;
 		map_ex<string, NodeItem> m_mapUUIDToNode;
-		map_ex<string, SmartConnect> m_mapUUIDToConnect;
+		map_ex<string, SOCKET> m_mapUUIDToConnect;
 		IControl *m_pControl = nullptr;
 		CLog *m_pLog = nullptr;
 		GLOBAL_CONFIG *m_pConfig;

@@ -25,9 +25,6 @@ namespace Sloong
 	class EasyConnect
 	{
 	public:
-		EasyConnect();
-		~EasyConnect();
-
 		// 以接受方的方式初始化
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
 		void Initialize( SOCKET sock, SSL_CTX* ctx= nullptr, bool useLongLongSize = false);
@@ -100,10 +97,10 @@ namespace Sloong
 		string m_strErrorMsg;
 		int m_nErrorCode;
 		bool m_bUseLongLongSize = false;
-		ConnectStatus m_stStatus;
+		ConnectStatus m_stStatus = ConnectStatus::Disconnect;
 	};
 
-	typedef shared_ptr<EasyConnect> SmartConnect;
+	typedef unique_ptr<EasyConnect> SmartConnect;
 
 }
 

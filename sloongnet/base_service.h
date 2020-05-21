@@ -36,7 +36,7 @@ namespace Sloong
 		virtual void Restart(SmartEvent event);
 		virtual void Exit();
 
-		TResult<shared_ptr<DataPackage>> RegisteToControl(SmartConnect con, string uuid);
+		TResult<shared_ptr<DataPackage>> RegisteToControl(EasyConnect* con, string uuid);
 	protected:
 		virtual CResult InitlializeForWorker(RuntimeDataPackage*);
 		virtual CResult InitlializeForManager(RuntimeDataPackage*);

@@ -27,7 +27,7 @@ namespace Sloong
         string UUID;
         string TemplateName;
         int TemplateID;
-        SmartConnect Connection;
+        SOCKET ConnectionID;
         Json::Value ToJson(){
             Json::Value item;
             item["Address"] = this->Address;

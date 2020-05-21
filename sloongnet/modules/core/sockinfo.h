@@ -63,7 +63,7 @@ namespace Sloong
         queue_ex<SmartPackage> m_oPrepareSendList;
 
 		time_t m_ActiveTime;
-		shared_ptr<EasyConnect> m_pCon;
+		unique_ptr<EasyConnect> m_pCon;
 		
         mutex m_oSockReadMutex;
         mutex m_oSockSendMutex; 

@@ -5,17 +5,6 @@
 
 bool support_ssl_reconnect = false;
 
-Sloong::EasyConnect::EasyConnect()
-{
-	m_stStatus = ConnectStatus::Disconnect;
-}
-
-
-Sloong::EasyConnect::~EasyConnect()
-{
-	Close();
-}
-
 void Sloong::EasyConnect::Initialize(SOCKET sock, SSL_CTX* ctx, bool useLongLongSize)
 {
 	m_nSocket = sock;

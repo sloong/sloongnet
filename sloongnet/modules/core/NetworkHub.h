@@ -72,7 +72,7 @@ namespace Sloong
 		void AddToSendList(int socket, int nPriority, const char* pBuf, int nSize, int nStart, const char* pExBuf, int nExSize);
         
     protected:
-        map<int, shared_ptr<CSockInfo>> m_SockList;
+        map_ex<int, unique_ptr<CSockInfo>> m_SockList;
         mutex                   m_oSockListMutex;
         bool                    m_bIsRunning;
         unique_ptr<CEpollEx>    m_pEpoll;

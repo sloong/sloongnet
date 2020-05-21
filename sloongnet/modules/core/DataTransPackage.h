@@ -17,7 +17,7 @@ namespace Sloong
     class CDataTransPackage
     {
 	public:
-        CDataTransPackage(SmartConnect conn):m_pCon(conn){}
+        CDataTransPackage(EasyConnect* conn):m_pCon(conn){}
 
 		void ResponsePackage(ResultType result, const string& message, const string* exdata =nullptr);
         void ResponsePackage(const CResult& result);
@@ -53,9 +53,9 @@ namespace Sloong
 
         inline string GetExtendData() { return m_pTransPackage->extend(); }
 
-        inline void SetConnection(SmartConnect conn){ m_pCon = conn; }
+        inline void SetConnection(EasyConnect* conn){ m_pCon = conn; }
 
-        inline SmartConnect GetConnection() { return m_pCon; }
+        inline EasyConnect* GetConnection() { return m_pCon; }
 
         inline int GetSocketID(){return m_pCon->GetSocketID(); }
 
@@ -95,7 +95,7 @@ namespace Sloong
         shared_ptr<DataPackage> m_pTransPackage;
         list<timeval> m_listClock;
     protected:
-        SmartConnect    m_pCon;
+        EasyConnect*    m_pCon;
     public:
         static inline void InitializeLog(CLog* log){ g_pLog = log; }
         static CLog*    g_pLog;
