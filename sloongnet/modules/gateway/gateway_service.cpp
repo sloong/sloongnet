@@ -306,7 +306,7 @@ CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage *pack)
 	event->SetRequestInfo(pack->GetConnection(), data_pack);
 	event->SetRequest(target->GetSocketID(), m_pRuntimeData->nodeuuid(), m_nSerialNumber, pack->GetPriority(), (int)Processer::Functions::ProcessMessage, pack->GetRecvMessage());
 	m_nSerialNumber++;
-	m_pControl->SendMessage(event);
+	m_pControl->CallMessage(event);
 	return CResult::Invalid();
 }
 

@@ -55,7 +55,7 @@ namespace Sloong
 	protected:
 		void ProcessPrepareSendList();
 		ResultType ProcessSendList();
-		SmartPackage GetSendPackage();
+		queue_ex<SmartPackage>* GetSendPackage();
 		void AddToSendList(SmartPackage pack);
 
 	public:

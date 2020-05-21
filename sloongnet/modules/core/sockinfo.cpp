@@ -78,7 +78,8 @@ void Sloong::CSockInfo::AddToSendList(SmartPackage pack)
 
 ResultType Sloong::CSockInfo::OnDataCanReceive( queue<SmartPackage>& readList )
 {
-	unique_lock<mutex> srlck(m_oSockReadMutex);
+	if(m_oSockReadMutex.try_lock()==false) return ResultType::Invalid;
+	unique_lock<mutex> srlck(m_oSockReadMutex,std::adopt_lock);
 
 	// 已经连接的用户,收到数据,可以开始读入
 	bool bLoop = false;
@@ -134,32 +135,49 @@ void Sloong::CSockInfo::ProcessPrepareSendList()
 
 ResultType Sloong::CSockInfo::ProcessSendList()
 {
-	bool bTrySend = true;
-	unique_lock<mutex> send_lck(m_oSockSendMutex);
-	while(bTrySend)
+	if(m_oSockSendMutex.try_lock()==false) return ResultType::Invalid;
+	unique_lock<mutex> srlck(m_oSockSendMutex,std::adopt_lock);
+
+	if( m_pSendingPackage != nullptr )
 	{
-		if( m_pSendingPackage == nullptr )
-		{
-			unique_lock<mutex> lck(m_oSendListMutex);
-			m_pSendingPackage = GetSendPackage();
-			if (m_pSendingPackage == nullptr){
-				m_pLog->Debug("All data is sent, the send info list is empty.");
-				m_bIsSendListEmpty = true;
-				return ResultType::Succeed;
-			}
-		}
-		
 		auto res =m_pSendingPackage->SendPackage();
 		if( res == ResultType::Error ){
 			m_pLog->Error(CUniversal::Format("Send data package error. close connect:[%s:%d]",m_pCon->m_strAddress,m_pCon->m_nPort));
 			return ResultType::Error;
 		}else if( res == ResultType::Retry ){
 			m_pLog->Debug(CUniversal::Format("Send data package done but not all data is send All[%d]:Sent[%d]. wait next write sign.", m_pSendingPackage->GetPackageSize(),m_pSendingPackage->GetSentSize()));
-			bTrySend = false;
 			return ResultType::Retry;
 		}else{
 			m_pSendingPackage = nullptr;
-			bTrySend = true;
+		}
+	}
+
+	bool bTrySend = true;
+	while(bTrySend)
+	{
+		auto list = GetSendPackage();
+		if( list == nullptr )
+		{
+			m_pLog->Debug("All data is sent, the send info list is empty.");
+			m_bIsSendListEmpty = true;
+			return ResultType::Succeed;
+		}
+		
+		while( list->TryPop(m_pSendingPackage) )
+		{
+			m_pLog->Debug(CUniversal::Format("Send new package, the list size[%d]",list->size()));
+			auto res =m_pSendingPackage->SendPackage();
+			if( res == ResultType::Error ){
+				m_pLog->Error(CUniversal::Format("Send data package error. close connect:[%s:%d]",m_pCon->m_strAddress,m_pCon->m_nPort));
+				return ResultType::Error;
+			}else if( res == ResultType::Retry ){
+				m_pLog->Debug(CUniversal::Format("Send data package done but not all data is send All[%d]:Sent[%d]. wait next write sign.", m_pSendingPackage->GetPackageSize(),m_pSendingPackage->GetSentSize()));
+				bTrySend = false;
+				return ResultType::Retry;
+			}else{
+				m_pSendingPackage = nullptr;
+				bTrySend = true;
+			}
 		}
 	}
 }
@@ -168,7 +186,7 @@ ResultType Sloong::CSockInfo::ProcessSendList()
 /// 获取发送信息列表
 // 首先判断上次发送标志，如果不为-1，表示上次的发送列表没有发送完成。直接返回指定的列表
 // 如果为-1，表示需要发送新的列表。按照优先级逐级的进行寻找。
-SmartPackage Sloong::CSockInfo::GetSendPackage()
+queue_ex<SmartPackage>* Sloong::CSockInfo::GetSendPackage()
 {
 	for (int i = 0; i < s_PriorityLevel; i++)
 	{
@@ -177,9 +195,7 @@ SmartPackage Sloong::CSockInfo::GetSendPackage()
 		else
 		{
 			m_pLog->Debug(CUniversal::Format("Send list, Priority level:%d", i));
-			SmartPackage pack;
-			if( m_pSendList[i].TryPop(pack) )
-				return pack;
+			return &m_pSendList[i];
 		}
 	}
 	return nullptr;

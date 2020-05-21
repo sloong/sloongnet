@@ -73,6 +73,8 @@ ResultType Sloong::CDataTransPackage::SendPackage()
 	if (m_nSent < m_nPackageSize){
 		return ResultType::Retry;
 	}else{
+		this->Record();
+		if( g_pLog ) g_pLog->Debug(CUniversal::Format("Send package succeed: %s", FormatRecord()));
 		return ResultType::Succeed;
 	}
 }
@@ -114,6 +116,19 @@ ResultType Sloong::CDataTransPackage::RecvPackage(int timeout)
 			return ResultType::Invalid;
 		}
 	}
-
+	this->Record();
 	return ResultType::Succeed;
+}
+
+string Sloong::CDataTransPackage::FormatRecord()
+{
+	string str;
+	auto start = m_listClock.begin();
+	for( auto item = m_listClock.begin()++; item!= m_listClock.end(); item++ )
+	{
+		auto s = (*item).tv_sec-(*start).tv_sec;
+		auto us = ((*item).tv_usec-(*start).tv_usec);
+		str = CUniversal::Format("%s[%d.%d]",str, s, us);
+	}
+	return str;
 }

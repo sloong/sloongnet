@@ -284,6 +284,8 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 				// In here, the result no the result for this request.
 				// it just for is need add the pack obj to send list.
 				res.SetResult(ResultType::Invalid);
+
+				pack->Record();
 				switch(pack->GetRecvPackage()->type()){
 					case DataPackage_PackageType::DataPackage_PackageType_EventPackage:{
 						m_pEventFunc(pack.get());
@@ -297,6 +299,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 					default:
 						m_pLog->Warn("Data package check type error. cannot process.");
 				}
+				pack->Record();
 				if( res.IsSucceed())
 					AddMessageToSendList(pack);
 			}
@@ -360,6 +363,8 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
 	auto res = info->OnDataCanReceive(readList);
 	if (res == ResultType::Error)
 		SendCloseConnectEvent(nSocket);
+	else if(res == ResultType::Invalid)
+		return ResultType::Succeed;
 
 	while( !readList.empty())
 	{

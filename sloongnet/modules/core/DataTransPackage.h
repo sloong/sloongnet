@@ -11,6 +11,7 @@
 #include "core.h"
 #include "utility.h"
 #include "EasyConnect.h"
+#include <sys/time.h>
 namespace Sloong
 {
     class CDataTransPackage
@@ -83,12 +84,16 @@ namespace Sloong
         }
         inline int GetSentSize(){ return m_nSent; }
         inline int GetPackageSize(){return m_nPackageSize;}
+
+        inline void Record(){ struct  timeval  start;gettimeofday(&start,NULL); m_listClock.push_back(start); }
+        string FormatRecord();
     protected:
         // Send data info
         string m_strPackageData;
         int m_nSent=0;
 		int m_nPackageSize=0;
         shared_ptr<DataPackage> m_pTransPackage;
+        list<timeval> m_listClock;
     protected:
         SmartConnect    m_pCon;
     public:
