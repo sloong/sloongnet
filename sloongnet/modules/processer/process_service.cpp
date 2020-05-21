@@ -87,7 +87,7 @@ CResult Sloong::SloongNetProcess::RequestPackageProcesser(CLuaProcessCenter* pPr
 	char* pExData = nullptr;
 	int nExSize;
 
-	auto msg = pack->GetRecvPackage();
+	auto msg = pack->GetDataPackage();
 	string uuid = msg->extend();
 	auto infoItem = m_mapUserInfoList.find(uuid);
 	if (infoItem == m_mapUserInfoList.end())
@@ -95,14 +95,10 @@ CResult Sloong::SloongNetProcess::RequestPackageProcesser(CLuaProcessCenter* pPr
 		m_mapUserInfoList[uuid] = make_unique<CLuaPacket>();
 		infoItem = m_mapUserInfoList.find(uuid);
 	}
-	if (pProcess->MsgProcess(infoItem->second.get(), msg->content(), strRes, pExData, nExSize)) {
-		msg->set_content(strRes);
+	if (!pProcess->MsgProcess(infoItem->second.get(), msg->content(), strRes, pExData, nExSize)) {
+		strRes = "{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}";
 	}
-	else {
-		m_pLog->Error("Error in process");
-		msg->set_content("{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}");
-	}
-	pack->ResponsePackage(msg);
+	pack->ResponsePackage( ResultType::Succeed, strRes);
 	return CResult::Succeed();
 }
 
@@ -145,7 +141,7 @@ inline CResult Sloong::SloongNetProcess::CreateProcessEnvironmentHandler(void** 
 void Sloong::SloongNetProcess::EventPackageProcesser(CDataTransPackage* trans_pack)
 {
 	auto event = Events_MIN;
-	auto data_pack = trans_pack->GetRecvPackage();
+	auto data_pack = trans_pack->GetDataPackage();
 	if(!Manager::Events_Parse(data_pack->content(),&event))
 	{
 		m_pLog->Error(CUniversal::Format("Receive event but parse error. content:[%s]",data_pack->content()));

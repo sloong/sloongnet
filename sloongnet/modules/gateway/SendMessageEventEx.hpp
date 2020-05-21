@@ -12,7 +12,10 @@ namespace Sloong
 	namespace Events
 	{
         struct RequestInfo{
-            shared_ptr<DataPackage> RequestDataPackage = nullptr;
+            int function;
+			int priority;
+			int SerialNumber;
+			string Sender;
             EasyConnect*    RequestConnect = nullptr;
         };
 		class CSendPackageExEvent : public CSendPackageEvent
@@ -21,9 +24,12 @@ namespace Sloong
 			CSendPackageExEvent(){}
 			virtual	~CSendPackageExEvent(){}
 
-			inline void SetRequestInfo(EasyConnect* conn, shared_ptr<DataPackage> pack){
+			inline void SetRequestInfo(EasyConnect* conn, int func, int priority, int serial, string sender){
                 m_RequestInfo.RequestConnect = conn;
-                m_RequestInfo.RequestDataPackage = pack;
+                m_RequestInfo.function = func;
+				m_RequestInfo.priority = priority;
+				m_RequestInfo.SerialNumber = serial;
+				m_RequestInfo.Sender = sender;
             }
             inline RequestInfo* GetRequestInfo(){
                 return &m_RequestInfo;

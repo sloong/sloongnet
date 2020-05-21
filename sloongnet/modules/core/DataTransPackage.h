@@ -19,11 +19,12 @@ namespace Sloong
 	public:
         CDataTransPackage(EasyConnect* conn):m_pCon(conn){}
 
+        void RequestPackage();
 		void ResponsePackage(ResultType result, const string& message, const string* exdata =nullptr);
         void ResponsePackage(const CResult& result);
 
-        void RequestPackage( shared_ptr<DataPackage> pack );
-        void ResponsePackage( shared_ptr<DataPackage> pack );
+        void RequestPackage( const DataPackage& pack );
+        void ResponsePackage( const DataPackage& pack  );
 
 	protected:
 		void PrepareSendPackageData();
@@ -45,13 +46,13 @@ namespace Sloong
          */
         ResultType SendPackage();
 
-        inline int GetFunction() { return m_pTransPackage->function();}
+        inline int GetFunction() { return m_pTransPackage.function();}
 
-        inline shared_ptr<DataPackage> GetRecvPackage(){ return m_pTransPackage;}
+        inline DataPackage* GetDataPackage(){ return &m_pTransPackage;}
 
-        inline string GetRecvMessage(){ return m_pTransPackage->content(); }
+        inline string GetRecvMessage(){ return m_pTransPackage.content(); }
 
-        inline string GetExtendData() { return m_pTransPackage->extend(); }
+        inline string GetExtendData() { return m_pTransPackage.extend(); }
 
         inline void SetConnection(EasyConnect* conn){ m_pCon = conn; }
 
@@ -68,18 +69,18 @@ namespace Sloong
          * @Params: 
          * @Return: 
          */
-        inline bool IsBigPackage(){ return m_pTransPackage->extend().length() > 0 ? true : false; }
+        inline bool IsBigPackage(){ return m_pTransPackage.extend().length() > 0 ? true : false; }
 
-        inline int GetPriority(){ return m_pTransPackage->prioritylevel(); }
+        inline int GetPriority(){ return m_pTransPackage.prioritylevel(); }
 
-        inline void SetPriority(int value){ m_pTransPackage->set_prioritylevel(value); }
+        inline void SetPriority(int value){ m_pTransPackage.set_prioritylevel(value); }
 
-        inline u_int64_t GetSerialNumber(){ return m_pTransPackage->serialnumber(); }
+        inline u_int64_t GetSerialNumber(){ return m_pTransPackage.serialnumber(); }
 
-        inline void SetSerialNumber(u_int64_t value){ m_pTransPackage->set_serialnumber(value); }
+        inline void SetSerialNumber(u_int64_t value){ m_pTransPackage.set_serialnumber(value); }
 
         inline void AddSerialNumber( u_int64_t& value ){
-            m_pTransPackage->set_serialnumber(value);
+            m_pTransPackage.set_serialnumber(value);
             value++;
         }
         inline int GetSentSize(){ return m_nSent; }
@@ -92,7 +93,7 @@ namespace Sloong
         string m_strPackageData;
         int m_nSent=0;
 		int m_nPackageSize=0;
-        shared_ptr<DataPackage> m_pTransPackage;
+        DataPackage m_pTransPackage;
         list<timeval> m_listClock;
     protected:
         EasyConnect*    m_pCon;
@@ -100,7 +101,6 @@ namespace Sloong
         static inline void InitializeLog(CLog* log){ g_pLog = log; }
         static CLog*    g_pLog;
     };
-
     typedef shared_ptr<CDataTransPackage> SmartPackage;
 }
 

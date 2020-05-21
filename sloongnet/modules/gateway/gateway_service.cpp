@@ -251,7 +251,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_r
 
 void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pack)
 {
-	auto data_pack = trans_pack->GetRecvPackage();
+	auto data_pack = trans_pack->GetDataPackage();
 	auto event = (Manager::Events)data_pack->function();
 	if (!Manager::Events_IsValid(event))
 	{
@@ -281,7 +281,7 @@ void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pa
 
 CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage *pack)
 {
-	auto data_pack = pack->GetRecvPackage();
+	auto data_pack = pack->GetDataPackage();
 	if (!m_mapFuncToTemplateIDs.exist(data_pack->function()) && !m_mapFuncToTemplateIDs.exist(-1))
 	{
 		return CResult::Make_Error(CUniversal::Format("No service can process for [%s].", data_pack->function()));
@@ -310,7 +310,7 @@ CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage *pack)
 
 	auto event = make_shared<CSendPackageExEvent>();
 	event->SetCallbackFunc(std::bind(&SloongNetGateway::MessageToClient, this, std::placeholders::_1, std::placeholders::_2));
-	event->SetRequestInfo(pack->GetConnection(), data_pack);
+	event->SetRequestInfo(pack->GetConnection(), data_pack->function(), data_pack->prioritylevel(), data_pack->serialnumber(), data_pack->sender() );
 	event->SetRequest(target, m_pRuntimeData->nodeuuid(), m_nSerialNumber, pack->GetPriority(), (int)Processer::Functions::ProcessMessage, pack->GetRecvMessage());
 	m_nSerialNumber++;
 	m_pControl->CallMessage(event);
@@ -321,15 +321,15 @@ CResult Sloong::SloongNetGateway::MessageToClient(IEvent *send_event, CDataTrans
 {
 	auto req_event = TYPE_TRANS<CSendPackageExEvent *>(send_event);
 	auto req_info = req_event->GetRequestInfo();
-	auto req_pack = req_info->RequestDataPackage;
 
-	auto res_data = res_pack->GetRecvPackage();
-	req_pack->set_content(res_data->content());
-	req_pack->set_result(res_data->result());
-	if (res_data->extend().size() > 0)
-		req_pack->set_extend(res_data->extend());
-
-	res_pack->ResponsePackage(req_pack);
+	auto res_data = res_pack->GetDataPackage();
+	res_data->set_function(req_info->function);
+	res_data->set_prioritylevel(req_info->priority);
+	res_data->set_serialnumber(req_info->SerialNumber);
+	res_data->set_sender(req_info->Sender);
+	res_data->set_type(Core::DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
 	res_pack->SetConnection(req_info->RequestConnect);
+
+	res_pack->ResponsePackage(*res_data);
 	return CResult::Succeed();
 }

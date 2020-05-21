@@ -36,30 +36,6 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
     Instance->Exit();
 }
 
-
-
-TResult<shared_ptr<DataPackage>> CSloongBaseService::RegisteToControl(EasyConnect* con, string uuid)
-{
-	auto req = make_shared<DataPackage>();
-    req->set_type(DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
-	req->set_function(Manager::Functions::RegisteWorker);
-	req->set_sender(uuid);
-
-	CDataTransPackage dataPackage(con);
-	dataPackage.RequestPackage(req);
-	ResultType result = dataPackage.SendPackage();
-	if (result != ResultType::Succeed)
-		return TResult<shared_ptr<DataPackage>>::Make_Error( "Send get config request error.");
-	result = dataPackage.RecvPackage(0);
-	if (result != ResultType::Succeed)
-		return TResult<shared_ptr<DataPackage>>::Make_Error("Receive get config result error.");
-	auto get_config_response_buf = dataPackage.GetRecvPackage();
-	if (!get_config_response_buf)
-		return TResult<shared_ptr<DataPackage>>::Make_Error("Parse the get config response data error.");
-
-	return TResult<shared_ptr<DataPackage>>::Make_OK(get_config_response_buf);
-}
-
 CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
 {
 	m_pManagerConnect = make_unique<EasyConnect>();
@@ -73,10 +49,21 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
 	string uuid;
 	while(true)
 	{
-		auto res = RegisteToControl(m_pManagerConnect.get(),uuid);
-		if (res.IsFialed()) return res;	
-
-		auto response = res.ResultObject();
+        CDataTransPackage dataPackage(m_pManagerConnect.get());
+        auto req = dataPackage.GetDataPackage();
+        req->set_type(DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+        req->set_function(Manager::Functions::RegisteWorker);
+        req->set_sender(uuid);
+        dataPackage.RequestPackage();
+        ResultType result = dataPackage.SendPackage();
+        if (result != ResultType::Succeed)
+            return CResult::Make_Error( "Send get config request error.");
+        result = dataPackage.RecvPackage(0);
+        if (result != ResultType::Succeed)
+            return CResult::Make_Error("Receive get config result error.");
+        auto response = dataPackage.GetDataPackage();
+        if (!response)
+            return CResult::Make_Error("Parse the get config response data error.");
 
 		if( response->result() == Core::ResultType::Retry ){
             if( uuid.length() == 0 ){
@@ -289,15 +276,14 @@ CResult CSloongBaseService::RegisteNode()
 {
     RegisteNodeRequest req_pack;
     req_pack.set_templateid(m_oServerConfig.templateid());
-    
-    auto req = make_shared<DataPackage>();
+
+	CDataTransPackage dataPackage(m_pManagerConnect.get());
+    auto req = dataPackage.GetDataPackage();
     req->set_type(DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
 	req->set_function(Manager::Functions::RegisteNode);
 	req->set_sender( m_oServerConfig.nodeuuid() );
 	req->set_content(ConvertObjToStr(&req_pack));
-
-	CDataTransPackage dataPackage(m_pManagerConnect.get());
-	dataPackage.RequestPackage(req);
+	dataPackage.RequestPackage();
 
 	ResultType result = dataPackage.SendPackage();
     if (result != ResultType::Succeed)
@@ -305,7 +291,7 @@ CResult CSloongBaseService::RegisteNode()
 	result = dataPackage.RecvPackage(0);
 	if (result != ResultType::Succeed)
 		return CResult::Make_Error(" Get RegisteNode result error.");
-	auto response = dataPackage.GetRecvPackage();
+	auto response = dataPackage.GetDataPackage();
 	if (!response)
 		return CResult::Make_Error("Parse the get config response data error.");
     if(response->result() != ResultType::Succeed)

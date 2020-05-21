@@ -65,7 +65,7 @@ CResult SloongNetFirewall::Initialized(IControl* ic)
 
 CResult Sloong::SloongNetFirewall::RequestPackageProcesser(CDataTransPackage* pack)
 {
-    auto msgPack = pack->GetRecvPackage();
+    auto msgPack = pack->GetDataPackage();
     auto sender = msgPack->sender();
     auto func = (Functions)msgPack->function();
     m_pLog->Debug(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
@@ -75,7 +75,7 @@ CResult Sloong::SloongNetFirewall::RequestPackageProcesser(CDataTransPackage* pa
 
 CResult Sloong::SloongNetFirewall::ResponsePackageProcesser(CDataTransPackage* pack)
 {
-    auto msgPack = pack->GetRecvPackage();
+    auto msgPack = pack->GetDataPackage();
     auto sender = msgPack->sender();
     auto func = (Functions)msgPack->function();
     m_pLog->Debug(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
@@ -108,7 +108,7 @@ inline CResult Sloong::SloongNetFirewall::CreateProcessEnvironmentHandler(void**
 void Sloong::SloongNetFirewall::EventPackageProcesser(CDataTransPackage* trans_pack)
 {
 	auto event = Events_MIN;
-	auto data_pack = trans_pack->GetRecvPackage();
+	auto data_pack = trans_pack->GetDataPackage();
 	if(!Manager::Events_Parse(data_pack->content(),&event))
 	{
 		m_pLog->Error(CUniversal::Format("Receive event but parse error. content:[%s]",data_pack->content()));

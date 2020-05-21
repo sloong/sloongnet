@@ -144,7 +144,7 @@ CResult Sloong::CServerManage::EventRecorderHandler(const string& req_obj, CData
 
 CResult Sloong::CServerManage::RegisteWorkerHandler(const string& req_obj, CDataTransPackage *pack)
 {
-	auto sender = pack->GetRecvPackage()->sender();
+	auto sender = pack->GetDataPackage()->sender();
 	if (sender.length() == 0)
 	{
 		sender = CUtility::GenUUID();
@@ -190,7 +190,7 @@ void Sloong::CServerManage::RefreshModuleReference(int id)
 
 CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTransPackage *pack)
 {
-	auto sender = pack->GetRecvPackage()->sender();
+	auto sender = pack->GetDataPackage()->sender();
 	auto req = ConvertStrToObj<RegisteNodeRequest>(req_obj);
 	if (!req || sender.length() == 0)
 		return CResult::Make_Error("The required parameter check error.");
@@ -379,7 +379,7 @@ CResult Sloong::CServerManage::QueryNodeHandler(const string& req_obj, CDataTran
 
 CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string& req_obj, CDataTransPackage *pack)
 {
-	auto data_pack = pack->GetRecvPackage();
+	auto data_pack = pack->GetDataPackage();
 	auto uuid = data_pack->sender();
 	if( !m_mapUUIDToNodeItem.exist(uuid))
 		return CResult::Make_Error(CUniversal::Format("The node is no registed. [%s]",uuid));

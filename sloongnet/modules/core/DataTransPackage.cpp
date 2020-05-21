@@ -6,43 +6,46 @@ void Sloong::CDataTransPackage::PrepareSendPackageData()
 {
 	if (g_pLog!= nullptr)
 	{
-		g_pLog->Debug(CUniversal::Format("SEND<<<[%d][%d]<<<%s&&&EXDATA<<<[%d]",m_pTransPackage->prioritylevel(),
-										m_pTransPackage->serialnumber(),m_pTransPackage->content(), m_pTransPackage->extend().length()));
+		g_pLog->Debug(CUniversal::Format("SEND<<<[%d][%d]<<<%s&&&EXDATA<<<[%d]",m_pTransPackage.prioritylevel(),
+										m_pTransPackage.serialnumber(),m_pTransPackage.content(), m_pTransPackage.extend().length()));
 	}
-	m_pTransPackage->SerializeToString(&m_strPackageData);
+	m_pTransPackage.SerializeToString(&m_strPackageData);
 	m_nPackageSize = (int)m_strPackageData.length();
 }
 
-void Sloong::CDataTransPackage::RequestPackage( shared_ptr<DataPackage> pack )
+void Sloong::CDataTransPackage::RequestPackage()
 {
-	m_pTransPackage = pack;
-	m_pTransPackage->set_status( DataPackage_StatusType::DataPackage_StatusType_Request );
+	m_pTransPackage.set_status( DataPackage_StatusType::DataPackage_StatusType_Request );
 	PrepareSendPackageData();
 }
 
-
-void Sloong::CDataTransPackage::ResponsePackage( shared_ptr<DataPackage> pack )
+void Sloong::CDataTransPackage::RequestPackage( const DataPackage& pack )
 {
 	m_pTransPackage = pack;
-	m_pTransPackage->set_status( DataPackage_StatusType::DataPackage_StatusType_Response );
-	PrepareSendPackageData();
+	RequestPackage();
 }
 
+void Sloong::CDataTransPackage::ResponsePackage( const DataPackage& pack )
+{
+	m_pTransPackage = pack;
+	m_pTransPackage.set_status( DataPackage_StatusType::DataPackage_StatusType_Response );
+	PrepareSendPackageData();
+}
 
 void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string& message,const string* exdata /*=nullptr*/)
 {
-	m_pTransPackage->set_result(result);
-	m_pTransPackage->set_content(message);
-	m_pTransPackage->set_status( DataPackage_StatusType::DataPackage_StatusType_Response );
-	if( exdata ) m_pTransPackage->set_extend(*exdata);
+	m_pTransPackage.set_result(result);
+	m_pTransPackage.set_content(message);
+	m_pTransPackage.set_status( DataPackage_StatusType::DataPackage_StatusType_Response );
+	if( exdata ) m_pTransPackage.set_extend(*exdata);
 	PrepareSendPackageData();
 }
 
 void Sloong::CDataTransPackage::ResponsePackage(const CResult& result)
 {
-	m_pTransPackage->set_result(result.Result());
-	m_pTransPackage->set_content(result.Message());
-	m_pTransPackage->set_status( DataPackage_StatusType::DataPackage_StatusType_Response );
+	m_pTransPackage.set_result(result.Result());
+	m_pTransPackage.set_content(result.Message());
+	m_pTransPackage.set_status( DataPackage_StatusType::DataPackage_StatusType_Response );
 	PrepareSendPackageData();
 }
 
@@ -90,27 +93,26 @@ ResultType Sloong::CDataTransPackage::RecvPackage(int timeout)
 		return net_res;
 	}
 
-	m_pTransPackage = make_shared<DataPackage>();
-	if(!m_pTransPackage->ParseFromString(result))
+	if(!m_pTransPackage.ParseFromString(result))
 	{
 		if( g_pLog ) g_pLog->Error("Parser receive data error.");
 		return ResultType::Error;
 	}
 
-	if (m_pTransPackage->prioritylevel() > s_PriorityLevel || m_pTransPackage->prioritylevel() < 0)
+	if (m_pTransPackage.prioritylevel() > s_PriorityLevel || m_pTransPackage.prioritylevel() < 0)
 	{
-		if( g_pLog ) g_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_pTransPackage->prioritylevel(), s_PriorityLevel));
+		if( g_pLog ) g_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_pTransPackage.prioritylevel(), s_PriorityLevel));
 		return ResultType::Error;
 	}
 	
-	if( g_pLog ) g_pLog->Debug(CUniversal::Format("RECV<<<[%d][%d]<<<%s",m_pTransPackage->prioritylevel(),m_pTransPackage->serialnumber(),m_pTransPackage->content()));
+	if( g_pLog ) g_pLog->Debug(CUniversal::Format("RECV<<<[%d][%d]<<<%s",m_pTransPackage.prioritylevel(),m_pTransPackage.serialnumber(),m_pTransPackage.content()));
 
-	if( m_pTransPackage->checkstring().length() > 0 ){
-		string rmd5 = CMD5::Encode(m_pTransPackage->content());
-		if ( strcasecmp(m_pTransPackage->checkstring().c_str(),rmd5.c_str()) != 0)
+	if( m_pTransPackage.checkstring().length() > 0 ){
+		string rmd5 = CMD5::Encode(m_pTransPackage.content());
+		if ( strcasecmp(m_pTransPackage.checkstring().c_str(),rmd5.c_str()) != 0)
 		{
 			// handle error.
-			string msg = CUniversal::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_pTransPackage->content(), rmd5, m_pTransPackage->checkstring() );
+			string msg = CUniversal::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_pTransPackage.content(), rmd5, m_pTransPackage.checkstring() );
 			if( g_pLog )g_pLog->Warn(msg);
 			ResponsePackage(ResultType::Error,msg);
 			return ResultType::Invalid;

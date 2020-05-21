@@ -91,7 +91,6 @@ void Sloong::CNetworkHub::Exit(SmartEvent event)
 void Sloong::CNetworkHub::SendPackageEventHandler(SmartEvent event)
 {
 	auto send_evt = dynamic_pointer_cast<CSendPackageEvent>(event);
-	auto pack = send_evt->GetDataPackage();
 	auto socket = send_evt->GetSocketID();
 
 	if (!m_SockList.exist(socket))
@@ -102,7 +101,7 @@ void Sloong::CNetworkHub::SendPackageEventHandler(SmartEvent event)
 	auto info = m_SockList[socket].get();
 
 	auto transPack = make_shared<CDataTransPackage>(info->m_pCon.get());
-	transPack->RequestPackage(pack);
+	transPack->RequestPackage(*send_evt->GetDataPackage());
 
 	AddMessageToSendList(transPack);
 }
@@ -278,12 +277,12 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 				res.SetResult(ResultType::Invalid);
 
 				pack->Record();
-				switch(pack->GetRecvPackage()->type()){
+				switch(pack->GetDataPackage()->type()){
 					case DataPackage_PackageType::DataPackage_PackageType_EventPackage:{
 						m_pEventFunc(pack.get());
 						}break;
 					case DataPackage_PackageType::DataPackage_PackageType_RequestPackage:{
-						if(pack->GetRecvPackage()->status()==DataPackage_StatusType::DataPackage_StatusType_Request) {
+						if(pack->GetDataPackage()->status()==DataPackage_StatusType::DataPackage_StatusType_Request) {
 							res = m_pRequestFunc(pEnv,pack.get());
 						}else{
 							res = m_pResponseFunc(pEnv,pack.get());

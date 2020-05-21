@@ -43,7 +43,7 @@ CResult SloongNetDataCenter::Initialized(IControl*)
 
 CResult Sloong::SloongNetDataCenter::RequestPackageProcesser(CDataTransPackage* pack)
 {
-    auto msgPack = pack->GetRecvPackage();
+    auto msgPack = pack->GetDataPackage();
     auto sender = msgPack->sender();
     auto func = msgPack->function();
     m_pLog->Debug(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
