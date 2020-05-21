@@ -73,7 +73,7 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG* config)
 	auto res = m_pServer->Initialize(nullptr);
 	if (res.IsFialed())
 	{
-		return CResult::Make_Error(CUniversal::Format("Init server manage fialed. error message:%s",res.Message()));
+		return CResult::Make_Error(Helper::Format("Init server manage fialed. error message:%s",res.Message().c_str()));
 	}
 
 	auto config_str = res.Message();

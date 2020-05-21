@@ -6,8 +6,8 @@ void Sloong::CDataTransPackage::PrepareSendPackageData()
 {
 	if (g_pLog!= nullptr)
 	{
-		g_pLog->Debug(CUniversal::Format("SEND<<<[%d][%d]<<<%s&&&EXDATA<<<[%d]",m_pTransPackage.prioritylevel(),
-										m_pTransPackage.serialnumber(),m_pTransPackage.content(), m_pTransPackage.extend().length()));
+		g_pLog->Debug(Helper::Format("SEND<<<[%d][%d]<<<%s&&&EXDATA<<<[%d]",m_pTransPackage.prioritylevel(),
+										m_pTransPackage.serialnumber(),m_pTransPackage.content().c_str(), m_pTransPackage.extend().length()));
 	}
 	m_pTransPackage.SerializeToString(&m_strPackageData);
 	m_nPackageSize = (int)m_strPackageData.length();
@@ -61,23 +61,23 @@ ResultType Sloong::CDataTransPackage::SendPackage()
 		if( g_pLog) g_pLog->Error("Cannot send message. the send data is zero");
 		return ResultType::Invalid;
 	}
-	if( g_pLog ) g_pLog->Debug(CUniversal::Format("Start send package : AllSize[%d],Sent[%d]", m_nPackageSize, m_nSent));
+	if( g_pLog ) g_pLog->Debug(Helper::Format("Start send package : AllSize[%d],Sent[%d]", m_nPackageSize, m_nSent));
 		
 	int nSentSize = m_pCon->SendPackage(m_strPackageData, m_nSent);
 	if (nSentSize < 0){
-		if( g_pLog) g_pLog->Warn(CUniversal::Format("Error when send data. Socket[%s:%d].Errno[%d].", m_pCon->m_strAddress, m_pCon->m_nPort, m_pCon->GetErrno()));
+		if( g_pLog) g_pLog->Warn(Helper::Format("Error when send data. Socket[%s:%d].Errno[%d].", m_pCon->m_strAddress.c_str(), m_pCon->m_nPort, m_pCon->GetErrno()));
 		return ResultType::Error;
 	}else{
 		m_nSent += nSentSize;
 	}
 
-	if( g_pLog ) g_pLog->Debug(CUniversal::Format("Send package end: AllSize[%d],Sent[%d]", m_nPackageSize, m_nSent));
+	if( g_pLog ) g_pLog->Debug(Helper::Format("Send package end: AllSize[%d],Sent[%d]", m_nPackageSize, m_nSent));
 
 	if (m_nSent < m_nPackageSize){
 		return ResultType::Retry;
 	}else{
 		this->Record();
-		if( g_pLog ) g_pLog->Debug(CUniversal::Format("Send package succeed: %s", FormatRecord()));
+		if( g_pLog ) g_pLog->Debug(Helper::Format("Send package succeed: %s", FormatRecord().c_str()));
 		return ResultType::Succeed;
 	}
 }
@@ -89,7 +89,7 @@ ResultType Sloong::CDataTransPackage::RecvPackage(int timeout)
 	if( net_res == ResultType::Retry ) return net_res;
 	else if( net_res == ResultType::Error )
 	{
-		if( g_pLog ) g_pLog->Warn(CUniversal::Format("Error when receive data. Socket[%s:%d].Errno[%d].", m_pCon->m_strAddress, m_pCon->m_nPort, m_pCon->GetErrno() ));
+		if( g_pLog ) g_pLog->Warn(Helper::Format("Error when receive data. Socket[%s:%d].Errno[%d].", m_pCon->m_strAddress.c_str(), m_pCon->m_nPort, m_pCon->GetErrno() ));
 		return net_res;
 	}
 
@@ -101,18 +101,18 @@ ResultType Sloong::CDataTransPackage::RecvPackage(int timeout)
 
 	if (m_pTransPackage.prioritylevel() > s_PriorityLevel || m_pTransPackage.prioritylevel() < 0)
 	{
-		if( g_pLog ) g_pLog->Error(CUniversal::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_pTransPackage.prioritylevel(), s_PriorityLevel));
+		if( g_pLog ) g_pLog->Error(Helper::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_pTransPackage.prioritylevel(), s_PriorityLevel));
 		return ResultType::Error;
 	}
 	
-	if( g_pLog ) g_pLog->Debug(CUniversal::Format("RECV<<<[%d][%d]<<<%s",m_pTransPackage.prioritylevel(),m_pTransPackage.serialnumber(),m_pTransPackage.content()));
+	if( g_pLog ) g_pLog->Debug(Helper::Format("RECV<<<[%d][%d]<<<%s",m_pTransPackage.prioritylevel(),m_pTransPackage.serialnumber(),m_pTransPackage.content()));
 
 	if( m_pTransPackage.checkstring().length() > 0 ){
 		string rmd5 = CMD5::Encode(m_pTransPackage.content());
 		if ( strcasecmp(m_pTransPackage.checkstring().c_str(),rmd5.c_str()) != 0)
 		{
 			// handle error.
-			string msg = CUniversal::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_pTransPackage.content(), rmd5, m_pTransPackage.checkstring() );
+			string msg = Helper::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_pTransPackage.content().c_str(), rmd5.c_str(), m_pTransPackage.checkstring().c_str() );
 			if( g_pLog )g_pLog->Warn(msg);
 			ResponsePackage(ResultType::Error,msg);
 			return ResultType::Invalid;
@@ -130,7 +130,7 @@ string Sloong::CDataTransPackage::FormatRecord()
 	{
 		auto s = (*item).tv_sec-(*start).tv_sec;
 		auto us = ((*item).tv_usec-(*start).tv_usec);
-		str = CUniversal::Format("%s[%d.%d]",str, s, us);
+		str = Helper::Format("%s[%d.%d]",str.c_str(), s, us);
 	}
 	return str;
 }

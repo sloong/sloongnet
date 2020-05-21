@@ -118,21 +118,21 @@ CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 	auto function = (Functions)pack->GetFunction();
 	if (!Manager::Functions_IsValid(function))
 	{
-		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Parser request package function[%s] error.", pack->GetRecvMessage()));
+		pack->ResponsePackage(ResultType::Error, Helper::Format("Parser request package function[%s] error.", pack->GetRecvMessage().c_str()));
 		return CResult::Succeed();
 	}
 	
 	auto req_obj = pack->GetRecvMessage();
 	auto func_name = Functions_Name(function);
-	m_pLog->Debug(CUniversal::Format("Request [%d][%s]:[%s]", function, func_name, req_obj));
+	m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name, req_obj));
 	if (!m_mapFuncToHandler.exist(function))
 	{
-		pack->ResponsePackage(ResultType::Error, CUniversal::Format("Function [%s] no handler.",func_name));
+		pack->ResponsePackage(ResultType::Error, Helper::Format("Function [%s] no handler.",func_name.c_str()));
 		return CResult::Succeed();
 	}
 
 	auto res = m_mapFuncToHandler[function](req_obj, pack);
-	m_pLog->Debug(CUniversal::Format("Response [%s]:[%s][%s].", func_name, Core::ResultType_Name(res.Result()), res.Message()));
+	m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), Core::ResultType_Name(res.Result()).c_str(), res.Message().c_str()));
 	pack->ResponsePackage(res);
 	return CResult::Succeed();
 }
@@ -156,7 +156,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string& req_obj, CData
 		item.Address = pack->GetSocketIP();
 		item.UUID = sender;
 		m_mapUUIDToNodeItem[sender] = item;
-		m_pLog->Debug(CUniversal::Format("Module[%s:%d] regist to system. Allocating uuid [%s].", item.Address, item.Port, item.UUID));
+		m_pLog->Debug(Helper::Format("Module[%s:%d] regist to system. Allocating uuid [%s].", item.Address.c_str(), item.Port, item.UUID.c_str()));
 		return CResult(ResultType::Retry, sender);
 	}
 
@@ -176,14 +176,14 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string& req_obj, CData
 	res.set_templateid(tpl.ID);
 	res.set_configuation(m_mapIDToTemplateItem[tpl.ID].Configuation);
 
-	m_pLog->Debug(CUniversal::Format("Allocating module[%s] Type to [%s]", sender_info->UUID, tpl.Name));
+	m_pLog->Debug(Helper::Format("Allocating module[%s] Type to [%s]", sender_info->UUID.c_str(), tpl.Name.c_str()));
 	return CResult::Make_OK( ConvertObjToStr(&res) );
 }
 
 void Sloong::CServerManage::RefreshModuleReference(int id)
 {
 	m_mapIDToTemplateItem[id].Reference.clear();
-	auto references = CUniversal::split(m_mapIDToTemplateItem[id].ConfiguationObj->modulereference(), ';');
+	auto references = Helper::split(m_mapIDToTemplateItem[id].ConfiguationObj->modulereference(), ';');
 	for (auto item : references)
 		m_mapIDToTemplateItem[id].Reference.push_back(stoi(item));
 }
@@ -197,10 +197,10 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTr
 
 	int id = req->templateid();
 	if (!m_mapIDToTemplateItem.exist(id))
-		return CResult::Make_Error(CUniversal::Format("The template id [%d] is no exist.", id));
+		return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
 
 	if (!m_mapUUIDToNodeItem.exist(sender))
-		return CResult::Make_Error(CUniversal::Format("The sender [%d] is no regitser.", sender));
+		return CResult::Make_Error(Helper::Format("The sender [%d] is no regitser.", sender));
 
 	if (id == 1)
 		return CResult::Make_Error("Template id error.");
@@ -269,7 +269,7 @@ CResult Sloong::CServerManage::DeleteTemplateHandler(const string& req_obj, CDat
 	int id = req->templateid();
 	if (!m_mapIDToTemplateItem.exist(id))
 	{
-		return CResult::Make_Error(CUniversal::Format("The template id [%d] is no exist.", id));
+		return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
 	}
 	if (id == 1)
 	{
@@ -338,7 +338,7 @@ CResult Sloong::CServerManage::QueryTemplateHandler(const string& req_obj, CData
 		{
 			if (!m_mapIDToTemplateItem.exist(id))
 			{
-				return CResult::Make_Error(CUniversal::Format("The template id [%d] is no exist.", id));
+				return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
 			}
 			m_mapIDToTemplateItem[id].ToProtobuf(res.add_templateinfos());
 		}
@@ -382,12 +382,12 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string& req_obj, 
 	auto data_pack = pack->GetDataPackage();
 	auto uuid = data_pack->sender();
 	if( !m_mapUUIDToNodeItem.exist(uuid))
-		return CResult::Make_Error(CUniversal::Format("The node is no registed. [%s]",uuid));
+		return CResult::Make_Error(Helper::Format("The node is no registed. [%s]",uuid.c_str()));
 
 	auto id = m_mapUUIDToNodeItem[uuid].TemplateID;
 
 	QueryReferenceInfoResponse res;
-	auto references = CUniversal::split(m_mapIDToTemplateItem[id].ConfiguationObj->modulereference(),',');
+	auto references = Helper::split(m_mapIDToTemplateItem[id].ConfiguationObj->modulereference(),',');
 	for (  auto ref: references )
 	{
 		auto item = res.add_templateinfos();

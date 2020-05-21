@@ -68,7 +68,7 @@ CResult Sloong::SloongNetFirewall::RequestPackageProcesser(CDataTransPackage* pa
     auto msgPack = pack->GetDataPackage();
     auto sender = msgPack->sender();
     auto func = (Functions)msgPack->function();
-    m_pLog->Debug(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
+    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
 
 	return CResult::Succeed();
 }
@@ -78,7 +78,7 @@ CResult Sloong::SloongNetFirewall::ResponsePackageProcesser(CDataTransPackage* p
     auto msgPack = pack->GetDataPackage();
     auto sender = msgPack->sender();
     auto func = (Functions)msgPack->function();
-    m_pLog->Debug(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
+    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
 
 	return CResult::Succeed();
 }
@@ -89,7 +89,7 @@ void Sloong::SloongNetFirewall::OnSocketClose(SmartEvent event)
 	auto info = net_evt->GetUserInfo();
 	if (!info)
 	{
-		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
+		m_pLog->Error(Helper::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
 		return;
 	}
 	// call close function.
@@ -111,7 +111,7 @@ void Sloong::SloongNetFirewall::EventPackageProcesser(CDataTransPackage* trans_p
 	auto data_pack = trans_pack->GetDataPackage();
 	if(!Manager::Events_Parse(data_pack->content(),&event))
 	{
-		m_pLog->Error(CUniversal::Format("Receive event but parse error. content:[%s]",data_pack->content()));
+		m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]",data_pack->content()));
 		return;
 	}
 

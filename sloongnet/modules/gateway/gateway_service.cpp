@@ -64,11 +64,11 @@ CResult SloongNetGateway::Initialized(SOCKET sock, IControl *iC)
 	{
 		shared_ptr<CNormalEvent> event = make_shared<CNormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableTimeoutCheck);
-		event->SetMessage(CUniversal::Format("{\"TimeoutTime\":\"%d\", \"CheckInterval\":%d}", (*m_pModuleConfig)["TimeoutTime"].asInt(), (*m_pModuleConfig)["TimeoutCheckInterval"].asInt()));
+		event->SetMessage(Helper::Format("{\"TimeoutTime\":\"%d\", \"CheckInterval\":%d}", (*m_pModuleConfig)["TimeoutTime"].asInt(), (*m_pModuleConfig)["TimeoutCheckInterval"].asInt()));
 		m_pControl->SendMessage(event);
 
 		event->SetEvent(EVENT_TYPE::EnableClientCheck);
-		event->SetMessage(CUniversal::Format("{\"ClientCheckKey\":\"%s\", \"ClientCheckTime\":%d}", (*m_pModuleConfig)["ClientCheckKey"].asString(), (*m_pModuleConfig)["ClientCheckKey"].asInt()));
+		event->SetMessage(Helper::Format("{\"ClientCheckKey\":\"%s\", \"ClientCheckTime\":%d}", (*m_pModuleConfig)["ClientCheckKey"].asString(), (*m_pModuleConfig)["ClientCheckKey"].asInt()));
 		m_pControl->SendMessage(event);
 	}
 	m_pLog = IData::GetLog();
@@ -83,7 +83,7 @@ CResult SloongNetGateway::RequestPackageProcesser(void *env, CDataTransPackage *
 {
 	m_pLog->Debug("Receive new request package.");
 	auto res = MessageToProcesser(trans_pack);
-	m_pLog->Debug(CUniversal::Format("Response [%s][%s].", Core::ResultType_Name(res.Result()), res.Message()));
+	m_pLog->Debug(Helper::Format("Response [%s][%s].", Core::ResultType_Name(res.Result()), res.Message()));
 	if (res.Result() == ResultType::Invalid)
 		return res;
 	trans_pack->ResponsePackage(res);
@@ -116,7 +116,7 @@ inline int SloongNetGateway::ParseFunctionValue(const string &s)
 	int res = 0;
 	auto nFunc = ConvertStrToInt(s, -1, &res);
 	if (nFunc == -1)
-		m_pLog->Error(CUniversal::Format("Parse function string[%s] to int error[%d].", s, res));
+		m_pLog->Error(Helper::Format("Parse function string[%s] to int error[%d].", s, res));
 	return nFunc;
 }
 
@@ -124,12 +124,12 @@ inline int SloongNetGateway::ParseFunctionValue(const string &s)
 list<int> SloongNetGateway::ProcessProviedFunction(const string &prov_func)
 {
 	list<int> res_list;
-	auto funcs = CUniversal::split(prov_func, ',');
+	auto funcs = Helper::split(prov_func, ',');
 	for (auto func : funcs)
 	{
 		if (func.find("-") != string::npos)
 		{
-			auto range = CUniversal::split(func, '-');
+			auto range = Helper::split(func, '-');
 			auto start = ParseFunctionValue(range[0]);
 			auto end = ParseFunctionValue(range[1]);
 			if (start == -1 || end == -1)
@@ -218,7 +218,7 @@ void Sloong::SloongNetGateway::OnSocketClose(SmartEvent event)
 	auto info = net_evt->GetUserInfo();
 	if (!info)
 	{
-		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
+		m_pLog->Error(Helper::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
 		return;
 	}
 }
@@ -230,7 +230,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_re
 	auto item = req->item();
 	m_mapUUIDToNode[item.uuid()] = item;
 	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
-	m_pLog->Debug(CUniversal::Format("New module is online:[%s][%s:%d]", item.uuid(), item.address(), item.port()));
+	m_pLog->Debug(Helper::Format("New module is online:[%s][%s:%d]", item.uuid(), item.address(), item.port()));
 
 	AddConnection(item.uuid(), item.address(), item.port());
 }
@@ -255,7 +255,7 @@ void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pa
 	auto event = (Manager::Events)data_pack->function();
 	if (!Manager::Events_IsValid(event))
 	{
-		m_pLog->Error(CUniversal::Format("EventPackageProcesser is called.but the fucntion[%d] check error.", event));
+		m_pLog->Error(Helper::Format("EventPackageProcesser is called.but the fucntion[%d] check error.", event));
 		return;
 	}
 
@@ -273,7 +273,7 @@ void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pa
 	break;
 	default:
 	{
-		m_pLog->Error(CUniversal::Format("Event is no processed. [%s][%d].", Manager::Events_Name(event), event));
+		m_pLog->Error(Helper::Format("Event is no processed. [%s][%d].", Manager::Events_Name(event), event));
 	}
 	break;
 	}
@@ -284,7 +284,7 @@ CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage *pack)
 	auto data_pack = pack->GetDataPackage();
 	if (!m_mapFuncToTemplateIDs.exist(data_pack->function()) && !m_mapFuncToTemplateIDs.exist(-1))
 	{
-		return CResult::Make_Error(CUniversal::Format("No service can process for [%s].", data_pack->function()));
+		return CResult::Make_Error(Helper::Format("No service can process for [%s].", data_pack->function()));
 	}
 
 	auto tpl_list = m_mapFuncToTemplateIDs[data_pack->function()];

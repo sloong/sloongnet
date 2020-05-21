@@ -56,7 +56,7 @@ ResultType Sloong::CSockInfo::SendDataPackage(SmartPackage pack)
 	auto res = pack->SendPackage();
 	if ( res == ResultType::Error ){
 		// TODO: 这里应该对错误进行区分处理
-		m_pLog->Warn(CUniversal::Format("Send data failed.[%s]", m_pCon->m_strAddress));//, m_pCon->G_FormatSSLErrorMsg(nMsgSend)));
+		m_pLog->Warn(Helper::Format("Send data failed.[%s]", m_pCon->m_strAddress.c_str()));//, m_pCon->G_FormatSSLErrorMsg(nMsgSend)));
 		return ResultType::Error;
 	}
 	if (res == ResultType::Retry ){
@@ -72,7 +72,7 @@ void Sloong::CSockInfo::AddToSendList(SmartPackage pack)
 {
 	unique_lock<mutex> lck(m_oPreSendMutex);
 	m_oPrepareSendList.push(pack);
-	m_pLog->Debug(CUniversal::Format("Add send package to prepare send list. list size:[%d]",m_oPrepareSendList.size()));
+	m_pLog->Debug(Helper::Format("Add send package to prepare send list. list size:[%d]",m_oPrepareSendList.size()));
 	m_bIsSendListEmpty = false;
 }
 
@@ -127,7 +127,7 @@ void Sloong::CSockInfo::ProcessPrepareSendList()
 	while ( m_oPrepareSendList.TryPop(pack) ){
 		auto priority = pack->GetPriority();
 		m_pSendList[priority].push(pack);
-		m_pLog->Debug(CUniversal::Format("Add package to send list[%d]. send list size[%d], prepare send list size[%d]",
+		m_pLog->Debug(Helper::Format("Add package to send list[%d]. send list size[%d], prepare send list size[%d]",
 								priority,m_pSendList[priority].size(),m_oPrepareSendList.size()));
 	}
 }
@@ -143,10 +143,10 @@ ResultType Sloong::CSockInfo::ProcessSendList()
 	{
 		auto res =m_pSendingPackage->SendPackage();
 		if( res == ResultType::Error ){
-			m_pLog->Error(CUniversal::Format("Send data package error. close connect:[%s:%d]",m_pCon->m_strAddress,m_pCon->m_nPort));
+			m_pLog->Error(Helper::Format("Send data package error. close connect:[%s:%d]",m_pCon->m_strAddress.c_str(),m_pCon->m_nPort));
 			return ResultType::Error;
 		}else if( res == ResultType::Retry ){
-			m_pLog->Debug(CUniversal::Format("Send data package done but not all data is send All[%d]:Sent[%d]. wait next write sign.", m_pSendingPackage->GetPackageSize(),m_pSendingPackage->GetSentSize()));
+			m_pLog->Debug(Helper::Format("Send data package done but not all data is send All[%d]:Sent[%d]. wait next write sign.", m_pSendingPackage->GetPackageSize(),m_pSendingPackage->GetSentSize()));
 			return ResultType::Retry;
 		}else{
 			m_pSendingPackage = nullptr;
@@ -166,13 +166,13 @@ ResultType Sloong::CSockInfo::ProcessSendList()
 		
 		while( list->TryPop(m_pSendingPackage) )
 		{
-			m_pLog->Debug(CUniversal::Format("Send new package, the list size[%d]",list->size()));
+			m_pLog->Debug(Helper::Format("Send new package, the list size[%d]",list->size()));
 			auto res =m_pSendingPackage->SendPackage();
 			if( res == ResultType::Error ){
-				m_pLog->Error(CUniversal::Format("Send data package error. close connect:[%s:%d]",m_pCon->m_strAddress,m_pCon->m_nPort));
+				m_pLog->Error(Helper::Format("Send data package error. close connect:[%s:%d]",m_pCon->m_strAddress.c_str(),m_pCon->m_nPort));
 				return ResultType::Error;
 			}else if( res == ResultType::Retry ){
-				m_pLog->Debug(CUniversal::Format("Send data package done but not all data is send All[%d]:Sent[%d]. wait next write sign.", m_pSendingPackage->GetPackageSize(),m_pSendingPackage->GetSentSize()));
+				m_pLog->Debug(Helper::Format("Send data package done but not all data is send All[%d]:Sent[%d]. wait next write sign.", m_pSendingPackage->GetPackageSize(),m_pSendingPackage->GetSentSize()));
 				bTrySend = false;
 				return ResultType::Retry;
 			}else{
@@ -195,7 +195,7 @@ queue_ex<SmartPackage>* Sloong::CSockInfo::GetSendPackage()
 			continue;
 		else
 		{
-			m_pLog->Debug(CUniversal::Format("Send list, Priority level:%d", i));
+			m_pLog->Debug(Helper::Format("Send list, Priority level:%d", i));
 			return &m_pSendList[i];
 		}
 	}

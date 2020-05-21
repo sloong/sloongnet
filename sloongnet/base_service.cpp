@@ -86,7 +86,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
             data->set_nodeuuid(uuid);
             break;
 		}else{
-            return CResult::Make_Error(CUniversal::Format("Control return an unexpected result [%s]. Message [%s].",Core::ResultType_Name(response->result()),response->content()));
+            return CResult::Make_Error(Helper::Format("Control return an unexpected result [%s]. Message [%s].",Core::ResultType_Name(response->result()).c_str(),response->content().c_str()));
 		}
 	};
 	cout << "Get configuation succeed." << endl;
@@ -148,7 +148,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     
     m_pLog->Initialize(pConfig->logpath(), "", LOGOPT(pConfig->logoperation()) , LOGLEVEL(pConfig->loglevel()), LOGTYPE::DAY);
 
-    CDataTransPackage::InitializeLog(m_pLog.get());
+    //CDataTransPackage::InitializeLog(m_pLog.get());
     res = InitModule();
     if( res.IsFialed() ) return res;
 
@@ -220,52 +220,52 @@ CResult CSloongBaseService::InitModule()
     // Load the module library
     string libFullPath = m_oServerConfig.templateconfig().modulepath()+m_oServerConfig.templateconfig().modulename();
 
-    m_pLog->Debug(CUniversal::Format("Start init module[%s] and load module functions",libFullPath));
+    m_pLog->Debug(Helper::Format("Start init module[%s] and load module functions",libFullPath.c_str()));
     m_pModule = dlopen(libFullPath.c_str(),RTLD_LAZY);
     if(m_pModule == nullptr)
     {
-        string errMsg = CUniversal::Format("Load library [%s] error[%s].",libFullPath.c_str(),dlerror());
+        string errMsg = Helper::Format("Load library [%s] error[%s].",libFullPath.c_str(),dlerror());
         m_pLog->Error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     char *errmsg;
     m_pModuleCreateProcessEvnFunc = (CreateProcessEnvironmentFunction)dlsym(m_pModule, "CreateProcessEnvironment");
     if ((errmsg = dlerror()) != NULL)  {
-        string errMsg = CUniversal::Format("Load function CreateProcessEnvironment error[%s].",errmsg);
+        string errMsg = Helper::Format("Load function CreateProcessEnvironment error[%s].",errmsg);
         m_pLog->Error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     m_pModuleRequestHandler = (RequestPackageProcessFunction)dlsym(m_pModule, "RequestPackageProcesser");
     if ((errmsg = dlerror()) != NULL)  {
-        string errMsg = CUniversal::Format("Load function RequestPackageProcesser error[%s].",errmsg);
+        string errMsg = Helper::Format("Load function RequestPackageProcesser error[%s].",errmsg);
         m_pLog->Error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     m_pModuleResponseHandler = (ResponsePackageProcessFunction)dlsym(m_pModule, "ResponsePackageProcesser");
     if ((errmsg = dlerror()) != NULL)  {
-        string errMsg = CUniversal::Format("Load function ResponsePackageProcesser error[%s].",errmsg);
+        string errMsg = Helper::Format("Load function ResponsePackageProcesser error[%s].",errmsg);
         m_pLog->Error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     m_pModuleEventHandler = (EventPackageProcessFunction)dlsym(m_pModule, "EventPackageProcesser");
     if ((errmsg = dlerror()) != NULL)  {
-        string errMsg = CUniversal::Format("Load function EventPackageProcessFunction error[%s].",errmsg);
+        string errMsg = Helper::Format("Load function EventPackageProcessFunction error[%s].",errmsg);
         m_pLog->Error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     m_pModuleAcceptHandler = (NewConnectAcceptProcessFunction)dlsym(m_pModule, "NewConnectAcceptProcesser");
     if ((errmsg = dlerror()) != NULL)  {
-        string errMsg = CUniversal::Format("Load function NewConnectAcceptProcesser error[%s]. Use default function.",errmsg);
+        string errMsg = Helper::Format("Load function NewConnectAcceptProcesser error[%s]. Use default function.",errmsg);
         m_pLog->Warn(errMsg);
     }
     m_pModuleInitializationFunc = (ModuleInitializationFunction)dlsym(m_pModule, "ModuleInitialization");
     if ((errmsg = dlerror()) != NULL)  {
-        string errMsg = CUniversal::Format("Load function ModuleInitialize error[%s]. maybe module no need initiliaze.",errmsg);
+        string errMsg = Helper::Format("Load function ModuleInitialize error[%s]. maybe module no need initiliaze.",errmsg);
         m_pLog->Warn(errMsg);
     }
     m_pModuleInitializedFunc = (ModuleInitializedFunction)dlsym(m_pModule, "ModuleInitialized");
     if ((errmsg = dlerror()) != NULL)  {
-        string errMsg = CUniversal::Format("Load function ModuleInitialize error[%s]. maybe module no need initiliaze.",errmsg);
+        string errMsg = Helper::Format("Load function ModuleInitialize error[%s]. maybe module no need initiliaze.",errmsg);
         m_pLog->Warn(errMsg);
     }
     m_pLog->Debug("load module functions done.");
@@ -295,7 +295,7 @@ CResult CSloongBaseService::RegisteNode()
 	if (!response)
 		return CResult::Make_Error("Parse the get config response data error.");
     if(response->result() != ResultType::Succeed)
-        return CResult::Make_Error(CUniversal::Format("RegisteNode request return error. message: %s", response->content()));
+        return CResult::Make_Error(Helper::Format("RegisteNode request return error. message: %s", response->content().c_str()));
     return CResult::Succeed();
 }
 

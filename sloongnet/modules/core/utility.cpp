@@ -133,7 +133,7 @@ string Sloong::CUtility::GetSocketAddress(int socket)
 	int nSize = sizeof(add);
 	memset(&add, 0, sizeof(add));
 	getpeername(socket, (sockaddr*)&add, (socklen_t*)&nSize);
-	return CUniversal::Format("%s:%d", inet_ntoa(add.sin_addr), add.sin_port);
+	return Helper::Format("%s:%d", inet_ntoa(add.sin_addr), add.sin_port);
 }
 
 int Sloong::CUtility::ReadFile(string filepath, char*& pBuffer)

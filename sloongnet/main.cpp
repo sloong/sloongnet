@@ -24,9 +24,13 @@ void PrintVersion()
 	cout << COPYRIGHT_TEXT << endl;
 }
 
+ 
+struct itimerval g_itimer;
 
 int main(int argc, char** args)
 {
+	
+    getitimer(ITIMER_PROF, &g_itimer);
 	try
 	{
 		// 参数共有2个，类型和地址信息
@@ -37,8 +41,6 @@ int main(int argc, char** args)
 			PrientHelp();
 			return -2;
 		}
-
-
 		
 		auto ManagerMode = true;
 		if (strcasecmp(args[1], "Worker") == 0)
@@ -61,7 +63,7 @@ int main(int argc, char** args)
 			return -1;
 		}
 
-		vector<string> addr = CUniversal::split(args[2], ':');
+		vector<string> addr = Helper::split(args[2], ':');
 		if (addr.size() != 2)
 		{
 			cout << "Address info format error. Format [addr]:[port]" << endl;

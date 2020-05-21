@@ -137,7 +137,7 @@ void Sloong::CNetworkHub::CloseConnectEventHandler(SmartEvent event)
 		return;
 
 	auto info = m_SockList[id].get();
-	m_pLog->Info(CUniversal::Format("close connect:%s:%d.", info->m_pCon->m_strAddress, info->m_pCon->m_nPort));
+	m_pLog->Info(Helper::Format("close connect:%s:%d.", info->m_pCon->m_strAddress.c_str(), info->m_pCon->m_nPort));
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList.erase(id);
 	sockLck.unlock();	
@@ -156,7 +156,7 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(SmartEvent event)
 
 	auto info = make_unique<CSockInfo>();
 	info->Initialize(m_iC, nSocket, m_pCTX);
-	m_pLog->Info(CUniversal::Format("Registe connection:[%s:%d].", info->m_pCon->m_strAddress, info->m_pCon->m_nPort));
+	m_pLog->Info(Helper::Format("Registe connection:[%s:%d].", info->m_pCon->m_strAddress.c_str(), info->m_pCon->m_nPort));
 
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList[nSocket] =std::move(info);
@@ -225,13 +225,13 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop(SMARTER param)
 			if (it->second != NULL && time(NULL) - it->second->m_ActiveTime > tout)
 			{
 				sockLck.unlock();
-				m_pLog->Info(CUniversal::Format("[Timeout]:[Close connect:%s]", it->second->m_pCon->m_strAddress));
+				m_pLog->Info(Helper::Format("[Timeout]:[Close connect:%s]", it->second->m_pCon->m_strAddress.c_str()));
 				SendCloseConnectEvent(it->first);
 				goto RecheckTimeout;
 			}
 		}
 		sockLck.unlock();
-		m_pLog->Debug(CUniversal::Format("Check connect timeout done. wait [%d] seconds.", tinterval));
+		m_pLog->Debug(Helper::Format("Check connect timeout done. wait [%d] seconds.", tinterval));
 		m_oCheckTimeoutThreadSync.wait_for(tinterval);
 	}
 	m_pLog->Info("check timeout connect thread is exit ");
@@ -318,7 +318,7 @@ ResultType Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 		int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, m_nClientCheckKeyLength, m_nClientCheckTime);
 		if (nLen != m_nClientCheckKeyLength || 0 != strcmp(pCheckBuf, m_strClientCheckKey.c_str()))
 		{
-			m_pLog->Warn(CUniversal::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nClientCheckKeyLength, nLen, m_strClientCheckKey.c_str(), pCheckBuf));
+			m_pLog->Warn(Helper::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nClientCheckKeyLength, nLen, m_strClientCheckKey.c_str(), pCheckBuf));
 			return ResultType::Error;
 		}
 	}
@@ -330,7 +330,7 @@ ResultType Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 		m_pAcceptFunc(info.get());
 	}
 
-	m_pLog->Info(CUniversal::Format("Accept client:[%s:%d].", info->m_pCon->m_strAddress, info->m_pCon->m_nPort));
+	m_pLog->Info(Helper::Format("Accept client:[%s:%d].", info->m_pCon->m_strAddress.c_str(), info->m_pCon->m_nPort));
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList[conn_sock] = std::move(info);
 	sockLck.unlock();

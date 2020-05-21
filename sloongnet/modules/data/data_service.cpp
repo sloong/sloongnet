@@ -46,7 +46,7 @@ CResult Sloong::SloongNetDataCenter::RequestPackageProcesser(CDataTransPackage* 
     auto msgPack = pack->GetDataPackage();
     auto sender = msgPack->sender();
     auto func = msgPack->function();
-    m_pLog->Debug(CUniversal::Format("Porcess [%s] request: sender[%d]", Functions_Name(func), sender));
+    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%d]", Functions_Name(func).c_str(), sender));
     if (m_oFunctionHandles.exist(func))
     {
         if (!m_oFunctionHandles[func](func, sender, pack))
@@ -64,7 +64,7 @@ CResult Sloong::SloongNetDataCenter::RequestPackageProcesser(CDataTransPackage* 
             return CResult::Succeed();
         }break;
         default:
-            m_pLog->Debug(CUniversal::Format("No handler for [%s] request: sender[%d]", Functions_Name(func), sender));
+            m_pLog->Debug(Helper::Format("No handler for [%s] request: sender[%d]", Functions_Name(func).c_str(), sender));
             pack->ResponsePackage(ResultType::Error, "No hanlder to process request.");
         }
     }
@@ -78,7 +78,7 @@ void Sloong::SloongNetDataCenter::OnSocketClose(SmartEvent event)
 	auto info = net_evt->GetUserInfo();
 	if (!info)
 	{
-		m_pLog->Error(CUniversal::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
+		m_pLog->Error(Helper::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
 		return;
 	}
 	// call close function.

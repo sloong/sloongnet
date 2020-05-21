@@ -25,10 +25,6 @@
 #include <execinfo.h>
 #include <fcntl.h>
 
-// Boost
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-
 // std c++ file
 #include <iostream>
 #include <queue>

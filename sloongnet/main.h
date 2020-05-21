@@ -13,5 +13,5 @@
 #include "export.h"
 using namespace Sloong;
 
-
+extern struct itimerval g_itimer;
 #endif //SLOONGNET_MAIN_H

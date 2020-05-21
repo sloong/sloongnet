@@ -21,7 +21,7 @@
 ## 直接安装
 1. 安装依赖包：
 ```
-yum install -y libuuid mariadb openssl ImageMagick GraphicsMagick boost readline libjpeg
+yum install -y libuuid mariadb openssl ImageMagick GraphicsMagick readline libjpeg
 ```
 2. 下载最新发布包
 3. 解压并执行.
@@ -31,7 +31,7 @@ yum install -y libuuid mariadb openssl ImageMagick GraphicsMagick boost readline
 * 安装所需要的依赖包
 
 ```
-yum install -y libuuid libuuid-devel mariadb mariadb-devel openssl-devel ImageMagick GraphicsMagick boost-devel readline-devel libjpeg-devel    
+yum install -y libuuid libuuid-devel mariadb mariadb-devel openssl-devel ImageMagick GraphicsMagick readline-devel libjpeg-devel    
 git clone https://git.sloong.com/public/library.git    
 cd library/
 ./install.sh
@@ -40,7 +40,7 @@ cd library/
 ```
 for ubuntu
 
-yum insatll -y uuid libmariadbclient18 ssl imagemagick graphicsmagick libboost 
+yum insatll -y uuid libmariadbclient18 ssl imagemagick graphicsmagick 
 ```
 
 * 开始编译

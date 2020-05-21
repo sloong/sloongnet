@@ -100,14 +100,14 @@ long long Sloong::EasyConnect::RecvLengthData(bool block)
         char nLen[s_llLen] = {0};
 		bRes = Read(nLen, s_llLen, block,0 ,false);
         if(bRes>1){
-			auto len = CUniversal::BytesToInt64(nLen);
+			auto len = Helper::BytesToInt64(nLen);
         	return len;
 		}
     }else{
         char nLen[s_lLen] = {0};
         bRes = Read(nLen, s_lLen, block,0, false);
 		if (bRes>1){
-			auto len = CUniversal::BytesToInt32(nLen);
+			auto len = Helper::BytesToInt32(nLen);
         	return len;
 		}
     }
@@ -120,12 +120,12 @@ bool Sloong::EasyConnect::SendLengthData(long long lengthData)
     if( m_bUseLongLongSize ) {
         char m_pMsgBuffer[s_llLen] = {0};
         char *pCpyPoint = m_pMsgBuffer;
-        CUniversal::Int64ToBytes(lengthData, pCpyPoint);
+        Helper::Int64ToBytes(lengthData, pCpyPoint);
         szLengthData = string(m_pMsgBuffer,s_llLen);
     }else{
         char m_pMsgBuffer[s_lLen] = {0};
         char *pCpyPoint = m_pMsgBuffer;
-        CUniversal::Int32ToBytes((uint32_t)lengthData, pCpyPoint);
+        Helper::Int32ToBytes((uint32_t)lengthData, pCpyPoint);
         szLengthData = string(m_pMsgBuffer,s_lLen);
     }
 	if( Write(szLengthData,0) < 1 )

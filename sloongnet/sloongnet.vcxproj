@@ -149,7 +149,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <LibraryDependencies>uuid;ssl;crypto;lua5.3;glib-2.0;univ;jsoncpp;sqlite3;protobuf;boost_serialization;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>uuid;ssl;crypto;lua5.3;glib-2.0;univ;jsoncpp;sqlite3;protobuf;%(LibraryDependencies)</LibraryDependencies>
       <AdditionalLibraryDirectories>./include;%(Link.AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>
       </AdditionalOptions>
@@ -167,7 +167,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <LibraryDependencies>uuid;ssl;crypto;lua5.3;glib-2.0;univ;jsoncpp;sqlite3;protobuf;boost_serialization;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>uuid;ssl;crypto;lua5.3;glib-2.0;univ;jsoncpp;sqlite3;protobuf;%(LibraryDependencies)</LibraryDependencies>
       <AdditionalLibraryDirectories>./include;%(Link.AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

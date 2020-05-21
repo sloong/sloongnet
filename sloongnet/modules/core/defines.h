@@ -11,6 +11,7 @@
 // univ head file
 #include "univ/defines.h"
 #include "univ/univ.h"
+#include "univ/univ.hpp"
 #include "univ/log.h"
 #include "univ/exception.h"
 #include "univ/threadpool.h"

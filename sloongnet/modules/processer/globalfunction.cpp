@@ -65,7 +65,7 @@ CGlobalFunction::~CGlobalFunction()
 
 void CGlobalFunction::ClearReceiveInfoByUUID(string uuid)
 {
-    m_pLog->Debug(CUniversal::Format("Clean receive info from g_RecvDataInfoList by :[%s]", uuid));
+    m_pLog->Debug(Helper::Format("Clean receive info from g_RecvDataInfoList by :[%s]", uuid.c_str()));
     auto p_item_list = g_RecvDataInfoList.find(uuid);
     if (p_item_list == g_RecvDataInfoList.end())
     {
@@ -114,7 +114,7 @@ void Sloong::CGlobalFunction::EnableDataReceive(int port)
         errno = bind(m_ListenSock, (struct sockaddr *)&address, sizeof(address));
 
         if (errno == -1)
-            throw normal_except(CUniversal::Format("bind to %d field. errno = %d", port, errno));
+            throw normal_except(Helper::Format("bind to %d field. errno = %d", port, errno));
 
         errno = listen(m_ListenSock, 1024);
 
@@ -132,7 +132,7 @@ void *Sloong::CGlobalFunction::RecvDataConnFunc(void *pParam)
         int conn_sock = -1;
         if ((conn_sock = accept(pThis->m_ListenSock, NULL, NULL)) > 0)
         {
-            pLog->Debug(CUniversal::Format("Accept data connect :[%s][%d]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
+            pLog->Debug(Helper::Format("Accept data connect :[%s][%d]", CUtility::GetSocketIP(conn_sock).c_str(), CUtility::GetSocketPort(conn_sock)));
             // When accept the connect , receive the uuid data. and
             char *pCheckBuf = new char[g_uuid_len + 1];
             memset(pCheckBuf, 0, g_uuid_len + 1);
@@ -142,14 +142,14 @@ void *Sloong::CGlobalFunction::RecvDataConnFunc(void *pParam)
             // Check uuid length
             if (nLen != g_uuid_len)
             {
-                pLog->Warn(CUniversal::Format("The uuid length error:[%d]. Close connect.", nLen));
+                pLog->Warn(Helper::Format("The uuid length error:[%d]. Close connect.", nLen));
                 close(conn_sock);
                 continue;
             }
             // Check uuid validity
             if (g_RecvDataInfoList.find(pCheckBuf) == g_RecvDataInfoList.end())
             {
-                pLog->Warn(CUniversal::Format("The uuid is not find in list:[%s]. Close connect.", pCheckBuf));
+                pLog->Warn(Helper::Format("The uuid is not find in list:[%s]. Close connect.", pCheckBuf));
                 close(conn_sock);
                 continue;
             }
@@ -180,7 +180,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
         return nullptr;
     }
     string uuid = conn_item->second;
-    pLog->Info(CUniversal::Format("Start thread to receive file data for :[%s]", uuid));
+    pLog->Info(Helper::Format("Start thread to receive file data for :[%s]", uuid.c_str()));
     // Find the recv info list.
     auto info_item = g_RecvDataInfoList.find(uuid);
     if (info_item == g_RecvDataInfoList.end())
@@ -207,7 +207,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
             else
             {
 
-                long long dlen = CUniversal::BytesToInt64(pLongBuffer);
+                long long dlen = Helper::BytesToInt64(pLongBuffer);
                 SAFE_DELETE_ARR(pLongBuffer);
                 // package length cannot big than 2147483648. this is max value for int.
                 if (dlen <= 0 || dlen > FILE_TRANS_MAX_SIZE || nRecvSize != g_data_pack_len)
@@ -227,7 +227,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
                     throw normal_except();
                 }
                 string trans_md5 = string(szMD5);
-                CUniversal::tolower(trans_md5);
+                Helper::tolower(trans_md5);
 
                 auto recv_file_item = recv_file_list.find(trans_md5);
                 if (recv_file_item == recv_file_list.end())
@@ -284,7 +284,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
                 SAFE_DELETE_ARR(data);
 
                 string file_md5 = CMD5::Encode(pack->strPath + pack->strName, true);
-                CUniversal::tolower(file_md5);
+                Helper::tolower(file_md5);
 
                 // check md5
                 if (trans_md5.compare(file_md5))
@@ -314,7 +314,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
             }
         } while (bLoop);
 
-        pLog->Debug(CUniversal::Format("Receive connect done. close:[%s:%d]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
+        pLog->Debug(Helper::Format("Receive connect done. close:[%s:%d]", CUtility::GetSocketIP(conn_sock).c_str(), CUtility::GetSocketPort(conn_sock)));
         close(conn_sock);
         return nullptr;
     }
@@ -456,26 +456,26 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State *l)
         if (orgName == "" || newName == "")
         {
             nRes = -2;
-            throw normal_except(CUniversal::Format("Move File error. File name cannot empty. orgName:%s;newName:%s", orgName, newName));
+            throw normal_except(Helper::Format("Move File error. File name cannot empty. orgName:%s;newName:%s", orgName.c_str(), newName.c_str()));
         }
 
         if (access(orgName.c_str(), ACC_R) != 0)
         {
             nRes = -1;
-            throw normal_except(CUniversal::Format("Move File error. Origin file not exist or can not read:[%s]", orgName));
+            throw normal_except(Helper::Format("Move File error. Origin file not exist or can not read:[%s]", orgName.c_str()));
         }
 
         int res = CUniversal::CheckFileDirectory(newName);
         if (res < 0)
         {
             nRes = -1;
-            throw normal_except(CUniversal::Format("Move File error.CheckFileDirectory error:[%s][%d]", newName, res));
+            throw normal_except(Helper::Format("Move File error.CheckFileDirectory error:[%s][%d]", newName.c_str(), res));
         }
 
         if (!CUniversal::MoveFile(orgName, newName))
         {
             // Move file need write access. so if move file error, try copy .
-            if (!CUniversal::RunSystemCmd(CUniversal::Format("cp \"%s\" \"%s\"", orgName, newName)))
+            if (!CUniversal::RunSystemCmd(Helper::Format("cp \"%s\" \"%s\"", orgName.c_str(), newName.c_str())))
             {
                 nRes = -3;
                 throw normal_except("Move File and try copy file error.");
@@ -519,7 +519,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State *l)
     {
         RecvDataPackage *pack = new RecvDataPackage();
         string md5 = i->first;
-        CUniversal::tolower(md5);
+        Helper::tolower(md5);
         pack->strName = i->second;
         pack->strPath = save_folder;
         pack->strMD5 = md5;
@@ -537,7 +537,7 @@ int CGlobalFunction::Lua_CheckRecvStatus(lua_State *l)
 {
     string uuid = CLua::GetString(l, 1);
     string md5 = CLua::GetString(l, 2);
-    CUniversal::tolower(md5);
+    Helper::tolower(md5);
     auto recv_list = g_RecvDataInfoList[uuid];
     auto recv_item = recv_list.find(md5);
     if (recv_item == recv_list.end())
@@ -572,7 +572,7 @@ int CGlobalFunction::Lua_ShowLog(lua_State *l)
     if (msg == "")
         return 0;
     else
-        msg = CUniversal::Format("[Script]:[%s]", msg);
+        msg = Helper::Format("[Script]:[%s]", msg.c_str());
 
     auto log = g_pThis->m_pLog;
     if (luaTitle == "Info")

@@ -43,7 +43,7 @@ void Sloong::CLuaProcessCenter::Initialize(IControl* iMsg)
 
 void Sloong::CLuaProcessCenter::HandleError(string err)
 {
-	g_pLog->Error(CUniversal::Format("[Script]:[%s]", err));
+	g_pLog->Error(Helper::Format("[Script]:[%s]", err.c_str()));
 }
 
 void Sloong::CLuaProcessCenter::ReloadContext(SmartEvent event)
@@ -82,7 +82,7 @@ void Sloong::CLuaProcessCenter::InitLua(CLua* pLua, string folder)
 	{
 		folder += '/';
 	}
-	pLua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), CUniversal::Format("'%s'", folder));
+	pLua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), Helper::Format("'%s'", folder.c_str()));
 }
 
 void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket* uinfo)
@@ -97,7 +97,7 @@ void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket* uinfo)
 
 string FormatJSONErrorMessage(string code,string message)
 {
-	return CUniversal::Format("{\"errno\": \"%s\",\"errmsg\" : \"%s\"}", code, message);
+	return Helper::Format("{\"errno\": \"%s\",\"errmsg\" : \"%s\"}", code.c_str(), message.c_str());
 }
 
 bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo,const string & msg, string & res, char*& exData, int& exSize)
@@ -170,7 +170,7 @@ int Sloong::CLuaProcessCenter::GetFreeLuaContext()
 	
 	for ( int i = 0; i<LUA_CONTEXT_WAIT_SECONDE&&m_oFreeLuaContext.empty(); i++)
 	{
-		m_pLog->Debug("Wait lua context 1 sencond :"+CUniversal::ntos(i));
+		m_pLog->Debug("Wait lua context 1 sencond :"+Helper::ntos(i));
 		m_oSSync.wait_for(1);
 	}
 
