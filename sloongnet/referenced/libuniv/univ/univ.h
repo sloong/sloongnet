@@ -26,8 +26,7 @@
 #include <mutex>
 using namespace std;
 #include <stdarg.h> // for va_list,va_start and va_end
-#include <boost/format.hpp>
-#include <boost/foreach.hpp>
+
 #include "defines.h"
 #define	ACC_R	4		/* Test for read permission.  */
 #define	ACC_W	2		/* Test for write permission.  */
@@ -35,24 +34,7 @@ using namespace std;
 #define	ACC_E	0		/* Test for existence.  */
 #define ACC_RW  6
 
-
-#ifdef _WINDOWS
-#include <WinSock2.h>
-#pragma comment(lib,"ws2_32.lib")
-#else
-#include <arpa/inet.h>
-#include <string.h>
-#include <inttypes.h>
-inline uint64_t htonll(uint64_t val) {
-	return  (((uint64_t)htonl(val)) << 32) + htonl(val >> 32);
-}
-
-inline uint64_t ntohll(uint64_t val) {
-	return  (((uint64_t)ntohl(val)) << 32) + ntohl(val >> 32);
-}
-#define SOCKET int
-
-#endif
+#include "univ.hpp"
 
 namespace Sloong
 {
@@ -76,42 +58,10 @@ namespace Sloong
 			/// Return values
 			///   return true if move file succeeded. else return false.
 			static bool MoveFile(string lpExistingFileName, string lpNewFileName);
-			static vector<string> split(const string& str, const char& = ',');
-			static string trim(const string& str);
-			static wstring trim(const wstring& str);
-			static string replace(const string& str, const string& src, const string& dest);
-			static wstring replace(const wstring& str, const wstring& src, const wstring& dest);
-			static string toansi(const wstring& str);
-			static wstring toutf(const string& str);	
+		
 			static string RunSystemCmdAndGetResult(const string& cmd);
 			static bool RunSystemCmd(const string& cmd);
-			static string BinaryToHex(const unsigned char* buf,int len);
 
-			static inline void Int64ToBytes(uint64_t l, char* pBuf)
-			{
-				auto ul_MessageLen = htonll(l);
-				memcpy(pBuf, (void*)&ul_MessageLen, 8);
-			}
-
-			static inline void Int32ToBytes(uint32_t l, char* buf)
-			{
-				auto ul_len = htonl(l);
-				memcpy(buf, (void*)&ul_len, 4);
-			}
-
-			static inline uint64_t BytesToInt64(char* point)
-			{
-				uint64_t netLen = 0;
-				memcpy(&netLen, point, 8);
-				return ntohll(netLen);
-			}
-
-			static inline uint32_t BytesToInt32(char* point)
-			{
-				uint32_t netLen = 0;
-				memcpy(&netLen, point, 4);
-				return ntohl(netLen);
-			}
 
 			/************************************************************************/
 			/*		SendEx function.
@@ -175,79 +125,6 @@ namespace Sloong
 			/************************************************************************/
 			static int RecvTimeout(SOCKET sock, char* buf, int nSize, int nTimeout, bool bAgain = false );
 
-            template<typename T>
-            static string ntos(T n)
-            {
-                stringstream ss;
-                ss << n;
-                return ss.str();
-            }
-
-            // packaging the boost::format;
-            template<class TFirst>
-            static void Format(boost::format& fmt, TFirst&& first) {  fmt % first; }
-
-            template<class TFirst>
-            static string Format(const char* format, TFirst&& first)
-            {
-                boost::format fmt(format);
-                Format(fmt, first);
-                return fmt.str();
-            }
-
-            template<class TFirst, class... TOther>
-            static void Format(boost::format& fmt, TFirst&& first, TOther&&... other)
-            {
-                fmt % first;
-                Format(fmt, other...);
-            }
-
-            template<class TFirst, class... TOther>
-            static string Format(const char* format, TFirst&& first, TOther&&... other)
-            {
-                boost::format fmt(format);
-                Format(fmt, first, other...);
-                return fmt.str();
-            }
-
-			// packaging the boost::wformat;
-			template<class TFirst>
-			static void Format(boost::wformat& fmt, TFirst&& first) { fmt % first; }
-
-			template<class TFirst>
-			static wstring Format(const wchar_t* format, TFirst&& first)
-			{
-				boost::wformat fmt(format);
-				Format(fmt, first);
-				return fmt.str();
-			}
-
-			template<class TFirst, class... TOther>
-			static void Format(boost::wformat& fmt, TFirst&& first, TOther&&... other)
-			{
-				fmt % first;
-				Format(fmt, other...);
-			}
-
-			template<class TFirst, class... TOther>
-			static wstring Format(const wchar_t* format, TFirst&& first, TOther&&... other)
-			{
-				boost::wformat fmt(format);
-				Format(fmt, first, other...);
-				return fmt.str();
-			}
-
-            static void tolower(string& str)
-            {
-                transform(str.begin(), str.end(), str.begin(), ::tolower);
-            }
-
-            static void touper(string& str)
-            {
-                transform(str.begin(), str.end(), str.begin(), ::toupper);
-            }
-
-			static string Replace(const string& str, const string& src, const string& dest);
 
 		};
 
