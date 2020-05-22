@@ -32,6 +32,14 @@ void Sloong::CDataTransPackage::ResponsePackage( const DataPackage& pack )
 	PrepareSendPackageData();
 }
 
+void Sloong::CDataTransPackage::ResponsePackage(ResultType result)
+{
+	m_pTransPackage.set_result(result);
+	m_pTransPackage.set_status( DataPackage_StatusType::DataPackage_StatusType_Response );
+	PrepareSendPackageData();
+}
+
+
 void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string& message,const string* exdata /*=nullptr*/)
 {
 	m_pTransPackage.set_result(result);

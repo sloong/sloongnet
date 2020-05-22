@@ -69,7 +69,7 @@ CResult SloongNetGateway::Initialized(SOCKET sock, IControl *iC)
 		m_pControl->SendMessage(event);
 
 		event->SetEvent(EVENT_TYPE::EnableClientCheck);
-		event->SetMessage(Helper::Format("{\"ClientCheckKey\":\"%s\", \"ClientCheckTime\":%d}", (*m_pModuleConfig)["ClientCheckKey"].asString(), (*m_pModuleConfig)["ClientCheckKey"].asInt()));
+		event->SetMessage(Helper::Format("{\"ClientCheckKey\":\"%s\", \"ClientCheckTime\":%d}", (*m_pModuleConfig)["ClientCheckKey"].asString().c_str(), (*m_pModuleConfig)["ClientCheckKey"].asInt()));
 		m_pControl->SendMessage(event);
 	}
 	m_pLog = IData::GetLog();
@@ -84,11 +84,9 @@ CResult SloongNetGateway::RequestPackageProcesser(void *env, CDataTransPackage *
 {
 	m_pLog->Debug("Receive new request package.");
 	auto res = MessageToProcesser(trans_pack);
-	m_pLog->Debug(Helper::Format("Response [%s][%s].", Core::ResultType_Name(res.Result()), res.Message()));
-	if (res.Result() == ResultType::Invalid)
-		return res;
-	trans_pack->ResponsePackage(res);
-	return CResult::Succeed();
+	m_pLog->Debug(Helper::Format("Response [%s][%s].", Core::ResultType_Name(res.Result()).c_str(), res.Message().c_str()));
+	//trans_pack->ResponsePackage(res);
+	return res;
 }
 
 CResult SloongNetGateway::ResponsePackageProcesser(CDataTransPackage *trans_pack)
@@ -122,7 +120,7 @@ inline int SloongNetGateway::ParseFunctionValue(const string &s)
 	int res = 0;
 	auto nFunc = ConvertStrToInt(s, -1, &res);
 	if (nFunc == -1)
-		m_pLog->Error(Helper::Format("Parse function string[%s] to int error[%d].", s, res));
+		m_pLog->Error(Helper::Format("Parse function string[%s] to int error[%d].", s.c_str(), res));
 	return nFunc;
 }
 
@@ -236,7 +234,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_re
 	auto item = req->item();
 	m_mapUUIDToNode[item.uuid()] = item;
 	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
-	m_pLog->Debug(Helper::Format("New module is online:[%s][%s:%d]", item.uuid(), item.address(), item.port()));
+	m_pLog->Debug(Helper::Format("New module is online:[%s][%s:%d]", item.uuid().c_str(), item.address().c_str(), item.port()));
 
 	AddConnection(item.uuid(), item.address(), item.port());
 }
@@ -279,7 +277,7 @@ void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pa
 	break;
 	default:
 	{
-		m_pLog->Error(Helper::Format("Event is no processed. [%s][%d].", Manager::Events_Name(event), event));
+		m_pLog->Error(Helper::Format("Event is no processed. [%s][%d].", Manager::Events_Name(event).c_str(), event));
 	}
 	break;
 	}
@@ -288,7 +286,7 @@ void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pa
 
 SOCKET Sloong::SloongNetGateway::GetPorcessConnect(int function)
 {
-	if (!m_mapFuncToTemplateIDs.exist(function && !m_mapFuncToTemplateIDs.exist(-1)))
+	if (!m_mapFuncToTemplateIDs.exist(function) && !m_mapFuncToTemplateIDs.exist(-1))
 	{
 		return INVALID_SOCKET;
 	}
@@ -332,11 +330,13 @@ CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage *pack)
 	info.RequestConnect = pack->GetConnection();
 	info.SerialNumber = data_pack->serialnumber();	
 		
-
 	auto serialNumber = GetSerialNumber();
 	data_pack->set_serialnumber(serialNumber);
+	pack->ClearConnection();
 	pack->SetSocket(target);	
 	pack->RequestPackage();
+
+	m_pLog->Debug(Helper::Format("Trans package [%d][%d] -> [%d][%d]", info.RequestConnect->GetSocketID(), info.SerialNumber, target, serialNumber));
 
 	m_mapSerialToRequest[serialNumber] = info;
 	return CResult::Succeed();
@@ -347,6 +347,7 @@ CResult Sloong::SloongNetGateway::MessageToClient(RequestInfo *req_info, CDataTr
 	auto res_data = res_pack->GetDataPackage();
 	res_data->set_serialnumber(req_info->SerialNumber);
 	res_pack->SetConnection(req_info->RequestConnect);
+	res_pack->ResponsePackage(ResultType::Succeed);
 
 	return CResult::Succeed();
 }

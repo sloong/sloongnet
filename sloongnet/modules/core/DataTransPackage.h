@@ -20,10 +20,11 @@ namespace Sloong
         CDataTransPackage(EasyConnect* conn):m_pCon(conn){m_nSocket = m_pCon->GetSocketID();}
 
         void RequestPackage();
+        void RequestPackage( const DataPackage& pack );
+
+        void ResponsePackage(ResultType result);
 		void ResponsePackage(ResultType result, const string& message, const string* exdata =nullptr);
         void ResponsePackage(const CResult& result);
-
-        void RequestPackage( const DataPackage& pack );
         void ResponsePackage( const DataPackage& pack  );
 
 	protected:
@@ -55,6 +56,7 @@ namespace Sloong
         inline string GetExtendData() { return m_pTransPackage.extend(); }
 
         inline void SetConnection(EasyConnect* conn){ m_pCon = conn; m_nSocket = m_pCon->GetSocketID(); }
+        inline void ClearConnection(){ m_pCon = nullptr; }
         inline void SetSocket(SOCKET sock){ m_nSocket = sock; }
 
         inline EasyConnect* GetConnection() { return m_pCon; }

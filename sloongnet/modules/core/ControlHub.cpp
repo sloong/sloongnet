@@ -120,7 +120,8 @@ void Sloong::CControlHub::CallMessage(SmartEvent event)
 		if (handler_num == 0)
 			return;
 
-		for_each(handler_list.begin(), handler_list.end(), [&](MsgHandlerFunc& func) {func(event); });
+		for( auto func : handler_list )
+			func(event);
 	}
 	catch (const exception& ex)
 	{
@@ -148,7 +149,7 @@ void Sloong::CControlHub::MessageWorkLoop(SMARTER param)
 				continue;
 			}
 			
-			if (!m_oMsgList.TryPop(event)){
+			if (m_oMsgList.TryPop(event) && event != nullptr){
 				// Get the message handler list.
 				CallMessage(event);
 			}
