@@ -158,7 +158,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string& req_obj, CData
 		item.Address = pack->GetSocketIP();
 		item.UUID = sender;
 		m_mapUUIDToNodeItem[sender] = item;
-		m_pLog->Debug(Helper::Format("Module[%s:%d] regist to system. Allocating uuid [%d].", item.Address.c_str(), item.Port, item.UUID));
+		m_pLog->Debug(Helper::Format("Module[%s:%d] regist to system. Allocating uuid [%llu].", item.Address.c_str(), item.Port, item.UUID));
 		char m_pMsgBuffer[8] = {0};
         char *pCpyPoint = m_pMsgBuffer;
         Helper::Int64ToBytes(sender, pCpyPoint);
@@ -184,7 +184,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string& req_obj, CData
 	res.set_templateid(tpl.ID);
 	res.set_configuation(m_mapIDToTemplateItem[tpl.ID].Configuation);
 
-	m_pLog->Debug(Helper::Format("Allocating module[%d] Type to [%s]", sender_info->UUID, tpl.Name.c_str()));
+	m_pLog->Debug(Helper::Format("Allocating module[%llu] Type to [%s]", sender_info->UUID, tpl.Name.c_str()));
 	return CResult::Make_OK( ConvertObjToStr(&res) );
 }
 
@@ -208,7 +208,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTr
 		return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
 
 	if (!m_mapUUIDToNodeItem.exist(sender))
-		return CResult::Make_Error(Helper::Format("The sender [%d] is no regitser.", sender));
+		return CResult::Make_Error(Helper::Format("The sender [%llu] is no regitser.", sender));
 
 	if (id == 1)
 		return CResult::Make_Error("Template id error.");
@@ -390,7 +390,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string& req_obj, 
 	auto data_pack = pack->GetDataPackage();
 	auto uuid = data_pack->sender();
 	if( !m_mapUUIDToNodeItem.exist(uuid))
-		return CResult::Make_Error(Helper::Format("The node is no registed. [%d]",uuid));
+		return CResult::Make_Error(Helper::Format("The node is no registed. [%llu]",uuid));
 
 	auto id = m_mapUUIDToNodeItem[uuid].TemplateID;
 

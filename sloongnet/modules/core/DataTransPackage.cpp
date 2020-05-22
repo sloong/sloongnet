@@ -6,8 +6,7 @@ void Sloong::CDataTransPackage::PrepareSendPackageData()
 {
 	if (g_pLog!= nullptr)
 	{
-		g_pLog->Debug(Helper::Format("SEND<<<[%d][%d]<<<%s&&&EXDATA<<<[%d]",m_pTransPackage.priority(),
-										m_pTransPackage.id(),m_pTransPackage.content().c_str(), m_pTransPackage.extend().length()));
+		g_pLog->Debug(Helper::Format("SEND<<<[%d][%llu]<<<%s&&&EXDATA<<<[%d]",m_pTransPackage.priority(),	m_pTransPackage.id(),m_pTransPackage.content().c_str(), m_pTransPackage.extend().length()));
 	}
 	m_pTransPackage.SerializeToString(&m_strPackageData);
 	m_nPackageSize = (int)m_strPackageData.length();
@@ -113,7 +112,7 @@ ResultType Sloong::CDataTransPackage::RecvPackage(int timeout)
 		return ResultType::Error;
 	}
 	
-	if( g_pLog ) g_pLog->Debug(Helper::Format("RECV<<<[%d][%d]<<<%s",m_pTransPackage.priority(),m_pTransPackage.id(),m_pTransPackage.content()));
+	if( g_pLog ) g_pLog->Debug(Helper::Format("RECV<<<[%d][%llu]<<<%s",m_pTransPackage.priority(),m_pTransPackage.id(),m_pTransPackage.content()));
 
 	if( m_pTransPackage.hash().length() > 0 ){
 			ResponsePackage(ResultType::Error,"Now don't support hash check.");

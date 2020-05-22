@@ -229,7 +229,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_re
 	auto item = req->item();
 	m_mapUUIDToNode[item.uuid()] = item;
 	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
-	m_pLog->Debug(Helper::Format("New module is online:[%d][%s:%d]", item.uuid(), item.address().c_str(), item.port()));
+	m_pLog->Debug(Helper::Format("New module is online:[%llu][%s:%d]", item.uuid(), item.address().c_str(), item.port()));
 
 	AddConnection(item.uuid(), item.address(), item.port());
 }
@@ -331,7 +331,7 @@ CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage *pack)
 	pack->SetSocket(target);	
 	pack->RequestPackage();
 
-	m_pLog->Debug(Helper::Format("Trans package [%d][%d] -> [%d][%d]", info.RequestConnect->GetSocketID(), info.SerialNumber, target, serialNumber));
+	m_pLog->Debug(Helper::Format("Trans package [%d][%llu] -> [%d][%llu]", info.RequestConnect->GetSocketID(), info.SerialNumber, target, serialNumber));
 
 	m_mapSerialToRequest[serialNumber] = info;
 	return CResult::Succeed();

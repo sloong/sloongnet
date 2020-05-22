@@ -68,7 +68,7 @@ CResult Sloong::SloongNetFirewall::RequestPackageProcesser(CDataTransPackage* pa
     auto msgPack = pack->GetDataPackage();
     auto sender = msgPack->sender();
     auto func = (Functions)msgPack->function();
-    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%d]", Functions_Name(func).c_str(), sender));
+    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%llu]", Functions_Name(func).c_str(), sender));
 
 	return CResult::Succeed();
 }
@@ -78,7 +78,7 @@ CResult Sloong::SloongNetFirewall::ResponsePackageProcesser(CDataTransPackage* p
     auto msgPack = pack->GetDataPackage();
     auto sender = msgPack->sender();
     auto func = (Functions)msgPack->function();
-    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%d]", Functions_Name(func).c_str(), sender));
+    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%llu]", Functions_Name(func).c_str(), sender));
 
 	return CResult::Succeed();
 }

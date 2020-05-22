@@ -46,7 +46,7 @@ CResult Sloong::SloongNetDataCenter::RequestPackageProcesser(CDataTransPackage* 
     auto msgPack = pack->GetDataPackage();
     auto sender = msgPack->sender();
     auto func = msgPack->function();
-    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%d]", Functions_Name(func).c_str(), sender));
+    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%llu]", Functions_Name(func).c_str(), sender));
     if (m_oFunctionHandles.exist(func))
     {
         if (!m_oFunctionHandles[func](func, sender, pack))
@@ -64,7 +64,7 @@ CResult Sloong::SloongNetDataCenter::RequestPackageProcesser(CDataTransPackage* 
             return CResult::Succeed();
         }break;
         default:
-            m_pLog->Debug(Helper::Format("No handler for [%s] request: sender[%d]", Functions_Name(func).c_str(), sender));
+            m_pLog->Debug(Helper::Format("No handler for [%s] request: sender[%llu]", Functions_Name(func).c_str(), sender));
             pack->ResponsePackage(ResultType::Error, "No hanlder to process request.");
         }
     }
