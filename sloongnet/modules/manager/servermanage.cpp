@@ -208,11 +208,11 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTr
 	// Save node info.
 	auto& item = m_mapUUIDToNodeItem[sender];
 	auto& tpl = m_mapIDToTemplateItem[id];
-	item.TemplateName = m_mapIDToTemplateItem[id].Name;
-	item.TemplateID = m_mapIDToTemplateItem[id].ID;
-	item.Port = m_mapIDToTemplateItem[id].ConfiguationObj->listenport();
+	item.TemplateName = tpl.Name;
+	item.TemplateID = tpl.ID;
+	item.Port = tpl.ConfiguationObj->listenport();
 	item.ConnectionID = pack->GetSocketID();
-	m_mapIDToTemplateItem[id].Created.unique_insert(sender);
+	tpl.Created.unique_insert(sender);
 	m_mapSocketToUUID[pack->GetSocketID()] = sender;
 
 	// Find reference node and notify them

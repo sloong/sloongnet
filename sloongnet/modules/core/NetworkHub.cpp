@@ -173,8 +173,6 @@ void Sloong::CNetworkHub::SendCloseConnectEvent(int socket)
 	auto event = make_shared<CNetworkEvent>(EVENT_TYPE::SocketClose);
 	event->SetSocketID(socket);
 
-	//TODO：
-	//event->SetUserInfo(info->m_pUserInfo.get());
 	m_iC->SendMessage(event);
 }
 

@@ -28,6 +28,10 @@ extern "C"
 
 namespace Sloong
 {
+	struct RequestInfo{
+		int SerialNumber;
+        EasyConnect*    RequestConnect = nullptr;
+    };
 	class SloongNetGateway
 	{
 	public:
@@ -55,7 +59,7 @@ namespace Sloong
 		void OnReferenceModuleOfflineEvent(const string&,CDataTransPackage *);
 	private:
 		CResult MessageToProcesser(CDataTransPackage *);
-		CResult MessageToClient(IEvent *, CDataTransPackage *);
+		CResult MessageToClient(RequestInfo*, CDataTransPackage *);
 
 		inline int ParseFunctionValue(const string&);
 		list<int> ProcessProviedFunction(const string&);
@@ -64,6 +68,9 @@ namespace Sloong
 
 	protected:
 		//list<shared_ptr<GatewayTranspond>> m_listTranspond;
+		inline int GetSerialNumber(){ return ++m_nSerialNumber; }
+		SOCKET GetPorcessConnect(int function);
+
 
 	protected:
 		map_ex<int, SmartEvent> m_listSendEvent;
@@ -71,6 +78,8 @@ namespace Sloong
 		map_ex<int, list_ex<string>> m_mapTempteIDToUUIDs;
 		map_ex<string, NodeItem> m_mapUUIDToNode;
 		map_ex<string, SOCKET> m_mapUUIDToConnect;
+		map_ex<int, RequestInfo> m_mapSerialToRequest;
+
 		IControl *m_pControl = nullptr;
 		CLog *m_pLog = nullptr;
 		GLOBAL_CONFIG *m_pConfig;

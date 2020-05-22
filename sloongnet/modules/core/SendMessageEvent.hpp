@@ -29,23 +29,29 @@ namespace Sloong
 			
 			void SetRequest( SOCKET target, string sender, int serialnumber, int priority, int func, string content,  string extend = "", DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_RequestPackage)
 			{
-				m_pData.set_sender(sender);
-				m_pData.set_type(type);
-				m_pData.set_function(func);
-				m_pData.set_content(content);
-				m_pData.set_extend(extend);
-				m_pData.set_prioritylevel(priority);
-				m_pData.set_serialnumber(serialnumber);
+				m_pData = make_unique<DataPackage>();
+				m_pData->set_sender(sender);
+				m_pData->set_type(type);
+				m_pData->set_function(func);
+				m_pData->set_content(content);
+				m_pData->set_extend(extend);
+				m_pData->set_prioritylevel(priority);
+				m_pData->set_serialnumber(serialnumber);
 
 				m_nSocketID = target;
 			}
 
 			DataPackage* GetDataPackage()
 			{
-				return &m_pData;
+				return m_pData.get();
+			}
+
+			unique_ptr<DataPackage> MoveDataPackage()
+			{
+				return std::move(m_pData);
 			}
 		protected:
-			DataPackage m_pData;
+			unique_ptr<DataPackage> m_pData = nullptr;
 			CallbackFunc		m_pCallback = nullptr;
 		};
 

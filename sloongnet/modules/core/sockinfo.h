@@ -67,7 +67,6 @@ namespace Sloong
 		
         mutex m_oSockReadMutex;
         mutex m_oSockSendMutex; 
-		mutex m_oSendListMutex;
         mutex m_oPreSendMutex;
 		SmartPackage m_pSendingPackage = nullptr;
         bool m_bIsSendListEmpty = true;

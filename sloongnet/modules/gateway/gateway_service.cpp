@@ -2,14 +2,15 @@
 #include "gateway_service.h"
 #include "utility.h"
 #include "IData.h"
-#include "SendMessageEventEx.hpp"
+#include "SendMessageEvent.hpp"
+using namespace Sloong;
+using namespace Sloong::Events;
 
 #include "protocol/manager.pb.h"
 using namespace Manager;
 
 #include "protocol/processer.pb.h"
-using namespace Sloong;
-using namespace Sloong::Events;
+
 
 unique_ptr<SloongNetGateway> Sloong::SloongNetGateway::Instance = nullptr;
 mutex processmutex;
@@ -93,6 +94,11 @@ CResult SloongNetGateway::RequestPackageProcesser(void *env, CDataTransPackage *
 CResult SloongNetGateway::ResponsePackageProcesser(CDataTransPackage *trans_pack)
 {
 	auto num = trans_pack->GetSerialNumber();
+	if( m_mapSerialToRequest.exist(num) )
+	{
+		return MessageToClient(&m_mapSerialToRequest[num],trans_pack);
+	}
+
 	if (!m_listSendEvent.exist(num))
 		m_pLog->Error("ResponsePackageProcesser no find the package");
 
@@ -279,57 +285,68 @@ void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pa
 	}
 }
 
-CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage *pack)
+
+SOCKET Sloong::SloongNetGateway::GetPorcessConnect(int function)
 {
-	auto data_pack = pack->GetDataPackage();
-	if (!m_mapFuncToTemplateIDs.exist(data_pack->function()) && !m_mapFuncToTemplateIDs.exist(-1))
+	if (!m_mapFuncToTemplateIDs.exist(function && !m_mapFuncToTemplateIDs.exist(-1)))
 	{
-		return CResult::Make_Error(Helper::Format("No service can process for [%s].", data_pack->function()));
+		return INVALID_SOCKET;
 	}
 
-	auto tpl_list = m_mapFuncToTemplateIDs[data_pack->function()];
-	tpl_list.copyfrom(m_mapFuncToTemplateIDs[-1]);
-
-	SOCKET target = INVALID_SOCKET;
-	for (auto tpl : tpl_list)
+	for( auto tpl : m_mapFuncToTemplateIDs[function])
 	{
 		if (m_mapTempteIDToUUIDs[tpl].size() == 0)
 			continue;
 
 		for (auto node : m_mapTempteIDToUUIDs[tpl])
 		{
-			target = m_mapUUIDToConnect[node];
-			break;
+			return m_mapUUIDToConnect[node];
 		}
 	}
 
+	for( auto tpl : m_mapFuncToTemplateIDs[-1])
+	{
+		if (m_mapTempteIDToUUIDs[tpl].size() == 0)
+			continue;
+
+		for (auto node : m_mapTempteIDToUUIDs[tpl])
+		{
+			return m_mapUUIDToConnect[node];
+		}
+	}
+
+	return INVALID_SOCKET;
+}
+
+
+CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage *pack)
+{
+	auto data_pack = pack->GetDataPackage();
+	auto target = GetPorcessConnect(data_pack->function());
 	if( target == INVALID_SOCKET )
 	{
 		return CResult::Make_Error("No process service online .");
 	}
 
-	auto event = make_shared<CSendPackageExEvent>();
-	event->SetCallbackFunc(std::bind(&SloongNetGateway::MessageToClient, this, std::placeholders::_1, std::placeholders::_2));
-	event->SetRequestInfo(pack->GetConnection(), data_pack->function(), data_pack->prioritylevel(), data_pack->serialnumber(), data_pack->sender() );
-	event->SetRequest(target, m_pRuntimeData->nodeuuid(), m_nSerialNumber, pack->GetPriority(), (int)Processer::Functions::ProcessMessage, pack->GetRecvMessage());
-	m_nSerialNumber++;
-	m_pControl->CallMessage(event);
-	return CResult::Invalid();
+	RequestInfo info;
+	info.RequestConnect = pack->GetConnection();
+	info.SerialNumber = data_pack->serialnumber();	
+		
+
+	auto serialNumber = GetSerialNumber();
+	data_pack->set_serialnumber(serialNumber);
+	pack->SetSocket(target);	
+	pack->RequestPackage();
+
+	m_mapSerialToRequest[serialNumber] = info;
+	return CResult::Succeed();
 }
 
-CResult Sloong::SloongNetGateway::MessageToClient(IEvent *send_event, CDataTransPackage *res_pack)
+CResult Sloong::SloongNetGateway::MessageToClient(RequestInfo *req_info, CDataTransPackage *res_pack)
 {
-	auto req_event = TYPE_TRANS<CSendPackageExEvent *>(send_event);
-	auto req_info = req_event->GetRequestInfo();
-
 	auto res_data = res_pack->GetDataPackage();
-	res_data->set_function(req_info->function);
-	res_data->set_prioritylevel(req_info->priority);
 	res_data->set_serialnumber(req_info->SerialNumber);
-	res_data->set_sender(req_info->Sender);
-	res_data->set_type(Core::DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
 	res_pack->SetConnection(req_info->RequestConnect);
 
-	res_pack->ResponsePackage(*res_data);
 	return CResult::Succeed();
 }
