@@ -10,6 +10,8 @@
 #include "utility.h"
 #include "SendMessageEvent.hpp"
 
+#include "snowflake.h"
+
 
 using namespace Sloong::Events;
 
@@ -86,7 +88,7 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 		if (item.second.Replicas == 0 || item.second.ID == 1)
 			continue;
 
-		if (item.second.Created.size() == item.second.Replicas)
+		if ((int)item.second.Created.size() >= item.second.Replicas)
 			continue;
 
 		if (item.second.Created.size() == 0)
@@ -99,10 +101,10 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 		if (item.second.Replicas == 0 || item.second.ID == 1)
 			continue;
 
-		if (item.second.Created.size() == item.second.Replicas)
+		if ((int)item.second.Created.size() >= item.second.Replicas)
 			continue;
 
-		if (item.second.Created.size() < item.second.Replicas)
+		if ((int)item.second.Created.size() < item.second.Replicas)
 			return item.first;
 	}
 	return -1;
@@ -124,7 +126,7 @@ CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 	
 	auto req_obj = pack->GetRecvMessage();
 	auto func_name = Functions_Name(function);
-	m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name, req_obj));
+	m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), req_obj.c_str()));
 	if (!m_mapFuncToHandler.exist(function))
 	{
 		pack->ResponsePackage(ResultType::Error, Helper::Format("Function [%s] no handler.",func_name.c_str()));
@@ -145,9 +147,9 @@ CResult Sloong::CServerManage::EventRecorderHandler(const string& req_obj, CData
 CResult Sloong::CServerManage::RegisteWorkerHandler(const string& req_obj, CDataTransPackage *pack)
 {
 	auto sender = pack->GetDataPackage()->sender();
-	if (sender.length() == 0)
+	if (sender == 0)
 	{
-		sender = CUtility::GenUUID();
+		sender = snowflake::Instance->nextid(); 
 	}
 	auto sender_info = m_mapUUIDToNodeItem.try_get(sender);
 	if (sender_info == nullptr)
@@ -156,14 +158,20 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string& req_obj, CData
 		item.Address = pack->GetSocketIP();
 		item.UUID = sender;
 		m_mapUUIDToNodeItem[sender] = item;
-		m_pLog->Debug(Helper::Format("Module[%s:%d] regist to system. Allocating uuid [%s].", item.Address.c_str(), item.Port, item.UUID.c_str()));
-		return CResult(ResultType::Retry, sender);
+		m_pLog->Debug(Helper::Format("Module[%s:%d] regist to system. Allocating uuid [%d].", item.Address.c_str(), item.Port, item.UUID));
+		char m_pMsgBuffer[8] = {0};
+        char *pCpyPoint = m_pMsgBuffer;
+        Helper::Int64ToBytes(sender, pCpyPoint);
+		return CResult(ResultType::Retry, string(m_pMsgBuffer,8));
 	}
 
 	auto index = SearchNeedCreateTemplate();
 	if (index == -1)
 	{
-		return CResult(ResultType::Retry, sender);
+		char m_pMsgBuffer[8] = {0};
+        char *pCpyPoint = m_pMsgBuffer;
+        Helper::Int64ToBytes(sender, pCpyPoint);
+		return CResult(ResultType::Retry, string(m_pMsgBuffer,8));
 	}
 
 	if (sender_info == nullptr)
@@ -176,7 +184,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string& req_obj, CData
 	res.set_templateid(tpl.ID);
 	res.set_configuation(m_mapIDToTemplateItem[tpl.ID].Configuation);
 
-	m_pLog->Debug(Helper::Format("Allocating module[%s] Type to [%s]", sender_info->UUID.c_str(), tpl.Name.c_str()));
+	m_pLog->Debug(Helper::Format("Allocating module[%d] Type to [%s]", sender_info->UUID, tpl.Name.c_str()));
 	return CResult::Make_OK( ConvertObjToStr(&res) );
 }
 
@@ -192,7 +200,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTr
 {
 	auto sender = pack->GetDataPackage()->sender();
 	auto req = ConvertStrToObj<RegisteNodeRequest>(req_obj);
-	if (!req || sender.length() == 0)
+	if (!req || sender == 0)
 		return CResult::Make_Error("The required parameter check error.");
 
 	int id = req->templateid();
@@ -216,7 +224,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTr
 	m_mapSocketToUUID[pack->GetSocketID()] = sender;
 
 	// Find reference node and notify them
-	list<string> notifyList;
+	list<uint64_t> notifyList;
 	for (auto item : m_mapIDToTemplateItem)
 	{
 		if (item.second.Reference.exist(id))
@@ -382,7 +390,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string& req_obj, 
 	auto data_pack = pack->GetDataPackage();
 	auto uuid = data_pack->sender();
 	if( !m_mapUUIDToNodeItem.exist(uuid))
-		return CResult::Make_Error(Helper::Format("The node is no registed. [%s]",uuid.c_str()));
+		return CResult::Make_Error(Helper::Format("The node is no registed. [%d]",uuid));
 
 	auto id = m_mapUUIDToNodeItem[uuid].TemplateID;
 
@@ -403,14 +411,14 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string& req_obj, 
 	return CResult::Make_OK( ConvertObjToStr(&res) );
 }
 
-void Sloong::CServerManage::SendEvent(list<string> notifyList, int event, ::google::protobuf::Message *msg)
+void Sloong::CServerManage::SendEvent(list<uint64_t> notifyList, int event, ::google::protobuf::Message *msg)
 {
 	for (auto item : notifyList)
 	{
 		string msg_str;
 		msg->SerializeToString(&msg_str);
 		auto req = make_shared<CSendPackageEvent>();
-		req->SetRequest(m_mapUUIDToNodeItem[item].ConnectionID,"0" ,m_nSerialNumber, 1, event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
+		req->SetRequest(m_mapUUIDToNodeItem[item].ConnectionID, IData::GetRuntimeData()->nodeuuid() , snowflake::Instance->nextid() , Core::HEIGHT_LEVEL , event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
 		m_pControl->SendMessage(req);
 	}
 }
@@ -424,7 +432,7 @@ void Sloong::CServerManage::OnSocketClosed(SOCKET sock)
 	auto id = m_mapUUIDToNodeItem[target].TemplateID;
 
 	// Find reference node and notify them
-	list<string> notifyList;
+	list<uint64_t> notifyList;
 	for (auto item : m_mapIDToTemplateItem)
 	{
 		if (item.second.Reference.exist(id))

@@ -64,20 +64,18 @@ namespace Sloong
 		inline int ParseFunctionValue(const string&);
 		list<int> ProcessProviedFunction(const string&);
 
-		void AddConnection(const string&, const string&, int);
+		void AddConnection(uint64_t, const string&, int);
 
 	protected:
-		//list<shared_ptr<GatewayTranspond>> m_listTranspond;
-		inline int GetSerialNumber(){ return ++m_nSerialNumber; }
 		SOCKET GetPorcessConnect(int function);
 
 
 	protected:
 		map_ex<int, SmartEvent> m_listSendEvent;
 		map_ex<int, list_ex<int>> m_mapFuncToTemplateIDs;
-		map_ex<int, list_ex<string>> m_mapTempteIDToUUIDs;
-		map_ex<string, NodeItem> m_mapUUIDToNode;
-		map_ex<string, SOCKET> m_mapUUIDToConnect;
+		map_ex<int, list_ex<uint64_t>> m_mapTempteIDToUUIDs;
+		map_ex<uint64_t, NodeItem> m_mapUUIDToNode;
+		map_ex<uint64_t, SOCKET> m_mapUUIDToConnect;
 		map_ex<int, RequestInfo> m_mapSerialToRequest;
 
 		IControl *m_pControl = nullptr;
@@ -86,8 +84,7 @@ namespace Sloong
 		Json::Value *m_pModuleConfig;
 		RuntimeDataPackage *m_pRuntimeData = nullptr;
 		SOCKET m_nManagerConnection = -1;
-		int m_nSerialNumber = 0;
-
+		
 	public:
 		static unique_ptr<SloongNetGateway> Instance;
 	};

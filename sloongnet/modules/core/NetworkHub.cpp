@@ -137,6 +137,7 @@ void Sloong::CNetworkHub::CloseConnectEventHandler(SmartEvent event)
 
 	auto info = m_SockList[id].get();
 	m_pLog->Info(Helper::Format("close connect:%s:%d.", info->m_pCon->m_strAddress.c_str(), info->m_pCon->m_nPort));
+	m_pEpoll->DeleteMonitorSocket(id);
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList.erase(id);
 	sockLck.unlock();	

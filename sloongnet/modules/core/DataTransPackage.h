@@ -74,18 +74,14 @@ namespace Sloong
          */
         inline bool IsBigPackage(){ return m_pTransPackage.extend().length() > 0 ? true : false; }
 
-        inline int GetPriority(){ return m_pTransPackage.prioritylevel(); }
+        inline int GetPriority(){ return m_pTransPackage.priority(); }
 
-        inline void SetPriority(int value){ m_pTransPackage.set_prioritylevel(value); }
+        inline void SetPriority(int value){ m_pTransPackage.set_priority(value); }
 
-        inline u_int64_t GetSerialNumber(){ return m_pTransPackage.serialnumber(); }
+        inline u_int64_t GetSerialNumber(){ return m_pTransPackage.id(); }
 
-        inline void SetSerialNumber(u_int64_t value){ m_pTransPackage.set_serialnumber(value); }
+        inline void SetSerialNumber(u_int64_t value){ m_pTransPackage.set_id(value); }
 
-        inline void AddSerialNumber( u_int64_t& value ){
-            m_pTransPackage.set_serialnumber(value);
-            value++;
-        }
         inline int GetSentSize(){ return m_nSent; }
         inline int GetPackageSize(){return m_nPackageSize;}
 

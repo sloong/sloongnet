@@ -14,7 +14,7 @@ message EventReferenceModuleOnline{
 }
 
 message EventReferenceModuleOffline{
-   string uuid=1;
+   fixed64 uuid=1;
 }
 
 enum Functions{
@@ -108,7 +108,7 @@ message QueryNodeRequest
 }
 
 message NodeItem{
-   string UUID=1;
+   fixed64 UUID=1;
    string TemplateName=2;
    int32 TemplateID=3;
    string Address = 4;

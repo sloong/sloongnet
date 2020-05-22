@@ -20,8 +20,7 @@ link_directories(
 SET(LIBRARY_OUTPUT_PATH "../")
 
 #允许gdb调试
-set(CMAKE_BUILD_TYPE "Debug")
-set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -g -ggdb -DDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -g -ggdb -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -DNODEBUG -DRELASE")
 
 add_definitions(-DLUA_USE_READLINE)
@@ -31,6 +30,9 @@ add_definitions(-DLUA_USE_READLINE)
 
 # 废弃API检测
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated")
+
+# for snowflake
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
 # 警告信息选项
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-switch -Wno-return-type -Wno-misleading-indentation")
@@ -63,7 +65,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,./")
 #添加链接库
 target_link_libraries(${PROJECT_NAME} m)
 target_link_libraries(${PROJECT_NAME} dl)
-target_link_libraries(${PROJECT_NAME} pthread)
 target_link_libraries(${PROJECT_NAME} univ)
 target_link_libraries(${PROJECT_NAME} protobuf)
 target_link_libraries(${PROJECT_NAME} jsoncpp)

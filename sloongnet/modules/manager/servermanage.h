@@ -24,7 +24,7 @@ namespace Sloong
         string Address;
         int Port;
         time_t ActiveTime;
-        string UUID;
+        uint64_t UUID;
         string TemplateName;
         int TemplateID;
         SOCKET ConnectionID;
@@ -35,7 +35,7 @@ namespace Sloong
             char buffer [80];
             strftime (buffer,80,"%c", std::localtime(&ActiveTime));
             item["ActiveTime"] = string(buffer);
-            item["UUID"] = this->UUID;
+            item["UUID"] = (Json::UInt64)this->UUID;
             item["TemplateName"] = this->TemplateName;
             item["TemplateID"] = this->TemplateID;
             return item;
@@ -106,7 +106,7 @@ namespace Sloong
         string Configuation;
         shared_ptr<GLOBAL_CONFIG> ConfiguationObj;
         list_ex<int> Reference;
-        list_ex<string> Created;
+        list_ex<uint64_t> Created;
     };
 
     typedef std::function<CResult(const string&,CDataTransPackage*)> FunctionHandler;
@@ -176,14 +176,13 @@ namespace Sloong
     private:
         int SearchNeedCreateTemplate();
         void RefreshModuleReference(int id);
-        void SendEvent(list<string>, int, ::google::protobuf::Message*);
+        void SendEvent(list<uint64_t>, int, ::google::protobuf::Message*);
 
     protected:
-        int m_nSerialNumber = 0;
         map_ex< Manager::Functions , FunctionHandler> m_mapFuncToHandler;
-        map_ex<string, NodeItem>	m_mapUUIDToNodeItem;
+        map_ex<int64_t, NodeItem>	m_mapUUIDToNodeItem;
         map_ex<int, TemplateItem>	m_mapIDToTemplateItem;
-        map_ex<SOCKET, string>      m_mapSocketToUUID;
+        map_ex<SOCKET, int64_t>      m_mapSocketToUUID;
         
     private:
         CLog* m_pLog = nullptr;

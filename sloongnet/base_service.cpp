@@ -46,7 +46,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
 	}
 	cout << "Connect to control succeed. Start registe and get configuation." << endl;
 	
-	string uuid;
+	int64_t uuid;
 	while(true)
 	{
         CDataTransPackage dataPackage(m_pManagerConnect.get());
@@ -66,8 +66,8 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
             return CResult::Make_Error("Parse the get config response data error.");
 
 		if( response->result() == Core::ResultType::Retry ){
-            if( uuid.length() == 0 ){
-                uuid = response->content();
+            if( uuid == 0 ){
+                uuid = Helper::BytesToInt64(response->content().c_str());
                 cout << "Control assigen uuid ."<< uuid << endl;
             }else{
                 sleep(1);
@@ -95,7 +95,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
 
 CResult CSloongBaseService::InitlializeForManager(RuntimeDataPackage* data)
 {
-    data->set_nodeuuid("0");
+    data->set_nodeuuid(0);
     auto config = data->mutable_templateconfig();
 	config->set_listenport( data->managerport() );
 	config->set_modulepath("./modules/");

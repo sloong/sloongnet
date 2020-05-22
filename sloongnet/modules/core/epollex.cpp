@@ -22,7 +22,7 @@ Sloong::CEpollEx::~CEpollEx()
 {
 }
 
-TResult<int> Sloong::CEpollEx::CreateListenSocket(string addr, int port)
+TResult<int> Sloong::CEpollEx::CreateListenSocket(const string& addr, int port)
 {
 	// 初始化socket
 	auto listen_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -95,6 +95,11 @@ void Sloong::CEpollEx::AddMonitorSocket(int nSocket)
 	CtlEpollEvent(EPOLL_CTL_ADD, nSocket, EPOLLIN);
 }
 
+void Sloong::CEpollEx::DeleteMonitorSocket(int nSocket)
+{
+	CtlEpollEvent(EPOLL_CTL_DEL, nSocket, 0);
+}
+
 void Sloong::CEpollEx::SetEventHandler(EpollEventHandlerFunc accept, EpollEventHandlerFunc recv, EpollEventHandlerFunc send, EpollEventHandlerFunc other)
 {
 	OnNewAccept = accept;
@@ -121,12 +126,7 @@ void Sloong::CEpollEx::CtlEpollEvent(int opt, int sock, int events)
 	// LT模式时，事件就绪时，假设对事件没做处理，内核会反复通知事件就绪	  	EPOLLLT
 	// ET模式时，事件就绪时，假设对事件没做处理，内核不会反复通知事件就绪  	EPOLLET
 	ent.events = events | EPOLLERR | EPOLLHUP | EPOLLET;
-	string opt_str;
-	if(opt&EPOLLIN) opt_str+="EPOLLIN";
-	if(opt&EPOLLOUT) opt_str+="|EPOLLOUT";
 
-	m_pLog->Debug(Helper::Format("Control epoll opt: Socket[%d] [%s] opt[%s]", sock, CUtility::GetSocketAddress(sock).c_str(), opt_str.c_str()));
-	// 设置事件到epoll对象
 	epoll_ctl(m_EpollHandle, opt, sock, &ent);
 }
 
@@ -230,6 +230,8 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 				{
 					m_pLog->Debug(Helper::Format("EPoll EPOLLIN event happened. Socket[%d][%s] Data Can Receive.",fd, CUtility::GetSocketAddress(fd).c_str()));
 					auto res = OnDataCanReceive(fd);
+					if( res == ResultType::Error )
+						DeleteMonitorSocket(fd);
 				}
 				// EPOLLOUT 可写消息
 				else if (m_Events[i].events & EPOLLOUT)

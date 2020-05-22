@@ -112,16 +112,6 @@ CResult Sloong::SloongNetProcess::ResponsePackageProcesser(CLuaProcessCenter* pP
 
 void Sloong::SloongNetProcess::OnSocketClose(SmartEvent event)
 {
-	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
-	auto info = net_evt->GetUserInfo();
-	if (!info)
-	{
-		m_pLog->Error(Helper::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
-		return;
-	}
-	// call close function.
-	//m_pProcess->CloseSocket(info);
-	//net_evt->CallCallbackFunc(net_evt);
 }
 
 

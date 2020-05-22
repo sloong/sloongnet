@@ -6,8 +6,8 @@ void Sloong::CDataTransPackage::PrepareSendPackageData()
 {
 	if (g_pLog!= nullptr)
 	{
-		g_pLog->Debug(Helper::Format("SEND<<<[%d][%d]<<<%s&&&EXDATA<<<[%d]",m_pTransPackage.prioritylevel(),
-										m_pTransPackage.serialnumber(),m_pTransPackage.content().c_str(), m_pTransPackage.extend().length()));
+		g_pLog->Debug(Helper::Format("SEND<<<[%d][%d]<<<%s&&&EXDATA<<<[%d]",m_pTransPackage.priority(),
+										m_pTransPackage.id(),m_pTransPackage.content().c_str(), m_pTransPackage.extend().length()));
 	}
 	m_pTransPackage.SerializeToString(&m_strPackageData);
 	m_nPackageSize = (int)m_strPackageData.length();
@@ -107,24 +107,17 @@ ResultType Sloong::CDataTransPackage::RecvPackage(int timeout)
 		return ResultType::Error;
 	}
 
-	if (m_pTransPackage.prioritylevel() > s_PriorityLevel || m_pTransPackage.prioritylevel() < 0)
+	if (m_pTransPackage.priority() > s_PriorityLevel || m_pTransPackage.priority() < 0)
 	{
-		if( g_pLog ) g_pLog->Error(Helper::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_pTransPackage.prioritylevel(), s_PriorityLevel));
+		if( g_pLog ) g_pLog->Error(Helper::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_pTransPackage.priority(), s_PriorityLevel));
 		return ResultType::Error;
 	}
 	
-	if( g_pLog ) g_pLog->Debug(Helper::Format("RECV<<<[%d][%d]<<<%s",m_pTransPackage.prioritylevel(),m_pTransPackage.serialnumber(),m_pTransPackage.content()));
+	if( g_pLog ) g_pLog->Debug(Helper::Format("RECV<<<[%d][%d]<<<%s",m_pTransPackage.priority(),m_pTransPackage.id(),m_pTransPackage.content()));
 
-	if( m_pTransPackage.checkstring().length() > 0 ){
-		string rmd5 = CMD5::Encode(m_pTransPackage.content());
-		if ( strcasecmp(m_pTransPackage.checkstring().c_str(),rmd5.c_str()) != 0)
-		{
-			// handle error.
-			string msg = Helper::Format("MD5 check fialed.Message:[%s].recv MD5:[%s].local md5[%s]",m_pTransPackage.content().c_str(), rmd5.c_str(), m_pTransPackage.checkstring().c_str() );
-			if( g_pLog )g_pLog->Warn(msg);
-			ResponsePackage(ResultType::Error,msg);
+	if( m_pTransPackage.hash().length() > 0 ){
+			ResponsePackage(ResultType::Error,"Now don't support hash check.");
 			return ResultType::Invalid;
-		}
 	}
 	this->Record();
 	return ResultType::Succeed;

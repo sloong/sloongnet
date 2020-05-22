@@ -161,7 +161,6 @@ string Sloong::CUtility::GenUUID()
 }
 
 
-
 #define MAX_STACK_LAYERS 256
 
 void Sloong::CUtility::write_call_stack()

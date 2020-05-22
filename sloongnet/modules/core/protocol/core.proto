@@ -85,6 +85,12 @@ enum EVENT_TYPE
 	
 }
 
+enum PRIORITY_LEVEL{
+    HEIGHT_LEVEL=0;
+    NORMAL_LEVEL=1;
+    LOW_LEVEL=2;
+}
+
 message DataPackage
 {
     enum PackageType{
@@ -101,13 +107,13 @@ message DataPackage
     // In event package, it's event id
     int32 Function = 3;
     // 优先级
-    int32 PriorityLevel = 4;
+    int32 Priority = 4;
     // 流水号
-    int64 SerialNumber = 5;
+    fixed64 ID = 5;
     // 校验串
-    string CheckString = 6;
+    bytes Hash = 6;
     // 发送者的唯一标识符
-    string Sender = 7;
+    fixed64 Sender = 7;
     // 结果代码
     ResultType Result = 8;
     // 消息内容
@@ -158,6 +164,6 @@ message RuntimeDataPackage
     string ManagerAddress=1;
 	int32 ManagerPort=2;
 	int32 TemplateID=3;
-    string NodeUUID=4;
+    fixed64 NodeUUID=4;
 	GLOBAL_CONFIG TemplateConfig=5;
 }

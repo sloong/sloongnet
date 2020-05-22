@@ -11,6 +11,8 @@ using namespace Manager;
 
 #include "protocol/processer.pb.h"
 
+#include "snowflake.h"
+
 
 unique_ptr<SloongNetGateway> Sloong::SloongNetGateway::Instance = nullptr;
 mutex processmutex;
@@ -110,8 +112,7 @@ void SloongNetGateway::QueryReferenceInfo()
 {
 	auto event = make_shared<CSendPackageEvent>();
 	event->SetCallbackFunc(std::bind(&SloongNetGateway::QueryReferenceInfoResponseHandler, this, std::placeholders::_1, std::placeholders::_2));
-	event->SetRequest(m_nManagerConnection, m_pRuntimeData->nodeuuid(), m_nSerialNumber, 1, (int)Functions::QueryReferenceInfo, "");
-	m_nSerialNumber++;
+	event->SetRequest(m_nManagerConnection, m_pRuntimeData->nodeuuid(), snowflake::Instance->nextid(), Core::HEIGHT_LEVEL, (int)Functions::QueryReferenceInfo, "");
 	m_pControl->SendMessage(event);
 }
 
@@ -182,7 +183,7 @@ CResult SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent *send_pack, C
 	return CResult::Invalid();
 }
 
-void SloongNetGateway::AddConnection(const string &uuid, const string &addr, int port)
+void SloongNetGateway::AddConnection( uint64_t uuid, const string &addr, int port)
 {
 	EasyConnect conn;
 	conn.Initialize(addr, port);
@@ -208,7 +209,7 @@ void SloongNetGateway::SendPackageHook(SmartEvent event)
 {
 	auto send_evt = dynamic_pointer_cast<CSendPackageEvent>(event);
 	auto pack = send_evt->GetDataPackage();
-	m_listSendEvent[pack->serialnumber()] = event;
+	m_listSendEvent[pack->id()] = event;
 }
 
 void SloongNetGateway::OnStart(SmartEvent evt)
@@ -218,13 +219,7 @@ void SloongNetGateway::OnStart(SmartEvent evt)
 
 void Sloong::SloongNetGateway::OnSocketClose(SmartEvent event)
 {
-	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
-	auto info = net_evt->GetUserInfo();
-	if (!info)
-	{
-		m_pLog->Error(Helper::Format("Get socket info from socket list error, the info is NULL. socket id is: %d", net_evt->GetSocketID()));
-		return;
-	}
+
 }
 
 void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_req, CDataTransPackage *trans_pack)
@@ -234,7 +229,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_re
 	auto item = req->item();
 	m_mapUUIDToNode[item.uuid()] = item;
 	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
-	m_pLog->Debug(Helper::Format("New module is online:[%s][%s:%d]", item.uuid().c_str(), item.address().c_str(), item.port()));
+	m_pLog->Debug(Helper::Format("New module is online:[%d][%s:%d]", item.uuid(), item.address().c_str(), item.port()));
 
 	AddConnection(item.uuid(), item.address(), item.port());
 }
@@ -328,10 +323,10 @@ CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage *pack)
 
 	RequestInfo info;
 	info.RequestConnect = pack->GetConnection();
-	info.SerialNumber = data_pack->serialnumber();	
+	info.SerialNumber = data_pack->id();	
 		
-	auto serialNumber = GetSerialNumber();
-	data_pack->set_serialnumber(serialNumber);
+	auto serialNumber = snowflake::Instance->nextid();
+	data_pack->set_id(serialNumber);
 	pack->ClearConnection();
 	pack->SetSocket(target);	
 	pack->RequestPackage();
@@ -345,7 +340,7 @@ CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage *pack)
 CResult Sloong::SloongNetGateway::MessageToClient(RequestInfo *req_info, CDataTransPackage *res_pack)
 {
 	auto res_data = res_pack->GetDataPackage();
-	res_data->set_serialnumber(req_info->SerialNumber);
+	res_data->set_id(req_info->SerialNumber);
 	res_pack->SetConnection(req_info->RequestConnect);
 	res_pack->ResponsePackage(ResultType::Succeed);
 

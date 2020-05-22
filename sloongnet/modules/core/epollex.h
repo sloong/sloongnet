@@ -22,28 +22,29 @@ namespace Sloong
 	public:
         CEpollEx();
 		virtual ~CEpollEx();
-        CResult Initialize(IControl* iM);
+        CResult Initialize(IControl*);
 		CResult Run();
 		void Exit();
 
-		void AddMonitorSocket(int socket);
-		void SetEventHandler(EpollEventHandlerFunc,EpollEventHandlerFunc,EpollEventHandlerFunc,EpollEventHandlerFunc);
-        
-		void MonitorSendStatus(int socket);
-		void UnmonitorSendStatus(int socket);
+		void AddMonitorSocket(int);
+		void DeleteMonitorSocket(int);
 
+		void MonitorSendStatus(int);
+		void UnmonitorSendStatus(int);
+
+		void SetEventHandler(EpollEventHandlerFunc,EpollEventHandlerFunc,EpollEventHandlerFunc,EpollEventHandlerFunc);
 	protected:
 		/// 设置socket到非阻塞模式
-		int SetSocketNonblocking(int socket);
-		TResult<int> CreateListenSocket(string addr, int port);
+		int SetSocketNonblocking(int);
+		TResult<int> CreateListenSocket( const string&, int);
 
 		/// 修改socket的epoll监听事件
-		void CtlEpollEvent(int opt, int sock, int events);
+		void CtlEpollEvent(int, int, int);
 		
 		// event function
-		void CloseConnectEventHandler(SmartEvent event);
+		void CloseConnectEventHandler(SmartEvent);
 
-		void MainWorkLoop(SMARTER params);
+		void MainWorkLoop(SMARTER);
 
 	protected:
 		EpollEventHandlerFunc OnDataCanReceive = nullptr;

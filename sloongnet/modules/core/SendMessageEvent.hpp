@@ -27,7 +27,7 @@ namespace Sloong
 				return CResult::Invalid();
 			}
 			
-			void SetRequest( SOCKET target, string sender, int serialnumber, int priority, int func, string content,  string extend = "", DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_RequestPackage)
+			void SetRequest( SOCKET target, uint64_t sender, uint64_t serialnumber, int32_t priority, int32_t func, string content,  string extend = "", DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_RequestPackage)
 			{
 				m_pData = make_unique<DataPackage>();
 				m_pData->set_sender(sender);
@@ -35,8 +35,8 @@ namespace Sloong
 				m_pData->set_function(func);
 				m_pData->set_content(content);
 				m_pData->set_extend(extend);
-				m_pData->set_prioritylevel(priority);
-				m_pData->set_serialnumber(serialnumber);
+				m_pData->set_priority(priority);
+				m_pData->set_id(serialnumber);
 
 				m_nSocketID = target;
 			}
