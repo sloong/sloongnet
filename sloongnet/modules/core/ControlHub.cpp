@@ -79,14 +79,12 @@ void Sloong::CControlHub::SendMessage(EVENT_TYPE msgType)
 {
 	auto evt = make_shared<CNormalEvent>();
 	evt->SetEvent(msgType);
-	unique_lock<mutex> lck(m_oMsgListMutex);
 	m_oMsgList.push(evt);
 	m_oSync.notify_one();
 }
 
 void Sloong::CControlHub::SendMessage(SmartEvent evt)
 {
-	unique_lock<mutex> lck(m_oMsgListMutex);
 	m_oMsgList.push(evt);
 	m_oSync.notify_one();
 }
@@ -124,7 +122,7 @@ void Sloong::CControlHub::CallMessage(SmartEvent event)
 
 		for_each(handler_list.begin(), handler_list.end(), [&](MsgHandlerFunc& func) {func(event); });
 	}
-	catch (exception ex)
+	catch (const exception& ex)
 	{
 		cerr << "Exception happed in CallMessage." << ex.what() << endl;
 	}
@@ -136,6 +134,7 @@ void Sloong::CControlHub::CallMessage(SmartEvent event)
 
 void Sloong::CControlHub::MessageWorkLoop(SMARTER param)
 {
+	SmartEvent event = nullptr;
 	while (m_emStatus != RUN_STATUS::Exit)
 	{
 		try
@@ -148,19 +147,10 @@ void Sloong::CControlHub::MessageWorkLoop(SMARTER param)
 				m_oSync.wait_for(1);
 				continue;
 			}
-			if (!m_oMsgList.empty()){
-				unique_lock<mutex> lck(m_oMsgListMutex);
-				if (m_oMsgList.empty())	{
-					lck.unlock();
-					continue;
-				}
-
-				auto p = m_oMsgList.front();
-				m_oMsgList.pop();
-				lck.unlock();
-
+			
+			if (!m_oMsgList.TryPop(event)){
 				// Get the message handler list.
-				CallMessage(p);
+				CallMessage(event);
 			}
 		}catch (...){
 			cerr << "Unhandle exception in CControlHub work loop." << endl;

@@ -55,8 +55,7 @@ namespace Sloong
 		map<string, void*> m_oTempDataList;
         // Message
         map<EVENT_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;
-		queue<SmartEvent> m_oMsgList;
-		mutex m_oMsgListMutex;
+		queue_ex<SmartEvent> m_oMsgList;
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;
 		CEasySync	m_oSync;
     };

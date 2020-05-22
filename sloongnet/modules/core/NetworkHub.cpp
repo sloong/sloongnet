@@ -92,12 +92,11 @@ void Sloong::CNetworkHub::SendPackageEventHandler(SmartEvent event)
 {
 	auto send_evt = dynamic_pointer_cast<CSendPackageEvent>(event);
 	auto socket = send_evt->GetSocketID();
-
 	if (!m_SockList.exist(socket))
 	{
-		m_pLog->Warn("AddMessageToSendList function called, but the socket is no regiestd in NetworkHub.");
+		m_pLog->Error("SendPackageEventHandler function called, but the socket is no regiestd in NetworkHub.");
 		return;
-	}	
+	}
 	auto info = m_SockList[socket].get();
 
 	auto transPack = make_shared<CDataTransPackage>(info->m_pCon.get());
@@ -112,7 +111,7 @@ void Sloong::CNetworkHub::AddMessageToSendList(SmartPackage pack)
 	int socket = pack->GetSocketID();
 	if (!m_SockList.exist(socket))
 	{
-		m_pLog->Warn("AddMessageToSendList function called, but the socket is no regiestd in NetworkHub.");
+		m_pLog->Error(Helper::Format("AddMessageToSendList function called, but the socket[%d] is no regiestd in NetworkHub.",socket));
 		return;
 	}
 
