@@ -24,6 +24,13 @@ void CSloongBaseService::sloong_terminator()
     exit(0);
 }
 
+void CSloongBaseService::sloong_unexpected()
+{
+    cout << "unexpected function is called, system will shutdown. " << endl;
+    CUtility::write_call_stack();
+    exit(0);
+}
+
 void CSloongBaseService::on_sigint(int signal)
 {
     cout << "SIGSEGV signal happened, system will shutdown. signal:" << signal << endl;
@@ -107,7 +114,7 @@ CResult CSloongBaseService::InitlializeForManager(RuntimeDataPackage* data)
 void CSloongBaseService::InitSystemEventHandler()
 {
     set_terminate(sloong_terminator);
-    set_unexpected(sloong_terminator);
+    set_unexpected(sloong_unexpected);
     //SIG_IGN:忽略信号的处理程序
     //SIGPIPE:在reader终止之后写pipe的时候发生
     signal(SIGPIPE, SIG_IGN); // this signal should call the socket check function. and remove the timeout socket.
@@ -148,7 +155,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     
     m_pLog->Initialize(pConfig->logpath(), "", LOGOPT(pConfig->logoperation()) , LOGLEVEL(pConfig->loglevel()), LOGTYPE::DAY);
 
-    //CDataTransPackage::InitializeLog(m_pLog.get());
+    CDataTransPackage::InitializeLog(m_pLog.get());
     res = InitModule();
     if( res.IsFialed() ) return res;
 
