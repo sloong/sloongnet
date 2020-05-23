@@ -78,14 +78,17 @@ namespace Sloong
 
         inline void SetPriority(int value){ m_pTransPackage.set_priority(value); }
 
-        inline u_int64_t GetSerialNumber(){ return m_pTransPackage.id(); }
+        inline uint64_t GetSerialNumber(){ return m_pTransPackage.id(); }
 
-        inline void SetSerialNumber(u_int64_t value){ m_pTransPackage.set_id(value); }
+        inline void SetSerialNumber(uint64_t value){ m_pTransPackage.set_id(value); }
 
         inline int GetSentSize(){ return m_nSent; }
         inline int GetPackageSize(){return m_nPackageSize;}
 
-        inline void Record(){ struct  timeval  start;gettimeofday(&start,NULL); m_listClock.push_back(start); }
+        inline timeval GetTimeval() { struct  timeval  start;gettimeofday(&start,NULL);return start; }
+        inline void Record(){  m_listClock.push_back(GetTimeval()); }
+        inline list<timeval>* GetRecord(){ return &m_listClock; }
+
         string FormatRecord();
     protected:
         // Send data info
