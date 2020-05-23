@@ -217,18 +217,15 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop(SMARTER param)
 	{
 		m_pLog->Debug("Check connect timeout start.");
 	RecheckTimeout:
-		unique_lock<mutex> sockLck(m_oSockListMutex);
 		for (auto it = m_SockList.begin(); it != m_SockList.end(); ++it)
 		{
 			if (it->second != NULL && time(NULL) - it->second->m_ActiveTime > tout)
 			{
-				sockLck.unlock();
 				m_pLog->Info(Helper::Format("[Timeout]:[Close connect:%s]", it->second->m_pCon->m_strAddress.c_str()));
 				SendCloseConnectEvent(it->first);
 				goto RecheckTimeout;
 			}
 		}
-		sockLck.unlock();
 		m_pLog->Debug(Helper::Format("Check connect timeout done. wait [%d] seconds.", tinterval));
 		m_oCheckTimeoutThreadSync.wait_for(tinterval);
 	}
