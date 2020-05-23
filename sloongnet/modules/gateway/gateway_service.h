@@ -12,6 +12,8 @@
 #include "core.h"
 #include "export.h"
 
+#include "transpond.h"
+
 #include "protocol/manager.pb.h"
 using namespace Manager;
 
@@ -28,10 +30,6 @@ extern "C"
 
 namespace Sloong
 {
-	struct RequestInfo{
-		int SerialNumber;
-        EasyConnect*    RequestConnect = nullptr;
-    };
 	class SloongNetGateway
 	{
 	public:
@@ -40,43 +38,38 @@ namespace Sloong
 		CResult Initialization(GLOBAL_CONFIG *);
 		CResult Initialized(SOCKET, IControl *);
 
+		CResult ResponsePackageProcesser( CDataTransPackage *);
+
 		void QueryReferenceInfo();
 		CResult QueryReferenceInfoResponseHandler(IEvent *, CDataTransPackage *);
 
 		inline CResult CreateProcessEnvironmentHandler(void **);
 		void EventPackageProcesser(CDataTransPackage *);
-		CResult RequestPackageProcesser(void *, CDataTransPackage *);
-		CResult ResponsePackageProcesser(CDataTransPackage *);
-
+		
 		// Event handler
 		void OnStart(SmartEvent);
 		void OnSocketClose(SmartEvent);
 		void SendPackageHook(SmartEvent);
 
-		CResult PackageProcesser(CDataTransPackage *);
-
 		void OnReferenceModuleOnlineEvent(const string&,CDataTransPackage *);
 		void OnReferenceModuleOfflineEvent(const string&,CDataTransPackage *);
 	private:
-		CResult MessageToProcesser(CDataTransPackage *);
-		CResult MessageToClient(RequestInfo*, CDataTransPackage *);
-
 		inline int ParseFunctionValue(const string&);
 		list<int> ProcessProviedFunction(const string&);
 
 		void AddConnection(uint64_t, const string&, int);
 
-	protected:
+	public:
 		SOCKET GetPorcessConnect(int function);
-
-
-	protected:
-		map_ex<int, SmartEvent> m_listSendEvent;
+		map_ex<uint64_t, SmartEvent> m_listSendEvent;
 		map_ex<int, list_ex<int>> m_mapFuncToTemplateIDs;
 		map_ex<int, list_ex<uint64_t>> m_mapTempteIDToUUIDs;
 		map_ex<uint64_t, NodeItem> m_mapUUIDToNode;
 		map_ex<uint64_t, SOCKET> m_mapUUIDToConnect;
-		map_ex<int, RequestInfo> m_mapSerialToRequest;
+		map_ex<uint64_t, RequestInfo> m_mapSerialToRequest;
+
+	protected:
+		list<unique_ptr<GatewayTranspond>> m_listTranspond;
 
 		IControl *m_pControl = nullptr;
 		CLog *m_pLog = nullptr;

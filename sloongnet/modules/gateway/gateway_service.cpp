@@ -11,21 +11,33 @@ using namespace Manager;
 
 #include "protocol/processer.pb.h"
 
+
 #include "snowflake.h"
 
 
 unique_ptr<SloongNetGateway> Sloong::SloongNetGateway::Instance = nullptr;
-mutex processmutex;
 
 extern "C" CResult RequestPackageProcesser(void *env, CDataTransPackage *pack)
 {
-	unique_lock<mutex> lock(processmutex);
-	return SloongNetGateway::Instance->RequestPackageProcesser(env, pack);
+	auto pTranspond = TYPE_TRANS<GatewayTranspond*>(env);
+	if( pTranspond)
+		return pTranspond->RequestPackageProcesser(pack);
+	else
+		return CResult::Make_Error("RequestPackageProcesser error, Environment convert failed.");
 }
 
 extern "C" CResult ResponsePackageProcesser(void *env, CDataTransPackage *pack)
 {
-	unique_lock<mutex> lock(processmutex);
+	auto num = pack->GetSerialNumber();
+	if( SloongNetGateway::Instance->m_mapSerialToRequest.exist(num) )
+	{
+		auto pTranspond = TYPE_TRANS<GatewayTranspond*>(env);
+		if( pTranspond)
+			return pTranspond->ResponsePackageProcesser(&SloongNetGateway::Instance->m_mapSerialToRequest[num],pack);
+		else
+			return CResult::Make_Error("ResponsePackageProcesser error, Environment convert failed.");
+	}
+
 	return SloongNetGateway::Instance->ResponsePackageProcesser(pack);
 }
 
@@ -82,31 +94,19 @@ CResult SloongNetGateway::Initialized(SOCKET sock, IControl *iC)
 	return CResult::Succeed();
 }
 
-CResult SloongNetGateway::RequestPackageProcesser(void *env, CDataTransPackage *trans_pack)
-{
-	m_pLog->Debug("Receive new request package.");
-	auto res = MessageToProcesser(trans_pack);
-	m_pLog->Debug(Helper::Format("Response [%s][%s].", Core::ResultType_Name(res.Result()).c_str(), res.Message().c_str()));
-	//trans_pack->ResponsePackage(res);
-	return res;
-}
 
-CResult SloongNetGateway::ResponsePackageProcesser(CDataTransPackage *trans_pack)
+CResult SloongNetGateway::ResponsePackageProcesser( CDataTransPackage *trans_pack)
 {
 	auto num = trans_pack->GetSerialNumber();
-	if( m_mapSerialToRequest.exist(num) )
-	{
-		return MessageToClient(&m_mapSerialToRequest[num],trans_pack);
-	}
-
 	if (!m_listSendEvent.exist(num))
-		m_pLog->Error("ResponsePackageProcesser no find the package");
+		return CResult::Make_Error("ResponsePackageProcesser no find the package.");
 
 	auto send_evt = dynamic_pointer_cast<CSendPackageEvent>(m_listSendEvent[num]);
 	auto need_send_res = send_evt->CallCallbackFunc(trans_pack);
 	m_listSendEvent.erase(num);
 	return need_send_res;
 }
+
 
 void SloongNetGateway::QueryReferenceInfo()
 {
@@ -196,12 +196,12 @@ void SloongNetGateway::AddConnection( uint64_t uuid, const string &addr, int por
 
 CResult SloongNetGateway::CreateProcessEnvironmentHandler(void **out_env)
 {
-	/*auto item = make_shared<GatewayTranspond>();
+	auto item = make_unique<GatewayTranspond>();
 	auto res = item->Initialize(m_pControl);
 	if (res.IsFialed())
 		return res;
-	m_listTranspond.push_back(item);
-	(*out_env) = item.get();*/
+	(*out_env) = item.get();
+	m_listTranspond.push_back(std::move(item));
 	return CResult::Succeed();
 }
 
@@ -311,38 +311,3 @@ SOCKET Sloong::SloongNetGateway::GetPorcessConnect(int function)
 	return INVALID_SOCKET;
 }
 
-
-CResult Sloong::SloongNetGateway::MessageToProcesser(CDataTransPackage *pack)
-{
-	auto data_pack = pack->GetDataPackage();
-	auto target = GetPorcessConnect(data_pack->function());
-	if( target == INVALID_SOCKET )
-	{
-		return CResult::Make_Error("No process service online .");
-	}
-
-	RequestInfo info;
-	info.RequestConnect = pack->GetConnection();
-	info.SerialNumber = data_pack->id();	
-		
-	auto serialNumber = snowflake::Instance->nextid();
-	data_pack->set_id(serialNumber);
-	pack->ClearConnection();
-	pack->SetSocket(target);	
-	pack->RequestPackage();
-
-	m_pLog->Debug(Helper::Format("Trans package [%d][%llu] -> [%d][%llu]", info.RequestConnect->GetSocketID(), info.SerialNumber, target, serialNumber));
-
-	m_mapSerialToRequest[serialNumber] = info;
-	return CResult::Succeed();
-}
-
-CResult Sloong::SloongNetGateway::MessageToClient(RequestInfo *req_info, CDataTransPackage *res_pack)
-{
-	auto res_data = res_pack->GetDataPackage();
-	res_data->set_id(req_info->SerialNumber);
-	res_pack->SetConnection(req_info->RequestConnect);
-	res_pack->ResponsePackage(ResultType::Succeed);
-
-	return CResult::Succeed();
-}
