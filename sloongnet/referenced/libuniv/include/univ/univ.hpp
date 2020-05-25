@@ -1,7 +1,6 @@
 #ifndef SLOONGNET_HELPER_H
 #define SLOONGNET_HELPER_H
 
-
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -13,6 +12,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <inttypes.h>
+#include <sys/time.h>
 #define SOCKET int
 #endif
 
@@ -213,6 +213,32 @@ namespace Sloong
             strResult = strWide;
             delete[] strWide;
             return strResult;
+        }
+
+        static inline timeval CurrentDatetime()
+        {
+            struct timeval current;
+            gettimeofday(&current, NULL);
+            return current;
+        }
+
+        static inline string FormatDatetime()
+        {
+            auto cur = CurrentDatetime();
+            auto lt = localtime(&cur.tv_sec);
+            return Helper::Format("%d/%d/%d-%d:%d:%d.%.4d", (lt->tm_year + 1900), lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec, cur.tv_usec / 1000);
+        }
+
+        /// Move file
+        /// Return values
+        ///   return true if move file succeeded. else return false.
+        static inline bool MoveFile(const string &lpExistingFileName, const string &lpNewFileName)
+        {
+#ifdef _WINDOWS
+            return ::MoveFileA(lpExistingFileName.c_str(), lpNewFileName.c_str()) != FALSE;
+#else
+            return rename(lpExistingFileName.c_str(), lpNewFileName.c_str()) == 0;
+#endif
         }
     };
 } // namespace Sloong

@@ -1,13 +1,12 @@
 #ifdef _WINDOWS
-	#ifdef SLOONGUNIVERSAL_EXPORTS
-		#define UNIVERSAL_API __declspec(dllexport)
-	#else
-		#define UNIVERSAL_API __declspec(dllimport)
-	#endif
+#ifdef SLOONGUNIVERSAL_EXPORTS
+#define UNIVERSAL_API __declspec(dllexport)
 #else
-	#define UNIVERSAL_API
+#define UNIVERSAL_API __declspec(dllimport)
 #endif
-
+#else
+#define UNIVERSAL_API
+#endif
 
 #ifndef UNIV_H
 #define UNIV_H
@@ -28,11 +27,11 @@ using namespace std;
 #include <stdarg.h> // for va_list,va_start and va_end
 
 #include "defines.h"
-#define	ACC_R	4		/* Test for read permission.  */
-#define	ACC_W	2		/* Test for write permission.  */
-#define	ACC_RUN	1		/* Test for execute permission.  */
-#define	ACC_E	0		/* Test for existence.  */
-#define ACC_RW  6
+#define ACC_R 4	  /* Test for read permission.  */
+#define ACC_W 2	  /* Test for write permission.  */
+#define ACC_RUN 1 /* Test for execute permission.  */
+#define ACC_E 0	  /* Test for existence.  */
+#define ACC_RW 6
 
 #include "univ.hpp"
 
@@ -44,8 +43,8 @@ namespace Sloong
 		{
 		public:
 			static wstring Version();
-			static void CopyStringToPoint(LPSTR& lpTarget, LPCSTR lpFrom);
-			static void CopyStringToPoint(LPWSTR& lpTarget, LPCWSTR lpFrom);
+			static void CopyStringToPoint(LPSTR &lpTarget, LPCSTR lpFrom);
+			static void CopyStringToPoint(LPWSTR &lpTarget, LPCWSTR lpFrom);
 			static wstring FormatWindowsErrorMessage(DWORD dwErrCode);
 			/*
 			Returns:
@@ -53,15 +52,10 @@ namespace Sloong
 				0 : path error
 				-1 : No write access.
 			*/
-			static int CheckFileDirectory(string filepath);
-			/// Move file 
-			/// Return values
-			///   return true if move file succeeded. else return false.
-			static bool MoveFile(string lpExistingFileName, string lpNewFileName);
-		
-			static string RunSystemCmdAndGetResult(const string& cmd);
-			static bool RunSystemCmd(const string& cmd);
-
+			static int CheckFileDirectory(const string &filepath);
+			
+			static string RunSystemCmdAndGetResult(const string &cmd);
+			static bool RunSystemCmd(const string &cmd);
 
 			/************************************************************************/
 			/*		SendEx function.
@@ -81,7 +75,7 @@ namespace Sloong
 				If 'bAgain' as true, some data was sent, and in next time happened EINTR\EAGAIN error, function will into the loop until all data send succeed or other error happened.
 			*/
 			/************************************************************************/
-			static int SendEx(SOCKET sock, const char* buf, int nSize, int nStart=0, bool bAgain=false);
+			static int SendEx(SOCKET sock, const char *buf, int nSize, int nStart = 0, bool bAgain = false);
 			/************************************************************************/
 			/*		ReceEx function.
 			Params:
@@ -100,7 +94,7 @@ namespace Sloong
 				If 'bAgain' as true, recved some data, and in next time happened EINTR\EAGAIN error, function will into a loop until all data received or other error happened.
 			*/
 			/************************************************************************/
-			static int RecvEx(SOCKET sock, char* buf, int nSize, bool bAgain = false );
+			static int RecvEx(SOCKET sock, char *buf, int nSize, bool bAgain = false);
 
 			/************************************************************************/
 			/*		ReceTimout function.
@@ -123,9 +117,7 @@ namespace Sloong
 				If 'bAgain' as true, recved some data, and in next time happened EINTR\EAGAIN error, function will into a loop until all data received or other error happened.
 			*/
 			/************************************************************************/
-			static int RecvTimeout(SOCKET sock, char* buf, int nSize, int nTimeout, bool bAgain = false );
-
-
+			static int RecvTimeout(SOCKET sock, char *buf, int nSize, int nTimeout, bool bAgain = false);
 		};
 
 #ifdef _WINDOWS
@@ -137,40 +129,39 @@ namespace Sloong
 		class UNIVERSAL_API CSize : public tagSIZE
 		{
 		public:
-
 			// Constructors
 			// construct an uninitialized size
 			CSize() throw();
 			// create from two integers
 			CSize(
-				 int initCX,
-				 int initCY) throw();
+				int initCX,
+				int initCY) throw();
 			// create from another size
-			CSize( SIZE initSize) throw();
+			CSize(SIZE initSize) throw();
 			// create from a point
-			CSize( POINT initPt) throw();
+			CSize(POINT initPt) throw();
 			// create from a DWORD: cx = LOWORD(dw) cy = HIWORD(dw)
-			CSize( DWORD dwSize) throw();
+			CSize(DWORD dwSize) throw();
 
 			// Operations
-			BOOL operator==( SIZE size) const throw();
-			BOOL operator!=( SIZE size) const throw();
-			void operator+=( SIZE size) throw();
-			void operator-=( SIZE size) throw();
-			void SetSize( int CX,  int CY) throw();
+			BOOL operator==(SIZE size) const throw();
+			BOOL operator!=(SIZE size) const throw();
+			void operator+=(SIZE size) throw();
+			void operator-=(SIZE size) throw();
+			void SetSize(int CX, int CY) throw();
 
 			// Operators returning CSize values
-			CSize operator+( SIZE size) const throw();
-			CSize operator-( SIZE size) const throw();
+			CSize operator+(SIZE size) const throw();
+			CSize operator-(SIZE size) const throw();
 			CSize operator-() const throw();
 
 			// Operators returning CPoint values
-			CPoint operator+( POINT point) const throw();
-			CPoint operator-( POINT point) const throw();
+			CPoint operator+(POINT point) const throw();
+			CPoint operator-(POINT point) const throw();
 
 			// Operators returning CRect values
-			CRect operator+( const RECT* lpRect) const throw();
-			CRect operator-( const RECT* lpRect) const throw();
+			CRect operator+(const RECT *lpRect) const throw();
+			CRect operator-(const RECT *lpRect) const throw();
 		};
 
 		/////////////////////////////////////////////////////////////////////////////
@@ -184,49 +175,47 @@ namespace Sloong
 			CPoint() throw();
 			// create from two integers
 			CPoint(
-				 int initX,
-				 int initY) throw();
+				int initX,
+				int initY) throw();
 			// create from another point
-			CPoint( POINT initPt) throw();
+			CPoint(POINT initPt) throw();
 			// create from a size
-			CPoint( SIZE initSize) throw();
+			CPoint(SIZE initSize) throw();
 			// create from an LPARAM: x = LOWORD(dw) y = HIWORD(dw)
-			CPoint( LPARAM dwPoint) throw();
-
+			CPoint(LPARAM dwPoint) throw();
 
 			// Operations
 
 			// translate the point
 			void Offset(
-				 int xOffset,
-				 int yOffset) throw();
-			void Offset( POINT point) throw();
-			void Offset( SIZE size) throw();
+				int xOffset,
+				int yOffset) throw();
+			void Offset(POINT point) throw();
+			void Offset(SIZE size) throw();
 			void SetPoint(
-				 int X,
-				 int Y) throw();
+				int X,
+				int Y) throw();
 
-			BOOL operator==( POINT point) const throw();
-			BOOL operator!=( POINT point) const throw();
-			void operator+=( SIZE size) throw();
-			void operator-=( SIZE size) throw();
-			void operator+=( POINT point) throw();
-			void operator-=( POINT point) throw();
+			BOOL operator==(POINT point) const throw();
+			BOOL operator!=(POINT point) const throw();
+			void operator+=(SIZE size) throw();
+			void operator-=(SIZE size) throw();
+			void operator+=(POINT point) throw();
+			void operator-=(POINT point) throw();
 
 			// Operators returning CPoint values
-			CPoint operator+( SIZE size) const throw();
-			CPoint operator-( SIZE size) const throw();
+			CPoint operator+(SIZE size) const throw();
+			CPoint operator-(SIZE size) const throw();
 			CPoint operator-() const throw();
-			CPoint operator+( POINT point) const throw();
+			CPoint operator+(POINT point) const throw();
 
 			// Operators returning CSize values
-			CSize operator-( POINT point) const throw();
+			CSize operator-(POINT point) const throw();
 
 			// Operators returning CRect values
-			CRect operator+( const RECT* lpRect) const throw();
-			CRect operator-( const RECT* lpRect) const throw();
+			CRect operator+(const RECT *lpRect) const throw();
+			CRect operator-(const RECT *lpRect) const throw();
 		};
-
 
 		/////////////////////////////////////////////////////////////////////////////
 		// CRect - A 2-D rectangle, similar to Windows RECT structure.
@@ -243,7 +232,7 @@ namespace Sloong
 				int r,
 				int b) throw();
 			// copy constructor
-			CRect(const RECT& srcRect) throw();
+			CRect(const RECT &srcRect) throw();
 
 			// from a pointer to another rect
 			CRect(LPCRECT lpSrcRect) throw();
@@ -265,13 +254,13 @@ namespace Sloong
 			// returns the size
 			CSize Size() const throw();
 			// reference to the top-left point
-			CPoint& TopLeft() throw();
+			CPoint &TopLeft() throw();
 			// reference to the bottom-right point
-			CPoint& BottomRight() throw();
+			CPoint &BottomRight() throw();
 			// const reference to the top-left point
-			const CPoint& TopLeft() const throw();
+			const CPoint &TopLeft() const throw();
 			// const reference to the bottom-right point
-			const CPoint& BottomRight() const throw();
+			const CPoint &BottomRight() const throw();
 			// the geometric center point of the rectangle
 			CPoint CenterPoint() const throw();
 			// swap the left and right
@@ -372,17 +361,17 @@ namespace Sloong
 				LPCRECT lpRectSrc2) throw();
 
 			// Additional Operations
-			void operator=(const RECT& srcRect) throw();
-			BOOL operator==(const RECT& rect) const throw();
-			BOOL operator!=(const RECT& rect) const throw();
+			void operator=(const RECT &srcRect) throw();
+			BOOL operator==(const RECT &rect) const throw();
+			BOOL operator!=(const RECT &rect) const throw();
 			void operator+=(POINT point) throw();
 			void operator+=(SIZE size) throw();
 			void operator+=(LPCRECT lpRect) throw();
 			void operator-=(POINT point) throw();
 			void operator-=(SIZE size) throw();
 			void operator-=(LPCRECT lpRect) throw();
-			void operator&=(const RECT& rect) throw();
-			void operator|=(const RECT& rect) throw();
+			void operator&=(const RECT &rect) throw();
+			void operator|=(const RECT &rect) throw();
 
 			// Operators returning CRect values
 			CRect operator+(POINT point) const throw();
@@ -391,14 +380,14 @@ namespace Sloong
 			CRect operator+(SIZE size) const throw();
 			CRect operator-(SIZE size) const throw();
 			CRect operator-(LPCRECT lpRect) const throw();
-			CRect operator&(const RECT& rect2) const throw();
-			CRect operator|(const RECT& rect2) const throw();
+			CRect operator&(const RECT &rect2) const throw();
+			CRect operator|(const RECT &rect2) const throw();
 			CRect MulDiv(
 				int nMultiplier,
 				int nDivisor) const throw();
 		};
 #endif // !_WINDOWS
-	}
-}
+	}  // namespace Universal
+} // namespace Sloong
 
 #endif //UNIV_H

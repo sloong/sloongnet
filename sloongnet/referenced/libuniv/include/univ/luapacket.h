@@ -25,11 +25,8 @@ namespace Sloong
             int setdata(lua_State* L);
             int getdata(lua_State* L);
 
-            void SetData(string key, string value);
-            string GetData(string key, string def);
-
-            string SerializeToString();
-            void ParseFromString(string& str );
+            void SetData(const string& key, const string& value);
+            string GetData(const string& key, const string& def);
 
             /**
              * @Remarks: Check the map object is changed after the Initialize with ParseFromString function.
@@ -53,7 +50,7 @@ namespace Sloong
 			shared_ptr<vector<string>> GetChangedItems();
 
         protected:
-            bool Exist(string key);
+            bool Exist(const string& key);
 
         private:
             mutex	m_oMutex;

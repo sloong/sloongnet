@@ -12,8 +12,8 @@ namespace Sloong
 			CMD5() {}
 			~CMD5() {}
 
-			static void Binary_Encode(string str, unsigned char(&md)[Sloong::Universal::MD5_LENGTH], bool bFile = false);
-			static string Encode(string str, bool bFile = false);
+			static void Binary_Encode(const string& str, unsigned char(&md)[Sloong::Universal::MD5_LENGTH], bool bFile = false);
+			static string Encode(const string& str, bool bFile = false);
 		};
 		
 		const int SHA1_LENGTH = 32;
@@ -24,7 +24,7 @@ namespace Sloong
 			~CSHA1() {}
 
 			// compare string or file hash value.
-			static string Encode(string str_src, bool file = false);
+			static string Encode(const string& str_src, bool file = false);
 			static void Binary_Encoding( const string& str_src, unsigned char (&md)[Sloong::Universal::SHA1_LENGTH], bool bFile = false);
 		};
 
@@ -37,7 +37,7 @@ namespace Sloong
 			~CSHA256() {}
 
 			// compare string or file hash value.
-			static string Encode(string str_src, bool file = false);
+			static string Encode(const string& str_src, bool file = false);
 			static void Binary_Encoding( const string& str_src, unsigned char (&md)[Sloong::Universal::SHA256_LENGTH], bool bFile = false);
 		};
 
@@ -48,7 +48,7 @@ namespace Sloong
 			~CSHA512() {}
 
 			// compare string or file hash value.
-			static string Encode(string str_src, bool file = false);
+			static string Encode(const string& str_src, bool file = false);
 			static void Binary_Encoding(const string& str_src, unsigned char(&md)[Sloong::Universal::SHA512_LENGTH], bool bFile = false);
 		};
 	}
