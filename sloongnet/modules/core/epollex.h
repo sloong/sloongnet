@@ -42,9 +42,9 @@ namespace Sloong
 		void CtlEpollEvent(int, int, int);
 		
 		// event function
-		void CloseConnectEventHandler(SmartEvent);
+		void CloseConnectEventHandler(IEvent*);
 
-		void MainWorkLoop(SMARTER);
+		void MainWorkLoop();
 
 	protected:
 		EpollEventHandlerFunc OnDataCanReceive = nullptr;

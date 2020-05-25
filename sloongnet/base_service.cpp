@@ -40,6 +40,7 @@ void CSloongBaseService::on_sigint(int signal)
 
 void CSloongBaseService::on_SIGINT_Event(int signal)
 {
+    cout << "SIGINT signal happened. Exit." << endl;
     Instance->Exit();
 }
 
@@ -326,9 +327,9 @@ CResult CSloongBaseService::Run(){
 void CSloongBaseService::Exit(){
     m_pLog->Info("Application will exit.");
     m_pControl->SendMessage(EVENT_TYPE::ProgramExit);
-    m_pControl->Exit();
     m_oExitSync.notify_one();
     if( m_pModule)
         dlclose(m_pModule);
+    m_pControl->Exit();
 }
 

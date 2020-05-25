@@ -16,15 +16,27 @@ namespace Sloong
     public:
         queue_ex() {}
         queue_ex(const queue_ex&) = delete;
-        void push(T data)
+        void push(const T& data)
         {
             unique_lock<shared_mutex> lock(m_mut);
             queue<T>::push(data);
+        }
+        void push_move(T data)
+        {
+            unique_lock<shared_mutex> lock(m_mut);
+            queue<T>::push(std::move(data));
         }
         T pop()
         {
             unique_lock<shared_mutex> lock(m_mut);
             auto item = this->front();
+            queue<T>::pop();
+            return item;
+        }
+        T pop_move()
+        {
+            unique_lock<shared_mutex> lock(m_mut);
+            auto item = std::move(this->front());
             queue<T>::pop();
             return item;
         }
@@ -42,6 +54,17 @@ namespace Sloong
                 return false;
 
             t = queue<T>::front();
+            queue<T>::pop();
+            return true;
+        }
+
+        bool TryMovePop(T& t)
+        {
+            unique_lock<shared_mutex> lock(m_mut);
+            if (queue<T>::empty())
+                return false;
+
+            t = std::move(queue<T>::front());
             queue<T>::pop();
             return true;
         }

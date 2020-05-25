@@ -80,7 +80,7 @@ CResult Sloong::CEpollEx::Initialize(IControl *iMsg)
 	m_EpollHandle = epoll_create(65535);
 
 	// Init the thread pool
-	CThreadPool::AddWorkThread(std::bind(&CEpollEx::MainWorkLoop, this, std::placeholders::_1), nullptr, workThread);
+	CThreadPool::AddWorkThread(std::bind(&CEpollEx::MainWorkLoop, this), workThread);
 
 	return CResult::Succeed();
 }
@@ -153,7 +153,7 @@ int Sloong::CEpollEx::SetSocketNonblocking(int socket)
 * Output: *
 * Others: *
 *************************************************/
-void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
+void Sloong::CEpollEx::MainWorkLoop()
 {
 	auto pid = this_thread::get_id();
 	string spid = Helper::ntos(pid);
@@ -267,11 +267,11 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 	m_pLog->Info("epoll work thread is exit " + spid);
 }
 
-void Sloong::CEpollEx::CloseConnectEventHandler(SmartEvent event)
+void Sloong::CEpollEx::CloseConnectEventHandler(IEvent* event)
 {
-	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
+	auto net_evt = TYPE_TRANS<CNetworkEvent*>(event);
 	auto socket = net_evt->GetSocketID();
-	CtlEpollEvent(EPOLL_CTL_DEL, socket, EPOLLIN | EPOLLOUT);
+	DeleteMonitorSocket(socket);
 }
 
 void Sloong::CEpollEx::Exit()
