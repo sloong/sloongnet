@@ -27,83 +27,85 @@ namespace Sloong
 	public:
 		// 以接受方的方式初始化
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
-		void Initialize( SOCKET sock, SSL_CTX* ctx= nullptr, bool useLongLongSize = false);
+		void Initialize(SOCKET, SSL_CTX *p = nullptr);
 
 		// 以发起方的方式初始化
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
-		void Initialize( string address, int port, SSL_CTX* ctx= nullptr, bool useLongLongSize = false);
+		void Initialize(const string &, int, SSL_CTX *p = nullptr);
 
 		bool Connect();
 
-		// 读取对端发送的数据，返回实际读取到的长度
-		// 函数并不保证数据会全部读取完成才返回。只会尝试尽可能多的读取，直到发生错误或者都去完成。所以需要检查期望读取的长度和实际读取的长度
-		// Return：
-		//	  -1 - 读取发生错误。且无法恢复。需要关闭连接。
-		//    >= 0 - 读取到的数据长度
-		int Read( char* data, int len, bool block, int timeout, bool bagain);
-		
-		// 接收一个数据包
-		// 如果接收到了所有的数据，那么返回succeed.
-		// 如果接收到了部分数据之后发生错误，直接返回Error
-		// 如果接收到了部分数据，并且超时设置为0，那么将会重复尝试，直至全部接收完毕或者发生其他错误，
-		// 如果接收到了部分数据，并且超时时间大于0，那么将会在发生超时之后，返回Timeout
-		// 如果没有接收到数据，并且发生了错误，返回Error
-		// 没有接收到数据，发生了超时，返回Timeout
-		ResultType RecvPackage(string& res, int timeOut = 0);
+		/* Receive a data package.
+		   Params:
+				1 -> The buffer to save received data.
+				2 -> Data package length.If it's first call, set to 0, When the function returns ti will be set to the length of this package. 
+						And in next calls, reset to this length.
+				3 -> Received length. If it's first call, set to 0. When the function returns it will be set to the actual received length. 
+						And in next calls, reset to this actual received length.
+				4 -> Block receive. until succeed or error.
+		   Returns:
+		    Succeed	-> All data received.
+		    Error	-> Error happened. need close socket.
+		    Retry	-> Part of the package was received, and it's happened EAGAIN error. need call this function again when socket is can received.
+		*/
+		ResultType RecvPackage(string&, int&, int&, bool=false);
 
-		long long RecvLengthData(bool block);
-
-		// 向对端发送数据，返回实际发送的长度
-		// 函数并不保证数据会全部发送完成才返回。只能尝试尽可能多的发送，直到发生错误或者全部发送完成。需要检查期望发送的长度和实际发送的长度
-		// Return：
-		//    -1 - 读取发生错误。且无法恢复。需要关闭连接。
-		//    >=0 - 成功发送的数据长度
-		int Write(const char* data, int len, int index);
-
-		int Write(string sendData, int index);
-
-		// 首先根据在Initialize函数中的参数发送Package长度（4Bit/8Bit）。然后在发送数据包本身
-		int SendPackage(string sendData, int index);
-
-		bool SendLengthData(long long lengthData);
+		/* Send the data package.
+		   Params:
+		  		1 -> the send data.
+		  		2 -> Sent length. If it's first call, set to 0. When the function returns it will be set to the actual sent length. 
+		  				And in next calls, reset to this actual sent length.
+		   Returns:
+		  	Succeed	-> All data is sent.
+		  	Error	-> Error happened. need close socket.
+		  	Retry	-> Part of the package was sent. and it's happened EAGAIN error. need call this function again when socket is can sent.
+		*/
+		ResultType SendPackage(const string &, int&);
 
 		void Close();
 
-		SOCKET GetSocketID(){
-			return m_nSocket;
-		}
+		inline SOCKET GetSocketID() { return m_nSocket; }
 
-		int GetErrno(){
-			return m_nErrno;
-		}
+		inline int GetErrno() { return m_nErrno; }
+
+	protected:
+		int Read(char *, int, bool, bool);
+
+		decltype(auto) RecvLengthData(bool);
+
+		int Write(const char *, int, int);
+
+		inline int Write(const string &sendData, int index) { return Write(sendData.c_str(), (int)sendData.length(), index); }
+
+		bool SendLengthData(int64_t);
+
 	public:
-		static unsigned long G_InitializeSSL(SSL_CTX*& ctx, string certFile, string keyFile, string passwd);
-		static string G_FormatSSLErrorMsg(int code);
+		static unsigned long G_InitializeSSL(SSL_CTX *&, const string &, const string &, const string &);
+		static string G_FormatSSLErrorMsg(int);
 
 	private:
-		bool CheckSSLStatus(bool bRead);
+		bool CheckSSLStatus(bool);
 		bool do_handshake();
 
-		int SSL_Read_Ex(SSL* ssl, char* buf, int nSize, int nTimeout, bool bAgagin);
-		int SSL_Write_Ex(SSL* ssl, char* buf, int len);
+		int SSL_Read_Ex(SSL *, char *, int, int, bool);
+		int SSL_Write_Ex(SSL *, char *, int);
+
 	public:
 		string m_strAddress;
 		int m_nPort;
+
 	private:
 		int m_nErrno;
-		SOCKET m_nSocket=INVALID_SOCKET;
-		SSL* m_pSSL = nullptr;
+		SOCKET m_nSocket = INVALID_SOCKET;
+		SSL *m_pSSL = nullptr;
 		bool m_bSupportReconnect = false;
 		string m_strErrorMsg;
 		int m_nErrorCode;
-		bool m_bUseLongLongSize = false;
 		ConnectStatus m_stStatus = ConnectStatus::Disconnect;
 	};
 
 	typedef unique_ptr<EasyConnect> SmartConnect;
 
-}
+} // namespace Sloong
 
 #endif // !SLOONGNET_EASY_CONNECT_H
-
-

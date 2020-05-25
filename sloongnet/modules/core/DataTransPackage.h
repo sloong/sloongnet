@@ -16,19 +16,19 @@ namespace Sloong
 {
     class CDataTransPackage
     {
-	public:
-        CDataTransPackage(EasyConnect* conn):m_pCon(conn){m_nSocket = m_pCon->GetSocketID();}
+    public:
+        CDataTransPackage(EasyConnect *conn) : m_pCon(conn) { m_nSocket = m_pCon->GetSocketID(); }
 
         void RequestPackage();
-        void RequestPackage( const DataPackage& pack );
+        void RequestPackage(const DataPackage &);
 
-        void ResponsePackage(ResultType result);
-		void ResponsePackage(ResultType result, const string& message, const string* exdata =nullptr);
-        void ResponsePackage(const CResult& result);
-        void ResponsePackage( const DataPackage& pack  );
+        void ResponsePackage(ResultType);
+        void ResponsePackage(ResultType, const string &, const string * = nullptr);
+        void ResponsePackage(const CResult &);
+        void ResponsePackage(const DataPackage &);
 
-	protected:
-		void PrepareSendPackageData();
+    protected:
+        void PrepareSendPackageData();
 
     public:
         /**
@@ -38,7 +38,7 @@ namespace Sloong
          *          if other error happened else return Error 
          *          if md5 check failed, return Invalied.
          */
-        ResultType RecvPackage(int);
+        ResultType RecvPackage(bool=false);
 
         /**
          * @Remarks: send this package
@@ -47,21 +47,25 @@ namespace Sloong
          */
         ResultType SendPackage();
 
-        inline int GetFunction() { return m_pTransPackage.function();}
+        inline int GetFunction() { return m_pTransPackage.function(); }
 
-        inline DataPackage* GetDataPackage(){ return &m_pTransPackage;}
+        inline DataPackage *GetDataPackage() { return &m_pTransPackage; }
 
-        inline string GetRecvMessage(){ return m_pTransPackage.content(); }
+        inline string GetRecvMessage() { return m_pTransPackage.content(); }
 
         inline string GetExtendData() { return m_pTransPackage.extend(); }
 
-        inline void SetConnection(EasyConnect* conn){ m_pCon = conn; m_nSocket = m_pCon->GetSocketID(); }
-        inline void ClearConnection(){ m_pCon = nullptr; }
-        inline void SetSocket(SOCKET sock){ m_nSocket = sock; }
+        inline void SetConnection(EasyConnect *conn)
+        {
+            m_pCon = conn;
+            m_nSocket = m_pCon->GetSocketID();
+        }
+        inline void ClearConnection() { m_pCon = nullptr; }
+        inline void SetSocket(SOCKET sock) { m_nSocket = sock; }
 
-        inline EasyConnect* GetConnection() { return m_pCon; }
+        inline EasyConnect *GetConnection() { return m_pCon; }
 
-        inline int GetSocketID(){ return m_nSocket; }
+        inline int GetSocketID() { return m_nSocket; }
 
         inline string GetSocketIP() { return CUtility::GetSocketIP(m_nSocket); }
 
@@ -72,40 +76,51 @@ namespace Sloong
          * @Params: 
          * @Return: 
          */
-        inline bool IsBigPackage(){ return m_pTransPackage.extend().length() > 0 ? true : false; }
+        inline bool IsBigPackage() { return m_pTransPackage.extend().length() > 0 ? true : false; }
 
-        inline int GetPriority(){ return m_pTransPackage.priority(); }
+        inline int GetPriority() { return m_pTransPackage.priority(); }
 
-        inline void SetPriority(int value){ m_pTransPackage.set_priority(value); }
+        inline void SetPriority(int value) { m_pTransPackage.set_priority(value); }
 
-        inline uint64_t GetSerialNumber(){ return m_pTransPackage.id(); }
+        inline uint64_t GetSerialNumber() { return m_pTransPackage.id(); }
 
-        inline void SetSerialNumber(uint64_t value){ m_pTransPackage.set_id(value); }
+        inline void SetSerialNumber(uint64_t value) { m_pTransPackage.set_id(value); }
 
-        inline int GetSentSize(){ return m_nSent; }
-        inline int GetPackageSize(){return m_nPackageSize;}
+        inline int GetSentSize() { return m_nSent; }
+        inline int GetPackageSize() { return m_nPackageSize; }
 
-        inline timeval GetTimeval() { struct  timeval  start;gettimeofday(&start,NULL);return start; }
-        inline void Record(){  m_listClock.push_back(GetTimeval()); }
-        inline list<timeval>* GetRecord(){ return &m_listClock; }
+        inline timeval GetTimeval()
+        {
+            struct timeval start;
+            gettimeofday(&start, NULL);
+            return start;
+        }
+        inline void Record() { m_listClock.push_back(GetTimeval()); }
+        inline list<timeval> *GetRecord() { return &m_listClock; }
 
         string FormatRecord();
+
+    protected:
+        ResultType RecvPackageSucceedProcess(const string&);
+
     protected:
         // Send data info
         string m_strPackageData;
-        int m_nSent=0;
-		int m_nPackageSize=0;
+        int m_nSent = 0;
+        int m_nReceived = 0;
+        int m_nPackageSize = 0;
         DataPackage m_pTransPackage;
         list<timeval> m_listClock;
-    protected:
-        EasyConnect*    m_pCon = nullptr;
-        SOCKET          m_nSocket = INVALID_SOCKET;
-    public:
-        static inline void InitializeLog(CLog* log){ g_pLog = log; }
-        static CLog*    g_pLog;
-    };
-    typedef shared_ptr<CDataTransPackage> SmartPackage;
-}
 
+    protected:
+        EasyConnect *m_pCon = nullptr;
+        SOCKET m_nSocket = INVALID_SOCKET;
+
+    public:
+        static inline void InitializeLog(CLog *log) { g_pLog = log; }
+        static CLog *g_pLog;
+    };
+    typedef unique_ptr<CDataTransPackage> UniqueTransPackage;
+} // namespace Sloong
 
 #endif
