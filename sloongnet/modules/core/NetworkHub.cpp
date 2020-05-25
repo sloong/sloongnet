@@ -10,7 +10,7 @@ using namespace Sloong::Events;
 Sloong::CNetworkHub::CNetworkHub()
 {
 	m_pEpoll = make_unique<CEpollEx>();
-	m_pWaitProcessList = new queue_ex<SmartPackage>[s_PriorityLevel]();
+	m_pWaitProcessList = new queue_ex<UniqueTransPackage>[s_PriorityLevel]();
 }
 
 Sloong::CNetworkHub::~CNetworkHub()
@@ -23,7 +23,8 @@ Sloong::CNetworkHub::~CNetworkHub()
 	{
 		while (!m_pWaitProcessList[i].empty())
 		{
-			m_pWaitProcessList[i].pop();
+			m_pWaitProcessList[i].front().reset();
+			m_pWaitProcessList[i].pop_move();
         }
 	}
 	SAFE_DELETE_ARR(m_pWaitProcessList);
@@ -62,12 +63,12 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	return CResult::Succeed();
 }
 
-void Sloong::CNetworkHub::Run(SmartEvent event)
+void Sloong::CNetworkHub::Run(IEvent* event)
 {
 	m_bIsRunning = true;
 	m_pEpoll->Run();
 	if (m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0)
-		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this, std::placeholders::_1), nullptr);
+		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this));
 
 	if (m_pRequestFunc == nullptr) {
 		m_pLog->Fatal("Process function is null.");
@@ -77,10 +78,10 @@ void Sloong::CNetworkHub::Run(SmartEvent event)
 	if (m_pConfig->processthreadquantity() < 1)
 		m_pLog->Fatal("the config value for process work quantity is invalid, please check.");
 
-	CThreadPool::AddWorkThread(std::bind(&CNetworkHub::MessageProcessWorkLoop, this, std::placeholders::_1), nullptr, m_pConfig->processthreadquantity());
+	CThreadPool::AddWorkThread(std::bind(&CNetworkHub::MessageProcessWorkLoop, this), m_pConfig->processthreadquantity());
 }
 
-void Sloong::CNetworkHub::Exit(SmartEvent event)
+void Sloong::CNetworkHub::Exit(IEvent* event)
 {
 	m_bIsRunning = false;
 	m_oCheckTimeoutThreadSync.notify_all();
@@ -88,9 +89,9 @@ void Sloong::CNetworkHub::Exit(SmartEvent event)
 	m_pEpoll->Exit();
 }
 
-void Sloong::CNetworkHub::SendPackageEventHandler(SmartEvent event)
+void Sloong::CNetworkHub::SendPackageEventHandler(IEvent* event)
 {
-	auto send_evt = dynamic_pointer_cast<CSendPackageEvent>(event);
+	auto send_evt = TYPE_TRANS<CSendPackageEvent*>(event);
 	auto socket = send_evt->GetSocketID();
 	if (!m_SockList.exist(socket))
 	{
@@ -99,14 +100,14 @@ void Sloong::CNetworkHub::SendPackageEventHandler(SmartEvent event)
 	}
 	auto info = m_SockList[socket].get();
 
-	auto transPack = make_shared<CDataTransPackage>(info->m_pCon.get());
+	auto transPack = make_unique<CDataTransPackage>(info->m_pCon.get());
 	transPack->RequestPackage(*send_evt->GetDataPackage());
 
 	AddMessageToSendList(transPack);
 }
 
 
-void Sloong::CNetworkHub::AddMessageToSendList(SmartPackage pack)
+void Sloong::CNetworkHub::AddMessageToSendList(UniqueTransPackage& pack)
 {
 	int socket = pack->GetSocketID();
 	if (!m_SockList.exist(socket))
@@ -116,7 +117,7 @@ void Sloong::CNetworkHub::AddMessageToSendList(SmartPackage pack)
 	}
 
 	auto info = m_SockList[socket].get();
-	auto res = info->SendDataPackage(pack);
+	auto res = info->SendDataPackage(std::move(pack));
 	if (res == ResultType::Retry)
 	{
 		m_pEpoll->MonitorSendStatus(socket);
@@ -128,9 +129,9 @@ void Sloong::CNetworkHub::AddMessageToSendList(SmartPackage pack)
 }
 
 
-void Sloong::CNetworkHub::CloseConnectEventHandler(SmartEvent event)
+void Sloong::CNetworkHub::CloseConnectEventHandler(IEvent* event)
 {
-	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
+	auto net_evt = TYPE_TRANS<CNetworkEvent*>(event);
 	auto id = net_evt->GetSocketID();
 	if (!m_SockList.exist(id))
 		return;
@@ -143,15 +144,15 @@ void Sloong::CNetworkHub::CloseConnectEventHandler(SmartEvent event)
 	sockLck.unlock();	
 }
 
-void Sloong::CNetworkHub::MonitorSendStatusEventHandler(SmartEvent event)
+void Sloong::CNetworkHub::MonitorSendStatusEventHandler(IEvent* event)
 {
-	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
+	auto net_evt = TYPE_TRANS<CNetworkEvent*>(event);
 	m_pEpoll->MonitorSendStatus(net_evt->GetSocketID());
 }
 
-void Sloong::CNetworkHub::RegisteConnectionEventHandler(SmartEvent event)
+void Sloong::CNetworkHub::RegisteConnectionEventHandler(IEvent* event)
 {
-	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
+	auto net_evt = TYPE_TRANS<CNetworkEvent*>(event);
 	auto nSocket = net_evt->GetSocketID();
 
 	auto info = make_unique<CSockInfo>();
@@ -170,10 +171,10 @@ void Sloong::CNetworkHub::SendCloseConnectEvent(int socket)
 	if (!m_SockList.exist(socket))
 		return;
 
-	auto event = make_shared<CNetworkEvent>(EVENT_TYPE::SocketClose);
+	auto event = make_unique<CNetworkEvent>(EVENT_TYPE::SocketClose);
 	event->SetSocketID(socket);
 
-	m_iC->SendMessage(event);
+	m_iC->SendMessage(std::move(event));
 }
 
 void Sloong::CNetworkHub::EnableClientCheck(const string &clientCheckKey, int clientCheckTime)
@@ -189,7 +190,7 @@ void Sloong::CNetworkHub::EnableTimeoutCheck(int timeoutTime, int checkInterval)
 	m_nCheckTimeoutInterval = checkInterval;
 }
 
-void Sloong::CNetworkHub::EnableSSL(string certFile, string keyFile, string passwd)
+void Sloong::CNetworkHub::EnableSSL(const string& certFile, const string& keyFile, const string& passwd)
 {
 	auto ret = EasyConnect::G_InitializeSSL(m_pCTX, certFile, keyFile, passwd);
 	if (ret != S_OK)
@@ -207,7 +208,7 @@ void Sloong::CNetworkHub::EnableSSL(string certFile, string keyFile, string pass
 * Output: *
 * Others: *
 *************************************************/
-void Sloong::CNetworkHub::CheckTimeoutWorkLoop(SMARTER param)
+void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
 {
 	int tout = m_nConnectTimeoutTime * 60;
 	int tinterval = m_nCheckTimeoutInterval * 60;
@@ -237,7 +238,7 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop(SMARTER param)
 /// 消息处理工作线程函数
 // 按照优先级，逐个处理待处理队列。每个队列处理完毕时，重新根据优先级处理，尽量保证高优先级的处理
 // 为了避免影响接收时的效率，将队列操作放松到最低。以每次一定数量的处理来逐级加锁。
-void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
+void Sloong::CNetworkHub::MessageProcessWorkLoop()
 {
 	m_pLog->Debug("MessageProcessWorkLoop thread is running.");
 	void* pEnv;
@@ -254,7 +255,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 	} 
 	
 	
-	SmartPackage pack;
+	UniqueTransPackage pack;
 	while (m_bIsRunning)
 	{
 		MessagePorcessListRetry:
@@ -265,7 +266,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 				continue;
 			}
 			
-			while( m_pWaitProcessList[i].TryPop(pack) )
+			while( m_pWaitProcessList[i].TryMovePop(pack) )
 			{
 				// In here, the result no the result for this request.
 				// it just for is need add the pack obj to send list.
@@ -288,6 +289,8 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop(SMARTER param)
 				pack->Record();
 				if( res.IsSucceed())
 					AddMessageToSendList(pack);
+				else
+					pack = nullptr;
 			}
 			goto MessagePorcessListRetry;
 		}
@@ -342,20 +345,19 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
 		return ResultType::Error;
 	}
 	auto info = m_SockList[nSocket].get();
+	if(!info->TryReceiveLock()) return ResultType::Invalid;
 
-
-	queue<SmartPackage> readList;
+	m_pLog->Verbos("OnDataCanReceive called");
+	queue<unique_ptr<CDataTransPackage>> readList;
 	auto res = info->OnDataCanReceive(readList);
 	if (res == ResultType::Error)
 		SendCloseConnectEvent(nSocket);
-	else if(res == ResultType::Invalid)
-		return ResultType::Succeed;
 
+	m_pLog->Verbos(Helper::Format("OnDataCanReceive done. package [%d].",readList.size()));
 	while( !readList.empty())
 	{
-		auto item = readList.front();
+		m_pWaitProcessList[readList.front()->GetPriority()].push_move(std::move(readList.front()));
 		readList.pop();
-		m_pWaitProcessList[item->GetPriority()].push(item);
 	}
 	m_oProcessThreadSync.notify_all();
 	return res;
@@ -369,6 +371,8 @@ ResultType Sloong::CNetworkHub::OnCanWriteData(int nSocket)
 		return ResultType::Error;
 	}
 	auto info = m_SockList[nSocket].get();
+
+	if( !info->TrySendLock()) return ResultType::Invalid;
 
 	auto res = info->OnDataCanSend();
 	if (res == ResultType::Error)

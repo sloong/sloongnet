@@ -41,12 +41,12 @@ void Sloong::CLuaProcessCenter::Initialize(IControl* iMsg)
 }
 
 
-void Sloong::CLuaProcessCenter::HandleError(string err)
+void Sloong::CLuaProcessCenter::HandleError(const string& err)
 {
 	g_pLog->Error(Helper::Format("[Script]:[%s]", err.c_str()));
 }
 
-void Sloong::CLuaProcessCenter::ReloadContext(SmartEvent event)
+void Sloong::CLuaProcessCenter::ReloadContext(IEvent* event)
 {
 	size_t n = m_pLuaList.size();
 	for (size_t i=0;i<n;i++)

@@ -29,7 +29,6 @@ namespace Sloong
 	protected:
 		int m_nRefCount = 0;
 	};
-	typedef shared_ptr<IEvent> SmartEvent;
 	template<typename T> inline
 	T EVENT_TRANS(IEvent* p)
 	{

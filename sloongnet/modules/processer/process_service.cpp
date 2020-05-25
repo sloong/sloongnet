@@ -110,7 +110,7 @@ CResult Sloong::SloongNetProcess::ResponsePackageProcesser(CLuaProcessCenter* pP
 	return CResult::Succeed();
 }
 
-void Sloong::SloongNetProcess::OnSocketClose(SmartEvent event)
+void Sloong::SloongNetProcess::OnSocketClose(IEvent* event)
 {
 }
 

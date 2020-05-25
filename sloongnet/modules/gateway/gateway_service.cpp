@@ -77,20 +77,21 @@ CResult SloongNetGateway::Initialized(SOCKET sock, IControl *iC)
 	m_pRuntimeData = IData::GetRuntimeData();
 	if (m_pModuleConfig)
 	{
-		shared_ptr<CNormalEvent> event = make_shared<CNormalEvent>();
+		auto event = make_unique<CNormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableTimeoutCheck);
 		event->SetMessage(Helper::Format("{\"TimeoutTime\":\"%d\", \"CheckInterval\":%d}", (*m_pModuleConfig)["TimeoutTime"].asInt(), (*m_pModuleConfig)["TimeoutCheckInterval"].asInt()));
-		m_pControl->SendMessage(event);
+		m_pControl->SendMessage(std::move(event));
 
+		event = make_unique<CNormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableClientCheck);
 		event->SetMessage(Helper::Format("{\"ClientCheckKey\":\"%s\", \"ClientCheckTime\":%d}", (*m_pModuleConfig)["ClientCheckKey"].asString().c_str(), (*m_pModuleConfig)["ClientCheckKey"].asInt()));
-		m_pControl->SendMessage(event);
+		m_pControl->SendMessage(std::move(event));
 	}
 	m_pLog = IData::GetLog();
 	m_nManagerConnection = sock;
 	m_pControl->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
 	m_pControl->RegisterEventHandler(EVENT_TYPE::SocketClose, std::bind(&SloongNetGateway::OnSocketClose, this, std::placeholders::_1));
-	m_pControl->RegisterEventHandler(EVENT_TYPE::SendPackage, std::bind(&SloongNetGateway::SendPackageHook, this, std::placeholders::_1));
+	m_pControl->RegisterEventHook(EVENT_TYPE::SendPackage, std::bind(&SloongNetGateway::SendPackageHook, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
@@ -99,9 +100,13 @@ CResult SloongNetGateway::ResponsePackageProcesser( CDataTransPackage *trans_pac
 {
 	auto num = trans_pack->GetSerialNumber();
 	if (!m_listSendEvent.exist(num))
+	{
+		m_pLog->Error("ResponsePackageProcesser no find the package.");
 		return CResult::Make_Error("ResponsePackageProcesser no find the package.");
+	}
+		
 
-	auto send_evt = dynamic_pointer_cast<CSendPackageEvent>(m_listSendEvent[num]);
+	auto send_evt = TYPE_TRANS<CSendPackageEvent*>(m_listSendEvent[num].get());
 	auto need_send_res = send_evt->CallCallbackFunc(trans_pack);
 	m_listSendEvent.erase(num);
 	return need_send_res;
@@ -110,10 +115,10 @@ CResult SloongNetGateway::ResponsePackageProcesser( CDataTransPackage *trans_pac
 
 void SloongNetGateway::QueryReferenceInfo()
 {
-	auto event = make_shared<CSendPackageEvent>();
+	auto event = make_unique<CSendPackageEvent>();
 	event->SetCallbackFunc(std::bind(&SloongNetGateway::QueryReferenceInfoResponseHandler, this, std::placeholders::_1, std::placeholders::_2));
 	event->SetRequest(m_nManagerConnection, m_pRuntimeData->nodeuuid(), snowflake::Instance->nextid(), Core::HEIGHT_LEVEL, (int)Functions::QueryReferenceInfo, "");
-	m_pControl->SendMessage(event);
+	m_pControl->CallMessage(std::move(event));
 }
 
 inline int SloongNetGateway::ParseFunctionValue(const string &s)
@@ -188,9 +193,9 @@ void SloongNetGateway::AddConnection( uint64_t uuid, const string &addr, int por
 	EasyConnect conn;
 	conn.Initialize(addr, port);
 	conn.Connect();
-	auto event = make_shared<CNetworkEvent>(EVENT_TYPE::RegisteConnection);
+	auto event = make_unique<CNetworkEvent>(EVENT_TYPE::RegisteConnection);
 	event->SetSocketID(conn.GetSocketID());
-	m_pControl->SendMessage(event);
+	m_pControl->SendMessage(std::move(event));
 	m_mapUUIDToConnect[uuid] = conn.GetSocketID();
 }
 
@@ -205,19 +210,19 @@ CResult SloongNetGateway::CreateProcessEnvironmentHandler(void **out_env)
 	return CResult::Succeed();
 }
 
-void SloongNetGateway::SendPackageHook(SmartEvent event)
+void SloongNetGateway::SendPackageHook(UniqueEvent event)
 {
-	auto send_evt = dynamic_pointer_cast<CSendPackageEvent>(event);
+	auto send_evt = TYPE_TRANS<CSendPackageEvent*>(event.get());
 	auto pack = send_evt->GetDataPackage();
-	m_listSendEvent[pack->id()] = event;
+	m_listSendEvent[pack->id()] = std::move(event);
 }
 
-void SloongNetGateway::OnStart(SmartEvent evt)
+void SloongNetGateway::OnStart(IEvent* evt)
 {
 	QueryReferenceInfo();
 }
 
-void Sloong::SloongNetGateway::OnSocketClose(SmartEvent event)
+void Sloong::SloongNetGateway::OnSocketClose(IEvent* event)
 {
 
 }
@@ -241,9 +246,9 @@ void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_r
 	auto uuid = req->uuid();
 	auto item = m_mapUUIDToNode[uuid];
 	m_mapTempteIDToUUIDs[item.templateid()].erase(item.uuid());
-	auto event = make_shared<CNetworkEvent>(EVENT_TYPE::SocketClose);
+	auto event = make_unique<CNetworkEvent>(EVENT_TYPE::SocketClose);
 	event->SetSocketID(m_mapUUIDToConnect[uuid]);
-	m_pControl->SendMessage(event);
+	m_pControl->SendMessage(std::move(event));
 	m_mapUUIDToConnect.erase(uuid);
 	m_mapUUIDToNode.erase(uuid);
 }

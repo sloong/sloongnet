@@ -32,9 +32,9 @@ namespace Sloong
 		bool MsgProcess( CLuaPacket * pUInfo, const string& msg, string& res, char*& exData, int& exSize);
 		int GetFreeLuaContext();
 		
-		void ReloadContext(SmartEvent event);
+		void ReloadContext(IEvent* event);
 	public:
-		static void HandleError(string err);
+		static void HandleError(const string& err);
 	protected:
 		vector<CLua*>	m_pLuaList;
 		vector<bool>	m_oReloadList;

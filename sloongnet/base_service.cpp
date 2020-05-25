@@ -65,7 +65,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
         ResultType result = dataPackage.SendPackage();
         if (result != ResultType::Succeed)
             return CResult::Make_Error( "Send get config request error.");
-        result = dataPackage.RecvPackage(0);
+        result = dataPackage.RecvPackage(true);
         if (result != ResultType::Succeed)
             return CResult::Make_Error("Receive get config result error.");
         auto response = dataPackage.GetDataPackage();
@@ -77,7 +77,8 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage* data)
                 uuid = Helper::BytesToInt64(response->content().c_str());
                 cout << "Control assigen uuid ."<< uuid << endl;
             }else{
-                sleep(1);
+                this_thread::sleep_for( std::chrono::seconds(1) );
+                //sleep(1);
                 cout << "Control return retry package. wait 1s and retry." << endl;
             }
             continue;
@@ -214,9 +215,9 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
             m_pLog->Fatal(res.Message());
             return res;
         }
-        auto event = make_shared<Events::CNetworkEvent>(EVENT_TYPE::RegisteConnection);
+        auto event = make_unique<Events::CNetworkEvent>(EVENT_TYPE::RegisteConnection);
         event->SetSocketID(sock);
-        m_pControl->SendMessage(event);
+        m_pControl->SendMessage(std::move(event));
     }
 
     return CResult::Succeed();
@@ -295,7 +296,7 @@ CResult CSloongBaseService::RegisteNode()
 	ResultType result = dataPackage.SendPackage();
     if (result != ResultType::Succeed)
 		return CResult::Make_Error( "Send RegisteNode request error.");
-	result = dataPackage.RecvPackage(0);
+	result = dataPackage.RecvPackage(true);
 	if (result != ResultType::Succeed)
 		return CResult::Make_Error(" Get RegisteNode result error.");
 	auto response = dataPackage.GetDataPackage();
@@ -307,7 +308,7 @@ CResult CSloongBaseService::RegisteNode()
 }
 
 
-void CSloongBaseService::Restart(SmartEvent event)
+void CSloongBaseService::Restart(IEvent* event)
 {
     // Restart service. use the Exit Sync object, notify the wait thread and return the ExitResult.
     // in main function, check the result, if is Retry, do the init loop.

@@ -41,7 +41,7 @@ namespace Sloong
 	protected:
 		void ResetControlConfig(GLOBAL_CONFIG* config);
 
-		void OnSocketClose(SmartEvent event);
+		void OnSocketClose(IEvent* event);
 		
 	protected:
 		list<shared_ptr<CServerManage>> m_listServerManage;

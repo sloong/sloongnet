@@ -47,9 +47,9 @@ namespace Sloong
 		void EventPackageProcesser(CDataTransPackage *);
 		
 		// Event handler
-		void OnStart(SmartEvent);
-		void OnSocketClose(SmartEvent);
-		void SendPackageHook(SmartEvent);
+		void OnStart(IEvent*);
+		void OnSocketClose(IEvent*);
+		void SendPackageHook(UniqueEvent);
 
 		void OnReferenceModuleOnlineEvent(const string&,CDataTransPackage *);
 		void OnReferenceModuleOfflineEvent(const string&,CDataTransPackage *);
@@ -61,7 +61,7 @@ namespace Sloong
 
 	public:
 		SOCKET GetPorcessConnect(int function);
-		map_ex<uint64_t, SmartEvent> m_listSendEvent;
+		map_ex<uint64_t, UniqueEvent> m_listSendEvent;
 		map_ex<int, list_ex<int>> m_mapFuncToTemplateIDs;
 		map_ex<int, list_ex<uint64_t>> m_mapTempteIDToUUIDs;
 		map_ex<uint64_t, NodeItem> m_mapUUIDToNode;

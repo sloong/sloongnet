@@ -120,11 +120,12 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
 }
 
 
-void Sloong::SloongControlService::OnSocketClose(SmartEvent event)
+void Sloong::SloongControlService::OnSocketClose(IEvent* event)
 {
-	auto net_evt = dynamic_pointer_cast<CNetworkEvent>(event);
+	auto net_evt = TYPE_TRANS<CNetworkEvent*>(event);
 	auto sock = net_evt->GetSocketID();
-	for( auto item : m_listServerManage ) item->OnSocketClosed(sock);
+	for( auto item : m_listServerManage ) 
+		item->OnSocketClosed(sock);
 }
 
 inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(void** out_env)

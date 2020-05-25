@@ -33,7 +33,7 @@ namespace Sloong
 		virtual CResult Initialize(bool, string, int);
 
 		virtual CResult Run();
-		virtual void Restart(SmartEvent event);
+		virtual void Restart(IEvent* event);
 		virtual void Exit();
 
 		TResult<shared_ptr<DataPackage>> RegisteToControl(EasyConnect* con, string uuid);

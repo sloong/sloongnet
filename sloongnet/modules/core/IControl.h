@@ -11,24 +11,26 @@
 #include "IEvent.h"
 namespace Sloong
 {
-	typedef std::function<void(shared_ptr<IEvent>)> MsgHandlerFunc;
-	
+	typedef unique_ptr<IEvent> UniqueEvent;
+	typedef std::function<void(IEvent *)> MsgHandlerFunc;
+	typedef std::function<void(UniqueEvent)> MsgHookFunc;
 	class IControl
 	{
 	public:
-		// Data 
-		virtual bool Add(DATA_ITEM item, void* object) = 0;
-		virtual void* Get(DATA_ITEM item) = 0;
-		virtual bool Remove(DATA_ITEM item) = 0;
-		virtual bool AddTemp(string name, void* object) = 0;
-		virtual void* GetTemp(string name) = 0;
+		// Data
+		virtual bool Add(DATA_ITEM, void *) = 0;
+		virtual void *Get(DATA_ITEM) = 0;
+		virtual bool Remove(DATA_ITEM) = 0;
+		virtual bool AddTemp(const string &, void *) = 0;
+		virtual void *GetTemp(const string &) = 0;
 		// Message
-		virtual void SendMessage(EVENT_TYPE msgType) = 0;
-		virtual void SendMessage(SmartEvent evt) = 0;
-		virtual void CallMessage(SmartEvent evt) = 0;
-		virtual void RegisterEvent(EVENT_TYPE t) = 0;
-		virtual void RegisterEventHandler(EVENT_TYPE t, MsgHandlerFunc func) = 0;
+		virtual void SendMessage(EVENT_TYPE) = 0;
+		virtual void SendMessage(UniqueEvent) = 0;
+		virtual void CallMessage(UniqueEvent) = 0;
+		virtual void RegisterEvent(EVENT_TYPE) = 0;
+		virtual void RegisterEventHandler(EVENT_TYPE, MsgHandlerFunc) = 0;
+		virtual void RegisterEventHook(EVENT_TYPE, MsgHookFunc) = 0;
 	};
-}
+} // namespace Sloong
 
 #endif

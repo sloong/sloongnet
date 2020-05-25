@@ -23,15 +23,15 @@ namespace Sloong
 
         void EnableClientCheck(const string& clientCheckKey, int clientCheckTime);
         void EnableTimeoutCheck(int timeoutTime, int checkInterval);
-        void EnableSSL(string certFile, string keyFile, string passwd);
+        void EnableSSL(const string& certFile, const string& keyFile, const string& passwd);
 
         // event handler
-        void Run(SmartEvent event);
-		void Exit(SmartEvent event);
-        void SendPackageEventHandler(SmartEvent event);
-        void CloseConnectEventHandler(SmartEvent event);
-		void MonitorSendStatusEventHandler(SmartEvent evt);
-        void RegisteConnectionEventHandler(SmartEvent evt);
+        void Run(IEvent* event);
+		void Exit(IEvent* event);
+        void SendPackageEventHandler(IEvent* event);
+        void CloseConnectEventHandler(IEvent* event);
+		void MonitorSendStatusEventHandler(IEvent* evt);
+        void RegisteConnectionEventHandler(IEvent* evt);
 
 
         inline void RegisterProcesser(RequestPackageProcessFunction req,ResponsePackageProcessFunction res,EventPackageProcessFunction event){
@@ -55,8 +55,8 @@ namespace Sloong
         }
 
         // Work thread.
-		void CheckTimeoutWorkLoop(SMARTER params=nullptr);
-        void MessageProcessWorkLoop(SMARTER params=nullptr);
+		void CheckTimeoutWorkLoop();
+        void MessageProcessWorkLoop();
 
         // Callback function
         ResultType OnNewAccept( int nSocket );
@@ -66,8 +66,8 @@ namespace Sloong
 
     protected:
         void SendCloseConnectEvent(int socket);
-        void SendMessage(int sock, int nPriority, long long nSwift, string msg, const char* pExData = NULL, int nExSize = 0 );
-        void AddMessageToSendList(SmartPackage pack);
+        void SendMessage(int sock, int nPriority, int64_t nSwift, string msg, const char* pExData = NULL, int nExSize = 0 );
+        void AddMessageToSendList(UniqueTransPackage& pack);
         /// 将响应消息加入到epoll发送列表中
 		void AddToSendList(int socket, int nPriority, const char* pBuf, int nSize, int nStart, const char* pExBuf, int nExSize);
         
@@ -95,7 +95,7 @@ namespace Sloong
         ResponsePackageProcessFunction          m_pResponseFunc = nullptr;
         EventPackageProcessFunction            m_pEventFunc = nullptr;
         NewConnectAcceptProcessFunction        m_pAcceptFunc = nullptr;
-        queue_ex<SmartPackage>*    m_pWaitProcessList;
+        queue_ex<UniqueTransPackage>*    m_pWaitProcessList;
     };
 }
 

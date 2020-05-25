@@ -417,9 +417,9 @@ void Sloong::CServerManage::SendEvent(list<uint64_t> notifyList, int event, ::go
 	{
 		string msg_str;
 		msg->SerializeToString(&msg_str);
-		auto req = make_shared<CSendPackageEvent>();
+		auto req = make_unique<CSendPackageEvent>();
 		req->SetRequest(m_mapUUIDToNodeItem[item].ConnectionID, IData::GetRuntimeData()->nodeuuid() , snowflake::Instance->nextid() , Core::HEIGHT_LEVEL , event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
-		m_pControl->SendMessage(req);
+		m_pControl->SendMessage(std::move(req));
 	}
 }
 

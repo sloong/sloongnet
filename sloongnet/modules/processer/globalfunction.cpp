@@ -207,7 +207,7 @@ void *Sloong::CGlobalFunction::RecvFileFunc(void *pParam)
             else
             {
 
-                long long dlen = Helper::BytesToInt64(pLongBuffer);
+                auto dlen = Helper::BytesToInt64(pLongBuffer);
                 SAFE_DELETE_ARR(pLongBuffer);
                 // package length cannot big than 2147483648. this is max value for int.
                 if (dlen <= 0 || dlen > FILE_TRANS_MAX_SIZE || nRecvSize != g_data_pack_len)
@@ -472,7 +472,7 @@ int Sloong::CGlobalFunction::Lua_MoveFile(lua_State *l)
             throw normal_except(Helper::Format("Move File error.CheckFileDirectory error:[%s][%d]", newName.c_str(), res));
         }
 
-        if (!CUniversal::MoveFile(orgName, newName))
+        if (!Helper::MoveFile(orgName, newName))
         {
             // Move file need write access. so if move file error, try copy .
             if (!CUniversal::RunSystemCmd(Helper::Format("cp \"%s\" \"%s\"", orgName.c_str(), newName.c_str())))
@@ -515,12 +515,12 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State *l)
     string uuid = CUtility::GenUUID();
 
     map<string, RecvDataPackage *> recv_list;
-    for (auto i = fileList.begin(); i != fileList.end(); i++)
+    for ( auto item : *fileList )
     {
         RecvDataPackage *pack = new RecvDataPackage();
-        string md5 = i->first;
+        string md5 = item.first;
         Helper::tolower(md5);
-        pack->strName = i->second;
+        pack->strName = item.second;
         pack->strPath = save_folder;
         pack->strMD5 = md5;
         pack->emStatus = RecvStatus::Wait;
