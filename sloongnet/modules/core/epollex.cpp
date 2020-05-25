@@ -8,6 +8,8 @@
 #include "IData.h"
 #include <arpa/inet.h>
 #include <netdb.h>
+// for TCP_NODELAY
+#include <netinet/tcp.h>
 
 using namespace Sloong;
 using namespace Sloong::Universal;
@@ -136,7 +138,10 @@ int Sloong::CEpollEx::SetSocketNonblocking(int socket)
 	int op;
 
 	op = fcntl(socket, F_GETFL, 0);
-	fcntl(socket, F_SETFL, op | O_NONBLOCK);
+	fcntl(socket, F_SETFL, op | O_NONBLOCK );
+
+	int enable = 1;
+    setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (void*)&enable,sizeof(enable));
 
 	return op;
 }
@@ -176,7 +181,8 @@ void Sloong::CEpollEx::MainWorkLoop(SMARTER param)
 		{
 			if (m_emStatus == RUN_STATUS::Created)
 			{
-				usleep(990000);
+				this_thread::sleep_for( std::chrono::microseconds(100) );
+				//usleep(990000);
 				continue;
 			}
 
