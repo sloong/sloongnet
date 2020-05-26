@@ -6,8 +6,8 @@ message(WorkDir:${CMAKE_CURRENT_LIST_DIR})
 
 include_directories(
     "${CMAKE_CURRENT_LIST_DIR}"
+    "${CMAKE_CURRENT_LIST_DIR}/referenced/sqlite_orm"
     "${CMAKE_CURRENT_LIST_DIR}/../../"
-    "${CMAKE_CURRENT_LIST_DIR}/../../referenced/sqlite_orm"
 	"${CMAKE_CURRENT_LIST_DIR}/../../referenced/libuniv/include"
     "${CMAKE_CURRENT_LIST_DIR}/../core"
 )
