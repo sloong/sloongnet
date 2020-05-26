@@ -163,7 +163,7 @@ void Sloong::CEpollEx::MainWorkLoop()
 	if (res.IsFialed())
 	{
 		m_pLog->Fatal(res.Message());
-		m_iC->SendMessage(EVENT_TYPE::ProgramExit );
+		m_iC->SendMessage(EVENT_TYPE::ProgramStop );
 		return;
 	}
 	int sock = res.ResultObject();

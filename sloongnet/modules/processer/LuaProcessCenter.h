@@ -8,7 +8,6 @@
 #pragma once
 
 #define LUA_INT_TYPE LUA_INT_LONG
-#include "EasySync.hpp"
 #include <jsoncpp/json/json.h>
 #include "IObject.h"
 namespace Sloong

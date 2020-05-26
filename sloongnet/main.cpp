@@ -90,6 +90,7 @@ int main(int argc, char** args)
 
 			res = Sloong::CSloongBaseService::Instance->Run();
 		} while (res.Result() == ResultType::Retry);
+		Sloong::CSloongBaseService::Instance = nullptr;
 		return 0;
 	}
 	catch (string & msg)

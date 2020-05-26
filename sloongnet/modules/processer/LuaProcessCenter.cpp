@@ -171,7 +171,7 @@ int Sloong::CLuaProcessCenter::GetFreeLuaContext()
 	for ( int i = 0; i<LUA_CONTEXT_WAIT_SECONDE&&m_oFreeLuaContext.empty(); i++)
 	{
 		m_pLog->Debug("Wait lua context 1 sencond :"+Helper::ntos(i));
-		m_oSSync.wait_for(1);
+		m_oSSync.wait_for(chrono::microseconds(500));
 	}
 
 	unique_lock<mutex> lck(m_oLuaContextMutex);

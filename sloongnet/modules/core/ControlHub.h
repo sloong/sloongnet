@@ -56,8 +56,8 @@ namespace Sloong
 		map<DATA_ITEM, void *> m_oDataList;
 		map<string, void *> m_oTempDataList;
 		// Message
-		map<EVENT_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;
-		map<EVENT_TYPE, MsgHookFunc> m_listMsgHook;
+		map_ex<EVENT_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;
+		map_ex<EVENT_TYPE, MsgHookFunc> m_listMsgHook;
 		queue_ex<UniqueEvent> m_oMsgList;
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;
 		CEasySync m_oSync;

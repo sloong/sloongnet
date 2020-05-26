@@ -32,8 +32,8 @@ CResult Sloong::CServerManage::Initialize(IControl *ic)
 	m_mapFuncToHandler[Functions::QueryTemplate] = std::bind(&CServerManage::QueryTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::QueryNode] = std::bind(&CServerManage::QueryNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::QueryReferenceInfo] = std::bind(&CServerManage::QueryReferenceInfoHandler, this, std::placeholders::_1, std::placeholders::_2);
-	m_mapFuncToHandler[Functions::StopNode] = std::bind(&CServerManage::QueryReferenceInfoHandler, this, std::placeholders::_1, std::placeholders::_2);
-	m_mapFuncToHandler[Functions::RestartNode] = std::bind(&CServerManage::QueryReferenceInfoHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_mapFuncToHandler[Functions::StopNode] = std::bind(&CServerManage::StopNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_mapFuncToHandler[Functions::RestartNode] = std::bind(&CServerManage::RestartNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
 
 	if (!CConfiguation::Instance->IsInituialized())
 	{
@@ -399,6 +399,8 @@ CResult Sloong::CServerManage::StopNodeHandler(const string& req_obj, CDataTrans
 	list<uint64_t> l;
 	l.push_back(id);
 	SendEvent(l, Core::ControlEvent::Stop, nullptr );
+
+	return CResult::Succeed();
 }
 
 CResult Sloong::CServerManage::RestartNodeHandler(const string& req_obj, CDataTransPackage *pack)
@@ -414,6 +416,8 @@ CResult Sloong::CServerManage::RestartNodeHandler(const string& req_obj, CDataTr
 	list<uint64_t> l;
 	l.push_back(id);
 	SendEvent(l, Core::ControlEvent::Restart, nullptr );
+
+	return CResult::Succeed();
 }
 
 

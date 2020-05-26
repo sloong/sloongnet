@@ -33,12 +33,10 @@ enum DATA_ITEM
 
 enum EVENT_TYPE
 {
-    option allow_alias = true;
 	/*
 	由 base_service 发送。程序准备完毕可以运行时发送
 	*/
 	ProgramStart=0;
-    ProgramExit=1;
     ProgramStop=1;
 	// 重新启用
 	// 程序将会从加载开始，重新执行获取配置，加载模块等操作

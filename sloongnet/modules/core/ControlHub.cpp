@@ -21,6 +21,8 @@ void Sloong::CControlHub::Run()
 void Sloong::CControlHub::Exit()
 {
 	m_emStatus = RUN_STATUS::Exit;
+	m_listMsgHook.clear();
+	m_oMsgHandlerList.clear();
 }
 
 bool Sloong::CControlHub::Add(DATA_ITEM item, void *object)
@@ -127,7 +129,7 @@ void Sloong::CControlHub::CallMessage(UniqueEvent event)
 		for (auto func : handler_list)
 			func(event.get());
 
-		if (m_listMsgHook[event->GetEvent()] != nullptr)
+		if (m_listMsgHook.exist(event->GetEvent()))
 			m_listMsgHook[event->GetEvent()](std::move(event));
 
 		event = nullptr;
@@ -152,12 +154,11 @@ void Sloong::CControlHub::MessageWorkLoop()
 			if (m_emStatus == RUN_STATUS::Created)
 			{
 				this_thread::sleep_for(std::chrono::microseconds(100));
-				//usleep(990000);
 				continue;
 			}
 			if (m_oMsgList.empty())
 			{
-				m_oSync.wait_for(1);
+				m_oSync.wait_for( chrono::seconds(1) );
 				continue;
 			}
 

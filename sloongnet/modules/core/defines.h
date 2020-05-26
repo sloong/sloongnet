@@ -33,9 +33,7 @@ inline T TYPE_TRANS(LPVOID p)
 	return tmp;
 }
 
-const int s_llLen = 8;
-const int s_lLen = 4;
-const int s_PriorityLevel = 5;
+const int s_PriorityLevel = 3;
 
 enum RecvStatus
 {

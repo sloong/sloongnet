@@ -7,6 +7,8 @@ bool support_ssl_reconnect = false;
 
 // If want use the int64 to send the length data, define this.
 //#define USE_INT64_LENGTH_SIZE	1
+constexpr int s_llLen = 8;
+constexpr int s_lLen = 4;
 
 void Sloong::EasyConnect::Initialize(SOCKET sock, SSL_CTX *ctx)
 {

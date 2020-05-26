@@ -54,7 +54,7 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	m_iC->RegisterEvent(EVENT_TYPE::MonitorSendStatus);
 	m_iC->RegisterEvent(EVENT_TYPE::RegisteConnection);
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&CNetworkHub::Run, this, std::placeholders::_1));
-	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramExit, std::bind(&CNetworkHub::Exit, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStop, std::bind(&CNetworkHub::Exit, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::SendPackage, std::bind(&CNetworkHub::SendPackageEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::SocketClose, std::bind(&CNetworkHub::CloseConnectEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::MonitorSendStatus, std::bind(&CNetworkHub::MonitorSendStatusEventHandler, this, std::placeholders::_1));
@@ -224,7 +224,7 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
 			}
 		}
 		m_pLog->Debug(Helper::Format("Check connect timeout done. wait [%d] seconds.", tinterval));
-		m_oCheckTimeoutThreadSync.wait_for(tinterval);
+		m_oCheckTimeoutThreadSync.wait_for( chrono::seconds(tinterval));
 	}
 	m_pLog->Info("check timeout connect thread is exit ");
 }
@@ -240,7 +240,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 	if (res.IsFialed())
 	{
 		m_pLog->Fatal(res.Message());
-		m_iC->SendMessage(EVENT_TYPE::ProgramExit);
+		m_iC->SendMessage(EVENT_TYPE::ProgramStop);
 		return;
 	}
 	if (pEnv == nullptr)
@@ -256,6 +256,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 		{
 			if (m_pWaitProcessList[i].empty())
 			{
+				m_oProcessThreadSync.wait_for(chrono::microseconds(10));
 				continue;
 			}
 
@@ -273,9 +274,11 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					switch (pack->GetDataPackage()->function())
 					{
 					case ControlEvent::Restart:
+						m_pLog->Info("Received restart control event. application will restart.");
 						m_iC->SendMessage(EVENT_TYPE::ProgramRestart);
 						break;
 					case ControlEvent::Stop:
+						m_pLog->Info("Received stop control event. application will stop.");
 						m_iC->SendMessage(EVENT_TYPE::ProgramStop);
 						break;
 					default:
@@ -307,7 +310,6 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 			}
 			goto MessagePorcessListRetry;
 		}
-		m_oProcessThreadSync.wait();
 	}
 	m_pLog->Info("MessageProcessWorkLoop thread is exit ");
 }
@@ -359,13 +361,13 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
 	if (!info->TryReceiveLock())
 		return ResultType::Invalid;
 
-	m_pLog->Verbos("OnDataCanReceive called");
+	m_pLog->Verbos("OnDataCanReceive called, start receiving package.");
 	queue<unique_ptr<CDataTransPackage>> readList;
 	auto res = info->OnDataCanReceive(readList);
 	if (res == ResultType::Error)
 		SendCloseConnectEvent(nSocket);
 
-	m_pLog->Verbos(Helper::Format("OnDataCanReceive done. package [%d].", readList.size()));
+	m_pLog->Verbos(Helper::Format("OnDataCanReceive done. received [%d] packages.", readList.size()));
 	while (!readList.empty())
 	{
 		m_pWaitProcessList[readList.front()->GetPriority()].push_move(std::move(readList.front()));
