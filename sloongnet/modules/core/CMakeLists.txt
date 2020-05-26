@@ -4,16 +4,6 @@ project(core)
 
 message(WorkDir:${CMAKE_CURRENT_LIST_DIR}) 
 
-include_directories(
-    "${CMAKE_CURRENT_LIST_DIR}"
-    "${CMAKE_CURRENT_LIST_DIR}/../../"
-	"${CMAKE_CURRENT_LIST_DIR}/../../referenced/libuniv/include"
-)
-
-link_directories(
-    "${CMAKE_CURRENT_LIST_DIR}/referenced/libuniv"
-)
-
 #当前目录下所有源文件赋给SRC_LIST
 aux_source_directory(. SRC_LIST)
 list(APPEND SRC_LIST ${MODULE_SRC_LIST})

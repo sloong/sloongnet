@@ -5,16 +5,10 @@ project(luaMiddleLayer)
 message(WorkDir:${CMAKE_CURRENT_LIST_DIR}) 
 
 include_directories(
-    "${CMAKE_CURRENT_LIST_DIR}"
-    "${CMAKE_CURRENT_LIST_DIR}/../../"
-	"${CMAKE_CURRENT_LIST_DIR}/../../referenced/libuniv/include"
-    "${CMAKE_CURRENT_LIST_DIR}/../core"
+	"${CMAKE_CURRENT_LIST_DIR}/referenced/lua-protobuf"
 )
 
-link_directories(
-    "${CMAKE_CURRENT_LIST_DIR}/referenced/libuniv"
-    "${CMAKE_CURRENT_LIST_DIR}/../"
-)
+SET(LIBRARY_OUTPUT_PATH "../../")
 
 #当前目录下所有源文件赋给SRC_LIST
 aux_source_directory(. SRC_LIST)

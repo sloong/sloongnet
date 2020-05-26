@@ -9,9 +9,6 @@ using namespace Sloong::Events;
 #include "protocol/manager.pb.h"
 using namespace Manager;
 
-#include "protocol/processer.pb.h"
-
-
 #include "snowflake.h"
 
 

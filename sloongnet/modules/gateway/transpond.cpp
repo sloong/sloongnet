@@ -10,8 +10,6 @@
 #include "IData.h"
 #include "gateway_service.h"
 
-#include "protocol/processer.pb.h"
-
 #include "snowflake.h"
 
 using namespace Sloong::Events;

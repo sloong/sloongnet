@@ -45,7 +45,7 @@ add_subdirectory(modules/core)
 add_subdirectory(modules/manager)
 add_subdirectory(modules/firewall)
 add_subdirectory(modules/gateway)
-add_subdirectory(modules/processer)
+add_subdirectory(modules/middleLayer/lua)
 
 
 #当前目录下所有源文件赋给SRC_LIST
