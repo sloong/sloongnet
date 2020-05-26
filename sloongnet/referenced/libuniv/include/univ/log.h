@@ -2,7 +2,7 @@
 #define LOG_H
 
 #include "univ.h"
-#include <condition_variable>
+#include "EasySync.hpp"
 
 using namespace Sloong::Universal;
 
@@ -158,7 +158,7 @@ namespace Sloong
 			int m_nLastDate = 0;
 			LOGTYPE m_emType;
 			bool m_bInit = false;
-			condition_variable m_CV;
+			CEasySync m_Sync;
 			mutex m_mutexLogCache;
 			mutex m_mutexLogPool;
 			RUN_STATUS m_emStatus;

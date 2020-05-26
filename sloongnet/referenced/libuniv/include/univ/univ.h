@@ -67,10 +67,10 @@ namespace Sloong
 				bAgain	-> continue when the EINTR,EAGAIN error if value is true.
 							else return direct. in default is false.  *Only LinuxOS
 			Return:
-				> 0 : The sent data length. it always bigger than 0. but may not same as nSize.
-				0 : Timeout. (Now no used)
+				> 0 & = nSize : Send succeed, return value is the sent data length.
+				> 0 & < nSize : The length of sent data . it always greater than 0 and less than nSize.
+				0 : socket is closed. (send function return 0)
 				-1 - -199 : send function return an error. the value is Negative of the errno.
-				-200 : socket is closed. (send function return 0)
 			Note:
 				If 'bAgain' as true, some data was sent, and in next time happened EINTR\EAGAIN error, function will into the loop until all data send succeed or other error happened.
 			*/
@@ -85,11 +85,10 @@ namespace Sloong
 				bAgagin	-> continue when the EINTR,EAGAIN error if value is true.
 							else return direct. in default is false.    *Only LinuxOS
 			Return:
-				> 0 & = nSize : Send succeed, return value is the recv data length.
+				> 0 & = nSize : Received succeed, return value is the recv data length.
 				> 0 & < nSize : Receive partial success. return received data length. it less than nSize and bigger than 0.
 				= 0 : socket is closed. (recv function return 0)
 				-1 - -199 : recv function return an error. the value is Negative of the errno.
-			
 			Note:
 				If 'bAgain' as true, recved some data, and in next time happened EINTR\EAGAIN error, function will into a loop until all data received or other error happened.
 			*/
@@ -112,7 +111,6 @@ namespace Sloong
 				-1 - -199 : recv function return an error. the value is Negative of the errno.
 				-200 : Timeout.(select function return 0)
 				-201 - -400: select function return an error. the value is (-200-errno).
-			
 			Note:
 				If 'bAgain' as true, recved some data, and in next time happened EINTR\EAGAIN error, function will into a loop until all data received or other error happened.
 			*/
