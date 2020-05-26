@@ -24,7 +24,7 @@ void Sloong::EasyConnect::Initialize(SOCKET sock, SSL_CTX *ctx)
 	}
 }
 
-void Sloong::EasyConnect::Initialize(const string& address, int port, SSL_CTX *ctx)
+void Sloong::EasyConnect::Initialize(const string &address, int port, SSL_CTX *ctx)
 {
 	m_strAddress = address;
 	m_nPort = port;
@@ -87,9 +87,7 @@ int Sloong::EasyConnect::SSL_Write_Ex(SSL *ssl, char *buf, int len)
 	return 0;
 }
 
-
-
-bool Sloong::EasyConnect::SendLengthData(int64_t lengthData)
+string Sloong::EasyConnect::GetLengthData(int64_t lengthData)
 {
 	string szLengthData;
 #ifdef USE_INT64_LENGTH_SIZE
@@ -103,34 +101,42 @@ bool Sloong::EasyConnect::SendLengthData(int64_t lengthData)
 	Helper::Int32ToBytes((uint32_t)lengthData, pCpyPoint);
 	szLengthData = string(m_pMsgBuffer, s_lLen);
 #endif
-	if (Write(szLengthData, 0) < 1)
-		return false;
-	return true;
+	return szLengthData;
 }
 
-ResultType Sloong::EasyConnect::SendPackage(const string& data, int& nSentSize)
+ResultType Sloong::EasyConnect::SendPackage(const string &data, int &nSentSize)
 {
-	if( nSentSize == 0 )
+	auto nCurSent = 0;
+	if (nSentSize == 0)
 	{
-		if( !SendLengthData(data.size()))
+		auto lendata = GetLengthData(data.size());
+		int nLen = lendata.size();
+		lendata.append(data);
+		nCurSent = Write(lendata, 0);
+		// In first time send. the length data must send succeed. 
+		if (nCurSent > nLen)
+			nSentSize = nCurSent - nLen;
+		else
 			return ResultType::Error;
 	}
-
-	auto len = Write(data, nSentSize);
-	if ( len > 0 )
+	else
 	{
-		nSentSize += len;
-		if( nSentSize == (int)data.length() )
+		nCurSent = Write(data, nSentSize);
+		if (nCurSent > 0)
+			nSentSize += nCurSent;
+	}
+	if (nCurSent > 0)
+	{
+		if (nSentSize == (int)data.length())
 			return ResultType::Succeed;
 		else
 			return ResultType::Retry;
 	}
-	else if( len == -11 )
-		return ResultType::Retry;		
+	else if (nCurSent == -11)
+		return ResultType::Retry;
 	else
 		return ResultType::Error;
 }
-
 
 // 成功返回数据包长度
 // 超时返回0
@@ -156,33 +162,32 @@ decltype(auto) Sloong::EasyConnect::RecvLengthData(bool block)
 #endif
 }
 
-
-ResultType Sloong::EasyConnect::RecvPackage(string &res, int& nPackage, int& nReceivedSize, bool block)
+ResultType Sloong::EasyConnect::RecvPackage(string &res, int &nPackage, int &nReceivedSize, bool block)
 {
-	if( nPackage == 0 )
+	if (nPackage == 0)
 	{
 		nPackage = RecvLengthData(block);
-		
-		if( nPackage == -11 )
+
+		if (nPackage == -11)
 			return ResultType::Warning;
-		else if( nPackage <= 0 )
+		else if (nPackage <= 0)
 			return ResultType::Error;
 	}
 
 	string buf;
-	buf.resize(nPackage-nReceivedSize);
+	buf.resize(nPackage - nReceivedSize);
 	auto len = Read(buf.data(), (int)buf.size(), block, false);
-	if ( len > 0 )
+	if (len > 0)
 	{
 		nReceivedSize += len;
 		res.append(buf);
-		if( nReceivedSize == nPackage )
+		if (nReceivedSize == nPackage)
 			return ResultType::Succeed;
 		else
 			return ResultType::Retry;
 	}
-	else if( len == -11 )
-		return ResultType::Retry;		
+	else if (len == -11)
+		return ResultType::Retry;
 	else
 		return ResultType::Error;
 }
@@ -314,7 +319,7 @@ void Sloong::EasyConnect::Close()
 	close(m_nSocket);
 }
 
-unsigned long Sloong::EasyConnect::G_InitializeSSL(SSL_CTX *&ctx, const string& certFile, const string& keyFile, const string& passwd)
+unsigned long Sloong::EasyConnect::G_InitializeSSL(SSL_CTX *&ctx, const string &certFile, const string &keyFile, const string &passwd)
 {
 	SSL_library_init();
 	OpenSSL_add_all_algorithms();			   /* load & register all cryptos, etc. */

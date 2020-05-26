@@ -77,7 +77,7 @@ namespace Sloong
 
 		inline int Write(const string &sendData, int index) { return Write(sendData.c_str(), (int)sendData.length(), index); }
 
-		bool SendLengthData(int64_t);
+		string GetLengthData(int64_t);
 
 	public:
 		static unsigned long G_InitializeSSL(SSL_CTX *&, const string &, const string &, const string &);
