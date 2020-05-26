@@ -14,7 +14,7 @@ using namespace Sloong;
 using namespace Sloong::Events;
 
 
-unique_ptr<SloongNetProcess> Sloong::SloongNetProcess::Instance = nullptr;
+unique_ptr<LuaMiddleLayer> Sloong::LuaMiddleLayer::Instance = nullptr;
 
 
 extern "C" CResult RequestPackageProcesser(void* pEnv, CDataTransPackage* pack)
@@ -22,10 +22,10 @@ extern "C" CResult RequestPackageProcesser(void* pEnv, CDataTransPackage* pack)
 	auto pProcess = TYPE_TRANS<CLuaProcessCenter*>(pEnv);
 	if( !pProcess)
 	{
-		SloongNetProcess::Instance->m_pLog->Error("Environment convert error. cannot process message.");
+		LuaMiddleLayer::Instance->m_pLog->Error("Environment convert error. cannot process message.");
 		return CResult::Invalid();
 	}
-	return SloongNetProcess::Instance->RequestPackageProcesser(pProcess,pack);
+	return LuaMiddleLayer::Instance->RequestPackageProcesser(pProcess,pack);
 }
 
 extern "C" CResult ResponsePackageProcesser(void* pEnv, CDataTransPackage* pack)
@@ -33,15 +33,15 @@ extern "C" CResult ResponsePackageProcesser(void* pEnv, CDataTransPackage* pack)
 	auto pProcess = TYPE_TRANS<CLuaProcessCenter*>(pEnv);
 	if( !pProcess)
 	{
-		SloongNetProcess::Instance->m_pLog->Error("Environment convert error. cannot process message.");
+		LuaMiddleLayer::Instance->m_pLog->Error("Environment convert error. cannot process message.");
 		return CResult::Invalid();
 	}
-	return SloongNetProcess::Instance->ResponsePackageProcesser(pProcess,pack);
+	return LuaMiddleLayer::Instance->ResponsePackageProcesser(pProcess,pack);
 }
 
 extern "C" CResult EventPackageProcesser(CDataTransPackage* pack)
 {
-	SloongNetProcess::Instance->EventPackageProcesser(pack);
+	LuaMiddleLayer::Instance->EventPackageProcesser(pack);
 	return CResult::Succeed();
 }
 	
@@ -51,21 +51,21 @@ extern "C" CResult NewConnectAcceptProcesser(CSockInfo* info)
 }
 	
 extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
-	SloongNetProcess::Instance = make_unique<SloongNetProcess>();
+	LuaMiddleLayer::Instance = make_unique<LuaMiddleLayer>();
 	return CResult::Succeed();
 }
 
 extern "C" CResult ModuleInitialized(SOCKET sock,IControl* iC){
-	return SloongNetProcess::Instance->Initialized(sock,iC);
+	return LuaMiddleLayer::Instance->Initialized(sock,iC);
 }
 
 extern "C" CResult CreateProcessEnvironment(void** out_env)
 {
-	return SloongNetProcess::Instance->CreateProcessEnvironmentHandler(out_env);
+	return LuaMiddleLayer::Instance->CreateProcessEnvironmentHandler(out_env);
 }
 
 
-CResult SloongNetProcess::Initialized(SOCKET sock,IControl* iC)
+CResult LuaMiddleLayer::Initialized(SOCKET sock,IControl* iC)
 {
 	m_pControl = iC;
 	IData::Initialize(iC);
@@ -77,11 +77,11 @@ CResult SloongNetProcess::Initialized(SOCKET sock,IControl* iC)
 	}
 	m_pLog = IData::GetLog();
 	m_nManagerConnection = sock;
-	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetProcess::OnSocketClose, this, std::placeholders::_1));
+	m_pControl->RegisterEventHandler(SocketClose, std::bind(&LuaMiddleLayer::OnSocketClose, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
-CResult Sloong::SloongNetProcess::RequestPackageProcesser(CLuaProcessCenter* pProcess,CDataTransPackage* pack)
+CResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter* pProcess,CDataTransPackage* pack)
 {
     string strRes("");
 	char* pExData = nullptr;
@@ -103,20 +103,20 @@ CResult Sloong::SloongNetProcess::RequestPackageProcesser(CLuaProcessCenter* pPr
 }
 
 
-CResult Sloong::SloongNetProcess::ResponsePackageProcesser(CLuaProcessCenter* pProcess,CDataTransPackage* pack)
+CResult Sloong::LuaMiddleLayer::ResponsePackageProcesser(CLuaProcessCenter* pProcess,CDataTransPackage* pack)
 {
 	m_pLog->Info("ResponsePackageProcesser event");
 	
 	return CResult::Succeed();
 }
 
-void Sloong::SloongNetProcess::OnSocketClose(IEvent* event)
+void Sloong::LuaMiddleLayer::OnSocketClose(IEvent* event)
 {
 }
 
 
 
-inline CResult Sloong::SloongNetProcess::CreateProcessEnvironmentHandler(void** out_env)
+inline CResult Sloong::LuaMiddleLayer::CreateProcessEnvironmentHandler(void** out_env)
 {
 	auto item = make_shared<CLuaProcessCenter>();
 	item->Initialize(m_pControl);
@@ -128,7 +128,7 @@ inline CResult Sloong::SloongNetProcess::CreateProcessEnvironmentHandler(void** 
 
 
 
-void Sloong::SloongNetProcess::EventPackageProcesser(CDataTransPackage* trans_pack)
+void Sloong::LuaMiddleLayer::EventPackageProcesser(CDataTransPackage* trans_pack)
 {
 	auto data_pack = trans_pack->GetDataPackage();
 	auto event = (Manager::Events)data_pack->function();

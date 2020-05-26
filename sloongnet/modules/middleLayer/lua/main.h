@@ -31,11 +31,11 @@ extern "C" {
 
 namespace Sloong
 {
-	class SloongNetProcess
+	class LuaMiddleLayer
 	{
 	public:
-		SloongNetProcess() {}
-		~SloongNetProcess() {}
+		LuaMiddleLayer() {}
+		~LuaMiddleLayer() {}
 
 		CResult Initialization(GLOBAL_CONFIG*);
 		CResult Initialized(SOCKET,IControl*);
@@ -61,7 +61,7 @@ namespace Sloong
 		Json::Value*   m_pModuleConfig;
 	public:
 		CLog*		m_pLog =nullptr;
-		static unique_ptr<SloongNetProcess> Instance;
+		static unique_ptr<LuaMiddleLayer> Instance;
 	};
 
 }
