@@ -3,10 +3,10 @@ import "core.proto";
 package Manager;
 
 enum Events{
-   RestartNode=0;
-   StopNode=1;
-   ReferenceModuleOnline=2;
-   ReferenceModuleOffline=3;
+   Invalid=0;
+   reserved 1 to 9;
+   ReferenceModuleOnline=10;
+   ReferenceModuleOffline=11;
 }
 
 message EventReferenceModuleOnline{
@@ -37,6 +37,8 @@ enum Functions{
     SetTemplate =6;
     QueryTemplate=7;
     QueryReferenceInfo=8;
+    RestartNode=9;
+    StopNode=10;
 }
 
 message PostLogMessageRequest
@@ -88,6 +90,14 @@ message SetTemplateRequest{
 message QueryTemplateRequest{
    // No set for query all
    repeated int32 TemplateID=1;
+}
+
+message StopNodeRequest{
+   fixed64 NodeID=1;
+}
+
+message RestartNodeRequest{
+   fixed64 NodeID=1;
 }
 
 message TemplateItem{

@@ -130,9 +130,9 @@ inline CResult Sloong::SloongNetProcess::CreateProcessEnvironmentHandler(void** 
 
 void Sloong::SloongNetProcess::EventPackageProcesser(CDataTransPackage* trans_pack)
 {
-	auto event = Events_MIN;
 	auto data_pack = trans_pack->GetDataPackage();
-	if(!Manager::Events_Parse(data_pack->content(),&event))
+	auto event = (Manager::Events)data_pack->function();
+	if (!Manager::Events_IsValid(event))
 	{
 		m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]",data_pack->content().c_str()));
 		return;
@@ -140,9 +140,6 @@ void Sloong::SloongNetProcess::EventPackageProcesser(CDataTransPackage* trans_pa
 
 	switch (event)
 	{
-	case Manager::Events::RestartNode:{
-		m_pControl->SendMessage(EVENT_TYPE::ProgramRestart);
-		}break;
 	case Manager::Events::ReferenceModuleOnline:{
 		m_pLog->Info("Receive ReferenceModuleOnline event");
 		}break;

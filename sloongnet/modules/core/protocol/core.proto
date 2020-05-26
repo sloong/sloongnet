@@ -91,6 +91,12 @@ enum PRIORITY_LEVEL{
     LOW_LEVEL=2;
 }
 
+enum ControlEvent{
+    InvalidEvent=0;
+    Restart=1;
+    Stop=2;
+}
+
 message DataPackage
 {
     enum PackageType{

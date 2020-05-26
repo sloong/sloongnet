@@ -163,6 +163,18 @@ namespace Sloong
         */
         CResult QueryNodeHandler(const string&,CDataTransPackage*);
 
+        /* 
+        Request:StopNodeRequest
+        Response:Result
+        */
+        CResult StopNodeHandler(const string&,CDataTransPackage*);
+
+        /* 
+        Request:RestartNodeRequest
+        Response:Result
+        */
+        CResult RestartNodeHandler(const string&,CDataTransPackage*);
+
         /*
         Request: None
         Response: QueryReferenceInfoResponse
@@ -176,7 +188,7 @@ namespace Sloong
     private:
         int SearchNeedCreateTemplate();
         void RefreshModuleReference(int id);
-        void SendEvent(list<uint64_t>, int, ::google::protobuf::Message*);
+        void SendEvent(const list<uint64_t>&, int, ::google::protobuf::Message*);
 
     protected:
         map_ex< Manager::Functions , FunctionHandler> m_mapFuncToHandler;

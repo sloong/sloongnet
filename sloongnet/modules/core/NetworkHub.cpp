@@ -19,13 +19,13 @@ Sloong::CNetworkHub::~CNetworkHub()
 	{
 		SSL_CTX_free(m_pCTX);
 	}
-	for (int i = 0; i < s_PriorityLevel;i++)
+	for (int i = 0; i < s_PriorityLevel; i++)
 	{
 		while (!m_pWaitProcessList[i].empty())
 		{
 			m_pWaitProcessList[i].front().reset();
 			m_pWaitProcessList[i].pop_move();
-        }
+		}
 	}
 	SAFE_DELETE_ARR(m_pWaitProcessList);
 }
@@ -43,7 +43,6 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	{
 		EnableSSL(m_pConfig->certfilepath(), m_pConfig->keyfilepath(), m_pConfig->certpasswd());
 	}
-	
 
 	m_pEpoll->SetEventHandler(std::bind(&CNetworkHub::OnNewAccept, this, std::placeholders::_1),
 							  std::bind(&CNetworkHub::OnDataCanReceive, this, std::placeholders::_1),
@@ -63,14 +62,15 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	return CResult::Succeed();
 }
 
-void Sloong::CNetworkHub::Run(IEvent* event)
+void Sloong::CNetworkHub::Run(IEvent *event)
 {
 	m_bIsRunning = true;
 	m_pEpoll->Run();
 	if (m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0)
 		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this));
 
-	if (m_pRequestFunc == nullptr) {
+	if (m_pRequestFunc == nullptr)
+	{
 		m_pLog->Fatal("Process function is null.");
 		m_iC->SendMessage(EVENT_TYPE::ProgramStop);
 	}
@@ -81,7 +81,7 @@ void Sloong::CNetworkHub::Run(IEvent* event)
 	CThreadPool::AddWorkThread(std::bind(&CNetworkHub::MessageProcessWorkLoop, this), m_pConfig->processthreadquantity());
 }
 
-void Sloong::CNetworkHub::Exit(IEvent* event)
+void Sloong::CNetworkHub::Exit(IEvent *event)
 {
 	m_bIsRunning = false;
 	m_oCheckTimeoutThreadSync.notify_all();
@@ -89,9 +89,9 @@ void Sloong::CNetworkHub::Exit(IEvent* event)
 	m_pEpoll->Exit();
 }
 
-void Sloong::CNetworkHub::SendPackageEventHandler(IEvent* event)
+void Sloong::CNetworkHub::SendPackageEventHandler(IEvent *event)
 {
-	auto send_evt = TYPE_TRANS<CSendPackageEvent*>(event);
+	auto send_evt = TYPE_TRANS<CSendPackageEvent *>(event);
 	auto socket = send_evt->GetSocketID();
 	if (!m_SockList.exist(socket))
 	{
@@ -106,13 +106,12 @@ void Sloong::CNetworkHub::SendPackageEventHandler(IEvent* event)
 	AddMessageToSendList(transPack);
 }
 
-
-void Sloong::CNetworkHub::AddMessageToSendList(UniqueTransPackage& pack)
+void Sloong::CNetworkHub::AddMessageToSendList(UniqueTransPackage &pack)
 {
 	int socket = pack->GetSocketID();
 	if (!m_SockList.exist(socket))
 	{
-		m_pLog->Error(Helper::Format("AddMessageToSendList function called, but the socket[%d] is no regiestd in NetworkHub.",socket));
+		m_pLog->Error(Helper::Format("AddMessageToSendList function called, but the socket[%d] is no regiestd in NetworkHub.", socket));
 		return;
 	}
 
@@ -128,10 +127,9 @@ void Sloong::CNetworkHub::AddMessageToSendList(UniqueTransPackage& pack)
 	}
 }
 
-
-void Sloong::CNetworkHub::CloseConnectEventHandler(IEvent* event)
+void Sloong::CNetworkHub::CloseConnectEventHandler(IEvent *event)
 {
-	auto net_evt = TYPE_TRANS<CNetworkEvent*>(event);
+	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event);
 	auto id = net_evt->GetSocketID();
 	if (!m_SockList.exist(id))
 		return;
@@ -141,18 +139,18 @@ void Sloong::CNetworkHub::CloseConnectEventHandler(IEvent* event)
 	m_pEpoll->DeleteMonitorSocket(id);
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList.erase(id);
-	sockLck.unlock();	
+	sockLck.unlock();
 }
 
-void Sloong::CNetworkHub::MonitorSendStatusEventHandler(IEvent* event)
+void Sloong::CNetworkHub::MonitorSendStatusEventHandler(IEvent *event)
 {
-	auto net_evt = TYPE_TRANS<CNetworkEvent*>(event);
+	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event);
 	m_pEpoll->MonitorSendStatus(net_evt->GetSocketID());
 }
 
-void Sloong::CNetworkHub::RegisteConnectionEventHandler(IEvent* event)
+void Sloong::CNetworkHub::RegisteConnectionEventHandler(IEvent *event)
 {
-	auto net_evt = TYPE_TRANS<CNetworkEvent*>(event);
+	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event);
 	auto nSocket = net_evt->GetSocketID();
 
 	auto info = make_unique<CSockInfo>();
@@ -160,11 +158,10 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(IEvent* event)
 	m_pLog->Info(Helper::Format("Registe connection:[%s:%d].", info->m_pCon->m_strAddress.c_str(), info->m_pCon->m_nPort));
 
 	unique_lock<mutex> sockLck(m_oSockListMutex);
-	m_SockList[nSocket] =std::move(info);
+	m_SockList[nSocket] = std::move(info);
 	sockLck.unlock();
 	m_pEpoll->AddMonitorSocket(nSocket);
 }
-	
 
 void Sloong::CNetworkHub::SendCloseConnectEvent(int socket)
 {
@@ -190,7 +187,7 @@ void Sloong::CNetworkHub::EnableTimeoutCheck(int timeoutTime, int checkInterval)
 	m_nCheckTimeoutInterval = checkInterval;
 }
 
-void Sloong::CNetworkHub::EnableSSL(const string& certFile, const string& keyFile, const string& passwd)
+void Sloong::CNetworkHub::EnableSSL(const string &certFile, const string &keyFile, const string &passwd)
 {
 	auto ret = EasyConnect::G_InitializeSSL(m_pCTX, certFile, keyFile, passwd);
 	if (ret != S_OK)
@@ -199,7 +196,6 @@ void Sloong::CNetworkHub::EnableSSL(const string& certFile, const string& keyFil
 		m_pLog->Error(EasyConnect::G_FormatSSLErrorMsg(ret));
 	}
 }
-
 
 /*************************************************
 * Function: * check_connect_timeout
@@ -233,61 +229,78 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
 	m_pLog->Info("check timeout connect thread is exit ");
 }
 
-
-
 /// 消息处理工作线程函数
 // 按照优先级，逐个处理待处理队列。每个队列处理完毕时，重新根据优先级处理，尽量保证高优先级的处理
 // 为了避免影响接收时的效率，将队列操作放松到最低。以每次一定数量的处理来逐级加锁。
 void Sloong::CNetworkHub::MessageProcessWorkLoop()
 {
 	m_pLog->Debug("MessageProcessWorkLoop thread is running.");
-	void* pEnv;
+	void *pEnv;
 	auto res = m_pCreateEnvFunc(&pEnv);
-	if( res.IsFialed() )
+	if (res.IsFialed())
 	{
 		m_pLog->Fatal(res.Message());
-		m_iC->SendMessage(EVENT_TYPE::ProgramExit );
+		m_iC->SendMessage(EVENT_TYPE::ProgramExit);
 		return;
-	} 
-	if( pEnv == nullptr )
+	}
+	if (pEnv == nullptr)
 	{
 		m_pLog->Warn("Create called succeed, but the evnironment value is null.");
-	} 
-	
-	
+	}
+
 	UniqueTransPackage pack;
 	while (m_bIsRunning)
 	{
-		MessagePorcessListRetry:
-		for( int i = 0; i < s_PriorityLevel; i++ )
+	MessagePorcessListRetry:
+		for (int i = 0; i < s_PriorityLevel; i++)
 		{
-			if( m_pWaitProcessList[i].empty())
+			if (m_pWaitProcessList[i].empty())
 			{
 				continue;
 			}
-			
-			while( m_pWaitProcessList[i].TryMovePop(pack) )
+
+			while (m_pWaitProcessList[i].TryMovePop(pack))
 			{
 				// In here, the result no the result for this request.
 				// it just for is need add the pack obj to send list.
 				res.SetResult(ResultType::Invalid);
 
 				pack->Record();
-				switch(pack->GetDataPackage()->type()){
-					case DataPackage_PackageType::DataPackage_PackageType_EventPackage:{
-						m_pEventFunc(pack.get());
-						}break;
-					case DataPackage_PackageType::DataPackage_PackageType_RequestPackage:{
-						if(pack->GetDataPackage()->status()==DataPackage_StatusType::DataPackage_StatusType_Request) {
-							res = m_pRequestFunc(pEnv,pack.get());
-						}else{
-							res = m_pResponseFunc(pEnv,pack.get());
-						}}break;
+				switch (pack->GetDataPackage()->type())
+				{
+				case DataPackage_PackageType::DataPackage_PackageType_EventPackage:
+				{
+					switch (pack->GetDataPackage()->function())
+					{
+					case ControlEvent::Restart:
+						m_iC->SendMessage(EVENT_TYPE::ProgramRestart);
+						break;
+					case ControlEvent::Stop:
+						m_iC->SendMessage(EVENT_TYPE::ProgramStop);
+						break;
 					default:
-						m_pLog->Warn("Data package check type error. cannot process.");
+						m_pEventFunc(pack.get());
+						break;
+					}
+				}
+				break;
+				case DataPackage_PackageType::DataPackage_PackageType_RequestPackage:
+				{
+					if (pack->GetDataPackage()->status() == DataPackage_StatusType::DataPackage_StatusType_Request)
+					{
+						res = m_pRequestFunc(pEnv, pack.get());
+					}
+					else
+					{
+						res = m_pResponseFunc(pEnv, pack.get());
+					}
+				}
+				break;
+				default:
+					m_pLog->Warn("Data package check type error. cannot process.");
 				}
 				pack->Record();
-				if( res.IsSucceed())
+				if (res.IsSucceed())
 					AddMessageToSendList(pack);
 				else
 					pack = nullptr;
@@ -298,7 +311,6 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 	}
 	m_pLog->Info("MessageProcessWorkLoop thread is exit ");
 }
-
 
 /// 有新链接到达。
 /// 接收链接之后，需要客户端首先发送客户端校验信息。只有校验成功之后才会进行SSL处理
@@ -324,7 +336,8 @@ ResultType Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 	auto info = make_unique<CSockInfo>();
 	info->Initialize(m_iC, conn_sock, m_pCTX);
 
-	if( m_pAcceptFunc ){
+	if (m_pAcceptFunc)
+	{
 		m_pAcceptFunc(info.get());
 	}
 
@@ -335,17 +348,16 @@ ResultType Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 	return ResultType::Succeed;
 }
 
-
-
 ResultType Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
 {
-	if ( !m_SockList.exist(nSocket))
+	if (!m_SockList.exist(nSocket))
 	{
 		m_pLog->Error("OnDataCanReceive called, but SockInfo is null.");
 		return ResultType::Error;
 	}
 	auto info = m_SockList[nSocket].get();
-	if(!info->TryReceiveLock()) return ResultType::Invalid;
+	if (!info->TryReceiveLock())
+		return ResultType::Invalid;
 
 	m_pLog->Verbos("OnDataCanReceive called");
 	queue<unique_ptr<CDataTransPackage>> readList;
@@ -353,8 +365,8 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
 	if (res == ResultType::Error)
 		SendCloseConnectEvent(nSocket);
 
-	m_pLog->Verbos(Helper::Format("OnDataCanReceive done. package [%d].",readList.size()));
-	while( !readList.empty())
+	m_pLog->Verbos(Helper::Format("OnDataCanReceive done. package [%d].", readList.size()));
+	while (!readList.empty())
 	{
 		m_pWaitProcessList[readList.front()->GetPriority()].push_move(std::move(readList.front()));
 		readList.pop();
@@ -365,14 +377,15 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
 
 ResultType Sloong::CNetworkHub::OnCanWriteData(int nSocket)
 {
-	if ( !m_SockList.exist(nSocket))
+	if (!m_SockList.exist(nSocket))
 	{
 		m_pLog->Error("OnCanWriteData called, but SockInfo is null.");
 		return ResultType::Error;
 	}
 	auto info = m_SockList[nSocket].get();
 
-	if( !info->TrySendLock()) return ResultType::Invalid;
+	if (!info->TrySendLock())
+		return ResultType::Invalid;
 
 	auto res = info->OnDataCanSend();
 	if (res == ResultType::Error)

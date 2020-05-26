@@ -32,6 +32,8 @@ CResult Sloong::CServerManage::Initialize(IControl *ic)
 	m_mapFuncToHandler[Functions::QueryTemplate] = std::bind(&CServerManage::QueryTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::QueryNode] = std::bind(&CServerManage::QueryNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::QueryReferenceInfo] = std::bind(&CServerManage::QueryReferenceInfoHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_mapFuncToHandler[Functions::StopNode] = std::bind(&CServerManage::QueryReferenceInfoHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_mapFuncToHandler[Functions::RestartNode] = std::bind(&CServerManage::QueryReferenceInfoHandler, this, std::placeholders::_1, std::placeholders::_2);
 
 	if (!CConfiguation::Instance->IsInituialized())
 	{
@@ -384,6 +386,36 @@ CResult Sloong::CServerManage::QueryNodeHandler(const string& req_obj, CDataTran
 	return CResult::Make_OK( ConvertObjToStr(&res) );
 }
 
+CResult Sloong::CServerManage::StopNodeHandler(const string& req_obj, CDataTransPackage *pack)
+{
+	auto req = ConvertStrToObj<StopNodeRequest>(req_obj);
+	if(!req)
+		return CResult::Make_Error("Parser message object fialed.");
+
+	auto id = req->nodeid();
+	if( !m_mapUUIDToNodeItem.exist(id)) 
+		return CResult::Make_Error("NodeID error, the node no exit.");
+
+	list<uint64_t> l;
+	l.push_back(id);
+	SendEvent(l, Core::ControlEvent::Stop, nullptr );
+}
+
+CResult Sloong::CServerManage::RestartNodeHandler(const string& req_obj, CDataTransPackage *pack)
+{
+	auto req = ConvertStrToObj<RestartNodeRequest>(req_obj);
+	if(!req)
+		return CResult::Make_Error("Parser message object fialed.");
+
+	auto id = req->nodeid();
+	if( !m_mapUUIDToNodeItem.exist(id)) 
+		return CResult::Make_Error("NodeID error, the node no exit.");
+
+	list<uint64_t> l;
+	l.push_back(id);
+	SendEvent(l, Core::ControlEvent::Restart, nullptr );
+}
+
 
 CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string& req_obj, CDataTransPackage *pack)
 {
@@ -411,12 +443,13 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string& req_obj, 
 	return CResult::Make_OK( ConvertObjToStr(&res) );
 }
 
-void Sloong::CServerManage::SendEvent(list<uint64_t> notifyList, int event, ::google::protobuf::Message *msg)
+void Sloong::CServerManage::SendEvent(const list<uint64_t>& notifyList, int event, ::google::protobuf::Message *msg)
 {
 	for (auto item : notifyList)
 	{
 		string msg_str;
-		msg->SerializeToString(&msg_str);
+		if( msg )
+			msg->SerializeToString(&msg_str);
 		auto req = make_unique<CSendPackageEvent>();
 		req->SetRequest(m_mapUUIDToNodeItem[item].ConnectionID, IData::GetRuntimeData()->nodeuuid() , snowflake::Instance->nextid() , Core::HEIGHT_LEVEL , event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
 		m_pControl->SendMessage(std::move(req));
