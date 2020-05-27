@@ -8,7 +8,7 @@
 #include "NetworkEvent.hpp"
 #include "transpond.h"
 #include "IData.h"
-#include "gateway_service.h"
+#include "main.h"
 
 #include "snowflake.h"
 

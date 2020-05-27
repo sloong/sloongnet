@@ -11,6 +11,7 @@ SCRIPTFOLDER=$(dirname $(readlink -f $0))
 #echo "ScriptFolder: "$SCRIPTFOLDER
 # cd to current file folder
 cd $SCRIPTFOLDER
+protoc -o base.pb base.proto
 protoc -o core.pb core.proto
 protoc -o manager.pb manager.proto
 protoc -o processer.pb processer.proto

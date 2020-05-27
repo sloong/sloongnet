@@ -118,15 +118,6 @@ void SloongNetGateway::QueryReferenceInfo()
 	m_pControl->CallMessage(std::move(event));
 }
 
-inline int SloongNetGateway::ParseFunctionValue(const string &s)
-{
-	int res = 0;
-	auto nFunc = ConvertStrToInt(s, -1, &res);
-	if (nFunc == -1)
-		m_pLog->Error(Helper::Format("Parse function string[%s] to int error[%d].", s.c_str(), res));
-	return nFunc;
-}
-
 // process the provied function string to list.
 list<int> SloongNetGateway::ProcessProviedFunction(const string &prov_func)
 {
@@ -137,9 +128,8 @@ list<int> SloongNetGateway::ProcessProviedFunction(const string &prov_func)
 		if (func.find("-") != string::npos)
 		{
 			auto range = Helper::split(func, '-');
-			auto start = ParseFunctionValue(range[0]);
-			auto end = ParseFunctionValue(range[1]);
-			if (start == -1 || end == -1)
+			int start,end;
+			if(!ConvertStrToInt(range[0],&start)||!ConvertStrToInt(range[1],&end) )
 				return res_list;
 			for (int i = start; i <= end; i++)
 			{
@@ -148,8 +138,8 @@ list<int> SloongNetGateway::ProcessProviedFunction(const string &prov_func)
 		}
 		else
 		{
-			auto nFunc = ParseFunctionValue(func);
-			if (nFunc == -1)
+			int nFunc;
+			if (!ConvertStrToInt(func,&nFunc))
 				return res_list;
 			res_list.push_back(nFunc);
 		}

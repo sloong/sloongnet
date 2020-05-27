@@ -71,8 +71,8 @@ int main(int argc, char** args)
 		}
 
 		auto ManagerAddress = addr[0];
-		auto ManagerPort = stoi(addr[1]);
-		if (ManagerPort == 0)
+		int ManagerPort;
+		if (!ConvertStrToInt(addr[1],&ManagerPort) || ManagerPort == 0)
 		{
 			cout << "Convert [" << addr[1] << "] to int port fialed." << endl;
 			return -3;

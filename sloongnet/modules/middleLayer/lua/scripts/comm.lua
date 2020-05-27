@@ -14,36 +14,36 @@ function string.split(str, delimiter)
 end
 
 function Debug(msg)
-	Sloongnet_ShowLog(msg,"Debug")
+	ShowLog(msg,"Debug")
 end
 
 function Info(msg)
-	Sloongnet_ShowLog(msg,"Info")
+	ShowLog(msg,"Info")
 end
 
 function Warn(msg)
-	Sloongnet_ShowLog(msg,"Warn")
+	ShowLog(msg,"Warn")
 end
 
 function Error(msg)
-	Sloongnet_ShowLog(msg,"Error")
+	ShowLog(msg,"Error")
 end
 
 function Assert(msg)
-	Sloongnet_ShowLog(msg,"Assert")
+	ShowLog(msg,"Assert")
 end
 
 function Fatal(msg)
-	Sloongnet_ShowLog(msg,"Fatal")
+	ShowLog(msg,"Fatal")
 end
 
 function Verbos(msg)
-	Sloongnet_ShowLog(msg,"Verbos")
+	ShowLog(msg,"Verbos")
 end
 
 function Log(msg,title)
 	if title == nil or title == '' then
 		return;
 	end
-	Sloongnet_ShowLog(msg,title)
+	ShowLog(msg,title)
 end

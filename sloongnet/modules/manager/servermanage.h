@@ -5,10 +5,10 @@
  * @LastEditTime: 2020-05-18 10:27:12
  * @Description: file content
  */
-#ifndef SERVERMANAGE_H
-#define SERVERMANAGE_H
+#ifndef SLOONGNET_MANAGER_SERVERMANAGE_h
+#define SLOONGNET_MANAGER_SERVERMANAGE_h
 
-#include "main.h"
+
 #include "configuation.h"
 #include "DataTransPackage.h"
 #include "protocol/manager.pb.h"

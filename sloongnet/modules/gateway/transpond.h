@@ -9,8 +9,9 @@
 #ifndef SLOONGNET_GATEWAY_TRANSPOND_H
 #define SLOONGNET_GATEWAY_TRANSPOND_H
 
+#include "DataTransPackage.h"
+#include "sockinfo.h"
 
-#include "main.h"
 namespace Sloong
 {
 	struct RequestInfo{

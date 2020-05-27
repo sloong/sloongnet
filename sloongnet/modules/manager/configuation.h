@@ -9,7 +9,6 @@
 #ifndef SLOONGNET_CONFIGUATION_H
 #define SLOONGNET_CONFIGUATION_H
 
-#include "main.h"
 #include "SQLiteEx.h"
 #include "SQLite_ORM.hpp"
 

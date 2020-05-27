@@ -112,11 +112,6 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 	return -1;
 }
 
-
-inline Functions ConvertStrToFunc(string str){
-	return (Functions)stoi(str);
-}
-
 CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 {
 	auto function = (Functions)pack->GetFunction();
@@ -195,7 +190,11 @@ void Sloong::CServerManage::RefreshModuleReference(int id)
 	m_mapIDToTemplateItem[id].Reference.clear();
 	auto references = Helper::split(m_mapIDToTemplateItem[id].ConfiguationObj->modulereference(), ';');
 	for (auto item : references)
-		m_mapIDToTemplateItem[id].Reference.push_back(stoi(item));
+	{
+		int id;
+		if( ConvertStrToInt(item,&id))
+			m_mapIDToTemplateItem[id].Reference.push_back(id);
+	}
 }
 
 CResult Sloong::CServerManage::RegisteNodeHandler(const string& req_obj, CDataTransPackage *pack)
@@ -434,8 +433,11 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string& req_obj, 
 	auto references = Helper::split(m_mapIDToTemplateItem[id].ConfiguationObj->modulereference(),',');
 	for (  auto ref: references )
 	{
+		auto ref_id = 0;
+		if(!ConvertStrToInt(ref,&ref_id))
+			continue;
 		auto item = res.add_templateinfos();
-		auto tpl = m_mapIDToTemplateItem[stoi(ref)];
+		auto tpl = m_mapIDToTemplateItem[ref_id];
 		item->set_templateid(tpl.ID);
 		item->set_providefunctions(tpl.ConfiguationObj->modulefunctoins());
 		for( auto node: tpl.Created)

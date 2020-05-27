@@ -77,31 +77,32 @@ inline string ConvertObjToStr(::google::protobuf::Message *obj)
 	return str_res;
 }
 
-inline int ConvertStrToInt(string str, int def = 0, int *out_res = nullptr)
+inline bool ConvertStrToInt(string str, int *out_res, string* err_msg = nullptr)
 {
-	if (out_res)
-		(*out_res) = 0;
+	
 	try
 	{
-		return stoi(str);
+		if (out_res)
+			(*out_res) = stoi(str);
+		return true;
 	}
 	catch (const invalid_argument &e)
 	{
-		if (out_res)
-			(*out_res) = -1;
-		return def;
+		if( err_msg )
+			*err_msg = "invalid_argument";
+		return false;
 	}
 	catch (const out_of_range &e)
 	{
-		if (out_res)
-			(*out_res) = -2;
-		return def;
+		if( err_msg )
+			*err_msg = "out_of_range";
+		return false;
 	}
 	catch (...)
 	{
-		if (out_res)
-			(*out_res) = -3;
-		return def;
+		if( err_msg )
+			*err_msg = "unknown";
+		return false;
 	}
 }
 

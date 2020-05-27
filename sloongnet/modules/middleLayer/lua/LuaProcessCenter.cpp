@@ -116,20 +116,25 @@ CResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 		{
 			m_oFreeLuaContext.push(id);
 			auto str_res = cres.GetData("response_result", "");
-			ResultType res;
-			if (!ResultType_Parse(str_res,&res))
+			int res;
+			if ( !ConvertStrToInt(str_res,&res)||!ResultType_IsValid(res) )
 			{
 				return CResult::Make_Error("Get result fialed " + str_res);
 			}
 			auto res_msg = cres.GetData("response_message", "");
 
-			return CResult(res, res_msg);
+			return CResult((ResultType)res, res_msg);
 		}
 		else
 		{
 			m_oFreeLuaContext.push(id);
 			return CResult::Make_Error("server process happened error.");
 		}
+	}
+	catch (const exception& ex)
+	{
+		m_oFreeLuaContext.push(id);
+		return CResult::Make_Error("server process error."+string(ex.what()));
 	}
 	catch (...)
 	{

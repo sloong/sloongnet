@@ -3,11 +3,11 @@ package Base;
 
 // Result
 enum ResultType{    
-    Succeed = 0;
-    Error = 1;
-    Warning = 2;
-    Retry = 3;
-    Invalid = 4;
+    Invalid = 0;
+    Succeed = 1;
+    Error = 2;
+    Warning = 3;
+    Retry = 4;
 }
 
 message DataPackage
