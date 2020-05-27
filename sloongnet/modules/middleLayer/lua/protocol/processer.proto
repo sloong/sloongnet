@@ -2,16 +2,18 @@ syntax = "proto3";
 package Processer;
 
 enum Functions{
-    GetText=0;
-    Reload=1;
-    UploadStart=2;
-	UploadEnd=3;
-	UploadWithTCP=4;
-	UploadWithTCPStart=5;
-	GetIP=6;
-    GetThumbImage=7;
+    Invalid=0;
+    reserved 1 to 600;// Processer function is start by 601
+    GetText=601;
+    Reload=602;
+    UploadStart=603;
+	UploadEnd=604;
+	UploadWithTCP=605;
+	UploadWithTCPStart=606;
+	GetIP=607;
+    GetThumbImage=608;
 }
 
-message ProcesserMessage{
+message GetTextMessage{
     string content=1;
 }

@@ -4,7 +4,7 @@ package Manager;
 
 enum Events{
    Invalid=0;
-   reserved 1 to 9;
+   reserved 1 to 9; // This is reserved for core 
    ReferenceModuleOnline=10;
    ReferenceModuleOffline=11;
 }
@@ -18,27 +18,30 @@ message EventReferenceModuleOffline{
 }
 
 enum Functions{
+    ManagerInvalidFunction=0;
     /* Flow: All -> Control
        Response: post log message to control
     */
-    PostLog=0;
+    PostLog=1;
     /* Flow: All -> All
        Response: Content - result with JSON string. 
     */
-    RegisteWorker=1;
+    RegisteWorker=2;
     /* Flow:  All -> Control
        Response: Content(string) - the uuid for sender.
                  Extend: config data
     */
-    RegisteNode=2;
-    QueryNode=3;
+    RegisteNode=3;
     AddTemplate=4;
     DeleteTemplate=5;
     SetTemplate =6;
     QueryTemplate=7;
     QueryReferenceInfo=8;
-    RestartNode=9;
-    StopNode=10;
+    QueryNode=9;
+    RestartNode=10;
+    StopNode=11;
+    // reserved for other service.
+    reserved 101 to max;
 }
 
 message PostLogMessageRequest

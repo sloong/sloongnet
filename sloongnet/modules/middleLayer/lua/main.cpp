@@ -83,22 +83,15 @@ CResult LuaMiddleLayer::Initialized(SOCKET sock,IControl* iC)
 
 CResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter* pProcess,CDataTransPackage* pack)
 {
-    string strRes("");
-	char* pExData = nullptr;
-	int nExSize;
-
 	auto msg = pack->GetDataPackage();
-	string uuid = msg->extend();
-	auto infoItem = m_mapUserInfoList.find(uuid);
-	if (infoItem == m_mapUserInfoList.end())
-	{
-		m_mapUserInfoList[uuid] = make_unique<CLuaPacket>();
-		infoItem = m_mapUserInfoList.find(uuid);
-	}
-	if (!pProcess->MsgProcess(infoItem->second.get(), msg->content(), strRes, pExData, nExSize)) {
-		strRes = "{\"errno\": \"-1\",\"errmsg\" : \"server process happened error\"}";
-	}
-	pack->ResponsePackage( ResultType::Succeed, strRes);
+	CLuaPacket* info = nullptr;
+	if ( !m_mapUserInfoList.exist(msg->sender()))
+		m_mapUserInfoList[msg->sender()] = make_unique<CLuaPacket>();
+	
+	info = m_mapUserInfoList[msg->sender()].get();
+	auto res = pProcess->MsgProcess( msg->function(), info, msg->content(), msg->extend());
+	
+	pack->ResponsePackage(res);
 	return CResult::Succeed();
 }
 

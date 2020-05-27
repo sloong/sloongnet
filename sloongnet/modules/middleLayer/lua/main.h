@@ -8,7 +8,6 @@
 #ifndef SLOONGNET_PROCESS_SERVICE_H
 #define SLOONGNET_PROCESS_SERVICE_H
 
-
 #include "sockinfo.h"
 #include "core.h"
 #include "export.h"
@@ -18,16 +17,16 @@
 #include "protocol/manager.pb.h"
 using namespace Manager;
 
-extern "C" {
-	CResult RequestPackageProcesser(void*,CDataTransPackage*);
-	CResult ResponsePackageProcesser(void*,CDataTransPackage*);
-	CResult EventPackageProcesser(CDataTransPackage*);
-	CResult NewConnectAcceptProcesser(CSockInfo*);
-	CResult ModuleInitialization(GLOBAL_CONFIG*);
-	CResult ModuleInitialized(SOCKET,IControl*);
-	CResult CreateProcessEnvironment(void**);
+extern "C"
+{
+	CResult RequestPackageProcesser(void *, CDataTransPackage *);
+	CResult ResponsePackageProcesser(void *, CDataTransPackage *);
+	CResult EventPackageProcesser(CDataTransPackage *);
+	CResult NewConnectAcceptProcesser(CSockInfo *);
+	CResult ModuleInitialization(GLOBAL_CONFIG *);
+	CResult ModuleInitialized(SOCKET, IControl *);
+	CResult CreateProcessEnvironment(void **);
 }
-
 
 namespace Sloong
 {
@@ -37,34 +36,33 @@ namespace Sloong
 		LuaMiddleLayer() {}
 		~LuaMiddleLayer() {}
 
-		CResult Initialization(GLOBAL_CONFIG*);
-		CResult Initialized(SOCKET,IControl*);
-		
-		CResult RequestPackageProcesser(CLuaProcessCenter*,CDataTransPackage*);
-		CResult ResponsePackageProcesser(CLuaProcessCenter*,CDataTransPackage*);
-		inline CResult CreateProcessEnvironmentHandler(void**);
-		
-		void EventPackageProcesser(CDataTransPackage*);
+		CResult Initialization(GLOBAL_CONFIG *);
+		CResult Initialized(SOCKET, IControl *);
 
-		void OnSocketClose(IEvent* evt);
-		
+		CResult RequestPackageProcesser(CLuaProcessCenter *, CDataTransPackage *);
+		CResult ResponsePackageProcesser(CLuaProcessCenter *, CDataTransPackage *);
+		inline CResult CreateProcessEnvironmentHandler(void **);
+
+		void EventPackageProcesser(CDataTransPackage *);
+
+		void OnSocketClose(IEvent *evt);
+
 	protected:
-		list<shared_ptr<CLuaProcessCenter>> m_listProcess;
-		map<string, unique_ptr<CLuaPacket>> m_mapUserInfoList;
-		
-		IControl* 	m_pControl = nullptr;
-		
+		list_ex<shared_ptr<CLuaProcessCenter>> m_listProcess;
+		map_ex<uint64_t, unique_ptr<CLuaPacket>> m_mapUserInfoList;
 
-		int 		m_nSerialNumber = 0;
-		SOCKET   m_nManagerConnection = -1;
-		GLOBAL_CONFIG* m_pConfig;
-		Json::Value*   m_pModuleConfig;
+		IControl *m_pControl = nullptr;
+
+		int m_nSerialNumber = 0;
+		SOCKET m_nManagerConnection = -1;
+		GLOBAL_CONFIG *m_pConfig;
+		Json::Value *m_pModuleConfig;
+
 	public:
-		CLog*		m_pLog =nullptr;
+		CLog *m_pLog = nullptr;
 		static unique_ptr<LuaMiddleLayer> Instance;
 	};
 
-}
-
+} // namespace Sloong
 
 #endif

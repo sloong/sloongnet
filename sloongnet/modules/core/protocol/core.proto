@@ -22,6 +22,17 @@ enum DATA_ITEM
     ReferenceTemplateInfo=4;
 }
 
+enum MODULE_TYPE
+{
+    Manager=0;
+    AuthCenter=1;
+    DataCenter=2;
+    FileCenter=3;
+    Firewall=4;
+    Gateway=5;
+    Processer=6;
+}
+
 enum EVENT_TYPE
 {
 	/*
@@ -109,18 +120,20 @@ message GLOBAL_CONFIG
 
     // Module
     string  ModuleName = 12;
-    string  ModulePath = 13;
-    bytes   ModuleConfig = 14;
+    MODULE_TYPE ModuleType = 13;
+    string  ModulePath = 14;
+    bytes   ModuleConfig = 15;
     // 引用的其他模板，即本节点可能由数据流向引用节点，并且在目标模板节点产生变动的时候会通知引用者。
-    string  ModuleReference = 15;
+    string  ModuleReference = 16;
     // 模板提供的功能，可以是多种形式：单功能，功能区（xx-xx），全功能（*）。各种形式之间使用逗号分隔
-    string  ModuleFunctoins = 16;
+    string  ModuleFunctoins = 17;
 
     // SSL
-    bool    EnableSSL=17;
-    string  CertFilePath=18;
-    string  KeyFilePath=19;
-    string  CertPasswd=20;
+    bool    EnableSSL=18;
+    string  CertFilePath=19;
+    string  KeyFilePath=20;
+    string  CertPasswd=21;
+
 };
 
 message RuntimeDataPackage

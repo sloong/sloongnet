@@ -1,5 +1,5 @@
 /* File Name: server.c */
-#include "gateway_service.h"
+#include "main.h"
 #include "utility.h"
 #include "IData.h"
 #include "SendMessageEvent.hpp"
