@@ -5,7 +5,8 @@ project(luaMiddleLayer)
 message(WorkDir:${CMAKE_CURRENT_LIST_DIR}) 
 
 include_directories(
-	"${CMAKE_CURRENT_LIST_DIR}/referenced/lua-protobuf"
+	"${CMAKE_CURRENT_LIST_DIR}"
+	"/usr/include/luajit-2.1"
 )
 
 SET(LIBRARY_OUTPUT_PATH "../../")
@@ -18,4 +19,4 @@ list(APPEND SRC_LIST ${MODULE_SRC_LIST})
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRC_LIST})
 
 #添加链接库
-target_link_libraries(${PROJECT_NAME} lua5.3)
+target_link_libraries(${PROJECT_NAME} luajit5.1)
