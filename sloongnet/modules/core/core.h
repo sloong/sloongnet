@@ -34,12 +34,9 @@
 #include <map>
 #include <mutex>
 
-
-// openssl head file
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-
 using namespace std;
+
+
 
 #include "protocol/core.pb.h"
 using namespace Core;
