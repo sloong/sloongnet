@@ -1,3 +1,9 @@
+package.path = package.path ..';./librarys/?.lua';
+package.cpath = package.cpath .. ';./librarys/?.so'
+
+__g_module_function__ = {};
+__g_all_processer_request__ ={};
+
 function require_ex( _mname )
   if package.loaded[_mname] then
     print( string.format("require_ex module[%s] reload", _mname))
@@ -6,13 +12,28 @@ function require_ex( _mname )
   return require( _mname )
 end
 
-g_all_request_processer = {};
+function AddModule(name,bm)
+	__g_module_function__[name] = bm;
+end
+
+function BuildRequestList()
+  for module_name, funcs in pairs(g_module_function) do
+    for func_name, func in pairs(funcs) do
+      __g_all_processer_request__[pb.enum(module_name,func_name)] = func;
+    end
+	end
+end
+
 
 Init = function( path )
-    package.path = path .. '?.lua';
+    local pb = require "pb" -- 载入 pb.dll
+    assert(pb.loadfile "protobuf/core.pb")
+    assert(pb.loadfile "protobuf/processer.pb")
+    JSON = (assert(loadfile(path .. 'json.lua')))()
     assert(require_ex('comm'),'load comm lua file failed.')
     assert(require_ex('main'),'load main lua file failed.')
-    JSON = (assert(loadfile(path .. 'json.lua')))()
+
+    BuildRequestList()
 end
 
 OnError = function( msg )
@@ -23,11 +44,11 @@ SocketCloseProcess = function( u)
 	Info("socket closed")
 end
 
-ProgressMessage = function( uinfo, c_req, c_res )
+ProgressMessage = function( func, c_req, uinfo, c_res )
     local req = c_req:getdata('json_request_message')
     local jreq = JSON:decode(req)
     local jres = JSON:decode('{}')
-    local func = g_all_request_processer[jreq['funcid']];
+    local func = __g_all_processer_request__[jreq['funcid']];
     Info('Call process function : ' .. jreq['funcid'] );
    
     if type(func) == 'function' then
@@ -50,4 +71,3 @@ ProgressMessage = function( uinfo, c_req, c_res )
     end
     return c_res;
 end
-

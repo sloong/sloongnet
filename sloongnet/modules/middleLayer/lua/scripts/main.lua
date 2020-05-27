@@ -91,7 +91,7 @@ function main_Req.GetThumbImage(u,req, res)
     return 0,path
 end
 
-g_main_request_processer = 
+AddModule('Processer.Functions', 
 {
 	['Reload'] = main_Req.ReloadScript,
 	['GetText'] = main_Req.TextTest,
@@ -101,5 +101,4 @@ g_main_request_processer =
 	['UploadWithTCPStart'] = main_Req.UploadWithTCPStart,
 	['GetIP'] = main_Req.GetIP,
     ['GetThumbImage'] = main_Req.GetThumbImage,
-}
-AddModule(g_main_request_processer)
+})
