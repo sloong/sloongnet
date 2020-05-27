@@ -40,13 +40,9 @@ namespace Sloong
         static int Lua_Base64_Encode(lua_State* l);
         static int Lua_Base64_Decode(lua_State* l);
         static int Lua_Hash_Encode(lua_State* l);
-        static int Lua_SendFile(lua_State* l);
         static int Lua_ReloadScript(lua_State* l);
         static int Lua_GetConfig(lua_State* l);
-        static int Lua_MoveFile(lua_State* l);
         static int Lua_GenUUID(lua_State* l);
-        static int Lua_ReceiveFile(lua_State* l);
-        static int Lua_CheckRecvStatus(lua_State* l);
         static int Lua_SetCommData(lua_State* l);
         static int Lua_GetCommData(lua_State* l);
         static int Lua_GetLogObject(lua_State* l);

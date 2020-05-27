@@ -1,5 +1,5 @@
 -- When message is recved, the fm will call this function.
-require_ex('ex');
+-- require_ex('ex');
 -- require_ex('sql');
 
 local main_Req = {};
@@ -11,8 +11,9 @@ end
 
 
 main_Req.TextTest = function( u, req, res )
-        res['TestText'] = Sloongnet_GetEngineVer()  .. ' -- Sloong Network Engine -- Copyright 2015-2018 Sloong.com. All Rights Reserved';
-        return 0
+	Info(req['content'])
+    res['TestText'] = Sloongnet_GetEngineVer()  .. ' -- Sloong Network Engine -- Copyright 2015-2018 Sloong.com. All Rights Reserved';
+    return Succeed
 end
 
 -- 上传文件流程
@@ -61,7 +62,7 @@ function main_Req.GetIP( u, req, res )
 	return 0;
 end
 
-function main_Req.UploadWithTCP( u, req, res )
+function main_Req.UploadWithTCP( u, req, res  )
 	local list = {};
 	for k,v in pairs(req['file_list']) do
 		for sk,sv in pairs(v) do 
@@ -74,7 +75,7 @@ function main_Req.UploadWithTCP( u, req, res )
 	return 0;
 end
 
-function main_Req.UploadWithTCPStart(u, req, res)
+function main_Req.UploadWithTCPStart(u, req, res )
 	local uuid = u:getdata('upload_tcp_uuid');
 	local res, path = Sloongnet_CheckRecvStatus(uuid,req['md5']);
 	if res then
@@ -86,15 +87,15 @@ function main_Req.UploadWithTCPStart(u, req, res)
 	end
 end
 
-function main_Req.GetThumbImage(u,req, res)
+function main_Req.GetThumbImage(u,req )
     local path = Sloongnet_GetThumbImage(req['path'],100,100,5,'/tmp/thumbpath');
     return 0,path
 end
 
 AddModule('Processer.Functions', 
 {
-	['Reload'] = main_Req.ReloadScript,
-	['GetText'] = main_Req.TextTest,
+	['Reload'] = {main_Req.ReloadScript,'',''}
+	['GetText'] = {main_Req.TextTest,'Processer.GetTextMessage',''},
 	['UploadStart'] = main_Req.UploadStart,
 	['UploadEnd'] = main_Req.UploadEnd,
 	['UploadWithTCP'] = main_Req.UploadWithTCP,

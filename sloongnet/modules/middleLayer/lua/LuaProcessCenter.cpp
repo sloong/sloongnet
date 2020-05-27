@@ -89,11 +89,6 @@ void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket *uinfo)
 	m_oFreeLuaContext.push(id);
 }
 
-string FormatJSONErrorMessage(string code, string message)
-{
-	return Helper::Format("{\"errno\": \"%s\",\"errmsg\" : \"%s\"}", code.c_str(), message.c_str());
-}
-
 CResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, const string &msg, const string &extend)
 {
 	int id = GetFreeLuaContext();

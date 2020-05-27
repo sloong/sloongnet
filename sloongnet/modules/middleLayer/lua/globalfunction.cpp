@@ -32,7 +32,6 @@ LuaFunctionRegistr g_LuaFunc[] =
         {"HashEncode", CGlobalFunction::Lua_Hash_Encode},
         {"ReloadScript", CGlobalFunction::Lua_ReloadScript},
         {"Get", CGlobalFunction::Lua_GetConfig},
-        {"MoveFile", CGlobalFunction::Lua_MoveFile},
         {"GenUUID", CGlobalFunction::Lua_GenUUID},
         {"SetCommData", CGlobalFunction::Lua_SetCommData},
         {"GetCommData", CGlobalFunction::Lua_GetCommData},
