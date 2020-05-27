@@ -31,7 +31,7 @@ namespace Sloong
 		int NewThreadInit();
 		void InitLua(CLua* pLua, string folder);
 		void CloseSocket(CLuaPacket* uinfo);
-		bool MsgProcess( CLuaPacket * pUInfo, const string& msg, string& res, char*& exData, int& exSize);
+		CResult MsgProcess( int function, CLuaPacket * pUInfo, const string& msg, const string& extend );
 		int GetFreeLuaContext();
 		
 		void ReloadContext(IEvent* event);

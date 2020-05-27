@@ -3,13 +3,12 @@
 #include "IData.h"
 using namespace Sloong;
 
-CLog* g_pLog = nullptr;
+CLog *g_pLog = nullptr;
 
 CLuaProcessCenter::CLuaProcessCenter()
 {
 	m_pGFunc = make_unique<CGlobalFunction>();
 }
-
 
 CLuaProcessCenter::~CLuaProcessCenter()
 {
@@ -20,7 +19,7 @@ CLuaProcessCenter::~CLuaProcessCenter()
 	}
 }
 
-void Sloong::CLuaProcessCenter::Initialize(IControl* iMsg)
+void Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 {
 	IObject::Initialize(iMsg);
 	g_pLog = m_pLog;
@@ -29,7 +28,7 @@ void Sloong::CLuaProcessCenter::Initialize(IControl* iMsg)
 	m_pConfig = IData::GetModuleConfig();
 
 	m_iC->RegisterEvent(EVENT_TYPE::ReloadLuaContext);
-	m_iC->RegisterEventHandler(ReloadLuaContext, std::bind(&CLuaProcessCenter::ReloadContext,this,std::placeholders::_1));
+	m_iC->RegisterEventHandler(ReloadLuaContext, std::bind(&CLuaProcessCenter::ReloadContext, this, std::placeholders::_1));
 	// 主要的循环方式为，根据输入的处理数来初始化指定数量的lua环境。
 	// 然后将其加入到可用队列
 	// 在处理开始之前根据队列情况拿到某lua环境的id并将其移除出可用队列
@@ -37,29 +36,25 @@ void Sloong::CLuaProcessCenter::Initialize(IControl* iMsg)
 	// 这里使用处理线程池的数量进行初始化，保证在所有线程都在处理Lua请求时不会因luacontext发生堵塞
 	for (int i = 0; i < m_pConfig->operator[]("LuaContextQuantity").asInt(); i++)
 		NewThreadInit();
-
 }
 
-
-void Sloong::CLuaProcessCenter::HandleError(const string& err)
+void Sloong::CLuaProcessCenter::HandleError(const string &err)
 {
 	g_pLog->Error(Helper::Format("[Script]:[%s]", err.c_str()));
 }
 
-void Sloong::CLuaProcessCenter::ReloadContext(IEvent* event)
+void Sloong::CLuaProcessCenter::ReloadContext(IEvent *event)
 {
 	size_t n = m_pLuaList.size();
-	for (size_t i=0;i<n;i++)
+	for (size_t i = 0; i < n; i++)
 	{
 		m_oReloadList[i] = true;
 	}
 }
 
-
-
 int Sloong::CLuaProcessCenter::NewThreadInit()
 {
-	CLua* pLua = new CLua();
+	CLua *pLua = new CLua();
 	pLua->SetErrorHandle(HandleError);
 	pLua->SetScriptFolder(m_pConfig->operator[]("LuaScriptFolder").asString());
 	m_pGFunc->RegistFuncToLua(pLua);
@@ -71,106 +66,84 @@ int Sloong::CLuaProcessCenter::NewThreadInit()
 	return id;
 }
 
-void Sloong::CLuaProcessCenter::InitLua(CLua* pLua, string folder)
+void Sloong::CLuaProcessCenter::InitLua(CLua *pLua, string folder)
 {
 	if (!pLua->RunScript(m_pConfig->operator[]("LuaEntryFile").asString()))
 	{
 		throw normal_except("Run Script Fialed.");
 	}
 	char tag = folder[folder.length() - 1];
-    if (tag != '/' && tag != '\\')
+	if (tag != '/' && tag != '\\')
 	{
 		folder += '/';
 	}
 	pLua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), Helper::Format("'%s'", folder.c_str()));
 }
 
-void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket* uinfo)
+void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket *uinfo)
 {
 	// call close function.
 	int id = GetFreeLuaContext();
-	CLua* pLua = m_pLuaList[id];
-	pLua->RunFunction(m_pConfig->operator[]("LuaSocketCloseFunction").asString() , uinfo);
+	CLua *pLua = m_pLuaList[id];
+	pLua->RunFunction(m_pConfig->operator[]("LuaSocketCloseFunction").asString(), uinfo);
 	m_oFreeLuaContext.push(id);
 }
 
-
-string FormatJSONErrorMessage(string code,string message)
+string FormatJSONErrorMessage(string code, string message)
 {
 	return Helper::Format("{\"errno\": \"%s\",\"errmsg\" : \"%s\"}", code.c_str(), message.c_str());
 }
 
-bool Sloong::CLuaProcessCenter::MsgProcess(CLuaPacket * pUInfo,const string & msg, string & res, char*& exData, int& exSize)
+CResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, const string &msg, const string &extend)
 {
-	// In process, need add the lua script runtime and call lua to process.
-	// In here, just show log to test.
-	exData = nullptr;
-	exSize = 0;
-	// process msg, get the md5 code and the swift number.
 	int id = GetFreeLuaContext();
-	if ( id < 0 )
-	{
-		res = FormatJSONErrorMessage("-1","server is busy now. please try again.");
-		return true;
-	}
-	CLua* pLua = m_pLuaList[id];
-
-	if (m_oReloadList[id] == true)
-	{
-		InitLua(pLua, m_pConfig->operator[]("LuaScriptFolder").asString());
-		m_oReloadList[id] = false;
-	}
-
-	CLuaPacket creq;
-	creq.SetData("json_request_message", msg);
-	CLuaPacket cres;
-	bool bRes;
+	if (id < 0)
+		return CResult::Make_Error("server is busy now. please try again.");
 	try
 	{
-		bRes = pLua->RunFunction(m_pConfig->operator[]("LuaProcessFunction").asString(), pUInfo, &creq, &cres);
+		CLua *pLua = m_pLuaList[id];
+		if (m_oReloadList[id] == true)
+		{
+			InitLua(pLua, m_pConfig->operator[]("LuaScriptFolder").asString());
+			m_oReloadList[id] = false;
+		}
+		CLuaPacket creq;
+		creq.SetData("request_message", msg);
+		if (extend.length() > 0)
+			creq.SetData("request_extend", extend);
+		CLuaPacket cres;
+		if (pLua->RunFunction(m_pConfig->operator[]("LuaProcessFunction").asString(), pUInfo, &creq, &cres))
+		{
+			m_oFreeLuaContext.push(id);
+			auto str_res = cres.GetData("response_result", "");
+			ResultType res;
+			if (!ResultType_Parse(str_res,&res))
+			{
+				return CResult::Make_Error("Get result fialed " + str_res);
+			}
+			auto res_msg = cres.GetData("response_message", "");
+
+			return CResult(res, res_msg);
+		}
+		else
+		{
+			m_oFreeLuaContext.push(id);
+			return CResult::Make_Error("server process happened error.");
+		}
 	}
-	catch(...)
+	catch (...)
 	{
 		m_oFreeLuaContext.push(id);
-		res = FormatJSONErrorMessage("-2","server process error.");
-		return false;
-	}
-	m_oFreeLuaContext.push(id);
-	if (bRes)
-	{
-		res = cres.GetData("json_response_message","");
-		string need = cres.GetData("NeedExData","false");
-		if ( need == "true"	)
-		{
-			auto uuid = cres.GetData("ExDataUUID","");
-			auto len = cres.GetData("ExDataSize","");
-			auto pData = m_iC->GetTemp("SendList" + uuid);
-			if (pData == nullptr)
-			{
-				res = FormatJSONErrorMessage("-2","ExData no saved in DataCenter, The uuid is " + uuid);
-				return true;
-			}
-			else
-			{
-				char* pBuf = TYPE_TRANS<char*>(pData);
-				exData = pBuf;
-				exSize = stoi(len);
-			}
-		}
-		return true;
-	}
-	else
-	{// 运行lua脚本失败
-		return false;
+		return CResult::Make_Error("server process error.");
 	}
 }
-#define LUA_CONTEXT_WAIT_SECONDE  10
+#define LUA_CONTEXT_WAIT_SECONDE 10
 int Sloong::CLuaProcessCenter::GetFreeLuaContext()
 {
-	
-	for ( int i = 0; i<LUA_CONTEXT_WAIT_SECONDE&&m_oFreeLuaContext.empty(); i++)
+
+	for (int i = 0; i < LUA_CONTEXT_WAIT_SECONDE && m_oFreeLuaContext.empty(); i++)
 	{
-		m_pLog->Debug("Wait lua context 1 sencond :"+Helper::ntos(i));
+		m_pLog->Debug("Wait lua context 1 sencond :" + Helper::ntos(i));
 		m_oSSync.wait_for(chrono::microseconds(500));
 	}
 
@@ -179,10 +152,9 @@ int Sloong::CLuaProcessCenter::GetFreeLuaContext()
 	{
 		m_pLog->Debug("no free context");
 		return -1;
-	}	
+	}
 	int nID = m_oFreeLuaContext.front();
 	m_oFreeLuaContext.pop();
 	lck.unlock();
 	return nID;
 }
-
