@@ -1,5 +1,4 @@
 #include "sockinfo.h"
-#include <univ/luapacket.h>
 #include "DataTransPackage.h"
 #include "NetworkEvent.hpp"
 #include "IData.h"

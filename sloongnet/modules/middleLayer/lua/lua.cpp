@@ -1,10 +1,8 @@
-#include "stdafx.h"
 #include "lua.h"
-#include "univ.h"
 #ifdef _WINDOWS
 #include <io.h>
 #endif // _WINDOWS
-using namespace Sloong::Universal;
+using namespace Sloong;
 
 typedef int (*LuaFunc)(lua_State *pLuaState);
 
@@ -264,7 +262,7 @@ bool CLua::RunFunction(string strFunctionName, CLuaPacket *pUserInfo, CLuaPacket
 	return true;
 }
 
-int Sloong::Universal::CLua::RunFunction(string strFunctionName, CLuaPacket *pUserInfo, string &strRequest, string &strResponse)
+int Sloong::CLua::RunFunction(string strFunctionName, CLuaPacket *pUserInfo, string &strRequest, string &strResponse)
 {
 	int nTop = lua_gettop(m_pScriptContext);
 	int nErr = 0;
@@ -289,7 +287,7 @@ int Sloong::Universal::CLua::RunFunction(string strFunctionName, CLuaPacket *pUs
 	return nRes;
 }
 
-void Sloong::Universal::CLua::RunFunction(string strFunctionName, CLuaPacket *pUserInfo)
+void Sloong::CLua::RunFunction(string strFunctionName, CLuaPacket *pUserInfo)
 {
 	int nTop = lua_gettop(m_pScriptContext);
 	int nErr = 0;
@@ -307,37 +305,37 @@ void Sloong::Universal::CLua::RunFunction(string strFunctionName, CLuaPacket *pU
 		lua_settop(m_pScriptContext, nTop);
 }
 
-int Sloong::Universal::CLua::GetInteger(lua_State *l, int nNum, int nDef /*= -1*/)
+int Sloong::CLua::GetInteger(lua_State *l, int nNum, int nDef /*= -1*/)
 {
 	return (int)luaL_optinteger(l, nNum, nDef);
 }
 
-bool Sloong::Universal::CLua::GetBoolen(lua_State *l, int nNum)
+bool Sloong::CLua::GetBoolen(lua_State *l, int nNum)
 {
 	return lua_toboolean(l, nNum);
 }
 
-void *Sloong::Universal::CLua::GetPointer(lua_State *l, int nNum)
+void *Sloong::CLua::GetPointer(lua_State *l, int nNum)
 {
 	return (void *)lua_topointer(l, nNum);
 }
 
-void Sloong::Universal::CLua::PushInteger(lua_State *l, int nValue)
+void Sloong::CLua::PushInteger(lua_State *l, int nValue)
 {
 	lua_pushinteger(l, nValue);
 }
 
-void Sloong::Universal::CLua::PushBoolen(lua_State *l, bool b)
+void Sloong::CLua::PushBoolen(lua_State *l, bool b)
 {
 	lua_pushboolean(l, b);
 }
 
-void Sloong::Universal::CLua::PushPointer(lua_State *l, void *pPointer)
+void Sloong::CLua::PushPointer(lua_State *l, void *pPointer)
 {
 	lua_pushlightuserdata(l, pPointer);
 }
 
-unique_ptr<map<std::string, std::string>> Sloong::Universal::CLua::GetTableParam(lua_State *l, int index)
+unique_ptr<map<std::string, std::string>> Sloong::CLua::GetTableParam(lua_State *l, int index)
 {
 	auto data = make_unique<map<string, string>>();
 	lua_pushnil(l);
@@ -367,7 +365,7 @@ unique_ptr<map<std::string, std::string>> Sloong::Universal::CLua::GetTableParam
 	return data;
 }
 
-void Sloong::Universal::CLua::PushPacket(CLuaPacket *pData)
+void Sloong::CLua::PushPacket(CLuaPacket *pData)
 {
 	if (pData)
 		Lunar<CLuaPacket>::push(m_pScriptContext, pData, false);

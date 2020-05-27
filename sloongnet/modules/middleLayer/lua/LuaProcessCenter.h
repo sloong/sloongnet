@@ -8,8 +8,11 @@
 #pragma once
 
 #define LUA_INT_TYPE LUA_INT_LONG
-#include <jsoncpp/json/json.h>
+#include "core.h"
 #include "IObject.h"
+
+#include "lua.h"
+
 namespace Sloong
 {
 	namespace Events

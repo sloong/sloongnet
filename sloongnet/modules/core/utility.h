@@ -1,15 +1,11 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-#include <univ/lua.h>
+#include "core.h"
+
 typedef unsigned char byte;
 namespace Sloong
 {
-	namespace Universal
-	{
-		class CLog;
-	}
-	using namespace Universal;
 	class CUtility
 	{
 	public:

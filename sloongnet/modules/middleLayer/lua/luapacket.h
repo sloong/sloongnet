@@ -1,64 +1,58 @@
 #ifndef LUAPACKET_H
 #define LUAPACKET_H
 
+#include "core.h"
 
-#include "univ.h"
-#include <mutex>
-#include<map>
-using std::mutex;
-using std::map;
 struct lua_State;
 namespace Sloong
 {
-    namespace Universal
+    class CLuaPacket
     {
-        class UNIVERSAL_API CLuaPacket
-        {
-        public:
-            static const char className[];
-        public:
-            CLuaPacket();
-            CLuaPacket(lua_State* L);
-            virtual ~CLuaPacket();
+    public:
+        static const char className[];
 
-            int clear(lua_State* L);
-            int setdata(lua_State* L);
-            int getdata(lua_State* L);
+    public:
+        CLuaPacket();
+        CLuaPacket(lua_State *L);
+        virtual ~CLuaPacket();
 
-            void SetData(const string& key, const string& value);
-            string GetData(const string& key, const string& def);
+        int clear(lua_State *L);
+        int setdata(lua_State *L);
+        int getdata(lua_State *L);
 
-            /**
+        void SetData(const string &key, const string &value);
+        string GetData(const string &key, const string &def);
+
+        /**
              * @Remarks: Check the map object is changed after the Initialize with ParseFromString function.
              * @Params: No
              * @Return: if no changed, return 0. else return the changed count.
              */
-            int IsChanged();
+        int IsChanged();
 
-            /**
+        /**
              * @Remarks: Confirm the modify. user need call the SerializeToString function to get the data and save it.
              * @Params: No
              * @Return: No
              */
-            void ConfirmChange();
+        void ConfirmChange();
 
-            /**
+        /**
              * @Remarks: Get changed items array. 
              * @Params: No
              * @Return: the array for changed items key.
              */
-			shared_ptr<vector<string>> GetChangedItems();
+        shared_ptr<vector<string>> GetChangedItems();
 
-        protected:
-            bool Exist(const string& key);
+    protected:
+        bool Exist(const string &key);
 
-        private:
-            mutex	m_oMutex;
-            map<string,string> m_oDataMap;
-            shared_ptr<vector<string>>  m_oChangeList;
-        };
+    private:
+        mutex m_oMutex;
+        map<string, string> m_oDataMap;
+        shared_ptr<vector<string>> m_oChangeList;
+    };
 
-    }
-}
+} // namespace Sloong
 
 #endif // LUAPACKET_H

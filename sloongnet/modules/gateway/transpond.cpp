@@ -25,7 +25,7 @@ CResult GatewayTranspond::RequestPackageProcesser(CDataTransPackage *trans_pack)
 {
 	m_pLog->Debug("Receive new request package.");
 	auto res = MessageToProcesser(trans_pack);
-	m_pLog->Debug(Helper::Format("Response [%s][%s].", Core::ResultType_Name(res.Result()).c_str(), res.Message().c_str()));
+	m_pLog->Debug(Helper::Format("Response [%s][%s].", ResultType_Name(res.Result()).c_str(), res.Message().c_str()));
 	return res;
 }
 

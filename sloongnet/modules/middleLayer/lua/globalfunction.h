@@ -2,6 +2,9 @@
 #define CGLOBALFUNCTION_H
 
 #include "IObject.h"
+#include "core.h"
+#include "lua.h"
+
 namespace Sloong
 {
     class CUtility;

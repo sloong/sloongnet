@@ -36,7 +36,8 @@
 
 using namespace std;
 
-
+#include "protocol/base.pb.h"
+using namespace Base;
 
 #include "protocol/core.pb.h"
 using namespace Core;

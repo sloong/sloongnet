@@ -72,7 +72,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data)
         if (!response)
             return CResult::Make_Error("Parse the get config response data error.");
 
-        if (response->result() == Core::ResultType::Retry)
+        if (response->result() == ResultType::Retry)
         {
             if (uuid == 0)
             {
@@ -87,7 +87,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data)
             }
             continue;
         }
-        else if (response->result() == Core::ResultType::Succeed)
+        else if (response->result() == ResultType::Succeed)
         {
             auto res_pack = ConvertStrToObj<RegisteWorkerResponse>(response->content());
             string serverConfig = res_pack->configuation();
@@ -102,7 +102,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data)
         }
         else
         {
-            return CResult::Make_Error(Helper::Format("Control return an unexpected result [%s]. Message [%s].", Core::ResultType_Name(response->result()).c_str(), response->content().c_str()));
+            return CResult::Make_Error(Helper::Format("Control return an unexpected result [%s]. Message [%s].", ResultType_Name(response->result()).c_str(), response->content().c_str()));
         }
     };
     cout << "Get configuation succeed." << endl;

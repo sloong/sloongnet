@@ -1,0 +1,42 @@
+syntax = "proto3";
+package Base;
+
+// Result
+enum ResultType{    
+    Succeed = 0;
+    Error = 1;
+    Warning = 2;
+    Retry = 3;
+    Invalid = 4;
+}
+
+message DataPackage
+{
+    enum PackageType{
+        RequestPackage=0;
+        EventPackage=1;
+    }
+    PackageType Type = 1;
+    enum StatusType{
+        Request=0;
+        Response=1;
+    }
+    StatusType Status=2;
+    // In request pacakge, it's function id.
+    // In event package, it's event id
+    int32 Function = 3;
+    // 优先级
+    int32 Priority = 4;
+    // 流水号
+    fixed64 ID = 5;
+    // 校验串
+    bytes Hash = 6;
+    // 发送者的唯一标识符
+    fixed64 Sender = 7;
+    // 结果代码
+    ResultType Result = 8;
+    // 消息内容
+    bytes Content = 9;
+    // 扩展数据，通常没用。但是一旦设置了这个字段则认为该包是BigPackage，直接进入队列而不是直接发送
+    bytes Extend = 10;
+}

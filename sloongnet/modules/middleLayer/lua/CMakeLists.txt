@@ -19,4 +19,4 @@ list(APPEND SRC_LIST ${MODULE_SRC_LIST})
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRC_LIST})
 
 #添加链接库
-target_link_libraries(${PROJECT_NAME} luajit5.1)
+target_link_libraries(${PROJECT_NAME} luajit-5.1)

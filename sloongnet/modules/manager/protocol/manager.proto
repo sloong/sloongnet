@@ -1,5 +1,5 @@
 syntax = "proto3";
-import "core.proto";
+import "base.proto";
 package Manager;
 
 enum Events{
@@ -49,7 +49,7 @@ message PostLogMessageRequest
       Response=1;
    }
    PostLogType Type=1;// Request or Response
-   Core.ResultType Result=2;// Succeed or Error
+   Base.ResultType Result=2;// Succeed or Error
    string Sender=3;// Message sender
    string Receiver=4;// Message receiver
    string Function=5;

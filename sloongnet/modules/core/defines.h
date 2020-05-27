@@ -16,8 +16,6 @@
 #include "univ/exception.h"
 #include "univ/threadpool.h"
 #include "univ/hash.h"
-#include "univ/lua.h"
-#include "univ/luapacket.h"
 #include "univ/base64.h"
 using namespace Sloong;
 using namespace Sloong::Universal;
