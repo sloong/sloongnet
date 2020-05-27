@@ -15,10 +15,8 @@ Sloong::CNetworkHub::CNetworkHub()
 
 Sloong::CNetworkHub::~CNetworkHub()
 {
-	if (m_pCTX)
-	{
-		SSL_CTX_free(m_pCTX);
-	}
+	if(m_pCTX)
+		EasyConnect::G_FreeSSL(m_pCTX);
 	for (int i = 0; i < s_PriorityLevel; i++)
 	{
 		while (!m_pWaitProcessList[i].empty())
@@ -189,7 +187,7 @@ void Sloong::CNetworkHub::EnableTimeoutCheck(int timeoutTime, int checkInterval)
 
 void Sloong::CNetworkHub::EnableSSL(const string &certFile, const string &keyFile, const string &passwd)
 {
-	auto ret = EasyConnect::G_InitializeSSL(m_pCTX, certFile, keyFile, passwd);
+	auto ret = EasyConnect::G_InitializeSSL(&m_pCTX, certFile, keyFile, passwd);
 	if (ret != S_OK)
 	{
 		m_pLog->Error("Initialize SSL environment error.");

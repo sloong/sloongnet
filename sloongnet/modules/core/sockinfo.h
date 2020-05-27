@@ -8,7 +8,6 @@
 #ifndef SOCKINFO_H
 #define SOCKINFO_H
 
-
 #include "EasyConnect.h"
 
 #include "DataTransPackage.h"
@@ -23,7 +22,7 @@ namespace Sloong
 		CSockInfo();
 		~CSockInfo();
 
-		void Initialize(IControl* iMsg, int sock, SSL_CTX* ctx);
+		void Initialize(IControl *, int, LPVOID);
 
 		/**
 		 * @Remarks: When data can receive, should call this function to receive the package.
@@ -32,7 +31,7 @@ namespace Sloong
 		 * 		if happened errors, return Error.
 		 * @Note: It always read all data in one time, so no return Retry.
 		 */
-		ResultType OnDataCanReceive( queue<UniqueTransPackage>& readList );
+		ResultType OnDataCanReceive(queue<UniqueTransPackage> &);
 
 		/**
 		 * @Remarks: When data can send, should call this function to send the package.
@@ -50,35 +49,37 @@ namespace Sloong
 		 * 			if happened erros, return Error.
 		 * 			if have extend data or all data is no send and have EAGAIN sinal , return Retry.
 		 */
-		ResultType SendDataPackage(UniqueTransPackage pack);
+		ResultType SendDataPackage(UniqueTransPackage);
 
-		inline bool TrySendLock(){
+		inline bool TrySendLock()
+		{
 			return m_oSockSendMutex.try_lock();
 		}
-		inline bool TryReceiveLock(){
+		inline bool TryReceiveLock()
+		{
 			return m_oSockReadMutex.try_lock();
 		}
 
 	protected:
 		void ProcessPrepareSendList();
 		ResultType ProcessSendList();
-		queue_ex<UniqueTransPackage>* GetSendPackage();
-		void AddToSendList(UniqueTransPackage pack);
+		queue_ex<UniqueTransPackage> *GetSendPackage();
+		void AddToSendList(UniqueTransPackage);
 
 	public:
-        queue_ex<UniqueTransPackage>* m_pSendList; // the send list of the bytes.
-        queue_ex<UniqueTransPackage>  m_oPrepareSendList;
+		queue_ex<UniqueTransPackage> *m_pSendList; // the send list of the bytes.
+		queue_ex<UniqueTransPackage> m_oPrepareSendList;
 
 		time_t m_ActiveTime;
 		unique_ptr<EasyConnect> m_pCon;
-		
-        mutex m_oSockReadMutex;
-        mutex m_oSockSendMutex; 
+
+		mutex m_oSockReadMutex;
+		mutex m_oSockSendMutex;
 		UniqueTransPackage m_pSendingPackage = nullptr;
 		UniqueTransPackage m_pReceiving = nullptr;
-        bool m_bIsSendListEmpty = true;
+		bool m_bIsSendListEmpty = true;
 	};
 
-}
+} // namespace Sloong
 
 #endif // SOCKINFO_H

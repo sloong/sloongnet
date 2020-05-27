@@ -30,7 +30,7 @@ CSockInfo::~CSockInfo()
 	}
 }
 
-void Sloong::CSockInfo::Initialize(IControl *iMsg, int sock, SSL_CTX *ctx)
+void Sloong::CSockInfo::Initialize(IControl *iMsg, int sock, LPVOID ctx)
 {
 	IObject::Initialize(iMsg);
 	m_ActiveTime = time(NULL);

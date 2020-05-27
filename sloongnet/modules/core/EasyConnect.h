@@ -2,6 +2,7 @@
 #define SLOONGNET_EASY_CONNECT_H
 
 #include "core.h"
+
 namespace Sloong
 {
 	namespace Universal
@@ -19,6 +20,7 @@ namespace Sloong
 		ConnectError,
 	};
 
+	
 	// 有两种使用方式：
 	//  1：作为接受方，此时需要提供一个已经建立连接的SOCKET。
 	//  2：作为发起方，此时需要提供一个目标地址，之后会自动处理连接过程
@@ -27,11 +29,11 @@ namespace Sloong
 	public:
 		// 以接受方的方式初始化
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
-		void Initialize(SOCKET, SSL_CTX *p = nullptr);
+		void Initialize(SOCKET, LPVOID p = nullptr);
 
 		// 以发起方的方式初始化
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
-		void Initialize(const string &, int, SSL_CTX *p = nullptr);
+		void Initialize(const string &, int, LPVOID p = nullptr);
 
 		bool Connect();
 
@@ -80,15 +82,16 @@ namespace Sloong
 		string GetLengthData(int64_t);
 
 	public:
-		static unsigned long G_InitializeSSL(SSL_CTX *&, const string &, const string &, const string &);
+		static unsigned long G_InitializeSSL(LPVOID*, const string &, const string &, const string &);
+		static void G_FreeSSL(LPVOID);
 		static string G_FormatSSLErrorMsg(int);
 
 	private:
 		bool CheckSSLStatus(bool);
 		bool do_handshake();
 
-		int SSL_Read_Ex(SSL *, char *, int, int, bool);
-		int SSL_Write_Ex(SSL *, char *, int);
+		int SSL_Read_Ex(char *, int, int, bool);
+		int SSL_Write_Ex(const char *, int);
 
 	public:
 		string m_strAddress;
@@ -97,7 +100,7 @@ namespace Sloong
 	private:
 		int m_nErrno;
 		SOCKET m_nSocket = INVALID_SOCKET;
-		SSL *m_pSSL = nullptr;
+		LPVOID m_pSSL = nullptr;
 		bool m_bSupportReconnect = false;
 		string m_strErrorMsg;
 		int m_nErrorCode;

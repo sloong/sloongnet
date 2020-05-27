@@ -78,7 +78,7 @@ namespace Sloong
         unique_ptr<CEpollEx>    m_pEpoll;
         CEasySync               m_oCheckTimeoutThreadSync;
         
-        SSL_CTX*                m_pCTX = nullptr;
+        LPVOID                m_pCTX = nullptr;
         GLOBAL_CONFIG*          m_pConfig = nullptr;
 
         // Timeout check

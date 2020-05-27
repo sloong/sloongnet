@@ -3,6 +3,11 @@
 #include "utility.h"
 #include "defines.h"
 
+// openssl head file
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
+
 bool support_ssl_reconnect = false;
 
 // If want use the int64 to send the length data, define this.
@@ -10,7 +15,7 @@ bool support_ssl_reconnect = false;
 constexpr int s_llLen = 8;
 constexpr int s_lLen = 4;
 
-void Sloong::EasyConnect::Initialize(SOCKET sock, SSL_CTX *ctx)
+void Sloong::EasyConnect::Initialize(SOCKET sock, LPVOID ctx)
 {
 	m_nSocket = sock;
 	m_strAddress = CUtility::GetSocketIP(m_nSocket);
@@ -18,21 +23,23 @@ void Sloong::EasyConnect::Initialize(SOCKET sock, SSL_CTX *ctx)
 
 	if (ctx)
 	{
-		m_pSSL = SSL_new(ctx);
-		SSL_set_fd(m_pSSL, sock);
-
-		SSL_set_accept_state(m_pSSL);
+		auto pCtx = TYPE_TRANS<SSL_CTX*>(ctx);
+		auto pSSL = SSL_new(pCtx);
+		SSL_set_fd(pSSL, sock);
+		SSL_set_accept_state(pSSL);
+		m_pSSL = pSSL;
 		do_handshake();
 	}
 }
 
-void Sloong::EasyConnect::Initialize(const string &address, int port, SSL_CTX *ctx)
+void Sloong::EasyConnect::Initialize(const string &address, int port, LPVOID ctx)
 {
 	m_strAddress = address;
 	m_nPort = port;
 	if (ctx)
 	{
-		m_pSSL = SSL_new(ctx);
+		auto pCtx = TYPE_TRANS<SSL_CTX*>(ctx);
+		m_pSSL = SSL_new(pCtx);
 	}
 }
 
@@ -55,25 +62,27 @@ bool Sloong::EasyConnect::Connect()
 	}
 	if (m_pSSL)
 	{
-		SSL_set_fd(m_pSSL, m_nSocket);
-		SSL_set_accept_state(m_pSSL);
+		auto pSSL = TYPE_TRANS<SSL*>(m_pSSL);
+		SSL_set_fd(pSSL, m_nSocket);
+		SSL_set_accept_state(pSSL);
 		do_handshake();
 	}
 	return true;
 }
 
-int Sloong::EasyConnect::SSL_Read_Ex(SSL *ssl, char *buf, int nSize, int nTimeout, bool bAgagin)
+int Sloong::EasyConnect::SSL_Read_Ex( char *buf, int nSize, int nTimeout, bool bAgagin)
 {
 	if (nSize <= 0)
 		return 0;
 
+	auto pSSL = TYPE_TRANS<SSL*>(m_pSSL);
 	int nIsRecv = 0;
 	int nNoRecv = nSize;
 	int nRecv = 0;
 	char *pBuf = buf;
 	while (nIsRecv < nSize)
 	{
-		nRecv = SSL_read(ssl, pBuf + nSize - nNoRecv, nNoRecv);
+		nRecv = SSL_read(pSSL, pBuf + nSize - nNoRecv, nNoRecv);
 		if (nRecv <= 0)
 		{
 			return nIsRecv;
@@ -84,9 +93,10 @@ int Sloong::EasyConnect::SSL_Read_Ex(SSL *ssl, char *buf, int nSize, int nTimeou
 	return nIsRecv;
 }
 
-int Sloong::EasyConnect::SSL_Write_Ex(SSL *ssl, char *buf, int len)
+int Sloong::EasyConnect::SSL_Write_Ex(const char *buf, int len)
 {
-	return 0;
+	auto pSSL = TYPE_TRANS<SSL*>(m_pSSL);
+	return SSL_write(pSSL,buf,len);
 }
 
 string Sloong::EasyConnect::GetLengthData(int64_t lengthData)
@@ -220,10 +230,11 @@ int Sloong::EasyConnect::Read(char *data, int len, bool block, bool bagain)
 	// 1.正常全部读取完成。
 	// 2.读取后发生错误，错误信息为SSL_ERROR_WANT_READ，需等待下次可读事件，并根据已读的部分进行组合。
 	// 3.读取后发生错误，错误信息为其他，认为连接发生问题需要重连。
-	int ret = SSL_Read_Ex(m_pSSL, data, len, 0, true);
+	int ret = SSL_Read_Ex( data, len, 0, true);
 	if (ret != len)
 	{
-		int err = SSL_get_error(m_pSSL, ret);
+		auto pSSL = TYPE_TRANS<SSL*>(m_pSSL);
+		int err = SSL_get_error(pSSL, ret);
 		switch (err)
 		{
 		case SSL_ERROR_WANT_READ:
@@ -267,7 +278,7 @@ int Sloong::EasyConnect::Write(const char *data, int len, int index)
 	}
 
 	// SSL发送数据
-	int ret = SSL_write(m_pSSL, data + index, len);
+	int ret = SSL_Write_Ex(data + index, len);
 	if (ret > 0)
 	{
 		if (ret != len)
@@ -277,7 +288,8 @@ int Sloong::EasyConnect::Write(const char *data, int len, int index)
 	}
 	else if (ret < 0)
 	{
-		int err = SSL_get_error(m_pSSL, ret);
+		auto pSSL = TYPE_TRANS<SSL*>(m_pSSL);
+		int err = SSL_get_error(pSSL, ret);
 
 		switch (err)
 		{
@@ -314,19 +326,20 @@ void Sloong::EasyConnect::Close()
 {
 	if (m_pSSL)
 	{
-		SSL_shutdown(m_pSSL);
-		SSL_free(m_pSSL);
+		auto pSSL = TYPE_TRANS<SSL*>(m_pSSL);
+		SSL_shutdown(pSSL);
+		SSL_free(pSSL);
 	}
 	shutdown(m_nSocket, SHUT_RDWR);
 	close(m_nSocket);
 }
 
-unsigned long Sloong::EasyConnect::G_InitializeSSL(SSL_CTX *&ctx, const string &certFile, const string &keyFile, const string &passwd)
+unsigned long Sloong::EasyConnect::G_InitializeSSL(LPVOID* out_ctx, const string &certFile, const string &keyFile, const string &passwd)
 {
 	SSL_library_init();
 	OpenSSL_add_all_algorithms();			   /* load & register all cryptos, etc. */
 	SSL_load_error_strings();				   /* load all error messages */
-	ctx = SSL_CTX_new(SSLv23_server_method()); /* create new server-method instance */
+	auto ctx = SSL_CTX_new(SSLv23_server_method()); /* create new server-method instance */
 	if (ctx == NULL)
 	{
 		return ERR_get_error();
@@ -356,7 +369,16 @@ unsigned long Sloong::EasyConnect::G_InitializeSSL(SSL_CTX *&ctx, const string &
 	{
 		return ERR_get_error();
 	}
+	*out_ctx = ctx;
 	return S_OK;
+}
+
+void Sloong::EasyConnect::G_FreeSSL(LPVOID ctx)
+{
+	if( ctx )
+	{
+		SSL_CTX_free(TYPE_TRANS<SSL_CTX*>(ctx));
+	}
 }
 
 string Sloong::EasyConnect::G_FormatSSLErrorMsg(int code)
@@ -366,13 +388,14 @@ string Sloong::EasyConnect::G_FormatSSLErrorMsg(int code)
 
 bool Sloong::EasyConnect::do_handshake()
 {
-	int res = SSL_do_handshake(m_pSSL);
+	auto pSSL = TYPE_TRANS<SSL*>(m_pSSL);
+	int res = SSL_do_handshake(pSSL);
 	if (1 == res)
 	{
 		m_stStatus = ConnectStatus::Ready;
 		return true;
 	}
-	switch (SSL_get_error(m_pSSL, res))
+	switch (SSL_get_error(pSSL, res))
 	{
 	case SSL_ERROR_WANT_WRITE:
 		//m_stStatus = ConnectStatus::WaitWrite;
