@@ -57,3 +57,4 @@ sloongnet/modules/*/protocol/*.pb.cc
 sloongnet/modules/*/protocol/*.pb.h
 sloongnet/protocol/*.pb.cc
 sloongnet/protocol/*.pb.h
+sloongnet/modules/middleLayer/rust/target/

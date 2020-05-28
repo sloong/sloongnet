@@ -9,6 +9,8 @@
 #ifndef SLOONGNET_MODULE_CORE_EXPORT_H
 #define SLOONGNET_MODULE_CORE_EXPORT_H
 
+#include "protocol/base.pb.h"
+using namespace Base;
 #include "protocol/core.pb.h"
 using namespace Core;
 #include "DataTransPackage.h"
