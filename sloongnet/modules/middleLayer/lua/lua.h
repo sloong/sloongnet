@@ -45,8 +45,8 @@ namespace Sloong
 		bool RunBuffer(LPCSTR pBuffer, size_t sz);
 		bool RunString(const string &strCommand);
 		void PushPacket(CLuaPacket *pData);
-		bool RunFunction(string strFunctionName, CLuaPacket *pUserInfo, CLuaPacket *pRequest, CLuaPacket *pResponse);
-		int RunFunction(string strFunctionName, CLuaPacket *pUserInfo, string &strRequest, string &strResponse);
+		bool RunFunction(string strFunctionName, int funcid, CLuaPacket *pUserInfo, CLuaPacket *pRequest, CLuaPacket *pResponse);
+		int RunFunction(string strFunctionName, int funcid,  CLuaPacket *pUserInfo, string &strRequest, string &strResponse);
 		void RunFunction(string strFunctionName, CLuaPacket *pUserInfo);
 		string GetErrorString();
 		bool AddFunction(const string &strFunctionName, LuaFunctionType pFunction);
@@ -73,7 +73,7 @@ namespace Sloong
 		inline void HandlerError(const string &strErrorType, const char *strCmd)
 		{
 			if (m_pErrorHandler)
-				m_pErrorHandler(Helper::Format("\n Error - %s:\n %s\n Error Message:%s%", strErrorType.c_str(), strCmd, GetErrorString().c_str()));
+				m_pErrorHandler(Helper::Format("\n Error - %s:\n %s\n Error Message:%s", strErrorType.c_str(), strCmd, GetErrorString().c_str()));
 		}
 		inline void AddFunctions(vector<LuaFunctionRegistr> *pFuncList)
 		{

@@ -137,8 +137,8 @@ int Sloong::CGlobalFunction::Lua_GetConfig(lua_State *l)
     string def = CLua::GetString(l, 3);
     // TODO: change to send message mode.
     //CConfiguation *pConfig = TYPE_TRANS<CConfiguation *>(g_pThis->m_iC->Get(DATA_ITEM::Configuation));
-    string value("");
-    try
+    string value("NO SUPPORT");
+    /*try
     {
         value = "NO SUPPORT";
         //value = pConfig->GetStringConfig("config",section, key, def);
@@ -148,7 +148,7 @@ int Sloong::CGlobalFunction::Lua_GetConfig(lua_State *l)
         CLua::PushString(l, "");
         CLua::PushString(l, e.what());
         return 2;
-    }
+    }*/
 
     CLua::PushString(l, value);
     return 1;

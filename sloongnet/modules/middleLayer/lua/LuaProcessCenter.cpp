@@ -19,7 +19,7 @@ CLuaProcessCenter::~CLuaProcessCenter()
 	}
 }
 
-void Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
+CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 {
 	IObject::Initialize(iMsg);
 	g_pLog = m_pLog;
@@ -34,8 +34,17 @@ void Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 	// 在处理开始之前根据队列情况拿到某lua环境的id并将其移除出可用队列
 	// 在处理完毕之后重新加回到可用队列中。
 	// 这里使用处理线程池的数量进行初始化，保证在所有线程都在处理Lua请求时不会因luacontext发生堵塞
-	for (int i = 0; i < m_pConfig->operator[]("LuaContextQuantity").asInt(); i++)
-		NewThreadInit();
+	auto num = m_pConfig->operator[]("LuaContextQuantity").asInt();
+	if( num < 1 )
+		return CResult::Make_Error("LuaContextQuantity must be bigger than 0,");
+
+	for (int i = 0; i < num; i++)
+	{
+		auto res = NewThreadInit();
+		if( res.IsFialed() )
+			return res;
+	}
+	return CResult::Succeed();
 }
 
 void Sloong::CLuaProcessCenter::HandleError(const string &err)
@@ -52,32 +61,33 @@ void Sloong::CLuaProcessCenter::ReloadContext(IEvent *event)
 	}
 }
 
-int Sloong::CLuaProcessCenter::NewThreadInit()
+CResult Sloong::CLuaProcessCenter::NewThreadInit()
 {
 	CLua *pLua = new CLua();
 	pLua->SetErrorHandle(HandleError);
 	pLua->SetScriptFolder(m_pConfig->operator[]("LuaScriptFolder").asString());
 	m_pGFunc->RegistFuncToLua(pLua);
-	InitLua(pLua, m_pConfig->operator[]("LuaScriptFolder").asString());
+	auto res = InitLua(pLua, m_pConfig->operator[]("LuaScriptFolder").asString());
+	if( res.IsFialed() )
+		return res;
 	m_pLuaList.push_back(pLua);
 	m_oReloadList.push_back(false);
 	int id = (int)m_pLuaList.size() - 1;
 	FreeLuaContext(id);
-	return id;
+	return CResult::Succeed();
 }
 
-void Sloong::CLuaProcessCenter::InitLua(CLua *pLua, string folder)
+CResult Sloong::CLuaProcessCenter::InitLua(CLua *pLua, string folder)
 {
 	if (!pLua->RunScript(m_pConfig->operator[]("LuaEntryFile").asString()))
 	{
-		throw normal_except("Run Script Fialed.");
+		return CResult::Make_Error("Run Script Fialed.");
 	}
-	char tag = folder[folder.length() - 1];
-	if (tag != '/' && tag != '\\')
+	if(!pLua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), Helper::Format("'%s'", folder.c_str())))
 	{
-		folder += '/';
+		return CResult::Make_Error("Run Function Fialed.");
 	}
-	pLua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), Helper::Format("'%s'", folder.c_str()));
+	return CResult::Succeed();
 }
 
 void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket *uinfo)
@@ -107,7 +117,7 @@ CResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 		if (extend.length() > 0)
 			creq.SetData("request_extend", extend);
 		CLuaPacket cres;
-		if (pLua->RunFunction(m_pConfig->operator[]("LuaProcessFunction").asString(), pUInfo, &creq, &cres))
+		if (pLua->RunFunction(m_pConfig->operator[]("LuaProcessFunction").asString(), function, pUInfo, &creq, &cres))
 		{
 			FreeLuaContext(id);
 			auto str_res = cres.GetData("response_result", "");

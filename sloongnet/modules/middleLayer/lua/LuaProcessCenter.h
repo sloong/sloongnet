@@ -27,9 +27,9 @@ namespace Sloong
 		CLuaProcessCenter();
 		~CLuaProcessCenter();
 
-		void Initialize(IControl* iMsg);
-		int NewThreadInit();
-		void InitLua(CLua* pLua, string folder);
+		CResult Initialize(IControl* iMsg);
+		CResult NewThreadInit();
+		CResult InitLua(CLua* pLua, string folder);
 		void CloseSocket(CLuaPacket* uinfo);
 		CResult MsgProcess( int function, CLuaPacket * pUInfo, const string& msg, const string& extend );
 		int GetFreeLuaContext();

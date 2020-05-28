@@ -57,6 +57,11 @@ std::string CLua::findScript(const string &strFullName)
 bool CLua::RunScript(const string &strFileName)
 {
 	std::string strFullName = findScript(strFileName);
+	if( strFullName.length() == 0)
+	{
+		HandlerError("Load Script", "No find scritp file:" + strFullName);
+		return false;
+	}
 
 	if (0 != luaL_loadfile(m_pScriptContext, strFullName.c_str()))
 	{
@@ -239,7 +244,7 @@ bool CLua::PushFunction(int nFuncRef)
 	return true;
 }
 
-bool CLua::RunFunction(string strFunctionName, CLuaPacket *pUserInfo, CLuaPacket *pRequest, CLuaPacket *pResponse)
+bool CLua::RunFunction(string strFunctionName,  int funcid, CLuaPacket *pUserInfo, CLuaPacket *pRequest, CLuaPacket *pResponse)
 {
 	int nTop = lua_gettop(m_pScriptContext);
 	int nErr = 0;
@@ -248,12 +253,12 @@ bool CLua::RunFunction(string strFunctionName, CLuaPacket *pUserInfo, CLuaPacket
 	nErr = lua_gettop(m_pScriptContext);
 
 	PushFunction(strFunctionName);
-
+	PushInteger(funcid);
 	PushPacket(pUserInfo);
 	PushPacket(pRequest);
 	PushPacket(pResponse);
 
-	if (0 != lua_pcall(m_pScriptContext, 3, LUA_MULTRET, nErr))
+	if (0 != lua_pcall(m_pScriptContext, 4, LUA_MULTRET, nErr))
 	{
 		GetErrorString();
 		return false;
@@ -262,7 +267,7 @@ bool CLua::RunFunction(string strFunctionName, CLuaPacket *pUserInfo, CLuaPacket
 	return true;
 }
 
-int Sloong::CLua::RunFunction(string strFunctionName, CLuaPacket *pUserInfo, string &strRequest, string &strResponse)
+int Sloong::CLua::RunFunction(string strFunctionName, int funcid, CLuaPacket *pUserInfo, string &strRequest, string &strResponse)
 {
 	int nTop = lua_gettop(m_pScriptContext);
 	int nErr = 0;
@@ -271,11 +276,11 @@ int Sloong::CLua::RunFunction(string strFunctionName, CLuaPacket *pUserInfo, str
 	nErr = lua_gettop(m_pScriptContext);
 
 	PushFunction(strFunctionName);
-
+	PushInteger(funcid);
 	PushPacket(pUserInfo);
 	PushString(strRequest);
 
-	if (0 != lua_pcall(m_pScriptContext, 2, LUA_MULTRET, nErr))
+	if (0 != lua_pcall(m_pScriptContext, 3, LUA_MULTRET, nErr))
 	{
 		strResponse = GetErrorString();
 		return -2;

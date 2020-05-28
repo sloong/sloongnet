@@ -112,7 +112,8 @@ void Sloong::LuaMiddleLayer::OnSocketClose(IEvent* event)
 inline CResult Sloong::LuaMiddleLayer::CreateProcessEnvironmentHandler(void** out_env)
 {
 	auto item = make_shared<CLuaProcessCenter>();
-	item->Initialize(m_pControl);
+	auto res = item->Initialize(m_pControl);
+	if( res.IsFialed() ) return res;
 	m_listProcess.push_back(item);
 	(*out_env) = item.get();
 	return CResult::Succeed();

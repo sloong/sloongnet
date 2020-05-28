@@ -5,14 +5,14 @@
 local main_Req = {};
 
 main_Req.ReloadScript = function( u, req, res )
-	Sloongnet_ReloadScript();
+	ReloadScript();
 	return 0;
 end
 
 
 main_Req.TextTest = function( u, req, res )
 	Info(req['content'])
-    res['TestText'] = Sloongnet_GetEngineVer()  .. ' -- Sloong Network Engine -- Copyright 2015-2018 Sloong.com. All Rights Reserved';
+    res['content'] = req['content'] .. '--' .. GetEngineVer()  .. ' -- Sloong Network Engine -- Copyright 2015-2018 Sloong.com. All Rights Reserved';
     return Succeed
 end
 
@@ -31,16 +31,16 @@ end
 -- return the path with guid.
 -- then client upload the file to the folder, 
 function main_Req.UploadStart(u, req, res)
-	res['ftpuser']=Sloongnet_Get('FTP','User','');
-	res['ftppwd']=Sloongnet_Get('FTP','Password','');
+	res['ftpuser']=Get('FTP','User','');
+	res['ftppwd']=Get('FTP','Password','');
 	Debug(res['filename'])
 	res['filename']=req['filename'];
 	res['fullname']=req['fullname'];
-	local baseUrl = Sloongnet_Get('FTP','UploadUrl','') 
+	local baseUrl = Get('FTP','UploadUrl','') 
 	res['ftpurl']=baseUrl
 	-- get guid from c++
 	--GetGUID()
-	local uuid = Sloongnet_GenUUID();
+	local uuid = GenUUID();
 	res['uuid']=uuid;
 	-- Return a floder path.
 	local path = uuid .. '/';
@@ -50,10 +50,10 @@ function main_Req.UploadStart(u, req, res)
 end
 
 function main_Req.UploadEnd( u, req, res )
-	local folder = Sloongnet_Get('FTP','UploadFolder','')
+	local folder = Get('FTP','UploadFolder','')
 	local path = folder .. req['UploadURL'] .. req['filename'];
 	local newPath = folder .. os.date('%Y%m%d') .. '/' .. req['filename'];
-	local errmsg ,errcode = Sloongnet_MoveFile(path,newPath);
+	local errmsg ,errcode = MoveFile(path,newPath);
 	return errcode, errmsg;
 end
 
@@ -69,7 +69,7 @@ function main_Req.UploadWithTCP( u, req, res  )
 			list[sk]=sv;
 		end
 	end
-	local uuid = Sloongnet_ReceiveFile(list,'/tmp/sloong/');
+	local uuid = ReceiveFile(list,'/tmp/sloong/');
 	u:setdata('upload_tcp_uuid',uuid)
 	res['uuid'] = uuid;
 	return 0;
@@ -77,7 +77,7 @@ end
 
 function main_Req.UploadWithTCPStart(u, req, res )
 	local uuid = u:getdata('upload_tcp_uuid');
-	local res, path = Sloongnet_CheckRecvStatus(uuid,req['md5']);
+	local res, path = CheckRecvStatus(uuid,req['md5']);
 	if res then
 		Debug('file saved in:' .. path)
 		return 0,path;
@@ -88,18 +88,18 @@ function main_Req.UploadWithTCPStart(u, req, res )
 end
 
 function main_Req.GetThumbImage(u,req )
-    local path = Sloongnet_GetThumbImage(req['path'],100,100,5,'/tmp/thumbpath');
+    local path = GetThumbImage(req['path'],100,100,5,'/tmp/thumbpath');
     return 0,path
 end
 
 AddModule('Processer.Functions', 
 {
-	['Reload'] = {main_Req.ReloadScript,'',''}
-	['GetText'] = {main_Req.TextTest,'Processer.GetTextMessage',''},
-	['UploadStart'] = main_Req.UploadStart,
-	['UploadEnd'] = main_Req.UploadEnd,
-	['UploadWithTCP'] = main_Req.UploadWithTCP,
-	['UploadWithTCPStart'] = main_Req.UploadWithTCPStart,
-	['GetIP'] = main_Req.GetIP,
-    ['GetThumbImage'] = main_Req.GetThumbImage,
+	['Reload'] = {main_Req.ReloadScript,'',''},
+	['GetText'] = {main_Req.TextTest,'Processer.GetTextMessageRequest','Processer.GetTextMessageResponse'},
+	-- ['UploadStart'] = main_Req.UploadStart,
+	-- ['UploadEnd'] = main_Req.UploadEnd,
+	-- ['UploadWithTCP'] = main_Req.UploadWithTCP,
+	-- ['UploadWithTCPStart'] = main_Req.UploadWithTCPStart,
+	-- ['GetIP'] = main_Req.GetIP,
+    -- ['GetThumbImage'] = main_Req.GetThumbImage,
 })
