@@ -63,8 +63,7 @@ SocketCloseProcess = function( u)
 	Info("socket closed")
 end
 
-ProgressMessage = function( funcid, uinfo, c_req, c_res )
-    local str_req = c_req:getdata('request_message')
+ProgressMessage = function( funcid, uinfo, str_req, str_extend )
     local func_info = __g_all_processer_request__[funcid];
     local func_name = __g_function_name__[funcid] or ''
     Info('Call process function : ' ..  func_name  );
@@ -87,6 +86,5 @@ ProgressMessage = function( funcid, uinfo, c_req, c_res )
       resmsg = string.format('not find the processer. the name is %s.' ,func_name);
     end
     Info( string.format('Function [%s] << [%s]', func_name, __g_result_value_to_name__[result] ))
-    c_res:setdata('response_result',result)
-    c_res:setdata('response_message',resmsg);
+    return result,resmsg
 end

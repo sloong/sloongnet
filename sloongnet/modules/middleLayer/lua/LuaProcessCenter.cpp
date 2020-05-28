@@ -95,7 +95,7 @@ void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket *uinfo)
 	// call close function.
 	int id = GetFreeLuaContext();
 	CLua *pLua = m_pLuaList[id];
-	pLua->RunFunction(m_pConfig->operator[]("LuaSocketCloseFunction").asString(), uinfo);
+	pLua->RunFunction(m_pConfig->operator[]("LuaSocketCloseFunction").asString(), uinfo, 0, "", "" );
 	FreeLuaContext(id);
 }
 
@@ -112,29 +112,9 @@ CResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 			InitLua(pLua, m_pConfig->operator[]("LuaScriptFolder").asString());
 			m_oReloadList[id] = false;
 		}
-		CLuaPacket creq;
-		creq.SetData("request_message", msg);
-		if (extend.length() > 0)
-			creq.SetData("request_extend", extend);
-		CLuaPacket cres;
-		if (pLua->RunFunction(m_pConfig->operator[]("LuaProcessFunction").asString(), function, pUInfo, &creq, &cres))
-		{
-			FreeLuaContext(id);
-			auto str_res = cres.GetData("response_result", "");
-			int res;
-			if ( !ConvertStrToInt(str_res,&res)||!ResultType_IsValid(res) )
-			{
-				return CResult::Make_Error("Get result fialed " + str_res);
-			}
-			auto res_msg = cres.GetData("response_message", "");
-
-			return CResult((ResultType)res, res_msg);
-		}
-		else
-		{
-			FreeLuaContext(id);
-			return CResult::Make_Error("server process happened error.");
-		}
+		auto res = pLua->RunFunction(m_pConfig->operator[]("LuaProcessFunction").asString(), pUInfo, function, msg);
+		FreeLuaContext(id);
+		return res;
 	}
 	catch (const exception& ex)
 	{

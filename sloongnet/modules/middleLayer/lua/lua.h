@@ -45,9 +45,7 @@ namespace Sloong
 		bool RunBuffer(LPCSTR pBuffer, size_t sz);
 		bool RunString(const string &strCommand);
 		void PushPacket(CLuaPacket *pData);
-		bool RunFunction(string strFunctionName, int funcid, CLuaPacket *pUserInfo, CLuaPacket *pRequest, CLuaPacket *pResponse);
-		int RunFunction(string strFunctionName, int funcid,  CLuaPacket *pUserInfo, string &strRequest, string &strResponse);
-		void RunFunction(string strFunctionName, CLuaPacket *pUserInfo);
+		CResult RunFunction(string, CLuaPacket *, int = 0, const string & = "", const string & = "");
 		string GetErrorString();
 		bool AddFunction(const string &strFunctionName, LuaFunctionType pFunction);
 		bool PushFunction(int nFuncRef);

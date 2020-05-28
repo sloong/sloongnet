@@ -244,7 +244,8 @@ bool CLua::PushFunction(int nFuncRef)
 	return true;
 }
 
-bool CLua::RunFunction(string strFunctionName,  int funcid, CLuaPacket *pUserInfo, CLuaPacket *pRequest, CLuaPacket *pResponse)
+
+CResult Sloong::CLua::RunFunction(string strFunctionName, CLuaPacket *pUserInfo, int funcid, const string &strRequest, const string &strExtend)
 {
 	int nTop = lua_gettop(m_pScriptContext);
 	int nErr = 0;
@@ -253,61 +254,24 @@ bool CLua::RunFunction(string strFunctionName,  int funcid, CLuaPacket *pUserInf
 	nErr = lua_gettop(m_pScriptContext);
 
 	PushFunction(strFunctionName);
-	PushInteger(funcid);
 	PushPacket(pUserInfo);
-	PushPacket(pRequest);
-	PushPacket(pResponse);
-
+	PushInteger(funcid);
+	PushString(strRequest);
+	PushString(strExtend);
 	if (0 != lua_pcall(m_pScriptContext, 4, LUA_MULTRET, nErr))
 	{
-		GetErrorString();
-		return false;
+		HandlerError("Script Error",strFunctionName);
+		return CResult::Make_Error("Run script error.");
 	}
-	lua_settop(m_pScriptContext, nTop);
-	return true;
-}
-
-int Sloong::CLua::RunFunction(string strFunctionName, int funcid, CLuaPacket *pUserInfo, string &strRequest, string &strResponse)
-{
-	int nTop = lua_gettop(m_pScriptContext);
-	int nErr = 0;
-
-	PushFunction("OnError");
-	nErr = lua_gettop(m_pScriptContext);
-
-	PushFunction(strFunctionName);
-	PushInteger(funcid);
-	PushPacket(pUserInfo);
-	PushString(strRequest);
-
-	if (0 != lua_pcall(m_pScriptContext, 3, LUA_MULTRET, nErr))
-	{
-		strResponse = GetErrorString();
-		return -2;
-	}
-	strResponse = lua_tostring(m_pScriptContext, -2);
+	auto strResponse = lua_tostring(m_pScriptContext, -2);
 	int nRes = (int)lua_tonumber(m_pScriptContext, -1);
-
 	lua_settop(m_pScriptContext, nTop);
-	return nRes;
-}
 
-void Sloong::CLua::RunFunction(string strFunctionName, CLuaPacket *pUserInfo)
-{
-	int nTop = lua_gettop(m_pScriptContext);
-	int nErr = 0;
-
-	PushFunction("OnError");
-	nErr = lua_gettop(m_pScriptContext);
-
-	PushFunction(strFunctionName);
-
-	PushPacket(pUserInfo);
-
-	if (0 != lua_pcall(m_pScriptContext, 1, LUA_MULTRET, nErr))
-		HandlerError("RunFunction", "lua_pcall function failed");
-	else
-		lua_settop(m_pScriptContext, nTop);
+	if (!ResultType_IsValid(nRes) )
+	{
+		return CResult::Make_Error("ResultType_IsValid " + Helper::ntos(nRes));
+	}
+	return CResult((ResultType)nRes,strResponse);
 }
 
 int Sloong::CLua::GetInteger(lua_State *l, int nNum, int nDef /*= -1*/)
