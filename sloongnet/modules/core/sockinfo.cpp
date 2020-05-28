@@ -200,6 +200,7 @@ ResultType Sloong::CSockInfo::ProcessSendList()
 			}
 		}
 	}
+	return ResultType::Error;
 }
 
 /// 获取发送信息列表

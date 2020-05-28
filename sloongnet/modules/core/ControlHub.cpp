@@ -158,7 +158,7 @@ void Sloong::CControlHub::MessageWorkLoop()
 			}
 			if (m_oMsgList.empty())
 			{
-				m_oSync.wait_for( chrono::seconds(1) );
+				m_oSync.wait_for( 1000 );
 				continue;
 			}
 

@@ -36,7 +36,7 @@ extern "C" CResult EventPackageProcesser(CDataTransPackage* pack)
 
 extern "C" CResult NewConnectAcceptProcesser(CSockInfo* info)
 {
-
+	return CResult::Succeed();
 }
 	
 extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){

@@ -73,7 +73,7 @@ namespace Sloong
         {
             unique_lock<shared_mutex> lock(m_mut);
             if (queue<T>::empty())
-                return shared_ptr<T>();
+                return nullptr;
             shared_ptr<T> res(make_shared<T>(queue<T>::front()));
             queue<T>::pop();
             return res;

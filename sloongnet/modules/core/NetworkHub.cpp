@@ -205,7 +205,7 @@ void Sloong::CNetworkHub::EnableSSL(const string &certFile, const string &keyFil
 void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
 {
 	int tout = m_nConnectTimeoutTime * 60;
-	int tinterval = m_nCheckTimeoutInterval * 60;
+	int tinterval = m_nCheckTimeoutInterval * 60 *1000;
 
 	m_pLog->Debug("Check connect timeout thread is running.");
 	while (m_bIsRunning)
@@ -221,8 +221,8 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
 				goto RecheckTimeout;
 			}
 		}
-		m_pLog->Debug(Helper::Format("Check connect timeout done. wait [%d] seconds.", tinterval));
-		m_oCheckTimeoutThreadSync.wait_for( chrono::seconds(tinterval));
+		m_pLog->Debug(Helper::Format("Check connect timeout done. wait [%d] ms.", tinterval));
+		m_oCheckTimeoutThreadSync.wait_for( tinterval);
 	}
 	m_pLog->Info("check timeout connect thread is exit ");
 }
@@ -254,7 +254,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 		{
 			if (m_pWaitProcessList[i].empty())
 			{
-				m_oProcessThreadSync.wait_for(chrono::microseconds(10));
+				m_oProcessThreadSync.wait_for(100);
 				continue;
 			}
 

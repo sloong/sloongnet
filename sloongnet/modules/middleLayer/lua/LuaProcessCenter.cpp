@@ -62,7 +62,7 @@ int Sloong::CLuaProcessCenter::NewThreadInit()
 	m_pLuaList.push_back(pLua);
 	m_oReloadList.push_back(false);
 	int id = (int)m_pLuaList.size() - 1;
-	m_oFreeLuaContext.push(id);
+	FreeLuaContext(id);
 	return id;
 }
 
@@ -86,7 +86,7 @@ void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket *uinfo)
 	int id = GetFreeLuaContext();
 	CLua *pLua = m_pLuaList[id];
 	pLua->RunFunction(m_pConfig->operator[]("LuaSocketCloseFunction").asString(), uinfo);
-	m_oFreeLuaContext.push(id);
+	FreeLuaContext(id);
 }
 
 CResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, const string &msg, const string &extend)
@@ -109,7 +109,7 @@ CResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 		CLuaPacket cres;
 		if (pLua->RunFunction(m_pConfig->operator[]("LuaProcessFunction").asString(), pUInfo, &creq, &cres))
 		{
-			m_oFreeLuaContext.push(id);
+			FreeLuaContext(id);
 			auto str_res = cres.GetData("response_result", "");
 			int res;
 			if ( !ConvertStrToInt(str_res,&res)||!ResultType_IsValid(res) )
@@ -122,18 +122,18 @@ CResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 		}
 		else
 		{
-			m_oFreeLuaContext.push(id);
+			FreeLuaContext(id);
 			return CResult::Make_Error("server process happened error.");
 		}
 	}
 	catch (const exception& ex)
 	{
-		m_oFreeLuaContext.push(id);
+		FreeLuaContext(id);
 		return CResult::Make_Error("server process error."+string(ex.what()));
 	}
 	catch (...)
 	{
-		m_oFreeLuaContext.push(id);
+		FreeLuaContext(id);
 		return CResult::Make_Error("server process error.");
 	}
 }
@@ -144,10 +144,9 @@ int Sloong::CLuaProcessCenter::GetFreeLuaContext()
 	for (int i = 0; i < LUA_CONTEXT_WAIT_SECONDE && m_oFreeLuaContext.empty(); i++)
 	{
 		m_pLog->Debug("Wait lua context 1 sencond :" + Helper::ntos(i));
-		m_oSSync.wait_for(chrono::microseconds(500));
+		m_oSSync.wait_for(500);
 	}
 
-	unique_lock<mutex> lck(m_oLuaContextMutex);
 	if (m_oFreeLuaContext.empty())
 	{
 		m_pLog->Debug("no free context");
@@ -155,6 +154,5 @@ int Sloong::CLuaProcessCenter::GetFreeLuaContext()
 	}
 	int nID = m_oFreeLuaContext.front();
 	m_oFreeLuaContext.pop();
-	lck.unlock();
 	return nID;
 }

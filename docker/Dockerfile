@@ -5,7 +5,7 @@ ENV ADDRESS_INFO=0.0.0.0:8001
 ENV NODE_TYPE=Manager
 
 RUN apt-get update \
-    && apt-get install -y libsqlite3-0 libprotobuf17 libuuid1 libssl1.1 liblua5.3-0 libjsoncpp1 \
+    && apt-get install -y libsqlite3-0 libprotobuf17 libuuid1 libssl1.1 libluajit-5.1 libjsoncpp1 \
     && mkdir /app && mkdir /data
 WORKDIR  /app
 

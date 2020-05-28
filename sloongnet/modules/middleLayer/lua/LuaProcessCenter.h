@@ -33,6 +33,10 @@ namespace Sloong
 		void CloseSocket(CLuaPacket* uinfo);
 		CResult MsgProcess( int function, CLuaPacket * pUInfo, const string& msg, const string& extend );
 		int GetFreeLuaContext();
+		inline void FreeLuaContext(int id){
+			m_oFreeLuaContext.push(id);
+			m_oSSync.notify_one();
+		}
 		
 		void ReloadContext(IEvent* event);
 	public:
@@ -40,9 +44,8 @@ namespace Sloong
 	protected:
 		vector<CLua*>	m_pLuaList;
 		vector<bool>	m_oReloadList;
-		queue<int>		m_oFreeLuaContext;
+		queue_ex<int>		m_oFreeLuaContext;
 		CEasySync		m_oSSync;
-		mutex			m_oLuaContextMutex;
 		unique_ptr<CGlobalFunction> m_pGFunc;
 		Json::Value*	m_pConfig;
 	};

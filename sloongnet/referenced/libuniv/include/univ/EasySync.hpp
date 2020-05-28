@@ -28,10 +28,9 @@ namespace Sloong
 		// 返回值：
 		//  true ：时间触发返回 
 		//  false ：超时返回 
-		template <class _Rep, class _Period>
-		bool wait_for(const chrono::duration<_Rep, _Period>& _Rel_time){
+		bool wait_for(int ms){
 			unique_lock<mutex> lck(m_oMutex);
-			if (m_oCV.wait_for(lck, _Rel_time) == std::cv_status::timeout)
+			if (m_oCV.wait_for(lck, chrono::microseconds(ms)) == std::cv_status::timeout)
 				return false;
 			else
 				return true;

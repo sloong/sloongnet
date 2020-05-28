@@ -92,6 +92,7 @@ ResultType Sloong::CDataTransPackage::SendPackage()
 			g_pLog->Warn(Helper::Format("Error when send data. Socket[%d][%s:%d].Errno[%d].", m_pCon->GetSocketID(), m_pCon->m_strAddress.c_str(), m_pCon->m_nPort, m_pCon->GetErrno()));
 		return ResultType::Error;
 	}
+	return ResultType::Error;
 }
 
 ResultType Sloong::CDataTransPackage::RecvPackage(bool block)
@@ -119,6 +120,7 @@ ResultType Sloong::CDataTransPackage::RecvPackage(bool block)
 			g_pLog->Warn(Helper::Format("Error when receive data. Socket[%d][%s:%d].Errno[%d].", m_pCon->GetSocketID(), m_pCon->m_strAddress.c_str(), m_pCon->m_nPort, m_pCon->GetErrno()));
 		return ResultType::Error;
 	}
+	return ResultType::Error;
 }
 
 ResultType Sloong::CDataTransPackage::RecvPackageSucceedProcess(const string& result)
