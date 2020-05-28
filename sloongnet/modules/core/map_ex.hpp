@@ -8,28 +8,29 @@
 #include <map>
 #include <memory>
 #include <shared_mutex>
-using std::shared_mutex;
 using std::shared_lock;
+using std::shared_mutex;
 using std::unique_lock;
 
 namespace Sloong
 {
-	template<typename K, typename V>
-	class map_ex:public std::map<K,V>
+	template <typename K, typename V>
+	class map_ex : public std::map<K, V>
 	{
 	private:
 		shared_mutex m_mut;
+
 	public:
-		std::shared_ptr<V> try_get(const K& key)
+		V *try_get(const K &key)
 		{
 			shared_lock<shared_mutex> lock(m_mut);
 			auto it = this->find(key);
 			if (it == this->end())
 				return nullptr;
-			return make_shared<V>(it->second);
+			return &it->second;
 		}
 
-		V try_get(const K& key, const K& def)
+		V &try_get(const K &key, const K &def)
 		{
 			shared_lock<shared_mutex> lock(m_mut);
 			auto it = this->find(key);
@@ -39,19 +40,19 @@ namespace Sloong
 				return it->second;
 		}
 
-		V& operator[](const K& key)
+		V &operator[](const K &key)
 		{
 			unique_lock<shared_mutex> lock(m_mut);
-			return map<K,V>::operator[](key);
+			return map<K, V>::operator[](key);
 		}
 
-		V& operator[](K&& key)
+		V &operator[](K &&key)
 		{
 			unique_lock<shared_mutex> lock(m_mut);
-			return map<K,V>::operator[](key);
+			return map<K, V>::operator[](key);
 		}
 
-		bool exist(const K& key)
+		bool exist(const K &key)
 		{
 			shared_lock<shared_mutex> lock(m_mut);
 			if (this->find(key) == this->end())
@@ -59,4 +60,4 @@ namespace Sloong
 			return true;
 		}
 	};
-}
+} // namespace Sloong

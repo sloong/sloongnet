@@ -70,7 +70,9 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG* config)
 	{
 		return CResult::Make_Error("Config object is nullptr.");
 	}
-	auto res = m_pServer->Initialize(nullptr);
+	
+	unique_ptr<CServerManage>	pServer = make_unique<CServerManage>();
+	auto res = pServer->Initialize(nullptr);
 	if (res.IsFialed())
 	{
 		return CResult::Make_Error(Helper::Format("Init server manage fialed. error message:%s",res.Message().c_str()));
@@ -85,7 +87,7 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG* config)
 		// If parse config error, run with default config.
 		cout <<  "Parser server config error. run with default setting." << endl;
 		ResetControlConfig(config);
-		res = m_pServer->ResetManagerTemplate(config);
+		res = pServer->ResetManagerTemplate(config);
 		if( res.IsFialed())
 		{
 			cout << "Save defualt template error. message:" << res.Message() << endl;
@@ -124,18 +126,18 @@ void Sloong::SloongControlService::OnSocketClose(IEvent* event)
 {
 	auto net_evt = TYPE_TRANS<CNetworkEvent*>(event);
 	auto sock = net_evt->GetSocketID();
-	for( auto item : m_listServerManage ) 
+	for( auto& item : m_listServerManage ) 
 		item->OnSocketClosed(sock);
 }
 
 inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(void** out_env)
 {
-	auto item = make_shared<CServerManage>();
+	auto item = make_unique<CServerManage>();
 	auto res = item->Initialize(m_pControl);
 	if (res.IsFialed())
 		return res;
-	m_listServerManage.push_back(item);
 	(*out_env) = item.get();
+	m_listServerManage.push_back(std::move(item));
 	return CResult::Succeed();
 }
 

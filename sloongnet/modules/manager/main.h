@@ -44,8 +44,7 @@ namespace Sloong
 		void OnSocketClose(IEvent* event);
 		
 	protected:
-		list<shared_ptr<CServerManage>> m_listServerManage;
-		unique_ptr<CServerManage>	m_pServer = make_unique<CServerManage>();
+		list<unique_ptr<CServerManage>> m_listServerManage;
 		IControl* 	m_pControl = nullptr;
 		CLog*		m_pLog =nullptr;
 		GLOBAL_CONFIG* m_pConfig;

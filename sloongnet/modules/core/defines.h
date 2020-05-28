@@ -13,7 +13,6 @@
 #include "univ/univ.h"
 #include "univ/univ.hpp"
 #include "univ/log.h"
-#include "univ/exception.h"
 #include "univ/threadpool.h"
 #include "univ/hash.h"
 #include "univ/base64.h"
