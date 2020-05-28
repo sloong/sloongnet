@@ -253,10 +253,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 		for (int i = 0; i < s_PriorityLevel; i++)
 		{
 			if (m_pWaitProcessList[i].empty())
-			{
-				m_oProcessThreadSync.wait_for(100);
 				continue;
-			}
 
 			while (m_pWaitProcessList[i].TryMovePop(pack))
 			{
@@ -308,6 +305,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 			}
 			goto MessagePorcessListRetry;
 		}
+		m_oProcessThreadSync.wait_for(1000);
 	}
 	m_pLog->Info("MessageProcessWorkLoop thread is exit ");
 }
