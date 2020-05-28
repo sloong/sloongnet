@@ -18,34 +18,36 @@ namespace Sloong
 	class CEasySync
 	{
 	public:
-		CEasySync(){}
-		~CEasySync() {}
-
-		void wait(){
+		inline void wait()
+		{
 			unique_lock<mutex> lck(m_oMutex);
 			m_oCV.wait(lck);
 		}
 		// 返回值：
-		//  true ：时间触发返回 
-		//  false ：超时返回 
-		bool wait_for(int ms){
+		//  true ：时间触发返回
+		//  false ：超时返回
+		inline bool wait_for(int ms)
+		{
 			unique_lock<mutex> lck(m_oMutex);
-			if (m_oCV.wait_for(lck, chrono::microseconds(ms)) == std::cv_status::timeout)
+			if (m_oCV.wait_for(lck, chrono::milliseconds(ms)) == std::cv_status::timeout)
+			{
 				return false;
+			}
 			else
 				return true;
 		}
-		void notify_one(){
+		inline void notify_one()
+		{
 			m_oCV.notify_one();
 		}
-		void notify_all(){
+		inline void notify_all()
+		{
 			m_oCV.notify_all();
 		}
-
 
 	protected:
 		condition_variable m_oCV;
 		mutex m_oMutex;
 	};
 
-}
+} // namespace Sloong

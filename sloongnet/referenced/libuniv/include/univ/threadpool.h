@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <condition_variable>
+#include "EasySync.hpp"
 using std::queue;
 using std::thread;
 using std::mutex;
@@ -86,8 +87,7 @@ namespace Sloong
 			static queue<ULONG>			m_oWaitList;
 			static void ThreadWorkLoop(void);
 			static mutex g_oJobListMutex;
-			static mutex g_oRunJobMutex;
-			static condition_variable g_oRunJobCV;
+			static CEasySync g_oSync;
 			static RUN_STATUS m_emStatus;
 			static ULONG m_nIDCursor;
 		};
