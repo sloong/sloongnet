@@ -6,55 +6,54 @@
  * @LastEditTime: 2020-05-14 14:14:01
  */
 
-#include "main.h"
+#include "manager.h"
 #include "utility.h"
 #include "NetworkEvent.hpp"
 #include "fstream_ex.hpp"
-
 
 using namespace Sloong::Events;
 
 unique_ptr<SloongControlService> Sloong::SloongControlService::Instance = nullptr;
 
-extern "C" CResult RequestPackageProcesser(void* pEnv, CDataTransPackage* pack)
+extern "C" CResult RequestPackageProcesser(void *pEnv, CDataTransPackage *pack)
 {
-	auto pServer = TYPE_TRANS<CServerManage*>(pEnv);
-	if( pServer)
+	auto pServer = TYPE_TRANS<CServerManage *>(pEnv);
+	if (pServer)
 		return pServer->ProcessHandler(pack);
 	else
 		return CResult::Make_Error("Environment convert error. cannot process message.");
 }
 
-extern "C" CResult ResponsePackageProcesser(void* pEnv, CDataTransPackage* pack)
+extern "C" CResult ResponsePackageProcesser(void *pEnv, CDataTransPackage *pack)
 {
-	auto pServer = TYPE_TRANS<CServerManage*>(pEnv);
-	if( pServer)
+	auto pServer = TYPE_TRANS<CServerManage *>(pEnv);
+	if (pServer)
 		return pServer->ProcessHandler(pack);
 	else
 		return CResult::Make_Error("Environment convert error. cannot process message.");
 }
 
-
-extern "C" CResult EventPackageProcesser(CDataTransPackage* pack){
+extern "C" CResult EventPackageProcesser(CDataTransPackage *pack)
+{
 	SloongControlService::Instance->EventPackageProcesser(pack);
 	return CResult::Succeed();
 }
 
-
-extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
+extern "C" CResult ModuleInitialization(GLOBAL_CONFIG *config)
+{
 	SloongControlService::Instance = make_unique<SloongControlService>();
-	return SloongControlService::Instance->Initialization(confiog);
+	return SloongControlService::Instance->Initialization(config);
 }
 
-extern "C" CResult ModuleInitialized(SOCKET sock,IControl* iC){
+extern "C" CResult ModuleInitialized(SOCKET sock, IControl *iC)
+{
 	return SloongControlService::Instance->Initialized(iC);
 }
 
-extern "C" CResult CreateProcessEnvironment(void** out_env)
+extern "C" CResult CreateProcessEnvironment(void **out_env)
 {
 	return SloongControlService::Instance->CreateProcessEnvironmentHandler(out_env);
 }
-
 
 /**
  * @Remarks: If have errors, the error message will print to standard output device.
@@ -64,31 +63,31 @@ extern "C" CResult CreateProcessEnvironment(void** out_env)
  * 
  * 
  */
-CResult SloongControlService::Initialization(GLOBAL_CONFIG* config)
+CResult SloongControlService::Initialization(GLOBAL_CONFIG *config)
 {
-	if( config == nullptr )
+	if (config == nullptr)
 	{
 		return CResult::Make_Error("Config object is nullptr.");
 	}
-	
-	unique_ptr<CServerManage>	pServer = make_unique<CServerManage>();
+
+	unique_ptr<CServerManage> pServer = make_unique<CServerManage>();
 	auto res = pServer->Initialize(nullptr);
 	if (res.IsFialed())
 	{
-		return CResult::Make_Error(Helper::Format("Init server manage fialed. error message:%s",res.Message().c_str()));
+		return CResult::Make_Error(Helper::Format("Init server manage fialed. error message:%s", res.Message().c_str()));
 	}
 
 	auto config_str = res.Message();
-	// Here, this port is came from COMMAND LINE. 
+	// Here, this port is came from COMMAND LINE.
 	// So we need save it before parse other setting.
 	auto port = config->listenport();
 	if (config_str.length() == 0 || !config->ParseFromString(config_str))
 	{
 		// If parse config error, run with default config.
-		cout <<  "Parser server config error. run with default setting." << endl;
+		cout << "Parser server config error. run with default setting." << endl;
 		ResetControlConfig(config);
 		res = pServer->ResetManagerTemplate(config);
-		if( res.IsFialed())
+		if (res.IsFialed())
 		{
 			cout << "Save defualt template error. message:" << res.Message() << endl;
 			return res;
@@ -96,11 +95,11 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG* config)
 	}
 	// When config parse done, revert the port setting. Because we always use the command line port.
 	config->set_listenport(port);
-	
+
 	return CResult::Succeed();
 }
 
-CResult SloongControlService::Initialized(IControl* iC)
+CResult SloongControlService::Initialized(IControl *iC)
 {
 	m_pControl = iC;
 	IData::Initialize(iC);
@@ -110,7 +109,7 @@ CResult SloongControlService::Initialized(IControl* iC)
 	return CResult::Succeed();
 }
 
-void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
+void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG *config)
 {
 	config->set_logpath("/data/log");
 	config->set_loglevel(Core::LogLevel::Info);
@@ -121,16 +120,15 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG* config)
 	config->set_receivetime(3);
 }
 
-
-void Sloong::SloongControlService::OnSocketClose(IEvent* event)
+void Sloong::SloongControlService::OnSocketClose(IEvent *event)
 {
-	auto net_evt = TYPE_TRANS<CNetworkEvent*>(event);
+	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event);
 	auto sock = net_evt->GetSocketID();
-	for( auto& item : m_listServerManage ) 
+	for (auto &item : m_listServerManage)
 		item->OnSocketClosed(sock);
 }
 
-inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(void** out_env)
+inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(void **out_env)
 {
 	auto item = make_unique<CServerManage>();
 	auto res = item->Initialize(m_pControl);
@@ -141,9 +139,7 @@ inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(voi
 	return CResult::Succeed();
 }
 
-
-
-void Sloong::SloongControlService::EventPackageProcesser(CDataTransPackage* pack)
+void Sloong::SloongControlService::EventPackageProcesser(CDataTransPackage *pack)
 {
 	m_pLog->Info("EventPackageProcesser is called.");
 }

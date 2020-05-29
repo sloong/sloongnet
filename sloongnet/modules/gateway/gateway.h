@@ -5,8 +5,8 @@
  * @LastEditTime: 2020-05-18 20:34:21
  * @Description: file content
  */
-#ifndef SLOONGNET_GATEWAY_SERVICE_H
-#define SLOONGNET_GATEWAY_SERVICE_H
+#ifndef SLOONGNET_MODULE_GATEWAY_H
+#define SLOONGNET_MODULE_GATEWAY_H
 
 #include "EasyConnect.h"
 #include "core.h"
@@ -38,26 +38,27 @@ namespace Sloong
 		CResult Initialization(GLOBAL_CONFIG *);
 		CResult Initialized(SOCKET, IControl *);
 
-		CResult ResponsePackageProcesser( CDataTransPackage *);
+		CResult ResponsePackageProcesser(CDataTransPackage *);
 
 		void QueryReferenceInfo();
 		CResult QueryReferenceInfoResponseHandler(IEvent *, CDataTransPackage *);
 
 		inline CResult CreateProcessEnvironmentHandler(void **);
 		void EventPackageProcesser(CDataTransPackage *);
-		
+
 		// Event handler
-		void OnStart(IEvent*);
-		void OnSocketClose(IEvent*);
+		void OnStart(IEvent *);
+		void OnSocketClose(IEvent *);
 		void SendPackageHook(UniqueEvent);
 
-		void OnReferenceModuleOnlineEvent(const string&,CDataTransPackage *);
-		void OnReferenceModuleOfflineEvent(const string&,CDataTransPackage *);
-	private:
-		inline int ParseFunctionValue(const string&);
-		list<int> ProcessProviedFunction(const string&);
+		void OnReferenceModuleOnlineEvent(const string &, CDataTransPackage *);
+		void OnReferenceModuleOfflineEvent(const string &, CDataTransPackage *);
 
-		void AddConnection(uint64_t, const string&, int);
+	private:
+		inline int ParseFunctionValue(const string &);
+		list<int> ProcessProviedFunction(const string &);
+
+		void AddConnection(uint64_t, const string &, int);
 
 	public:
 		SOCKET GetPorcessConnect(int function);
@@ -77,7 +78,7 @@ namespace Sloong
 		Json::Value *m_pModuleConfig;
 		RuntimeDataPackage *m_pRuntimeData = nullptr;
 		SOCKET m_nManagerConnection = -1;
-		
+
 	public:
 		static unique_ptr<SloongNetGateway> Instance;
 	};

@@ -8,12 +8,9 @@
 #ifndef SOCKINFO_H
 #define SOCKINFO_H
 
-#include "EasyConnect.h"
-
+#include "IObject.h"
 #include "DataTransPackage.h"
 
-#include "IObject.h"
-#include "IControl.h"
 namespace Sloong
 {
 	class CSockInfo : IObject

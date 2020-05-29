@@ -6,7 +6,7 @@
  * @Description: file content
  */
 /* File Name: server.c */
-#include "main.h"
+#include "luaMiddleLayer.h"
 #include "utility.h"
 #include "NetworkEvent.hpp"
 #include "IData.h"

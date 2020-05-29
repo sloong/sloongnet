@@ -32,33 +32,6 @@ inline T TYPE_TRANS(LPVOID p)
 
 const int s_PriorityLevel = 3;
 
-enum RecvStatus
-{
-	Wait = 0,
-	Receiving = 1,
-	Saveing = 2,
-	Done = 3,
-	VerificationError = 4,
-	OtherError = 5,
-};
-
-// Receive file struce for GFunc
-struct RecvDataPackage
-{
-	string strMD5 = "";
-	RecvStatus emStatus = RecvStatus::Wait;
-	string strName = "";
-	string strPath = "";
-};
-
-enum HashType
-{
-	MD5 = 0,
-	SHA_1 = 1,
-	SHA_256 = 2,
-	SHA_512 = 3,
-};
-
 template <class T>
 inline shared_ptr<T> ConvertStrToObj(string obj)
 {
@@ -76,9 +49,9 @@ inline string ConvertObjToStr(::google::protobuf::Message *obj)
 	return str_res;
 }
 
-inline bool ConvertStrToInt(string str, int *out_res, string* err_msg = nullptr)
+inline bool ConvertStrToInt(string str, int *out_res, string *err_msg = nullptr)
 {
-	
+
 	try
 	{
 		if (out_res)
@@ -87,19 +60,19 @@ inline bool ConvertStrToInt(string str, int *out_res, string* err_msg = nullptr)
 	}
 	catch (const invalid_argument &e)
 	{
-		if( err_msg )
+		if (err_msg)
 			*err_msg = "invalid_argument";
 		return false;
 	}
 	catch (const out_of_range &e)
 	{
-		if( err_msg )
+		if (err_msg)
 			*err_msg = "out_of_range";
 		return false;
 	}
 	catch (...)
 	{
-		if( err_msg )
+		if (err_msg)
 			*err_msg = "unknown";
 		return false;
 	}

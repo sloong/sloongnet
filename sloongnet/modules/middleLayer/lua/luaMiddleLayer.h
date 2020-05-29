@@ -5,8 +5,8 @@
  * @LastEditTime: 2020-05-19 19:28:21
  * @Description: file content
  */
-#ifndef SLOONGNET_PROCESS_SERVICE_H
-#define SLOONGNET_PROCESS_SERVICE_H
+#ifndef SLOONGNET_MODULE_MIDDLE_LAYER_LUA_H
+#define SLOONGNET_MODULE_MIDDLE_LAYER_LUA_H
 
 #include "sockinfo.h"
 #include "core.h"
@@ -65,4 +65,4 @@ namespace Sloong
 
 } // namespace Sloong
 
-#endif
+#endif // SLOONGNET_MODULE_MIDDLE_LAYER_LUA_H

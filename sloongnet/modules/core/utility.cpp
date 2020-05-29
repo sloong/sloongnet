@@ -137,10 +137,10 @@ string Sloong::CUtility::GetSocketAddress(int socket)
 	return Helper::Format("%s:%d", inet_ntoa(add.sin_addr), add.sin_port);
 }
 
-int Sloong::CUtility::ReadFile(string filepath, char*& pBuffer)
+int Sloong::CUtility::ReadFile(const string& filepath, char*& pBuffer)
 {
     if( -1 == access(filepath.c_str(),R_OK))
-        throw normal_except("File no exit or cannot read.file path is:" + filepath);
+		return -1;
 	ifstream in(filepath.c_str(), ios::in | ios::binary);
 	streampos  pos = in.tellg();
 	in.seekg(0, ios::end);

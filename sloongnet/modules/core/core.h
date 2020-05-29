@@ -8,7 +8,6 @@
 #ifndef SLOONGNET_MODULE_CORE_CORE_H
 #define SLOONGNET_MODULE_CORE_CORE_H
 
-
 // std c head file
 #include <errno.h> // for errno
 #include <stdio.h>
@@ -18,7 +17,7 @@
 #include <stdarg.h>
 
 // linux head file
-#include <sys/times.h> 
+#include <sys/times.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -33,7 +32,6 @@
 #include <memory>
 #include <map>
 #include <mutex>
-
 using namespace std;
 
 #include "protocol/base.pb.h"

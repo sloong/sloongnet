@@ -12,19 +12,19 @@
 
 namespace Sloong
 {
-	class IObject
-	{
+    class IObject
+    {
     public:
-        void Initialize(IControl* iMsg)
+        inline void Initialize(IControl *iMsg)
         {
-             m_iC = iMsg;
-             m_pLog = TYPE_TRANS<CLog*>(m_iC->Get(DATA_ITEM::Logger));
+            m_iC = iMsg;
+            m_pLog = TYPE_TRANS<CLog *>(m_iC->Get(DATA_ITEM::Logger));
         }
 
     protected:
-        IControl*   m_iC;
-        CLog*       m_pLog;
+        IControl *m_iC;
+        CLog *m_pLog;
     };
-}
+} // namespace Sloong
 
-#endif
+#endif // SLOONGNET_INTERFACE_OBJECT_H

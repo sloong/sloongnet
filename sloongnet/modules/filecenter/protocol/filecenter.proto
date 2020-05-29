@@ -1,0 +1,44 @@
+syntax = "proto3";
+package FileCenter;
+
+enum Functions{
+    Invalid=0;
+    reserved 1 to 300;// FileCenter function is start by 301-400
+    UploadStart=301;
+	UploadEnd=302;
+	UploadWithTCP=303;
+	UploadWithTCPStart=304;
+    GetFile=305;
+    GetThumbImage=306;
+    reserved 400 to max;
+}
+
+message UploadStartRequest{
+    string content=1;
+}
+
+message UploadStartResponse{
+    string content=1;
+}
+
+message PrepareSendFileRequest{
+    string FileName=1;
+}
+message PrepareSendFileResponse{
+    string Token=1;
+    int32 FileSize=2;
+}
+
+message UploadFileItem{
+    string FileName=1;
+    string FileHash=2;
+}
+
+message ReceiveFileRequest{
+    string SaveFolder=1;
+    repeated UploadFileItem Infos=2;
+}
+
+message ReceiveFileResponse{
+    string Token=1;
+}
