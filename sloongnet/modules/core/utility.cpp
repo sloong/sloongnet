@@ -152,6 +152,11 @@ int Sloong::CUtility::ReadFile(const string& filepath, char*& pBuffer)
 	return nSize;
 }
 
+CResult Sloong::CUtility::WriteFile(const string& filepath, const char* pBuffer, int size)
+{
+	return CResult::Make_Error("No realize.");
+}
+
 string Sloong::CUtility::GenUUID()
 {
 	char uuid[37] = { 0 };

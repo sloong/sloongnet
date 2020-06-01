@@ -19,6 +19,9 @@
 using namespace Sloong;
 using namespace Sloong::Universal;
 
+#include <memory>
+using namespace std;
+
 #include "protocol/core.pb.h"
 using namespace Core;
 
@@ -33,7 +36,7 @@ inline T TYPE_TRANS(LPVOID p)
 const int s_PriorityLevel = 3;
 
 template <class T>
-inline shared_ptr<T> ConvertStrToObj(string obj)
+inline shared_ptr<T> ConvertStrToObj(const string &obj)
 {
 	shared_ptr<T> item = make_shared<T>();
 	if (!item->ParseFromString(obj))
@@ -49,9 +52,8 @@ inline string ConvertObjToStr(::google::protobuf::Message *obj)
 	return str_res;
 }
 
-inline bool ConvertStrToInt(string str, int *out_res, string *err_msg = nullptr)
+inline bool ConvertStrToInt(const string &str, int *out_res, string *err_msg = nullptr)
 {
-
 	try
 	{
 		if (out_res)
@@ -76,6 +78,16 @@ inline bool ConvertStrToInt(string str, int *out_res, string *err_msg = nullptr)
 			*err_msg = "unknown";
 		return false;
 	}
+}
+
+inline string &FormatFolderString(string &str)
+{
+	char tag = str.at(str.length() - 1);
+	if (tag != '/' && tag != '\\')
+	{
+		str.append("/");
+	}
+	return str;
 }
 
 #endif

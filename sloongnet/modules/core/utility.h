@@ -21,6 +21,8 @@ namespace Sloong
 		static string GetSocketAddress(int socket);
 
 		static int ReadFile(const string& filepath, char*& bBuffer);
+		static CResult WriteFile(const string& filepath, const char* buf, int size);
+
 		static string GenUUID();
 
 		static void write_call_stack();
