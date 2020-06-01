@@ -1,0 +1,11 @@
+syntax = "proto3";
+package DataCenter;
+
+// DataCenter function is start by 201-300
+enum Functions{
+    Invalid=0;
+    reserved 1 to 200;
+    RunSQL=201;
+    reserved 300 to max;
+}
+
