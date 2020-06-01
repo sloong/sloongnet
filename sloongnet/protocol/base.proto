@@ -1,6 +1,5 @@
 syntax = "proto3";
 package Base;
-
 // Result
 enum ResultType{    
     Invalid = 0;
@@ -9,7 +8,6 @@ enum ResultType{
     Warning = 3;
     Retry = 4;
 }
-
 message DataPackage
 {
     enum PackageType{
@@ -22,8 +20,8 @@ message DataPackage
         Response=1;
     }
     StatusType Status=2;
-    // In request pacakge, it's function id.
-    // In event package, it's event id
+    // In request pacakge, it'\''s function id.
+    // In event package, it'\''s event id
     int32 Function = 3;
     // 优先级
     int32 Priority = 4;
