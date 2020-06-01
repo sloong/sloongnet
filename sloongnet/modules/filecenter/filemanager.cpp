@@ -5,7 +5,13 @@ using namespace Sloong;
 CResult Sloong::FileManager::Initialize(IControl *ic)
 {
     IObject::Initialize(ic);
-    m_mapFuncToHandler[Functions::UploadStart] = std::bind(&FileManager::PrepareSendFile, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::TestSpeed] = std::bind(&FileManager::TestSpeedHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::PrepareUpload] = std::bind(&FileManager::PrepareUploadHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::Uploading] = std::bind(&FileManager::UploadingHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::Uploaded] = std::bind(&FileManager::UploadedHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::PrepareDownload] = std::bind(&FileManager::PrepareDownloadHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::Downloading] = std::bind(&FileManager::DownloadingHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::Downloaded] = std::bind(&FileManager::DownloadedHandler, this, std::placeholders::_1, std::placeholders::_2);
     return CResult::Succeed();
 }
 
@@ -31,6 +37,30 @@ CResult Sloong::FileManager::RequestPackageProcesser(CDataTransPackage *tans_pac
     m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.Result()).c_str(), res.Message().c_str()));
     tans_pack->ResponsePackage(res);
     return CResult::Succeed();
+}
+
+CResult Sloong::FileManager::MergeFile(const map_ex<int,string> &fileList, const string &saveFile)
+{
+    string files;
+    for (auto &item : fileList)
+        files += item.second + " ";
+    auto res = CUniversal::RunSystemCmdAndGetResult(Helper::Format("cat %s > %s", files.c_str(), saveFile.c_str()));
+    return CResult::Succeed();
+}
+
+CResult Sloong::FileManager::SplitFile(const string &saveFile, map_ex<int,string> &fileList)
+{
+    /*
+    split [选项]... [要切割的文件 [输出文件前缀]]
+    -a, --suffix-length=N   使用长度为 N 的后缀 (默认 2)
+    -b, --bytes=SIZE        设置输出文件的大小。支持单位：m,k
+    -C, --line-bytes=SIZE   设置输出文件的最大行数。与 -b 类似，但会尽量维持每行的完整性
+    -d, --numeric-suffixes  使用数字后缀代替字母
+    -l, --lines=NUMBER      设备输出文件的行数
+        --help     显示版本信息
+        --version  输出版本信息
+    */
+   return CResult::Make_Error("No readlize");
 }
 
 CResult Sloong::FileManager::MoveFile(const string &source, const string &target)
@@ -71,329 +101,162 @@ CResult Sloong::FileManager::MoveFile(const string &source, const string &target
 
     return CResult::Succeed();
 }
-
-CResult Sloong::FileManager::EnableDataReceive(int port, int timtout)
+void Sloong::FileManager::ClearCache(const string &folder)
 {
-    if (port < 0)
-        return CResult::Make_Error("Listen port error.");
+    // TODO:
+    
+}
+CResult Sloong::FileManager::GetFileSize(const string &source, int *out_size)
+{
+    // TODO:
+    return CResult::Make_Error("No readlize");
+}
+CResult Sloong::FileManager::QueryFilePath(const string &hash_md5)
+{
+    return CResult::Make_Error("No readlize");
+}
 
-    m_ListenSock = socket(AF_INET, SOCK_STREAM, 0);
-    int sock_op = 1;
-    // SOL_SOCKET:在socket层面设置
-    // SO_REUSEADDR:允许套接字和一个已在使用中的地址捆绑
-    setsockopt(m_ListenSock, SOL_SOCKET, SO_REUSEADDR, &sock_op, sizeof(sock_op));
+CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, CDataTransPackage *trans_pack)
+{
+    auto req = ConvertStrToObj<PrepareUploadRequest>(str_req);
 
-    struct sockaddr_in address;
-    memset(&address, 0, sizeof(address));
-    address.sin_addr.s_addr = htonl(INADDR_ANY);
-    address.sin_port = htons((uint16_t)port);
+    auto token = CUtility::GenUUID();
+    auto info = req->info();
+    m_mapTokenToUploadInfo[token].Name = info.name();
+    m_mapTokenToUploadInfo[token].Hash_MD5 = info.hash_md5();
+    m_mapTokenToUploadInfo[token].Path = FormatFolderString(m_strUploadTempSaveFolder) + token + "/";
 
-    errno = bind(m_ListenSock, (struct sockaddr *)&address, sizeof(address));
+    PrepareUploadResponse res;
+    res.set_token(token);
+    return CResult::Make_OK(ConvertObjToStr(&res));
+}
 
-    if (errno == -1)
-        return CResult::Make_Error(Helper::Format("bind to %d field. errno = %d", port, errno));
+CResult Sloong::FileManager::UploadingHandler(const string &str_req, CDataTransPackage *trans_pack)
+{
+    auto req = ConvertStrToObj<UploadingRequest>(str_req);
+auto& token = req->token();
+    if (!m_mapTokenToUploadInfo.exist(token))
+        return CResult::Make_Error("Need request PrepareUpload firest.");
 
-    errno = listen(m_ListenSock, 1024);
+    auto extend = trans_pack->GetExtendData();
+    if (extend.length() == 0)
+    {
+        return CResult::Make_Error("The package extend length is 0.");
+    }
+    if (req->hash_md5() != CMD5::Encode(extend))
+    {
+        return CResult::Make_Error("Hasd check error.");
+    }
 
-    m_nRecvDataTimeoutTime = timtout;
-    CThreadPool::AddWorkThread(std::bind(&FileManager::RecvDataConnFunc, this), 1);
+    auto info = m_mapTokenToUploadInfo.try_get(token);
+    auto fileName = Helper::Format("%s%s.%d", info->Path, info->Name, req->splitpackageid());
+    CUtility::WriteFile(fileName, extend.c_str(),extend.size());
+    info->SplitPackageFile[req->splitpackageid()] = fileName;
+
     return CResult::Succeed();
 }
 
-void FileManager::ClearReceiveInfoByUUID(string uuid)
+CResult Sloong::FileManager::UploadedHandler(const string &str_req, CDataTransPackage *trans_pack)
 {
-    m_pLog->Debug(Helper::Format("Clean receive info from g_RecvDataInfoList by :[%s]", uuid.c_str()));
-    auto p_item_list = g_RecvDataInfoList.find(uuid);
-    if (p_item_list == g_RecvDataInfoList.end())
-    {
-        return;
-    }
-    auto item_list = p_item_list->second;
-    for (auto item = item_list.begin(); item != item_list.end(); item++)
-    {
-        RecvDataPackage *pack = item->second;
-        SAFE_DELETE(pack);
-        item_list.erase(item);
-    }
+    auto req = ConvertStrToObj<UploadedRequest>(str_req);
+    auto& token = req->token();
+    if (!m_mapTokenToUploadInfo.exist(token))
+        return CResult::Make_Error("Need request PrepareUpload firest.");
+
+    auto info = m_mapTokenToUploadInfo.try_get(token);
+    auto full_path = info->Path + info->Name;
+    auto res = MergeFile(info->SplitPackageFile, full_path);
+    if (res.IsFialed())
+        return res;
+
+    if (info->Hash_MD5 != CMD5::Encode(full_path, true))
+        return CResult::Make_Error("Hasd check error.");
+
+    
+    res = MoveFile(full_path, m_strArchiveFolder);
+    if (res.IsFialed())
+        return res;
+
+    return CResult::Succeed();
 }
 
-CResult Sloong::FileManager::PrepareSendFile(const string &str_req, CDataTransPackage *trans_pack)
+CResult Sloong::FileManager::PrepareDownloadHandler(const string &str_req, CDataTransPackage *trans_pack)
 {
-    auto req = ConvertStrToObj<PrepareSendFileRequest>(str_req);
-    auto &filename = req->filename();
-    if (filename.length() < 1)
-        return CResult::Make_Error("Param is empty.");
+    auto req = ConvertStrToObj<PrepareDownloadRequest>(str_req);
 
-    char *pBuf = nullptr;
-    auto nSize = CUtility::ReadFile(filename, pBuf);
-    if (nSize < 0)
+    auto res = QueryFilePath(req->hash_md5());
+    if( res.IsFialed())
+        return res;
+
+    string real_path = res.Message();
+    if (access(real_path.c_str(), ACC_R) != 0)
     {
-        return CResult::Make_Error(Helper::Format("Cannot access target file[%s].", filename.c_str()));
+        return CResult::Make_Error("Cann't access to target file.");
     }
 
-    auto uuid = CUtility::GenUUID();
+    auto token = CUtility::GenUUID();
+    string cacheFolder = Helper::Format("%s%s",m_strCacheFolder.c_str(), token.c_str());
+    // TODO. need process the pialed case.
+    auto& file_list = m_mapTokenToDownloadInfo[token].SplitPackageFile;
+    res = SplitFile(real_path, file_list);
+    if (res.IsFialed())
+        return res;
 
-    m_iC->AddTemp(uuid, pBuf);
+    int size = 0;
+    res = GetFileSize(real_path, &size);
+    if (res.IsFialed())
+        return res;
 
-    PrepareSendFileResponse res;
-    res.set_filesize(nSize);
-    res.set_token(uuid);
+    m_mapTokenToDownloadInfo[token].RealPath = real_path;
+    m_mapTokenToDownloadInfo[token].CacheFolder = cacheFolder;
+    m_mapTokenToDownloadInfo[token].Hash_MD5 = CMD5::Encode(real_path, true);
+    m_mapTokenToDownloadInfo[token].Size = size;
+
+    PrepareDownloadResponse response;
+    response.set_token(token);
+    response.set_filesize(size);
+    auto infoMap = response.mutable_splitpackageinfos();
+    for( auto &item : file_list)
+    {
+        infoMap->operator[](item.first) = CMD5::Encode(item.second,true);
+    }
+    
+    return CResult::Make_OK(ConvertObjToStr(&response));
+}
+
+CResult Sloong::FileManager::DownloadingHandler(const string &str_req, CDataTransPackage *trans_pack)
+{
+    auto req = ConvertStrToObj<DownloadingRequest>(str_req);
+    auto& token = req->token();
+    if (!m_mapTokenToUploadInfo.exist(token))
+        return CResult::Make_Error("Need request PrepareDownload firest.");
+
+    auto info = m_mapTokenToDownloadInfo.try_get(token);
+    auto path = info->SplitPackageFile.try_get(req->splitpackageid());
+    char* buf=nullptr;
+    auto size = CUtility::ReadFile(*path,buf);
+    auto data_package = trans_pack->GetDataPackage();
+    data_package->set_extend(buf,size);
+    DownloadingResponse res;
+    res.set_hash_md5(CMD5::Encode(*path,true));
     return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
-void Sloong::FileManager::RecvDataConnFunc()
+CResult Sloong::FileManager::DownloadedHandler(const string &str_req, CDataTransPackage *trans_pack)
 {
-    CLog *pLog = m_pLog;
-    while (m_emStatus != RUN_STATUS::Exit)
+    auto req = ConvertStrToObj<DownloadedRequest>(str_req);
+    auto& token = req->token();
+    if (m_mapTokenToUploadInfo.exist(token))
     {
-        int conn_sock = -1;
-        if ((conn_sock = accept(m_ListenSock, NULL, NULL)) > 0)
-        {
-            pLog->Debug(Helper::Format("Accept data connect :[%s][%d]", CUtility::GetSocketIP(conn_sock).c_str(), CUtility::GetSocketPort(conn_sock)));
-            // When accept the connect , receive the uuid data. and
-            char *pCheckBuf = new char[g_uuid_len + 1];
-            memset(pCheckBuf, 0, g_uuid_len + 1);
-            // In Check function, client need send the check key in 3 second.
-            // 这里仍然使用Universal提供的ReceEx。这里不需要进行SSL接收
-            int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, g_uuid_len, m_nRecvDataTimeoutTime);
-            // Check uuid length
-            if (nLen != g_uuid_len)
-            {
-                pLog->Warn(Helper::Format("The uuid length error:[%d]. Close connect.", nLen));
-                close(conn_sock);
-                continue;
-            }
-            // Check uuid validity
-            if (g_RecvDataInfoList.find(pCheckBuf) == g_RecvDataInfoList.end())
-            {
-                pLog->Warn(Helper::Format("The uuid is not find in list:[%s]. Close connect.", pCheckBuf));
-                close(conn_sock);
-                continue;
-            }
-            // Add to connect list
-            g_RecvDataConnList[conn_sock] = pCheckBuf;
-            // Start new thread to recv data for this connect.
-           
-            // TODO: modify the libarary function.
-            //CThreadPool::AddWorkThread(std::bind(&FileManager::RecvFileFunc, this, std::placeholders::_1),  make_shared<int>(conn_sock));
-        }
+        auto info = m_mapTokenToDownloadInfo.try_get(token);
+        ClearCache(info->CacheFolder);
+        m_mapTokenToDownloadInfo.erase(token);
     }
+
+    return CResult::Succeed();
 }
 
-void Sloong::FileManager::RecvFileFunc(int conn_sock)
+CResult Sloong::FileManager::TestSpeedHandler(const string &str_req, CDataTransPackage *trans_pack)
 {
-    CLog *pLog = m_pLog;
-    // Find the recv uuid.
-    auto conn_item = g_RecvDataConnList.find(conn_sock);
-    if (conn_item == g_RecvDataConnList.end())
-    {
-        pLog->Error("The socket id is not find in conn list.");
-        return;
-    }
-    string uuid = conn_item->second;
-    pLog->Info(Helper::Format("Start thread to receive file data for :[%s]", uuid.c_str()));
-    // Find the recv info list.
-    auto info_item = g_RecvDataInfoList.find(uuid);
-    if (info_item == g_RecvDataInfoList.end())
-    {
-        pLog->Error("The uuid is not find in info list.");
-        return;
-    }
-    try
-    {
-        map<string, RecvDataPackage *> recv_file_list = info_item->second;
-        bool bLoop = false;
-        do
-        {
-            char *pLongBuffer = new char[g_data_pack_len + 1](); //dataLeng;
-            memset(pLongBuffer, 0, g_data_pack_len + 1);
-            int nRecvSize = CUniversal::RecvTimeout(conn_sock, pLongBuffer, g_data_pack_len, m_nRecvDataTimeoutTime);
-            if (nRecvSize <= 0)
-            {
-                // 读取错误,将这个连接从监听中移除并关闭连接
-                SAFE_DELETE_ARR(pLongBuffer);
-                pLog->Warn("Recv data package length error.");
-                return;
-            }
-            else
-            {
-
-                auto dlen = Helper::BytesToInt64(pLongBuffer);
-                SAFE_DELETE_ARR(pLongBuffer);
-                // package length cannot big than 2147483648. this is max value for int.
-                if (dlen <= 0 || dlen > FILE_TRANS_MAX_SIZE || nRecvSize != g_data_pack_len)
-                {
-                    pLog->Error("Receive data length error.");
-                    return;
-                }
-                int dtlen = (int)dlen;
-
-                char *szMD5 = new char[g_md5_len + 1];
-                memset(szMD5, 0, g_md5_len + 1);
-                nRecvSize = CUniversal::RecvTimeout(conn_sock, szMD5, g_md5_len, m_nRecvDataTimeoutTime, true);
-                if (nRecvSize <= 0)
-                {
-                    pLog->Error("Receive data package md5 error.");
-                    SAFE_DELETE_ARR(szMD5);
-                    return;
-                }
-                string trans_md5 = string(szMD5);
-                Helper::tolower(trans_md5);
-
-                auto recv_file_item = recv_file_list.find(trans_md5);
-                if (recv_file_item == recv_file_list.end())
-                {
-                    pLog->Error("the file md5 is not find in recv list.");
-                    return;
-                }
-                RecvDataPackage *pack = recv_file_item->second;
-                pack->emStatus = RecvStatus::Receiving;
-
-                char *data = new char[dtlen];
-                memset(data, 0, dtlen);
-
-                // In here receive 10240 length data in one time.
-                // because the file length is different, if the file is too big, and user network speed not to fast,
-                // it will be fialed.
-                char *pData = data;
-                int nRecvdLen = 0;
-                while (nRecvdLen < dtlen)
-                {
-                    int nOnceRecvLen = 10240;
-                    if (dtlen - nRecvdLen < 10240)
-                        nOnceRecvLen = dtlen - nRecvdLen;
-                    nRecvSize = CUniversal::RecvTimeout(conn_sock, pData, nOnceRecvLen, m_nRecvDataTimeoutTime, true);
-                    if (nRecvSize < 0)
-                    {
-                        pLog->Error("Receive data error.");
-                        SAFE_DELETE_ARR(data);
-                        return;
-                    }
-                    else if (nRecvSize == 0)
-                    {
-                        pLog->Error("Receive data timeout.");
-                        SAFE_DELETE_ARR(data);
-                        return;
-                    }
-                    else
-                    {
-                        pData += nRecvSize;
-                        nRecvdLen += nRecvSize;
-                    }
-                }
-
-                pack->emStatus = RecvStatus::Saveing;
-
-                // check target file path is not exist
-                CUniversal::CheckFileDirectory(pack->strPath);
-
-                // save to file
-                ofstream of;
-                of.open(pack->strPath + pack->strName, ios::out | ios::trunc | ios::binary);
-                of.write(data, dtlen);
-                of.close();
-                SAFE_DELETE_ARR(data);
-
-                string file_md5 = CMD5::Encode(pack->strPath + pack->strName, true);
-                Helper::tolower(file_md5);
-
-                // check md5
-                if (trans_md5.compare(file_md5))
-                {
-                    pLog->Error("the file data is different with md5 code.");
-                    pack->emStatus = RecvStatus::VerificationError;
-                }
-                else
-                {
-                    pack->emStatus = RecvStatus::Done;
-                }
-
-                // check the receive file list status
-                for (auto item = recv_file_list.begin(); item != recv_file_list.end(); item++)
-                {
-                    auto pack = item->second;
-                    if (pack->emStatus == RecvStatus::Wait)
-                    {
-                        bLoop = true;
-                        break;
-                    }
-                    else
-                    {
-                        bLoop = false;
-                    }
-                }
-            }
-        } while (bLoop);
-
-        pLog->Debug(Helper::Format("Receive connect done. close:[%s:%d]", CUtility::GetSocketIP(conn_sock).c_str(), CUtility::GetSocketPort(conn_sock)));
-        close(conn_sock);
-    }
-    catch (const std::exception &)
-    {
-        close(conn_sock);
-        ClearReceiveInfoByUUID(uuid);
-    }
+    return CResult::Succeed();
 }
-
-// Receive File funcs
-// Client requeset with file list info
-// and here add the info to list and Build one uuid and return this uuid.
-CResult FileManager::ReceiveFile(const string &str_req, CDataTransPackage *trans_pack)
-{
-    auto req = ConvertStrToObj<ReceiveFileRequest>(str_req);
-
-    string save_folder = req->savefolder();
-    string uuid = CUtility::GenUUID();
-    // The file list, key is md5 ,value is file name
-
-    map<string, RecvDataPackage *> recv_list;
-    for (auto &item : req->infos())
-    {
-        RecvDataPackage *pack = new RecvDataPackage();
-        string md5 = item.filehash();
-        Helper::tolower(md5);
-        pack->strName = item.filename();
-        pack->strPath = save_folder;
-        pack->strMD5 = md5;
-        pack->emStatus = RecvStatus::Wait;
-        recv_list[md5] = pack;
-    }
-
-    g_RecvDataInfoList[uuid] = recv_list;
-
-    ReceiveFileResponse res;
-    res.set_token(uuid);
-    return CResult::Make_OK(ConvertObjToStr(&res));
-}
-/*
-int FileManager::CheckRecvStatus(const string &str_req, CDataTransPackage *trans_pack)
-{
-    string uuid = CLua::GetString(l, 1);
-    string md5 = CLua::GetString(l, 2);
-    Helper::tolower(md5);
-    auto recv_list = g_RecvDataInfoList[uuid];
-    auto recv_item = recv_list.find(md5);
-    if (recv_item == recv_list.end())
-    {
-        CLua::PushInteger(l, RecvStatus::OtherError);
-        CLua::PushString(l, "Cannot find the hash receive info.");
-        return 2;
-    }
-    else
-    {
-        RecvDataPackage *pack = recv_item->second;
-        if (pack->emStatus == RecvStatus::Done)
-        {
-            recv_list.erase(recv_item);
-            CLua::PushInteger(l, RecvStatus::Done);
-            CLua::PushString(l, pack->strPath + pack->strName);
-            return 2;
-        }
-        else
-        {
-            CLua::PushInteger(l, pack->emStatus);
-            CLua::PushString(l, "");
-            return 2;
-        }
-    }
-}*/

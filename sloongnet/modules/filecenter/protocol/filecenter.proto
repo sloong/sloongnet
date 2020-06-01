@@ -4,41 +4,60 @@ package FileCenter;
 enum Functions{
     Invalid=0;
     reserved 1 to 300;// FileCenter function is start by 301-400
-    UploadStart=301;
-	UploadEnd=302;
-	UploadWithTCP=303;
-	UploadWithTCPStart=304;
-    GetFile=305;
-    GetThumbImage=306;
+    TestSpeed=301;
+    PrepareUpload=302;
+    Uploading=303;
+	Uploaded=304;
+    PrepareDownload=305;
+    Downloading=306;
+    Downloaded=307;
     reserved 400 to max;
 }
 
-message UploadStartRequest{
-    string content=1;
+message FileInfoItem {
+    string Name=1;
+    string Hash_MD5=2;
+    int32 FileSize=3;
 }
 
-message UploadStartResponse{
-    string content=1;
+message PrepareUploadRequest{
+    FileInfoItem info=1;
 }
 
-message PrepareSendFileRequest{
-    string FileName=1;
+message PrepareUploadResponse{
+    string Token=1;
 }
-message PrepareSendFileResponse{
+
+message UploadingRequest{
+    string Token=1;
+    int32 SplitPackageID=2;
+    string Hash_MD5 = 3;
+}
+
+message UploadedRequest{
+    string Token=1;
+}
+
+message PrepareDownloadRequest{
+    string Hash_MD5=1;
+}
+
+message PrepareDownloadResponse{
     string Token=1;
     int32 FileSize=2;
+    map<int32,string> SplitPackageInfos=3;
 }
 
-message UploadFileItem{
-    string FileName=1;
-    string FileHash=2;
+message DownloadingRequest{
+    string Token=1;
+    int32 SplitPackageID=2;
 }
 
-message ReceiveFileRequest{
-    string SaveFolder=1;
-    repeated UploadFileItem Infos=2;
+message DownloadingResponse{
+    string Hash_MD5=1;
 }
 
-message ReceiveFileResponse{
+message DownloadedRequest{
     string Token=1;
 }
+

@@ -9,68 +9,62 @@ using namespace FileCenter;
 
 namespace Sloong
 {
-    enum RecvStatus
+    typedef struct UploadInfo
     {
-        Wait = 0,
-        Receiving = 1,
-        Saveing = 2,
-        Done = 3,
-        VerificationError = 4,
-        OtherError = 5,
-    };
-    struct RecvDataPackage
+        string Path;
+        string Name;
+        string Hash_MD5;
+        map_ex<int, string> SplitPackageFile;
+    } UploadInfo;
+    typedef struct DownloadInfo
     {
-        string strMD5 = "";
-        RecvStatus emStatus = RecvStatus::Wait;
-        string strName = "";
-        string strPath = "";
-    };
-
+        string RealPath;
+        string CacheFolder;
+        string Hash_MD5;
+        int Size;
+        map_ex<int, string> SplitPackageFile;
+    } DownloadInfo;
     typedef std::function<CResult(const string &, CDataTransPackage *)> FunctionHandler;
     class FileManager : IObject
     {
     public:
-        ~FileManager()
-        {
-            for (auto &item : g_RecvDataInfoList)
-            {
-                ClearReceiveInfoByUUID(item.first);
-            }
-        }
-
         CResult Initialize(IControl *ic);
-        CResult EnableDataReceive(int,int);
+        CResult EnableDataReceive(int, int);
 
         CResult RequestPackageProcesser(CDataTransPackage *);
         CResult ResponsePackageProcesser(CDataTransPackage *);
 
-        CResult PrepareSendFile(const string &str_req, CDataTransPackage *trans_pack);
-        CResult ReceiveFile(const string &str_req, CDataTransPackage *trans_pack);
-
-        
+        CResult PrepareUploadHandler(const string &str_req, CDataTransPackage *trans_pack);
+        CResult UploadingHandler(const string &str_req, CDataTransPackage *trans_pack);
+        CResult UploadedHandler(const string &str_req, CDataTransPackage *trans_pack);
+        CResult PrepareDownloadHandler(const string &str_req, CDataTransPackage *trans_pack);
+        CResult DownloadingHandler(const string &str_req, CDataTransPackage *trans_pack);
+        CResult DownloadedHandler(const string &str_req, CDataTransPackage *trans_pack);
+        CResult TestSpeedHandler(const string &str_req, CDataTransPackage *trans_pack);
 
     protected:
-        void RecvDataConnFunc();
-        void ClearReceiveInfoByUUID(string uuid);
         CResult MoveFile(const string &source, const string &target);
 
-        void RecvFileFunc(int conn_sock);
+        CResult QueryFilePath(const string &);
+
+        CResult MergeFile(const map_ex<int, string> &fileList, const string &saveFile);
+        CResult SplitFile(const string &saveFile, map_ex<int, string> &fileList);
+        CResult GetFileSize(const string &path, int *out_size);
+        void ClearCache(const string &folder);
 
     protected:
-        RUN_STATUS  m_emStatus = RUN_STATUS::Created;
+        RUN_STATUS m_emStatus = RUN_STATUS::Created;
         map_ex<FileCenter::Functions, FunctionHandler> m_mapFuncToHandler;
-        int m_ListenSock ;
-        map<int, string> g_RecvDataConnList;
-        int m_nRecvDataTimeoutTime;
-        map<string, map<string, RecvDataPackage *>> g_RecvDataInfoList;
+        map_ex<string, UploadInfo> m_mapTokenToUploadInfo;
+        map_ex<string, DownloadInfo> m_mapTokenToDownloadInfo;
 
+        string m_strUploadTempSaveFolder;
+
+        // TODO: set the archive path.
+        string m_strArchiveFolder = "/tmp";
+        string m_strCacheFolder = "/tmp";
     };
 
-    static int g_data_pack_len = 8;
-    static int g_uuid_len = 36;
-    static int g_md5_len = 32;
-    static int FILE_TRANS_MAX_SIZE = 20 * 1024 * 1024; //20mb
-    static string g_temp_file_path = "/tmp/sloong/receivefile/temp.tmp";
 } // namespace Sloong
 
 #endif

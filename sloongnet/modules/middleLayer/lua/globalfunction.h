@@ -26,14 +26,6 @@ namespace Sloong
         void Initialize(IControl *iMsg);
         void Exit();
         void RegistFuncToLua(CLua *pLua);
-        void EnableDataReceive(int port);
-
-    protected:
-        void ClearReceiveInfoByUUID(string uuid);
-
-    private:
-        static void *RecvDataConnFunc(void *pParam);
-        static void *RecvFileFunc(void *pParam);
 
     protected:
         CUtility *m_pUtility;
