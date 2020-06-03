@@ -11,7 +11,7 @@
 #include "EasyConnect.h"
 #include "core.h"
 #include "export.h"
-
+#include "IObject.h"
 #include "transpond.h"
 
 #include "protocol/manager.pb.h"
@@ -30,7 +30,7 @@ extern "C"
 
 namespace Sloong
 {
-	class SloongNetGateway
+	class SloongNetGateway : public IObject
 	{
 	public:
 		SloongNetGateway() {}
@@ -71,9 +71,7 @@ namespace Sloong
 
 	protected:
 		list<unique_ptr<GatewayTranspond>> m_listTranspond;
-
-		IControl *m_pControl = nullptr;
-		CLog *m_pLog = nullptr;
+		
 		GLOBAL_CONFIG *m_pConfig;
 		Json::Value *m_pModuleConfig;
 		RuntimeDataPackage *m_pRuntimeData = nullptr;

@@ -67,7 +67,7 @@ extern "C" CResult CreateProcessEnvironment(void **out_env)
 
 CResult SloongNetGateway::Initialized(SOCKET sock, IControl *iC)
 {
-	m_pControl = iC;
+	IObject::Initialize(iC);
 	IData::Initialize(iC);
 	m_pConfig = IData::GetGlobalConfig();
 	m_pModuleConfig = IData::GetModuleConfig();
@@ -77,18 +77,17 @@ CResult SloongNetGateway::Initialized(SOCKET sock, IControl *iC)
 		auto event = make_unique<CNormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableTimeoutCheck);
 		event->SetMessage(Helper::Format("{\"TimeoutTime\":\"%d\", \"CheckInterval\":%d}", (*m_pModuleConfig)["TimeoutTime"].asInt(), (*m_pModuleConfig)["TimeoutCheckInterval"].asInt()));
-		m_pControl->SendMessage(std::move(event));
+		m_iC->SendMessage(std::move(event));
 
 		event = make_unique<CNormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableClientCheck);
 		event->SetMessage(Helper::Format("{\"ClientCheckKey\":\"%s\", \"ClientCheckTime\":%d}", (*m_pModuleConfig)["ClientCheckKey"].asString().c_str(), (*m_pModuleConfig)["ClientCheckKey"].asInt()));
-		m_pControl->SendMessage(std::move(event));
+		m_iC->SendMessage(std::move(event));
 	}
-	m_pLog = IData::GetLog();
 	m_nManagerConnection = sock;
-	m_pControl->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
-	m_pControl->RegisterEventHandler(EVENT_TYPE::SocketClose, std::bind(&SloongNetGateway::OnSocketClose, this, std::placeholders::_1));
-	m_pControl->RegisterEventHook(EVENT_TYPE::SendPackage, std::bind(&SloongNetGateway::SendPackageHook, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::SocketClose, std::bind(&SloongNetGateway::OnSocketClose, this, std::placeholders::_1));
+	m_iC->RegisterEventHook(EVENT_TYPE::SendPackage, std::bind(&SloongNetGateway::SendPackageHook, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
@@ -115,7 +114,7 @@ void SloongNetGateway::QueryReferenceInfo()
 	auto event = make_unique<CSendPackageEvent>();
 	event->SetCallbackFunc(std::bind(&SloongNetGateway::QueryReferenceInfoResponseHandler, this, std::placeholders::_1, std::placeholders::_2));
 	event->SetRequest(m_nManagerConnection, m_pRuntimeData->nodeuuid(), snowflake::Instance->nextid(), Core::HEIGHT_LEVEL, (int)Functions::QueryReferenceInfo, "");
-	m_pControl->CallMessage(std::move(event));
+	m_iC->CallMessage(std::move(event));
 }
 
 // process the provied function string to list.
@@ -182,14 +181,14 @@ void SloongNetGateway::AddConnection( uint64_t uuid, const string &addr, int por
 	conn.Connect();
 	auto event = make_unique<CNetworkEvent>(EVENT_TYPE::RegisteConnection);
 	event->SetSocketID(conn.GetSocketID());
-	m_pControl->SendMessage(std::move(event));
+	m_iC->SendMessage(std::move(event));
 	m_mapUUIDToConnect[uuid] = conn.GetSocketID();
 }
 
 CResult SloongNetGateway::CreateProcessEnvironmentHandler(void **out_env)
 {
 	auto item = make_unique<GatewayTranspond>();
-	auto res = item->Initialize(m_pControl);
+	auto res = item->Initialize(m_iC);
 	if (res.IsFialed())
 		return res;
 	(*out_env) = item.get();
@@ -235,7 +234,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_r
 	m_mapTempteIDToUUIDs[item.templateid()].erase(item.uuid());
 	auto event = make_unique<CNetworkEvent>(EVENT_TYPE::SocketClose);
 	event->SetSocketID(m_mapUUIDToConnect[uuid]);
-	m_pControl->SendMessage(std::move(event));
+	m_iC->SendMessage(std::move(event));
 	m_mapUUIDToConnect.erase(uuid);
 	m_mapUUIDToNode.erase(uuid);
 }
