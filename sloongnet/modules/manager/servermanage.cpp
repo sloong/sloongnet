@@ -16,11 +16,7 @@ using namespace Sloong::Events;
 
 CResult Sloong::CServerManage::Initialize(IControl *ic)
 {
-	if (ic)
-	{
-		m_pControl = ic;
-		m_pLog = IData::GetLog();
-	}
+	IObject::Initialize(ic);
 
 	m_mapFuncToHandler[Functions::PostLog] = std::bind(&CServerManage::EventRecorderHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::RegisteWorker] = std::bind(&CServerManage::RegisteWorkerHandler, this, std::placeholders::_1, std::placeholders::_2);
@@ -460,7 +456,7 @@ void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int even
 			msg->SerializeToString(&msg_str);
 		auto req = make_unique<CSendPackageEvent>();
 		req->SetRequest(m_mapUUIDToNodeItem[item].ConnectionID, IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Core::HEIGHT_LEVEL, event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
-		m_pControl->SendMessage(std::move(req));
+		m_iC->SendMessage(std::move(req));
 	}
 }
 

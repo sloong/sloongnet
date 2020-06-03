@@ -14,6 +14,7 @@
 using namespace Manager;
 
 #include "IData.h"
+#include "IObject.h"
 namespace Sloong
 {
     struct NodeItem
@@ -114,8 +115,7 @@ namespace Sloong
         list_ex<uint64_t> Created;
     };
 
-    typedef std::function<CResult(const string &, CDataTransPackage *)> FunctionHandler;
-    class CServerManage
+    class CServerManage : public IObject
     {
     public:
         CResult Initialize(IControl *ic);
@@ -200,10 +200,6 @@ namespace Sloong
         map_ex<int64_t, NodeItem> m_mapUUIDToNodeItem;
         map_ex<int, TemplateItem> m_mapIDToTemplateItem;
         map_ex<SOCKET, int64_t> m_mapSocketToUUID;
-
-    private:
-        CLog *m_pLog = nullptr;
-        IControl *m_pControl = nullptr;
     };
 } // namespace Sloong
 #endif
