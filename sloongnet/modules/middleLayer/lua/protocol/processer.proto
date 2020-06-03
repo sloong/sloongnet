@@ -6,12 +6,7 @@ enum Functions{
     reserved 1 to 600;// Processer function is start by 601
     GetText=601;
     Reload=602;
-    UploadStart=603;
-	UploadEnd=604;
-	UploadWithTCP=605;
-	UploadWithTCPStart=606;
 	GetIP=607;
-    GetThumbImage=608;
 }
 
 message GetTextMessageRequest{

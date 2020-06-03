@@ -96,10 +96,6 @@ AddModule('Processer.Functions',
 {
 	['Reload'] = {main_Req.ReloadScript,'',''},
 	['GetText'] = {main_Req.TextTest,'Processer.GetTextMessageRequest','Processer.GetTextMessageResponse'},
-	-- ['UploadStart'] = main_Req.UploadStart,
-	-- ['UploadEnd'] = main_Req.UploadEnd,
-	-- ['UploadWithTCP'] = main_Req.UploadWithTCP,
-	-- ['UploadWithTCPStart'] = main_Req.UploadWithTCPStart,
 	-- ['GetIP'] = main_Req.GetIP,
     -- ['GetThumbImage'] = main_Req.GetThumbImage,
 })
