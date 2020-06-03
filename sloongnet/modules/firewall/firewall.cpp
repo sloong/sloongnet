@@ -5,8 +5,8 @@
  * @LastEditTime: 2020-05-14 14:16:47
  * @Description: file content
  */
-#include "main.h"
-#include "utility.h"
+#include "firewall.h"
+
 #include "NetworkEvent.hpp"
 
 #include "protocol/manager.pb.h"
@@ -44,7 +44,7 @@ extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
 	return CResult::Succeed();
 }
 
-extern "C" CResult ModuleInitialized(IControl* iC){
+extern "C" CResult ModuleInitialized(SOCKET sock, IControl* iC){
 	return SloongNetFirewall::Instance->Initialized(iC);
 }
 
