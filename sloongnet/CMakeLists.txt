@@ -36,6 +36,7 @@ add_subdirectory(modules/core)
 add_subdirectory(modules/manager)
 add_subdirectory(modules/firewall)
 add_subdirectory(modules/gateway)
+add_subdirectory(modules/datacenter)
 add_subdirectory(modules/filecenter)
 add_subdirectory(modules/middleLayer/lua)
 

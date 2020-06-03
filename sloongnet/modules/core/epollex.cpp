@@ -182,7 +182,6 @@ void Sloong::CEpollEx::MainWorkLoop()
 			if (m_emStatus == RUN_STATUS::Created)
 			{
 				this_thread::sleep_for( std::chrono::microseconds(100) );
-				//usleep(990000);
 				continue;
 			}
 
