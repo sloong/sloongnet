@@ -5,73 +5,105 @@
  * @LastEditTime: 2020-04-17 18:25:58
  * @Description: file content
  */
-#include "main.h"
+#include "datacenter.h"
 #include "IData.h"
-#include "utility.h"
 #include "NetworkEvent.hpp"
 using namespace Sloong;
 using namespace Sloong::Events;
 
-unique_ptr<SloongNetDataCenter> Sloong::SloongNetDataCenter::Instance = nullptr;
+#include "protocol/manager.pb.h"
 
-extern "C" CResult RequestPackageProcesser(CDataTransPackage* pack)
-{
-	return SloongNetDataCenter::Instance->RequestPackageProcesser(pack);
-}
-	
-extern "C" CResult NewConnectAcceptProcesser(CSockInfo* info)
-{
+unique_ptr<CDataCenter> Sloong::CDataCenter::Instance = nullptr;
 
+extern "C" CResult RequestPackageProcesser(void *env, CDataTransPackage *pack)
+{
+	auto pDB = TYPE_TRANS<DBHub *>(env);
+	if (pDB)
+		return pDB->RequestPackageProcesser(pack);
+	else
+		return CResult::Make_Error("RequestPackageProcesser error, Environment convert failed.");
 }
-	
-extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
-	SloongNetDataCenter::Instance = make_unique<SloongNetDataCenter>();
+
+extern "C" CResult ResponsePackageProcesser(void *env, CDataTransPackage *pack)
+{
+	/*auto pDB = TYPE_TRANS<DBHub *>(env);
+	if (pDB)
+		return pDB->ResponsePackageProcesser(pack);
+	else
+		return CResult::Make_Error("ResponsePackageProcesser error, Environment convert failed.");*/
+	return CResult::Make_Error("NO SUPPORT!");
+}
+
+extern "C" CResult EventPackageProcesser(CDataTransPackage *pack)
+{
+	CDataCenter::Instance->EventPackageProcesser(pack);
 	return CResult::Succeed();
 }
 
-extern "C" CResult ModuleInitialized(IControl* iC){
-	return SloongNetDataCenter::Instance->Initialized(iC);
+extern "C" CResult NewConnectAcceptProcesser(CSockInfo *info)
+{
+	return CResult::Succeed();
 }
 
-CResult SloongNetDataCenter::Initialized(IControl*)
+extern "C" CResult ModuleInitialization(GLOBAL_CONFIG *confiog)
 {
-	m_oConfig.ParseFromString(m_oServerConfig->exconfig());
-	m_pNetwork->RegisterRequestProcesser(std::bind(&SloongNetDataCenter::RequestPackageProcesser, this, std::placeholders::_1));
-	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetDataCenter::OnSocketClose, this, std::placeholders::_1));
+	CDataCenter::Instance = make_unique<CDataCenter>();
+	return CResult::Succeed();
 }
 
-
-CResult Sloong::SloongNetDataCenter::RequestPackageProcesser(CDataTransPackage* pack)
+extern "C" CResult ModuleInitialized(SOCKET sock, IControl *iC)
 {
-    auto msgPack = pack->GetDataPackage();
-    auto sender = msgPack->sender();
-    auto func = msgPack->function();
-    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%llu]", Functions_Name(func).c_str(), sender));
-    if (m_oFunctionHandles.exist(func))
-    {
-        if (!m_oFunctionHandles[func](func, sender, pack))
-        {
-            return CResult::Succeed();
-        }
-    }
-    else
-    {
-        switch (func)
-        {
-        case Functions::RestartService:
-        {
-           
-            return CResult::Succeed();
-        }break;
-        default:
-            m_pLog->Debug(Helper::Format("No handler for [%s] request: sender[%llu]", Functions_Name(func).c_str(), sender));
-            pack->ResponsePackage(ResultType::Error, "No hanlder to process request.");
-        }
-    }
+	return CDataCenter::Instance->Initialized(sock, iC);
+}
+
+extern "C" CResult CreateProcessEnvironment(void **out_env)
+{
+	return CDataCenter::Instance->CreateProcessEnvironmentHandler(out_env);
+}
+
+CResult CDataCenter::Initialized(SOCKET sock, IControl *ic)
+{
+	IObject::Initialize(ic);
+	IData::Initialize(ic);
+	m_pConfig = IData::GetGlobalConfig();
+	m_pModuleConfig = IData::GetModuleConfig();
+	m_pRuntimeData = IData::GetRuntimeData();
+	if (m_pModuleConfig == nullptr)
+	{
+		return CResult::Make_Error("Initialize error. no config data.");
+	}
+	m_nManagerConnection = sock;
 
 	return CResult::Succeed();
 }
 
-void Sloong::SloongNetDataCenter::OnSocketClose(SmartEvent event)
+CResult CDataCenter::CreateProcessEnvironmentHandler(void **out_env)
 {
+	auto item = make_unique<DBHub>();
+	auto res = item->Initialize(m_iC);
+	if (res.IsFialed())
+		return res;
+	(*out_env) = item.get();
+	m_listDBHub.push_back(std::move(item));
+	return CResult::Succeed();
+}
+
+void Sloong::CDataCenter::EventPackageProcesser(CDataTransPackage *trans_pack)
+{
+	auto data_pack = trans_pack->GetDataPackage();
+	auto event = (Manager::Events)data_pack->function();
+	if (!Manager::Events_IsValid(event))
+	{
+		m_pLog->Error(Helper::Format("EventPackageProcesser is called.but the fucntion[%d] check error.", event));
+		return;
+	}
+
+	switch (event)
+	{
+	default:
+	{
+		m_pLog->Error(Helper::Format("Event is no processed. [%s][%d].", Manager::Events_Name(event).c_str(), event));
+	}
+	break;
+	}
 }

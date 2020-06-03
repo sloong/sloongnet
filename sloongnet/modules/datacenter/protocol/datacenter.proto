@@ -9,3 +9,12 @@ enum Functions{
     reserved 300 to max;
 }
 
+
+message RunSQLRequest{
+    string SQLCMD=1;
+}
+
+message RunSQLResponse{
+    int32 AffectedRows=1;
+    repeated string Results=2;
+}

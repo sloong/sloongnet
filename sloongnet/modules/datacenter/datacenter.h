@@ -11,34 +11,43 @@
 
 #include "core.h"
 #include "export.h"
+#include "IObject.h"
+
+#include "dbhub.h"
 
 extern "C" {
-	CResult RequestPackageProcesser(CDataTransPackage*);
-	CResult NewConnectAcceptProcesser(CSockInfo*);
-	CResult ModuleInitialization(GLOBAL_CONFIG*);
-	CResult ModuleInitialized(IControl*);
+	CResult RequestPackageProcesser(void *, CDataTransPackage *);
+	CResult ResponsePackageProcesser(void *, CDataTransPackage *);
+	CResult EventPackageProcesser(CDataTransPackage *);
+	CResult NewConnectAcceptProcesser(CSockInfo *);
+	CResult ModuleInitialization(GLOBAL_CONFIG *);
+	CResult ModuleInitialized(SOCKET, IControl *);
+	CResult CreateProcessEnvironment(void **);
 }
 
 namespace Sloong
 {	
-	class SloongNetDataCenter
+	class CDataCenter : public IObject
 	{
 	public:
-		SloongNetDataCenter() {}
+		CDataCenter() {}
 
-		CResult Initialized(IControl*);
+		CResult Initialization(GLOBAL_CONFIG *);
+		CResult Initialized(SOCKET, IControl *);
 
-		CResult RequestPackageProcesser(CDataTransPackage*);
-		
-		void OnSocketClose(SmartEvent evt);
+		inline CResult CreateProcessEnvironmentHandler(void **);
+		void EventPackageProcesser(CDataTransPackage *);
+
 	protected:
+		list<unique_ptr<DBHub>> m_listDBHub;
 
-	protected:
-		IControl* 	m_pControl = nullptr;
-		CLog*		m_pLog =nullptr;
 		GLOBAL_CONFIG* m_pConfig;
+		Json::Value *m_pModuleConfig;
+		RuntimeDataPackage *m_pRuntimeData = nullptr;
+		SOCKET m_nManagerConnection = -1;
+
 	public:
-		static unique_ptr<SloongNetDataCenter> Instance;
+		static unique_ptr<CDataCenter> Instance;
 	};
 
 }
