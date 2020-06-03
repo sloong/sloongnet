@@ -25,69 +25,76 @@ using namespace std;
 #include "protocol/core.pb.h"
 using namespace Core;
 
-template <typename T>
-inline T TYPE_TRANS(LPVOID p)
+#include "result.hpp"
+namespace Sloong
 {
-	T tmp = static_cast<T>(p);
-	assert(tmp);
-	return tmp;
-}
+	class CDataTransPackage;
+	typedef std::function<CResult(const string &, CDataTransPackage *)> FunctionHandler;
 
-const int s_PriorityLevel = 3;
+	template <typename T>
+	inline T TYPE_TRANS(LPVOID p)
+	{
+		T tmp = static_cast<T>(p);
+		assert(tmp);
+		return tmp;
+	}
 
-template <class T>
-inline shared_ptr<T> ConvertStrToObj(const string &obj)
-{
-	shared_ptr<T> item = make_shared<T>();
-	if (!item->ParseFromString(obj))
-		return nullptr;
-	return item;
-}
+	const int s_PriorityLevel = 3;
 
-inline string ConvertObjToStr(::google::protobuf::Message *obj)
-{
-	string str_res;
-	if (!obj->SerializeToString(&str_res))
-		return "";
-	return str_res;
-}
+	template <class T>
+	inline shared_ptr<T> ConvertStrToObj(const string &obj)
+	{
+		shared_ptr<T> item = make_shared<T>();
+		if (!item->ParseFromString(obj))
+			return nullptr;
+		return item;
+	}
 
-inline bool ConvertStrToInt(const string &str, int *out_res, string *err_msg = nullptr)
-{
-	try
+	inline string ConvertObjToStr(::google::protobuf::Message *obj)
 	{
-		if (out_res)
-			(*out_res) = stoi(str);
-		return true;
+		string str_res;
+		if (!obj->SerializeToString(&str_res))
+			return "";
+		return str_res;
 	}
-	catch (const invalid_argument &e)
-	{
-		if (err_msg)
-			*err_msg = "invalid_argument";
-		return false;
-	}
-	catch (const out_of_range &e)
-	{
-		if (err_msg)
-			*err_msg = "out_of_range";
-		return false;
-	}
-	catch (...)
-	{
-		if (err_msg)
-			*err_msg = "unknown";
-		return false;
-	}
-}
 
-inline string &FormatFolderString(string &str)
-{
-	char tag = str.at(str.length() - 1);
-	if (tag != '/' && tag != '\\')
+	inline bool ConvertStrToInt(const string &str, int *out_res, string *err_msg = nullptr)
 	{
-		str.append("/");
+		try
+		{
+			if (out_res)
+				(*out_res) = stoi(str);
+			return true;
+		}
+		catch (const invalid_argument &e)
+		{
+			if (err_msg)
+				*err_msg = "invalid_argument";
+			return false;
+		}
+		catch (const out_of_range &e)
+		{
+			if (err_msg)
+				*err_msg = "out_of_range";
+			return false;
+		}
+		catch (...)
+		{
+			if (err_msg)
+				*err_msg = "unknown";
+			return false;
+		}
 	}
-	return str;
-}
+
+	inline string &FormatFolderString(string &str)
+	{
+		char tag = str.at(str.length() - 1);
+		if (tag != '/' && tag != '\\')
+		{
+			str.append("/");
+		}
+		return str;
+	}
+} // namespace Sloong
 
 #endif

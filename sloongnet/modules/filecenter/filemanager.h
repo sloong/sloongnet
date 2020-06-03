@@ -24,7 +24,7 @@ namespace Sloong
         int Size;
         map_ex<int, string> SplitPackageFile;
     } DownloadInfo;
-    typedef std::function<CResult(const string &, CDataTransPackage *)> FunctionHandler;
+    
     class FileManager : IObject
     {
     public:
