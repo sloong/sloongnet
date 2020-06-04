@@ -1,6 +1,7 @@
 #include "DataTransPackage.h"
 
 CLog *Sloong::CDataTransPackage::g_pLog = nullptr;
+int Sloong::CDataTransPackage::g_max_package_size = 5* 1024 *1024;
 
 void Sloong::CDataTransPackage::PrepareSendPackageData()
 {
@@ -12,7 +13,7 @@ void Sloong::CDataTransPackage::PrepareSendPackageData()
 		m_pTransPackage.set_content("The package size is to bigger.");
 		m_pTransPackage.clear_extend();
 		if (g_pLog != nullptr)
-			g_pLog->Assert("The package size is to bigger, this's returned and replaced with an error message package.")
+			g_pLog->Assert("The package size is to bigger, this's returned and replaced with an error message package.");
 		m_pTransPackage.SerializeToString(&m_strPackageData);	
 	}
 	if (g_pLog != nullptr)
