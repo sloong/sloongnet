@@ -6,6 +6,15 @@ void Sloong::CDataTransPackage::PrepareSendPackageData()
 {
 	m_pTransPackage.SerializeToString(&m_strPackageData);
 	m_nPackageSize = (int)m_strPackageData.length();
+	if( m_nPackageSize > g_max_package_size)
+	{
+		m_pTransPackage.set_result(ResultType::Error);
+		m_pTransPackage.set_content("The package size is to bigger.");
+		m_pTransPackage.clear_extend();
+		if (g_pLog != nullptr)
+			g_pLog->Assert("The package size is to bigger, this's returned and replaced with an error message package.")
+		m_pTransPackage.SerializeToString(&m_strPackageData);	
+	}
 	if (g_pLog != nullptr)
 		g_pLog->Debug(Helper::Format("SEND>>>[%d][%llu]>>>[%d]", m_pTransPackage.priority(), m_pTransPackage.id(), m_nPackageSize));
 }
@@ -141,6 +150,12 @@ ResultType Sloong::CDataTransPackage::RecvPackageSucceedProcess(const string& re
 
 	if (g_pLog)
 		g_pLog->Debug(Helper::Format("RECV<<<[%d][%llu]<<<[%d]", m_pTransPackage.priority(), m_pTransPackage.id(), result.size()));
+
+	if( result.size() > g_max_package_size )
+	{
+		ResponsePackage(ResultType::Error, "The package size is to bigger.");
+		return ResultType::Invalid;
+	}
 
 	if (m_pTransPackage.hash().length() > 0)
 	{

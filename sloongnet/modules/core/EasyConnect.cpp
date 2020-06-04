@@ -185,7 +185,7 @@ ResultType Sloong::EasyConnect::RecvPackage(string &res, int &nPackage, int &nRe
 		else if (nPackage <= 0)
 			return ResultType::Error;
 	}
-
+	
 	string buf;
 	buf.resize(nPackage - nReceivedSize);
 	auto len = Read(buf.data(), (int)buf.size(), block, false);

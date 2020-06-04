@@ -121,6 +121,7 @@ namespace Sloong
     public:
         static inline void InitializeLog(CLog *log) { g_pLog = log; }
         static CLog *g_pLog;
+        static int g_max_package_size = 5* 1024 *1024;
     };
     typedef unique_ptr<CDataTransPackage> UniqueTransPackage;
 } // namespace Sloong
