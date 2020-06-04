@@ -137,8 +137,8 @@ message QueryNodeResponse
 
 
 message ReportLoadStatusRequest{
-   int32 CPULoad=1;
-   int32 MemroyUsed=3;
-   int32 NetworkIn=5;
-   int32 NetworkOut=6;
+   double CPULoad=1;
+   double MemroyUsed=3;
+   double NetworkIn=5;
+   double NetworkOut=6;
 }
