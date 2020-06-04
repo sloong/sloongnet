@@ -40,6 +40,7 @@ enum Functions{
     QueryNode=9;
     RestartNode=10;
     StopNode=11;
+    ReportLoadStatus=12;
     // reserved for other service.
     reserved 101 to max;
 }
@@ -135,3 +136,9 @@ message QueryNodeResponse
 }
 
 
+message ReportLoadStatusRequest{
+   int32 CPULoad=1;
+   int32 MemroyUsed=3;
+   int32 NetworkIn=5;
+   int32 NetworkOut=6;
+}

@@ -49,6 +49,8 @@ namespace Sloong
 
         inline int GetFunction() { return m_pTransPackage.function(); }
 
+        inline uint64_t GetSender() { return m_pTransPackage.sender(); }
+
         inline DataPackage *GetDataPackage() { return &m_pTransPackage; }
 
         inline string GetRecvMessage() { return m_pTransPackage.content(); }

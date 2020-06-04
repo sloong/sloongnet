@@ -1,36 +1,20 @@
 #include "utility.h"
-#include <unistd.h>	// for sleep
+#include <unistd.h> // for sleep
 #include <stdio.h>	// for FILE open and close
 #include <fstream>
 #include <string.h> // for stricmp
-#include<univ/exception.h>
 #include <uuid/uuid.h>
 #include <execinfo.h>
 using namespace std;
 using namespace Sloong;
-#ifdef _WINDOWS  
+#ifdef _WINDOWS
 
 #else
 
-#endif  
+#endif
 
 
-
-CUtility::CUtility()
-{
-}
-
-typedef struct PACKEDCPU
-{
-	char name[20];      //定义一个char类型的数组名name有20个元素
-	unsigned int user; //定义一个无符号的int类型的user
-	unsigned int nice; //定义一个无符号的int类型的nice
-	unsigned int system;//定义一个无符号的int类型的system
-	unsigned int idle; //定义一个无符号的int类型的idle
-}CPU_OCCUPY;
-
-
-int CUtility::GetMemory(int& total, int& free)
+int CUtility::GetMemory(int &total, int &free)
 {
 	ifstream ofs;
 	ofs.open("/proc/meminfo");
@@ -61,53 +45,38 @@ int CUtility::GetMemory(int& total, int& free)
 	return 0;
 }
 
-int cal_cpuoccupy(CPU_OCCUPY *o, CPU_OCCUPY *n)
-{
-	unsigned long od, nd;
-	unsigned long id, sd;
-	int cpu_use = 0;
-
-	od = (unsigned long)(o->user + o->nice + o->system + o->idle);//第一次(用户+优先级+系统+空闲)的时间再赋给od
-	nd = (unsigned long)(n->user + n->nice + n->system + n->idle);//第二次(用户+优先级+系统+空闲)的时间再赋给od
-
-	id = (unsigned long)(n->user - o->user);    //用户第一次和第二次的时间之差再赋给id
-	sd = (unsigned long)(n->system - o->system);//系统第一次和第二次的时间之差再赋给sd
-	if ((nd - od) != 0)
-		cpu_use = (int)((sd + id) * 10000) / (nd - od); //((用户+系统)乖100)除(第一次和第二次的时间差)再赋给g_cpu_used
-	else cpu_use = 0;
-	//printf("cpu: %u\n",cpu_use);
-	return cpu_use;
-}
-
-void get_cpuoccupy(CPU_OCCUPY *cpust) //对无类型get函数含有一个形参结构体类弄的指针O
+void CUtility::RecordCPUStatus(CPU_OCCUPY* cpust)
 {
 	FILE *fd;
 	char buff[256];
-	CPU_OCCUPY *cpu_occupy;
-	cpu_occupy = cpust;
 
 	fd = fopen("/proc/stat", "r");
 	fgets(buff, sizeof(buff), fd);
 
-	sscanf(buff, "%s %u %u %u %u", cpu_occupy->name, &cpu_occupy->user, &cpu_occupy->nice, &cpu_occupy->system, &cpu_occupy->idle);
+	sscanf(buff, "%s %u %u %u %u", cpust->name, &cpust->user, &cpust->nice, &cpust->system, &cpust->idle);
 
 	fclose(fd);
 }
 
-
-int CUtility::GetCpuUsed(double nWaitTime)
+double CUtility::CalculateCPULoad(CPU_OCCUPY *prev)
 {
-	CPU_OCCUPY cpu_stat1;
-	CPU_OCCUPY cpu_stat2;
-	int cpu;
+	CPU_OCCUPY cur;
+	RecordCPUStatus(&cur);
 
-	get_cpuoccupy((CPU_OCCUPY *)&cpu_stat1);
-	sleep(nWaitTime);
+	unsigned long od, nd;
+	unsigned long id, sd;
+	double cpu_use = 0.0;
 
-	get_cpuoccupy((CPU_OCCUPY *)&cpu_stat2);
+	od = (unsigned long)(prev->user + prev->nice + prev->system + prev->idle); //第一次(用户+优先级+系统+空闲)的时间再赋给od
+	nd = (unsigned long)(cur.user + cur.nice + cur.system + cur.idle);	   //第二次(用户+优先级+系统+空闲)的时间再赋给od
 
-	cpu = cal_cpuoccupy((CPU_OCCUPY *)&cpu_stat1, (CPU_OCCUPY *)&cpu_stat2);
-	return cpu;
+	id = (unsigned long)(cur.user - prev->user);	  //用户第一次和第二次的时间之差再赋给id
+	sd = (unsigned long)(cur.system - prev->system); //系统第一次和第二次的时间之差再赋给sd
+	if ((nd - od) != 0)
+		cpu_use = ((sd + id) * 10000) / (nd - od); //((用户+系统)乖100)除(第一次和第二次的时间差)再赋给g_cpu_used
+	else
+		cpu_use = 0;
+	return cpu_use;
 }
 
 string Sloong::CUtility::GetSocketIP(int socket)
@@ -115,7 +84,7 @@ string Sloong::CUtility::GetSocketIP(int socket)
 	struct sockaddr_in add;
 	int nSize = sizeof(add);
 	memset(&add, 0, sizeof(add));
-	getpeername(socket, (sockaddr*)&add, (socklen_t*)&nSize);
+	getpeername(socket, (sockaddr *)&add, (socklen_t *)&nSize);
 	return string(inet_ntoa(add.sin_addr));
 }
 
@@ -124,7 +93,7 @@ int Sloong::CUtility::GetSocketPort(int socket)
 	struct sockaddr_in add;
 	int nSize = sizeof(add);
 	memset(&add, 0, sizeof(add));
-	getpeername(socket, (sockaddr*)&add, (socklen_t*)&nSize);
+	getpeername(socket, (sockaddr *)&add, (socklen_t *)&nSize);
 	return add.sin_port;
 }
 
@@ -133,16 +102,16 @@ string Sloong::CUtility::GetSocketAddress(int socket)
 	struct sockaddr_in add;
 	int nSize = sizeof(add);
 	memset(&add, 0, sizeof(add));
-	getpeername(socket, (sockaddr*)&add, (socklen_t*)&nSize);
+	getpeername(socket, (sockaddr *)&add, (socklen_t *)&nSize);
 	return Helper::Format("%s:%d", inet_ntoa(add.sin_addr), add.sin_port);
 }
 
-int Sloong::CUtility::ReadFile(const string& filepath, char*& pBuffer)
+int Sloong::CUtility::ReadFile(const string &filepath, char *&pBuffer)
 {
-    if( -1 == access(filepath.c_str(),R_OK))
+	if (-1 == access(filepath.c_str(), R_OK))
 		return -1;
 	ifstream in(filepath.c_str(), ios::in | ios::binary);
-	streampos  pos = in.tellg();
+	streampos pos = in.tellg();
 	in.seekg(0, ios::end);
 	int nSize = in.tellg();
 	in.seekg(pos);
@@ -152,47 +121,34 @@ int Sloong::CUtility::ReadFile(const string& filepath, char*& pBuffer)
 	return nSize;
 }
 
-CResult Sloong::CUtility::WriteFile(const string& filepath, const char* pBuffer, int size)
+CResult Sloong::CUtility::WriteFile(const string &filepath, const char *pBuffer, int size)
 {
 	return CResult::Make_Error("No realize.");
 }
 
 string Sloong::CUtility::GenUUID()
 {
-	char uuid[37] = { 0 };
+	char uuid[37] = {0};
 	uuid_t uu;
 	uuid_generate(uu);
 	uuid_unparse(uu, uuid);
 	return uuid;
 }
 
-
 #define MAX_STACK_LAYERS 256
 
-void Sloong::CUtility::write_call_stack()
+string Sloong::CUtility::GetCallStack()
 {
-	//int fd = open("/usr/local/info.dat", O_RDWR | O_CREAT | O_APPEND);
-	void *array[MAX_STACK_LAYERS];
-	size_t size;
-	char **strings;
 	string strRet("");
-	size = backtrace(array, MAX_STACK_LAYERS);
-	strings = backtrace_symbols(array, size);
+	void *array[MAX_STACK_LAYERS];
+	auto size = backtrace(array, MAX_STACK_LAYERS);
+	auto strings = backtrace_symbols(array, size);
 	for (int i = 0; i < size; i++)
 	{
-		cout << strings[i] << endl;
-	//if (fd > 0)
-	//{
-	//write(fd, strings[i], strlen(strings[i]));
-	//write(fd, "\n", 1);
-	//}
-	//strRet.append(strings[i]);
-	//if (i < size - 1)
-	//strRet.append(1, '\n');
+		strRet.append(strings[i]);
+		if (i < size - 1)
+			strRet.append(1, '\n');
 	}
-	//if (fd > 0)
-	//write(fd, "\n", 1);
-
 	free(strings);
-	//backtrace_symbols_fd(array, size, fd);
+	return strRet;
 }

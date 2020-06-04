@@ -1,13 +1,13 @@
 #include "mysqlex.h"
 
-NResult Sloong::MySqlEx::Query(string sqlCmd, vector<string> *vRes)
+NResult Sloong::MySqlEx::Query(const string& sqlCmd, vector<string> *vRes)
 {
 	if (!m_bIsConnect)
 	{
 		return NResult::Make_Error("No connect to server. please call Connect function first.");
 	}
-	if (g_bShowSQLCmd && g_pLog)
-		g_pLog->Verbos(CUniversal::Format("[SQL]:[%s]", cmd));
+	if ( m_pLog )
+		m_pLog->Verbos(Helper::Format("[SQL]:[%s]", sqlCmd.c_str()));
 
 	mysql_ping(&m_MySql);
 	if (0 != mysql_query(&m_MySql, sqlCmd.c_str()))
@@ -47,19 +47,19 @@ NResult Sloong::MySqlEx::Query(string sqlCmd, vector<string> *vRes)
 		mysql_free_result(res);
 	}
 
-	if (g_bShowSQLResult && g_pLog)
-		g_pLog->Verbos(CUniversal::Format("[SQL]:[Rows:[%d]", nRes));
-	return nRes;
+	if (m_pLog)
+		m_pLog->Verbos(Helper::Format("[SQL]:[Rows:[%d]", nRes));
+	return NResult::Make_OK(nRes);
 }
 
-NResult Sloong::MySqlEx::Query(string sqlCmd, string *strRes)
+NResult Sloong::MySqlEx::Query(const string& sqlCmd, string *strRes)
 {
 	if (!m_bIsConnect)
 	{
 		return NResult::Make_Error("No connect to server. please call Connect function first.");
 	}
-	if (g_bShowSQLCmd && g_pLog)
-		g_pLog->Verbos(CUniversal::Format("[SQL]:[%s]", cmd));
+	if (m_pLog)
+		m_pLog->Verbos(Helper::Format("[SQL]:[%s]", sqlCmd.c_str()));
 
 	mysql_ping(&m_MySql);
 	if (0 != mysql_query(&m_MySql, sqlCmd.c_str()))
@@ -95,9 +95,10 @@ NResult Sloong::MySqlEx::Query(string sqlCmd, string *strRes)
 			}
 			allLine = allLine + LINE_SEP + line;
 		}
+		*strRes = allLine;
 	}
 
-	if (g_bShowSQLResult && g_pLog)
-		g_pLog->Verbos(CUniversal::Format("[SQL]:[Rows:[%d],Res:[%s]]", nRes, allLine.c_str()));
-	return nRes;
+	if (m_pLog)
+		m_pLog->Verbos(Helper::Format("[SQL]:[Rows:[%d],Res:[%s]]", nRes, strRes->c_str()));
+	return NResult::Make_OK(nRes);
 }

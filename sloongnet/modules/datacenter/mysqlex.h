@@ -22,6 +22,8 @@ namespace Sloong
 			mysql_close(&m_MySql);
 		}
 
+		inline void SetLog( CLog* log ){ m_pLog = log; }
+
 		CResult Connect(const string &Address, int Port, const string &User, const string &Password, const string &Database)
 		{
 			if (!mysql_real_connect(&m_MySql, Address.c_str(), User.c_str(),
@@ -44,6 +46,7 @@ namespace Sloong
 		}
 
 	private:
+		CLog* m_pLog = nullptr;
 		MYSQL m_MySql;
 		string m_strErrorMsg;
 		bool m_bIsConnect = false;

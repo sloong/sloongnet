@@ -106,7 +106,7 @@ int main(int argc, char** args)
 	catch (...)
 	{
 		cout << "Unhandle exception happened, system will shutdown. " << endl;
-		CUtility::write_call_stack();
+		cout << CUtility::GetCallStack();
 		return -4;
 	}
 }

@@ -24,16 +24,14 @@ namespace Sloong
 	public:
 		CSloongBaseService() {}
 
-		virtual ~CSloongBaseService()
-		{
-				}
+		virtual ~CSloongBaseService(){}
 
 		// Just call it without Control module.
 		virtual CResult Initialize(bool, string, int);
 
 		virtual CResult Run();
 		virtual void Stop();
-		
+
 		TResult<shared_ptr<DataPackage>> RegisteToControl(EasyConnect *con, string uuid);
 
 	protected:
@@ -45,7 +43,6 @@ namespace Sloong
 		void InitSystemEventHandler();
 		void OnRestart(IEvent *event);
 		void OnStop(IEvent *event);
-
 
 	protected:
 		static void sloong_terminator();
@@ -76,6 +73,7 @@ namespace Sloong
 		ModuleInitializationFunction m_pModuleInitializationFunc = nullptr;
 		ModuleInitializedFunction m_pModuleInitializedFunc = nullptr;
 
+		static constexpr int REPORT_LOAD_STATUS_INTERVAL = 1000*60; // one mintue
 	public:
 		static unique_ptr<CSloongBaseService> Instance;
 	};

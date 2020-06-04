@@ -119,6 +119,10 @@ namespace Sloong
     {
     public:
         CResult Initialize(IControl *ic);
+        
+        CResult ResetManagerTemplate(GLOBAL_CONFIG *config);
+
+        void OnSocketClosed(SOCKET);
 
         CResult ProcessHandler(CDataTransPackage *);
 
@@ -186,10 +190,14 @@ namespace Sloong
         */
         CResult QueryReferenceInfoHandler(const string &, CDataTransPackage *);
 
-        CResult ResetManagerTemplate(GLOBAL_CONFIG *config);
+        /*
+        Request: ReportLoadStatusRequest
+        Response: None
+        */
+        CResult ReportLoadStatusHandler(const string &, CDataTransPackage *);
 
-        void OnSocketClosed(SOCKET);
 
+        
     private:
         int SearchNeedCreateTemplate();
         void RefreshModuleReference(int id);

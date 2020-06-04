@@ -8,7 +8,8 @@
 
 #include "base_service.h"
 #include "utility.h"
-#include "NetworkEvent.hpp"
+#include "SendPackageEvent.hpp"
+#include "snowflake.h"
 
 #include "protocol/manager.pb.h"
 using namespace Manager;
@@ -19,21 +20,21 @@ unique_ptr<CSloongBaseService> Sloong::CSloongBaseService::Instance = nullptr;
 void CSloongBaseService::sloong_terminator()
 {
     cout << "terminator function is called, system will shutdown. " << endl;
-    CUtility::write_call_stack();
+    cout << CUtility::GetCallStack();
     exit(0);
 }
 
 void CSloongBaseService::sloong_unexpected()
 {
     cout << "unexpected function is called, system will shutdown. " << endl;
-    CUtility::write_call_stack();
+    cout << CUtility::GetCallStack();
     exit(0);
 }
 
 void CSloongBaseService::on_sigint(int signal)
 {
     cout << "SIGSEGV signal happened, system will shutdown. signal:" << signal << endl;
-    CUtility::write_call_stack();
+    cout << CUtility::GetCallStack();
     exit(0);
 }
 
@@ -332,7 +333,24 @@ CResult CSloongBaseService::Run()
     m_pLog->Info("Application begin running.");
     m_pControl->SendMessage(EVENT_TYPE::ProgramStart);
     m_emStatus = RUN_STATUS::Running;
-    m_oExitSync.wait();
+    auto prev_time = chrono::system_clock::now();
+    auto prev_status = 	make_shared<CPU_OCCUPY>();
+    CUtility::RecordCPUStatus(prev_status.get());
+    int mem_total, mem_free;
+    // Report server load status each one minutes.
+    while(!m_oExitSync.wait_for(REPORT_LOAD_STATUS_INTERVAL))
+    {
+        Manager::ReportLoadStatusRequest req;
+        auto load = CUtility::CalculateCPULoad(prev_status.get());        
+        CUtility::GetMemory(mem_total,mem_free);
+        req.set_cpuload(load);
+        req.set_memroyused(mem_total/mem_free);
+        auto event = make_unique<Events::CSendPackageEvent>();
+	    event->SetRequest(m_pManagerConnect->GetSocketID(), m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(),  Core::PRIORITY_LEVEL::LOW_LEVEL , (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
+	    m_pControl->SendMessage(std::move(event));
+
+        CUtility::RecordCPUStatus(prev_status.get());
+    }
     return m_oExitResult;
 }
 
