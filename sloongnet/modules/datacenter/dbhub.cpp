@@ -38,7 +38,7 @@ CResult Sloong::DBHub::RequestPackageProcesser(CDataTransPackage *pack)
 	}
 
 	auto res = m_mapFuncToHandler[function](req_obj, pack);
-	m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.Result()).c_str(), res.Message().c_str()));
+	m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
 	pack->ResponsePackage(res);
 	return CResult::Succeed();
 }
@@ -55,7 +55,7 @@ CResult Sloong::DBHub::RunSQLHandler(const string &req_obj, CDataTransPackage *p
         return res;
 
     RunSQLResponse response;
-    response.set_affectedrows(res.ResultObject());
+    response.set_affectedrows(res.GetResultObject());
     for( auto& item: vRes)
     {
         auto p = response.add_results();

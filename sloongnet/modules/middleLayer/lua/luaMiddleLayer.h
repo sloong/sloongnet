@@ -13,6 +13,7 @@
 #include "export.h"
 #include <jsoncpp/json/json.h>
 #include "LuaProcessCenter.h"
+#include "IObject.h"
 
 #include "protocol/manager.pb.h"
 using namespace Manager;
@@ -30,7 +31,7 @@ extern "C"
 
 namespace Sloong
 {
-	class LuaMiddleLayer
+	class LuaMiddleLayer : public IObject
 	{
 	public:
 		LuaMiddleLayer() {}
@@ -47,19 +48,17 @@ namespace Sloong
 
 		void OnSocketClose(IEvent *evt);
 
+		inline CLog* GetLog(){ return m_pLog; }
+
 	protected:
 		list_ex<shared_ptr<CLuaProcessCenter>> m_listProcess;
 		map_ex<uint64_t, unique_ptr<CLuaPacket>> m_mapUserInfoList;
-
-		IControl *m_pControl = nullptr;
-
 		int m_nSerialNumber = 0;
 		SOCKET m_nManagerConnection = -1;
 		GLOBAL_CONFIG *m_pConfig;
 		Json::Value *m_pModuleConfig;
 
 	public:
-		CLog *m_pLog = nullptr;
 		static unique_ptr<LuaMiddleLayer> Instance;
 	};
 

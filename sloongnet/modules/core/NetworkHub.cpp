@@ -237,7 +237,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 	auto res = m_pCreateEnvFunc(&pEnv);
 	if (res.IsFialed())
 	{
-		m_pLog->Fatal(res.Message());
+		m_pLog->Fatal(res.GetMessage());
 		m_iC->SendMessage(EVENT_TYPE::ProgramStop);
 		return;
 	}

@@ -32,7 +32,8 @@ LuaFunctionRegistr g_LuaFunc[] =
         {"GenUUID", CGlobalFunction::Lua_GenUUID},
         {"SetCommData", CGlobalFunction::Lua_SetCommData},
         {"GetCommData", CGlobalFunction::Lua_GetCommData},
-        {"GetLogObject", CGlobalFunction::Lua_GetLogObject},
+        {"SetExtendData", CGlobalFunction::Lua_SetExtendData},
+        {"SetExtendDataByFile", CGlobalFunction::Lua_SetExtendDataByFile},
 };
 
 void Sloong::CGlobalFunction::Initialize(IControl *ic)
@@ -171,28 +172,55 @@ int CGlobalFunction::Lua_ShowLog(lua_State *l)
 
 int CGlobalFunction::Lua_SetCommData(lua_State *l)
 {
-    auto key = CLua::GetString(l,1,"");
-    if( key.length() > 0 )
+    auto key = CLua::GetString(l, 1, "");
+    if (key.length() > 0)
     {
-        m_mapCommData[key] = CLua::GetString(l,2,"");
+        Instance->m_mapCommData[key] = CLua::GetString(l, 2, "");
     }
     return 0;
 }
 
 int CGlobalFunction::Lua_GetCommData(lua_State *l)
 {
-    auto key = CLua::GetString(l,1,"");
-    if( key.length() > 0 && m_mapCommData.exist(key) )
-    {
-        CLua::PushString(l,m_mapCommData[key]);
-    }
+    auto key = CLua::GetString(l, 1, "");
+    if (key.length() > 0 && Instance->m_mapCommData.exist(key))
+        CLua::PushString(l, Instance->m_mapCommData[key]);
     else
-        CLua::PushString(l,"");
+        CLua::PushString(l, "");
     return 1;
 }
 
 int CGlobalFunction::Lua_GetLogObject(lua_State *l)
 {
     CLua::PushPointer(l, CGlobalFunction::Instance->m_pLog);
+    return 1;
+}
+
+int CGlobalFunction::Lua_SetExtendData(lua_State *l)
+{
+    auto data = CLua::GetString(l, 1, "");
+    auto uuid = "";
+    if (data.length() > 0)
+    {
+        auto uuid = CUtility::GenUUID();
+        Instance->m_iC->AddTempString(uuid, data);
+    }
+
+    CLua::PushString(l, uuid);
+    return 1;
+}
+
+int CGlobalFunction::Lua_SetExtendDataByFile(lua_State *l)
+{
+    auto file = CLua::GetString(l,1,"");
+    auto uuid = "";
+    int size = 0;
+    auto pBuf = CUtility::ReadFile(file, &size);
+    if( size > 0 )
+    {
+        auto uuid = CUtility::GenUUID();
+        Instance->m_iC->AddTempBytes(uuid, pBuf, size);
+    }
+    CLua::PushString(l, uuid);
     return 1;
 }

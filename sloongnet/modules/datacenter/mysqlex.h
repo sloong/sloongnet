@@ -6,7 +6,6 @@
 #include "core.h"
 namespace Sloong
 {
-	typedef TResult<int> NResult;
 	class MySqlEx
 	{
 	public:

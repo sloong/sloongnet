@@ -170,8 +170,8 @@ CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 	}
 
 	auto res = m_mapFuncToHandler[function](req_str, pack);
-	m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.Result()).c_str(), res.Message().c_str()));
-	if( res.Result() == ResultType::Ignore )
+	m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
+	if( res.GetResult() == ResultType::Ignore )
 		return res;
 	pack->ResponsePackage(res);
 	return CResult::Succeed();

@@ -23,7 +23,9 @@ namespace Sloong
         void RequestPackage(const DataPackage &);
 
         void ResponsePackage(ResultType);
-        void ResponsePackage(ResultType, const string &, const string * = nullptr);
+        void ResponsePackage(ResultType, const string &);
+        void ResponsePackage(ResultType, const string &, const string& extend);
+        void ResponsePackage(ResultType, const string &, const char* exnted, int size);
         void ResponsePackage(const CResult &);
         void ResponsePackage(const DataPackage &);
 
@@ -121,7 +123,7 @@ namespace Sloong
     public:
         static CLog *g_pLog;
         static inline void InitializeLog(CLog *log) { g_pLog = log; }
-        static int g_max_package_size; // In default it;s 5MB
+        static size_t g_max_package_size; // In default it;s 5MB
         static inline void SetPackageSizeLimit( int size_of_byte ){  g_max_package_size = size_of_byte; }
     };
     typedef unique_ptr<CDataTransPackage> UniqueTransPackage;

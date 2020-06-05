@@ -18,11 +18,18 @@ namespace Sloong
 	{
 	public:
 		// Data
-		virtual bool Add(DATA_ITEM, void *) = 0;
+		virtual void Add(DATA_ITEM, void *) = 0;
 		virtual void *Get(DATA_ITEM) = 0;
-		virtual bool Remove(DATA_ITEM) = 0;
-		virtual bool AddTemp(const string &, void *) = 0;
-		virtual void *GetTemp(const string &) = 0;
+		virtual void Remove(DATA_ITEM) = 0;
+		virtual void AddTempString(const string &, const string &) = 0;
+		virtual void AddTempObject(const string &, const void *, int) = 0;
+		virtual void AddTempBytes(const string &, unique_ptr<char[]> &, int) = 0;
+		virtual string GetTempString(const string &) = 0;
+		virtual void *GetTempObject(const string &, int *) = 0;
+		virtual unique_ptr<char[]> GetTempBytes(const string &, int *) = 0;
+		virtual bool ExistTempBytes(const string &key)=0;
+		virtual bool ExistTempObject(const string &key)=0;
+		virtual bool ExistTempString(const string &key)=0;
 		// Message
 		virtual void SendMessage(EVENT_TYPE) = 0;
 		virtual void SendMessage(UniqueEvent) = 0;

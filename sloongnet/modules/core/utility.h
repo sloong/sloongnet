@@ -28,7 +28,7 @@ namespace Sloong
 		static int GetSocketPort(int socket);
 		static string GetSocketAddress(int socket);
 
-		static int ReadFile(const string &filepath, char *&bBuffer);
+		static unique_ptr<char[]> ReadFile(const string &filepath, int* out_size );
 		static CResult WriteFile(const string &filepath, const char *buf, int size);
 
 		static string GenUUID();

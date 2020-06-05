@@ -84,12 +84,12 @@ int main(int argc, char** args)
 		{
 			res = Sloong::CSloongBaseService::Instance->Initialize(ManagerMode,ManagerAddress,ManagerPort);
 			if (!res.IsSucceed()) {
-				cout << "Initialize server error. Message: " << res.Message() << endl;
+				cout << "Initialize server error. Message: " << res.GetMessage() << endl;
 				return -5;
 			}
 
 			res = Sloong::CSloongBaseService::Instance->Run();
-		} while (res.Result() == ResultType::Retry);
+		} while (res.GetResult() == ResultType::Retry);
 		Sloong::CSloongBaseService::Instance = nullptr;
 		return 0;
 	}

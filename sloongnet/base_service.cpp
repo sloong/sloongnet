@@ -173,14 +173,14 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     res = m_pModuleInitializationFunc(pConfig);
     if (res.IsFialed())
     {
-        m_pLog->Fatal(res.Message());
+        m_pLog->Fatal(res.GetMessage());
         return res;
     }
 
     res = m_pControl->Initialize(pConfig->mqthreadquantity());
     if (res.IsFialed())
     {
-        m_pLog->Fatal(res.Message());
+        m_pLog->Fatal(res.GetMessage());
         return res;
     }
 
@@ -207,7 +207,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     res = m_pNetwork->Initialize(m_pControl.get());
     if (res.IsFialed())
     {
-        m_pLog->Fatal(res.Message());
+        m_pLog->Fatal(res.GetMessage());
         return res;
     }
 
@@ -219,14 +219,14 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
         sock = m_pManagerConnect->GetSocketID();
     res = m_pModuleInitializedFunc(sock, m_pControl.get());
     if (res.IsFialed())
-        m_pLog->Fatal(res.Message());
+        m_pLog->Fatal(res.GetMessage());
 
     if (!ManagerMode)
     {
         res = RegisteNode();
         if (res.IsFialed())
         {
-            m_pLog->Fatal(res.Message());
+            m_pLog->Fatal(res.GetMessage());
             return res;
         }
         auto event = make_unique<Events::CNetworkEvent>(EVENT_TYPE::RegisteConnection);

@@ -34,7 +34,10 @@ namespace Sloong
         static int Lua_SetCommData(lua_State *l);
         static int Lua_GetCommData(lua_State *l);
         static int Lua_GetLogObject(lua_State *l);
+        static int Lua_SetExtendData(lua_State *l);
+        static int Lua_SetExtendDataByFile(lua_State *l);
 
+    protected:
         map_ex<string,string> m_mapCommData;
 
     public:

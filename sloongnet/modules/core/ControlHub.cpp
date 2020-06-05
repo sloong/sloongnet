@@ -14,26 +14,11 @@ CResult Sloong::CControlHub::Initialize(int quantity)
 	return CResult::Succeed();
 }
 
-void Sloong::CControlHub::Run()
-{
-	m_emStatus = RUN_STATUS::Running;
-}
-
 void Sloong::CControlHub::Exit()
 {
 	m_emStatus = RUN_STATUS::Exit;
 	m_listMsgHook.clear();
 	m_oMsgHandlerList.clear();
-}
-
-bool Sloong::CControlHub::Add(DATA_ITEM item, void *object)
-{
-	auto it = m_oDataList.find(item);
-	if (it != m_oDataList.end())
-		return false;
-
-	m_oDataList.insert(make_pair(item, object));
-	return false;
 }
 
 void *Sloong::CControlHub::Get(DATA_ITEM item)
@@ -45,34 +30,45 @@ void *Sloong::CControlHub::Get(DATA_ITEM item)
 	return (*data).second;
 }
 
-bool Sloong::CControlHub::Remove(DATA_ITEM item)
+string Sloong::CControlHub::GetTempString(const string &key)
 {
-	auto it = m_oDataList.find(item);
-	if (it == m_oDataList.end())
-		return false;
-
-	m_oDataList.erase(item);
-	return true;
-}
-
-bool Sloong::CControlHub::AddTemp(const string &name, void *object)
-{
-	auto it = m_oTempDataList.find(name);
-	if (it != m_oTempDataList.end())
-		return false;
-
-	m_oTempDataList[name] = object;
-	return true;
-}
-
-void *Sloong::CControlHub::GetTemp(const string &name)
-{
-	auto item = m_oTempDataList.find(name);
-	if (item == m_oTempDataList.end())
+	auto item = m_oTempStringList.find(key);
+	if (item == m_oTempStringList.end())
 		return nullptr;
 
-	m_oTempDataList.erase(name);
-	return (*item).second;
+	auto res = (*item).second;
+	m_oTempStringList.erase(key);
+	return res;
+}
+
+void *Sloong::CControlHub::GetTempObject(const string &name, int *out_size)
+{
+	auto it = m_oTempObjectList.find(name);
+	if (it == m_oTempObjectList.end())
+		return nullptr;
+
+	auto item = (*it).second;
+	if (out_size)
+		*out_size = item.size;
+	auto ptr = item.ptr;
+	m_oTempObjectList.erase(name);
+	return ptr;
+}
+
+unique_ptr<char[]> Sloong::CControlHub::GetTempBytes(const string &name, int *out_in_size)
+{
+	auto it = m_oTempBytesList.find(name);
+	if (it == m_oTempBytesList.end())
+		return nullptr;
+
+	auto &item = (*it).second;
+
+	if (out_in_size)
+		*out_in_size = item.size;
+
+	auto ptr = std::move(item.ptr);
+	m_oTempBytesList.erase(name);
+	return ptr;
 }
 
 void Sloong::CControlHub::SendMessage(EVENT_TYPE msgType)
@@ -90,11 +86,6 @@ void Sloong::CControlHub::SendMessage(UniqueEvent evt)
 	m_oSync.notify_one();
 }
 
-void Sloong::CControlHub::RegisterEvent(EVENT_TYPE t)
-{
-	m_oMsgHandlerList[t] = vector<MsgHandlerFunc>();
-}
-
 /**
  * @Remarks: One message only have one handler. so cannot register handled message again.
  * @Params: 
@@ -110,11 +101,6 @@ void Sloong::CControlHub::RegisterEventHandler(EVENT_TYPE t, MsgHandlerFunc func
 	{
 		m_oMsgHandlerList[t].push_back(func);
 	}
-}
-
-void Sloong::CControlHub::RegisterEventHook(EVENT_TYPE t, MsgHookFunc func)
-{
-	m_listMsgHook[t] = func;
 }
 
 void Sloong::CControlHub::CallMessage(UniqueEvent event)
@@ -159,7 +145,7 @@ void Sloong::CControlHub::MessageWorkLoop()
 			}
 			if (m_oMsgList.empty())
 			{
-				m_oSync.wait_for( 1000 );
+				m_oSync.wait_for(1000);
 				continue;
 			}
 

@@ -22,8 +22,11 @@ namespace Sloong
             m_emResult = res;
             m_strMessage = what;
         }
-        inline ResultType Result() const {
+        inline ResultType GetResult() const {
             return m_emResult;
+        }
+        inline void SetResult(ResultType res){
+            m_emResult = res;
         }
         inline bool IsSucceed() const {
             return m_emResult == ResultType::Succeed ? true : false;
@@ -31,13 +34,12 @@ namespace Sloong
         inline bool IsFialed() const {
             return m_emResult == ResultType::Succeed ? false : true;
         }
-        inline string Message() const {
+        inline void SetMessage(const string& str){
+            m_strMessage = str;
+        }
+        inline string GetMessage() const {
             return m_strMessage;
         }
-        inline void SetResult(ResultType res){
-            m_emResult = res;
-        }
-        
     public:
         static inline CResult Make_Error(const string& what) {
             return CResult(ResultType::Error, what);
@@ -65,18 +67,22 @@ namespace Sloong
         TResult(ResultType res, const string& what, T result) :CResult(res, what) {
             m_tResultObject = result;
         }
-        T ResultObject() const {
+        T GetResultObject() const {
             return m_tResultObject;
         }
         static inline TResult Make_Error(const string& what) {
             return TResult(ResultType::Error, what );
         }
-        static inline TResult Make_OK(T result) {
-            return TResult(ResultType::Succeed, "", result);
+        static inline TResult Make_OK(T& result, const string& msg = "") {
+            return TResult(ResultType::Succeed, msg, result);
         }
     protected:
         T m_tResultObject;
     };
+
+    typedef TResult<int> NResult;
+	typedef TResult<std::pair<char*,int>> PResult;
+    typedef TResult<string> SResult;
 } // namespace  Sloong
 
 

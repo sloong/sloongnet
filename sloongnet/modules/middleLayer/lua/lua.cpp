@@ -245,7 +245,7 @@ bool CLua::PushFunction(int nFuncRef)
 }
 
 
-CResult Sloong::CLua::RunFunction(string strFunctionName, CLuaPacket *pUserInfo, int funcid, const string &strRequest, const string &strExtend)
+CResult Sloong::CLua::RunFunction(const string & strFunctionName, CLuaPacket *pUserInfo, int funcid, const string &strRequest, const string &strExtend, string* extendDataUUID)
 {
 	int nTop = lua_gettop(m_pScriptContext);
 	int nErr = 0;
@@ -263,11 +263,14 @@ CResult Sloong::CLua::RunFunction(string strFunctionName, CLuaPacket *pUserInfo,
 		HandlerError("Script Error",strFunctionName);
 		return CResult::Make_Error("Run script error.");
 	}
-	auto strResponse = lua_tostring(m_pScriptContext, -2);
-	int nRes = (int)lua_tonumber(m_pScriptContext, -1);
+	int nRes = (int)GetInteger(-1,0);
+	auto strResponse = GetString(-2,"");
+	if( extendDataUUID)
+		*extendDataUUID = GetString(-3,"");
+	
 	lua_settop(m_pScriptContext, nTop);
 
-	if (!ResultType_IsValid(nRes) )
+	if (!ResultType_IsValid(nRes) || nRes == ResultType::Invalid )
 	{
 		return CResult::Make_Error("ResultType_IsValid " + Helper::ntos(nRes));
 	}

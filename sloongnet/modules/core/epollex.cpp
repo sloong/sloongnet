@@ -162,11 +162,11 @@ void Sloong::CEpollEx::MainWorkLoop()
 	auto res = CreateListenSocket("0.0.0.0", port);
 	if (res.IsFialed())
 	{
-		m_pLog->Fatal(res.Message());
+		m_pLog->Fatal(res.GetMessage());
 		m_iC->SendMessage(EVENT_TYPE::ProgramStop );
 		return;
 	}
-	int sock = res.ResultObject();
+	int sock = res.GetResultObject();
 	unique_lock<mutex> lock(m_acceptMutex);
 	m_mapAcceptSocketToPID[sock] = pid;
 	lock.unlock();

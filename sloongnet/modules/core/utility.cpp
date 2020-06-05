@@ -106,19 +106,24 @@ string Sloong::CUtility::GetSocketAddress(int socket)
 	return Helper::Format("%s:%d", inet_ntoa(add.sin_addr), add.sin_port);
 }
 
-int Sloong::CUtility::ReadFile(const string &filepath, char *&pBuffer)
+unique_ptr<char[]> Sloong::CUtility::ReadFile(const string &filepath, int* out_size )
 {
 	if (-1 == access(filepath.c_str(), R_OK))
-		return -1;
+	{
+		*out_size = -1;
+		return nullptr;
+	}
+		
 	ifstream in(filepath.c_str(), ios::in | ios::binary);
 	streampos pos = in.tellg();
 	in.seekg(0, ios::end);
 	int nSize = in.tellg();
 	in.seekg(pos);
-	pBuffer = new char[nSize];
-	in.read(pBuffer, nSize);
+	auto pBuf = make_unique<char[]>(nSize);
+	in.read(pBuf.get(), nSize);
 	in.close();
-	return nSize;
+	*out_size = nSize;
+	return pBuf;
 }
 
 CResult Sloong::CUtility::WriteFile(const string &filepath, const char *pBuffer, int size)

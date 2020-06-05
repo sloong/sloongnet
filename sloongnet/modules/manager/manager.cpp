@@ -74,10 +74,10 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG *config)
 	auto res = pServer->Initialize(nullptr);
 	if (res.IsFialed())
 	{
-		return CResult::Make_Error(Helper::Format("Init server manage fialed. error message:%s", res.Message().c_str()));
+		return CResult::Make_Error(Helper::Format("Init server manage fialed. error message:%s", res.GetMessage().c_str()));
 	}
 
-	auto config_str = res.Message();
+	auto config_str = res.GetMessage();
 	// Here, this port is came from COMMAND LINE.
 	// So we need save it before parse other setting.
 	auto port = config->listenport();
@@ -89,7 +89,7 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG *config)
 		res = pServer->ResetManagerTemplate(config);
 		if (res.IsFialed())
 		{
-			cout << "Save defualt template error. message:" << res.Message() << endl;
+			cout << "Save defualt template error. message:" << res.GetMessage() << endl;
 			return res;
 		}
 	}

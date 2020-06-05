@@ -1,13 +1,13 @@
 #include "DataTransPackage.h"
 
 CLog *Sloong::CDataTransPackage::g_pLog = nullptr;
-int Sloong::CDataTransPackage::g_max_package_size = 5* 1024 *1024;
+size_t Sloong::CDataTransPackage::g_max_package_size = 5* 1024 *1024;
 
 void Sloong::CDataTransPackage::PrepareSendPackageData()
 {
 	m_pTransPackage.SerializeToString(&m_strPackageData);
 	m_nPackageSize = (int)m_strPackageData.length();
-	if( m_nPackageSize > g_max_package_size)
+	if( m_nPackageSize > (int)g_max_package_size)
 	{
 		m_pTransPackage.set_result(ResultType::Error);
 		m_pTransPackage.set_content("The package size is to bigger.");
@@ -35,31 +35,53 @@ void Sloong::CDataTransPackage::RequestPackage(const DataPackage &pack)
 void Sloong::CDataTransPackage::ResponsePackage(const DataPackage &pack)
 {
 	m_pTransPackage = pack;
+	m_pTransPackage.clear_extend();
+	m_pTransPackage.clear_content();
 	m_pTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
 	PrepareSendPackageData();
 }
 
 void Sloong::CDataTransPackage::ResponsePackage(ResultType result)
 {
+	m_pTransPackage.clear_extend();
+	m_pTransPackage.clear_content();
 	m_pTransPackage.set_result(result);
 	m_pTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
 	PrepareSendPackageData();
 }
 
-void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string &message, const string *exdata /*=nullptr*/)
+void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string &message)
+{
+	m_pTransPackage.clear_extend();
+	m_pTransPackage.set_result(result);
+	m_pTransPackage.set_content(message);
+	m_pTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
+	PrepareSendPackageData();
+}
+
+void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string &message, const string& extend)
 {
 	m_pTransPackage.set_result(result);
 	m_pTransPackage.set_content(message);
 	m_pTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
-	if (exdata)
-		m_pTransPackage.set_extend(*exdata);
+	m_pTransPackage.set_extend(extend);
+	PrepareSendPackageData();
+}
+
+void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string &message, const char* extend, int size )
+{
+	m_pTransPackage.set_result(result);
+	m_pTransPackage.set_content(message);
+	m_pTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
+	m_pTransPackage.set_content(extend,size);
 	PrepareSendPackageData();
 }
 
 void Sloong::CDataTransPackage::ResponsePackage(const CResult &result)
 {
-	m_pTransPackage.set_result(result.Result());
-	m_pTransPackage.set_content(result.Message());
+	m_pTransPackage.clear_extend();
+	m_pTransPackage.set_result(result.GetResult());
+	m_pTransPackage.set_content(result.GetMessage());
 	m_pTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
 	PrepareSendPackageData();
 }

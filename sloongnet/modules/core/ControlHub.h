@@ -13,13 +13,26 @@
 #include "core.h"
 namespace Sloong
 {
+	typedef struct ObjectData
+	{
+		void *ptr = nullptr;
+		int size = 0;
+	} ObjectData;
+	typedef struct BytesData
+	{
+		unique_ptr<char[]> ptr = nullptr;
+		int size = 0;
+	} BytesData;
 	class CControlHub : public IControl
 	{
 	public:
 		// Always return true
 		CResult Initialize(int);
 
-		void Run();
+		void Run()
+		{
+			m_emStatus = RUN_STATUS::Running;
+		}
 		void Exit();
 
 		// Message
@@ -28,14 +41,23 @@ namespace Sloong
 
 		void CallMessage(UniqueEvent);
 
-		void RegisterEvent(EVENT_TYPE t);
+		inline void RegisterEvent(EVENT_TYPE t)
+		{
+			m_oMsgHandlerList[t] = vector<MsgHandlerFunc>();
+		}
 		void RegisterEventHandler(EVENT_TYPE, MsgHandlerFunc);
-		void RegisterEventHook(EVENT_TYPE, MsgHookFunc);
+		inline void RegisterEventHook(EVENT_TYPE t, MsgHookFunc func)
+		{
+			m_listMsgHook[t] = func;
+		}
 
 		void MessageWorkLoop();
 
 		// Data
-		bool Add(DATA_ITEM, void *);
+		void Add(DATA_ITEM item, void *object)
+		{
+			m_oDataList[item] = object;
+		}
 		void *Get(DATA_ITEM);
 
 		template <typename T>
@@ -46,15 +68,42 @@ namespace Sloong
 			return tmp;
 		}
 
-		bool Remove(DATA_ITEM);
+		void Remove(DATA_ITEM item)
+		{
+			m_oDataList.erase(item);
+		}
 
-		bool AddTemp(const string &, void *);
-		void *GetTemp(const string &);
+		void AddTempString(const string &key, const string &value)
+		{
+			m_oTempStringList[key] = value;
+		}
+		string GetTempString(const string &);
+		inline bool ExistTempString(const string &key) { return m_oTempStringList.exist(key); }
+
+		void AddTempObject(const string &key, const void *object, int size) { m_oTempObjectList[key] = ObjectData{ptr : const_cast<void *>(object), size : size}; }
+		void *GetTempObject(const string &, int *);
+		inline bool ExistTempObject(const string &key) { return m_oTempObjectList.exist(key); }
+
+		void AddTempBytes(const string &key, unique_ptr<char[]> &bytes, int size)
+		{
+			m_oTempBytesList[key] = BytesData();
+			m_oTempBytesList[key].ptr = std::move(bytes);
+			m_oTempBytesList[key].size = size;
+		}
+		unique_ptr<char[]> GetTempBytes(const string &, int *);
+		inline bool ExistTempBytes(const string &key)
+		{
+			if (m_oTempBytesList.find(key) == m_oTempBytesList.end())
+				return false;
+			return true;
+		}
 
 	protected:
 		// Data
 		map<DATA_ITEM, void *> m_oDataList;
-		map<string, void *> m_oTempDataList;
+		map_ex<string, string> m_oTempStringList;
+		map_ex<string, ObjectData> m_oTempObjectList;
+		map<string, BytesData> m_oTempBytesList;
 		// Message
 		map_ex<EVENT_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;
 		map_ex<EVENT_TYPE, MsgHookFunc> m_listMsgHook;

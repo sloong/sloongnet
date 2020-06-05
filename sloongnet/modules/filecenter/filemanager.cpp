@@ -34,7 +34,7 @@ CResult Sloong::FileManager::RequestPackageProcesser(CDataTransPackage *tans_pac
     }
 
     auto res = m_mapFuncToHandler[function](req_obj, tans_pack);
-    m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.Result()).c_str(), res.Message().c_str()));
+    m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
     tans_pack->ResponsePackage(res);
     return CResult::Succeed();
 }
@@ -188,7 +188,7 @@ CResult Sloong::FileManager::PrepareDownloadHandler(const string &str_req, CData
     if( res.IsFialed())
         return res;
 
-    string real_path = res.Message();
+    string real_path = res.GetMessage();
     if (access(real_path.c_str(), ACC_R) != 0)
     {
         return CResult::Make_Error("Cann't access to target file.");
@@ -233,10 +233,10 @@ CResult Sloong::FileManager::DownloadingHandler(const string &str_req, CDataTran
 
     auto info = m_mapTokenToDownloadInfo.try_get(token);
     auto path = info->SplitPackageFile.try_get(req->splitpackageid());
-    char* buf=nullptr;
-    auto size = CUtility::ReadFile(*path,buf);
+    int size = 0;
+    auto buf = CUtility::ReadFile(*path,&size);
     auto data_package = trans_pack->GetDataPackage();
-    data_package->set_extend(buf,size);
+    data_package->set_extend(buf.get(),size);
     DownloadingResponse res;
     res.set_hash_md5(CMD5::Encode(*path,true));
     return CResult::Make_OK(ConvertObjToStr(&res));

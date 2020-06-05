@@ -91,11 +91,11 @@ void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket *uinfo)
 	FreeLuaContext(id);
 }
 
-CResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, const string &msg, const string &extend)
+SResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, const string &msg, const string &extend)
 {
 	int id = GetFreeLuaContext();
 	if (id < 0)
-		return CResult::Make_Error("server is busy now. please try again.");
+		return SResult::Make_Error("server is busy now. please try again.");
 	try
 	{
 		CLua *pLua = m_pLuaList[id];
@@ -104,19 +104,20 @@ CResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 			InitLua(pLua, m_pConfig->operator[]("LuaScriptFolder").asString());
 			m_oReloadList[id] = false;
 		}
-		auto res = pLua->RunFunction(m_pConfig->operator[]("LuaProcessFunction").asString(), pUInfo, function, msg);
-		FreeLuaContext(id);
-		return res;
+		string extendUUID("");
+		auto res = pLua->RunFunction(m_pConfig->operator[]("LuaProcessFunction").asString(), pUInfo, function, msg, extend, &extendUUID);
+		FreeLuaContext(id);		
+		return SResult::Make_OK(extendUUID,res.GetMessage());
 	}
 	catch (const exception& ex)
 	{
 		FreeLuaContext(id);
-		return CResult::Make_Error("server process error."+string(ex.what()));
+		return SResult::Make_Error("server process error."+string(ex.what()));
 	}
 	catch (...)
 	{
 		FreeLuaContext(id);
-		return CResult::Make_Error("server process error.");
+		return SResult::Make_Error("server process error.");
 	}
 }
 #define LUA_CONTEXT_WAIT_SECONDE 10
