@@ -18,10 +18,7 @@ using namespace Sloong;
 using namespace Sloong::Universal;
 using namespace Sloong::Events;
 
-CGlobalFunction *CGlobalFunction::g_pThis = NULL;
-mutex g_SQLMutex;
-
-
+unique_ptr<CGlobalFunction> Sloong::CGlobalFunction::Instance = make_unique<CGlobalFunction>();
 
 LuaFunctionRegistr g_LuaFunc[] =
     {
@@ -31,33 +28,16 @@ LuaFunctionRegistr g_LuaFunc[] =
         {"Base64Decode", CGlobalFunction::Lua_Base64_Decode},
         {"HashEncode", CGlobalFunction::Lua_Hash_Encode},
         {"ReloadScript", CGlobalFunction::Lua_ReloadScript},
-        {"Get", CGlobalFunction::Lua_GetConfig},
+        {"GetConfig", CGlobalFunction::Lua_GetConfig},
         {"GenUUID", CGlobalFunction::Lua_GenUUID},
         {"SetCommData", CGlobalFunction::Lua_SetCommData},
         {"GetCommData", CGlobalFunction::Lua_GetCommData},
         {"GetLogObject", CGlobalFunction::Lua_GetLogObject},
 };
 
-CGlobalFunction::CGlobalFunction()
+void Sloong::CGlobalFunction::Initialize(IControl *ic)
 {
-    m_pUtility = new CUtility();
-    g_pThis = this;
-}
-
-CGlobalFunction::~CGlobalFunction()
-{
-    SAFE_DELETE(m_pUtility);
-    
-}
-
-void Sloong::CGlobalFunction::Initialize(IControl *iMsg)
-{
-    IObject::Initialize(iMsg);
-}
-
-void Sloong::CGlobalFunction::Exit()
-{
-    m_bIsRunning = false;
+    IObject::Initialize(ic);
 }
 
 void Sloong::CGlobalFunction::RegistFuncToLua(CLua *pLua)
@@ -126,7 +106,7 @@ int Sloong::CGlobalFunction::Lua_Hash_Encode(lua_State *l)
 
 int Sloong::CGlobalFunction::Lua_ReloadScript(lua_State *l)
 {
-    g_pThis->m_iC->SendMessage(EVENT_TYPE::ReloadLuaContext);
+    CGlobalFunction::Instance->m_iC->SendMessage(EVENT_TYPE::ReloadLuaContext);
     return 0;
 }
 
@@ -154,7 +134,6 @@ int Sloong::CGlobalFunction::Lua_GetConfig(lua_State *l)
     return 1;
 }
 
-
 int CGlobalFunction::Lua_GenUUID(lua_State *l)
 {
     CLua::PushString(l, CUtility::GenUUID());
@@ -170,7 +149,7 @@ int CGlobalFunction::Lua_ShowLog(lua_State *l)
     else
         msg = Helper::Format("[Script]:[%s]", msg.c_str());
 
-    auto log = g_pThis->m_pLog;
+    auto log = CGlobalFunction::Instance->m_pLog;
     if (luaTitle == "Info")
         log->Info(msg);
     else if (luaTitle == "Warn")
@@ -192,16 +171,28 @@ int CGlobalFunction::Lua_ShowLog(lua_State *l)
 
 int CGlobalFunction::Lua_SetCommData(lua_State *l)
 {
+    auto key = CLua::GetString(l,1,"");
+    if( key.length() > 0 )
+    {
+        m_mapCommData[key] = CLua::GetString(l,2,"");
+    }
     return 0;
 }
 
 int CGlobalFunction::Lua_GetCommData(lua_State *l)
 {
-    return 0;
+    auto key = CLua::GetString(l,1,"");
+    if( key.length() > 0 && m_mapCommData.exist(key) )
+    {
+        CLua::PushString(l,m_mapCommData[key]);
+    }
+    else
+        CLua::PushString(l,"");
+    return 1;
 }
 
 int CGlobalFunction::Lua_GetLogObject(lua_State *l)
 {
-    CLua::PushPointer(l, g_pThis->m_pLog);
+    CLua::PushPointer(l, CGlobalFunction::Instance->m_pLog);
     return 1;
 }

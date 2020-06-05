@@ -20,11 +20,10 @@ namespace Sloong
 		class CNetworkEvent;
 	}
 	using namespace Events;
-	class CGlobalFunction;
 	class CLuaProcessCenter : IObject
 	{
 	public:
-		CLuaProcessCenter();
+		CLuaProcessCenter(){}
 		~CLuaProcessCenter();
 
 		CResult Initialize(IControl* iMsg);
@@ -37,16 +36,13 @@ namespace Sloong
 			m_oFreeLuaContext.push(id);
 			m_oSSync.notify_one();
 		}
-		
+		void HandleError(const string& err);
 		void ReloadContext(IEvent* event);
-	public:
-		static void HandleError(const string& err);
 	protected:
 		vector<CLua*>	m_pLuaList;
 		vector<bool>	m_oReloadList;
 		queue_ex<int>		m_oFreeLuaContext;
 		CEasySync		m_oSSync;
-		unique_ptr<CGlobalFunction> m_pGFunc;
 		Json::Value*	m_pConfig;
 	};
 

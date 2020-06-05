@@ -3,13 +3,6 @@
 #include "IData.h"
 using namespace Sloong;
 
-CLog *g_pLog = nullptr;
-
-CLuaProcessCenter::CLuaProcessCenter()
-{
-	m_pGFunc = make_unique<CGlobalFunction>();
-}
-
 CLuaProcessCenter::~CLuaProcessCenter()
 {
 	size_t nLen = m_pLuaList.size();
@@ -22,9 +15,8 @@ CLuaProcessCenter::~CLuaProcessCenter()
 CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 {
 	IObject::Initialize(iMsg);
-	g_pLog = m_pLog;
-
-	m_pGFunc->Initialize(m_iC);
+	 
+	CGlobalFunction::Instance->Initialize(m_iC);
 	m_pConfig = IData::GetModuleConfig();
 
 	m_iC->RegisterEvent(EVENT_TYPE::ReloadLuaContext);
@@ -49,7 +41,7 @@ CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 
 void Sloong::CLuaProcessCenter::HandleError(const string &err)
 {
-	g_pLog->Error(Helper::Format("[Script]:[%s]", err.c_str()));
+	m_pLog->Error(Helper::Format("[Script]:[%s]", err.c_str()));
 }
 
 void Sloong::CLuaProcessCenter::ReloadContext(IEvent *event)
@@ -64,9 +56,9 @@ void Sloong::CLuaProcessCenter::ReloadContext(IEvent *event)
 CResult Sloong::CLuaProcessCenter::NewThreadInit()
 {
 	CLua *pLua = new CLua();
-	pLua->SetErrorHandle(HandleError);
+	pLua->SetErrorHandle(std::bind(&CLuaProcessCenter::HandleError,this,placeholders::_1));
 	pLua->SetScriptFolder(m_pConfig->operator[]("LuaScriptFolder").asString());
-	m_pGFunc->RegistFuncToLua(pLua);
+	CGlobalFunction::Instance->RegistFuncToLua(pLua);
 	auto res = InitLua(pLua, m_pConfig->operator[]("LuaScriptFolder").asString());
 	if( res.IsFialed() )
 		return res;

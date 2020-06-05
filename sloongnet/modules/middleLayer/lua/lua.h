@@ -9,7 +9,7 @@ struct lua_State;
 namespace Sloong
 {
 	typedef int (*LuaFunctionType)(lua_State *pLuaState);
-	typedef void (*ErrorHandleType)(const string &strError);
+	typedef std::function<void(const string &)> ErrorHandleType;
 
 	struct LuaFunctionRegistr
 	{

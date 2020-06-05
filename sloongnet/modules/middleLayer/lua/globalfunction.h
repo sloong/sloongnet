@@ -16,23 +16,11 @@ namespace Sloong
         SHA_512 = 3,
     };
 
-    class CUtility;
     class CGlobalFunction : IObject
     {
     public:
-        CGlobalFunction();
-        ~CGlobalFunction();
-
         void Initialize(IControl *iMsg);
-        void Exit();
         void RegistFuncToLua(CLua *pLua);
-
-    protected:
-        CUtility *m_pUtility;
-        int m_ListenSock;
-        bool m_bIsRunning = true;
-
-        int m_nRecvDataTimeoutTime;
 
     public:
         static int Lua_ShowLog(lua_State *l);
@@ -47,8 +35,10 @@ namespace Sloong
         static int Lua_GetCommData(lua_State *l);
         static int Lua_GetLogObject(lua_State *l);
 
+        map_ex<string,string> m_mapCommData;
+
     public:
-        static CGlobalFunction *g_pThis;
+        static unique_ptr<CGlobalFunction> Instance;
     };
 } // namespace Sloong
 #endif // !CGLOBALFUNCTION_H
