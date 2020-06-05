@@ -27,6 +27,7 @@ PROJECT=sloongnet
 MAKEFLAG=debug
 CMAKEFLAG=Debug
 CMAKE_FILE_PATH=$SCRIPTFOLDER/../$PROJECT
+CPU_NUM=`grep -c "model name" /proc/cpuinfo`
 
 # default value is debug
 VERSION_STR=$(cat $SCRIPTFOLDER/../version)
@@ -47,7 +48,8 @@ build(){
 		echo "Run cmake cmd return error. build stop."
 		exit 1
 	fi
-	make
+
+	make -j$CPU_NUM
 	if [ $? -ne 0 ];then
 		echo "Run make cmd return error. build stop."
 		exit 1
