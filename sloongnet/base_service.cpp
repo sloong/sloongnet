@@ -54,7 +54,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data)
     }
     cout << "Connect to control succeed. Start registe and get configuation." << endl;
 
-    int64_t uuid;
+    int64_t uuid=0;
     while (true)
     {
         CDataTransPackage dataPackage(m_pManagerConnect.get());

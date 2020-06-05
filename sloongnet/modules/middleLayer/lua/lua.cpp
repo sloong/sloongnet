@@ -148,7 +148,7 @@ std::string CLua::GetErrorString()
 			continue;
 		}
 
-		sprintf(buff, "%4d-   ", level - 1);
+		sprintf(buff, "%4d-   -", level - 1);
 		lua_pushstring(m_pScriptContext, buff);
 		lua_getinfo(m_pScriptContext, "Snl", &ar);
 		lua_pushfstring(m_pScriptContext, "%s:", ar.short_src);
