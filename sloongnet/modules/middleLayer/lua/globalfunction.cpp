@@ -221,6 +221,7 @@ int CGlobalFunction::Lua_SetExtendDataByFile(lua_State *l)
         auto uuid = CUtility::GenUUID();
         Instance->m_iC->AddTempBytes(uuid, pBuf, size);
     }
+    CLua::PushInteger(l, size);
     CLua::PushString(l, uuid);
-    return 1;
+    return 2;
 }
