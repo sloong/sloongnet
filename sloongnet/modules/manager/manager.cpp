@@ -70,13 +70,9 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG *config)
 		return CResult::Make_Error("Config object is nullptr.");
 	}
 
-	unique_ptr<CServerManage> pServer = make_unique<CServerManage>();
-	auto res = pServer->Initialize(nullptr);
-	if (res.IsFialed())
-	{
-		return CResult::Make_Error(Helper::Format("Init server manage fialed. error message:%s", res.GetMessage().c_str()));
-	}
-
+	auto res = CServerManage::LoadManagerConfig();
+	if( res.IsFialed() )
+		return res;
 	auto config_str = res.GetMessage();
 	// Here, this port is came from COMMAND LINE.
 	// So we need save it before parse other setting.
@@ -86,7 +82,7 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG *config)
 		// If parse config error, run with default config.
 		cout << "Parser server config error. run with default setting." << endl;
 		ResetControlConfig(config);
-		res = pServer->ResetManagerTemplate(config);
+		res = CServerManage::ResetManagerTemplate(config);
 		if (res.IsFialed())
 		{
 			cout << "Save defualt template error. message:" << res.GetMessage() << endl;

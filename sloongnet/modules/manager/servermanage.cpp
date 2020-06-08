@@ -46,12 +46,22 @@ CResult Sloong::CServerManage::Initialize(IControl *ic)
 		m_mapIDToTemplateItem[addItem.ID] = addItem;
 		RefreshModuleReference(addItem.ID);
 	}
+	return CResult::Succeed();
+	
+}
 
-	auto res = CConfiguation::Instance->GetTemplate(1);
-	if (res.IsFialed())
-		return CResult::Succeed();
-	else
+CResult Sloong::CServerManage::LoadManagerConfig()
+{
+	if (!CConfiguation::Instance->IsInituialized())
+	{
+		auto res = CConfiguation::Instance->Initialize("/data/configuation.db");
+		if (res.IsFialed())
+			return res;
+	}
+	auto res =  CConfiguation::Instance->GetTemplate(1);
+	if( res.IsFialed())
 		return res;
+	return CResult::Make_OK(string(res.GetResultObject().configuation.begin(), res.GetResultObject().configuation.end()));
 }
 
 CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG *config)
@@ -74,7 +84,6 @@ CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG *config)
 		res = CConfiguation::Instance->SetTemplate(1, info);
 	else
 		res = CConfiguation::Instance->AddTemplate(info, nullptr);
-	m_mapIDToTemplateItem[1] = item;
 	return res;
 }
 
