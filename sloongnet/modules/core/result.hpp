@@ -67,7 +67,7 @@ namespace Sloong
         TResult(ResultType res, const string& what, T result) :CResult(res, what) {
             m_tResultObject = result;
         }
-        T GetResultObject() const {
+        inline T& GetResultObject() {
             return m_tResultObject;
         }
         static inline TResult Make_Error(const string& what) {
