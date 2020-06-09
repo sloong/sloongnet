@@ -60,3 +60,5 @@ sloongnet/protocol/*.pb.h
 sloongnet/modules/middleLayer/rust/target/
 build/sloongnet-debug
 build/sloongnet-release
+sloongnet/modules/middleLayer/lua/protocol/*.pb.cc
+sloongnet/modules/middleLayer/lua/protocol/*.pb.h
