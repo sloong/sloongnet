@@ -129,7 +129,6 @@ std::string CLua::GetErrorString()
 	lua_pushliteral(m_pScriptContext, "Call Stack:\r\n");
 	while (lua_getstack(m_pScriptContext, level++, &ar))
 	{
-		char buff[10] = {0};
 		if (level > LEVELS1 && firstpart)
 		{
 			if (!lua_getstack(m_pScriptContext, level + LEVELS2, &ar))
@@ -148,8 +147,7 @@ std::string CLua::GetErrorString()
 			continue;
 		}
 
-		sprintf(buff, "%4d-   -", level - 1);
-		lua_pushstring(m_pScriptContext, buff);
+		lua_pushfstring(m_pScriptContext, "%4d-   ", level - 1));
 		lua_getinfo(m_pScriptContext, "Snl", &ar);
 		lua_pushfstring(m_pScriptContext, "%s:", ar.short_src);
 		if (ar.currentline > 0)
