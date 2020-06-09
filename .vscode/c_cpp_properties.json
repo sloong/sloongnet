@@ -8,8 +8,8 @@
                 "/usr/include/x86_64-linux-gnu/",
                 "/usr/local/include",
                 "/usr/include/google/protobuf/",
-                "${workspaceFolder}/sloongnet/modules/core/",
-                "${workspaceFolder}/sloongnet/**"
+                "${workspaceFolder}/src/modules/core/",
+                "${workspaceFolder}/src/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/cpp",
@@ -30,8 +30,8 @@
                 "/usr/local/include",
                 "/usr/lib/gcc/x86_64-linux-gnu/7/include/",
                 "/usr/include/google/protobuf/",
-                "${workspaceFolder}/sloongnet/interface/",
-                "${workspaceFolder}/sloongnet/**"
+                "${workspaceFolder}/src/interface/",
+                "${workspaceFolder}/src/**"
             ],
             "defines": [],
             "cStandard": "c11",
