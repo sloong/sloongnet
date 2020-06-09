@@ -39,6 +39,8 @@ LuaFunctionRegistr g_LuaFunc[] =
 void Sloong::CGlobalFunction::Initialize(IControl *ic)
 {
     IObject::Initialize(ic);
+    IData::Initialize(ic);
+    m_pModuleConfig = IData::GetModuleConfig();
 }
 
 void Sloong::CGlobalFunction::RegistFuncToLua(CLua *pLua)
@@ -116,22 +118,15 @@ int Sloong::CGlobalFunction::Lua_GetConfig(lua_State *l)
     string section = CLua::GetString(l, 1);
     string key = CLua::GetString(l, 2);
     string def = CLua::GetString(l, 3);
-    // TODO: change to send message mode.
-    //CConfiguation *pConfig = TYPE_TRANS<CConfiguation *>(g_pThis->m_iC->Get(DATA_ITEM::Configuation));
-    string value("NO SUPPORT");
-    /*try
+    auto config = CGlobalFunction::Instance->m_pModuleConfig;
+    if( config->isMember(section) && (*config)[section].isMember(key))
     {
-        value = "NO SUPPORT";
-        //value = pConfig->GetStringConfig("config",section, key, def);
+        CLua::PushString(l,(*config)[section][key].asString());
     }
-    catch (normal_except &e)
+    else
     {
-        CLua::PushString(l, "");
-        CLua::PushString(l, e.what());
-        return 2;
-    }*/
-
-    CLua::PushString(l, value);
+        CLua::PushString(l,def);
+    }
     return 1;
 }
 

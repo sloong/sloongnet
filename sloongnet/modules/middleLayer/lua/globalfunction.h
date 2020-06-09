@@ -39,6 +39,7 @@ namespace Sloong
 
     protected:
         map_ex<string,string> m_mapCommData;
+        Json::Value* m_pModuleConfig = nullptr;
 
     public:
         static unique_ptr<CGlobalFunction> Instance;
