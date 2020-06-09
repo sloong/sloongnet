@@ -29,7 +29,7 @@ add_definitions(-DLUA_USE_READLINE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-switch")
 
 # C++ 版本
-set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++20 ${CMAKE_CXX_FLAGS}")
 
 # 添加module
 add_subdirectory(modules/core)
