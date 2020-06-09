@@ -7,10 +7,10 @@ ENV NODE_TYPE=Manager
 RUN mkdir /app && mkdir /data && apt update && apt install -y wget unzip
 WORKDIR  /app
 
-RUN wget -o next_gen.tar.gz https://git.sloong.com:8000/sloongnet/engine/archive/next_gen.zip
-RUN unzip next_gen.zip -d /app/
-RUN /app/engine/build/environment.sh
-RUN /app/engine/build/build.sh -r
+RUN wget -o next_gen.tar.gz https://git.sloong.com:8000/sloongnet/engine/archive/next_gen.zip && \
+    unzip next_gen.zip -d /app/ && \
+    /app/engine/build/environment.sh && \
+    /app/engine/build/build.sh -r
 
 FROM debian:10-slim
 
