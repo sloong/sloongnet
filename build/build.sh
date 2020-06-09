@@ -26,7 +26,7 @@ cd $SCRIPTFOLDER
 PROJECT=sloongnet
 MAKEFLAG=debug
 CMAKEFLAG=Debug
-CMAKE_FILE_PATH=$SCRIPTFOLDER/../$PROJECT
+CMAKE_FILE_PATH=$SCRIPTFOLDER/../src
 CPU_NUM=`grep -c "model name" /proc/cpuinfo`
 
 # default value is debug
