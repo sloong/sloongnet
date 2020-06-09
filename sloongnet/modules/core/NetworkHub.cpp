@@ -15,7 +15,7 @@ Sloong::CNetworkHub::CNetworkHub()
 
 Sloong::CNetworkHub::~CNetworkHub()
 {
-	if(m_pCTX)
+	if (m_pCTX)
 		EasyConnect::G_FreeSSL(m_pCTX);
 	for (int i = 0; i < s_PriorityLevel; i++)
 	{
@@ -205,7 +205,7 @@ void Sloong::CNetworkHub::EnableSSL(const string &certFile, const string &keyFil
 void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
 {
 	int tout = m_nConnectTimeoutTime * 60;
-	int tinterval = m_nCheckTimeoutInterval * 60 *1000;
+	int tinterval = m_nCheckTimeoutInterval * 60 * 1000;
 
 	m_pLog->Debug("Check connect timeout thread is running.");
 	while (m_bIsRunning)
@@ -222,7 +222,7 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
 			}
 		}
 		m_pLog->Debug(Helper::Format("Check connect timeout done. wait [%d] ms.", tinterval));
-		m_oCheckTimeoutThreadSync.wait_for( tinterval);
+		m_oCheckTimeoutThreadSync.wait_for(tinterval);
 	}
 	m_pLog->Info("check timeout connect thread is exit ");
 }
@@ -249,63 +249,70 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 	UniqueTransPackage pack;
 	while (m_bIsRunning)
 	{
-	MessagePorcessListRetry:
-		for (int i = 0; i < s_PriorityLevel; i++)
+		try
 		{
-			if (m_pWaitProcessList[i].empty())
-				continue;
-
-			while (m_pWaitProcessList[i].TryMovePop(pack))
+		MessagePorcessListRetry:
+			for (int i = 0; i < s_PriorityLevel; i++)
 			{
-				// In here, the result no the result for this request.
-				// it just for is need add the pack obj to send list.
-				res.SetResult(ResultType::Invalid);
+				if (m_pWaitProcessList[i].empty())
+					continue;
 
-				pack->Record();
-				switch (pack->GetDataPackage()->type())
+				while (m_pWaitProcessList[i].TryMovePop(pack))
 				{
-				case DataPackage_PackageType::DataPackage_PackageType_EventPackage:
-				{
-					switch (pack->GetDataPackage()->function())
+					// In here, the result no the result for this request.
+					// it just for is need add the pack obj to send list.
+					res.SetResult(ResultType::Invalid);
+
+					pack->Record();
+					switch (pack->GetDataPackage()->type())
 					{
-					case ControlEvent::Restart:
-						m_pLog->Info("Received restart control event. application will restart.");
-						m_iC->SendMessage(EVENT_TYPE::ProgramRestart);
-						break;
-					case ControlEvent::Stop:
-						m_pLog->Info("Received stop control event. application will stop.");
-						m_iC->SendMessage(EVENT_TYPE::ProgramStop);
-						break;
+					case DataPackage_PackageType::DataPackage_PackageType_EventPackage:
+					{
+						switch (pack->GetDataPackage()->function())
+						{
+						case ControlEvent::Restart:
+							m_pLog->Info("Received restart control event. application will restart.");
+							m_iC->SendMessage(EVENT_TYPE::ProgramRestart);
+							break;
+						case ControlEvent::Stop:
+							m_pLog->Info("Received stop control event. application will stop.");
+							m_iC->SendMessage(EVENT_TYPE::ProgramStop);
+							break;
+						default:
+							m_pEventFunc(pack.get());
+							break;
+						}
+					}
+					break;
+					case DataPackage_PackageType::DataPackage_PackageType_RequestPackage:
+					{
+						if (pack->GetDataPackage()->status() == DataPackage_StatusType::DataPackage_StatusType_Request)
+						{
+							res = m_pRequestFunc(pEnv, pack.get());
+						}
+						else
+						{
+							res = m_pResponseFunc(pEnv, pack.get());
+						}
+					}
+					break;
 					default:
-						m_pEventFunc(pack.get());
-						break;
+						m_pLog->Warn("Data package check type error. cannot process.");
 					}
-				}
-				break;
-				case DataPackage_PackageType::DataPackage_PackageType_RequestPackage:
-				{
-					if (pack->GetDataPackage()->status() == DataPackage_StatusType::DataPackage_StatusType_Request)
-					{
-						res = m_pRequestFunc(pEnv, pack.get());
-					}
+					pack->Record();
+					if (res.IsSucceed())
+						AddMessageToSendList(pack);
 					else
-					{
-						res = m_pResponseFunc(pEnv, pack.get());
-					}
+						pack = nullptr;
 				}
-				break;
-				default:
-					m_pLog->Warn("Data package check type error. cannot process.");
-				}
-				pack->Record();
-				if (res.IsSucceed())
-					AddMessageToSendList(pack);
-				else
-					pack = nullptr;
+				goto MessagePorcessListRetry;
 			}
-			goto MessagePorcessListRetry;
+			m_oProcessThreadSync.wait_for(1000);
 		}
-		m_oProcessThreadSync.wait_for(1000);
+		catch (...)
+		{
+			m_pLog->Error("Unknown exception happened in MessageProcessWorkLoop");
+		}
 	}
 	m_pLog->Info("MessageProcessWorkLoop thread is exit ");
 }
