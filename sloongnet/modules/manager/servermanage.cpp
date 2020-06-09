@@ -505,7 +505,7 @@ CResult Sloong::CServerManage::ReportLoadStatusHandler(const string &req_str, CD
 {
 	auto req = ConvertStrToObj<ReportLoadStatusRequest>(req_str);
 	
-	m_pLog->Info(Helper::Format("Node[%s] load status :CPU[%d]Mem[%d]", pack->GetSender(), req->cpuload(), req->memroyused() ));
+	m_pLog->Info(Helper::Format("Node[%lld] load status :CPU[%lf]Mem[%lf]", pack->GetSender(), req->cpuload(), req->memroyused() ));
 	
 	return CResult(ResultType::Ignore);
 }
