@@ -113,6 +113,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data)
 CResult CSloongBaseService::InitlializeForManager(RuntimeDataPackage *data)
 {
     data->set_nodeuuid(0);
+    data->set_templateid(1);
     auto config = data->mutable_templateconfig();
     config->set_listenport(data->managerport());
     config->set_modulepath("./modules/");
@@ -345,9 +346,13 @@ CResult CSloongBaseService::Run()
         CUtility::GetMemory(mem_total,mem_free);
         req.set_cpuload(load);
         req.set_memroyused(mem_total/mem_free);
-        auto event = make_unique<Events::CSendPackageEvent>();
-	    event->SetRequest(m_pManagerConnect->GetSocketID(), m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(),  Core::PRIORITY_LEVEL::LOW_LEVEL , (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
-	    m_pControl->SendMessage(std::move(event));
+        
+        if( m_oServerConfig.templateid() != 1 )// Manager module
+        {
+            auto event = make_unique<Events::CSendPackageEvent>();
+            event->SetRequest(m_pManagerConnect->GetSocketID(), m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(),  Core::PRIORITY_LEVEL::LOW_LEVEL , (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
+	        m_pControl->SendMessage(std::move(event));
+        }
 
         CUtility::RecordCPUStatus(prev_status.get());
     }
