@@ -55,11 +55,20 @@ build(){
 		exit 1
 	fi
 
-	cd ../../
+	if [ -d $OUTPATH  ];then
+		rm -rdf $OUTPATH
+	fi
+	mkdir -p $OUTPATH/modules/
+
+	cp $CMAKE_FILE_PATH/referenced/libuniv/libuniv.so $OUTPATH/
+	cp $SCRIPTFOLDER/$MAKEFLAG/$PROJECT $OUTPATH/
+	cp $CMAKE_FILE_PATH/../configuation.db $OUTPATH/
+	cp $CMAKE_FILE_PATH/../docker/run.sh $OUTPATH/
+	cp $SCRIPTFOLDER/$MAKEFLAG/modules/*.so $OUTPATH/modules/
 }
 
 build_debug(){
-	OUTPATH=$SCRIPTFOLDER/$PROJECT-debug-v$VERSION_STR
+	OUTPATH=$SCRIPTFOLDER/$PROJECT-debug
 	MAKEFLAG=debug
 	CMAKEFLAG=Debug
 	clean
@@ -67,7 +76,7 @@ build_debug(){
 }
 
 build_release(){
-	OUTPATH=$SCRIPTFOLDER/$PROJECT-v$VERSION_STR
+	OUTPATH=$SCRIPTFOLDER/$PROJECT-release
 	MAKEFLAG=release
 	CMAKEFLAG=Release
 	clean
@@ -75,13 +84,14 @@ build_release(){
 }
 
 zipfile(){
+	OUTFILE=$OUTPATH-v$VERSION_STR
 	cd $CMAKE_FILE_PATH/referenced/libuniv
-	tar -rv -f $OUTPATH.tar libuniv.so
+	tar -rv -f $OUTFILE.tar libuniv.so
 	cd $CMAKE_FILE_PATH/..
-	tar -rv -f $OUTPATH.tar configuation.db
-	tar -rv -f $OUTPATH.tar -C $SCRIPTFOLDER/$MAKEFLAG $PROJECT
+	tar -rv -f $OUTFILE.tar configuation.db
+	tar -rv -f $OUTFILE.tar -C $SCRIPTFOLDER/$MAKEFLAG $PROJECT
 	cd $SCRIPTFOLDER/$MAKEFLAG
-	tar -rv -f $OUTPATH.tar modules/*.so 
+	tar -rv -f $OUTFILE.tar modules/*.so 
 }
 
 

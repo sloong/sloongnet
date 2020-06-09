@@ -15,7 +15,7 @@ SET(LIBRARY_OUTPUT_PATH "../../")
 aux_source_directory(. SRC_LIST)
 list(APPEND SRC_LIST ${MODULE_SRC_LIST})
 
-#生成可执行文件
+#生成目标文件
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRC_LIST})
 
 #添加链接库

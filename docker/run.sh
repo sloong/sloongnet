@@ -8,8 +8,7 @@
  ###
  # check db file 
 if [ ! -e /data/configuation.db ];then
-    cp /app/engine/configuation.db /data/configuation.db
+    cp /usr/local/bin/configuation.db /data/configuation.db
 fi
  # start app
-cd /app/engine/build/debug/
-./sloongnet $NODE_TYPE $ADDRESS_INFO
+/usr/local/bin/sloongnet $NODE_TYPE $ADDRESS_INFO

@@ -22,8 +22,6 @@ enum DATA_ITEM
     ReferenceTemplateInfo=4;
 }
 
-
-
 enum EVENT_TYPE
 {
 	/*
