@@ -10,9 +10,9 @@ pwd
 SCRIPTFOLDER=$(dirname $(readlink -f $0))
 echo "ScriptFolder: "$SCRIPTFOLDER
 # cd to current file folder
-cd $SCRIPTFOLDER
+cd $SCRIPTFOLDER/../
 
-VERSION_STR=$(cat ../version)
+VERSION_STR=$(cat version)
 
-docker build -t sloongnet:$VERSION_STR .
+docker build -t sloongnet:$VERSION_STR -f $SCRIPTFOLDER/../Dockerfile $SCRIPTFOLDER/../
 docker tag sloongnet:$VERSION_STR sloongnet:latest

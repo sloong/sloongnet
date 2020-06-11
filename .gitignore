@@ -1,64 +1,11 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
 
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-*.log
-*.sdf
-*.suo
-*.opensdf
-*.db
-*.user
-*.ipch
-.vs
-
-build/debug
+build/debug/
 build/release/
+build/sloongnet-debug/
+build/sloongnet-release/
 build/*.tar
-servctrl/servctrl/bin/
-obj
-*.pyc
-/sloongnet/bin/
 sloongnet-*.zip
-docker/output
-docker/output.zip
-WebUI/dist/
-WebUI/Sloongnet_WebUI.egg-info/
-WebUI/docker/output.tar.gz
-docker/output.tar
-sloongnet/modules/*.so
-CMakeFiles
-cmake_install.cmake
-CMakeCache.txt
-Makefile
-sloongnet/modules/*/protocol/*.pb.cc
-sloongnet/modules/*/protocol/*.pb.h
-sloongnet/protocol/*.pb.cc
-sloongnet/protocol/*.pb.h
 sloongnet/modules/middleLayer/rust/target/
-build/sloongnet-debug
-build/sloongnet-release
-sloongnet/modules/middleLayer/lua/protocol/*.pb.cc
-sloongnet/modules/middleLayer/lua/protocol/*.pb.h
+!protocol/*.proto
+*.pb.cc
+*.pb.h
