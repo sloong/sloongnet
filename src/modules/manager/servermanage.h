@@ -124,76 +124,18 @@ namespace Sloong
 
         CResult ProcessHandler(CDataTransPackage *);
 
-        /*
-        Request:PostLogMessageRequest
-        Response:Result
-        */
         CResult EventRecorderHandler(const string &, CDataTransPackage *);
-
-        /* When worker start, send this request to registe a worker, and wait manage assigning template.
-        Request: Function
-        Response: Result    -> Succeed      RegisteWorkerMessageResponse
-                            -> Retry        Wait assign, wait some time and retry again.
-        */
         CResult RegisteWorkerHandler(const string &, CDataTransPackage *);
-
-        /* When assigning tamplate, and node is ready to work, send this requst.
-        Request : RegisteNodeRequest
-        Response: Result
-        */
         CResult RegisteNodeHandler(const string &, CDataTransPackage *);
-
-        /* 
-        Request:AddTemplateRequest
-        Response: Result
-        */
         CResult AddTemplateHandler(const string &, CDataTransPackage *);
-        /* 
-        Request:DeleteTemplateRequest
-        Response: Result
-        */
         CResult DeleteTemplateHandler(const string &, CDataTransPackage *);
-        /* 
-        Request :SetTemplateRequest
-        Response: Result
-        */
         CResult SetTemplateHandler(const string &, CDataTransPackage *);
-        /* 
-        Request:QueryTemplateRequest
-        Response:QueryTemplateResponse
-        */
         CResult QueryTemplateHandler(const string &, CDataTransPackage *);
-
-        /* 
-        Request:QueryNodeRequest
-        Response:QueryNodeResponse
-        */
         CResult QueryNodeHandler(const string &, CDataTransPackage *);
-
-        /* 
-        Request:StopNodeRequest
-        Response:Result
-        */
         CResult StopNodeHandler(const string &, CDataTransPackage *);
-
-        /* 
-        Request:RestartNodeRequest
-        Response:Result
-        */
         CResult RestartNodeHandler(const string &, CDataTransPackage *);
-
-        /*
-        Request: None
-        Response: QueryReferenceInfoResponse
-        */
         CResult QueryReferenceInfoHandler(const string &, CDataTransPackage *);
-
-        /*
-        Request: ReportLoadStatusRequest
-        Response: None
-        */
         CResult ReportLoadStatusHandler(const string &, CDataTransPackage *);
-
 
     public:
         static CResult LoadManagerConfig();

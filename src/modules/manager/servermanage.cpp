@@ -114,7 +114,7 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 		if ((int)item.second.Created.size() < item.second.Replicas)
 			return item.first;
 	}
-	return -1;
+	return 0;
 }
 
 
@@ -212,8 +212,18 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CData
 		return CResult(ResultType::Retry, string(m_pMsgBuffer, 8));
 	}
 
-	auto index = SearchNeedCreateTemplate();
-	if (index == -1)
+	int index = -1;
+	if( req_str.length() > 0 )
+	{
+		auto req = ConvertStrToObj<RegisterWorkerRequest>(req_str);
+		index = req->forcetargettemplateid();
+	}
+	if( index == 0 )
+	{
+		index = SearchNeedCreateTemplate();
+	}
+	
+	if (index == 0)
 	{
 		char m_pMsgBuffer[8] = {0};
 		char *pCpyPoint = m_pMsgBuffer;
