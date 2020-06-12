@@ -4,6 +4,8 @@ project(core)
 
 message(WorkDir:${CMAKE_CURRENT_LIST_DIR}) 
 
+SET(LIBRARY_OUTPUT_PATH "../../")
+
 #当前目录下所有源文件赋给SRC_LIST
 aux_source_directory(. SRC_LIST)
 list(APPEND SRC_LIST ${MODULE_SRC_LIST})
