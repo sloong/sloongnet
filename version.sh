@@ -1,6 +1,6 @@
 #!/bin/bash
 # build the version text file 
-VER_FILE_PATH=sloongnet/version.h
+VER_FILE_PATH=src/version.h
 rm -f $VER_FILE_PATH
 _GIT_VERSION_VALUE=`git rev-list --all | wc -l`
 VER_TEXT=$(cat version.h.template | sed "s/GIT_VERSION/$_GIT_VERSION_VALUE/g")
