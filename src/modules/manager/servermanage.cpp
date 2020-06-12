@@ -215,7 +215,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CData
 	int index = -1;
 	if( req_str.length() > 0 )
 	{
-		auto req = ConvertStrToObj<RegisterWorkerRequest>(req_str);
+		auto req = ConvertStrToObj<RegisteWorkerRequest>(req_str);
 		index = req->forcetargettemplateid();
 	}
 	if( index == 0 )

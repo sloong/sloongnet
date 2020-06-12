@@ -44,7 +44,7 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
     Instance->Stop();
 }
 
-CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data)
+CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int forceTempID)
 {
     m_pManagerConnect = make_unique<EasyConnect>();
     m_pManagerConnect->Initialize(data->manageraddress(), data->managerport(), nullptr);
@@ -62,6 +62,12 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data)
         req->set_type(DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
         req->set_function(Manager::Functions::RegisteWorker);
         req->set_sender(uuid);
+        if( forceTempID > 0 )
+        {
+            RegisteWorkerRequest sub_req;
+            sub_req.set_forcetargettemplateid(forceTempID);
+            req->set_content(ConvertObjToStr(&sub_req));
+        }
         dataPackage.RequestPackage();
         ResultType result = dataPackage.SendPackage();
         if (result != ResultType::Succeed)
@@ -136,7 +142,7 @@ void CSloongBaseService::InitSystemEventHandler()
     signal(SIGSEGV, &on_sigint);
 }
 
-CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int port)
+CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int port, int forceTempID)
 {
     m_oServerConfig.set_manageraddress(address);
     m_oServerConfig.set_managerport(port);
@@ -151,7 +157,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     }
     else
     {
-        res = InitlializeForWorker(&m_oServerConfig);
+        res = InitlializeForWorker(&m_oServerConfig, forceTempID);
     }
     if (res.IsFialed())
         return res;

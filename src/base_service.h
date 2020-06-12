@@ -27,7 +27,7 @@ namespace Sloong
 		virtual ~CSloongBaseService(){}
 
 		// Just call it without Control module.
-		virtual CResult Initialize(bool, string, int);
+		virtual CResult Initialize(bool, string, int, int=0);
 
 		virtual CResult Run();
 		virtual void Stop();
@@ -35,7 +35,7 @@ namespace Sloong
 		TResult<shared_ptr<DataPackage>> RegisteToControl(EasyConnect *con, string uuid);
 
 	protected:
-		virtual CResult InitlializeForWorker(RuntimeDataPackage *);
+		virtual CResult InitlializeForWorker(RuntimeDataPackage *, int);
 		virtual CResult InitlializeForManager(RuntimeDataPackage *);
 
 		CResult RegisteNode();

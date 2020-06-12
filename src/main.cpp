@@ -11,11 +11,14 @@
 
 void PrientHelp()
 {
-	cout << "sloongnet [<type>] [<address:port>]" << endl;
+	cout << "sloongnet [<type>] [<address:port>] [--F=<ForceTargetTemplateID>]" << endl;
 	cout << "sloongnet version" << endl;
 	cout << "<type>: Manager|Worker" << endl;
+	cout << "<address:port>: Listen port / Manager port" << endl;
+	cout << "--F=<ForceTargetTemplateID>: If this node just for one templateid, set it." << endl;
+	cout << "--?/--help/--h: Print help info." << endl;
+	cout << "--v/--version: Print version info." << endl;
 }
-
 
 void PrintVersion()
 {
@@ -24,66 +27,74 @@ void PrintVersion()
 	cout << COPYRIGHT_TEXT << endl;
 }
 
- 
-struct itimerval g_itimer;
-
-int main(int argc, char** args)
+typedef struct CmdInfo
 {
-	
-    getitimer(ITIMER_PROF, &g_itimer);
+	CmdInfo()
+	{
+		ManagerMode = false;
+		Address = "";
+		Port = 0;
+		ForceTargetTemplateID = 0;
+	}
+	bool ManagerMode;
+	string Address;
+	int Port;
+	int ForceTargetTemplateID;
+} CmdInfo;
+
+int main(int argc, char **args)
+{
 	try
 	{
-		// 参数共有2个，类型和地址信息
-		// 1 类型，为指定值
-		// 2 地址信息：格式->地址：端口。如果类型为control，表示为监听地址
-		if (argc != 3)
+		CmdInfo info;
+		for (int i = 1; i < argc; i++)
 		{
-			PrientHelp();
+			auto item = string(args[i]);
+			if (strcasecmp(args[i], "Manager") == 0)
+			{
+				info.ManagerMode = true;
+				continue;
+			}
+			if (item.find(":") != string::npos)
+			{
+				vector<string> addr = Helper::split(args[2], ':');
+				info.Address = addr[0];
+				if (!ConvertStrToInt(addr[1], &info.Port))
+				{
+					cout << "Convert [" << addr[1] << "] to int port fialed." << endl;
+					return -1;
+				}
+			}
+			if (item.find("-F") != string::npos)
+			{
+				auto tempid = item.substr(2);
+				ConvertStrToInt(tempid, &info.ForceTargetTemplateID);
+			}
+			if (strcasecmp(args[i], "--v") == 0 || strcasecmp(args[i], "--version") == 0)
+			{
+				PrintVersion();
+				return 0;
+			}
+			if (strcasecmp(args[i], "--?") == 0 || strcasecmp(args[i], "--help") == 0 || strcasecmp(args[i], "--h") == 0)
+			{
+				PrientHelp();
+				return 0;
+			}
+		}
+
+		if (info.Port == 0)
+		{
+			cout << "Port error, please check." << endl;
 			return -2;
 		}
-		
-		auto ManagerMode = true;
-		if (strcasecmp(args[1], "Worker") == 0)
-		{
-			ManagerMode = false;
-		}
-		else if (strcasecmp(args[1], "Manager") == 0)
-		{
-			ManagerMode = true;
-		}
-		else if (strcasecmp(args[1], "version") == 0)
-		{
-			PrintVersion();
-			return 0;
-		}
-		else
-		{
-			cout << "Parse module type error." << endl;
-			PrientHelp();
-			return -1;
-		}
 
-		vector<string> addr = Helper::split(args[2], ':');
-		if (addr.size() != 2)
-		{
-			cout << "Address info format error. Format [addr]:[port]" << endl;
-			return -3;
-		}
-
-		auto ManagerAddress = addr[0];
-		int ManagerPort;
-		if (!ConvertStrToInt(addr[1],&ManagerPort) || ManagerPort == 0)
-		{
-			cout << "Convert [" << addr[1] << "] to int port fialed." << endl;
-			return -3;
-		}
-	
 		CResult res = CResult::Succeed();
 		Sloong::CSloongBaseService::Instance = make_unique<Sloong::CSloongBaseService>();
 		do
 		{
-			res = Sloong::CSloongBaseService::Instance->Initialize(ManagerMode,ManagerAddress,ManagerPort);
-			if (!res.IsSucceed()) {
+			res = Sloong::CSloongBaseService::Instance->Initialize(info.ManagerMode, info.Address, info.Port, info.ForceTargetTemplateID);
+			if (!res.IsSucceed())
+			{
 				cout << "Initialize server error. Message: " << res.GetMessage() << endl;
 				return -5;
 			}
@@ -93,12 +104,12 @@ int main(int argc, char** args)
 		Sloong::CSloongBaseService::Instance = nullptr;
 		return 0;
 	}
-	catch (string & msg)
+	catch (string &msg)
 	{
 		cout << "exception happened, message:" << msg << endl;
 		return -4;
 	}
-	catch (exception & exc)
+	catch (exception &exc)
 	{
 		cout << "exception happened, message:" << exc.what() << endl;
 		return -4;

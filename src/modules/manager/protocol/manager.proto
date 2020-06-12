@@ -96,7 +96,7 @@ message RegisteWorkerRequest
 {
    // In defualt no should set, just send request with empty content.
    // Just ues this when a worker node is for specified template.
-   int32 ForceTargetTemplateID;
+   int32 ForceTargetTemplateID=1;
 }
 
 message RegisteWorkerResponse
