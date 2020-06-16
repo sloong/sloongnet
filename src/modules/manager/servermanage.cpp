@@ -126,7 +126,7 @@ void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int even
 		if (msg)
 			msg->SerializeToString(&msg_str);
 		auto req = make_unique<CSendPackageEvent>();
-		req->SetRequest(m_mapUUIDToNodeItem[item].ConnectionID, IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Core::HEIGHT_LEVEL, event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
+		req->SetRequest(m_mapUUIDToNodeItem[item].ConnectionID, IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
 		m_iC->SendMessage(std::move(req));
 	}
 }

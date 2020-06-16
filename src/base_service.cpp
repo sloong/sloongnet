@@ -356,7 +356,7 @@ CResult CSloongBaseService::Run()
         if( m_oServerConfig.templateid() != 1 )// Manager module
         {
             auto event = make_unique<Events::CSendPackageEvent>();
-            event->SetRequest(m_pManagerConnect->GetSocketID(), m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(),  Core::PRIORITY_LEVEL::LOW_LEVEL , (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
+            event->SetRequest(m_pManagerConnect->GetSocketID(), m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(),  Base::PRIORITY_LEVEL::LOW_LEVEL , (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
 	        m_pControl->SendMessage(std::move(event));
         }
 

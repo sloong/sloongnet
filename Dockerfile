@@ -12,7 +12,7 @@ FROM debian:10-slim
 
 LABEL maintainer="admin@sloong.com"
 ENV ADDRESS_INFO=0.0.0.0:8001
-ENV NODE_TYPE=Manager
+ENV NODE_TYPE=Worker
 
 RUN apt update && apt install -y \
     libsqlite3-0 libprotobuf17 libuuid1 libssl1.1  libjsoncpp1 mariadb-client libluajit-5.1

@@ -113,7 +113,7 @@ void SloongNetGateway::QueryReferenceInfo()
 {
 	auto event = make_unique<CSendPackageEvent>();
 	event->SetCallbackFunc(std::bind(&SloongNetGateway::QueryReferenceInfoResponseHandler, this, std::placeholders::_1, std::placeholders::_2));
-	event->SetRequest(m_nManagerConnection, m_pRuntimeData->nodeuuid(), snowflake::Instance->nextid(), Core::HEIGHT_LEVEL, (int)Functions::QueryReferenceInfo, "");
+	event->SetRequest(m_nManagerConnection, m_pRuntimeData->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, (int)Functions::QueryReferenceInfo, "");
 	m_iC->CallMessage(std::move(event));
 }
 

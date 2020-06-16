@@ -62,6 +62,7 @@ build(){
 
 	cp $CMAKE_FILE_PATH/referenced/libuniv/libuniv.so $OUTPATH/
 	cp $SCRIPTFOLDER/$MAKEFLAG/$PROJECT $OUTPATH/
+	cp $SCRIPTFOLDER/$MAKEFLAG/libcore.so $OUTPATH/
 	cp $CMAKE_FILE_PATH/../configuation.db $OUTPATH/
 	cp $CMAKE_FILE_PATH/../docker/run.sh $OUTPATH/
 	cp $SCRIPTFOLDER/$MAKEFLAG/modules/*.so $OUTPATH/modules/

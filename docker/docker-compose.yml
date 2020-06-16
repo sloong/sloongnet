@@ -4,9 +4,10 @@ services:
     image: sloong/sloongnet:latest
     container_name: controler
     environment:
-      - ADDRESS_INFO=8000
+      - ADDRESS_INFO=0.0.0.0:8000
+      - NODE_TYPE=Manager
     ports:
-      - "8001:8000"
+      - "18000:8000"
     volumes:
       - "control_local:/data"
     networks:
@@ -19,15 +20,11 @@ services:
     image: sloong/sloongnet:latest
     container_name: moduler
     environment:
-      - ADDRESS_INFO=10.0.0.18:8001
+      - ADDRESS_INFO=controler:8000
     ports:
-      - "8002:8000"
+      - "18002:8000"
     volumes:
-      - type: volume
-        source: module_local
-        target: /data
-        volume:
-          nocopy: true
+      - "control_local:/data"
     networks:
       - sloongnet
     depends_on:
