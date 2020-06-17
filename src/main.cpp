@@ -55,7 +55,7 @@ int main(int argc, char **args)
 				info.ManagerMode = true;
 				continue;
 			}
-			if (item.find(":") != string::npos)
+			else if (item.find(":") != string::npos)
 			{
 				vector<string> addr = Helper::split(args[2], ':');
 				info.Address = addr[0];
@@ -65,17 +65,17 @@ int main(int argc, char **args)
 					return -1;
 				}
 			}
-			if (item.find("-F") != string::npos)
+			else if (item.find("-F=") != string::npos)
 			{
-				auto tempid = item.substr(2);
+				auto tempid = item.substr(3);
 				ConvertStrToInt(tempid, &info.ForceTargetTemplateID);
 			}
-			if (strcasecmp(args[i], "--v") == 0 || strcasecmp(args[i], "--version") == 0)
+			else if (strcasecmp(args[i], "--v") == 0 || strcasecmp(args[i], "--version") == 0)
 			{
 				PrintVersion();
 				return 0;
 			}
-			if (strcasecmp(args[i], "--?") == 0 || strcasecmp(args[i], "--help") == 0 || strcasecmp(args[i], "--h") == 0)
+			else if (strcasecmp(args[i], "--?") == 0 || strcasecmp(args[i], "--help") == 0 || strcasecmp(args[i], "--h") == 0)
 			{
 				PrientHelp();
 				return 0;
