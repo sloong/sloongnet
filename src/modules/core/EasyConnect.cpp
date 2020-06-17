@@ -42,13 +42,19 @@ void Sloong::EasyConnect::Initialize(const string &address, int port, LPVOID ctx
 		m_pSSL = SSL_new(pCtx);
 	}
 }
-
 bool Sloong::EasyConnect::Connect()
 {
+	auto res = CUtility::HostnameToIP(m_strAddress);
+	if( res.IsFialed() )
+	{
+		return false;
+	}
+	auto list = res.GetResultObject();
+	
 	struct sockaddr_in remote_addr;
 	memset(&remote_addr, 0, sizeof(remote_addr));
 	remote_addr.sin_family = AF_INET;
-	remote_addr.sin_addr.s_addr = inet_addr(m_strAddress.c_str());
+	remote_addr.sin_addr.s_addr = inet_addr(list[0].c_str());
 	remote_addr.sin_port = htons((uint16_t)m_nPort);
 	if ((m_nSocket = socket(PF_INET, SOCK_STREAM, 0)) < 0)
 	{

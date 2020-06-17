@@ -83,6 +83,7 @@ namespace Sloong
     typedef TResult<int> NResult;
 	typedef TResult<std::pair<char*,int>> PResult;
     typedef TResult<string> SResult;
+    typedef TResult<vector<string>> VStrResult;
 } // namespace  Sloong
 
 

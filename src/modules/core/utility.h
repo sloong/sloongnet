@@ -33,6 +33,9 @@ namespace Sloong
 
 		static string GenUUID();
 
+		static VStrResult HostnameToIP(const string&);
+		static VStrResult IPToHostName(const string&);
+
 		static string GetCallStack();
 	};
 
