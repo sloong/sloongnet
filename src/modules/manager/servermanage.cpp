@@ -212,7 +212,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CData
 		return CResult(ResultType::Retry, string(m_pMsgBuffer, 8));
 	}
 
-	int index = -1;
+	int index = 0;
 	if( req_str.length() > 0 )
 	{
 		auto req = ConvertStrToObj<RegisteWorkerRequest>(req_str);
