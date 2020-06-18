@@ -37,7 +37,7 @@ namespace Sloong
         inline void SetMessage(const string& str){
             m_strMessage = str;
         }
-        inline string GetMessage() const {
+        inline const string& GetMessage() const {
             return m_strMessage;
         }
     public:
