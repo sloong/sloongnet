@@ -106,8 +106,11 @@ SResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 		}
 		string extendUUID("");
 		auto res = pLua->RunFunction(m_pConfig->operator[]("LuaProcessFunction").asString(), pUInfo, function, msg, extend, &extendUUID);
-		FreeLuaContext(id);		
-		return SResult::Make_OK(extendUUID,res.GetMessage());
+		FreeLuaContext(id);
+		if( res.IsFialed() )
+			return SResult::Make_Error(res.GetMessage());
+		else
+			return SResult::Make_OK(extendUUID,res.GetMessage());
 	}
 	catch (const exception& ex)
 	{
