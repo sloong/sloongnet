@@ -16,6 +16,7 @@ void PrientHelp()
 	cout << "<type>: Manager|Worker" << endl;
 	cout << "<address:port>: Listen port / Manager port" << endl;
 	cout << "--F=<ForceTargetTemplateID>: If this node just for one templateid, set it." << endl;
+	cout << "--T=<TypeName>: Set it for target module type." << endl;
 	cout << "--?/--help/--h: Print help info." << endl;
 	cout << "--v/--version: Print version info." << endl;
 }
@@ -35,11 +36,13 @@ typedef struct CmdInfo
 		Address = "";
 		Port = 0;
 		ForceTargetTemplateID = 0;
+		ForceTargetType = "";
 	}
 	bool ManagerMode;
 	string Address;
 	int Port;
 	int ForceTargetTemplateID;
+	string ForceTargetType;
 } CmdInfo;
 
 int main(int argc, char **args)
@@ -69,6 +72,10 @@ int main(int argc, char **args)
 			{
 				auto tempid = item.substr(3);
 				ConvertStrToInt(tempid, &info.ForceTargetTemplateID);
+			}
+			else if (item.find("-T=") != string::npos)
+			{
+				info.ForceTargetType = item.substr(3);
 			}
 			else if (strcasecmp(args[i], "--v") == 0 || strcasecmp(args[i], "--version") == 0)
 			{

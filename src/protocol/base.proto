@@ -17,6 +17,17 @@ enum PRIORITY_LEVEL{
     LOW_LEVEL=2;
 }
 
+enum ModuleType
+{
+    InvalidModule=0;
+    Manager=1;
+    DataCenter=2;
+    FileCenter=3;
+    Firewall=4;
+    Gateway=5;
+    Processer=6;
+}
+
 
 message DataPackage
 {

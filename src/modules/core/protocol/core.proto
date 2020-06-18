@@ -1,5 +1,8 @@
+// Protobuf for Core Module
+// If other module is develop by C/C++, and want base on Core module, use this protocol
 syntax = "proto3";
 package Core;
+
 
 // LogLevel
 enum LogLevel{

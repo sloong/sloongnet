@@ -169,9 +169,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     pConfig->set_loglevel(Core::LogLevel::All);
     pConfig->set_logoperation(pConfig->logoperation() | LOGOPT::WriteToSTDOut);
 #endif
-
     m_pLog->Initialize(pConfig->logpath(), "", LOGOPT(pConfig->logoperation()), LOGLEVEL(pConfig->loglevel()), LOGTYPE::DAY);
-
     CDataTransPackage::InitializeLog(m_pLog.get());
     res = InitModule();
     if (res.IsFialed())
@@ -183,6 +181,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
         m_pLog->Fatal(res.GetMessage());
         return res;
     }
+    m_pLog->Debug("Module initialization succeed.");
 
     res = m_pControl->Initialize(pConfig->mqthreadquantity());
     if (res.IsFialed())
@@ -190,7 +189,8 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
         m_pLog->Fatal(res.GetMessage());
         return res;
     }
-
+    m_pLog->Debug("Control center initialization succeed.");
+    
     m_pControl->Add(DATA_ITEM::ServerConfiguation, m_oServerConfig.mutable_templateconfig());
     m_pControl->Add(Logger, m_pLog.get());
     m_pControl->Add(DATA_ITEM::RuntimeData, &m_oServerConfig);
@@ -217,6 +217,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
         m_pLog->Fatal(res.GetMessage());
         return res;
     }
+    m_pLog->Debug("Network initialization succeed.");
 
     m_pNetwork->RegisterEnvCreateProcesser(m_pModuleCreateProcessEvnFunc);
     m_pNetwork->RegisterProcesser(m_pModuleRequestHandler, m_pModuleResponseHandler, m_pModuleEventHandler);
@@ -227,7 +228,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     res = m_pModuleInitializedFunc(sock, m_pControl.get());
     if (res.IsFialed())
         m_pLog->Fatal(res.GetMessage());
-
+    m_pLog->Debug("Module initialized succeed.");
     if (!ManagerMode)
     {
         res = RegisteNode();

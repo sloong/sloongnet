@@ -11,4 +11,4 @@ if [ ! -e /data/configuation.db ];then
     cp /usr/local/bin/configuation.db /data/configuation.db
 fi
  # start app
-/usr/local/bin/sloongnet $NODE_TYPE $ADDRESS_INFO
+/usr/local/bin/sloongnet $NODE_TYPE $ADDRESS_INFO $EXTEND_PARAM
