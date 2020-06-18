@@ -46,7 +46,7 @@ namespace Sloong
 		bool RunString(const string &strCommand);
 		void PushPacket(CLuaPacket *pData);
 		CResult RunFunction(const string &, CLuaPacket *, int = 0, const string & = "", const string & = "", string* extendDataUUID = nullptr);
-		string GetErrorString();
+		
 		bool AddFunction(const string &strFunctionName, LuaFunctionType pFunction);
 		bool PushFunction(int nFuncRef);
 		bool GetLuaFuncRef(int &nFunc, const string &strFuncName);
@@ -71,7 +71,7 @@ namespace Sloong
 		inline void HandlerError(const string &strErrorType, const char *strCmd)
 		{
 			if (m_pErrorHandler)
-				m_pErrorHandler(Helper::Format("\n Error - %s:\n %s\n Error Message:%s", strErrorType.c_str(), strCmd, GetErrorString().c_str()));
+				m_pErrorHandler(Helper::Format("\n Error - %s:\n %s\n Error Message:%s", strErrorType.c_str(), strCmd, GetCallStack(m_pScriptContext).c_str()));
 		}
 		inline void AddFunctions(vector<LuaFunctionRegistr> *pFuncList)
 		{
@@ -111,6 +111,7 @@ namespace Sloong
 		static void PushInteger(lua_State *l, int nValue);
 		static void PushBoolen(lua_State *l, bool b);
 		static void PushPointer(lua_State *l, void *pPointer);
+		static string GetCallStack(lua_State *l);
 		static unique_ptr<map<string, string>> GetTableParam(lua_State *l, int index);
 
 	protected:

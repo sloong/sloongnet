@@ -115,30 +115,30 @@ bool CLua::RunString(const string &strCommand)
 #define LEVELS1 12 // size of the first part of the stack
 #define LEVELS2 10 // size of the second part
 
-std::string CLua::GetErrorString()
+std::string CLua::GetCallStack(lua_State *l)
 {
 	int level = 0;
 	int firstpart = 1;
 
 	lua_Debug ar;
-	if (!lua_isstring(m_pScriptContext, 1))
-		return "";
+	if (!lua_isstring(l, 1))
+		return "No stack info";
 
-	lua_settop(m_pScriptContext, 1);
-	lua_pushliteral(m_pScriptContext, "\r\n");
-	lua_pushliteral(m_pScriptContext, "Call Stack:\r\n");
-	while (lua_getstack(m_pScriptContext, level++, &ar))
+	lua_settop(l, 1);
+	lua_pushliteral(l, "\r\n");
+	lua_pushliteral(l, "Call Stack:\r\n");
+	while (lua_getstack(l, level++, &ar))
 	{
 		if (level > LEVELS1 && firstpart)
 		{
-			if (!lua_getstack(m_pScriptContext, level + LEVELS2, &ar))
+			if (!lua_getstack(l, level + LEVELS2, &ar))
 			{
 				level--;
 			}
 			else
 			{
-				lua_pushliteral(m_pScriptContext, "                    ....\r\n");
-				while (lua_getstack(m_pScriptContext, level + LEVELS2, &ar))
+				lua_pushliteral(l, "                    ....\r\n");
+				while (lua_getstack(l, level + LEVELS2, &ar))
 				{
 					level++;
 				}
@@ -147,11 +147,17 @@ std::string CLua::GetErrorString()
 			continue;
 		}
 
-		lua_pushfstring(m_pScriptContext, "%4d-   ", level - 1);
-		lua_getinfo(m_pScriptContext, "Snl", &ar);
-		lua_pushfstring(m_pScriptContext, "%s:", ar.short_src);
+		lua_pushfstring(l, "%4d-   ", level - 1);
+		// 'n': 填充 name 及 namewhat 域；
+		// 'S': 填充 source， short_src，linedefined，lastlinedefined，以及 what 域；
+		// 'l': 填充 currentline 域；
+		// 'u': 填充 nups 域；
+		// 'f': 把正在运行中指定级别处函数压入堆栈； （译注：一般用于获取函数调用中的信息， 级别是由 ar 中的私有部分来提供。 如果用于获取静态函数，那么就直接把指定函数重新压回堆栈， 但这样做通常无甚意义。）
+		// 'L': 压一个 table 入栈，这个 table 中的整数索引用于描述函数中哪些行是有效行。 （有效行指有实际代码的行， 即你可以置入断点的行。 无效行包括空行和只有注释的行。）
+		lua_getinfo(l, "Snl", &ar);
+		lua_pushfstring(l, "%s:", ar.short_src);
 		if (ar.currentline > 0)
-			lua_pushfstring(m_pScriptContext, "%d:", ar.currentline);
+			lua_pushfstring(l, "%d:", ar.currentline);
 
 		switch (*ar.namewhat)
 		{
@@ -159,25 +165,25 @@ std::string CLua::GetErrorString()
 		case 'l': // local
 		case 'f': // field
 		case 'm': // method
-			lua_pushfstring(m_pScriptContext, " In function '%s'", ar.name);
+			lua_pushfstring(l, " In function '%s'", ar.name);
 			break;
 		default:
 		{
 			if (*ar.what == 'm')
-				lua_pushfstring(m_pScriptContext, "in main chunk");
+				lua_pushfstring(l, "in main chunk");
 			else if (*ar.what == 'C') // c function
-				lua_pushfstring(m_pScriptContext, "%s", ar.short_src);
+				lua_pushfstring(l, "%s", ar.short_src);
 			else
-				lua_pushfstring(m_pScriptContext, " in function <%s:%d>", ar.short_src, ar.linedefined);
+				lua_pushfstring(l, " in function <%s:%d>", ar.short_src, ar.linedefined);
 		}
 		}
-		lua_pushliteral(m_pScriptContext, "\r\n");
-		lua_concat(m_pScriptContext, lua_gettop(m_pScriptContext));
+		lua_pushliteral(l, "\r\n");
+		lua_concat(l, lua_gettop(l));
 	}
 
-	lua_concat(m_pScriptContext, lua_gettop((m_pScriptContext)));
+	lua_concat(l, lua_gettop((l)));
 
-	return lua_tostring(m_pScriptContext, -1);
+	return lua_tostring(l, -1);
 }
 
 bool CLua::AddFunction(const string &pFunctionName, LuaFunctionType pFunction)
@@ -242,24 +248,42 @@ bool CLua::PushFunction(int nFuncRef)
 	return true;
 }
 
+static int GlobalErrorHandler( lua_State *L)
+{
+	CLua::PushString(L,CLua::GetCallStack(L));
+	return 1;
+}
 
 CResult Sloong::CLua::RunFunction(const string & strFunctionName, CLuaPacket *pUserInfo, int funcid, const string &strRequest, const string &strExtend, string* extendDataUUID)
 {
 	int nTop = lua_gettop(m_pScriptContext);
-	int nErr = 0;
 
-	PushFunction("OnError");
-	nErr = lua_gettop(m_pScriptContext);
-
+	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
+	auto nErr = lua_gettop(m_pScriptContext);
+	
 	PushFunction(strFunctionName);
-	PushPacket(pUserInfo);
+	// Push params
 	PushInteger(funcid);
+	PushPacket(pUserInfo);
 	PushString(strRequest);
 	PushString(strExtend);
-	if (0 != lua_pcall(m_pScriptContext, 4, LUA_MULTRET, nErr))
+	auto res = lua_pcall(m_pScriptContext, 4, LUA_MULTRET, nErr);
+	lua_remove( m_pScriptContext, nErr );
+	if( res != LUA_OK )
 	{
-		HandlerError("Script Error",strFunctionName);
-		return CResult::Make_Error("Run script error.");
+		auto str = Helper::Format("\n [%d]Error - %s\n Error Message:%s", res, strFunctionName.c_str(), GetString(m_pScriptContext,1).c_str());
+
+		if (m_pErrorHandler)
+			m_pErrorHandler( str );
+		else
+		{
+			cout << str << endl;
+			#ifdef DEBUG
+				return CResult::Make_Error(str);
+			#else
+				return CResult::Make_Error("Service internal error.");
+			#endif
+		}
 	}
 	int nRes = (int)GetInteger(-1,0);
 	auto strResponse = GetString(-2,"");
