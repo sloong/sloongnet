@@ -87,31 +87,48 @@ CResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter *pProc
 		m_mapUserInfoList[msg->sender()] = make_unique<CLuaPacket>();
 
 	info = m_mapUserInfoList[msg->sender()].get();
-	auto res = pProcess->MsgProcess(msg->function(), info, msg->content(), msg->extend());
-	auto extendUUID = res.GetResultObject();
-	if (extendUUID.length() > 0)
+	auto function = msg->function();
+	auto& content =msg->content();
+	auto& extend = msg->extend();
+	m_pLog->Verbos(Helper::Format("Request [%d]:[%d][%d]", function, content.length(), extend.length()));
+	auto res = pProcess->MsgProcess(function, info, content, extend);
+	if( res.IsFialed() )
 	{
-		if (m_iC->ExistTempBytes(extendUUID))
-		{
-			int size = 0;
-			auto ptr = m_iC->GetTempBytes(extendUUID, &size);
-			pack->ResponsePackage(res.GetResult(), res.GetMessage(),ptr.get(), size);
-		}
-		else if (m_iC->ExistTempString(extendUUID))
-		{
-			pack->ResponsePackage(res.GetResult(), res.GetMessage(),m_iC->GetTempString(extendUUID));
-		}
-		else
-		{
-			m_pLog->Error("Message is required an extend UUID. but not find in IControl. Ignore the extend.");
-			pack->ResponsePackage(res.GetResult(), res.GetMessage());
-		}
+		m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%s].", function, ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
+		pack->ResponsePackage(res);
 	}
 	else
 	{
-		pack->ResponsePackage(res.GetResult(), res.GetMessage());
+		auto& content = res.GetMessage();
+		auto& extendUUID = res.GetResultObject();
+		if (extendUUID.length() > 0)
+		{
+			if (m_iC->ExistTempBytes(extendUUID))
+			{
+				int size = 0;
+				auto ptr = m_iC->GetTempBytes(extendUUID, &size);
+				m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length(), size));
+				pack->ResponsePackage(res.GetResult(), content,ptr.get(), size);
+			}
+			else if (m_iC->ExistTempString(extendUUID))
+			{
+				auto extend = m_iC->GetTempString(extendUUID);
+				m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length(), extend.length()));
+				pack->ResponsePackage(res.GetResult(), content, extend);
+			}
+			else
+			{
+				m_pLog->Error(Helper::Format("Response [%d]:[%s][%d][Message is required an extend UUID. but not find in IControl. Ignore.]", function, ResultType_Name(res.GetResult()).c_str(), content.length()));
+				pack->ResponsePackage(res.GetResult(),content);
+			}
+		}
+		else
+		{
+			m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length()));
+			pack->ResponsePackage(res);
+		}
 	}
-	return CResult(res.GetResult());
+	return CResult::Succeed();
 }
 
 CResult Sloong::LuaMiddleLayer::ResponsePackageProcesser(CLuaProcessCenter *pProcess, CDataTransPackage *pack)
