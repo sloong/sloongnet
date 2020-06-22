@@ -416,8 +416,8 @@ CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, CData
 			m_mapIDToTemplateItem[id].ToProtobuf(res.add_templateinfos());
 		}
 	}
-	auto& str_res = ConvertObjToStr(&res);
-	m_pLog->Debug("Query Template Succeed: [%s]", CBase64::Encode(str_res).c_str());
+	auto str_res = ConvertObjToStr(&res);
+	m_pLog->Debug(Helper::Format("Query Template Succeed: Count[%d];[%s]", res.templateinfos_size(), CBase64::Encode(str_res).c_str()));
 	return CResult::Make_OK(str_res);
 }
 
