@@ -285,10 +285,10 @@ CResult Sloong::CLua::RunFunction(const string & strFunctionName, CLuaPacket *pU
 			#endif
 		}
 	}
-	int nRes = (int)GetInteger(-1,0);
-	auto strResponse = GetString(-2,"");
+	int nRes = (int)GetInteger(1,0);
+	auto strResponse = GetString(2,"");
 	if( extendDataUUID)
-		*extendDataUUID = GetString(-3,"");
+		*extendDataUUID = GetString(3,"");
 	
 	lua_settop(m_pScriptContext, nTop);
 
