@@ -70,22 +70,10 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG *config)
 		return CResult::Make_Error("Config object is nullptr.");
 	}
 
-	auto& moduleConfig = config->moduleconfig();
-	if( moduleConfig.length() > 0 )
+	auto path = std::getenv("ManagerConfiguationDBFilePath");
+	if(path != nullptr )
 	{
-		Json::Value root;
-		Json::Reader reader;
-        if( !reader.parse(moduleConfig, root) )
-		{
-			return CResult::Make_Error("Parse module config fialed.");
-		}
-
-		if(!root["ConfiguationDBPath"].isString()) 
-		{
-			return CResult::Make_Error("ConfiguationDBPath type error. must as string.");
-		}
-		
-		m_strDBFilePath = root["ConfiguationDBPath"].asString();
+		m_strDBFilePath = path;
 	}
 	auto res = CServerManage::LoadManagerConfig(m_strDBFilePath);
 	if( res.IsFialed() )

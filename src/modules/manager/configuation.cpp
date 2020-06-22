@@ -16,11 +16,11 @@ Sloong::CConfiguation::CConfiguation()
 
 CResult Sloong::CConfiguation::Initialize(const string &dbPath)
 {
-		if( 0 != access(dbPath.c_str(), R_OK) )
-		{
-			return CResult::Make_Error("Configuation database file no exist or no access. file path: " + dbPath);
-		}
-        
+    if (0 != access(dbPath.c_str(), R_OK))
+    {
+        return CResult::Make_Error("Configuation database file no exist or no access. file path: " + dbPath);
+    }
+
     unique_lock<mutex> lck(m_oMutex);
     m_oStorage = make_unique<Storage>(InitStorage(dbPath));
     m_bInitialized = true;
