@@ -14,7 +14,7 @@
 
 using namespace Sloong::Events;
 
-CResult Sloong::CServerManage::Initialize(IControl *ic)
+CResult Sloong::CServerManage::Initialize(IControl *ic, const string& db_path )
 {
 	IObject::Initialize(ic);
 
@@ -33,7 +33,7 @@ CResult Sloong::CServerManage::Initialize(IControl *ic)
 
 	if (!CConfiguation::Instance->IsInituialized())
 	{
-		auto res = CConfiguation::Instance->Initialize("/data/configuation.db");
+		auto res = CConfiguation::Instance->Initialize(db_path);
 		if (res.IsFialed())
 			return res;
 	}
@@ -50,11 +50,11 @@ CResult Sloong::CServerManage::Initialize(IControl *ic)
 	
 }
 
-CResult Sloong::CServerManage::LoadManagerConfig()
+CResult Sloong::CServerManage::LoadManagerConfig( const string& db_path)
 {
 	if (!CConfiguation::Instance->IsInituialized())
 	{
-		auto res = CConfiguation::Instance->Initialize("/data/configuation.db");
+		auto res = CConfiguation::Instance->Initialize(db_path);
 		if (res.IsFialed())
 			return res;
 	}

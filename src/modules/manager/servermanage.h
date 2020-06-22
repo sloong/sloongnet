@@ -118,7 +118,7 @@ namespace Sloong
     class CServerManage : public IObject
     {
     public:
-        CResult Initialize(IControl *ic);
+        CResult Initialize(IControl *ic, const string&);
         
         void OnSocketClosed(SOCKET);
 
@@ -138,7 +138,7 @@ namespace Sloong
         CResult ReportLoadStatusHandler(const string &, CDataTransPackage *);
 
     public:
-        static CResult LoadManagerConfig();
+        static CResult LoadManagerConfig(const string&);
         static CResult ResetManagerTemplate(GLOBAL_CONFIG *config);
 
 

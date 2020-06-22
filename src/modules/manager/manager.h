@@ -48,6 +48,7 @@ namespace Sloong
 		IControl *m_pControl = nullptr;
 		CLog *m_pLog = nullptr;
 		GLOBAL_CONFIG *m_pConfig;
+		string m_strDBFilePath="./configuation.db";
 
 	public:
 		static unique_ptr<SloongControlService> Instance;

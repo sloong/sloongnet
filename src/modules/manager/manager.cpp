@@ -70,10 +70,28 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG *config)
 		return CResult::Make_Error("Config object is nullptr.");
 	}
 
-	auto res = CServerManage::LoadManagerConfig();
+	auto& moduleConfig = config->moduleconfig();
+	if( moduleConfig.length() > 0 )
+	{
+		Json::Value root;
+		Json::Reader reader;
+        if( !reader.parse(moduleConfig, root) )
+		{
+			return CResult::Make_Error("Parse module config fialed.");
+		}
+
+		if(!root["ConfiguationDBPath"].isString()) 
+		{
+			return CResult::Make_Error("ConfiguationDBPath type error. must as string.");
+		}
+		
+		m_strDBFilePath = root["ConfiguationDBPath"].asString();
+	}
+	auto res = CServerManage::LoadManagerConfig(m_strDBFilePath);
 	if( res.IsFialed() )
 		return res;
 	auto config_str = res.GetMessage();
+	
 	// Here, this port is came from COMMAND LINE.
 	// So we need save it before parse other setting.
 	auto port = config->listenport();
@@ -107,7 +125,7 @@ CResult SloongControlService::Initialized(IControl *iC)
 
 void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG *config)
 {
-	config->set_logpath("/data/log");
+	config->set_logpath("./log");
 	config->set_loglevel(Core::LogLevel::Info);
 	config->set_mqthreadquantity(1);
 	config->set_enablessl(false);
@@ -127,7 +145,7 @@ void Sloong::SloongControlService::OnSocketClose(IEvent *event)
 inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(void **out_env)
 {
 	auto item = make_unique<CServerManage>();
-	auto res = item->Initialize(m_pControl);
+	auto res = item->Initialize(m_pControl,m_strDBFilePath);
 	if (res.IsFialed())
 		return res;
 	(*out_env) = item.get();
