@@ -171,7 +171,7 @@ CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 
 	auto req_str = pack->GetRecvMessage();
 	auto func_name = Functions_Name(function);
-	m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), req_str.c_str()));
+	m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), CBase64::Encode(req_str).c_str()));
 	if (!m_mapFuncToHandler.exist(function))
 	{
 		pack->ResponsePackage(ResultType::Error, Helper::Format("Function [%s] no handler.", func_name.c_str()));
@@ -179,7 +179,7 @@ CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 	}
 
 	auto res = m_mapFuncToHandler[function](req_str, pack);
-	m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
+	m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), CBase64::Encode(res.GetMessage()).c_str()));
 	if( res.GetResult() == ResultType::Ignore )
 		return res;
 	pack->ResponsePackage(res);
@@ -416,8 +416,9 @@ CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, CData
 			m_mapIDToTemplateItem[id].ToProtobuf(res.add_templateinfos());
 		}
 	}
-
-	return CResult::Make_OK(ConvertObjToStr(&res));
+	auto& str_res = ConvertObjToStr(&res);
+	m_pLog->Debug("Query Template Succeed: [%s]", CBase64::Encode(str_res).c_str());
+	return CResult::Make_OK(str_res);
 }
 
 CResult Sloong::CServerManage::QueryNodeHandler(const string &req_str, CDataTransPackage *pack)
