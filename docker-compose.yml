@@ -3,9 +3,9 @@ services:
   controler:
     image: sloong/sloongnet:latest
     container_name: controler
-    environment:
-      - ADDRESS_INFO=0.0.0.0:8000
-      - NODE_TYPE=Manager
+    command:
+      - Manager
+      - 0.0.0.0:8000
     ports:
       - "18000:8000"
     volumes:
