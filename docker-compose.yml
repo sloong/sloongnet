@@ -1,8 +1,8 @@
 version: '3.2'
 services:
-  controler:
+  controller:
     image: sloong/sloongnet:latest
-    container_name: controler
+    container_name: controller
     command:
       - Manager
       - 0.0.0.0:8000
@@ -19,8 +19,6 @@ services:
   moduler:
     image: sloong/sloongnet:latest
     container_name: moduler
-    environment:
-      - ADDRESS_INFO=controler:8000
     ports:
       - "18002:8000"
     volumes:
@@ -28,7 +26,7 @@ services:
     networks:
       - sloongnet
     depends_on:
-      - controler
+      - controller
     deploy:
       mode: replicated
       replicas: 1

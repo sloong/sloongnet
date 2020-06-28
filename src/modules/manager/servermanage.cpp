@@ -225,10 +225,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CData
 	
 	if (index == 0)
 	{
-		char m_pMsgBuffer[8] = {0};
-		char *pCpyPoint = m_pMsgBuffer;
-		Helper::Int64ToBytes(sender, pCpyPoint);
-		return CResult(ResultType::Retry, string(m_pMsgBuffer, 8));
+		return CResult(ResultType::Retry, "Wait");
 	}
 
 	if (sender_info == nullptr)
