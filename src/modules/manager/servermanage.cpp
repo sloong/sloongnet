@@ -236,7 +236,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CData
 
 	if(!m_mapIDToTemplateItem.exist(index) )
 	{
-		return CResult::Make_Error("Allocating type no configuation info.");
+		return CResult(ResultType::Retry, "Allocating type no exist.");
 	}
 
 	auto tpl = m_mapIDToTemplateItem[index];
