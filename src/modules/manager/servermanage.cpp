@@ -46,6 +46,7 @@ CResult Sloong::CServerManage::Initialize(IControl *ic, const string& db_path )
 		m_mapIDToTemplateItem[addItem.ID] = addItem;
 		RefreshModuleReference(addItem.ID);
 	}
+	m_mapIDToTemplateItem[1].Created.push_back(0);
 	return CResult::Succeed();
 	
 }
