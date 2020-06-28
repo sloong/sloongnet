@@ -17,11 +17,11 @@ namespace Sloong
     const static string Default_Create_Database_File_SQL = 
 "CREATE TABLE 'template_list' (\
   'id' integer NOT NULL,\
-  'configuation' blob,\
+  'replicas' integer,\
   'name' TEXT,\
   'note' TEXT,\
-  'replicas' integer,\
   'reference' TEXT,\
+  'configuation' blob,\
   PRIMARY KEY ('id')\
 );";
 
@@ -29,10 +29,10 @@ namespace Sloong
     {
         int id;
         int replicas;
-        vector<char> configuation;
         string name;
         string note;
         string reference;
+        vector<char> configuation;
     };
 
     inline auto InitStorage(const string& path) {
@@ -41,10 +41,11 @@ namespace Sloong
             make_table(TEMPLATE_TBL_NAME,
                 make_column("id", &TemplateInfo::id, autoincrement(), primary_key()),
                 make_column("replicas", &TemplateInfo::replicas),
-                make_column("configuation", &TemplateInfo::configuation),
                 make_column("name", &TemplateInfo::name),
                 make_column("note", &TemplateInfo::note),
-                make_column("reference", &TemplateInfo::reference))
+                make_column("reference", &TemplateInfo::reference),
+                make_column("configuation", &TemplateInfo::configuation)
+            )
         );
     }
 

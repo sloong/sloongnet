@@ -236,6 +236,11 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CData
 		return CResult::Make_Error("Add server info to ServerList fialed.");
 	}
 
+	if(!m_mapIDToTemplateItem.exist(index) )
+	{
+		return CResult::Make_Error("Allocating type no configuation info.");
+	}
+
 	auto tpl = m_mapIDToTemplateItem[index];
 	RegisteWorkerResponse res;
 	res.set_templateid(tpl.ID);

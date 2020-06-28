@@ -61,6 +61,7 @@ namespace Sloong
             ID = info.id;
             Name = info.name;
             Note = info.note;
+            //Configuation = CBase64::Decode(this->Configuation);// string(info.configuation.begin(), info.configuation.end());
             Configuation = string(info.configuation.begin(), info.configuation.end());
             Replicas = info.replicas;
             BuildCache();
@@ -68,6 +69,7 @@ namespace Sloong
         TemplateInfo ToTemplateInfo()
         {
             TemplateInfo info;
+            //info.configuation = CBase64::Encode(this->Configuation);//   vector<char>(this->Configuation.begin(), this->Configuation.end());
             info.configuation = vector<char>(this->Configuation.begin(), this->Configuation.end());
             info.id = this->ID;
             info.name = this->Name;
