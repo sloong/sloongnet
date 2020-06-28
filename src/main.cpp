@@ -49,6 +49,12 @@ int main(int argc, char **args)
 {
 	try
 	{
+		cout << "Command line:";
+		for (int i = 1; i < argc; i++)
+		{
+			cout << args[i] << " ";
+		}
+		cout << endl;
 		CmdInfo info;
 		for (int i = 1; i < argc; i++)
 		{

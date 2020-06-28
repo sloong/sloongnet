@@ -12,8 +12,6 @@ RUN /tmp/build/build.sh -r
 FROM ubuntu:20.04
 
 LABEL maintainer="admin@sloong.com"
-ENV ADDRESS_INFO=0.0.0.0:8000
-ENV NODE_TYPE=Worker
 
 RUN apt update && apt install -y \
     libsqlite3-0 libprotobuf17 libuuid1 libssl1.1  libjsoncpp1 libmariadb3 libluajit-5.1-2
@@ -25,4 +23,4 @@ RUN mkdir -p /data/log
 VOLUME /data
 EXPOSE 8000
 ENTRYPOINT ["/usr/local/bin/sloongnet"]
-CMD [$NODE_TYPE,$ADDRESS_INFO]
+CMD ["Worker","controller:8000"]
