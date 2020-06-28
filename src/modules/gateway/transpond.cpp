@@ -67,7 +67,7 @@ CResult Sloong::GatewayTranspond::MessageToClient(RequestInfo *req_info, CDataTr
 	auto res_data = res_pack->GetDataPackage();
 	res_data->set_id(req_info->SerialNumber);
 	res_pack->SetConnection(req_info->RequestConnect);
-	res_pack->ResponsePackage(res_data->result());
+	res_pack->ResponsePackage(res_data);
 
 	auto t = res_pack->GetRecord();
 	t->push_front(req_info->tProcess);

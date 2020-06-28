@@ -32,11 +32,10 @@ void Sloong::CDataTransPackage::RequestPackage(const DataPackage &pack)
 	RequestPackage();
 }
 
-void Sloong::CDataTransPackage::ResponsePackage(const DataPackage &pack)
+void Sloong::CDataTransPackage::ResponsePackage(DataPackage *pack)
 {
-	m_pTransPackage = pack;
-	m_pTransPackage.clear_extend();
-	m_pTransPackage.clear_content();
+	if( pack != nullptr && (uint64_t)pack != (uint64_t)this )
+		m_pTransPackage = *pack;
 	m_pTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
 	PrepareSendPackageData();
 }

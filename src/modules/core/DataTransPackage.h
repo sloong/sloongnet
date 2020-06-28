@@ -22,12 +22,78 @@ namespace Sloong
         void RequestPackage();
         void RequestPackage(const DataPackage &);
 
+        /**
+         * @Summary: 
+         *      Response datapackage only with an result code. 
+         * @Params: 
+         *      Result type. 
+         * @Remarks: 
+         *      Only used it when you just need return an result code. 
+         *      This function will !!! auto clear the Content and Extend !!!.
+         */
         void ResponsePackage(ResultType);
-        void ResponsePackage(ResultType, const string &);
-        void ResponsePackage(ResultType, const string &, const string& extend);
-        void ResponsePackage(ResultType, const string &, const char* exnted, int size);
+
+        /**
+         * @Summary: 
+         *      Response datapackage with content (Recommend)
+         * @Params: 
+         *      1 > Result object
+         * @Remarks: 
+         *      Only used it when you don't need return the extend data. 
+         *      This function will !!! auto clear the Extend !!!.
+         */
         void ResponsePackage(const CResult &);
-        void ResponsePackage(const DataPackage &);
+
+        /**
+         * @Summary: 
+         *      Response datapackage with content.
+         * @Params: 
+         *      1 > Result type. 
+         *      2 > Response content.
+         * @Remarks: 
+         *      Only used it when you don't need return the extend data. 
+         *      This function will !!! auto clear the Extend !!!.
+         */
+        void ResponsePackage(ResultType, const string &);
+        
+        /**
+         * @Summary: 
+         *      Response datapackage with content and extend data.
+         * @Params: 
+         *      1 > Result type. 
+         *      2 > Response content.
+         *      3 > Response extend data.
+         * @Remarks: 
+         *      Only used it when you need return and extend data. 
+         *      This package will be see big package, and add to send list.
+         */
+        void ResponsePackage(ResultType, const string &, const string& extend);
+
+        /**
+         * @Summary: 
+         *      Response datapackage with content and extend data.
+         * @Params: 
+         *      1 > Result type. 
+         *      2 > Response content.
+         *      3 > Response extend data pointer.
+         *      4 > Response extend data size.
+         * @Remarks: 
+         *      Only used it when you need return and extend data. 
+         *      This package will be see big package, and add to send list.
+         */
+        void ResponsePackage(ResultType, const string &, const char* exnted, int size);
+
+        /**
+         * @Summary: 
+         *      Response datapackage with an exist DataPackage object.
+         * @Params: 
+         *      1 > The DataPackage object.
+         * @Remarks: 
+         *      Only used it when you need control everything. 
+         *      This function just set the status to response.
+         */
+        void ResponsePackage(DataPackage*);
+
 
     protected:
         void PrepareSendPackageData();
