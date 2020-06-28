@@ -60,7 +60,7 @@ CResult Sloong::CServerManage::LoadManagerConfig( const string& db_path)
 	}
 	auto res =  CConfiguation::Instance->GetTemplate(1);
 	if( res.IsFialed())
-		return res;
+		return CResult(ResultType::Warning);
 	return CResult::Make_OK(string(res.GetResultObject().configuation.begin(), res.GetResultObject().configuation.end()));
 }
 

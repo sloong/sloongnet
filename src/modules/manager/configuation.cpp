@@ -18,7 +18,10 @@ CResult Sloong::CConfiguation::Initialize(const string &dbPath)
 {
     if (0 != access(dbPath.c_str(), R_OK))
     {
-        return CResult::Make_Error("Configuation database file no exist or no access. file path: " + dbPath);
+        CSQLiteEx sql;
+        auto res = sql.Initialize(dbPath,Default_Create_Database_File_SQL);
+        if( res.IsFialed() )
+            return res;
     }
 
     unique_lock<mutex> lck(m_oMutex);
@@ -36,6 +39,10 @@ TResult<TemplateInfo> Sloong::CConfiguation::GetTemplate(int id)
         return TResult<TemplateInfo>::Make_OK(template_item);
     }
     catch (system_error &ex)
+    {
+        return TResult<TemplateInfo>::Make_Error(ex.what());
+    }
+    catch ( exception &ex)
     {
         return TResult<TemplateInfo>::Make_Error(ex.what());
     }

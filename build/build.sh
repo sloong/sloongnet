@@ -63,7 +63,6 @@ build(){
 	cp $CMAKE_FILE_PATH/referenced/libuniv/libuniv.so $OUTPATH/
 	cp $SCRIPTFOLDER/$MAKEFLAG/$PROJECT $OUTPATH/
 	cp $SCRIPTFOLDER/$MAKEFLAG/libcore.so $OUTPATH/
-	cp $CMAKE_FILE_PATH/../configuation.db $OUTPATH/
 	cp $CMAKE_FILE_PATH/../docker/run.sh $OUTPATH/
 	cp $SCRIPTFOLDER/$MAKEFLAG/modules/*.so $OUTPATH/modules/
 }
@@ -89,7 +88,6 @@ zipfile(){
 	cd $CMAKE_FILE_PATH/referenced/libuniv
 	tar -rv -f $OUTFILE.tar libuniv.so
 	cd $CMAKE_FILE_PATH/..
-	tar -rv -f $OUTFILE.tar configuation.db
 	tar -rv -f $OUTFILE.tar -C $SCRIPTFOLDER/$MAKEFLAG $PROJECT
 	cd $SCRIPTFOLDER/$MAKEFLAG
 	tar -rv -f $OUTFILE.tar modules/*.so 

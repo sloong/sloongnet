@@ -76,8 +76,9 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG *config)
 		m_strDBFilePath = path;
 	}
 	auto res = CServerManage::LoadManagerConfig(m_strDBFilePath);
-	if( res.IsFialed() )
+	if( res.GetResult() != ResultType::Warning && res.GetResult() != ResultType::Succeed )
 		return res;
+	
 	auto config_str = res.GetMessage();
 	
 	// Here, this port is came from COMMAND LINE.

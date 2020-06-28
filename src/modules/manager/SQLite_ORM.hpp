@@ -14,6 +14,17 @@ namespace Sloong
 {
     const static string TEMPLATE_TBL_NAME = "template_list";
 
+    const static string Default_Create_Database_File_SQL = 
+"CREATE TABLE 'template_list' (\
+  'id' integer NOT NULL,\
+  'configuation' blob,\
+  'name' TEXT,\
+  'note' TEXT,\
+  'replicas' integer,\
+  'reference' TEXT,\
+  PRIMARY KEY ('id')\
+);";
+
     struct TemplateInfo
     {
         int id;
