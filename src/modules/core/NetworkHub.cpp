@@ -234,6 +234,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 {
 	m_pLog->Debug("MessageProcessWorkLoop thread is running.");
 	void *pEnv;
+	m_pLog->Verbos("Call module create process environment function.");
 	auto res = m_pCreateEnvFunc(&pEnv);
 	if (res.IsFialed())
 	{
@@ -245,8 +246,13 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 	{
 		m_pLog->Warn("Create called succeed, but the evnironment value is null.");
 	}
+	else
+	{
+		m_pLog->Verbos("Create called succeed.");
+	}
 
 	UniqueTransPackage pack;
+	DataPackage* data_pack = nullptr;
 	while (m_bIsRunning)
 	{
 		try
@@ -264,11 +270,12 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					res.SetResult(ResultType::Invalid);
 
 					pack->Record();
-					switch (pack->GetDataPackage()->type())
+					data_pack = pack->GetDataPackage();
+					switch (data_pack->type())
 					{
 					case DataPackage_PackageType::DataPackage_PackageType_EventPackage:
 					{
-						switch (pack->GetDataPackage()->function())
+						switch (data_pack->function())
 						{
 						case ControlEvent::Restart:
 							m_pLog->Info("Received restart control event. application will restart.");
@@ -286,7 +293,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					break;
 					case DataPackage_PackageType::DataPackage_PackageType_RequestPackage:
 					{
-						if (pack->GetDataPackage()->status() == DataPackage_StatusType::DataPackage_StatusType_Request)
+						if (data_pack->status() == DataPackage_StatusType::DataPackage_StatusType_Request)
 						{
 							res = m_pRequestFunc(pEnv, pack.get());
 						}
@@ -300,6 +307,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 						m_pLog->Warn("Data package check type error. cannot process.");
 					}
 					pack->Record();
+					data_pack = nullptr;
 					if (res.IsSucceed())
 						AddMessageToSendList(pack);
 					else
