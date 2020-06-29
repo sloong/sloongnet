@@ -23,11 +23,7 @@ CResult Sloong::GatewayTranspond::Initialize(IControl* ic)
 
 CResult GatewayTranspond::RequestPackageProcesser(CDataTransPackage *trans_pack)
 {
-	m_pLog->Debug("Receive new request package.");
-	auto res = MessageToProcesser(trans_pack);
-	m_pLog->Debug(Helper::Format("Response [%s][%s].", ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
-	trans_pack->ResponsePackage(res);
-	return CResult::Succeed();
+	return MessageToProcesser(trans_pack);
 }
 
 CResult GatewayTranspond::ResponsePackageProcesser( RequestInfo* info, CDataTransPackage *trans_pack)
@@ -38,11 +34,14 @@ CResult GatewayTranspond::ResponsePackageProcesser( RequestInfo* info, CDataTran
 
 CResult Sloong::GatewayTranspond::MessageToProcesser(CDataTransPackage *pack)
 {
+	m_pLog->Debug("Receive new request package.");
 	auto data_pack = pack->GetDataPackage();
 	auto target = SloongNetGateway::Instance->GetPorcessConnect(data_pack->function());
 	if( target == INVALID_SOCKET )
 	{
-		return CResult::Make_Error("No process service online .");
+		pack->ResponsePackage(ResultType::Error,"No process service online .");
+		m_pLog->Debug(Helper::Format("No find process service for function[%d]. package [%d][%llu]", data_pack->function(),  pack->GetSocketID(), pack->GetSerialNumber() ));
+		return CResult::Succeed();
 	}
 
 	RequestInfo info;
