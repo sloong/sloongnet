@@ -84,11 +84,9 @@ build_release(){
 
 zipfile(){
 	OUTFILE=$OUTPATH-v$VERSION_STR
-	cd $CMAKE_FILE_PATH/referenced/libuniv
-	tar -rv -f $OUTFILE.tar libuniv.so
-	cd $CMAKE_FILE_PATH/..
-	tar -rv -f $OUTFILE.tar -C $SCRIPTFOLDER/$MAKEFLAG $PROJECT
-	cd $SCRIPTFOLDER/$MAKEFLAG
+	cd $OUTPATH
+	tar -rv -f $OUTFILE.tar *.so
+	tar -rv -f $OUTFILE.tar $PROJECT
 	tar -rv -f $OUTFILE.tar modules/*.so 
 }
 
