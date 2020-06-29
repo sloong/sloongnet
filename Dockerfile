@@ -1,7 +1,7 @@
 FROM gcc:9.3 AS build-env
 
 RUN apt update && apt install -y \
-    unzip cmake libsqlite3-dev libprotobuf-dev protobuf-compiler uuid-dev libssl-dev libjsoncpp-dev libmariadbclient-dev libluajit-5.1-dev
+    cmake libsqlite3-dev libprotobuf-dev protobuf-compiler uuid-dev libssl-dev libjsoncpp-dev libmariadbclient-dev libluajit-5.1-dev
 
 COPY . /tmp/
 WORKDIR /tmp

@@ -132,7 +132,7 @@ ResultType Sloong::EasyConnect::SendPackage(const string &data, int &nSentSize)
 		lendata.append(data);
 		nCurSent = Write(lendata, 0);
 		// In first time send. the length data must send succeed. 
-		if (nCurSent > nLen)
+		if (nCurSent >= nLen)
 			nSentSize = nCurSent - nLen;
 		else
 			return ResultType::Error;

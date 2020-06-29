@@ -17,7 +17,7 @@ void Sloong::CDataTransPackage::PrepareSendPackageData()
 		m_pTransPackage.SerializeToString(&m_strPackageData);	
 	}
 	if (g_pLog != nullptr)
-		g_pLog->Debug(Helper::Format("SEND>>>No[%llu]>>[%d]>>[%d]byte", m_pTransPackage.priority(), m_pTransPackage.id(), m_nPackageSize));
+		g_pLog->Debug(Helper::Format("SEND>>>[%d]>>No[%llu]>>[%d]byte>>>>%s", m_pTransPackage.priority(), m_pTransPackage.id(), m_nPackageSize, CBase64::Encode(m_strPackageData).c_str()));
 }
 
 void Sloong::CDataTransPackage::RequestPackage()
@@ -171,7 +171,7 @@ ResultType Sloong::CDataTransPackage::RecvPackageSucceedProcess(const string& re
 	}
 
 	if (g_pLog)
-		g_pLog->Debug(Helper::Format("RECV<<<No[%llu]<<[%d]<<[%d]byte", m_pTransPackage.priority(), m_pTransPackage.id(), result.size()));
+		g_pLog->Debug(Helper::Format("RECV<<<[%d]<<No[%llu]<<[%d]byte<<<<%s", m_pTransPackage.priority(), m_pTransPackage.id(), result.size(), CBase64::Encode(result).c_str()));
 
 	if( result.size() > g_max_package_size )
 	{

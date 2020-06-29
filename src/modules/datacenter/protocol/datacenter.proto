@@ -5,13 +5,30 @@ package DataCenter;
 enum Functions{
     Invalid=0;
     reserved 1 to 200;
-    RunSQL=201;
+
+    //
+    // Request:ConnectDatabaseRequest
+    // Response:ConnectDatabaseResponse
+    ConnectDatabase=201;
+
+    //
+    // Request:PostLogMessageRequest
+    // Response:Result
+    RunSQL=202;
     reserved 300 to max;
 }
 
+message ConnectDatabaseRequest{
+    string DatabaseName=1;
+}
+
+message ConnectDatabaseResponse{
+    int32 SessionID=1;
+}
 
 message RunSQLRequest{
-    string SQLCMD=1;
+    int32 SessionID=1;
+    string SQLCMD=2;
 }
 
 message RunSQLResponse{
