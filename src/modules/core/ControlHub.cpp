@@ -116,8 +116,8 @@ void Sloong::CControlHub::CallMessage(UniqueEvent event)
 		for (auto func : handler_list)
 			func(event.get());
 
-		if (m_listMsgHook.exist(event->GetEvent()))
-			m_listMsgHook[event->GetEvent()](std::move(event));
+		if (m_listMsgHook.exist(evt_type))
+			m_listMsgHook[evt_type](std::move(event));
 
 		event = nullptr;
 	}

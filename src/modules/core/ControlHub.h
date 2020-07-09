@@ -43,7 +43,8 @@ namespace Sloong
 
 		inline void RegisterEvent(EVENT_TYPE t)
 		{
-			m_oMsgHandlerList[t] = vector<MsgHandlerFunc>();
+			if( !m_oMsgHandlerList.exist(t))
+				m_oMsgHandlerList[t] = vector<MsgHandlerFunc>();
 		}
 		void RegisterEventHandler(EVENT_TYPE, MsgHandlerFunc);
 		inline void RegisterEventHook(EVENT_TYPE t, MsgHookFunc func)
