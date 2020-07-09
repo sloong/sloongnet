@@ -27,7 +27,7 @@
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
                     "Manager",
-                    "0.0.0.0:9000"
+                    "0.0.0.0:19000"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/debug/",
@@ -43,7 +43,7 @@
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
                     "Worker",
-                    "127.0.0.1:9000"
+                    "127.0.0.1:19000"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/debug/",

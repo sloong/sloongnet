@@ -3,19 +3,10 @@
 #include "IData.h"
 using namespace Sloong;
 
-CLuaProcessCenter::~CLuaProcessCenter()
-{
-	size_t nLen = m_pLuaList.size();
-	for (size_t i = 0; i < nLen; i++)
-	{
-		SAFE_DELETE(m_pLuaList[i]);
-	}
-}
-
 CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 {
 	IObject::Initialize(iMsg);
-	 
+
 	CGlobalFunction::Instance->Initialize(m_iC);
 	m_pConfig = IData::GetModuleConfig();
 
@@ -27,13 +18,13 @@ CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 	// 在处理完毕之后重新加回到可用队列中。
 	// 这里使用处理线程池的数量进行初始化，保证在所有线程都在处理Lua请求时不会因luacontext发生堵塞
 	auto num = m_pConfig->operator[]("LuaContextQuantity").asInt();
-	if( num < 1 )
+	if (num < 1)
 		return CResult::Make_Error("LuaContextQuantity must be bigger than 0,");
 
 	for (int i = 0; i < num; i++)
 	{
 		auto res = NewThreadInit();
-		if( res.IsFialed() )
+		if (res.IsFialed())
 			return res;
 	}
 	return CResult::Succeed();
@@ -46,25 +37,26 @@ void Sloong::CLuaProcessCenter::HandleError(const string &err)
 
 void Sloong::CLuaProcessCenter::ReloadContext(IEvent *event)
 {
-	size_t n = m_pLuaList.size();
-	for (size_t i = 0; i < n; i++)
+	for (auto &i : m_listLuaContent)
 	{
-		m_oReloadList[i] = true;
+		i.Reload = true;
 	}
 }
 
 CResult Sloong::CLuaProcessCenter::NewThreadInit()
 {
-	CLua *pLua = new CLua();
-	pLua->SetErrorHandle(std::bind(&CLuaProcessCenter::HandleError,this,placeholders::_1));
-	pLua->SetScriptFolder(m_pConfig->operator[]("LuaScriptFolder").asString());
-	CGlobalFunction::Instance->RegistFuncToLua(pLua);
-	auto res = InitLua(pLua, m_pConfig->operator[]("LuaScriptFolder").asString());
-	if( res.IsFialed() )
+	LuaContent lua;
+	lua.Content = new CLua();
+	lua.Reload = false;
+	lua.Content->SetErrorHandle(std::bind(&CLuaProcessCenter::HandleError, this, placeholders::_1));
+	lua.Content->SetScriptFolder(m_pConfig->operator[]("LuaScriptFolder").asString());
+	CGlobalFunction::Instance->RegistFuncToLua(lua.Content);
+	auto res = InitLua(lua.Content, m_pConfig->operator[]("LuaScriptFolder").asString());
+	if (res.IsFialed())
 		return res;
-	m_pLuaList.push_back(pLua);
-	m_oReloadList.push_back(false);
-	int id = (int)m_pLuaList.size() - 1;
+	
+	m_listLuaContent.push_back(lua);
+	int id = (int)m_listLuaContent.size() - 1;
 	FreeLuaContext(id);
 	return CResult::Succeed();
 }
@@ -75,7 +67,7 @@ CResult Sloong::CLuaProcessCenter::InitLua(CLua *pLua, string folder)
 	{
 		return CResult::Make_Error("Run Script Fialed.");
 	}
-	if(!pLua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), Helper::Format("'%s'", folder.c_str())))
+	if (!pLua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), Helper::Format("'%s'", folder.c_str())))
 	{
 		return CResult::Make_Error("Run Function Fialed.");
 	}
@@ -86,8 +78,8 @@ void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket *uinfo)
 {
 	// call close function.
 	int id = GetFreeLuaContext();
-	CLua *pLua = m_pLuaList[id];
-	pLua->RunFunction(m_pConfig->operator[]("LuaSocketCloseFunction").asString(), uinfo, 0, "", "" );
+	auto pLua = m_listLuaContent[id].Content;
+	pLua->RunFunction(m_pConfig->operator[]("LuaSocketCloseFunction").asString(), uinfo, 0, "", "");
 	FreeLuaContext(id);
 }
 
@@ -98,24 +90,24 @@ SResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 		return SResult::Make_Error("server is busy now. please try again.");
 	try
 	{
-		CLua *pLua = m_pLuaList[id];
-		if (m_oReloadList[id] == true)
+		auto &content = m_listLuaContent[id];
+		if (true == content.Reload)
 		{
-			InitLua(pLua, m_pConfig->operator[]("LuaScriptFolder").asString());
-			m_oReloadList[id] = false;
+			InitLua(content.Content, m_pConfig->operator[]("LuaScriptFolder").asString());
+			content.Reload = false;
 		}
 		string extendUUID("");
-		auto res = pLua->RunFunction(m_pConfig->operator[]("LuaProcessFunction").asString(), pUInfo, function, msg, extend, &extendUUID);
+		auto res = content.Content->RunFunction(m_pConfig->operator[]("LuaProcessFunction").asString(), pUInfo, function, msg, extend, &extendUUID);
 		FreeLuaContext(id);
-		if( res.IsFialed() )
+		if (res.IsFialed())
 			return SResult::Make_Error(res.GetMessage());
 		else
-			return SResult::Make_OK(extendUUID,res.GetMessage());
+			return SResult::Make_OK(extendUUID, res.GetMessage());
 	}
-	catch (const exception& ex)
+	catch (const exception &ex)
 	{
 		FreeLuaContext(id);
-		return SResult::Make_Error("server process error."+string(ex.what()));
+		return SResult::Make_Error("server process error." + string(ex.what()));
 	}
 	catch (...)
 	{
@@ -126,7 +118,6 @@ SResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 #define LUA_CONTEXT_WAIT_SECONDE 10
 int Sloong::CLuaProcessCenter::GetFreeLuaContext()
 {
-
 	for (int i = 0; i < LUA_CONTEXT_WAIT_SECONDE && m_oFreeLuaContext.empty(); i++)
 	{
 		m_pLog->Debug("Wait lua context 1 sencond :" + Helper::ntos(i));

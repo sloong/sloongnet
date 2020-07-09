@@ -19,12 +19,24 @@ namespace Sloong
 	{
 		class CNetworkEvent;
 	}
+	class LuaContent
+	{
+	public:
+		void Destory(){
+			SAFE_DELETE(Content);
+		}
+		bool Reload = false;
+		CLua* Content = nullptr;
+	};
 	using namespace Events;
 	class CLuaProcessCenter : IObject
 	{
 	public:
 		CLuaProcessCenter(){}
-		~CLuaProcessCenter();
+		~CLuaProcessCenter(){
+			for( auto& i: m_listLuaContent)
+				i.Destory();
+		}
 
 		CResult Initialize(IControl* iMsg);
 		CResult NewThreadInit();
@@ -39,8 +51,7 @@ namespace Sloong
 		void HandleError(const string& err);
 		void ReloadContext(IEvent* event);
 	protected:
-		vector<CLua*>	m_pLuaList;
-		vector<bool>	m_oReloadList;
+		vector<LuaContent>	m_listLuaContent;
 		queue_ex<int>		m_oFreeLuaContext;
 		CEasySync		m_oSSync;
 		Json::Value*	m_pConfig;
