@@ -34,7 +34,7 @@ string Sloong::CControlHub::GetTempString(const string &key)
 {
 	auto item = m_oTempStringList.find(key);
 	if (item == m_oTempStringList.end())
-		return nullptr;
+		return string();
 
 	auto res = (*item).second;
 	m_oTempStringList.erase(key);
