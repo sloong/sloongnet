@@ -5,83 +5,83 @@ size_t Sloong::CDataTransPackage::g_max_package_size = 5* 1024 *1024;
 
 void Sloong::CDataTransPackage::PrepareSendPackageData()
 {
-	m_pTransPackage.SerializeToString(&m_strPackageData);
+	m_oTransPackage.SerializeToString(&m_strPackageData);
 	m_nPackageSize = (int)m_strPackageData.length();
 	if( m_nPackageSize > (int)g_max_package_size)
 	{
-		m_pTransPackage.set_result(ResultType::Error);
-		m_pTransPackage.set_content("The package size is to bigger.");
-		m_pTransPackage.clear_extend();
+		m_oTransPackage.set_result(ResultType::Error);
+		m_oTransPackage.set_content("The package size is to bigger.");
+		m_oTransPackage.clear_extend();
 		if (g_pLog != nullptr)
 			g_pLog->Assert("The package size is to bigger, this's returned and replaced with an error message package.");
-		m_pTransPackage.SerializeToString(&m_strPackageData);	
+		m_oTransPackage.SerializeToString(&m_strPackageData);	
 	}
 	if (g_pLog != nullptr)
-		g_pLog->Debug(Helper::Format("SEND>>>[%d]>>No[%llu]>>[%d]byte>>>>%s", m_pTransPackage.priority(), m_pTransPackage.id(), m_nPackageSize, CBase64::Encode(m_strPackageData).c_str()));
+		g_pLog->Debug(Helper::Format("SEND>>>[%d]>>No[%llu]>>[%d]byte>>>>%s", m_oTransPackage.priority(), m_oTransPackage.id(), m_nPackageSize, CBase64::Encode(m_strPackageData).c_str()));
 }
 
 void Sloong::CDataTransPackage::RequestPackage()
 {
-	m_pTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Request);
+	m_oTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Request);
 	PrepareSendPackageData();
 }
 
 void Sloong::CDataTransPackage::RequestPackage(const DataPackage &pack)
 {
-	m_pTransPackage = pack;
+	m_oTransPackage = pack;
 	RequestPackage();
 }
 
 void Sloong::CDataTransPackage::ResponsePackage(DataPackage *pack)
 {
 	if( pack != nullptr && (uint64_t)pack != (uint64_t)this )
-		m_pTransPackage = *pack;
-	m_pTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
+		m_oTransPackage = *pack;
+	m_oTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
 	PrepareSendPackageData();
 }
 
 void Sloong::CDataTransPackage::ResponsePackage(ResultType result)
 {
-	m_pTransPackage.clear_extend();
-	m_pTransPackage.clear_content();
-	m_pTransPackage.set_result(result);
-	m_pTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
+	m_oTransPackage.clear_extend();
+	m_oTransPackage.clear_content();
+	m_oTransPackage.set_result(result);
+	m_oTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
 	PrepareSendPackageData();
 }
 
 void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string &message)
 {
-	m_pTransPackage.clear_extend();
-	m_pTransPackage.set_result(result);
-	m_pTransPackage.set_content(message);
-	m_pTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
+	m_oTransPackage.clear_extend();
+	m_oTransPackage.set_result(result);
+	m_oTransPackage.set_content(message);
+	m_oTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
 	PrepareSendPackageData();
 }
 
 void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string &message, const string& extend)
 {
-	m_pTransPackage.set_result(result);
-	m_pTransPackage.set_content(message);
-	m_pTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
-	m_pTransPackage.set_extend(extend);
+	m_oTransPackage.set_result(result);
+	m_oTransPackage.set_content(message);
+	m_oTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
+	m_oTransPackage.set_extend(extend);
 	PrepareSendPackageData();
 }
 
 void Sloong::CDataTransPackage::ResponsePackage(ResultType result, const string &message, const char* extend, int size )
 {
-	m_pTransPackage.set_result(result);
-	m_pTransPackage.set_content(message);
-	m_pTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
-	m_pTransPackage.set_content(extend,size);
+	m_oTransPackage.set_result(result);
+	m_oTransPackage.set_content(message);
+	m_oTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
+	m_oTransPackage.set_content(extend,size);
 	PrepareSendPackageData();
 }
 
 void Sloong::CDataTransPackage::ResponsePackage(const CResult &result)
 {
-	m_pTransPackage.clear_extend();
-	m_pTransPackage.set_result(result.GetResult());
-	m_pTransPackage.set_content(result.GetMessage());
-	m_pTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
+	m_oTransPackage.clear_extend();
+	m_oTransPackage.set_result(result.GetResult());
+	m_oTransPackage.set_content(result.GetMessage());
+	m_oTransPackage.set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
 	PrepareSendPackageData();
 }
 
@@ -156,22 +156,22 @@ ResultType Sloong::CDataTransPackage::RecvPackage(bool block)
 
 ResultType Sloong::CDataTransPackage::RecvPackageSucceedProcess(const string& result)
 {
-	if (!m_pTransPackage.ParseFromString(result))
+	if (!m_oTransPackage.ParseFromString(result))
 	{
 		if (g_pLog)
 			g_pLog->Error("Parser receive data error.");
 		return ResultType::Error;
 	}
 
-	if (m_pTransPackage.priority() > s_PriorityLevel || m_pTransPackage.priority() < 0)
+	if (m_oTransPackage.priority() > s_PriorityLevel || m_oTransPackage.priority() < 0)
 	{
 		if (g_pLog)
-			g_pLog->Error(Helper::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_pTransPackage.priority(), s_PriorityLevel));
+			g_pLog->Error(Helper::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", m_oTransPackage.priority(), s_PriorityLevel));
 		return ResultType::Error;
 	}
 
 	if (g_pLog)
-		g_pLog->Debug(Helper::Format("RECV<<<[%d]<<No[%llu]<<[%d]byte<<<<%s", m_pTransPackage.priority(), m_pTransPackage.id(), result.size(), CBase64::Encode(result).c_str()));
+		g_pLog->Debug(Helper::Format("RECV<<<[%d]<<No[%llu]<<[%d]byte<<<<%s", m_oTransPackage.priority(), m_oTransPackage.id(), result.size(), CBase64::Encode(result).c_str()));
 
 	if( result.size() > g_max_package_size )
 	{
@@ -179,7 +179,7 @@ ResultType Sloong::CDataTransPackage::RecvPackageSucceedProcess(const string& re
 		return ResultType::Invalid;
 	}
 
-	if (m_pTransPackage.hash().length() > 0)
+	if (m_oTransPackage.hash().length() > 0)
 	{
 		ResponsePackage(ResultType::Error, "Now don't support hash check.");
 		return ResultType::Invalid;

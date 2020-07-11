@@ -115,15 +115,15 @@ namespace Sloong
          */
         ResultType SendPackage();
 
-        inline int GetFunction() { return m_pTransPackage.function(); }
+        inline int GetFunction() { return m_oTransPackage.function(); }
 
-        inline uint64_t GetSender() { return m_pTransPackage.sender(); }
+        inline uint64_t GetSender() { return m_oTransPackage.sender(); }
 
-        inline DataPackage *GetDataPackage() { return &m_pTransPackage; }
+        inline DataPackage *GetDataPackage() { return &m_oTransPackage; }
 
-        inline string GetRecvMessage() { return m_pTransPackage.content(); }
+        inline string GetRecvMessage() { return m_oTransPackage.content(); }
 
-        inline string GetExtendData() { return m_pTransPackage.extend(); }
+        inline string GetExtendData() { return m_oTransPackage.extend(); }
 
         inline void SetConnection(EasyConnect *conn)
         {
@@ -146,15 +146,15 @@ namespace Sloong
          * @Params: 
          * @Return: 
          */
-        inline bool IsBigPackage() { return m_pTransPackage.extend().length() > 0 ? true : false; }
+        inline bool IsBigPackage() { return m_oTransPackage.extend().length() > 0 ? true : false; }
 
-        inline int GetPriority() { return m_pTransPackage.priority(); }
+        inline int GetPriority() { return m_oTransPackage.priority(); }
 
-        inline void SetPriority(int value) { m_pTransPackage.set_priority(value); }
+        inline void SetPriority(int value) { m_oTransPackage.set_priority(value); }
 
-        inline uint64_t GetSerialNumber() { return m_pTransPackage.id(); }
+        inline uint64_t GetSerialNumber() { return m_oTransPackage.id(); }
 
-        inline void SetSerialNumber(uint64_t value) { m_pTransPackage.set_id(value); }
+        inline void SetSerialNumber(uint64_t value) { m_oTransPackage.set_id(value); }
 
         inline int GetSentSize() { return m_nSent; }
         inline int GetPackageSize() { return m_nPackageSize; }
@@ -179,7 +179,7 @@ namespace Sloong
         int m_nSent = 0;
         int m_nReceived = 0;
         int m_nPackageSize = 0;
-        DataPackage m_pTransPackage;
+        DataPackage m_oTransPackage;
         list<timeval> m_listClock;
 
     protected:
