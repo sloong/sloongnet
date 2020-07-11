@@ -14,7 +14,7 @@
 
 using namespace Sloong::Events;
 
-CResult Sloong::CServerManage::Initialize(IControl *ic, const string& db_path )
+CResult Sloong::CServerManage::Initialize(IControl *ic, const string &db_path)
 {
 	IObject::Initialize(ic);
 
@@ -48,10 +48,9 @@ CResult Sloong::CServerManage::Initialize(IControl *ic, const string& db_path )
 	}
 	m_mapIDToTemplateItem[1].Created.push_back(0);
 	return CResult::Succeed();
-	
 }
 
-CResult Sloong::CServerManage::LoadManagerConfig( const string& db_path)
+CResult Sloong::CServerManage::LoadManagerConfig(const string &db_path)
 {
 	if (!CConfiguation::Instance->IsInituialized())
 	{
@@ -59,8 +58,8 @@ CResult Sloong::CServerManage::LoadManagerConfig( const string& db_path)
 		if (res.IsFialed())
 			return res;
 	}
-	auto res =  CConfiguation::Instance->GetTemplate(1);
-	if( res.IsFialed())
+	auto res = CConfiguation::Instance->GetTemplate(1);
+	if (res.IsFialed())
 		return CResult(ResultType::Warning);
 	return CResult::Make_OK(string(res.GetResultObject().configuation.begin(), res.GetResultObject().configuation.end()));
 }
@@ -117,7 +116,6 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 	}
 	return 0;
 }
-
 
 void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int event, ::google::protobuf::Message *msg)
 {
@@ -181,7 +179,7 @@ CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
 
 	auto res = m_mapFuncToHandler[function](req_str, pack);
 	m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), CBase64::Encode(res.GetMessage()).c_str()));
-	if( res.GetResult() == ResultType::Ignore )
+	if (res.GetResult() == ResultType::Ignore)
 		return res;
 	pack->ResponsePackage(res);
 	return CResult::Succeed();
@@ -214,16 +212,16 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CData
 	}
 
 	int index = 0;
-	if( req_str.length() > 0 )
+	if (req_str.length() > 0)
 	{
 		auto req = ConvertStrToObj<RegisteWorkerRequest>(req_str);
 		index = req->forcetargettemplateid();
 	}
-	if( index == 0 )
+	if (index == 0)
 	{
 		index = SearchNeedCreateTemplate();
 	}
-	
+
 	if (index == 0)
 	{
 		return CResult(ResultType::Retry, "Wait");
@@ -234,7 +232,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CData
 		return CResult::Make_Error("Add server info to ServerList fialed.");
 	}
 
-	if(!m_mapIDToTemplateItem.exist(index) )
+	if (!m_mapIDToTemplateItem.exist(index))
 	{
 		return CResult(ResultType::Retry, "Allocating type no exist.");
 	}
@@ -400,7 +398,7 @@ CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, CData
 	auto req = ConvertStrToObj<QueryTemplateRequest>(req_str);
 
 	QueryTemplateResponse res;
-	if (req->templateid_size() == 0)
+	if (req->queryall())
 	{
 		for (auto &i : m_mapIDToTemplateItem)
 		{
@@ -409,16 +407,31 @@ CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, CData
 	}
 	else
 	{
-		auto ids = req->templateid();
-		for (auto id : ids)
+		if (req->templateid_size() > 0)
 		{
-			if (!m_mapIDToTemplateItem.exist(id))
+			auto ids = req->templateid();
+			for (auto id : ids)
 			{
-				return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
+				if (m_mapIDToTemplateItem.exist(id))
+					m_mapIDToTemplateItem[id].ToProtobuf(res.add_templateinfos());
+				else
+					return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
 			}
-			m_mapIDToTemplateItem[id].ToProtobuf(res.add_templateinfos());
+		}
+		else if (req->templatetype_size() > 0)
+		{
+			auto types = req->templatetype();
+			for (auto t : types)
+			{
+				for( auto& item : m_mapIDToTemplateItem )
+				{
+					if( item.second.ConfiguationObj->moduletype() == t )
+						item.second.ToProtobuf(res.add_templateinfos());
+				}
+			}
 		}
 	}
+
 	auto str_res = ConvertObjToStr(&res);
 	m_pLog->Debug(Helper::Format("Query Template Succeed: Count[%d];[%s]", res.templateinfos_size(), CBase64::Encode(str_res).c_str()));
 	return CResult::Make_OK(str_res);
@@ -518,8 +531,8 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 CResult Sloong::CServerManage::ReportLoadStatusHandler(const string &req_str, CDataTransPackage *pack)
 {
 	auto req = ConvertStrToObj<ReportLoadStatusRequest>(req_str);
-	
-	m_pLog->Info(Helper::Format("Node[%lld] load status :CPU[%lf]Mem[%lf]", pack->GetSender(), req->cpuload(), req->memroyused() ));
-	
+
+	m_pLog->Info(Helper::Format("Node[%lld] load status :CPU[%lf]Mem[%lf]", pack->GetSender(), req->cpuload(), req->memroyused()));
+
 	return CResult(ResultType::Ignore);
 }

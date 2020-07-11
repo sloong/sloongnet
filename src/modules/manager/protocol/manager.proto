@@ -73,7 +73,6 @@ enum Functions{
     // Response: None
     ReportLoadStatus=12;
 
-    QueryTemplateByType=13;
     // reserved for other service.
     reserved 101 to max;
 }
@@ -131,9 +130,12 @@ message DeleteTemplateRequest{
 message SetTemplateRequest{
    TemplateItem SetInfo=1;
 }
+
+// Query template info by ID or type.
 message QueryTemplateRequest{
-   // No set for query all
    repeated int32 TemplateID=1;
+   repeated int32 TemplateType=2;
+   bool QueryAll=3;
 }
 
 message StopNodeRequest{
