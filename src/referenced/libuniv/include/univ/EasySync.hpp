@@ -24,7 +24,7 @@ namespace Sloong
 			m_oCV.wait(lck);
 		}
 		// 返回值：
-		//  true ：时间触发返回
+		//  true ：事件触发返回
 		//  false ：超时返回
 		inline bool wait_for(int ms)
 		{

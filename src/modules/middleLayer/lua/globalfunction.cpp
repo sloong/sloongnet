@@ -1,14 +1,15 @@
 #include "globalfunction.h"
-// sys
-#include <sys/socket.h>
-#include <netinet/in.h>
-// univ
 
 #include "utility.h"
 #include "version.h"
 #include "epollex.h"
-#include "NormalEvent.hpp"
+#include "DataTransPackage.h"
+#include "SendPackageEvent.hpp"
 #include "IData.h"
+
+#include "snowflake.h"
+
+#include "protocol/datacenter.pb.h"
 
 using namespace std;
 
@@ -34,6 +35,7 @@ LuaFunctionRegistr g_LuaFunc[] =
         {"GetCommData", CGlobalFunction::Lua_GetCommData},
         {"SetExtendData", CGlobalFunction::Lua_SetExtendData},
         {"SetExtendDataByFile", CGlobalFunction::Lua_SetExtendDataByFile},
+        {"SendReqeustToDBCenter", CGlobalFunction::Lua_SendRequestToDBCenter},
 };
 
 void Sloong::CGlobalFunction::Initialize(IControl *ic)
@@ -119,13 +121,13 @@ int Sloong::CGlobalFunction::Lua_GetConfig(lua_State *l)
     string key = CLua::GetString(l, 2);
     string def = CLua::GetString(l, 3);
     auto config = CGlobalFunction::Instance->m_pModuleConfig;
-    if( config->isMember(section) && (*config)[section].isMember(key))
+    if (config->isMember(section) && (*config)[section].isMember(key))
     {
-        CLua::PushString(l,(*config)[section][key].asString());
+        CLua::PushString(l, (*config)[section][key].asString());
     }
     else
     {
-        CLua::PushString(l,def);
+        CLua::PushString(l, def);
     }
     return 1;
 }
@@ -207,11 +209,11 @@ int CGlobalFunction::Lua_SetExtendData(lua_State *l)
 
 int CGlobalFunction::Lua_SetExtendDataByFile(lua_State *l)
 {
-    auto file = CLua::GetString(l,1,"");
+    auto file = CLua::GetString(l, 1, "");
     auto uuid = "";
     int size = 0;
     auto pBuf = CUtility::ReadFile(file, &size);
-    if( size > 0 )
+    if (size > 0)
     {
         auto uuid = CUtility::GenUUID();
         Instance->m_iC->AddTempBytes(uuid, pBuf, size);
@@ -219,4 +221,55 @@ int CGlobalFunction::Lua_SetExtendDataByFile(lua_State *l)
     CLua::PushInteger(l, size);
     CLua::PushString(l, uuid);
     return 2;
+}
+
+int CGlobalFunction::Lua_SendRequestToDBCenter(lua_State *l)
+{
+    auto func = CLua::GetInteger(l, 1, DataCenter::Functions::Invalid);
+    auto request_str = CLua::GetString(l, 2, "");
+    if (func == DataCenter::Functions::Invalid || !DataCenter::Functions_IsValid(func))
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, "Function is invalid");
+        return 2;
+    }
+
+    if (request_str.empty())
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, "request data is empty");
+        return 2;
+    }
+
+    int connect_socket = 0;
+    auto package_id = snowflake::Instance->nextid();
+    auto req = make_unique<CSendPackageEvent>();
+    req->SetCallbackFunc(std::bind(&CGlobalFunction::OnSendPackageResponse, CGlobalFunction::Instance.get(), std::placeholders::_1, std::placeholders::_2));
+    req->SetRequest(connect_socket, IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, func, request_str, "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+    CGlobalFunction::Instance->m_iC->SendMessage(std::move(req));
+
+    CEasySync sync;
+    CGlobalFunction::Instance->m_mapIDToSync[package_id] = &sync;
+    if (!sync.wait_for(5000))
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, "timtout");
+        return 2;
+    }
+
+    auto response_str = CGlobalFunction::Instance->m_iC->GetTempString(Helper::ntos(package_id));
+    CLua::PushInteger(l, Base::ResultType::Succeed);
+    CLua::PushString(l, response_str);
+    return 2;
+}
+
+CResult CGlobalFunction::OnSendPackageResponse(IEvent *event, CDataTransPackage *pack)
+{
+    auto id = pack->GetSerialNumber();
+
+    m_iC->AddTempString(Helper::ntos(id), pack->GetRecvMessage());
+    auto sync = m_mapIDToSync.try_get(id);
+    m_mapIDToSync.erase(id);
+    (*sync)->notify_one();
+    return CResult::Succeed();
 }

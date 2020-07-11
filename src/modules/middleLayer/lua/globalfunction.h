@@ -1,8 +1,9 @@
 #ifndef CGLOBALFUNCTION_H
 #define CGLOBALFUNCTION_H
 
-#include "IObject.h"
+
 #include "core.h"
+#include "IObject.h"
 #include "lua.h"
 
 namespace Sloong
@@ -16,7 +17,7 @@ namespace Sloong
         SHA_512 = 3,
     };
 
-    class CGlobalFunction : IObject
+    class CGlobalFunction : public IObject
     {
     public:
         void Initialize(IControl *iMsg);
@@ -36,10 +37,15 @@ namespace Sloong
         static int Lua_GetLogObject(lua_State *l);
         static int Lua_SetExtendData(lua_State *l);
         static int Lua_SetExtendDataByFile(lua_State *l);
+        static int Lua_SendRequestToDBCenter(lua_State *l);
+
+    protected:
+        CResult OnSendPackageResponse(IEvent*,CDataTransPackage*);
 
     protected:
         map_ex<string,string> m_mapCommData;
         Json::Value* m_pModuleConfig = nullptr;
+        map_ex<int64_t, CEasySync*> m_mapIDToSync;
 
     public:
         static unique_ptr<CGlobalFunction> Instance;
