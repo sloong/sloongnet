@@ -6,32 +6,75 @@ enum Functions{
     Invalid=0;
     reserved 1 to 200;
 
-    //
+    // Connect to Database. It will return the connect result.
     // Request:ConnectDatabaseRequest
     // Response:ConnectDatabaseResponse
     ConnectDatabase=201;
 
-    //
-    // Request:PostLogMessageRequest
-    // Response:Result
-    RunSQL=202;
+    // Run query sql.
+    // Request: QuerySQLCmdRequest
+    // Response: QuerySQLCmdResponse
+    QuerySQLCmd=202;
+
+    // Run insert sql
+    // Request: InsertSQLCmdRequest
+    // Response: InsertSQLCmdResponse
+    InsertSQLCmd=203;
+
+    // Run update sql
+    // Request: UpdateSQLCmdRequest
+    // Response: UpdateSQLCmdResponse
+    UpdateSQLCmd=204;
+
+    // Run delete sql
+    // Request: DeleteSQLCmdRequest
+    // Response: DeleteSQLCmdResponse
+    DeleteSQLCmd=205;
+
     reserved 300 to max;
 }
 
 message ConnectDatabaseRequest{
-    string DatabaseName=1;
+    string Database=1;
 }
 
 message ConnectDatabaseResponse{
     int32 SessionID=1;
 }
 
-message RunSQLRequest{
+message QuerySQLCmdRequest{
     int32 SessionID=1;
     string SQLCMD=2;
 }
 
-message RunSQLResponse{
+message QuerySQLCmdResponse{
     int32 AffectedRows=1;
     repeated string Results=2;
+}
+
+message InsertSQLCmdRequest{
+    int32 SessionID=1;
+    string SQLCMD=2;
+}
+
+message InsertSQLCmdResponse{
+    int32 AffectedRows=1;
+}
+
+message UpdateSQLCmdRequest{
+    int32 SessionID=1;
+    string SQLCMD=2;
+}
+
+message UpdateSQLCmdResponse{
+    int32 AffectedRows=1;
+}
+
+message DeleteSQLCmdRequest{
+    int32 SessionID=1;
+    string SQLCMD=2;
+}
+
+message DeleteSQLCmdResponse{
+    int32 AffectedRows=1;
 }

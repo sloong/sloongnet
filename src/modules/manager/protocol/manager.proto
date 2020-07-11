@@ -72,6 +72,8 @@ enum Functions{
     // Request: ReportLoadStatusRequest
     // Response: None
     ReportLoadStatus=12;
+
+    QueryTemplateByType=13;
     // reserved for other service.
     reserved 101 to max;
 }

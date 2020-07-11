@@ -25,6 +25,17 @@ enum DATA_ITEM
     ReferenceTemplateInfo=4;
 }
 
+enum MODULE_TYPE
+{
+    Manager=0;
+    AuthCenter=1;
+    DataCenter=2;
+    FileCenter=3;
+    Firewall=4;
+    Gateway=5;
+    Processer=6;
+}
+
 enum EVENT_TYPE
 {
 	/*
@@ -106,16 +117,7 @@ message GLOBAL_CONFIG
 
     // Module
     string  ModuleName = 12;
-    enum MODULE_TYPE
-    {
-        Manager=0;
-        AuthCenter=1;
-        DataCenter=2;
-        FileCenter=3;
-        Firewall=4;
-        Gateway=5;
-        Processer=6;
-    }
+
     MODULE_TYPE ModuleType = 13;
     string  ModulePath = 14;
     bytes   ModuleConfig = 15;

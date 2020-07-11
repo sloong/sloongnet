@@ -13,21 +13,24 @@ using namespace DataCenter;
 namespace Sloong
 {
 
-
     class DBHub : public IObject
     {
-        public:
-        CResult Initialize( IControl* ic );
+    public:
+        CResult Initialize(IControl *ic);
 
         CResult RequestPackageProcesser(CDataTransPackage *);
 
-        CResult RunSQLHandler(const string &req_obj, CDataTransPackage *pack);
+        CResult ConnectDatabaseHandler(const string &req_obj, CDataTransPackage *pack);
+        CResult QuerySQLCmdHandler(const string &req_obj, CDataTransPackage *pack);
+        CResult InsertSQLCmdHandler(const string &req_obj, CDataTransPackage *pack);
+        CResult UpdateSQLCmdHandler(const string &req_obj, CDataTransPackage *pack);
+        CResult DeleteSQLCmdHandler(const string &req_obj, CDataTransPackage *pack);
 
-        protected:
+    protected:
         map_ex<DataCenter::Functions, FunctionHandler> m_mapFuncToHandler;
-        unique_ptr<MySqlEx> m_pMySql = nullptr;
+        map_ex<int, unique_ptr<MySqlEx>> m_mapSessionIDToDBConnection;
+        map_ex<string, int> m_mapDBNameToSessioinID;
     };
-}
-
+} // namespace Sloong
 
 #endif
