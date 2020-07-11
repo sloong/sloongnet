@@ -31,6 +31,13 @@ namespace Sloong
 		static RuntimeDataPackage* GetRuntimeData(){
 			return TYPE_TRANS<RuntimeDataPackage*>(m_iC->Get(DATA_ITEM::RuntimeData ));
 		}
+		static int GetManagerSocket(){
+			auto p = m_iC->Get(DATA_ITEM::ManagerSocket);
+			if( p == nullptr) return INVALID_SOCKET;
+			auto p2 = TYPE_TRANS<int*>(p);
+			if( p2 == nullptr ) return INVALID_SOCKET;
+			return *(p2);
+		}
 	public:
 		static IControl* m_iC;
 	};

@@ -10,6 +10,7 @@
 #include "snowflake.h"
 
 #include "protocol/datacenter.pb.h"
+#include "protocol/manager.pb.h"
 
 using namespace std;
 
@@ -38,11 +39,24 @@ LuaFunctionRegistr g_LuaFunc[] =
         {"SendReqeustToDBCenter", CGlobalFunction::Lua_SendRequestToDBCenter},
 };
 
-void Sloong::CGlobalFunction::Initialize(IControl *ic)
+CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
 {
     IObject::Initialize(ic);
     IData::Initialize(ic);
     m_pModuleConfig = IData::GetModuleConfig();
+
+    int manager_socket = IData::GetManagerSocket();
+    if( manager_socket == INVALID_SOCKET )
+        return CResult::Make_Error("Get manager socket error.");
+
+    Manager::QueryTemplateRequest request;
+    request.add_templatetype(Core::MODULE_TYPE::DataCenter);
+    auto package_id = snowflake::Instance->nextid();
+    auto req = make_unique<CSendPackageEvent>();
+    req->SetCallbackFunc(std::bind(&CGlobalFunction::OnQueryDBCenterResponse, CGlobalFunction::Instance.get(), std::placeholders::_1, std::placeholders::_2));
+    req->SetRequest(manager_socket, IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, Manager::Functions::QueryTemplate , ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+    CGlobalFunction::Instance->m_iC->SendMessage(std::move(req));
+    return CResult::Succeed();
 }
 
 void Sloong::CGlobalFunction::RegistFuncToLua(CLua *pLua)
@@ -262,7 +276,10 @@ int CGlobalFunction::Lua_SendRequestToDBCenter(lua_State *l)
     CLua::PushString(l, response_str);
     return 2;
 }
-
+CResult CGlobalFunction::OnQueryDBCenterResponse(IEvent *event, CDataTransPackage *pack)
+{
+    return CResult::Succeed();
+}
 CResult CGlobalFunction::OnSendPackageResponse(IEvent *event, CDataTransPackage *pack)
 {
     auto id = pack->GetSerialNumber();

@@ -240,6 +240,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
         auto event = make_unique<Events::CNetworkEvent>(EVENT_TYPE::RegisteConnection);
         event->SetSocketID(sock);
         m_pControl->SendMessage(std::move(event));
+        m_pControl->Add(DATA_ITEM::ManagerSocket, &sock);
     }
 
     return CResult::Succeed();

@@ -23,6 +23,7 @@ enum DATA_ITEM
 	Logger=2;
 	RuntimeData=3;
     ReferenceTemplateInfo=4;
+    ManagerSocket=5;
 }
 
 enum MODULE_TYPE

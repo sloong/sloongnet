@@ -20,7 +20,7 @@ namespace Sloong
     class CGlobalFunction : public IObject
     {
     public:
-        void Initialize(IControl *iMsg);
+        CResult Initialize(IControl *iMsg);
         void RegistFuncToLua(CLua *pLua);
 
     public:
@@ -41,11 +41,13 @@ namespace Sloong
 
     protected:
         CResult OnSendPackageResponse(IEvent*,CDataTransPackage*);
+        CResult OnQueryDBCenterResponse(IEvent*,CDataTransPackage*);
 
     protected:
         map_ex<string,string> m_mapCommData;
         Json::Value* m_pModuleConfig = nullptr;
         map_ex<int64_t, CEasySync*> m_mapIDToSync;
+        int m_SocketDBCenter=INVALID_SOCKET;
 
     public:
         static unique_ptr<CGlobalFunction> Instance;

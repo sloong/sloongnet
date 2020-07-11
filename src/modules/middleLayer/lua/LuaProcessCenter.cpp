@@ -7,7 +7,6 @@ CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 {
 	IObject::Initialize(iMsg);
 
-	CGlobalFunction::Instance->Initialize(m_iC);
 	m_pConfig = IData::GetModuleConfig();
 
 	m_iC->RegisterEvent(EVENT_TYPE::ReloadLuaContext);

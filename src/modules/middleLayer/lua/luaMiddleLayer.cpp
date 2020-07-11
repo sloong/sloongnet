@@ -9,6 +9,7 @@
 #include "luaMiddleLayer.h"
 #include "utility.h"
 #include "NetworkEvent.hpp"
+#include "globalfunction.h"
 #include "IData.h"
 using namespace Sloong;
 using namespace Sloong::Events;
@@ -76,7 +77,7 @@ CResult LuaMiddleLayer::Initialized(SOCKET sock, IControl *iC)
 	}
 	m_nManagerConnection = sock;
 	m_iC->RegisterEventHandler(SocketClose, std::bind(&LuaMiddleLayer::OnSocketClose, this, std::placeholders::_1));
-	return CResult::Succeed();
+	return CGlobalFunction::Instance->Initialize(m_iC);
 }
 
 CResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter *pProcess, CDataTransPackage *pack)
