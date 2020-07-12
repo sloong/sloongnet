@@ -53,7 +53,7 @@ namespace Sloong
 	protected:
 		vector<LuaContent>	m_listLuaContent;
 		queue_ex<int>		m_oFreeLuaContext;
-		CEasySync		m_oSSync;
+		EasySync		m_oSSync;
 		Json::Value*	m_pConfig;
 	};
 

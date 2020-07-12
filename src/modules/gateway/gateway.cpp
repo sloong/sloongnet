@@ -73,15 +73,15 @@ CResult SloongNetGateway::Initialized(SOCKET sock, IControl *iC)
 	m_pRuntimeData = IData::GetRuntimeData();
 	if (m_pModuleConfig)
 	{
-		auto event = make_unique<CNormalEvent>();
+		auto event = make_shared<CNormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableTimeoutCheck);
 		event->SetMessage(Helper::Format("{\"TimeoutTime\":\"%d\", \"CheckInterval\":%d}", (*m_pModuleConfig)["TimeoutTime"].asInt(), (*m_pModuleConfig)["TimeoutCheckInterval"].asInt()));
-		m_iC->SendMessage(std::move(event));
+		m_iC->SendMessage(event);
 
-		event = make_unique<CNormalEvent>();
+		event = make_shared<CNormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableClientCheck);
 		event->SetMessage(Helper::Format("{\"ClientCheckKey\":\"%s\", \"ClientCheckTime\":%d}", (*m_pModuleConfig)["ClientCheckKey"].asString().c_str(), (*m_pModuleConfig)["ClientCheckKey"].asInt()));
-		m_iC->SendMessage(std::move(event));
+		m_iC->SendMessage(event);
 	}
 	m_nManagerConnection = sock;
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
@@ -99,10 +99,10 @@ CResult SloongNetGateway::ResponsePackageProcesser( CDataTransPackage *trans_pac
 
 void SloongNetGateway::QueryReferenceInfo()
 {
-	auto event = make_unique<CSendPackageEvent>();
+	auto event = make_shared<CSendPackageEvent>();
 	event->SetCallbackFunc(std::bind(&SloongNetGateway::QueryReferenceInfoResponseHandler, this, std::placeholders::_1, std::placeholders::_2));
 	event->SetRequest(m_nManagerConnection, m_pRuntimeData->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, (int)Functions::QueryReferenceInfo, "");
-	m_iC->CallMessage(std::move(event));
+	m_iC->CallMessage(event);
 }
 
 // process the provied function string to list.
@@ -167,9 +167,9 @@ void SloongNetGateway::AddConnection( uint64_t uuid, const string &addr, int por
 	EasyConnect conn;
 	conn.Initialize(addr, port);
 	conn.Connect();
-	auto event = make_unique<CNetworkEvent>(EVENT_TYPE::RegisteConnection);
+	auto event = make_shared<CNetworkEvent>(EVENT_TYPE::RegisteConnection);
 	event->SetSocketID(conn.GetSocketID());
-	m_iC->SendMessage(std::move(event));
+	m_iC->SendMessage(event);
 	m_mapUUIDToConnect[uuid] = conn.GetSocketID();
 }
 

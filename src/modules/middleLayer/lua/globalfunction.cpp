@@ -52,10 +52,10 @@ CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
     Manager::QueryTemplateRequest request;
     request.add_templatetype(Core::MODULE_TYPE::DataCenter);
     auto package_id = snowflake::Instance->nextid();
-    auto req = make_unique<CSendPackageEvent>();
-    req->SetCallbackFunc(std::bind(&CGlobalFunction::OnQueryDBCenterResponse, CGlobalFunction::Instance.get(), std::placeholders::_1, std::placeholders::_2));
+    auto req = make_shared<CSendPackageEvent>();
+    req->SetCallbackFunc(std::bind(&CGlobalFunction::OnQueryDBCenterTemplateResponse, CGlobalFunction::Instance.get(), std::placeholders::_1, std::placeholders::_2));
     req->SetRequest(manager_socket, IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, Manager::Functions::QueryTemplate , ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
-    CGlobalFunction::Instance->m_iC->SendMessage(std::move(req));
+    CGlobalFunction::Instance->m_iC->SendMessage(req);
     return CResult::Succeed();
 }
 
@@ -255,14 +255,20 @@ int CGlobalFunction::Lua_SendRequestToDBCenter(lua_State *l)
         return 2;
     }
 
-    int connect_socket = 0;
+    if( CGlobalFunction::Instance->m_SocketDBCenter == nullptr )
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, "No connect to DBCenter.");
+        return 2;
+    }
+    
     auto package_id = snowflake::Instance->nextid();
     auto req = make_unique<CSendPackageEvent>();
     req->SetCallbackFunc(std::bind(&CGlobalFunction::OnSendPackageResponse, CGlobalFunction::Instance.get(), std::placeholders::_1, std::placeholders::_2));
-    req->SetRequest(connect_socket, IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, func, request_str, "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+    req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID() , IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, func, request_str, "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
     CGlobalFunction::Instance->m_iC->SendMessage(std::move(req));
 
-    CEasySync sync;
+    EasySync sync;
     CGlobalFunction::Instance->m_mapIDToSync[package_id] = &sync;
     if (!sync.wait_for(5000))
     {
@@ -276,10 +282,46 @@ int CGlobalFunction::Lua_SendRequestToDBCenter(lua_State *l)
     CLua::PushString(l, response_str);
     return 2;
 }
-CResult CGlobalFunction::OnQueryDBCenterResponse(IEvent *event, CDataTransPackage *pack)
+CResult CGlobalFunction::OnQueryDBCenterTemplateResponse(IEvent *event, CDataTransPackage *pack)
 {
+    auto res_str = pack->GetRecvMessage();
+    auto res = ConvertStrToObj<Manager::QueryTemplateResponse>(res_str);
+    Manager::QueryNodeRequest query_node_req; 
+    for( auto& item : res->templateinfos())
+    {
+        query_node_req.add_templateid(item.id());
+    }
+    if( query_node_req.templateid_size() > 0 )
+    {
+        int manager_socket = IData::GetManagerSocket();
+
+        auto package_id = snowflake::Instance->nextid();
+        auto req = make_shared<CSendPackageEvent>();
+        req->SetCallbackFunc(std::bind(&CGlobalFunction::OnQueryDBCenterNodeResponse, CGlobalFunction::Instance.get(), std::placeholders::_1, std::placeholders::_2));
+        req->SetRequest(manager_socket, IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, Manager::Functions::QueryNode , ConvertObjToStr(&query_node_req), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+        CGlobalFunction::Instance->m_iC->SendMessage(req);
+    }
     return CResult::Succeed();
 }
+
+
+CResult CGlobalFunction::OnQueryDBCenterNodeResponse(IEvent *event, CDataTransPackage *pack)
+{
+    auto res_str = pack->GetRecvMessage();
+    auto res = ConvertStrToObj<Manager::QueryNodeResponse>(res_str);
+    if( res->nodeinfos_size() > 0 )
+    {
+        auto info = res->nodeinfos();
+        m_SocketDBCenter = make_unique<EasyConnect>();
+        m_SocketDBCenter->Initialize(info[0].address(),info[0].port());
+        auto reg_event = make_shared<CNetworkEvent>(EVENT_TYPE::RegisteConnection);
+        reg_event->SetSocketID(m_SocketDBCenter->GetSocketID());
+        m_iC->SendMessage(reg_event);
+    }
+    return CResult::Succeed();
+}
+
+
 CResult CGlobalFunction::OnSendPackageResponse(IEvent *event, CDataTransPackage *pack)
 {
     auto id = pack->GetSerialNumber();

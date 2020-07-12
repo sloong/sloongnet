@@ -87,7 +87,7 @@ namespace Sloong
 			static queue<ULONG>			m_oWaitList;
 			static void ThreadWorkLoop(void);
 			static mutex g_oJobListMutex;
-			static CEasySync g_oSync;
+			static EasySync g_oSync;
 			static RUN_STATUS m_emStatus;
 			static ULONG m_nIDCursor;
 		};

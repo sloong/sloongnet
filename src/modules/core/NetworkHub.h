@@ -76,7 +76,7 @@ namespace Sloong
         mutex                   m_oSockListMutex;
         bool                    m_bIsRunning;
         unique_ptr<CEpollEx>    m_pEpoll;
-        CEasySync               m_oCheckTimeoutThreadSync;
+        EasySync               m_oCheckTimeoutThreadSync;
         
         LPVOID                m_pCTX = nullptr;
         GLOBAL_CONFIG*          m_pConfig = nullptr;
@@ -89,7 +89,7 @@ namespace Sloong
 		int m_nClientCheckKeyLength=0;
         int m_nClientCheckTime=0;
         // For message process 
-        CEasySync               m_oProcessThreadSync;
+        EasySync               m_oProcessThreadSync;
         CreateProcessEnvironmentFunction         m_pCreateEnvFunc = nullptr;
         RequestPackageProcessFunction          m_pRequestFunc = nullptr;
         ResponsePackageProcessFunction          m_pResponseFunc = nullptr;

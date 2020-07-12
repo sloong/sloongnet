@@ -15,7 +15,7 @@ using namespace std;
 namespace Sloong
 {
 
-	class CEasySync
+	class EasySync
 	{
 	public:
 		inline void wait()

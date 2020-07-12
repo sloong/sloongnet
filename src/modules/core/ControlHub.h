@@ -178,7 +178,7 @@ namespace Sloong
 		map_ex<EVENT_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;
 		queue_ex<SharedEvent> m_oMsgList;
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;
-		CEasySync m_oSync;
+		EasySync m_oSync;
 	};
 } // namespace Sloong
 

@@ -5,7 +5,7 @@
 #include "core.h"
 #include "IObject.h"
 #include "lua.h"
-
+#include "EasyConnect.h"
 namespace Sloong
 {
 
@@ -41,13 +41,14 @@ namespace Sloong
 
     protected:
         CResult OnSendPackageResponse(IEvent*,CDataTransPackage*);
-        CResult OnQueryDBCenterResponse(IEvent*,CDataTransPackage*);
+        CResult OnQueryDBCenterTemplateResponse(IEvent*,CDataTransPackage*);
+        CResult OnQueryDBCenterNodeResponse(IEvent*,CDataTransPackage*);
 
     protected:
         map_ex<string,string> m_mapCommData;
         Json::Value* m_pModuleConfig = nullptr;
-        map_ex<int64_t, CEasySync*> m_mapIDToSync;
-        int m_SocketDBCenter=INVALID_SOCKET;
+        map_ex<int64_t, EasySync*> m_mapIDToSync;
+        unique_ptr<EasyConnect> m_SocketDBCenter=nullptr;
 
     public:
         static unique_ptr<CGlobalFunction> Instance;

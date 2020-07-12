@@ -164,10 +164,10 @@ void Sloong::CNetworkHub::SendCloseConnectEvent(int socket)
 	if (!m_SockList.exist(socket))
 		return;
 
-	auto event = make_unique<CNetworkEvent>(EVENT_TYPE::SocketClose);
+	auto event = make_shared<CNetworkEvent>(EVENT_TYPE::SocketClose);
 	event->SetSocketID(socket);
 
-	m_iC->SendMessage(std::move(event));
+	m_iC->SendMessage(event);
 }
 
 void Sloong::CNetworkHub::EnableClientCheck(const string &clientCheckKey, int clientCheckTime)

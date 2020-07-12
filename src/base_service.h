@@ -58,7 +58,7 @@ namespace Sloong
 		SmartConnect m_pManagerConnect = nullptr;
 		Json::Value m_oModuleConfig;
 		shared_ptr<EasyConnect> m_pSocket;
-		CEasySync m_oExitSync;
+		EasySync m_oExitSync;
 		CResult m_oExitResult = CResult::Succeed();
 		u_int64_t m_nSerialNumber = 0;
 		string m_strUUID;
