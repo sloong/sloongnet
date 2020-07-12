@@ -47,10 +47,6 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 							  std::bind(&CNetworkHub::OnCanWriteData, this, std::placeholders::_1),
 							  std::bind(&CNetworkHub::OnOtherEventHappened, this, std::placeholders::_1));
 
-	m_iC->RegisterEvent(EVENT_TYPE::SocketClose);
-	m_iC->RegisterEvent(EVENT_TYPE::SendPackage);
-	m_iC->RegisterEvent(EVENT_TYPE::MonitorSendStatus);
-	m_iC->RegisterEvent(EVENT_TYPE::RegisteConnection);
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&CNetworkHub::Run, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStop, std::bind(&CNetworkHub::Exit, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::SendPackage, std::bind(&CNetworkHub::SendPackageEventHandler, this, std::placeholders::_1));
@@ -60,7 +56,7 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	return CResult::Succeed();
 }
 
-void Sloong::CNetworkHub::Run(IEvent *event)
+void Sloong::CNetworkHub::Run(SharedEvent event)
 {
 	m_bIsRunning = true;
 	m_pEpoll->Run();
@@ -79,7 +75,7 @@ void Sloong::CNetworkHub::Run(IEvent *event)
 	CThreadPool::AddWorkThread(std::bind(&CNetworkHub::MessageProcessWorkLoop, this), m_pConfig->processthreadquantity());
 }
 
-void Sloong::CNetworkHub::Exit(IEvent *event)
+void Sloong::CNetworkHub::Exit(SharedEvent event)
 {
 	m_bIsRunning = false;
 	m_oCheckTimeoutThreadSync.notify_all();
@@ -87,9 +83,9 @@ void Sloong::CNetworkHub::Exit(IEvent *event)
 	m_pEpoll->Exit();
 }
 
-void Sloong::CNetworkHub::SendPackageEventHandler(IEvent *event)
+void Sloong::CNetworkHub::SendPackageEventHandler(SharedEvent event)
 {
-	auto send_evt = TYPE_TRANS<CSendPackageEvent *>(event);
+	auto send_evt = TYPE_TRANS<CSendPackageEvent *>(event.get());
 	auto socket = send_evt->GetSocketID();
 	if (!m_SockList.exist(socket))
 	{
@@ -97,6 +93,8 @@ void Sloong::CNetworkHub::SendPackageEventHandler(IEvent *event)
 		return;
 	}
 	auto info = m_SockList[socket].get();
+	if (send_evt->HaveCallbackFunc())
+		m_iC->AddTempSharedPtr(Helper::ntos(send_evt->GetDataPackage()->id()), event);
 
 	auto transPack = make_unique<CDataTransPackage>(info->m_pCon.get());
 	transPack->RequestPackage(*send_evt->GetDataPackage());
@@ -125,9 +123,9 @@ void Sloong::CNetworkHub::AddMessageToSendList(UniqueTransPackage &pack)
 	}
 }
 
-void Sloong::CNetworkHub::CloseConnectEventHandler(IEvent *event)
+void Sloong::CNetworkHub::CloseConnectEventHandler(SharedEvent event)
 {
-	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event);
+	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event.get());
 	auto id = net_evt->GetSocketID();
 	if (!m_SockList.exist(id))
 		return;
@@ -140,15 +138,15 @@ void Sloong::CNetworkHub::CloseConnectEventHandler(IEvent *event)
 	sockLck.unlock();
 }
 
-void Sloong::CNetworkHub::MonitorSendStatusEventHandler(IEvent *event)
+void Sloong::CNetworkHub::MonitorSendStatusEventHandler(SharedEvent event)
 {
-	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event);
+	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event.get());
 	m_pEpoll->MonitorSendStatus(net_evt->GetSocketID());
 }
 
-void Sloong::CNetworkHub::RegisteConnectionEventHandler(IEvent *event)
+void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent event)
 {
-	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event);
+	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event.get());
 	auto nSocket = net_evt->GetSocketID();
 
 	auto info = make_unique<CSockInfo>();
@@ -252,7 +250,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 	}
 
 	UniqueTransPackage pack;
-	DataPackage* data_pack = nullptr;
+	DataPackage *data_pack = nullptr;
 	while (m_bIsRunning)
 	{
 		try
@@ -299,7 +297,15 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 						}
 						else
 						{
-							res = m_pResponseFunc(pEnv, pack.get());
+							auto event = m_iC->GetTempSharedPtr(Helper::ntos(pack->GetSerialNumber()));
+							CSendPackageEvent *send_evt = nullptr;
+							if (event != nullptr)
+								send_evt = TYPE_TRANS<CSendPackageEvent *>(event.get());
+
+							if (send_evt != nullptr)
+								res = send_evt->CallCallbackFunc(pack.get());
+							else
+								res = m_pResponseFunc(pEnv, pack.get());
 						}
 					}
 					break;

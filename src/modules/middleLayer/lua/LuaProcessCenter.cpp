@@ -9,7 +9,6 @@ CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 
 	m_pConfig = IData::GetModuleConfig();
 
-	m_iC->RegisterEvent(EVENT_TYPE::ReloadLuaContext);
 	m_iC->RegisterEventHandler(ReloadLuaContext, std::bind(&CLuaProcessCenter::ReloadContext, this, std::placeholders::_1));
 	// 主要的循环方式为，根据输入的处理数来初始化指定数量的lua环境。
 	// 然后将其加入到可用队列
@@ -34,7 +33,7 @@ void Sloong::CLuaProcessCenter::HandleError(const string &err)
 	m_pLog->Error(Helper::Format("[Script]:[%s]", err.c_str()));
 }
 
-void Sloong::CLuaProcessCenter::ReloadContext(IEvent *event)
+void Sloong::CLuaProcessCenter::ReloadContext(SharedEvent event)
 {
 	for (auto &i : m_listLuaContent)
 	{

@@ -29,7 +29,7 @@ namespace Sloong
 
         void EventPackageProcesser(CDataTransPackage *);
 
-        void OnSocketClose(IEvent *evt);
+        void OnSocketClose(SharedEvent);
 
     protected:
         list<unique_ptr<FileManager>> m_listManage;

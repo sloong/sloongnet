@@ -41,15 +41,14 @@ namespace Sloong
 		CResult ResponsePackageProcesser(CDataTransPackage *);
 
 		void QueryReferenceInfo();
-		CResult QueryReferenceInfoResponseHandler(IEvent *, CDataTransPackage *);
+		CResult QueryReferenceInfoResponseHandler(IEvent*, CDataTransPackage *);
 
 		inline CResult CreateProcessEnvironmentHandler(void **);
 		void EventPackageProcesser(CDataTransPackage *);
 
 		// Event handler
-		void OnStart(IEvent *);
-		void OnSocketClose(IEvent *);
-		void SendPackageHook(UniqueEvent);
+		void OnStart(SharedEvent);
+		void OnSocketClose(SharedEvent);
 
 		void OnReferenceModuleOnlineEvent(const string &, CDataTransPackage *);
 		void OnReferenceModuleOfflineEvent(const string &, CDataTransPackage *);
@@ -62,7 +61,6 @@ namespace Sloong
 
 	public:
 		SOCKET GetPorcessConnect(int function);
-		map_ex<uint64_t, UniqueEvent> m_listSendEvent;
 		map_ex<int, list_ex<int>> m_mapFuncToTemplateIDs;
 		map_ex<int, list_ex<uint64_t>> m_mapTempteIDToUUIDs;
 		map_ex<uint64_t, NodeItem> m_mapUUIDToNode;

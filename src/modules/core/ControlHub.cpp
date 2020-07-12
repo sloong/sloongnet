@@ -17,7 +17,6 @@ CResult Sloong::CControlHub::Initialize(int quantity)
 void Sloong::CControlHub::Exit()
 {
 	m_emStatus = RUN_STATUS::Exit;
-	m_listMsgHook.clear();
 	m_oMsgHandlerList.clear();
 }
 
@@ -32,42 +31,59 @@ void *Sloong::CControlHub::Get(DATA_ITEM item)
 
 string Sloong::CControlHub::GetTempString(const string &key)
 {
-	auto item = m_oTempStringList.find(key);
-	if (item == m_oTempStringList.end())
+	auto baseitem = m_oTempDataList.try_get(key);
+	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::String)
 		return string();
 
-	auto res = (*item).second;
-	m_oTempStringList.erase(key);
+	auto item = dynamic_cast<StringData *>(*baseitem);
+	auto res = item->Data;
+	m_oTempDataList.erase(key);
+	SAFE_DELETE(item);
 	return res;
 }
 
-void *Sloong::CControlHub::GetTempObject(const string &name, int *out_size)
+void *Sloong::CControlHub::GetTempObject(const string &key, int *out_size)
 {
-	auto it = m_oTempObjectList.find(name);
-	if (it == m_oTempObjectList.end())
+	auto baseitem = m_oTempDataList.try_get(key);
+	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::Object)
 		return nullptr;
 
-	auto item = (*it).second;
+	auto item = dynamic_cast<ObjectData *>(*baseitem);
 	if (out_size)
-		*out_size = item.size;
-	auto ptr = item.ptr;
-	m_oTempObjectList.erase(name);
+		*out_size = item->Size;
+	auto ptr = item->Ptr;
+	m_oTempDataList.erase(key);
+	SAFE_DELETE(item);
 	return ptr;
 }
 
-unique_ptr<char[]> Sloong::CControlHub::GetTempBytes(const string &name, int *out_in_size)
+unique_ptr<char[]> Sloong::CControlHub::GetTempBytes(const string &key, int *out_in_size)
 {
-	auto it = m_oTempBytesList.find(name);
-	if (it == m_oTempBytesList.end())
+	auto baseitem = m_oTempDataList.try_get(key);
+	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::Bytes)
 		return nullptr;
 
-	auto &item = (*it).second;
-
+	auto item = dynamic_cast<BytesData *>(*baseitem);
 	if (out_in_size)
-		*out_in_size = item.size;
+		*out_in_size = item->Size;
 
-	auto ptr = std::move(item.ptr);
-	m_oTempBytesList.erase(name);
+	auto ptr = std::move(item->Ptr);
+	m_oTempDataList.erase(key);
+	SAFE_DELETE(item);
+	return ptr;
+}
+
+shared_ptr<void> Sloong::CControlHub::GetTempSharedPtr(const string &key)
+{
+	auto baseitem = m_oTempDataList.try_get(key);
+	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::SharedPtr)
+		return nullptr;
+
+	auto item = dynamic_cast<SharedPtrData *>(*baseitem);
+
+	auto ptr = item->Ptr;
+	m_oTempDataList.erase(key);
+	SAFE_DELETE(item);
 	return ptr;
 }
 
@@ -80,7 +96,7 @@ void Sloong::CControlHub::SendMessage(EVENT_TYPE msgType)
 	m_oSync.notify_one();
 }
 
-void Sloong::CControlHub::SendMessage(UniqueEvent evt)
+void Sloong::CControlHub::SendMessage(SharedEvent evt)
 {
 	m_oMsgList.push_move(std::move(evt));
 	m_oSync.notify_one();
@@ -93,17 +109,13 @@ void Sloong::CControlHub::SendMessage(UniqueEvent evt)
  */
 void Sloong::CControlHub::RegisterEventHandler(EVENT_TYPE t, MsgHandlerFunc func)
 {
-	if (m_oMsgHandlerList.find(t) == m_oMsgHandlerList.end())
-	{
-		throw normal_except("Target event is not regist.");
-	}
-	else
-	{
-		m_oMsgHandlerList[t].push_back(func);
-	}
+	if (!m_oMsgHandlerList.exist(t))
+		m_oMsgHandlerList[t] = vector<MsgHandlerFunc>();
+	
+	m_oMsgHandlerList[t].push_back(func);
 }
 
-void Sloong::CControlHub::CallMessage(UniqueEvent event)
+void Sloong::CControlHub::CallMessage(SharedEvent event)
 {
 	try
 	{
@@ -114,12 +126,7 @@ void Sloong::CControlHub::CallMessage(UniqueEvent event)
 			return;
 
 		for (auto func : handler_list)
-			func(event.get());
-
-		if (m_listMsgHook.exist(evt_type))
-			m_listMsgHook[evt_type](std::move(event));
-
-		event = nullptr;
+			func(event);
 	}
 	catch (const exception &ex)
 	{
@@ -133,7 +140,7 @@ void Sloong::CControlHub::CallMessage(UniqueEvent event)
 
 void Sloong::CControlHub::MessageWorkLoop()
 {
-	UniqueEvent event = nullptr;
+	SharedEvent event = nullptr;
 	while (m_emStatus != RUN_STATUS::Exit)
 	{
 		try
@@ -152,7 +159,7 @@ void Sloong::CControlHub::MessageWorkLoop()
 			if (m_oMsgList.TryMovePop(event) && event != nullptr)
 			{
 				// Get the message handler list.
-				CallMessage(std::move(event));
+				CallMessage(event);
 			}
 		}
 		catch (...)

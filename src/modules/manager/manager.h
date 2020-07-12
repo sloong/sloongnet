@@ -39,9 +39,9 @@ namespace Sloong
 		void EventPackageProcesser(CDataTransPackage *);
 
 	protected:
-		void ResetControlConfig(GLOBAL_CONFIG *config);
+		void ResetControlConfig(GLOBAL_CONFIG *);
 
-		void OnSocketClose(IEvent *event);
+		void OnSocketClose(SharedEvent);
 
 	protected:
 		list<unique_ptr<CServerManage>> m_listServerManage;

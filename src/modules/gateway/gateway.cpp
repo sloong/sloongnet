@@ -8,7 +8,6 @@ using namespace Sloong::Events;
 
 #include "protocol/manager.pb.h"
 using namespace Manager;
-
 #include "snowflake.h"
 
 
@@ -87,25 +86,14 @@ CResult SloongNetGateway::Initialized(SOCKET sock, IControl *iC)
 	m_nManagerConnection = sock;
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::SocketClose, std::bind(&SloongNetGateway::OnSocketClose, this, std::placeholders::_1));
-	m_iC->RegisterEventHook(EVENT_TYPE::SendPackage, std::bind(&SloongNetGateway::SendPackageHook, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
 
 CResult SloongNetGateway::ResponsePackageProcesser( CDataTransPackage *trans_pack)
 {
-	auto num = trans_pack->GetSerialNumber();
-	if (!m_listSendEvent.exist(num))
-	{
-		m_pLog->Error("ResponsePackageProcesser no find the package.");
-		return CResult::Make_Error("ResponsePackageProcesser no find the package.");
-	}
-		
-
-	auto send_evt = TYPE_TRANS<CSendPackageEvent*>(m_listSendEvent[num].get());
-	auto need_send_res = send_evt->CallCallbackFunc(trans_pack);
-	m_listSendEvent.erase(num);
-	return need_send_res;
+	m_pLog->Error("ResponsePackageProcesser no find the package.");
+	return CResult::Make_Error("ResponsePackageProcesser no find the package.");
 }
 
 
@@ -146,7 +134,7 @@ list<int> SloongNetGateway::ProcessProviedFunction(const string &prov_func)
 	return res_list;
 }
 
-CResult SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent *send_pack, CDataTransPackage *res_pack)
+CResult SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent* send_pack, CDataTransPackage *res_pack)
 {
 	auto str_res = res_pack->GetRecvMessage();
 	auto res = ConvertStrToObj<QueryReferenceInfoResponse>(str_res);
@@ -196,19 +184,12 @@ CResult SloongNetGateway::CreateProcessEnvironmentHandler(void **out_env)
 	return CResult::Succeed();
 }
 
-void SloongNetGateway::SendPackageHook(UniqueEvent event)
-{
-	auto send_evt = TYPE_TRANS<CSendPackageEvent*>(event.get());
-	auto pack = send_evt->GetDataPackage();
-	m_listSendEvent[pack->id()] = std::move(event);
-}
-
-void SloongNetGateway::OnStart(IEvent* evt)
+void SloongNetGateway::OnStart(SharedEvent evt)
 {
 	QueryReferenceInfo();
 }
 
-void Sloong::SloongNetGateway::OnSocketClose(IEvent* event)
+void Sloong::SloongNetGateway::OnSocketClose(SharedEvent event)
 {
 
 }

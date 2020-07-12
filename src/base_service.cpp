@@ -205,9 +205,6 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
         m_pControl->Add(DATA_ITEM::ModuleConfiguation, nullptr);
     }
 
-    m_pControl->RegisterEvent(ProgramStop);
-    m_pControl->RegisterEvent(ProgramStart);
-    m_pControl->RegisterEvent(ProgramRestart);
     m_pControl->RegisterEventHandler(ProgramRestart, std::bind(&CSloongBaseService::OnRestart, this, std::placeholders::_1));
     m_pControl->RegisterEventHandler(ProgramStop, std::bind(&CSloongBaseService::OnStop, this, std::placeholders::_1));
     IData::Initialize(m_pControl.get());
@@ -375,7 +372,7 @@ void CSloongBaseService::Stop()
     m_pControl->SendMessage(EVENT_TYPE::ProgramStop);
 }
 
-void CSloongBaseService::OnRestart(IEvent *event)
+void CSloongBaseService::OnRestart(SharedEvent event)
 {
     // Restart service. use the Exit Sync object, notify the wait thread and return the ExitResult.
     // in main function, check the result, if is Retry, do the init loop.
@@ -383,7 +380,7 @@ void CSloongBaseService::OnRestart(IEvent *event)
     m_oExitSync.notify_all();
 }
 
-void CSloongBaseService::OnStop(IEvent *event)
+void CSloongBaseService::OnStop(SharedEvent event)
 {
     m_oExitSync.notify_all();
     m_pControl->Exit();

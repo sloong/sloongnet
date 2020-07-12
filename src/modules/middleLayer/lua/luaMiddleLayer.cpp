@@ -139,7 +139,7 @@ CResult Sloong::LuaMiddleLayer::ResponsePackageProcesser(CLuaProcessCenter *pPro
 	return CResult::Succeed();
 }
 
-void Sloong::LuaMiddleLayer::OnSocketClose(IEvent *event)
+void Sloong::LuaMiddleLayer::OnSocketClose(SharedEvent event)
 {
 }
 

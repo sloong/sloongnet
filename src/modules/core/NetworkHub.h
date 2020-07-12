@@ -26,12 +26,12 @@ namespace Sloong
         void EnableSSL(const string& certFile, const string& keyFile, const string& passwd);
 
         // event handler
-        void Run(IEvent* event);
-		void Exit(IEvent* event);
-        void SendPackageEventHandler(IEvent* event);
-        void CloseConnectEventHandler(IEvent* event);
-		void MonitorSendStatusEventHandler(IEvent* evt);
-        void RegisteConnectionEventHandler(IEvent* evt);
+        void Run(SharedEvent);
+		void Exit(SharedEvent event);
+        void SendPackageEventHandler(SharedEvent);
+        void CloseConnectEventHandler(SharedEvent);
+		void MonitorSendStatusEventHandler(SharedEvent);
+        void RegisteConnectionEventHandler(SharedEvent);
 
 
         inline void RegisterProcesser(RequestPackageProcessFunction req,ResponsePackageProcessFunction res,EventPackageProcessFunction event){

@@ -41,14 +41,14 @@ namespace Sloong
 		CResult RegisteNode();
 		CResult InitModule();
 		void InitSystemEventHandler();
-		void OnRestart(IEvent *event);
-		void OnStop(IEvent *event);
+		void OnRestart(SharedEvent);
+		void OnStop(SharedEvent);
 
 	protected:
 		static void sloong_terminator();
 		static void sloong_unexpected();
-		static void on_sigint(int signal);
-		static void on_SIGINT_Event(int signal);
+		static void on_sigint(int);
+		static void on_SIGINT_Event(int);
 
 	protected:
 		unique_ptr<CNetworkHub> m_pNetwork = make_unique<CNetworkHub>();

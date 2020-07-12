@@ -83,7 +83,7 @@ CResult Sloong::SloongNetFirewall::ResponsePackageProcesser(CDataTransPackage* p
 	return CResult::Succeed();
 }
 
-void Sloong::SloongNetFirewall::OnSocketClose(IEvent* event)
+void Sloong::SloongNetFirewall::OnSocketClose(SharedEvent event)
 {
 }
 

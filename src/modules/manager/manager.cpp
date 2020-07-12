@@ -123,9 +123,9 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG *config)
 	config->set_receivetime(3);
 }
 
-void Sloong::SloongControlService::OnSocketClose(IEvent *event)
+void Sloong::SloongControlService::OnSocketClose(SharedEvent event)
 {
-	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event);
+	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event.get());
 	auto sock = net_evt->GetSocketID();
 	for (auto &item : m_listServerManage)
 		item->OnSocketClosed(sock);

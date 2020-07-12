@@ -65,7 +65,7 @@ CResult CFileCenter::Initialized(IControl *ic)
     return CResult::Succeed();
 }
 
-void Sloong::CFileCenter::OnSocketClose(IEvent *event)
+void Sloong::CFileCenter::OnSocketClose(SharedEvent event)
 {
 }
 

@@ -37,7 +37,7 @@ namespace Sloong
 
 		void EventPackageProcesser(CDataTransPackage*);
 
-		void OnSocketClose(IEvent* evt);
+		void OnSocketClose(SharedEvent evt);
 	protected:
 
 	protected:

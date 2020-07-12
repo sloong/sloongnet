@@ -11,9 +11,8 @@
 #include "IEvent.h"
 namespace Sloong
 {
-	typedef unique_ptr<IEvent> UniqueEvent;
-	typedef std::function<void(IEvent *)> MsgHandlerFunc;
-	typedef std::function<void(UniqueEvent)> MsgHookFunc;
+	typedef shared_ptr<IEvent> SharedEvent;
+	typedef std::function<void(SharedEvent)> MsgHandlerFunc;
 	class IControl
 	{
 	public:
@@ -25,6 +24,7 @@ namespace Sloong
 		virtual void AddTempString(const string &, const string &) = 0;
 		virtual void AddTempObject(const string &, const void *, int) = 0;
 		virtual void AddTempBytes(const string &, unique_ptr<char[]> &, int) = 0;
+		virtual void AddTempSharedPtr(const string &, shared_ptr<void>) = 0;
 
 		// Get temp string, the param is key.
 		// If key not exist, return empty string
@@ -32,16 +32,17 @@ namespace Sloong
 		virtual string GetTempString(const string &) = 0;
 		virtual void *GetTempObject(const string &, int *) = 0;
 		virtual unique_ptr<char[]> GetTempBytes(const string &, int *) = 0;
-		virtual bool ExistTempBytes(const string &key)=0;
-		virtual bool ExistTempObject(const string &key)=0;
-		virtual bool ExistTempString(const string &key)=0;
+		virtual shared_ptr<void> GetTempSharedPtr(const string &) = 0;
+
+		virtual bool ExistTempBytes(const string &) = 0;
+		virtual bool ExistTempObject(const string &) = 0;
+		virtual bool ExistTempString(const string &) = 0;
+		virtual bool ExistTempSharedPtr(const string &) = 0;
 		// Message
 		virtual void SendMessage(EVENT_TYPE) = 0;
-		virtual void SendMessage(UniqueEvent) = 0;
-		virtual void CallMessage(UniqueEvent) = 0;
-		virtual void RegisterEvent(EVENT_TYPE) = 0;
+		virtual void SendMessage(SharedEvent) = 0;
+		virtual void CallMessage(SharedEvent) = 0;
 		virtual void RegisterEventHandler(EVENT_TYPE, MsgHandlerFunc) = 0;
-		virtual void RegisterEventHook(EVENT_TYPE, MsgHookFunc) = 0;
 	};
 } // namespace Sloong
 

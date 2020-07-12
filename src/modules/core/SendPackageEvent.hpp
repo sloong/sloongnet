@@ -26,6 +26,7 @@ namespace Sloong
 					return m_pCallback(this,p); 
 				return CResult::Invalid();
 			}
+			inline bool HaveCallbackFunc(){ return m_pCallback != nullptr; }
 			
 			void SetRequest( SOCKET target, uint64_t sender, uint64_t serialnumber, int32_t priority, int32_t func, string content,  string extend = "", DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_RequestPackage)
 			{
@@ -50,6 +51,7 @@ namespace Sloong
 			{
 				return std::move(m_pData);
 			}
+			
 		protected:
 			unique_ptr<DataPackage> m_pData = nullptr;
 			CallbackFunc		m_pCallback = nullptr;

@@ -13,16 +13,63 @@
 #include "core.h"
 namespace Sloong
 {
-	typedef struct ObjectData
+	enum TempDataItemType
 	{
-		void *ptr = nullptr;
-		int size = 0;
-	} ObjectData;
-	typedef struct BytesData
+		String,
+		Object,
+		Bytes,
+		SharedPtr,
+	};
+	class TempDataItem
 	{
-		unique_ptr<char[]> ptr = nullptr;
-		int size = 0;
-	} BytesData;
+	public:
+		virtual ~TempDataItem(){}
+		TempDataItemType Type;
+	};
+	class StringData : public TempDataItem
+	{
+	public:
+		StringData( const string &data)
+		{
+			Type = TempDataItemType::String;
+			Data = data;
+		}
+		string Data;
+	};
+	class ObjectData : public TempDataItem
+	{
+	public:
+		ObjectData( void *p, int s)
+		{
+			Type = TempDataItemType::Object;
+			Ptr = p;
+			Size = s;
+		}
+		void *Ptr = nullptr;
+		int Size = 0;
+	};
+	class BytesData : public TempDataItem
+	{
+	public:
+		BytesData( unique_ptr<char[]> &p, int s)
+		{
+			Type = TempDataItemType::Bytes;
+			Ptr = std::move(p);
+			Size = s;
+		}
+		unique_ptr<char[]> Ptr = nullptr;
+		int Size = 0;
+	};
+	class SharedPtrData : public TempDataItem
+	{
+	public:
+		SharedPtrData( shared_ptr<void> p)
+		{
+			Type = TempDataItemType::SharedPtr;
+			Ptr = p;
+		}
+		shared_ptr<void> Ptr = nullptr;
+	};
 	class CControlHub : public IControl
 	{
 	public:
@@ -37,20 +84,11 @@ namespace Sloong
 
 		// Message
 		void SendMessage(EVENT_TYPE);
-		void SendMessage(UniqueEvent);
+		void SendMessage(SharedEvent);
 
-		void CallMessage(UniqueEvent);
+		void CallMessage(SharedEvent);
 
-		inline void RegisterEvent(EVENT_TYPE t)
-		{
-			if( !m_oMsgHandlerList.exist(t))
-				m_oMsgHandlerList[t] = vector<MsgHandlerFunc>();
-		}
 		void RegisterEventHandler(EVENT_TYPE, MsgHandlerFunc);
-		inline void RegisterEventHook(EVENT_TYPE t, MsgHookFunc func)
-		{
-			m_listMsgHook[t] = func;
-		}
 
 		void MessageWorkLoop();
 
@@ -76,39 +114,69 @@ namespace Sloong
 
 		void AddTempString(const string &key, const string &value)
 		{
-			m_oTempStringList[key] = value;
+			m_oTempDataList[key] = new StringData( value);
 		}
 		string GetTempString(const string &);
-		inline bool ExistTempString(const string &key) { return m_oTempStringList.exist(key); }
+		inline bool ExistTempString(const string &key)
+		{
+			auto i = m_oTempDataList.try_get(key);
+			if (i == nullptr || (*i)->Type != TempDataItemType::String)
+				return false;
+			else
+				return true;
+		}
 
-		void AddTempObject(const string &key, const void *object, int size) { m_oTempObjectList[key] = ObjectData{ptr : const_cast<void *>(object), size : size}; }
+		void AddTempObject(const string &key, const void *object, int size)
+		{
+			m_oTempDataList[key] = new ObjectData(const_cast<void *>(object), size);
+		}
 		void *GetTempObject(const string &, int *);
-		inline bool ExistTempObject(const string &key) { return m_oTempObjectList.exist(key); }
+		inline bool ExistTempObject(const string &key) 
+		{
+			auto i = m_oTempDataList.try_get(key);
+			if (i == nullptr || (*i)->Type != TempDataItemType::Object)
+				return false;
+			else
+				return true;
+		}
 
 		void AddTempBytes(const string &key, unique_ptr<char[]> &bytes, int size)
 		{
-			m_oTempBytesList[key] = BytesData();
-			m_oTempBytesList[key].ptr = std::move(bytes);
-			m_oTempBytesList[key].size = size;
+			m_oTempDataList[key] = new BytesData( bytes, size);
 		}
+
 		unique_ptr<char[]> GetTempBytes(const string &, int *);
 		inline bool ExistTempBytes(const string &key)
 		{
-			if (m_oTempBytesList.find(key) == m_oTempBytesList.end())
+			auto i = m_oTempDataList.try_get(key);
+			if (i == nullptr || (*i)->Type != TempDataItemType::Bytes)
 				return false;
-			return true;
+			else
+				return true;
+		}
+
+		void AddTempSharedPtr(const string &key, shared_ptr<void> ptr)
+		{
+			m_oTempDataList[key] = new SharedPtrData( ptr);
+		}
+		shared_ptr<void> GetTempSharedPtr(const string &);
+		inline bool ExistTempSharedPtr(const string &key)
+		{
+			auto i = m_oTempDataList.try_get(key);
+			if (i == nullptr || (*i)->Type != TempDataItemType::SharedPtr)
+				return false;
+			else
+				return true;
 		}
 
 	protected:
 		// Data
 		map<DATA_ITEM, void *> m_oDataList;
-		map_ex<string, string> m_oTempStringList;
-		map_ex<string, ObjectData> m_oTempObjectList;
-		map<string, BytesData> m_oTempBytesList;
+		map_ex<string, TempDataItem *> m_oTempDataList;
+
 		// Message
 		map_ex<EVENT_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;
-		map_ex<EVENT_TYPE, MsgHookFunc> m_listMsgHook;
-		queue_ex<UniqueEvent> m_oMsgList;
+		queue_ex<SharedEvent> m_oMsgList;
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;
 		CEasySync m_oSync;
 	};

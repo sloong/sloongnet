@@ -46,7 +46,7 @@ namespace Sloong
 
 		void EventPackageProcesser(CDataTransPackage *);
 
-		void OnSocketClose(IEvent *evt);
+		void OnSocketClose(SharedEvent);
 
 		inline CLog* GetLog(){ return m_pLog; }
 

@@ -49,7 +49,7 @@ namespace Sloong
 			m_oSSync.notify_one();
 		}
 		void HandleError(const string& err);
-		void ReloadContext(IEvent* event);
+		void ReloadContext(SharedEvent event);
 	protected:
 		vector<LuaContent>	m_listLuaContent;
 		queue_ex<int>		m_oFreeLuaContext;
