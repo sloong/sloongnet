@@ -37,15 +37,14 @@ namespace Sloong
         static int Lua_GetLogObject(lua_State *l);
         static int Lua_SetExtendData(lua_State *l);
         static int Lua_SetExtendDataByFile(lua_State *l);
-        static int Lua_SendRequestToDBCenter(lua_State *l);
+        static int Lua_ConnectToDBCenter(lua_State *l);
+        static int Lua_SQLQueryToDBCenter(lua_State *l);
 
     protected:
-        CResult OnSendPackageResponse(IEvent*,CDataTransPackage*);
-        CResult OnQueryDBCenterTemplateResponse(IEvent*,CDataTransPackage*);
-        CResult OnQueryDBCenterNodeResponse(IEvent*,CDataTransPackage*);
-
+        CResult OnQueryDBCenterTemplateResponse(IEvent *event, CDataTransPackage *pack);
     protected:
         map_ex<string,string> m_mapCommData;
+        map_ex<string,int> m_mapDBNameToSessionID;
         Json::Value* m_pModuleConfig = nullptr;
         map_ex<int64_t, EasySync*> m_mapIDToSync;
         unique_ptr<EasyConnect> m_SocketDBCenter=nullptr;

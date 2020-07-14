@@ -36,7 +36,8 @@ LuaFunctionRegistr g_LuaFunc[] =
         {"GetCommData", CGlobalFunction::Lua_GetCommData},
         {"SetExtendData", CGlobalFunction::Lua_SetExtendData},
         {"SetExtendDataByFile", CGlobalFunction::Lua_SetExtendDataByFile},
-        {"SendReqeustToDBCenter", CGlobalFunction::Lua_SendRequestToDBCenter},
+        {"ConnectToDBCenter", CGlobalFunction::Lua_ConnectToDBCenter},
+        {"SQLQueryToDBCenter", CGlobalFunction::Lua_SQLQueryToDBCenter},
 };
 
 CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
@@ -46,7 +47,7 @@ CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
     m_pModuleConfig = IData::GetModuleConfig();
 
     int manager_socket = IData::GetManagerSocket();
-    if( manager_socket == INVALID_SOCKET )
+    if (manager_socket == INVALID_SOCKET)
         return CResult::Make_Error("Get manager socket error.");
 
     Manager::QueryTemplateRequest request;
@@ -54,7 +55,7 @@ CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
     auto package_id = snowflake::Instance->nextid();
     auto req = make_shared<CSendPackageEvent>();
     req->SetCallbackFunc(std::bind(&CGlobalFunction::OnQueryDBCenterTemplateResponse, CGlobalFunction::Instance.get(), std::placeholders::_1, std::placeholders::_2));
-    req->SetRequest(manager_socket, IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, Manager::Functions::QueryTemplate , ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+    req->SetRequest(manager_socket, IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, Manager::Functions::QueryTemplate, ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
     CGlobalFunction::Instance->m_iC->SendMessage(req);
     return CResult::Succeed();
 }
@@ -237,36 +238,101 @@ int CGlobalFunction::Lua_SetExtendDataByFile(lua_State *l)
     return 2;
 }
 
-int CGlobalFunction::Lua_SendRequestToDBCenter(lua_State *l)
+int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
 {
-    auto func = CLua::GetInteger(l, 1, DataCenter::Functions::Invalid);
-    auto request_str = CLua::GetString(l, 2, "");
-    if (func == DataCenter::Functions::Invalid || !DataCenter::Functions_IsValid(func))
+    auto DBName = CLua::GetString(l, 1, "");
+    if (DBName.empty())
     {
         CLua::PushInteger(l, Base::ResultType::Error);
-        CLua::PushString(l, "Function is invalid");
+        CLua::PushString(l, "Database is empty");
         return 2;
     }
 
-    if (request_str.empty())
+    if (CGlobalFunction::Instance->m_mapDBNameToSessionID.exist(DBName))
+    {
+        CLua::PushInteger(l, Base::ResultType::Succeed);
+        CLua::PushInteger(l, CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName]);
+        return 2;
+    }
+
+    DataCenter::ConnectDatabaseRequest request;
+    request.set_database(DBName);
+
+    auto package_id = snowflake::Instance->nextid();
+    auto req = make_shared<CSendPackageEvent>();
+
+    // TODO: If connect error, how process it?
+    req->SetCallbackFunc([DBName](IEvent *event, CDataTransPackage *pack) {
+        auto res_str = pack->GetRecvMessage();
+        auto res = ConvertStrToObj<DataCenter::ConnectDatabaseResponse>(res_str);
+
+        CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName] = res->sessionid();
+        return CResult::Succeed();
+    });
+    req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID(), IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+    CGlobalFunction::Instance->m_iC->SendMessage(req);
+
+    EasySync sync;
+    CGlobalFunction::Instance->m_mapIDToSync[package_id] = &sync;
+    if (!sync.wait_for(5000))
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, "timtout");
+        return 2;
+    }
+
+    auto response_str = CGlobalFunction::Instance->m_iC->GetTempString(Helper::ntos(package_id));
+    CLua::PushInteger(l, Base::ResultType::Succeed);
+    CLua::PushString(l, response_str);
+    return 2;
+}
+
+// Request sql query cmd to dbcenter.
+// Params:
+//     1> SessionID
+//     2> Cmd
+int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
+{
+    auto SessionID = CLua::GetInteger(l, 1, -1);
+    if (SessionID == -1)
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, "Database session id is invalid, call ConnectDBCenter first.");
+        return 2;
+    }
+
+    auto query_cmd = CLua::GetString(l, 2, "");
+    if (query_cmd.empty())
     {
         CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, "request data is empty");
         return 2;
     }
 
-    if( CGlobalFunction::Instance->m_SocketDBCenter == nullptr )
+    if (CGlobalFunction::Instance->m_SocketDBCenter == nullptr)
     {
         CLua::PushInteger(l, Base::ResultType::Error);
-        CLua::PushString(l, "No connect to DBCenter.");
+        CLua::PushString(l, "Work node no connect to DBCenter.");
         return 2;
     }
-    
+
+    DataCenter::QuerySQLCmdRequest request;
+    request.set_sessionid(SessionID);
+    request.set_sqlcmd(query_cmd);
+
     auto package_id = snowflake::Instance->nextid();
-    auto req = make_unique<CSendPackageEvent>();
-    req->SetCallbackFunc(std::bind(&CGlobalFunction::OnSendPackageResponse, CGlobalFunction::Instance.get(), std::placeholders::_1, std::placeholders::_2));
-    req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID() , IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, func, request_str, "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
-    CGlobalFunction::Instance->m_iC->SendMessage(std::move(req));
+    auto req = make_shared<CSendPackageEvent>();
+    req->SetCallbackFunc([](IEvent *event, CDataTransPackage *pack) {
+        auto id = pack->GetSerialNumber();
+
+        CGlobalFunction::Instance->m_iC->AddTempString(Helper::ntos(id), pack->GetRecvMessage());
+        auto sync = CGlobalFunction::Instance->m_mapIDToSync.try_get(id);
+        CGlobalFunction::Instance->m_mapIDToSync.erase(id);
+        (*sync)->notify_one();
+        return CResult::Succeed();
+    });
+    req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID(), IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, DataCenter::Functions::QuerySQLCmd , ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+    CGlobalFunction::Instance->m_iC->SendMessage(req);
 
     EasySync sync;
     CGlobalFunction::Instance->m_mapIDToSync[package_id] = &sync;
@@ -286,49 +352,32 @@ CResult CGlobalFunction::OnQueryDBCenterTemplateResponse(IEvent *event, CDataTra
 {
     auto res_str = pack->GetRecvMessage();
     auto res = ConvertStrToObj<Manager::QueryTemplateResponse>(res_str);
-    Manager::QueryNodeRequest query_node_req; 
-    for( auto& item : res->templateinfos())
+    Manager::QueryNodeRequest query_node_req;
+    for (auto &item : res->templateinfos())
     {
         query_node_req.add_templateid(item.id());
     }
-    if( query_node_req.templateid_size() > 0 )
+    if (query_node_req.templateid_size() > 0)
     {
         int manager_socket = IData::GetManagerSocket();
-
         auto package_id = snowflake::Instance->nextid();
         auto req = make_shared<CSendPackageEvent>();
-        req->SetCallbackFunc(std::bind(&CGlobalFunction::OnQueryDBCenterNodeResponse, CGlobalFunction::Instance.get(), std::placeholders::_1, std::placeholders::_2));
-        req->SetRequest(manager_socket, IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, Manager::Functions::QueryNode , ConvertObjToStr(&query_node_req), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+        req->SetCallbackFunc([](IEvent *event, CDataTransPackage *pack) {
+            auto res_str = pack->GetRecvMessage();
+            auto res = ConvertStrToObj<Manager::QueryNodeResponse>(res_str);
+            if (res->nodeinfos_size() > 0)
+            {
+                auto info = res->nodeinfos();
+                CGlobalFunction::Instance->m_SocketDBCenter = make_unique<EasyConnect>();
+                CGlobalFunction::Instance->m_SocketDBCenter->Initialize(info[0].address(), info[0].port());
+                auto reg_event = make_shared<CNetworkEvent>(EVENT_TYPE::RegisteConnection);
+                reg_event->SetSocketID(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID());
+                CGlobalFunction::Instance->m_iC->SendMessage(reg_event);
+            }
+            return CResult::Succeed();
+        });
+        req->SetRequest(manager_socket, IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, Manager::Functions::QueryNode, ConvertObjToStr(&query_node_req), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
         CGlobalFunction::Instance->m_iC->SendMessage(req);
     }
-    return CResult::Succeed();
-}
-
-
-CResult CGlobalFunction::OnQueryDBCenterNodeResponse(IEvent *event, CDataTransPackage *pack)
-{
-    auto res_str = pack->GetRecvMessage();
-    auto res = ConvertStrToObj<Manager::QueryNodeResponse>(res_str);
-    if( res->nodeinfos_size() > 0 )
-    {
-        auto info = res->nodeinfos();
-        m_SocketDBCenter = make_unique<EasyConnect>();
-        m_SocketDBCenter->Initialize(info[0].address(),info[0].port());
-        auto reg_event = make_shared<CNetworkEvent>(EVENT_TYPE::RegisteConnection);
-        reg_event->SetSocketID(m_SocketDBCenter->GetSocketID());
-        m_iC->SendMessage(reg_event);
-    }
-    return CResult::Succeed();
-}
-
-
-CResult CGlobalFunction::OnSendPackageResponse(IEvent *event, CDataTransPackage *pack)
-{
-    auto id = pack->GetSerialNumber();
-
-    m_iC->AddTempString(Helper::ntos(id), pack->GetRecvMessage());
-    auto sync = m_mapIDToSync.try_get(id);
-    m_mapIDToSync.erase(id);
-    (*sync)->notify_one();
     return CResult::Succeed();
 }
