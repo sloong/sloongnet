@@ -85,7 +85,7 @@ CResult Sloong::DBHub::QuerySQLCmdHandler(const string &req_obj, CDataTransPacka
         return res;
 
     QuerySQLCmdResponse response;
-    response.set_affectedrows(res.GetResultObject());
+    //response.set_affectedrows(res.GetResultObject());
     for (auto &item : vRes)
     {
         auto p = response.add_results();

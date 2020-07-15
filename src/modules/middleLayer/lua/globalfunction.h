@@ -42,6 +42,7 @@ namespace Sloong
 
     protected:
         CResult OnQueryDBCenterTemplateResponse(IEvent *event, CDataTransPackage *pack);
+        
     protected:
         map_ex<string,string> m_mapCommData;
         map_ex<string,int> m_mapDBNameToSessionID;

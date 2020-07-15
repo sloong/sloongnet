@@ -48,7 +48,6 @@ message QuerySQLCmdRequest{
 }
 
 message QuerySQLCmdResponse{
-    int32 AffectedRows=1;
     repeated string Results=2;
 }
 

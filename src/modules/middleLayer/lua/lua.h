@@ -45,8 +45,8 @@ namespace Sloong
 		bool RunBuffer(LPCSTR pBuffer, size_t sz);
 		bool RunString(const string &strCommand);
 		void PushPacket(CLuaPacket *pData);
-		CResult RunFunction(const string &, CLuaPacket *, int = 0, const string & = "", const string & = "", string* extendDataUUID = nullptr);
-		
+		CResult RunFunction(const string &, CLuaPacket *, int = 0, const string & = "", const string & = "", string *extendDataUUID = nullptr);
+
 		bool AddFunction(const string &strFunctionName, LuaFunctionType pFunction);
 		bool PushFunction(int nFuncRef);
 		bool GetLuaFuncRef(int &nFunc, const string &strFuncName);
@@ -100,19 +100,21 @@ namespace Sloong
 
 		// Static functions.
 	public:
-		static string GetString(lua_State *l, int nNum, const string &strDefault = "");
-		static double GetDouble(lua_State *l, int nNum, double dDefault = -1.0f);
-		static int GetInteger(lua_State *l, int nNum, int nDef = -1);
-		static bool GetBoolen(lua_State *l, int nNum);
-		static void *GetPointer(lua_State *l, int nNum);
-		static void PushString(lua_State *l, const string &strString);
-		static void PushDouble(lua_State *l, double dValue);
-		static void PushNil(lua_State *l);
-		static void PushInteger(lua_State *l, int nValue);
-		static void PushBoolen(lua_State *l, bool b);
-		static void PushPointer(lua_State *l, void *pPointer);
-		static string GetCallStack(lua_State *l);
-		static unique_ptr<map<string, string>> GetTableParam(lua_State *l, int index);
+		static string GetString(lua_State *, int, const string & = "");
+		static double GetDouble(lua_State *, int, double = -1.0f);
+		static int GetInteger(lua_State *, int, int = -1);
+		static bool GetBoolen(lua_State *, int);
+		static void *GetPointer(lua_State *, int);
+		static void PushString(lua_State *, const string &);
+		static void PushDouble(lua_State *, double);
+		static void PushNil(lua_State *);
+		static void PushInteger(lua_State *, int);
+		static void PushBoolen(lua_State *, bool);
+		static void PushPointer(lua_State *, void *);
+		static string GetCallStack(lua_State *);
+		static void PushTable(lua_State *, const map<string, string> &);
+		static void PushTable(lua_State*, const list<string>&);
+		static unique_ptr<map<string, string>> GetTableParam(lua_State *, int);
 
 	protected:
 		string findScript(const string &strFullName);

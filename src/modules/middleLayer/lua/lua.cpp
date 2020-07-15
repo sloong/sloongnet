@@ -329,6 +329,28 @@ void Sloong::CLua::PushPointer(lua_State *l, void *pPointer)
 	lua_pushlightuserdata(l, pPointer);
 }
 
+void Sloong::CLua::PushTable( lua_State* l, const map<string,string>& mapValue)
+{
+	lua_newtable(l);
+	for( auto& item : mapValue )
+	{
+		lua_pushstring(l, item.first.c_str());
+		lua_pushstring(l, item.second.c_str());
+		lua_rawset(l,-3);
+	}
+}
+
+void Sloong::CLua::PushTable( lua_State* l, const list<string>& listValue)
+{
+	lua_newtable(l);
+	int i = 1;
+	for( auto& item : listValue)
+	{
+		lua_pushstring(l, item.c_str());
+		lua_rawseti(l, -2, i);
+	}
+}
+
 unique_ptr<map<std::string, std::string>> Sloong::CLua::GetTableParam(lua_State *l, int index)
 {
 	auto data = make_unique<map<string, string>>();
