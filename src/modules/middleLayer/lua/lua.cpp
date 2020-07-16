@@ -343,11 +343,24 @@ void Sloong::CLua::PushTable( lua_State* l, const map<string,string>& mapValue)
 void Sloong::CLua::PushTable( lua_State* l, const list<string>& listValue)
 {
 	lua_newtable(l);
-	int i = 1;
+	int index = 1;
 	for( auto& item : listValue)
 	{
 		lua_pushstring(l, item.c_str());
-		lua_rawseti(l, -2, i);
+		lua_rawseti(l, -2, index);
+		index++;
+	}
+}
+
+void Sloong::CLua::Push2DTable( lua_State* l, const list<list<string>>& listValue)
+{
+	lua_newtable(l);
+	int index = 1;
+	for( auto& item : listValue )
+	{
+		PushTable(l, item);
+		lua_rawseti(l, -2, index);
+		index++;
 	}
 }
 

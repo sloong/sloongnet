@@ -76,6 +76,9 @@ namespace Sloong
         static inline TResult Make_OK(T& result, const string& msg = "") {
             return TResult(ResultType::Succeed, msg, result);
         }
+        static inline TResult Make_OK(T&& result, const string& msg = "" ){
+            return TResult(ResultType::Succeed, msg, result);
+        }
     protected:
         T m_tResultObject;
     };

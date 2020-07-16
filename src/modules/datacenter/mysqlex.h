@@ -4,8 +4,10 @@
 #include <mariadb/mysql.h>
 
 #include "core.h"
+#include "DBResult.h"
 namespace Sloong
 {
+	typedef TResult<EasyResult> DResult;
 	class MySqlEx
 	{
 	public:
@@ -21,31 +23,32 @@ namespace Sloong
 			mysql_close(&m_MySql);
 		}
 
-		inline void SetLog( CLog* log ){ m_pLog = log; }
+		inline void SetLog(CLog *log) { m_pLog = log; }
 
-		CResult Connect(const string &Address, int Port, const string &User, const string &Password, const string &Database)
-		{
-			if (!mysql_real_connect(&m_MySql, Address.c_str(), User.c_str(),
-									Password.c_str(), Database.c_str(), Port, NULL, 0))
-			{
-				return CResult::Make_Error(GetError());
-			}
-			mysql_set_character_set(&m_MySql, "utf8");
-			m_bIsConnect = true;
-			return CResult::Succeed();
+		CResult Connect(const string &Address, int Port, const string &User, const string &Password, const string &Database);
+
+		DResult Query(const string &);
+
+		inline NResult Insert(const string &cmd){
+			return RunModifySQLCmd(cmd);
 		}
-		
-		NResult Query(const string &, vector<string> *);
-		NResult Query(const string &, string* );
+		inline NResult Delete(const string &cmd){
+			return RunModifySQLCmd(cmd);
+		}
+		inline NResult Update(const string &cmd){
+			return RunModifySQLCmd(cmd);
+		}
 
 		const string &GetError()
 		{
 			m_strErrorMsg = mysql_error(&m_MySql);
 			return m_strErrorMsg;
 		}
+	protected:
+		NResult RunModifySQLCmd( const string& );
 
 	private:
-		CLog* m_pLog = nullptr;
+		CLog *m_pLog = nullptr;
 		MYSQL m_MySql;
 		string m_strErrorMsg;
 		bool m_bIsConnect = false;

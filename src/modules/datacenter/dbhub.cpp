@@ -79,17 +79,19 @@ CResult Sloong::DBHub::QuerySQLCmdHandler(const string &req_obj, CDataTransPacka
     if (session == nullptr)
         return CResult::Make_Error("SessionID is invaild.");
 
-    vector<string> vRes;
-    auto res = (*session)->Query(req->sqlcmd(), &vRes);
+    auto res = (*session)->Query(req->sqlcmd());
     if (res.IsFialed())
         return res;
 
+    auto sql_res = res.GetResultObject();
     QuerySQLCmdResponse response;
-    //response.set_affectedrows(res.GetResultObject());
-    for (auto &item : vRes)
+    for( int i = 0; i< sql_res->GetLinesNum(); i++ )
     {
-        auto p = response.add_results();
-        *p = item;
+        auto line = response.add_lines();
+        for( int j = 0; j < sql_res->GetColumnsNum(); j++ )
+        {
+            line->add_rawdataitem(sql_res->GetData(i,j));
+        }
     }
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
@@ -102,8 +104,7 @@ CResult Sloong::DBHub::InsertSQLCmdHandler(const string &req_obj, CDataTransPack
     if (session == nullptr)
         return CResult::Make_Error("SessionID is invaild.");
 
-    vector<string> vRes;
-    auto res = (*session)->Query(req->sqlcmd(), &vRes);
+    auto res = (*session)->Insert(req->sqlcmd());
     if (res.IsFialed())
         return res;
 
@@ -121,8 +122,7 @@ CResult Sloong::DBHub::DeleteSQLCmdHandler(const string &req_obj, CDataTransPack
     if (session == nullptr)
         return CResult::Make_Error("SessionID is invaild.");
 
-    vector<string> vRes;
-    auto res = (*session)->Query(req->sqlcmd(), &vRes);
+    auto res = (*session)->Delete(req->sqlcmd());
     if (res.IsFialed())
         return res;
 
@@ -140,8 +140,7 @@ CResult Sloong::DBHub::UpdateSQLCmdHandler(const string &req_obj, CDataTransPack
     if (session == nullptr)
         return CResult::Make_Error("SessionID is invaild.");
         
-    vector<string> vRes;
-    auto res = (*session)->Query(req->sqlcmd(), &vRes);
+    auto res = (*session)->Update(req->sqlcmd());
     if (res.IsFialed())
         return res;
 

@@ -380,13 +380,16 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
 
     auto response_str = CGlobalFunction::Instance->m_iC->GetTempString(Helper::ntos(package_id));
     auto response = ConvertStrToObj<DataCenter::QuerySQLCmdResponse>(response_str);
-    CLua::PushInteger(l, response->results_size());
-    list<string> res;
-    for( auto& item : response->results())
+    CLua::PushInteger(l, response->lines_size());
+    list<list<string>> res;
+    for( auto& item : response->lines())
     {
-        res.push_back(item);
+        list<string> row;
+        for( auto& j : item.rawdataitem())
+            row.push_back(j);
+        res.push_back(row);
     }
-    CLua::PushTable(l, res);
+    CLua::Push2DTable(l, res);
     return 2;
 }
 

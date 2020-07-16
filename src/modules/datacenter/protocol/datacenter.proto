@@ -47,8 +47,12 @@ message QuerySQLCmdRequest{
     string SQLCMD=2;
 }
 
+message SQLResultLineItem{
+    repeated string RawDataItem=1;
+}
+
 message QuerySQLCmdResponse{
-    repeated string Results=2;
+    repeated SQLResultLineItem Lines=2;
 }
 
 message InsertSQLCmdRequest{

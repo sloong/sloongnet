@@ -15,11 +15,11 @@ namespace Sloong
     typedef vector<string> DBLine;
     #define TRUE_STRING "true"
     #define FALSE_STRING "false"
-    class CDBResult
+    class DBResult
     {
     public:
-        CDBResult();
-        ~CDBResult();
+        DBResult();
+        ~DBResult();
 
         // Get Columns number
         int GetColumnsNum();
@@ -64,7 +64,7 @@ namespace Sloong
         vector<shared_ptr<DBLine>> m_oDatas;
     };
 
-    typedef shared_ptr<CDBResult> EasyResult;
+    typedef shared_ptr<DBResult> EasyResult;
 }
 
 
