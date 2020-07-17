@@ -37,7 +37,7 @@ DResult Sloong::MySqlEx::Query(const string &sqlCmd)
 	if( mysql_num_rows(res) > 0)
 	{
 		int nNums = mysql_num_fields(res);
-		for( int i = 1; i < nNums; i++ )
+		for( int i = 0; i < nNums; i++ )
 		{
 			dbresult->AppendColumn("");
 		}
@@ -45,7 +45,7 @@ DResult Sloong::MySqlEx::Query(const string &sqlCmd)
 		while ((row = mysql_fetch_row(res)))
 		{
 			int index = dbresult->AppendLine();
-			for (int i = 1; i < nNums; i++)
+			for (int i = 0; i < nNums; i++)
 			{
 				dbresult->SetItemData(index,i,row[i]);
 			}
