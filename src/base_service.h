@@ -56,6 +56,7 @@ namespace Sloong
 		unique_ptr<CLog> m_pLog = make_unique<CLog>();
 		RuntimeDataPackage m_oServerConfig;
 		SmartConnect m_pManagerConnect = nullptr;
+		int m_nManagerSocket = INVALID_SOCKET;
 		Json::Value m_oModuleConfig;
 		shared_ptr<EasyConnect> m_pSocket;
 		EasySync m_oExitSync;

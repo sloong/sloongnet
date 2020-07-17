@@ -219,10 +219,16 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     m_pNetwork->RegisterEnvCreateProcesser(m_pModuleCreateProcessEvnFunc);
     m_pNetwork->RegisterProcesser(m_pModuleRequestHandler, m_pModuleResponseHandler, m_pModuleEventHandler);
     m_pNetwork->RegisterAccpetConnectProcesser(m_pModuleAcceptHandler);
-    auto sock = INVALID_SOCKET;
     if (m_pManagerConnect)
-        sock = m_pManagerConnect->GetSocketID();
-    res = m_pModuleInitializedFunc(sock, m_pControl.get());
+    {
+        m_nManagerSocket = m_pManagerConnect->GetSocketID();
+        auto event = make_shared<Events::CNetworkEvent>(EVENT_TYPE::RegisteConnection);
+        event->SetSocketID(m_nManagerSocket);
+        m_pControl->SendMessage(event);
+        m_pControl->Add(DATA_ITEM::ManagerSocket, &m_nManagerSocket);
+    }
+
+    res = m_pModuleInitializedFunc(m_nManagerSocket, m_pControl.get());
     if (res.IsFialed())
         m_pLog->Fatal(res.GetMessage());
     m_pLog->Debug("Module initialized succeed.");
@@ -234,10 +240,6 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
             m_pLog->Fatal(res.GetMessage());
             return res;
         }
-        auto event = make_shared<Events::CNetworkEvent>(EVENT_TYPE::RegisteConnection);
-        event->SetSocketID(sock);
-        m_pControl->SendMessage(event);
-        m_pControl->Add(DATA_ITEM::ManagerSocket, &sock);
     }
 
     return CResult::Succeed();
