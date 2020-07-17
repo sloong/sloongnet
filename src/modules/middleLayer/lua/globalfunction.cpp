@@ -321,26 +321,20 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
     DataCenter::ConnectDatabaseRequest request;
     request.set_database(DBName);
 
-    auto package_id = snowflake::Instance->nextid();
     auto req = make_shared<CSendPackageEvent>();
-
+    auto sync = make_shared<EasySync>();
     // TODO: If connect error, how process it?
-    req->SetCallbackFunc([DBName](IEvent *event, CDataTransPackage *pack) {
-        auto id = pack->GetSerialNumber();
+    req->SetCallbackFunc([DBName,sync](IEvent *event, CDataTransPackage *pack) {
         auto res_str = pack->GetRecvMessage();
         auto res = ConvertStrToObj<DataCenter::ConnectDatabaseResponse>(res_str);
 
         CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName] = res->sessionid();
-        auto sync = CGlobalFunction::Instance->m_mapIDToSync.try_get(id);
-        CGlobalFunction::Instance->m_mapIDToSync.erase(id);
-        (*sync)->notify_one();
+        sync->notify_one();
     });
-    req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID(), IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+    req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID(), IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
     CGlobalFunction::Instance->m_iC->SendMessage(req);
 
-    EasySync sync;
-    CGlobalFunction::Instance->m_mapIDToSync[package_id] = &sync;
-    if (!sync.wait_for(5000))
+    if (!sync->wait_for(5000))
     {
         CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, "timtout");
@@ -385,36 +379,30 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
     request.set_sessionid(SessionID);
     request.set_sqlcmd(query_cmd);
 
-    auto package_id = snowflake::Instance->nextid();
+    auto response_str = make_shared<string>();
     auto req = make_shared<CSendPackageEvent>();
-    auto result = make_shared<ResultType>();
-    (*result) = ResultType::Invalid;
-    req->SetCallbackFunc([result](IEvent *event, CDataTransPackage *trans_pack) {
-        auto id = trans_pack->GetSerialNumber();
+    auto result = make_shared<ResultType>(ResultType::Invalid);
+    auto sync = make_shared<EasySync>();
+    req->SetCallbackFunc([result,sync,response_str](IEvent *event, CDataTransPackage *trans_pack) {
         auto pack = trans_pack->GetDataPackage();
         (*result) = pack->result();
 
-        CGlobalFunction::Instance->m_iC->AddTempString(Helper::ntos(id), pack->content());
-        auto sync = CGlobalFunction::Instance->m_mapIDToSync.try_get(id);
-        CGlobalFunction::Instance->m_mapIDToSync.erase(id);
-        (*sync)->notify_one();
+        *response_str = pack->content();
+        sync->notify_one();
     });
-    req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID(), IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, DataCenter::Functions::QuerySQLCmd , ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
-    CGlobalFunction::Instance->m_iC->SendMessage(req);
+    req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID(), IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, DataCenter::Functions::QuerySQLCmd , ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+    CGlobalFunction::Instance->m_iC->CallMessage(req);
 
-    EasySync sync;
-    CGlobalFunction::Instance->m_mapIDToSync[package_id] = &sync;
-    if (!sync.wait_for(5000))
+    if (!sync->wait_for(5000))
     {
         CLua::PushInteger(l, -1);
         CLua::PushString(l, "timtout");
         return 2;
     }
 
-    auto response_str = CGlobalFunction::Instance->m_iC->GetTempString(Helper::ntos(package_id));
     if( (*result) == ResultType::Succeed )
     {
-        auto response = ConvertStrToObj<DataCenter::QuerySQLCmdResponse>(response_str);
+        auto response = ConvertStrToObj<DataCenter::QuerySQLCmdResponse>(*response_str);
         CLua::PushInteger(l, response->lines_size());
         list<list<string>> res;
         for( auto& item : response->lines())
@@ -430,7 +418,7 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
     else
     {
         CLua::PushInteger(l,-1);
-        CLua::PushString(l,response_str);
+        CLua::PushString(l,*response_str);
         return 2;
     }
 }

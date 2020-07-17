@@ -48,7 +48,6 @@ namespace Sloong
         map_ex<string,string> m_mapCommData;
         map_ex<string,int> m_mapDBNameToSessionID;
         Json::Value* m_pModuleConfig = nullptr;
-        map_ex<int64_t, EasySync*> m_mapIDToSync;
         unique_ptr<EasyConnect> m_SocketDBCenter=nullptr;
 
     public:
