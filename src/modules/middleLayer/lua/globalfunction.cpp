@@ -93,6 +93,9 @@ void CGlobalFunction::OnQueryDBCenterTemplateResponse(IEvent *event, CDataTransP
             if (res->nodeinfos_size() > 0)
             {
                 auto info = res->nodeinfos();
+                if(CGlobalFunction::Instance->m_SocketDBCenter != nullptr )
+                    return;
+                    
                 CGlobalFunction::Instance->m_SocketDBCenter = make_unique<EasyConnect>();
                 CGlobalFunction::Instance->m_pLog->Verbos(Helper::Format("Try connect to datacenter[%s:%d]", info[0].address().c_str(), info[0].port() ));
                 CGlobalFunction::Instance->m_SocketDBCenter->Initialize(info[0].address(), info[0].port());
@@ -323,11 +326,14 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
 
     // TODO: If connect error, how process it?
     req->SetCallbackFunc([DBName](IEvent *event, CDataTransPackage *pack) {
+        auto id = pack->GetSerialNumber();
         auto res_str = pack->GetRecvMessage();
         auto res = ConvertStrToObj<DataCenter::ConnectDatabaseResponse>(res_str);
 
         CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName] = res->sessionid();
-        return CResult::Succeed();
+        auto sync = CGlobalFunction::Instance->m_mapIDToSync.try_get(id);
+        CGlobalFunction::Instance->m_mapIDToSync.erase(id);
+        (*sync)->notify_one();
     });
     req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID(), IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
     CGlobalFunction::Instance->m_iC->SendMessage(req);
@@ -341,9 +347,8 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
         return 2;
     }
 
-    auto response_str = CGlobalFunction::Instance->m_iC->GetTempString(Helper::ntos(package_id));
     CLua::PushInteger(l, Base::ResultType::Succeed);
-    CLua::PushString(l, response_str);
+    CLua::PushInteger(l, CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName]);
     return 2;
 }
 
@@ -389,7 +394,6 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
         auto sync = CGlobalFunction::Instance->m_mapIDToSync.try_get(id);
         CGlobalFunction::Instance->m_mapIDToSync.erase(id);
         (*sync)->notify_one();
-        return CResult::Succeed();
     });
     req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID(), IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, DataCenter::Functions::QuerySQLCmd , ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
     CGlobalFunction::Instance->m_iC->SendMessage(req);
