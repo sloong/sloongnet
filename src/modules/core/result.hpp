@@ -53,6 +53,9 @@ namespace Sloong
         static inline CResult Invalid(){
             return CResult(ResultType::Invalid);
         }
+        static inline CResult Ignore(){
+            return CResult(ResultType::Ignore);
+        }
     protected:
         ResultType m_emResult;
         string m_strMessage;

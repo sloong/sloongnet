@@ -15,7 +15,7 @@ unique_ptr<SloongNetGateway> Sloong::SloongNetGateway::Instance = nullptr;
 
 extern "C" CResult RequestPackageProcesser(void *env, CDataTransPackage *pack)
 {
-	auto pTranspond = TYPE_TRANS<GatewayTranspond*>(env);
+	auto pTranspond = STATIC_TRANS<GatewayTranspond*>(env);
 	if( pTranspond)
 		return pTranspond->RequestPackageProcesser(pack);
 	else
@@ -27,7 +27,7 @@ extern "C" CResult ResponsePackageProcesser(void *env, CDataTransPackage *pack)
 	auto num = pack->GetSerialNumber();
 	if( SloongNetGateway::Instance->m_mapSerialToRequest.exist(num) )
 	{
-		auto pTranspond = TYPE_TRANS<GatewayTranspond*>(env);
+		auto pTranspond = STATIC_TRANS<GatewayTranspond*>(env);
 		if( pTranspond)
 			return pTranspond->ResponsePackageProcesser(&SloongNetGateway::Instance->m_mapSerialToRequest[num],pack);
 		else

@@ -17,7 +17,7 @@ unique_ptr<CDataCenter> Sloong::CDataCenter::Instance = nullptr;
 
 extern "C" CResult RequestPackageProcesser(void *env, CDataTransPackage *pack)
 {
-	auto pDB = TYPE_TRANS<DBHub *>(env);
+	auto pDB = STATIC_TRANS<DBHub *>(env);
 	if (pDB)
 		return pDB->RequestPackageProcesser(pack);
 	else
@@ -26,7 +26,7 @@ extern "C" CResult RequestPackageProcesser(void *env, CDataTransPackage *pack)
 
 extern "C" CResult ResponsePackageProcesser(void *env, CDataTransPackage *pack)
 {
-	/*auto pDB = TYPE_TRANS<DBHub *>(env);
+	/*auto pDB = STATIC_TRANS<DBHub *>(env);
 	if (pDB)
 		return pDB->ResponsePackageProcesser(pack);
 	else

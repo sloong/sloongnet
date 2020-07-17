@@ -18,7 +18,7 @@ namespace Sloong
         inline void Initialize(IControl *iMsg)
         {
             m_iC = iMsg;
-            m_pLog = TYPE_TRANS<CLog *>(m_iC->Get(DATA_ITEM::Logger));
+            m_pLog = STATIC_TRANS<CLog *>(m_iC->Get(DATA_ITEM::Logger));
         }
 
     protected:

@@ -85,11 +85,11 @@ void Sloong::CNetworkHub::Exit(SharedEvent event)
 
 void Sloong::CNetworkHub::SendPackageEventHandler(SharedEvent event)
 {
-	auto send_evt = TYPE_TRANS<CSendPackageEvent *>(event.get());
+	auto send_evt = DYNAMIC_TRANS<CSendPackageEvent *>(event.get());
 	auto socket = send_evt->GetSocketID();
 	if (!m_SockList.exist(socket))
 	{
-		m_pLog->Error("SendPackageEventHandler function called, but the socket is no regiestd in NetworkHub.");
+		m_pLog->Error(Helper::Format("SendPackageEventHandler function called, but the socket[%d] is no regiestd in NetworkHub.",socket));
 		return;
 	}
 	auto info = m_SockList[socket].get();
@@ -125,7 +125,7 @@ void Sloong::CNetworkHub::AddMessageToSendList(UniqueTransPackage &pack)
 
 void Sloong::CNetworkHub::CloseConnectEventHandler(SharedEvent event)
 {
-	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event.get());
+	auto net_evt = DYNAMIC_TRANS<CNetworkEvent *>(event.get());
 	auto id = net_evt->GetSocketID();
 	if (!m_SockList.exist(id))
 		return;
@@ -140,18 +140,18 @@ void Sloong::CNetworkHub::CloseConnectEventHandler(SharedEvent event)
 
 void Sloong::CNetworkHub::MonitorSendStatusEventHandler(SharedEvent event)
 {
-	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event.get());
+	auto net_evt = DYNAMIC_TRANS<CNetworkEvent *>(event.get());
 	m_pEpoll->MonitorSendStatus(net_evt->GetSocketID());
 }
 
 void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent event)
 {
-	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event.get());
+	auto net_evt = DYNAMIC_TRANS<CNetworkEvent *>(event.get());
 	auto nSocket = net_evt->GetSocketID();
 
 	auto info = make_unique<CSockInfo>();
 	info->Initialize(m_iC, nSocket, m_pCTX);
-	m_pLog->Info(Helper::Format("Registe connection:[%s:%d].", info->m_pCon->m_strAddress.c_str(), info->m_pCon->m_nPort));
+	m_pLog->Info(Helper::Format("Registe connection:[%d][%s:%d].", nSocket, info->m_pCon->m_strAddress.c_str(), info->m_pCon->m_nPort));
 
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList[nSocket] = std::move(info);
@@ -265,7 +265,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 				{
 					// In here, the result no the result for this request.
 					// it just for is need add the pack obj to send list.
-					res.SetResult(ResultType::Invalid);
+					res.SetResult(ResultType::Ignore);
 
 					pack->Record();
 					data_pack = pack->GetDataPackage();
@@ -297,13 +297,14 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 						}
 						else
 						{
-							auto event = m_iC->GetTempSharedPtr(Helper::ntos(pack->GetSerialNumber()));
+							auto event = static_pointer_cast<IEvent>(m_iC->GetTempSharedPtr(Helper::ntos(pack->GetSerialNumber())));
 							CSendPackageEvent *send_evt = nullptr;
 							if (event != nullptr)
-								send_evt = TYPE_TRANS<CSendPackageEvent *>(event.get());
+								send_evt = DYNAMIC_TRANS<CSendPackageEvent *>(event.get());
 
 							if (send_evt != nullptr)
-								res = send_evt->CallCallbackFunc(pack.get());
+								// Ignore the event call back function return values.
+								send_evt->CallCallbackFunc(pack.get());
 							else
 								res = m_pResponseFunc(pEnv, pack.get());
 						}

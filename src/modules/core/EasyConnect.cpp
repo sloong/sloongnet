@@ -23,7 +23,7 @@ void Sloong::EasyConnect::Initialize(SOCKET sock, LPVOID ctx)
 
 	if (ctx)
 	{
-		auto pCtx = TYPE_TRANS<SSL_CTX*>(ctx);
+		auto pCtx = STATIC_TRANS<SSL_CTX*>(ctx);
 		auto pSSL = SSL_new(pCtx);
 		SSL_set_fd(pSSL, sock);
 		SSL_set_accept_state(pSSL);
@@ -38,7 +38,7 @@ void Sloong::EasyConnect::Initialize(const string &address, int port, LPVOID ctx
 	m_nPort = port;
 	if (ctx)
 	{
-		auto pCtx = TYPE_TRANS<SSL_CTX*>(ctx);
+		auto pCtx = STATIC_TRANS<SSL_CTX*>(ctx);
 		m_pSSL = SSL_new(pCtx);
 	}
 }
@@ -68,7 +68,7 @@ bool Sloong::EasyConnect::Connect()
 	}
 	if (m_pSSL)
 	{
-		auto pSSL = TYPE_TRANS<SSL*>(m_pSSL);
+		auto pSSL = STATIC_TRANS<SSL*>(m_pSSL);
 		SSL_set_fd(pSSL, m_nSocket);
 		SSL_set_accept_state(pSSL);
 		do_handshake();
@@ -81,7 +81,7 @@ int Sloong::EasyConnect::SSL_Read_Ex( char *buf, int nSize, int nTimeout, bool b
 	if (nSize <= 0)
 		return 0;
 
-	auto pSSL = TYPE_TRANS<SSL*>(m_pSSL);
+	auto pSSL = STATIC_TRANS<SSL*>(m_pSSL);
 	int nIsRecv = 0;
 	int nNoRecv = nSize;
 	int nRecv = 0;
@@ -101,7 +101,7 @@ int Sloong::EasyConnect::SSL_Read_Ex( char *buf, int nSize, int nTimeout, bool b
 
 int Sloong::EasyConnect::SSL_Write_Ex(const char *buf, int len)
 {
-	auto pSSL = TYPE_TRANS<SSL*>(m_pSSL);
+	auto pSSL = STATIC_TRANS<SSL*>(m_pSSL);
 	return SSL_write(pSSL,buf,len);
 }
 
@@ -239,7 +239,7 @@ int Sloong::EasyConnect::Read(char *data, int len, bool block, bool bagain)
 	int ret = SSL_Read_Ex( data, len, 0, true);
 	if (ret != len)
 	{
-		auto pSSL = TYPE_TRANS<SSL*>(m_pSSL);
+		auto pSSL = STATIC_TRANS<SSL*>(m_pSSL);
 		int err = SSL_get_error(pSSL, ret);
 		switch (err)
 		{
@@ -294,7 +294,7 @@ int Sloong::EasyConnect::Write(const char *data, int len, int index)
 	}
 	else if (ret < 0)
 	{
-		auto pSSL = TYPE_TRANS<SSL*>(m_pSSL);
+		auto pSSL = STATIC_TRANS<SSL*>(m_pSSL);
 		int err = SSL_get_error(pSSL, ret);
 
 		switch (err)
@@ -332,7 +332,7 @@ void Sloong::EasyConnect::Close()
 {
 	if (m_pSSL)
 	{
-		auto pSSL = TYPE_TRANS<SSL*>(m_pSSL);
+		auto pSSL = STATIC_TRANS<SSL*>(m_pSSL);
 		SSL_shutdown(pSSL);
 		SSL_free(pSSL);
 	}
@@ -383,7 +383,7 @@ void Sloong::EasyConnect::G_FreeSSL(LPVOID ctx)
 {
 	if( ctx )
 	{
-		SSL_CTX_free(TYPE_TRANS<SSL_CTX*>(ctx));
+		SSL_CTX_free(STATIC_TRANS<SSL_CTX*>(ctx));
 	}
 }
 
@@ -394,7 +394,7 @@ string Sloong::EasyConnect::G_FormatSSLErrorMsg(int code)
 
 bool Sloong::EasyConnect::do_handshake()
 {
-	auto pSSL = TYPE_TRANS<SSL*>(m_pSSL);
+	auto pSSL = STATIC_TRANS<SSL*>(m_pSSL);
 	int res = SSL_do_handshake(pSSL);
 	if (1 == res)
 	{

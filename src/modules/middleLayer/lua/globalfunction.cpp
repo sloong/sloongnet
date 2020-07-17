@@ -45,10 +45,18 @@ CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
     IObject::Initialize(ic);
     IData::Initialize(ic);
     m_pModuleConfig = IData::GetModuleConfig();
+    ReferenceDataCenterConnection();
+    return CResult::Succeed();
+}
 
+void Sloong::CGlobalFunction::ReferenceDataCenterConnection()
+{
     int manager_socket = IData::GetManagerSocket();
     if (manager_socket == INVALID_SOCKET)
-        return CResult::Make_Error("Get manager socket error.");
+    {
+        CGlobalFunction::Instance->m_pLog->Error("Get manager socket error in ReferenceDataCenterConnection.");
+        return;
+    }
 
     Manager::QueryTemplateRequest request;
     request.add_templatetype(Core::MODULE_TYPE::DataCenter);
@@ -57,10 +65,9 @@ CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
     req->SetCallbackFunc(std::bind(&CGlobalFunction::OnQueryDBCenterTemplateResponse, CGlobalFunction::Instance.get(), std::placeholders::_1, std::placeholders::_2));
     req->SetRequest(manager_socket, IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, Manager::Functions::QueryTemplate, ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
     CGlobalFunction::Instance->m_iC->SendMessage(req);
-    return CResult::Succeed();
 }
 
-CResult CGlobalFunction::OnQueryDBCenterTemplateResponse(IEvent *event, CDataTransPackage *pack)
+void CGlobalFunction::OnQueryDBCenterTemplateResponse(IEvent *event, CDataTransPackage *pack)
 {
     auto res_str = pack->GetRecvMessage();
     auto res = ConvertStrToObj<Manager::QueryTemplateResponse>(res_str);
@@ -72,6 +79,12 @@ CResult CGlobalFunction::OnQueryDBCenterTemplateResponse(IEvent *event, CDataTra
     if (query_node_req.templateid_size() > 0)
     {
         int manager_socket = IData::GetManagerSocket();
+        if (manager_socket == INVALID_SOCKET)
+        {
+            CGlobalFunction::Instance->m_pLog->Error("Get manager socket error in query dbcenter work node.");
+            return;
+        }
+            
         auto package_id = snowflake::Instance->nextid();
         auto req = make_shared<CSendPackageEvent>();
         req->SetCallbackFunc([](IEvent *event, CDataTransPackage *pack) {
@@ -81,17 +94,21 @@ CResult CGlobalFunction::OnQueryDBCenterTemplateResponse(IEvent *event, CDataTra
             {
                 auto info = res->nodeinfos();
                 CGlobalFunction::Instance->m_SocketDBCenter = make_unique<EasyConnect>();
+                CGlobalFunction::Instance->m_pLog->Verbos(Helper::Format("Try connect to datacenter[%s:%d]", info[0].address().c_str(), info[0].port() ));
                 CGlobalFunction::Instance->m_SocketDBCenter->Initialize(info[0].address(), info[0].port());
+                if (!CGlobalFunction::Instance->m_SocketDBCenter->Connect())
+                {
+                    CGlobalFunction::Instance->m_pLog->Error("Connect to datacenter fialed.");
+                    return;
+                }
                 auto reg_event = make_shared<CNetworkEvent>(EVENT_TYPE::RegisteConnection);
                 reg_event->SetSocketID(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID());
                 CGlobalFunction::Instance->m_iC->SendMessage(reg_event);
             }
-            return CResult::Succeed();
         });
         req->SetRequest(manager_socket, IData::GetRuntimeData()->nodeuuid(), package_id, Base::HEIGHT_LEVEL, Manager::Functions::QueryNode, ConvertObjToStr(&query_node_req), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
         CGlobalFunction::Instance->m_iC->SendMessage(req);
     }
-    return CResult::Succeed();
 }
 
 
@@ -283,6 +300,14 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
         return 2;
     }
 
+    if(CGlobalFunction::Instance->m_SocketDBCenter == nullptr )
+    {
+        CGlobalFunction::Instance->ReferenceDataCenterConnection();
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, "No connect to datacenter.");
+        return 2;
+    }
+
     if (CGlobalFunction::Instance->m_mapDBNameToSessionID.exist(DBName))
     {
         CLua::PushInteger(l, Base::ResultType::Succeed);
@@ -392,4 +417,3 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
     CLua::Push2DTable(l, res);
     return 2;
 }
-

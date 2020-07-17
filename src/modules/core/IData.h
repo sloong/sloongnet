@@ -20,22 +20,22 @@ namespace Sloong
 			if ( m_iC == nullptr) m_iC = ic;
 		}
 		static GLOBAL_CONFIG* GetGlobalConfig(){
-			return TYPE_TRANS<GLOBAL_CONFIG*>(m_iC->Get(DATA_ITEM::ServerConfiguation ));
+			return STATIC_TRANS<GLOBAL_CONFIG*>(m_iC->Get(DATA_ITEM::ServerConfiguation ));
 		}
 		static Json::Value* GetModuleConfig(){
-			return TYPE_TRANS<Json::Value*>(m_iC->Get(DATA_ITEM::ModuleConfiguation ));
+			return STATIC_TRANS<Json::Value*>(m_iC->Get(DATA_ITEM::ModuleConfiguation ));
 		}
 		static CLog* GetLog(){
-			return TYPE_TRANS<CLog*>(m_iC->Get(DATA_ITEM::Logger));
+			return STATIC_TRANS<CLog*>(m_iC->Get(DATA_ITEM::Logger));
 		}
 		static RuntimeDataPackage* GetRuntimeData(){
-			return TYPE_TRANS<RuntimeDataPackage*>(m_iC->Get(DATA_ITEM::RuntimeData ));
+			return STATIC_TRANS<RuntimeDataPackage*>(m_iC->Get(DATA_ITEM::RuntimeData ));
 		}
 		static int GetManagerSocket(){
 			auto p = m_iC->Get(DATA_ITEM::ManagerSocket);
 			if( p == nullptr) return INVALID_SOCKET;
-			auto p2 = TYPE_TRANS<int*>(p);
-			if( p2 == nullptr ) return INVALID_SOCKET;
+			auto p2 = STATIC_TRANS<int*>(p);
+			if( p2 == nullptr || *(p2) < INVALID_SOCKET ) return INVALID_SOCKET;
 			return *(p2);
 		}
 	public:

@@ -46,6 +46,9 @@ namespace Sloong
 
 		void EventPackageProcesser(CDataTransPackage *);
 
+		void OnReferenceModuleOnlineEvent(const string &, CDataTransPackage *);
+		void OnReferenceModuleOfflineEvent(const string &, CDataTransPackage *);
+
 		void OnSocketClose(SharedEvent);
 
 		inline CLog* GetLog(){ return m_pLog; }

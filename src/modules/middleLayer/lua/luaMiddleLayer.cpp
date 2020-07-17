@@ -18,7 +18,7 @@ unique_ptr<LuaMiddleLayer> Sloong::LuaMiddleLayer::Instance = nullptr;
 
 extern "C" CResult RequestPackageProcesser(void *pEnv, CDataTransPackage *pack)
 {
-	auto pProcess = TYPE_TRANS<CLuaProcessCenter *>(pEnv);
+	auto pProcess = STATIC_TRANS<CLuaProcessCenter *>(pEnv);
 	if (!pProcess)
 	{
 		LuaMiddleLayer::Instance->GetLog()->Error("Environment convert error. cannot process message.");
@@ -29,7 +29,7 @@ extern "C" CResult RequestPackageProcesser(void *pEnv, CDataTransPackage *pack)
 
 extern "C" CResult ResponsePackageProcesser(void *pEnv, CDataTransPackage *pack)
 {
-	auto pProcess = TYPE_TRANS<CLuaProcessCenter *>(pEnv);
+	auto pProcess = STATIC_TRANS<CLuaProcessCenter *>(pEnv);
 	if (!pProcess)
 	{
 		LuaMiddleLayer::Instance->GetLog()->Error("Environment convert error. cannot process message.");
@@ -154,6 +154,33 @@ inline CResult Sloong::LuaMiddleLayer::CreateProcessEnvironmentHandler(void **ou
 	return CResult::Succeed();
 }
 
+
+void Sloong::LuaMiddleLayer::OnReferenceModuleOnlineEvent(const string &str_req, CDataTransPackage *trans_pack)
+{
+	m_pLog->Info("Receive ReferenceModuleOnline event");
+	/*auto req = ConvertStrToObj<Manager::EventReferenceModuleOnline>(str_req);
+	auto item = req->item();
+	m_mapUUIDToNode[item.uuid()] = item;
+	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
+	m_pLog->Debug(Helper::Format("New module is online:[%llu][%s:%d]", item.uuid(), item.address().c_str(), item.port()));
+
+	AddConnection(item.uuid(), item.address(), item.port());*/
+}
+
+void Sloong::LuaMiddleLayer::OnReferenceModuleOfflineEvent(const string &str_req, CDataTransPackage *trans_pack)
+{
+	m_pLog->Info("Receive ReferenceModuleOffline event");
+	/*auto req = ConvertStrToObj<Manager::EventReferenceModuleOffline>(str_req);
+	auto uuid = req->uuid();
+	auto item = m_mapUUIDToNode[uuid];
+	m_mapTempteIDToUUIDs[item.templateid()].erase(item.uuid());
+	auto event = make_unique<CNetworkEvent>(EVENT_TYPE::SocketClose);
+	event->SetSocketID(m_mapUUIDToConnect[uuid]);
+	m_iC->SendMessage(std::move(event));
+	m_mapUUIDToConnect.erase(uuid);
+	m_mapUUIDToNode.erase(uuid);*/
+}
+
 void Sloong::LuaMiddleLayer::EventPackageProcesser(CDataTransPackage *trans_pack)
 {
 	auto data_pack = trans_pack->GetDataPackage();
@@ -168,16 +195,17 @@ void Sloong::LuaMiddleLayer::EventPackageProcesser(CDataTransPackage *trans_pack
 	{
 	case Manager::Events::ReferenceModuleOnline:
 	{
-		m_pLog->Info("Receive ReferenceModuleOnline event");
+		OnReferenceModuleOnlineEvent(data_pack->content(), trans_pack);
 	}
 	break;
 	case Manager::Events::ReferenceModuleOffline:
 	{
-		m_pLog->Info("Receive ReferenceModuleOffline event");
+		OnReferenceModuleOfflineEvent(data_pack->content(), trans_pack);
 	}
 	break;
 	default:
 	{
+		m_pLog->Error(Helper::Format("Event is no processed. [%s][%d].", Manager::Events_Name(event).c_str(), event));
 	}
 	break;
 	}

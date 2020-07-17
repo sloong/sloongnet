@@ -41,7 +41,8 @@ namespace Sloong
         static int Lua_SQLQueryToDBCenter(lua_State *l);
 
     protected:
-        CResult OnQueryDBCenterTemplateResponse(IEvent *event, CDataTransPackage *pack);
+        void ReferenceDataCenterConnection();
+        void OnQueryDBCenterTemplateResponse(IEvent *event, CDataTransPackage *pack);
         
     protected:
         map_ex<string,string> m_mapCommData;

@@ -13,7 +13,7 @@ namespace Sloong
 	class CDataTransPackage;
 	namespace Events
 	{
-		typedef std::function<CResult(IEvent*,CDataTransPackage*)> CallbackFunc;
+		typedef std::function<void(IEvent*,CDataTransPackage*)> CallbackFunc;
 		class CSendPackageEvent : public CNetworkEvent
 		{
 		public:
@@ -21,10 +21,9 @@ namespace Sloong
 			virtual	~CSendPackageEvent(){}
 
 			inline void SetCallbackFunc(CallbackFunc p){ m_pCallback = p; }
-			inline CResult CallCallbackFunc(CDataTransPackage* p){ 
+			inline void CallCallbackFunc(CDataTransPackage* p){ 
 				if(m_pCallback) 
-					return m_pCallback(this,p); 
-				return CResult::Invalid();
+					m_pCallback(this,p); 
 			}
 			inline bool HaveCallbackFunc(){ return m_pCallback != nullptr; }
 			

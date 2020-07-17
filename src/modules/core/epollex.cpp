@@ -278,7 +278,7 @@ void Sloong::CEpollEx::MainWorkLoop()
 
 void Sloong::CEpollEx::CloseConnectEventHandler(IEvent* event)
 {
-	auto net_evt = TYPE_TRANS<CNetworkEvent*>(event);
+	auto net_evt = DYNAMIC_TRANS<CNetworkEvent*>(event);
 	auto socket = net_evt->GetSocketID();
 	DeleteMonitorSocket(socket);
 }

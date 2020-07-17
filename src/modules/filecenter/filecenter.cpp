@@ -10,7 +10,7 @@ unique_ptr<CFileCenter> Sloong::CFileCenter::Instance = nullptr;
 
 extern "C" CResult RequestPackageProcesser(void *pEnv, CDataTransPackage *pack)
 {
-    auto pManager = TYPE_TRANS<FileManager *>(pEnv);
+    auto pManager = STATIC_TRANS<FileManager *>(pEnv);
     if (pManager)
         return pManager->RequestPackageProcesser(pack);
     else
@@ -19,7 +19,7 @@ extern "C" CResult RequestPackageProcesser(void *pEnv, CDataTransPackage *pack)
 
 extern "C" CResult ResponsePackageProcesser(void *pEnv, CDataTransPackage *pack)
 {
-    auto pManager = TYPE_TRANS<FileManager *>(pEnv);
+    auto pManager = STATIC_TRANS<FileManager *>(pEnv);
     if (pManager)
         return pManager->ResponsePackageProcesser(pack);
     else

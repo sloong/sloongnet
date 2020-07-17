@@ -31,13 +31,22 @@ namespace Sloong
 	class CDataTransPackage;
 	typedef std::function<CResult(const string &, CDataTransPackage *)> FunctionHandler;
 
-	template <typename T>
-	inline T TYPE_TRANS(LPVOID p)
+	template <typename T, typename K>
+	inline T STATIC_TRANS(K p)
 	{
 		T tmp = static_cast<T>(p);
 		assert(tmp);
 		return tmp;
 	}
+
+	template <typename T, typename K>
+	inline auto DYNAMIC_TRANS(K p)
+	{
+		auto tmp = dynamic_cast<T>(p);
+		assert(tmp);
+		return tmp;
+	}
+
 
 	const int s_PriorityLevel = 3;
 

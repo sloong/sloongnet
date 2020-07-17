@@ -17,7 +17,7 @@ unique_ptr<SloongControlService> Sloong::SloongControlService::Instance = nullpt
 
 extern "C" CResult RequestPackageProcesser(void *pEnv, CDataTransPackage *pack)
 {
-	auto pServer = TYPE_TRANS<CServerManage *>(pEnv);
+	auto pServer = STATIC_TRANS<CServerManage *>(pEnv);
 	if (pServer)
 		return pServer->ProcessHandler(pack);
 	else
@@ -26,7 +26,7 @@ extern "C" CResult RequestPackageProcesser(void *pEnv, CDataTransPackage *pack)
 
 extern "C" CResult ResponsePackageProcesser(void *pEnv, CDataTransPackage *pack)
 {
-	auto pServer = TYPE_TRANS<CServerManage *>(pEnv);
+	auto pServer = STATIC_TRANS<CServerManage *>(pEnv);
 	if (pServer)
 		return pServer->ProcessHandler(pack);
 	else
@@ -125,7 +125,7 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG *config)
 
 void Sloong::SloongControlService::OnSocketClose(SharedEvent event)
 {
-	auto net_evt = TYPE_TRANS<CNetworkEvent *>(event.get());
+	auto net_evt = DYNAMIC_TRANS<CNetworkEvent *>(event.get());
 	auto sock = net_evt->GetSocketID();
 	for (auto &item : m_listServerManage)
 		item->OnSocketClosed(sock);
