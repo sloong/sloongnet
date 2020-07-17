@@ -387,10 +387,14 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
 
     auto package_id = snowflake::Instance->nextid();
     auto req = make_shared<CSendPackageEvent>();
-    req->SetCallbackFunc([](IEvent *event, CDataTransPackage *pack) {
-        auto id = pack->GetSerialNumber();
+    auto result = make_shared<ResultType>();
+    (*result) = ResultType::Invalid;
+    req->SetCallbackFunc([result](IEvent *event, CDataTransPackage *trans_pack) {
+        auto id = trans_pack->GetSerialNumber();
+        auto pack = trans_pack->GetDataPackage();
+        (*result) = pack->result();
 
-        CGlobalFunction::Instance->m_iC->AddTempString(Helper::ntos(id), pack->GetRecvMessage());
+        CGlobalFunction::Instance->m_iC->AddTempString(Helper::ntos(id), pack->content());
         auto sync = CGlobalFunction::Instance->m_mapIDToSync.try_get(id);
         CGlobalFunction::Instance->m_mapIDToSync.erase(id);
         (*sync)->notify_one();
@@ -408,16 +412,25 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
     }
 
     auto response_str = CGlobalFunction::Instance->m_iC->GetTempString(Helper::ntos(package_id));
-    auto response = ConvertStrToObj<DataCenter::QuerySQLCmdResponse>(response_str);
-    CLua::PushInteger(l, response->lines_size());
-    list<list<string>> res;
-    for( auto& item : response->lines())
+    if( (*result) == ResultType::Succeed )
     {
-        list<string> row;
-        for( auto& j : item.rawdataitem())
-            row.push_back(j);
-        res.push_back(row);
+        auto response = ConvertStrToObj<DataCenter::QuerySQLCmdResponse>(response_str);
+        CLua::PushInteger(l, response->lines_size());
+        list<list<string>> res;
+        for( auto& item : response->lines())
+        {
+            list<string> row;
+            for( auto& j : item.rawdataitem())
+                row.push_back(j);
+            res.push_back(row);
+        }
+        CLua::Push2DTable(l, res);
+        return 2;
     }
-    CLua::Push2DTable(l, res);
-    return 2;
+    else
+    {
+        CLua::PushInteger(l,-1);
+        CLua::PushString(l,response_str);
+        return 2;
+    }
 }
