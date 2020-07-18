@@ -17,6 +17,7 @@ namespace Sloong
     class CDataTransPackage
     {
     public:
+        CDataTransPackage(const CDataTransPackage& pack){ m_pCon = pack.m_pCon; m_nSocket = m_pCon->GetSocketID(); }
         CDataTransPackage(EasyConnect *conn) : m_pCon(conn) { m_nSocket = m_pCon->GetSocketID(); }
 
         void RequestPackage();
