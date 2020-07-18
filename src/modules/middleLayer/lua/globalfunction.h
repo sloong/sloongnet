@@ -39,6 +39,7 @@ namespace Sloong
         static int Lua_SetExtendDataByFile(lua_State *l);
         static int Lua_ConnectToDBCenter(lua_State *l);
         static int Lua_SQLQueryToDBCenter(lua_State *l);
+        static int Lua_SQLInsertToDBCenter(lua_State *l);
 
     protected:
         void ReferenceDataCenterConnection();
