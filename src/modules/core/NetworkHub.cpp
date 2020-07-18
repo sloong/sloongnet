@@ -89,7 +89,7 @@ void Sloong::CNetworkHub::SendPackageEventHandler(SharedEvent event)
 	auto socket = send_evt->GetSocketID();
 	if (!m_SockList.exist(socket))
 	{
-		m_pLog->Error(Helper::Format("SendPackageEventHandler function called, but the socket[%d] is no regiestd in NetworkHub.",socket));
+		m_pLog->Error(Helper::Format("SendPackageEventHandler function called, but the socket[%d] is no regiestd in NetworkHub.", socket));
 		return;
 	}
 	auto info = m_SockList[socket].get();
@@ -292,22 +292,9 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					case DataPackage_PackageType::DataPackage_PackageType_RequestPackage:
 					{
 						if (data_pack->status() == DataPackage_StatusType::DataPackage_StatusType_Request)
-						{
 							res = m_pRequestFunc(pEnv, pack.get());
-						}
 						else
-						{
-							auto event = static_pointer_cast<IEvent>(m_iC->GetTempSharedPtr(Helper::ntos(pack->GetSerialNumber())));
-							CSendPackageEvent *send_evt = nullptr;
-							if (event != nullptr)
-								send_evt = DYNAMIC_TRANS<CSendPackageEvent *>(event.get());
-
-							if (send_evt != nullptr)
-								// Ignore the event call back function return values.
-								send_evt->CallCallbackFunc(pack.get());
-							else
-								res = m_pResponseFunc(pEnv, pack.get());
-						}
+							res = m_pResponseFunc(pEnv, pack.get());
 					}
 					break;
 					default:
@@ -388,8 +375,26 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
 	m_pLog->Verbos(Helper::Format("OnDataCanReceive done. received [%d] packages.", readList.size()));
 	while (!readList.empty())
 	{
-		m_pWaitProcessList[readList.front()->GetPriority()].push_move(std::move(readList.front()));
+		auto t = std::move(readList.front());
 		readList.pop();
+		auto pack = t->GetDataPackage();
+		if (pack->type() == DataPackage_PackageType::DataPackage_PackageType_RequestPackage && pack->status() == DataPackage_StatusType::DataPackage_StatusType_Response)
+		{
+			auto event = static_pointer_cast<IEvent>(m_iC->GetTempSharedPtr(Helper::ntos(t->GetSerialNumber())));
+			shared_ptr<CSendPackageEvent> send_evt = nullptr;
+			if (event != nullptr)
+				send_evt = dynamic_pointer_cast<CSendPackageEvent>(event);
+			if (send_evt != nullptr)
+			{
+				auto shared_pack = shared_ptr<CDataTransPackage>(move(t));
+				CThreadPool::EnqueTask([send_evt, shared_pack](SMARTER p) {
+					send_evt->CallCallbackFunc(shared_pack.get());
+					return (SMARTER)nullptr;
+				});
+				continue;
+			}
+		}
+		m_pWaitProcessList[readList.front()->GetPriority()].push_move(std::move(t));
 	}
 	m_oProcessThreadSync.notify_all();
 	return res;
