@@ -394,7 +394,7 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
 				continue;
 			}
 		}
-		m_pWaitProcessList[readList.front()->GetPriority()].push_move(std::move(t));
+		m_pWaitProcessList[t->GetPriority()].push_move(std::move(t));
 	}
 	m_oProcessThreadSync.notify_all();
 	return res;
