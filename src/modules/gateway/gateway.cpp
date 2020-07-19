@@ -145,7 +145,10 @@ CResult SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent* send_pack, C
 	for (auto info : templateInfos)
 	{
 		if (info.providefunctions() == "*")
+		{
+			m_pLog->Verbos(Helper::Format("Universal processer find: template id[%d]", info.templateid()));
 			m_mapFuncToTemplateIDs[-1].unique_insert(info.templateid());
+		}
 		else
 		{
 			for (auto i : ProcessProviedFunction(info.providefunctions()))
@@ -201,7 +204,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_re
 	auto item = req->item();
 	m_mapUUIDToNode[item.uuid()] = item;
 	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
-	m_pLog->Debug(Helper::Format("New module is online:[%llu][%s:%d]", item.uuid(), item.address().c_str(), item.port()));
+	m_pLog->Debug(Helper::Format("New module is online:templateid[%d]->node id[%llu][%s:%d],node list size[%s]", item.templateid(), item.uuid(), item.address().c_str(), item.port(), m_mapTempteIDToUUIDs.size()));
 
 	AddConnection(item.uuid(), item.address(), item.port());
 }
