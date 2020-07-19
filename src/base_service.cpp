@@ -54,7 +54,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
     }
     cout << "Connect to control succeed. Start registe and get configuation." << endl;
 
-    int64_t uuid=0;
+    int64_t uuid = 0;
     while (true)
     {
         CDataTransPackage dataPackage(m_pManagerConnect.get());
@@ -62,7 +62,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
         req->set_type(DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
         req->set_function(Manager::Functions::RegisteWorker);
         req->set_sender(uuid);
-        if( forceTempID > 0 )
+        if (forceTempID > 0)
         {
             RegisteWorkerRequest sub_req;
             sub_req.set_forcetargettemplateid(forceTempID);
@@ -190,7 +190,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
         return res;
     }
     m_pLog->Debug("Control center initialization succeed.");
-    
+
     m_pControl->Add(DATA_ITEM::ServerConfiguation, m_oServerConfig.mutable_templateconfig());
     m_pControl->Add(Logger, m_pLog.get());
     m_pControl->Add(DATA_ITEM::RuntimeData, &m_oServerConfig);
@@ -341,34 +341,43 @@ CResult CSloongBaseService::Run()
     m_pLog->Info("Application begin running.");
     m_pControl->SendMessage(EVENT_TYPE::ProgramStart);
     m_emStatus = RUN_STATUS::Running;
-    auto prev_time = chrono::system_clock::now();
-    auto prev_status = 	make_shared<CPU_OCCUPY>();
-    CUtility::RecordCPUStatus(prev_status.get());
-    int mem_total, mem_free;
-    // Report server load status each one minutes.
-    while(!m_oExitSync.wait_for(REPORT_LOAD_STATUS_INTERVAL))
+    bool enableReport = false;
+    if (enableReport)
     {
-        Manager::ReportLoadStatusRequest req;
-        auto load = CUtility::CalculateCPULoad(prev_status.get());        
-        CUtility::GetMemory(mem_total,mem_free);
-        req.set_cpuload(load);
-        req.set_memroyused(mem_total/mem_free);
-        
-        if( m_oServerConfig.templateid() != 1 )// Manager module
-        {
-            auto event = make_shared<Events::CSendPackageEvent>();
-            event->SetRequest(m_pManagerConnect->GetSocketID(), m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(),  Base::PRIORITY_LEVEL::LOW_LEVEL , (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
-	        m_pControl->SendMessage(event);
-        }
-
+        auto prev_status = make_shared<CPU_OCCUPY>();
         CUtility::RecordCPUStatus(prev_status.get());
+        int mem_total, mem_free;
+        // Report server load status each one minutes.
+        while (!m_oExitSync.wait_for(REPORT_LOAD_STATUS_INTERVAL))
+        {
+            Manager::ReportLoadStatusRequest req;
+            auto load = CUtility::CalculateCPULoad(prev_status.get());
+            CUtility::GetMemory(mem_total, mem_free);
+            req.set_cpuload(load);
+            req.set_memroyused(mem_total / mem_free);
+
+            if (m_oServerConfig.templateid() != 1) // Manager module
+            {
+                auto event = make_shared<Events::CSendPackageEvent>();
+                event->SetRequest(m_pManagerConnect->GetSocketID(), m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(), Base::PRIORITY_LEVEL::LOW_LEVEL, (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
+                m_pControl->SendMessage(event);
+            }
+
+            CUtility::RecordCPUStatus(prev_status.get());
+        }
     }
+    else
+    {
+        m_oExitSync.wait();
+    }
+
     return m_oExitResult;
 }
 
 void CSloongBaseService::Stop()
 {
-    if(m_emStatus == RUN_STATUS::Exit) return;
+    if (m_emStatus == RUN_STATUS::Exit)
+        return;
     m_pLog->Info("Application will exit.");
     m_emStatus = RUN_STATUS::Exit;
     m_pControl->SendMessage(EVENT_TYPE::ProgramStop);
