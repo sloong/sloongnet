@@ -58,10 +58,14 @@ message QuerySQLCmdResponse{
 message InsertSQLCmdRequest{
     int32 SessionID=1;
     string SQLCMD=2;
+    // If set true, will return "SELECT @@IDENTITY" value.
+    bool GetIdentity=3;
 }
 
 message InsertSQLCmdResponse{
     int32 AffectedRows=1;
+    // If no set GetIdentity, return 0. else return the value. if get fialed, return -1;
+    int32 Identity=2;
 }
 
 message UpdateSQLCmdRequest{

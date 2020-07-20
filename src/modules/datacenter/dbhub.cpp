@@ -111,6 +111,22 @@ CResult Sloong::DBHub::InsertSQLCmdHandler(const string &req_obj, CDataTransPack
     InsertSQLCmdResponse response;
     response.set_affectedrows(res.GetResultObject());
 
+    if ( req->getidentity() )
+    {
+        auto id_res = (*session)->Query("SELECT @@IDENTITY");
+        if( id_res.IsFialed() )
+            response.set_identity(-1);
+        else
+        {
+            auto obj = id_res.GetResultObject();
+            int id;
+            if( !ConvertStrToInt(obj->GetData(1,1), &id))
+                response.set_identity(-1);
+            else
+                response.set_identity(id);
+        }
+    }
+
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
