@@ -9,6 +9,7 @@ CResult Sloong::CControlHub::Initialize(int quantity)
 	if (quantity < 1)
 		return CResult::Make_Error("CControlHub work quantity must big than 0.");
 	CThreadPool::AddWorkThread(std::bind(&CControlHub::MessageWorkLoop, this), quantity);
+	CThreadPool::Initialize(3);
 	CThreadPool::Run();
 	Run();
 	return CResult::Succeed();
