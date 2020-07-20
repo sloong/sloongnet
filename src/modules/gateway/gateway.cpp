@@ -204,7 +204,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_re
 	auto item = req->item();
 	m_mapUUIDToNode[item.uuid()] = item;
 	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
-	m_pLog->Debug(Helper::Format("New module is online:templateid[%d]->node id[%llu][%s:%d],node list size[%s]", item.templateid(), item.uuid(), item.address().c_str(), item.port(), m_mapTempteIDToUUIDs.size()));
+	m_pLog->Debug(Helper::Format("New module is online:templateid[%d]->node id[%llu][%s:%d],node list size[%d]", item.templateid(), item.uuid(), item.address().c_str(), item.port(), m_mapTempteIDToUUIDs.size()));
 
 	AddConnection(item.uuid(), item.address(), item.port());
 }
@@ -258,6 +258,7 @@ SOCKET Sloong::SloongNetGateway::GetPorcessConnect(int function)
 {
 	if (!m_mapFuncToTemplateIDs.exist(function) && !m_mapFuncToTemplateIDs.exist(-1))
 	{
+		m_pLog->Warn(Helper::Format("Function to template map list no have function [%d] and universal processer. the map list size [%d]", function, m_mapFuncToTemplateIDs.size()));
 		return INVALID_SOCKET;
 	}
 
