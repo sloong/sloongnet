@@ -57,6 +57,7 @@ CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, CDataTransP
         if (res.IsFialed())
             return res;
 
+        connection->SetLog(m_pLog);
         auto id = m_mapSessionIDToDBConnection.size() + 1;
         m_mapSessionIDToDBConnection[id] = std::move(connection);
         m_mapDBNameToSessioinID[req->database()] = id;
