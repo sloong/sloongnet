@@ -39,6 +39,8 @@ LuaFunctionRegistr g_LuaFunc[] =
         {"ConnectToDBCenter", CGlobalFunction::Lua_ConnectToDBCenter},
         {"SQLQueryToDBCenter", CGlobalFunction::Lua_SQLQueryToDBCenter},
         {"SQLInsertToDBCenter", CGlobalFunction::Lua_SQLInsertToDBCenter},
+        {"SQLDeleteToDBCenter", CGlobalFunction::Lua_SQLDeleteToDBCenter},
+        {"SQLUpdateToDBCenter", CGlobalFunction::Lua_SQLUpdateToDBCenter},
 };
 
 CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
@@ -85,7 +87,7 @@ void CGlobalFunction::OnQueryDBCenterTemplateResponse(IEvent *event, CDataTransP
             CGlobalFunction::Instance->m_pLog->Error("Get manager socket error in query dbcenter work node.");
             return;
         }
-            
+
         auto package_id = snowflake::Instance->nextid();
         auto req = make_shared<CSendPackageEvent>();
         req->SetCallbackFunc([](IEvent *event, CDataTransPackage *pack) {
@@ -94,11 +96,11 @@ void CGlobalFunction::OnQueryDBCenterTemplateResponse(IEvent *event, CDataTransP
             if (res->nodeinfos_size() > 0)
             {
                 auto info = res->nodeinfos();
-                if(CGlobalFunction::Instance->m_SocketDBCenter != nullptr )
+                if (CGlobalFunction::Instance->m_SocketDBCenter != nullptr)
                     return;
-                    
+
                 CGlobalFunction::Instance->m_SocketDBCenter = make_unique<EasyConnect>();
-                CGlobalFunction::Instance->m_pLog->Verbos(Helper::Format("Try connect to datacenter[%s:%d]", info[0].address().c_str(), info[0].port() ));
+                CGlobalFunction::Instance->m_pLog->Verbos(Helper::Format("Try connect to datacenter[%s:%d]", info[0].address().c_str(), info[0].port()));
                 CGlobalFunction::Instance->m_SocketDBCenter->Initialize(info[0].address(), info[0].port());
                 if (!CGlobalFunction::Instance->m_SocketDBCenter->Connect())
                 {
@@ -114,7 +116,6 @@ void CGlobalFunction::OnQueryDBCenterTemplateResponse(IEvent *event, CDataTransP
         CGlobalFunction::Instance->m_iC->SendMessage(req);
     }
 }
-
 
 void Sloong::CGlobalFunction::RegistFuncToLua(CLua *pLua)
 {
@@ -304,7 +305,7 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
         return 2;
     }
 
-    if(CGlobalFunction::Instance->m_SocketDBCenter == nullptr )
+    if (CGlobalFunction::Instance->m_SocketDBCenter == nullptr)
     {
         CGlobalFunction::Instance->ReferenceDataCenterConnection();
         CLua::PushInteger(l, Base::ResultType::Error);
@@ -325,7 +326,7 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
     auto req = make_shared<CSendPackageEvent>();
     auto sync = make_shared<EasySync>();
     // TODO: If connect error, how process it?
-    req->SetCallbackFunc([DBName,sync](IEvent *event, CDataTransPackage *pack) {
+    req->SetCallbackFunc([DBName, sync](IEvent *event, CDataTransPackage *pack) {
         auto res_str = pack->GetRecvMessage();
         auto res = ConvertStrToObj<DataCenter::ConnectDatabaseResponse>(res_str);
 
@@ -347,6 +348,55 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
     return 2;
 }
 
+bool CGlobalFunction::SQLFunctionPrepareCheck(lua_State *l, int sessionid, const string &sql)
+{
+    if (sessionid == -1)
+    {
+        CLua::PushInteger(l, -1);
+        CLua::PushString(l, "Database session id is invalid, call ConnectDBCenter first.");
+        return false;
+    }
+
+    if (sql.empty())
+    {
+        CLua::PushInteger(l, -1);
+        CLua::PushString(l, "request data is empty");
+        return false;
+    }
+
+    if (CGlobalFunction::Instance->m_SocketDBCenter == nullptr)
+    {
+        CLua::PushInteger(l, -1);
+        CLua::PushString(l, "Work node no connect to DBCenter.");
+        return false;
+    }
+    return true;
+}
+
+CResult CGlobalFunction::RunSQLFunction(const string &request_str, int func)
+{
+    auto response_str = make_shared<string>();
+    auto req = make_shared<CSendPackageEvent>();
+    auto result = make_shared<ResultType>(ResultType::Invalid);
+    auto sync = make_shared<EasySync>();
+    req->SetCallbackFunc([result, sync, response_str](IEvent *event, CDataTransPackage *trans_pack) {
+        auto pack = trans_pack->GetDataPackage();
+        (*result) = pack->result();
+
+        *response_str = pack->content();
+        sync->notify_one();
+    });
+    req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID(), IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL,
+                    func, request_str, "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+    CGlobalFunction::Instance->m_iC->CallMessage(req);
+
+    if (!sync->wait_for(5000))
+    {
+        return CResult::Make_Error("Timeout");
+    }
+    return CResult::Make_OK(*response_str);
+}
+
 // Request sql query cmd to dbcenter.
 // Params:
 //     1> SessionID
@@ -354,62 +404,24 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
 int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
 {
     auto SessionID = CLua::GetInteger(l, 1, -1);
-    if (SessionID == -1)
-    {
-        CLua::PushInteger(l, -1);
-        CLua::PushString(l, "Database session id is invalid, call ConnectDBCenter first.");
-        return 2;
-    }
-
     auto query_cmd = CLua::GetString(l, 2, "");
-    if (query_cmd.empty())
-    {
-        CLua::PushInteger(l, -1);
-        CLua::PushString(l, "request data is empty");
+    if (!SQLFunctionPrepareCheck(l, SessionID, query_cmd))
         return 2;
-    }
-
-    if (CGlobalFunction::Instance->m_SocketDBCenter == nullptr)
-    {
-        CLua::PushInteger(l, -1);
-        CLua::PushString(l, "Work node no connect to DBCenter.");
-        return 2;
-    }
 
     DataCenter::QuerySQLCmdRequest request;
     request.set_sessionid(SessionID);
     request.set_sqlcmd(query_cmd);
 
-    auto response_str = make_shared<string>();
-    auto req = make_shared<CSendPackageEvent>();
-    auto result = make_shared<ResultType>(ResultType::Invalid);
-    auto sync = make_shared<EasySync>();
-    req->SetCallbackFunc([result,sync,response_str](IEvent *event, CDataTransPackage *trans_pack) {
-        auto pack = trans_pack->GetDataPackage();
-        (*result) = pack->result();
-
-        *response_str = pack->content();
-        sync->notify_one();
-    });
-    req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID(), IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, DataCenter::Functions::QuerySQLCmd , ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
-    CGlobalFunction::Instance->m_iC->CallMessage(req);
-
-    if (!sync->wait_for(5000))
+    auto res = RunSQLFunction(ConvertObjToStr(&request), (int)DataCenter::Functions::QuerySQLCmd);
+    if (res.IsSucceed())
     {
-        CLua::PushInteger(l, -1);
-        CLua::PushString(l, "timtout");
-        return 2;
-    }
-
-    if( (*result) == ResultType::Succeed )
-    {
-        auto response = ConvertStrToObj<DataCenter::QuerySQLCmdResponse>(*response_str);
+        auto response = ConvertStrToObj<DataCenter::QuerySQLCmdResponse>(res.GetMessage());
         CLua::PushInteger(l, response->lines_size());
         list<list<string>> res;
-        for( auto& item : response->lines())
+        for (auto &item : response->lines())
         {
             list<string> row;
-            for( auto& j : item.rawdataitem())
+            for (auto &j : item.rawdataitem())
                 row.push_back(j);
             res.push_back(row);
         }
@@ -418,13 +430,11 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
     }
     else
     {
-        CLua::PushInteger(l,-1);
-        CLua::PushString(l,*response_str);
+        CLua::PushInteger(l, -1);
+        CLua::PushString(l, res.GetMessage());
         return 2;
     }
 }
-
-
 
 // Request sql query cmd to dbcenter.
 // Params:
@@ -433,64 +443,89 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
 int CGlobalFunction::Lua_SQLInsertToDBCenter(lua_State *l)
 {
     auto SessionID = CLua::GetInteger(l, 1, -1);
-    if (SessionID == -1)
-    {
-        CLua::PushInteger(l, -1);
-        CLua::PushString(l, "Database session id is invalid, call ConnectDBCenter first.");
-        return 2;
-    }
-
     auto sql_cmd = CLua::GetString(l, 2, "");
-    if (sql_cmd.empty())
-    {
-        CLua::PushInteger(l, -1);
-        CLua::PushString(l, "request data is empty");
+    if (!SQLFunctionPrepareCheck(l, SessionID, sql_cmd))
         return 2;
-    }
-
-    if (CGlobalFunction::Instance->m_SocketDBCenter == nullptr)
-    {
-        CLua::PushInteger(l, -1);
-        CLua::PushString(l, "Work node no connect to DBCenter.");
-        return 2;
-    }
 
     DataCenter::InsertSQLCmdRequest request;
     request.set_sessionid(SessionID);
     request.set_sqlcmd(sql_cmd);
 
-    auto response_str = make_shared<string>();
-    auto req = make_shared<CSendPackageEvent>();
-    auto result = make_shared<ResultType>(ResultType::Invalid);
-    auto sync = make_shared<EasySync>();
-    req->SetCallbackFunc([result,sync,response_str](IEvent *event, CDataTransPackage *trans_pack) {
-        auto pack = trans_pack->GetDataPackage();
-        (*result) = pack->result();
-
-        *response_str = pack->content();
-        sync->notify_one();
-    });
-    req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter->GetSocketID(), IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, DataCenter::Functions::InsertSQLCmd , ConvertObjToStr(&request), "", DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
-    CGlobalFunction::Instance->m_iC->CallMessage(req);
-
-    if (!sync->wait_for(5000))
+    auto res = RunSQLFunction(ConvertObjToStr(&request), (int)DataCenter::Functions::InsertSQLCmd);
+    if (res.IsSucceed())
     {
-        CLua::PushInteger(l, -1);
-        CLua::PushString(l, "timtout");
+        auto response = ConvertStrToObj<DataCenter::InsertSQLCmdResponse>(res.GetMessage());
+        if (response->affectedrows() > 0)
+        {
+            CLua::PushBoolen(l, true);
+            CLua::PushInteger(l, response->identity());
+        }
+        else
+        {
+            CLua::PushBoolen(l, false);
+            CLua::PushString(l, "SQL Run succeed, but affectedrows is 0");
+        }
         return 2;
     }
-
-    if( (*result) == ResultType::Succeed )
+    else
     {
-        auto response = ConvertStrToObj<DataCenter::InsertSQLCmdResponse>(*response_str);
+        CLua::PushBoolen(l, false);
+        CLua::PushString(l, res.GetMessage());
+        return 2;
+    }
+}
+
+int CGlobalFunction::Lua_SQLDeleteToDBCenter(lua_State *l)
+{
+    auto SessionID = CLua::GetInteger(l, 1, -1);
+    auto sql_cmd = CLua::GetString(l, 2, "");
+    if (!SQLFunctionPrepareCheck(l, SessionID, sql_cmd))
+        return 2;
+
+    DataCenter::DeleteSQLCmdRequest request;
+    request.set_sessionid(SessionID);
+    request.set_sqlcmd(sql_cmd);
+
+    auto res = RunSQLFunction(ConvertObjToStr(&request), (int)DataCenter::Functions::DeleteSQLCmd);
+    if (res.IsSucceed())
+    {
+        auto response = ConvertStrToObj<DataCenter::DeleteSQLCmdResponse>(res.GetMessage());
         CLua::PushInteger(l, response->affectedrows());
         CLua::PushString(l, "");
         return 2;
     }
     else
     {
-        CLua::PushInteger(l,-1);
-        CLua::PushString(l,*response_str);
+        CLua::PushBoolen(l, -1);
+        CLua::PushString(l, res.GetMessage());
+        return 2;
+    }
+}
+
+int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
+{
+    auto SessionID = CLua::GetInteger(l, 1, -1);
+    auto sql_cmd = CLua::GetString(l, 2, "");
+    if (!SQLFunctionPrepareCheck(l, SessionID, sql_cmd))
+        return 2;
+
+    DataCenter::UpdateSQLCmdRequest request;
+    request.set_sessionid(SessionID);
+    request.set_sqlcmd(sql_cmd);
+
+
+    auto res = RunSQLFunction(ConvertObjToStr(&request), (int)DataCenter::Functions::UpdateSQLCmd);
+    if (res.IsSucceed())
+    {
+        auto response = ConvertStrToObj<DataCenter::UpdateSQLCmdResponse>(res.GetMessage());
+        CLua::PushInteger(l, response->affectedrows());
+        CLua::PushString(l, "");
+        return 2;
+    }
+    else
+    {
+        CLua::PushBoolen(l, -1);
+        CLua::PushString(l, res.GetMessage());
         return 2;
     }
 }

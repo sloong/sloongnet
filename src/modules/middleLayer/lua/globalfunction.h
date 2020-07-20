@@ -40,10 +40,14 @@ namespace Sloong
         static int Lua_ConnectToDBCenter(lua_State *l);
         static int Lua_SQLQueryToDBCenter(lua_State *l);
         static int Lua_SQLInsertToDBCenter(lua_State *l);
+        static int Lua_SQLDeleteToDBCenter(lua_State *l);
+        static int Lua_SQLUpdateToDBCenter(lua_State *l);
 
     protected:
         void ReferenceDataCenterConnection();
         void OnQueryDBCenterTemplateResponse(IEvent *event, CDataTransPackage *pack);
+        static CResult RunSQLFunction( const string& req, int func );
+        static bool SQLFunctionPrepareCheck( lua_State* l, int sessionid, const string& sql );
         
     protected:
         map_ex<string,string> m_mapCommData;
