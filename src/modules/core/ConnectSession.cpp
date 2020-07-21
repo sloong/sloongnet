@@ -1,19 +1,19 @@
-#include "sockinfo.h"
+#include "ConnectSession.h"
 #include "DataTransPackage.h"
 #include "NetworkEvent.hpp"
 #include "IData.h"
 using namespace Sloong;
 using namespace Sloong::Universal;
 using namespace Sloong::Events;
-Sloong::CSockInfo::CSockInfo()
+Sloong::ConnectSession::ConnectSession()
 {
 	m_pSendList = new queue_ex<UniqueTransPackage>[s_PriorityLevel]();
-	m_pCon = make_unique<EasyConnect>();
+	m_pConnection = make_unique<EasyConnect>();
 }
 
-CSockInfo::~CSockInfo()
+ConnectSession::~ConnectSession()
 {
-	m_pCon->Close();
+	m_pConnection->Close();
 	for (int i = 0; i < s_PriorityLevel; i++)
 	{
 		while (!m_pSendList[i].empty())
@@ -29,17 +29,17 @@ CSockInfo::~CSockInfo()
 	}
 }
 
-void Sloong::CSockInfo::Initialize(IControl *iMsg, int sock, LPVOID ctx)
+void Sloong::ConnectSession::Initialize(IControl *iMsg, int sock, LPVOID ctx)
 {
 	IObject::Initialize(iMsg);
 	m_ActiveTime = time(NULL);
-	m_pCon->Initialize(sock, ctx);
+	m_pConnection->Initialize(sock, ctx);
 }
 
-ResultType Sloong::CSockInfo::SendDataPackage(UniqueTransPackage pack)
+ResultType Sloong::ConnectSession::SendDataPackage(UniqueTransPackage pack)
 {
 	if (pack->GetConnection() == nullptr)
-		pack->SetConnection(this->m_pCon.get());
+		pack->SetConnection(this->m_pConnection.get());
 	// if have exdata, directly add to epoll list.
 	if (pack->IsBigPackage() || m_pSendingPackage != nullptr || (m_bIsSendListEmpty == false && !m_oPrepareSendList.empty()) || m_oSockSendMutex.try_lock() == false)
 	{
@@ -57,7 +57,7 @@ ResultType Sloong::CSockInfo::SendDataPackage(UniqueTransPackage pack)
 		return ResultType::Succeed;
 	}else if( res == ResultType::Error)
 	{
-		m_pLog->Warn(Helper::Format("Send data failed.[%s]", m_pCon->m_strAddress.c_str()));
+		m_pLog->Warn(Helper::Format("Send data failed.[%s]", m_pConnection->m_strAddress.c_str()));
 		return ResultType::Error;
 	}else if (res == ResultType::Retry)
 	{
@@ -69,14 +69,14 @@ ResultType Sloong::CSockInfo::SendDataPackage(UniqueTransPackage pack)
 	}
 }
 
-void Sloong::CSockInfo::AddToSendList(UniqueTransPackage pack)
+void Sloong::ConnectSession::AddToSendList(UniqueTransPackage pack)
 {
 	m_oPrepareSendList.push_move(std::move(pack));
 	m_pLog->Debug(Helper::Format("Add send package to prepare send list. list size:[%d]", m_oPrepareSendList.size()));
 	m_bIsSendListEmpty = false;
 }
 
-ResultType Sloong::CSockInfo::OnDataCanReceive(queue<UniqueTransPackage> &readList)
+ResultType Sloong::ConnectSession::OnDataCanReceive(queue<UniqueTransPackage> &readList)
 {
 	unique_lock<mutex> srlck(m_oSockReadMutex, std::adopt_lock);
 
@@ -86,7 +86,7 @@ ResultType Sloong::CSockInfo::OnDataCanReceive(queue<UniqueTransPackage> &readLi
 	{
 		UniqueTransPackage pack = nullptr;
 		if (m_pReceiving == nullptr)
-			pack = make_unique<CDataTransPackage>(m_pCon.get());
+			pack = make_unique<CDataTransPackage>(m_pConnection.get());
 		else
 			pack = std::move(m_pReceiving);
 
@@ -113,7 +113,7 @@ ResultType Sloong::CSockInfo::OnDataCanReceive(queue<UniqueTransPackage> &readLi
 		{
 			// The data package is invalid(Hash check error.)
 			auto event = make_unique<CNetworkEvent>(EVENT_TYPE::MonitorSendStatus);
-			event->SetSocketID(m_pCon->GetSocketID());
+			event->SetSocketID(m_pConnection->GetSocketID());
 			m_iC->SendMessage(std::move(event));
 			AddToSendList(std::move(pack));
 		}else
@@ -126,13 +126,13 @@ ResultType Sloong::CSockInfo::OnDataCanReceive(queue<UniqueTransPackage> &readLi
 	return ResultType::Succeed;
 }
 
-ResultType Sloong::CSockInfo::OnDataCanSend()
+ResultType Sloong::ConnectSession::OnDataCanSend()
 {
 	ProcessPrepareSendList();
 	return ProcessSendList();
 }
 
-void Sloong::CSockInfo::ProcessPrepareSendList()
+void Sloong::ConnectSession::ProcessPrepareSendList()
 {
 	// progress the prepare send list first
 	UniqueTransPackage pack = nullptr;
@@ -145,7 +145,7 @@ void Sloong::CSockInfo::ProcessPrepareSendList()
 	}
 }
 
-ResultType Sloong::CSockInfo::ProcessSendList()
+ResultType Sloong::ConnectSession::ProcessSendList()
 {
 	unique_lock<mutex> srlck(m_oSockSendMutex, std::adopt_lock);
 	if (m_pSendingPackage != nullptr)
@@ -153,7 +153,7 @@ ResultType Sloong::CSockInfo::ProcessSendList()
 		auto res = m_pSendingPackage->SendPackage();
 		if (res == ResultType::Error)
 		{
-			m_pLog->Error(Helper::Format("Send data package error. close connect:[%s:%d]", m_pCon->m_strAddress.c_str(), m_pCon->m_nPort));
+			m_pLog->Error(Helper::Format("Send data package error. close connect:[%s:%d]", m_pConnection->m_strAddress.c_str(), m_pConnection->m_nPort));
 			return ResultType::Error;
 		}
 		else if (res == ResultType::Retry)
@@ -184,7 +184,7 @@ ResultType Sloong::CSockInfo::ProcessSendList()
 			auto res = m_pSendingPackage->SendPackage();
 			if (res == ResultType::Error)
 			{
-				m_pLog->Error(Helper::Format("Send data package error. close connect:[%s:%d]", m_pCon->m_strAddress.c_str(), m_pCon->m_nPort));
+				m_pLog->Error(Helper::Format("Send data package error. close connect:[%s:%d]", m_pConnection->m_strAddress.c_str(), m_pConnection->m_nPort));
 				return ResultType::Error;
 			}
 			else if (res == ResultType::Retry)
@@ -206,7 +206,7 @@ ResultType Sloong::CSockInfo::ProcessSendList()
 /// 获取发送信息列表
 // 首先判断上次发送标志，如果不为-1，表示上次的发送列表没有发送完成。直接返回指定的列表
 // 如果为-1，表示需要发送新的列表。按照优先级逐级的进行寻找。
-queue_ex<UniqueTransPackage> *Sloong::CSockInfo::GetSendPackage()
+queue_ex<UniqueTransPackage> *Sloong::ConnectSession::GetSendPackage()
 {
 	for (int i = 0; i < s_PriorityLevel; i++)
 	{

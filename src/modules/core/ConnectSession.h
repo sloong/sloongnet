@@ -13,11 +13,11 @@
 
 namespace Sloong
 {
-	class CSockInfo : IObject
+	class ConnectSession : IObject
 	{
 	public:
-		CSockInfo();
-		~CSockInfo();
+		ConnectSession();
+		~ConnectSession();
 
 		void Initialize(IControl *, int, LPVOID);
 
@@ -68,7 +68,7 @@ namespace Sloong
 		queue_ex<UniqueTransPackage> m_oPrepareSendList;
 
 		time_t m_ActiveTime;
-		unique_ptr<EasyConnect> m_pCon;
+		unique_ptr<EasyConnect> m_pConnection;
 
 		mutex m_oSockReadMutex;
 		mutex m_oSockSendMutex;

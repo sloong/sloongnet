@@ -29,16 +29,16 @@ CResult Sloong::DBHub::RequestPackageProcesser(CDataTransPackage *pack)
         return CResult::Succeed();
     }
 
-    auto req_obj = pack->GetRecvMessage();
+    auto req_str = pack->GetRecvMessage();
     auto func_name = Functions_Name(function);
-    m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), req_obj.c_str()));
+    m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), CBase64::Encode(req_str).c_str()));
     if (!m_mapFuncToHandler.exist(function))
     {
         pack->ResponsePackage(ResultType::Error, Helper::Format("Function [%s] no handler.", func_name.c_str()));
         return CResult::Succeed();
     }
 
-    auto res = m_mapFuncToHandler[function](req_obj, pack);
+    auto res = m_mapFuncToHandler[function](req_str, pack);
     m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
     pack->ResponsePackage(res);
     return CResult::Succeed();

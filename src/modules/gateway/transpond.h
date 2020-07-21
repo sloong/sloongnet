@@ -10,7 +10,7 @@
 #define SLOONGNET_GATEWAY_TRANSPOND_H
 
 #include "DataTransPackage.h"
-#include "sockinfo.h"
+#include "ConnectSession.h"
 
 namespace Sloong
 {

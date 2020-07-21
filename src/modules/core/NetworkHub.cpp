@@ -1,6 +1,6 @@
 #include "NetworkHub.h"
 #include "epollex.h"
-#include "sockinfo.h"
+#include "ConnectSession.h"
 #include "NetworkEvent.hpp"
 #include "SendPackageEvent.hpp"
 #include "IData.h"
@@ -96,7 +96,7 @@ void Sloong::CNetworkHub::SendPackageEventHandler(SharedEvent event)
 	if (send_evt->HaveCallbackFunc())
 		m_iC->AddTempSharedPtr(Helper::ntos(send_evt->GetDataPackage()->id()), event);
 
-	auto transPack = make_unique<CDataTransPackage>(info->m_pCon.get());
+	auto transPack = make_unique<CDataTransPackage>(info->m_pConnection.get());
 	transPack->RequestPackage(*send_evt->GetDataPackage());
 
 	AddMessageToSendList(transPack);
@@ -131,7 +131,7 @@ void Sloong::CNetworkHub::CloseConnectEventHandler(SharedEvent event)
 		return;
 
 	auto info = m_SockList[id].get();
-	m_pLog->Info(Helper::Format("close connect:%s:%d.", info->m_pCon->m_strAddress.c_str(), info->m_pCon->m_nPort));
+	m_pLog->Info(Helper::Format("close connect:%s:%d.", info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
 	m_pEpoll->DeleteMonitorSocket(id);
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList.erase(id);
@@ -149,9 +149,9 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent event)
 	auto net_evt = DYNAMIC_TRANS<CNetworkEvent *>(event.get());
 	auto nSocket = net_evt->GetSocketID();
 
-	auto info = make_unique<CSockInfo>();
+	auto info = make_unique<ConnectSession>();
 	info->Initialize(m_iC, nSocket, m_pCTX);
-	m_pLog->Info(Helper::Format("Registe connection:[%d][%s:%d].", nSocket, info->m_pCon->m_strAddress.c_str(), info->m_pCon->m_nPort));
+	m_pLog->Info(Helper::Format("Registe connection:[%d][%s:%d].", nSocket, info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
 
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList[nSocket] = std::move(info);
@@ -214,7 +214,7 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
 		{
 			if (it->second != NULL && time(NULL) - it->second->m_ActiveTime > tout)
 			{
-				m_pLog->Info(Helper::Format("[Timeout]:[Close connect:%s]", it->second->m_pCon->m_strAddress.c_str()));
+				m_pLog->Info(Helper::Format("[Timeout]:[Close connect:%s]", it->second->m_pConnection->m_strAddress.c_str()));
 				SendCloseConnectEvent(it->first);
 				goto RecheckTimeout;
 			}
@@ -340,7 +340,7 @@ ResultType Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 		}
 	}
 
-	auto info = make_unique<CSockInfo>();
+	auto info = make_unique<ConnectSession>();
 	info->Initialize(m_iC, conn_sock, m_pCTX);
 
 	if (m_pAcceptFunc)
@@ -348,7 +348,7 @@ ResultType Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 		m_pAcceptFunc(info.get());
 	}
 
-	m_pLog->Info(Helper::Format("Accept client:[%s:%d].", info->m_pCon->m_strAddress.c_str(), info->m_pCon->m_nPort));
+	m_pLog->Info(Helper::Format("Accept client:[%s:%d].", info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_SockList[conn_sock] = std::move(info);
 	sockLck.unlock();

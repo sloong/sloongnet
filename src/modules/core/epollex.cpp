@@ -2,7 +2,7 @@
 
 #include "epollex.h"
 #include "EasyConnect.h"
-#include "sockinfo.h"
+#include "ConnectSession.h"
 #include "NetworkEvent.hpp"
 
 #include "IData.h"

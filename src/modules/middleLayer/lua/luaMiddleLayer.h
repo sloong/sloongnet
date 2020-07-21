@@ -8,7 +8,7 @@
 #ifndef SLOONGNET_MODULE_MIDDLE_LAYER_LUA_H
 #define SLOONGNET_MODULE_MIDDLE_LAYER_LUA_H
 
-#include "sockinfo.h"
+#include "ConnectSession.h"
 #include "core.h"
 #include "export.h"
 #include <jsoncpp/json/json.h>
@@ -23,7 +23,7 @@ extern "C"
 	CResult RequestPackageProcesser(void *, CDataTransPackage *);
 	CResult ResponsePackageProcesser(void *, CDataTransPackage *);
 	CResult EventPackageProcesser(CDataTransPackage *);
-	CResult NewConnectAcceptProcesser(CSockInfo *);
+	CResult NewConnectAcceptProcesser(ConnectSession *);
 	CResult ModuleInitialization(GLOBAL_CONFIG *);
 	CResult ModuleInitialized(SOCKET, IControl *);
 	CResult CreateProcessEnvironment(void **);
