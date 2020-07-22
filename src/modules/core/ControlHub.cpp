@@ -90,7 +90,7 @@ shared_ptr<void> Sloong::CControlHub::GetTempSharedPtr(const string &key)
 
 void Sloong::CControlHub::SendMessage(EVENT_TYPE msgType)
 {
-	auto event = make_unique<CNormalEvent>();
+	auto event = make_unique<NormalEvent>();
 	event->SetEvent(msgType);
 	m_oMsgList.push_move(std::move(event));
 

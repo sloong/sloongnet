@@ -11,10 +11,10 @@ namespace Sloong
 {
     namespace Events
     {
-        class SendPackageToManagerEvent : public CNormalEvent
+        class SendPackageToManagerEvent : public NormalEvent
         {
         public:
-            SendPackageToManagerEvent(int func, string content) : CNormalEvent(EVENT_TYPE::SendPackageToManager)
+            SendPackageToManagerEvent(int func, string content) : NormalEvent(EVENT_TYPE::SendPackageToManager)
             {
                 FunctionID = func;
                 Content = content;

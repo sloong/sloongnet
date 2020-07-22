@@ -361,8 +361,8 @@ CResult CSloongBaseService::Run()
 
             if (m_oServerConfig.templateid() != 1) // Manager module
             {
-                auto event = make_shared<Events::CSendPackageEvent>();
-                event->SetRequest(m_pManagerConnect->GetSocketID(), m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(), Base::PRIORITY_LEVEL::LOW_LEVEL, (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
+                auto event = make_shared<Events::SendPackageEvent>(m_pManagerConnect->GetHashCode());
+                event->SetRequest( m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(), Base::PRIORITY_LEVEL::LOW_LEVEL, (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
                 m_iC->SendMessage(event);
             }
 
@@ -409,15 +409,15 @@ void CSloongBaseService::OnSendPackageToManagerEventHandler(SharedEvent e)
 {
     auto event = dynamic_pointer_cast<SendPackageToManagerEvent>(e);
     
-    auto req = make_shared<CSendPackageEvent>();
+    auto req = make_shared<SendPackageEvent>(m_pManagerConnect->GetHashCode() );
     req->SetCallbackFunc([event](IEvent* e, CDataTransPackage* p){
         event->CallCallbackFunc(p->GetDataPackage());
     });
-    req->SetRequest( m_pManagerConnect->GetSocketID() , IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event->GetFunctionID() ,event->GetContent() );
+    req->SetRequest(  IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event->GetFunctionID() ,event->GetContent() );
     m_iC->SendMessage(req);
 }
 
 
 void CSloongBaseService::OnGetManagerSocketEventHandler(SharedEvent e)
-{
+{ 
 }

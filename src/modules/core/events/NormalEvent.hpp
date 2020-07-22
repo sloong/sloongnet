@@ -13,12 +13,12 @@ namespace Sloong
 {
 	namespace Events
 	{
-		class CNormalEvent : public IEvent
+		class NormalEvent : public IEvent
 		{
 		public:
-			CNormalEvent(){}
-			CNormalEvent(EVENT_TYPE t):m_emType(t){}
-			virtual ~CNormalEvent(){}
+			NormalEvent(){}
+			NormalEvent(EVENT_TYPE t):m_emType(t){}
+			virtual ~NormalEvent(){}
 
 			inline void SetEvent(EVENT_TYPE t){ m_emType = t; }
 			inline EVENT_TYPE GetEvent(){ return m_emType; }

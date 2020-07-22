@@ -74,12 +74,12 @@ CResult SloongNetGateway::Initialized(SOCKET sock, IControl *iC)
 	m_pRuntimeData = IData::GetRuntimeData();
 	if (m_pModuleConfig)
 	{
-		auto event = make_shared<CNormalEvent>();
+		auto event = make_shared<NormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableTimeoutCheck);
 		event->SetMessage(Helper::Format("{\"TimeoutTime\":\"%d\", \"CheckInterval\":%d}", (*m_pModuleConfig)["TimeoutTime"].asInt(), (*m_pModuleConfig)["TimeoutCheckInterval"].asInt()));
 		m_iC->SendMessage(event);
 
-		event = make_shared<CNormalEvent>();
+		event = make_shared<NormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableClientCheck);
 		event->SetMessage(Helper::Format("{\"ClientCheckKey\":\"%s\", \"ClientCheckTime\":%d}", (*m_pModuleConfig)["ClientCheckKey"].asString().c_str(), (*m_pModuleConfig)["ClientCheckKey"].asInt()));
 		m_iC->SendMessage(event);

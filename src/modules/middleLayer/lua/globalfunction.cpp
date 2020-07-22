@@ -295,7 +295,7 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
     DataCenter::ConnectDatabaseRequest request;
     request.set_database(DBName);
 
-    auto req = make_shared<CSendPackageEvent>();
+    auto req = make_shared<SendPackageEvent>(CGlobalFunction::Instance->m_SocketDBCenter);
     auto sync = make_shared<EasySync>();
     // TODO: If connect error, how process it?
     req->SetCallbackFunc([DBName, sync](IEvent *event, CDataTransPackage *pack) {
@@ -305,7 +305,7 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
         CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName] = res->sessionid();
         sync->notify_one();
     });
-    req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter, IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request));
+    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request));
     CGlobalFunction::Instance->m_iC->SendMessage(req);
 
     if (!sync->wait_for(5000))
@@ -348,7 +348,7 @@ bool CGlobalFunction::SQLFunctionPrepareCheck(lua_State *l, int sessionid, const
 CResult CGlobalFunction::RunSQLFunction(const string &request_str, int func)
 {
     auto response_str = make_shared<string>();
-    auto req = make_shared<CSendPackageEvent>();
+    auto req = make_shared<SendPackageEvent>(CGlobalFunction::Instance->m_SocketDBCenter);
     auto result = make_shared<ResultType>(ResultType::Invalid);
     auto sync = make_shared<EasySync>();
     req->SetCallbackFunc([result, sync, response_str](IEvent *event, CDataTransPackage *trans_pack) {
@@ -358,8 +358,7 @@ CResult CGlobalFunction::RunSQLFunction(const string &request_str, int func)
         *response_str = pack->content();
         sync->notify_one();
     });
-    req->SetRequest(CGlobalFunction::Instance->m_SocketDBCenter, IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL,
-                    func, request_str);
+    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, func, request_str);
     CGlobalFunction::Instance->m_iC->CallMessage(req);
 
     if (!sync->wait_for(5000))

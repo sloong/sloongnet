@@ -91,7 +91,7 @@ enum EVENT_TYPE
 	//////////////////////////////////////////////////////////////////////////
 	// 请求重新载入Lua环境
 	// 当需要重新载入Lua Context的时候发送该请求。
-	// 请求类型为CNormalEvent
+	// 请求类型为NormalEvent
 	ReloadLuaContext=21;
 
     

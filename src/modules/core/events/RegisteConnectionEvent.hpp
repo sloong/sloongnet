@@ -11,10 +11,10 @@ namespace Sloong
 {
 	namespace Events
 	{
-		class RegisteConnectionEvent : public CNormalEvent
+		class RegisteConnectionEvent : public NormalEvent
 		{
 		public:
-			RegisteConnectionEvent(const string& address, int port):CNormalEvent( EVENT_TYPE::RegisteConnection ){
+			RegisteConnectionEvent(const string& address, int port):NormalEvent( EVENT_TYPE::RegisteConnection ){
                 Address = address;
                 Port = port;
             }

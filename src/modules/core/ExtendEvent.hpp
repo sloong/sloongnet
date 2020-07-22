@@ -5,7 +5,7 @@ namespace Sloong
 {
 	namespace Events
 	{
-		class CExtendEvent : public CNormalEvent
+		class CExtendEvent : public NormalEvent
 		{
 		public:
 			CExtendEvent(){}

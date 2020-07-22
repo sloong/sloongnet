@@ -6,28 +6,29 @@
  * @Description: file content
  */
 #pragma once
-#include "NetworkEvent.hpp"
+#include "NormalEvent.hpp"
 #include "protocol/core.pb.h"
 namespace Sloong
 {
 	class CDataTransPackage;
 	namespace Events
 	{
-		typedef std::function<void(IEvent*,CDataTransPackage*)> CallbackFunc;
-		class CSendPackageEvent : public CNetworkEvent
+		class SendPackageEvent : public NormalEvent
 		{
 		public:
-			CSendPackageEvent():CNetworkEvent(EVENT_TYPE::SendPackage){}
-			virtual	~CSendPackageEvent(){}
+			SendPackageEvent(int64_t id):NormalEvent(EVENT_TYPE::SendPackage){
+				m_ConnectionHashCode = id;
+			}
+			virtual	~SendPackageEvent(){}
 
-			inline void SetCallbackFunc(CallbackFunc p){ m_pCallback = p; }
+			inline void SetCallbackFunc(std::function<void(IEvent*,CDataTransPackage*)> p){ m_pCallback = p; }
 			inline void CallCallbackFunc(CDataTransPackage* p){ 
 				if(m_pCallback) 
 					m_pCallback(this,p); 
 			}
 			inline bool HaveCallbackFunc(){ return m_pCallback != nullptr; }
 			
-			void SetRequest( SOCKET target, uint64_t sender, uint64_t serialnumber, int32_t priority, int32_t func, string content,  string extend = "", DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_RequestPackage)
+			void SetRequest( uint64_t sender, uint64_t serialnumber, int32_t priority, int32_t func, string content,  string extend = "", DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_RequestPackage)
 			{
 				m_pData = make_unique<DataPackage>();
 				m_pData->set_sender(sender);
@@ -37,23 +38,24 @@ namespace Sloong
 				m_pData->set_extend(extend);
 				m_pData->set_priority(priority);
 				m_pData->set_id(serialnumber);
-
-				m_nSocketID = target;
 			}
 
-			DataPackage* GetDataPackage()
+			inline DataPackage* GetDataPackage()
 			{
 				return m_pData.get();
 			}
 
-			unique_ptr<DataPackage> MoveDataPackage()
+			inline unique_ptr<DataPackage> MoveDataPackage()
 			{
 				return std::move(m_pData);
 			}
+
+			inline int64_t GetConnectionHashCode(){ return m_ConnectionHashCode; }
 			
 		protected:
+			int64_t m_ConnectionHashCode = 0;
 			unique_ptr<DataPackage> m_pData = nullptr;
-			CallbackFunc		m_pCallback = nullptr;
+			std::function<void(IEvent*,CDataTransPackage*)>		m_pCallback = nullptr;
 		};
 
 	}

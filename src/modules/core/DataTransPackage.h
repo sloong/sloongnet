@@ -17,7 +17,11 @@ namespace Sloong
     class CDataTransPackage
     {
     public:
-        CDataTransPackage(const CDataTransPackage& pack){ m_pCon = pack.m_pCon; m_nSocket = m_pCon->GetSocketID(); }
+        CDataTransPackage(const CDataTransPackage &pack)
+        {
+            m_pCon = pack.m_pCon;
+            m_nSocket = m_pCon->GetSocketID();
+        }
         CDataTransPackage(EasyConnect *conn) : m_pCon(conn) { m_nSocket = m_pCon->GetSocketID(); }
 
         void RequestPackage();
@@ -56,7 +60,7 @@ namespace Sloong
          *      This function will !!! auto clear the Extend !!!.
          */
         void ResponsePackage(ResultType, const string &);
-        
+
         /**
          * @Summary: 
          *      Response datapackage with content and extend data.
@@ -68,7 +72,7 @@ namespace Sloong
          *      Only used it when you need return and extend data. 
          *      This package will be see big package, and add to send list.
          */
-        void ResponsePackage(ResultType, const string &, const string& extend);
+        void ResponsePackage(ResultType, const string &, const string &extend);
 
         /**
          * @Summary: 
@@ -82,7 +86,7 @@ namespace Sloong
          *      Only used it when you need return and extend data. 
          *      This package will be see big package, and add to send list.
          */
-        void ResponsePackage(ResultType, const string &, const char* exnted, int size);
+        void ResponsePackage(ResultType, const string &, const char *exnted, int size);
 
         /**
          * @Summary: 
@@ -93,8 +97,7 @@ namespace Sloong
          *      Only used it when you need control everything. 
          *      This function just set the status to response.
          */
-        void ResponsePackage(DataPackage*);
-
+        void ResponsePackage(DataPackage *);
 
     protected:
         void PrepareSendPackageData();
@@ -107,7 +110,7 @@ namespace Sloong
          *          if other error happened else return Error 
          *          if md5 check failed, return Invalied.
          */
-        ResultType RecvPackage(bool=false);
+        ResultType RecvPackage(bool = false);
 
         /**
          * @Remarks: send this package
@@ -137,6 +140,8 @@ namespace Sloong
         inline EasyConnect *GetConnection() { return m_pCon; }
 
         inline int GetSocketID() { return m_nSocket; }
+
+        inline int64_t GetConnectionHashCode() { return m_pCon->GetHashCode(); }
 
         inline string GetSocketIP() { return CUtility::GetSocketIP(m_nSocket); }
 
@@ -172,7 +177,7 @@ namespace Sloong
         string FormatRecord();
 
     protected:
-        ResultType RecvPackageSucceedProcess(const string&);
+        ResultType RecvPackageSucceedProcess(const string &);
 
     protected:
         // Send data info
@@ -191,7 +196,7 @@ namespace Sloong
         static CLog *g_pLog;
         static inline void InitializeLog(CLog *log) { g_pLog = log; }
         static size_t g_max_package_size; // In default it;s 5MB
-        static inline void SetPackageSizeLimit( int size_of_byte ){  g_max_package_size = size_of_byte; }
+        static inline void SetPackageSizeLimit(int size_of_byte) { g_max_package_size = size_of_byte; }
     };
     typedef unique_ptr<CDataTransPackage> UniqueTransPackage;
 } // namespace Sloong

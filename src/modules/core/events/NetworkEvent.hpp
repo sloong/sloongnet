@@ -13,10 +13,10 @@ namespace Sloong
 	class CDataTransPackage;
 	namespace Events
 	{
-		class CNetworkEvent : public CNormalEvent
+		class CNetworkEvent : public NormalEvent
 		{
 		public:
-			CNetworkEvent(EVENT_TYPE t):CNormalEvent(t){}
+			CNetworkEvent(EVENT_TYPE t):NormalEvent(t){}
 			virtual	~CNetworkEvent(){}
 
 			inline int GetSocketID() { return m_nSocketID; }

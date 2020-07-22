@@ -124,18 +124,18 @@ void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int even
 		string msg_str;
 		if (msg)
 			msg->SerializeToString(&msg_str);
-		auto req = make_unique<CSendPackageEvent>();
-		req->SetRequest(m_mapUUIDToNodeItem[item].ConnectionID, IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
+		auto req = make_unique<SendPackageEvent>(m_mapUUIDToNodeItem[item].ConnectionHashCode);
+		req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
 		m_iC->SendMessage(std::move(req));
 	}
 }
 
-void Sloong::CServerManage::OnSocketClosed(SOCKET sock)
+void Sloong::CServerManage::OnSocketClosed(int64_t con)
 {
-	if (!m_mapSocketToUUID.exist(sock))
+	if (!m_mapConnectionToUUID.exist(con))
 		return;
 
-	auto target = m_mapSocketToUUID[sock];
+	auto target = m_mapConnectionToUUID[con];
 	auto id = m_mapUUIDToNodeItem[target].TemplateID;
 
 	// Find reference node and notify them
@@ -284,9 +284,9 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, CDataTr
 	item.TemplateName = tpl.Name;
 	item.TemplateID = tpl.ID;
 	item.Port = tpl.ConfiguationObj->listenport();
-	item.ConnectionID = pack->GetSocketID();
+	item.ConnectionHashCode = pack->GetConnectionHashCode();
 	tpl.Created.unique_insert(sender);
-	m_mapSocketToUUID[pack->GetSocketID()] = sender;
+	m_mapConnectionToUUID[pack->GetConnectionHashCode()] = sender;
 
 	// Find reference node and notify them
 	list<uint64_t> notifyList;

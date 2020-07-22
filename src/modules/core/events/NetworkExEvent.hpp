@@ -14,7 +14,7 @@ namespace Sloong
 	class CDataTransPackage;
 	namespace Events
 	{
-		class CNetworkExEvent : public CNormalEvent, public CExtendEvent
+		class CNetworkExEvent : public NormalEvent, public CExtendEvent
 		{
 		public:
 			CNetworkExEvent(EVENT_TYPE t):m_emType(t){}

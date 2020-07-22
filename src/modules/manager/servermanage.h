@@ -26,7 +26,7 @@ namespace Sloong
         uint64_t UUID;
         string TemplateName;
         int TemplateID;
-        SOCKET ConnectionID;
+        int64_t ConnectionHashCode;
         Json::Value ToJson()
         {
             Json::Value item;
@@ -122,7 +122,7 @@ namespace Sloong
     public:
         CResult Initialize(IControl *ic, const string&);
         
-        void OnSocketClosed(SOCKET);
+        void OnSocketClosed(int64_t);
 
         CResult ProcessHandler(CDataTransPackage *);
 
@@ -153,7 +153,7 @@ namespace Sloong
         map_ex<Manager::Functions, FunctionHandler> m_mapFuncToHandler;
         map_ex<int64_t, NodeItem> m_mapUUIDToNodeItem;
         map_ex<int, TemplateItem> m_mapIDToTemplateItem;
-        map_ex<SOCKET, int64_t> m_mapSocketToUUID;
+        map_ex<int64_t, int64_t> m_mapConnectionToUUID;
     };
 } // namespace Sloong
 #endif

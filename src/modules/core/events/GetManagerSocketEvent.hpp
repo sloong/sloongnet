@@ -11,10 +11,10 @@ namespace Sloong
 {
 	namespace Events
 	{
-		class GetMessageSocketEvent : public CNormalEvent
+		class GetMessageSocketEvent : public NormalEvent
 		{
 		public:
-			GetMessageSocketEvent():CNormalEvent( EVENT_TYPE::GetManagerSocket ){
+			GetMessageSocketEvent():NormalEvent( EVENT_TYPE::GetManagerSocket ){
                 Address = address;
                 Port = port;
             }

@@ -86,14 +86,14 @@ void Sloong::CNetworkHub::Exit(SharedEvent event)
 
 void Sloong::CNetworkHub::SendPackageEventHandler(SharedEvent event)
 {
-	auto send_evt = DYNAMIC_TRANS<CSendPackageEvent *>(event.get());
-	auto socket = send_evt->GetSocketID();
-	if (!m_mapSocketIDToHash.exist(socket))
+	auto send_evt = DYNAMIC_TRANS<SendPackageEvent *>(event.get());
+	auto id = send_evt->GetConnectionHashCode();
+	if (!m_mapHashToConnectSession.exist(id))
 	{
-		m_pLog->Error(Helper::Format("SendPackageEventHandler function called, but the socket[%d] is no regiestd in NetworkHub.", socket));
+		m_pLog->Error(Helper::Format("SendPackageEventHandler function called, but the session[%lld] is no regiestd in NetworkHub.", socket));
 		return;
 	}
-	auto info = m_mapHashToConnectSession[m_mapSocketIDToHash[socket]].get();
+	auto info = m_mapHashToConnectSession[id].get();
 	if (send_evt->HaveCallbackFunc())
 		m_iC->AddTempSharedPtr(Helper::ntos(send_evt->GetDataPackage()->id()), event);
 
@@ -401,9 +401,9 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
 		if (pack->type() == DataPackage_PackageType::DataPackage_PackageType_RequestPackage && pack->status() == DataPackage_StatusType::DataPackage_StatusType_Response)
 		{
 			auto event = static_pointer_cast<IEvent>(m_iC->GetTempSharedPtr(Helper::ntos(t->GetSerialNumber())));
-			shared_ptr<CSendPackageEvent> send_evt = nullptr;
+			shared_ptr<SendPackageEvent> send_evt = nullptr;
 			if (event != nullptr)
-				send_evt = dynamic_pointer_cast<CSendPackageEvent>(event);
+				send_evt = dynamic_pointer_cast<SendPackageEvent>(event);
 			if (send_evt != nullptr)
 			{
 				auto shared_pack = shared_ptr<CDataTransPackage>(move(t));
