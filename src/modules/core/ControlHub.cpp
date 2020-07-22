@@ -1,7 +1,7 @@
 
 #include "ControlHub.h"
 #include "univ/exception.h"
-#include "NormalEvent.hpp"
+#include "events/NormalEvent.hpp"
 using namespace Sloong::Events;
 
 CResult Sloong::CControlHub::Initialize(int quantity)

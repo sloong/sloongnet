@@ -10,7 +10,7 @@
 #define SLOONGNET_GATEWAY_TRANSPOND_H
 
 #include "DataTransPackage.h"
-#include "ConnectSession.h"
+#include "IControl.h"
 
 namespace Sloong
 {
@@ -34,7 +34,7 @@ namespace Sloong
 		CResult MessageToClient(RequestInfo*, CDataTransPackage *);
 
     protected:
-		IControl* 	m_pControl = nullptr;
+		IControl* 	m_iC = nullptr;
 		CLog*		m_pLog =nullptr;
 	};
 

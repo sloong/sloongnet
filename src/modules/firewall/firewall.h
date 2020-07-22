@@ -16,7 +16,7 @@ extern "C" {
 	CResult RequestPackageProcesser(void*,CDataTransPackage*);
 	CResult ResponsePackageProcesser(void*,CDataTransPackage*);
 	CResult EventPackageProcesser(CDataTransPackage*);
-	CResult NewConnectAcceptProcesser(ConnectSession*);
+	CResult NewConnectAcceptProcesser(SOCKET);
 	CResult ModuleInitialization(GLOBAL_CONFIG*);
 	CResult ModuleInitialized(SOCKET, IControl *);
 	CResult CreateProcessEnvironment(void**);
@@ -41,7 +41,7 @@ namespace Sloong
 	protected:
 
 	protected:
-		IControl* 	m_pControl = nullptr;
+		IControl* 	m_iC = nullptr;
 		CLog*		m_pLog =nullptr;
 		GLOBAL_CONFIG* m_pConfig;
 	public:

@@ -7,9 +7,6 @@
  */
 #include "datacenter.h"
 #include "IData.h"
-#include "NetworkEvent.hpp"
-using namespace Sloong;
-using namespace Sloong::Events;
 
 #include "protocol/manager.pb.h"
 
@@ -40,7 +37,7 @@ extern "C" CResult EventPackageProcesser(CDataTransPackage *pack)
 	return CResult::Succeed();
 }
 
-extern "C" CResult NewConnectAcceptProcesser(ConnectSession *info)
+extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 {
 	return CResult::Succeed();
 }

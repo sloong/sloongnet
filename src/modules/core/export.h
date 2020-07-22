@@ -14,12 +14,12 @@ using namespace Base;
 #include "protocol/core.pb.h"
 using namespace Core;
 #include "DataTransPackage.h"
-#include "ConnectSession.h"
+#include "IControl.h"
 typedef CResult (*CreateProcessEnvironmentFunction)(void**);
 typedef CResult (*RequestPackageProcessFunction)(void*,CDataTransPackage*);
 typedef CResult (*ResponsePackageProcessFunction)(void*,CDataTransPackage*);
 typedef CResult (*EventPackageProcessFunction)(CDataTransPackage*);
-typedef CResult (*NewConnectAcceptProcessFunction)(ConnectSession*);
+typedef CResult (*NewConnectAcceptProcessFunction)(SOCKET);
 typedef CResult (*ModuleInitializationFunction)(GLOBAL_CONFIG*);
-typedef CResult (*ModuleInitializedFunction)(SOCKET,IControl*);
+typedef CResult (*ModuleInitializedFunction)(IControl*);
 #endif //SLOONGNET_MODULE_CORE_EXPORT_H

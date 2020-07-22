@@ -8,7 +8,6 @@
 /* File Name: server.c */
 #include "luaMiddleLayer.h"
 #include "utility.h"
-#include "NetworkEvent.hpp"
 #include "globalfunction.h"
 #include "IData.h"
 using namespace Sloong;
@@ -44,7 +43,7 @@ extern "C" CResult EventPackageProcesser(CDataTransPackage *pack)
 	return CResult::Succeed();
 }
 
-extern "C" CResult NewConnectAcceptProcesser(ConnectSession *info)
+extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 {
 	return CResult::Succeed();
 }
@@ -55,9 +54,9 @@ extern "C" CResult ModuleInitialization(GLOBAL_CONFIG *confiog)
 	return CResult::Succeed();
 }
 
-extern "C" CResult ModuleInitialized(SOCKET sock, IControl *iC)
+extern "C" CResult ModuleInitialized(IControl *iC)
 {
-	return LuaMiddleLayer::Instance->Initialized(sock, iC);
+	return LuaMiddleLayer::Instance->Initialized( iC);
 }
 
 extern "C" CResult CreateProcessEnvironment(void **out_env)
@@ -65,7 +64,7 @@ extern "C" CResult CreateProcessEnvironment(void **out_env)
 	return LuaMiddleLayer::Instance->CreateProcessEnvironmentHandler(out_env);
 }
 
-CResult LuaMiddleLayer::Initialized(SOCKET sock, IControl *iC)
+CResult LuaMiddleLayer::Initialized(IControl *iC)
 {
 	IObject::Initialize(iC);
 	IData::Initialize(iC);
@@ -75,7 +74,6 @@ CResult LuaMiddleLayer::Initialized(SOCKET sock, IControl *iC)
 	{
 		return CResult::Make_Error("No set module config. cannot go on.");
 	}
-	m_nManagerConnection = sock;
 	m_iC->RegisterEventHandler(SocketClose, std::bind(&LuaMiddleLayer::OnSocketClose, this, std::placeholders::_1));
 	return CGlobalFunction::Instance->Initialize(m_iC);
 }
@@ -170,15 +168,6 @@ void Sloong::LuaMiddleLayer::OnReferenceModuleOnlineEvent(const string &str_req,
 void Sloong::LuaMiddleLayer::OnReferenceModuleOfflineEvent(const string &str_req, CDataTransPackage *trans_pack)
 {
 	m_pLog->Info("Receive ReferenceModuleOffline event");
-	/*auto req = ConvertStrToObj<Manager::EventReferenceModuleOffline>(str_req);
-	auto uuid = req->uuid();
-	auto item = m_mapUUIDToNode[uuid];
-	m_mapTempteIDToUUIDs[item.templateid()].erase(item.uuid());
-	auto event = make_unique<CNetworkEvent>(EVENT_TYPE::SocketClose);
-	event->SetSocketID(m_mapUUIDToConnect[uuid]);
-	m_iC->SendMessage(std::move(event));
-	m_mapUUIDToConnect.erase(uuid);
-	m_mapUUIDToNode.erase(uuid);*/
 }
 
 void Sloong::LuaMiddleLayer::EventPackageProcesser(CDataTransPackage *trans_pack)

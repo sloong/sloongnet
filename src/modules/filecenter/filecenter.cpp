@@ -32,7 +32,7 @@ extern "C" CResult EventPackageProcesser(CDataTransPackage *pack)
     return CResult::Succeed();
 }
 
-extern "C" CResult NewConnectAcceptProcesser(ConnectSession *info)
+extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 {
     return CResult::Succeed();
 }

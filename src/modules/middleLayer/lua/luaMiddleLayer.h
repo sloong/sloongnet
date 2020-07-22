@@ -8,7 +8,6 @@
 #ifndef SLOONGNET_MODULE_MIDDLE_LAYER_LUA_H
 #define SLOONGNET_MODULE_MIDDLE_LAYER_LUA_H
 
-#include "ConnectSession.h"
 #include "core.h"
 #include "export.h"
 #include <jsoncpp/json/json.h>
@@ -23,9 +22,9 @@ extern "C"
 	CResult RequestPackageProcesser(void *, CDataTransPackage *);
 	CResult ResponsePackageProcesser(void *, CDataTransPackage *);
 	CResult EventPackageProcesser(CDataTransPackage *);
-	CResult NewConnectAcceptProcesser(ConnectSession *);
+	CResult NewConnectAcceptProcesser(SOCKET);
 	CResult ModuleInitialization(GLOBAL_CONFIG *);
-	CResult ModuleInitialized(SOCKET, IControl *);
+	CResult ModuleInitialized( IControl *);
 	CResult CreateProcessEnvironment(void **);
 }
 
@@ -38,7 +37,7 @@ namespace Sloong
 		~LuaMiddleLayer() {}
 
 		CResult Initialization(GLOBAL_CONFIG *);
-		CResult Initialized(SOCKET, IControl *);
+		CResult Initialized( IControl *);
 
 		CResult RequestPackageProcesser(CLuaProcessCenter *, CDataTransPackage *);
 		CResult ResponsePackageProcesser(CLuaProcessCenter *, CDataTransPackage *);
@@ -56,8 +55,6 @@ namespace Sloong
 	protected:
 		list_ex<shared_ptr<CLuaProcessCenter>> m_listProcess;
 		map_ex<uint64_t, unique_ptr<CLuaPacket>> m_mapUserInfoList;
-		int m_nSerialNumber = 0;
-		SOCKET m_nManagerConnection = -1;
 		GLOBAL_CONFIG *m_pConfig;
 		Json::Value *m_pModuleConfig;
 

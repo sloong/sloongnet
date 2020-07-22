@@ -22,7 +22,7 @@ extern "C"
 	CResult RequestPackageProcesser(void *, CDataTransPackage *);
 	CResult ResponsePackageProcesser(void *, CDataTransPackage *);
 	CResult EventPackageProcesser(CDataTransPackage *);
-	CResult NewConnectAcceptProcesser(ConnectSession *);
+	CResult NewConnectAcceptProcesser(SOCKET);
 	CResult ModuleInitialization(GLOBAL_CONFIG *);
 	CResult ModuleInitialized(SOCKET, IControl *);
 	CResult CreateProcessEnvironment(void **);
@@ -41,7 +41,7 @@ namespace Sloong
 		CResult ResponsePackageProcesser(CDataTransPackage *);
 
 		void QueryReferenceInfo();
-		CResult QueryReferenceInfoResponseHandler(IEvent*, CDataTransPackage *);
+		void QueryReferenceInfoResponseHandler(IEvent*, DataPackage *);
 
 		inline CResult CreateProcessEnvironmentHandler(void **);
 		void EventPackageProcesser(CDataTransPackage *);
@@ -64,7 +64,7 @@ namespace Sloong
 		map_ex<int, list_ex<int>> m_mapFuncToTemplateIDs;
 		map_ex<int, list_ex<uint64_t>> m_mapTempteIDToUUIDs;
 		map_ex<uint64_t, NodeItem> m_mapUUIDToNode;
-		map_ex<uint64_t, SOCKET> m_mapUUIDToConnect;
+		map_ex<uint64_t, int64_t> m_mapUUIDToConnectionID;
 		map_ex<uint64_t, RequestInfo> m_mapSerialToRequest;
 
 	protected:

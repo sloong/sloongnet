@@ -5,19 +5,15 @@
  * @LastEditTime: 2020-05-14 20:39:20
  * @Description: file content
  */
-#include "NetworkEvent.hpp"
 #include "transpond.h"
 #include "IData.h"
 #include "gateway.h"
-
 #include "snowflake.h"
-
-using namespace Sloong::Events;
 
 CResult Sloong::GatewayTranspond::Initialize(IControl* ic)
 {
     m_pLog = IData::GetLog();
-    m_pControl = ic;
+    m_iC = ic;
     return CResult::Succeed();
 }
 

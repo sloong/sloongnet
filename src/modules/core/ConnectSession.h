@@ -19,7 +19,7 @@ namespace Sloong
 		ConnectSession();
 		~ConnectSession();
 
-		void Initialize(IControl *, int, LPVOID);
+		void Initialize(IControl *, UniqueConnection);
 
 		/**
 		 * @Remarks: When data can receive, should call this function to receive the package.
@@ -68,7 +68,7 @@ namespace Sloong
 		queue_ex<UniqueTransPackage> m_oPrepareSendList;
 
 		time_t m_ActiveTime;
-		unique_ptr<EasyConnect> m_pConnection;
+		UniqueConnection m_pConnection = nullptr;
 
 		mutex m_oSockReadMutex;
 		mutex m_oSockSendMutex;

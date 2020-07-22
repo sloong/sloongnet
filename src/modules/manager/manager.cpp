@@ -8,7 +8,7 @@
 
 #include "manager.h"
 #include "utility.h"
-#include "NetworkEvent.hpp"
+#include "events/NetworkEvent.hpp"
 #include "fstream_ex.hpp"
 
 using namespace Sloong::Events;
@@ -104,11 +104,11 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG *config)
 
 CResult SloongControlService::Initialized(IControl *iC)
 {
-	m_pControl = iC;
+	m_iC = iC;
 	IData::Initialize(iC);
 	m_pConfig = IData::GetGlobalConfig();
 	m_pLog = IData::GetLog();
-	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongControlService::OnSocketClose, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(SocketClose, std::bind(&SloongControlService::OnSocketClose, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
@@ -134,7 +134,7 @@ void Sloong::SloongControlService::OnSocketClose(SharedEvent event)
 inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(void **out_env)
 {
 	auto item = make_unique<CServerManage>();
-	auto res = item->Initialize(m_pControl,m_strDBFilePath);
+	auto res = item->Initialize(m_iC,m_strDBFilePath);
 	if (res.IsFialed())
 		return res;
 	(*out_env) = item.get();

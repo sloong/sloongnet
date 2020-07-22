@@ -23,7 +23,6 @@ enum DATA_ITEM
 	Logger=2;
 	RuntimeData=3;
     ReferenceTemplateInfo=4;
-    ManagerSocket=5;
 }
 
 enum MODULE_TYPE
@@ -39,53 +38,63 @@ enum MODULE_TYPE
 
 enum EVENT_TYPE
 {
-	/*
-	由 base_service 发送。程序准备完毕可以运行时发送
-	*/
-	ProgramStart=0;
-    ProgramStop=1;
-	// 重新启用
-	// 程序将会从加载开始，重新执行获取配置，加载模块等操作
-	ProgramRestart=2;
+    InvalidEventType=0;
+    //////////////////////////////////////////////////////////////////////////
+	// 由 * Application * 主程序提供的消息 (1-10)
+	//////////////////////////////////////////////////////////////////////////
+	// 程序准备完毕可以运行时发送
+	ProgramStart=1;
+
+    // 程序需要退出时发送
+    ProgramStop=2;
+
+	// 重新启动。程序将会从加载开始，重新执行获取配置，加载模块等操作
+	ProgramRestart=3;
+
+    // 发送请求到Manager服务
+    SendPackageToManager=4;
 
 
 	//////////////////////////////////////////////////////////////////////////
-	// 由 * NetworkHub * 模块提供的消息
+	// 由 * NetworkHub * 模块提供的消息 (11-20)
 	//////////////////////////////////////////////////////////////////////////
 	// 当连接关闭时会发送该消息
 	// 需要在处理完成后调用回调函数以清除连接信息。
 	// 参数类型为CNetworkEvent
-	SocketClose=3;
+	SocketClose=11;
 
 	// 需要发送数据给客户端时，使用该消息
-	SendPackage=4;
-
-    
+	SendPackage=12;
 
 	// 需要监听socket的可写状态时，使用该消息
 	// 类型为CNetworkEvent.
-	MonitorSendStatus=5;
+	MonitorSendStatus=13;
 
 	// 启用超时检查
 	// 参数类型为NormalEvent, 
 	//   实参为JSON，格式
 	// {"TimeoutTime":"", "CheckInterval":""}
-	EnableTimeoutCheck=6;
+	EnableTimeoutCheck=14;
 
 	// 启用连接检查
 	// 参数类型为NormalEvent
 	//   实参为JSON，格式
 	// {"ClientCheckKey":"","ClientCheckTime":""}
-	EnableClientCheck=7;
-	
-	// 请求重新载入Lua环境
-	// 当需要重新载入Lua Context的时候发送该请求。
-	// 请求类型为CNormalEvent
-	ReloadLuaContext=8;
+	EnableClientCheck=15;
 
     // 注册一个已经存在的连接到EPOLL
     // 参数类型为类型为CNetworkEvent
-    RegisteConnection=9;
+    RegisteConnection=16;
+	
+    //////////////////////////////////////////////////////////////////////////
+	// 由 * LuaMiddleLayer * 模块提供的消息 (21-30)
+	//////////////////////////////////////////////////////////////////////////
+	// 请求重新载入Lua环境
+	// 当需要重新载入Lua Context的时候发送该请求。
+	// 请求类型为CNormalEvent
+	ReloadLuaContext=21;
+
+    
 	
 }
 

@@ -1,6 +1,6 @@
 #include "ConnectSession.h"
 #include "DataTransPackage.h"
-#include "NetworkEvent.hpp"
+#include "events/NetworkEvent.hpp"
 #include "IData.h"
 using namespace Sloong;
 using namespace Sloong::Universal;
@@ -8,12 +8,12 @@ using namespace Sloong::Events;
 Sloong::ConnectSession::ConnectSession()
 {
 	m_pSendList = new queue_ex<UniqueTransPackage>[s_PriorityLevel]();
-	m_pConnection = make_unique<EasyConnect>();
 }
 
 ConnectSession::~ConnectSession()
 {
-	m_pConnection->Close();
+	if( m_pConnection)
+		m_pConnection->Close();
 	for (int i = 0; i < s_PriorityLevel; i++)
 	{
 		while (!m_pSendList[i].empty())
@@ -29,11 +29,11 @@ ConnectSession::~ConnectSession()
 	}
 }
 
-void Sloong::ConnectSession::Initialize(IControl *iMsg, int sock, LPVOID ctx)
+void Sloong::ConnectSession::Initialize(IControl *iMsg, UniqueConnection conn)
 {
 	IObject::Initialize(iMsg);
 	m_ActiveTime = time(NULL);
-	m_pConnection->Initialize(sock, ctx);
+	m_pConnection = std::move(conn);
 }
 
 ResultType Sloong::ConnectSession::SendDataPackage(UniqueTransPackage pack)

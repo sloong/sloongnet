@@ -19,7 +19,7 @@ extern "C" {
 	CResult RequestPackageProcesser(void *, CDataTransPackage *);
 	CResult ResponsePackageProcesser(void *, CDataTransPackage *);
 	CResult EventPackageProcesser(CDataTransPackage *);
-	CResult NewConnectAcceptProcesser(ConnectSession *);
+	CResult NewConnectAcceptProcesser(SOCKET);
 	CResult ModuleInitialization(GLOBAL_CONFIG *);
 	CResult ModuleInitialized(SOCKET, IControl *);
 	CResult CreateProcessEnvironment(void **);

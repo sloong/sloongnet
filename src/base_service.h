@@ -40,9 +40,13 @@ namespace Sloong
 
 		CResult RegisteNode();
 		CResult InitModule();
-		void InitSystemEventHandler();
-		void OnRestart(SharedEvent);
-		void OnStop(SharedEvent);
+		void InitSystem();
+		
+	protected:
+		void OnProgramRestartEventHandler(SharedEvent);
+		void OnProgramStopEventHandler(SharedEvent);
+		void OnSendPackageToManagerEventHandler(SharedEvent);
+		void OnGetManagerSocketEventHandler(SharedEvent);
 
 	protected:
 		static void sloong_terminator();
@@ -52,17 +56,13 @@ namespace Sloong
 
 	protected:
 		unique_ptr<CNetworkHub> m_pNetwork = make_unique<CNetworkHub>();
-		unique_ptr<CControlHub> m_pControl = make_unique<CControlHub>();
+		unique_ptr<CControlHub> m_iC = make_unique<CControlHub>();
 		unique_ptr<CLog> m_pLog = make_unique<CLog>();
 		RuntimeDataPackage m_oServerConfig;
-		SmartConnect m_pManagerConnect = nullptr;
-		int m_nManagerSocket = INVALID_SOCKET;
+		UniqueConnection m_pManagerConnect = nullptr;
 		Json::Value m_oModuleConfig;
-		shared_ptr<EasyConnect> m_pSocket;
 		EasySync m_oExitSync;
 		CResult m_oExitResult = CResult::Succeed();
-		u_int64_t m_nSerialNumber = 0;
-		string m_strUUID;
 		void *m_pModule = nullptr;
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;
 

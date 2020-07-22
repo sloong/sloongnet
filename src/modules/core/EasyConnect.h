@@ -27,13 +27,13 @@ namespace Sloong
 	class EasyConnect
 	{
 	public:
-		// 以接受方的方式初始化
+		// 以接受方/服务端的方式初始化。链接断开后不进行任何操作
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
-		void Initialize(SOCKET, LPVOID p = nullptr);
+		void InitializeAsServer(SOCKET, LPVOID p = nullptr);
 
-		// 以发起方的方式初始化
+		// 以发起方/客户端的方式初始化。链接断开后会根据信息尝试重连
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
-		void Initialize(const string &, int, LPVOID p = nullptr);
+		void InitializeAsClient(const string &, int, LPVOID p = nullptr);
 
 		bool Connect();
 
@@ -70,6 +70,8 @@ namespace Sloong
 
 		inline int GetErrno() { return m_nErrno; }
 
+		inline int64_t GetHashCode() { return m_nHashCode; }
+
 	protected:
 		int Read(char *, int, bool, bool);
 
@@ -96,6 +98,8 @@ namespace Sloong
 	public:
 		string m_strAddress;
 		int m_nPort;
+		bool m_bReconnect = false;
+		int64_t m_nHashCode;
 
 	private:
 		int m_nErrno;
@@ -107,7 +111,7 @@ namespace Sloong
 		ConnectStatus m_stStatus = ConnectStatus::Disconnect;
 	};
 
-	typedef unique_ptr<EasyConnect> SmartConnect;
+	typedef unique_ptr<EasyConnect> UniqueConnection;
 
 } // namespace Sloong
 

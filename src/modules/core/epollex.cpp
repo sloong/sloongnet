@@ -3,16 +3,14 @@
 #include "epollex.h"
 #include "EasyConnect.h"
 #include "ConnectSession.h"
-#include "NetworkEvent.hpp"
-
 #include "IData.h"
+// System file
 #include <arpa/inet.h>
 #include <netdb.h>
 // for TCP_NODELAY
 #include <netinet/tcp.h>
 
-using namespace Sloong;
-using namespace Sloong::Universal;
+#include "events/NetworkEvent.hpp"
 using namespace Sloong::Events;
 
 Sloong::CEpollEx::CEpollEx()

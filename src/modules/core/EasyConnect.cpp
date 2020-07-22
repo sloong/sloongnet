@@ -15,8 +15,9 @@ bool support_ssl_reconnect = false;
 constexpr int s_llLen = 8;
 constexpr int s_lLen = 4;
 
-void Sloong::EasyConnect::Initialize(SOCKET sock, LPVOID ctx)
+void Sloong::EasyConnect::InitializeAsServer(SOCKET sock, LPVOID ctx)
 {
+	m_bReconnect = false;
 	m_nSocket = sock;
 	m_strAddress = CUtility::GetSocketIP(m_nSocket);
 	m_nPort = CUtility::GetSocketPort(m_nSocket);
@@ -32,10 +33,12 @@ void Sloong::EasyConnect::Initialize(SOCKET sock, LPVOID ctx)
 	}
 }
 
-void Sloong::EasyConnect::Initialize(const string &address, int port, LPVOID ctx)
+void Sloong::EasyConnect::InitializeAsClient(const string &address, int port, LPVOID ctx)
 {
+	m_bReconnect = true;
 	m_strAddress = address;
 	m_nPort = port;
+	m_nHashCode = std::hash<string>{}(Helper::Format("%s:%d",m_strAddress.c_str(),m_nPort));
 	if (ctx)
 	{
 		auto pCtx = STATIC_TRANS<SSL_CTX*>(ctx);

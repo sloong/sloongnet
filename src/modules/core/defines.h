@@ -26,6 +26,9 @@ using namespace std;
 using namespace Core;
 
 #include "result.hpp"
+	
+#define ARRAYSIZE(a) (sizeof(a) / sizeof(a[0]))
+
 namespace Sloong
 {
 	class CDataTransPackage;

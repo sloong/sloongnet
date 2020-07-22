@@ -8,7 +8,7 @@
 #include "servermanage.h"
 
 #include "utility.h"
-#include "SendPackageEvent.hpp"
+#include "events/SendPackageEvent.hpp"
 
 #include "snowflake.h"
 

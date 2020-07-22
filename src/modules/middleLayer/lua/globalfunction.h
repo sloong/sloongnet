@@ -45,7 +45,7 @@ namespace Sloong
 
     protected:
         void ReferenceDataCenterConnection();
-        void OnQueryDBCenterTemplateResponse(IEvent *event, CDataTransPackage *pack);
+        void OnQueryDBCenterTemplateResponse(IEvent *event, DataPackage *pack);
         static CResult RunSQLFunction( const string& req, int func );
         static bool SQLFunctionPrepareCheck( lua_State* l, int sessionid, const string& sql );
         
@@ -53,7 +53,7 @@ namespace Sloong
         map_ex<string,string> m_mapCommData;
         map_ex<string,int> m_mapDBNameToSessionID;
         Json::Value* m_pModuleConfig = nullptr;
-        unique_ptr<EasyConnect> m_SocketDBCenter=nullptr;
+        int64_t m_SocketDBCenter=0;
 
     public:
         static unique_ptr<CGlobalFunction> Instance;

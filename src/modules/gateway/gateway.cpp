@@ -2,7 +2,8 @@
 #include "gateway.h"
 #include "utility.h"
 #include "IData.h"
-#include "SendPackageEvent.hpp"
+#include "events/SendPackageToManagerEvent.hpp"
+#include "events/RegisteConnectionEvent.hpp"
 using namespace Sloong;
 using namespace Sloong::Events;
 
@@ -43,7 +44,7 @@ extern "C" CResult EventPackageProcesser(CDataTransPackage *pack)
 	return CResult::Succeed();
 } 
 
-extern "C" CResult NewConnectAcceptProcesser(ConnectSession *info)
+extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 {
 	return CResult::Succeed();
 }
@@ -99,9 +100,8 @@ CResult SloongNetGateway::ResponsePackageProcesser( CDataTransPackage *trans_pac
 
 void SloongNetGateway::QueryReferenceInfo()
 {
-	auto event = make_shared<CSendPackageEvent>();
+	auto event = make_shared<SendPackageToManagerEvent>(Functions::QueryReferenceInfo, "");
 	event->SetCallbackFunc(std::bind(&SloongNetGateway::QueryReferenceInfoResponseHandler, this, std::placeholders::_1, std::placeholders::_2));
-	event->SetRequest(m_nManagerConnection, m_pRuntimeData->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, (int)Functions::QueryReferenceInfo, "");
 	m_iC->CallMessage(event);
 }
 
@@ -134,12 +134,12 @@ list<int> SloongNetGateway::ProcessProviedFunction(const string &prov_func)
 	return res_list;
 }
 
-CResult SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent* send_pack, CDataTransPackage *res_pack)
+void SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent* send_pack, DataPackage *res_pack)
 {
-	auto str_res = res_pack->GetRecvMessage();
+	auto str_res = res_pack->content();
 	auto res = ConvertStrToObj<QueryReferenceInfoResponse>(str_res);
 	if (res == nullptr || res->templateinfos_size() == 0)
-		return CResult::Invalid();
+		return;
 
 	auto templateInfos = res->templateinfos();
 	for (auto info : templateInfos)
@@ -162,18 +162,15 @@ CResult SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent* send_pack, C
 			AddConnection(item.uuid(), item.address(), item.port());
 		}
 	}
-	return CResult::Invalid();
 }
 
 void SloongNetGateway::AddConnection( uint64_t uuid, const string &addr, int port)
 {
-	EasyConnect conn;
-	conn.Initialize(addr, port);
-	conn.Connect();
-	auto event = make_shared<CNetworkEvent>(EVENT_TYPE::RegisteConnection);
-	event->SetSocketID(conn.GetSocketID());
+	auto event = make_shared<RegisteConnectionEvent>(addr, port);
+	event->SetCallbackFunc([this,uuid](IEvent* e, int64_t hashcode){
+		m_mapUUIDToConnectionID[uuid] = hashcode;
+	});
 	m_iC->SendMessage(event);
-	m_mapUUIDToConnect[uuid] = conn.GetSocketID();
 }
 
 CResult SloongNetGateway::CreateProcessEnvironmentHandler(void **out_env)
@@ -216,10 +213,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_r
 	auto uuid = req->uuid();
 	auto item = m_mapUUIDToNode[uuid];
 	m_mapTempteIDToUUIDs[item.templateid()].erase(item.uuid());
-	auto event = make_unique<CNetworkEvent>(EVENT_TYPE::SocketClose);
-	event->SetSocketID(m_mapUUIDToConnect[uuid]);
-	m_iC->SendMessage(std::move(event));
-	m_mapUUIDToConnect.erase(uuid);
+	m_mapUUIDToConnectionID.erase(uuid);
 	m_mapUUIDToNode.erase(uuid);
 }
 
@@ -269,7 +263,7 @@ SOCKET Sloong::SloongNetGateway::GetPorcessConnect(int function)
 
 		for (auto node : m_mapTempteIDToUUIDs[tpl])
 		{
-			return m_mapUUIDToConnect[node];
+			return m_mapUUIDToConnectionID[node];
 		}
 	}
 
@@ -280,7 +274,7 @@ SOCKET Sloong::SloongNetGateway::GetPorcessConnect(int function)
 
 		for (auto node : m_mapTempteIDToUUIDs[tpl])
 		{
-			return m_mapUUIDToConnect[node];
+			return m_mapUUIDToConnectionID[node];
 		}
 	}
 

@@ -8,8 +8,12 @@
 
 #include "base_service.h"
 #include "utility.h"
-#include "SendPackageEvent.hpp"
 #include "snowflake.h"
+
+#include "events/SendPackageEvent.hpp"
+#include "events/SendPackageToManagerEvent.hpp"
+#include "events/RegisteConnectionEvent.hpp"
+using namespace Sloong::Events;
 
 #include "protocol/manager.pb.h"
 using namespace Manager;
@@ -47,7 +51,7 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
 CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int forceTempID)
 {
     m_pManagerConnect = make_unique<EasyConnect>();
-    m_pManagerConnect->Initialize(data->manageraddress(), data->managerport(), nullptr);
+    m_pManagerConnect->InitializeAsClient(data->manageraddress(), data->managerport(), nullptr);
     if (!m_pManagerConnect->Connect())
     {
         return CResult::Make_Error("Connect to control fialed.");
@@ -127,7 +131,7 @@ CResult CSloongBaseService::InitlializeForManager(RuntimeDataPackage *data)
     return CResult::Succeed();
 }
 
-void CSloongBaseService::InitSystemEventHandler()
+void CSloongBaseService::InitSystem()
 {
     set_terminate(sloong_terminator);
     set_unexpected(sloong_unexpected);
@@ -148,7 +152,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     m_oServerConfig.set_managerport(port);
     m_oExitResult = CResult::Succeed();
 
-    InitSystemEventHandler();
+    InitSystem();
 
     CResult res = CResult::Succeed();
     if (ManagerMode)
@@ -183,7 +187,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     }
     m_pLog->Debug("Module initialization succeed.");
 
-    res = m_pControl->Initialize(pConfig->mqthreadquantity());
+    res = m_iC->Initialize(pConfig->mqthreadquantity());
     if (res.IsFialed())
     {
         m_pLog->Fatal(res.GetMessage());
@@ -191,24 +195,26 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     }
     m_pLog->Debug("Control center initialization succeed.");
 
-    m_pControl->Add(DATA_ITEM::ServerConfiguation, m_oServerConfig.mutable_templateconfig());
-    m_pControl->Add(Logger, m_pLog.get());
-    m_pControl->Add(DATA_ITEM::RuntimeData, &m_oServerConfig);
+    m_iC->Add(DATA_ITEM::ServerConfiguation, m_oServerConfig.mutable_templateconfig());
+    m_iC->Add(DATA_ITEM::Logger, m_pLog.get());
+    m_iC->Add(DATA_ITEM::RuntimeData, &m_oServerConfig);
     if (pConfig->moduleconfig().length() > 0)
     {
         Json::Reader reader;
         reader.parse(pConfig->moduleconfig(), m_oModuleConfig);
-        m_pControl->Add(DATA_ITEM::ModuleConfiguation, &m_oModuleConfig);
+        m_iC->Add(DATA_ITEM::ModuleConfiguation, &m_oModuleConfig);
     }
     else
     {
-        m_pControl->Add(DATA_ITEM::ModuleConfiguation, nullptr);
+        m_iC->Add(DATA_ITEM::ModuleConfiguation, nullptr);
     }
 
-    m_pControl->RegisterEventHandler(ProgramRestart, std::bind(&CSloongBaseService::OnRestart, this, std::placeholders::_1));
-    m_pControl->RegisterEventHandler(ProgramStop, std::bind(&CSloongBaseService::OnStop, this, std::placeholders::_1));
-    IData::Initialize(m_pControl.get());
-    res = m_pNetwork->Initialize(m_pControl.get());
+    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramRestart, std::bind(&CSloongBaseService::OnProgramRestartEventHandler, this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStop, std::bind(&CSloongBaseService::OnProgramStopEventHandler, this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(EVENT_TYPE::SendPackageToManager, std::bind(&CSloongBaseService::OnSendPackageToManagerEventHandler, this, std::placeholders::_1));
+    
+    IData::Initialize(m_iC.get());
+    res = m_pNetwork->Initialize(m_iC.get());
     if (res.IsFialed())
     {
         m_pLog->Fatal(res.GetMessage());
@@ -221,14 +227,11 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     m_pNetwork->RegisterAccpetConnectProcesser(m_pModuleAcceptHandler);
     if (m_pManagerConnect)
     {
-        m_nManagerSocket = m_pManagerConnect->GetSocketID();
-        auto event = make_shared<Events::CNetworkEvent>(EVENT_TYPE::RegisteConnection);
-        event->SetSocketID(m_nManagerSocket);
-        m_pControl->SendMessage(event);
-        m_pControl->Add(DATA_ITEM::ManagerSocket, &m_nManagerSocket);
+        auto event = make_shared<Events::RegisteConnectionEvent>(m_pManagerConnect->m_strAddress, m_pManagerConnect->m_nPort);
+        m_iC->SendMessage(event);
     }
 
-    res = m_pModuleInitializedFunc(m_nManagerSocket, m_pControl.get());
+    res = m_pModuleInitializedFunc(m_iC.get());
     if (res.IsFialed())
         m_pLog->Fatal(res.GetMessage());
     m_pLog->Debug("Module initialized succeed.");
@@ -339,7 +342,7 @@ CResult CSloongBaseService::RegisteNode()
 CResult CSloongBaseService::Run()
 {
     m_pLog->Info("Application begin running.");
-    m_pControl->SendMessage(EVENT_TYPE::ProgramStart);
+    m_iC->SendMessage(EVENT_TYPE::ProgramStart);
     m_emStatus = RUN_STATUS::Running;
     bool enableReport = false;
     if (enableReport)
@@ -360,7 +363,7 @@ CResult CSloongBaseService::Run()
             {
                 auto event = make_shared<Events::CSendPackageEvent>();
                 event->SetRequest(m_pManagerConnect->GetSocketID(), m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(), Base::PRIORITY_LEVEL::LOW_LEVEL, (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
-                m_pControl->SendMessage(event);
+                m_iC->SendMessage(event);
             }
 
             CUtility::RecordCPUStatus(prev_status.get());
@@ -380,10 +383,10 @@ void CSloongBaseService::Stop()
         return;
     m_pLog->Info("Application will exit.");
     m_emStatus = RUN_STATUS::Exit;
-    m_pControl->SendMessage(EVENT_TYPE::ProgramStop);
+    m_iC->SendMessage(EVENT_TYPE::ProgramStop);
 }
 
-void CSloongBaseService::OnRestart(SharedEvent event)
+void CSloongBaseService::OnProgramRestartEventHandler(SharedEvent event)
 {
     // Restart service. use the Exit Sync object, notify the wait thread and return the ExitResult.
     // in main function, check the result, if is Retry, do the init loop.
@@ -391,12 +394,30 @@ void CSloongBaseService::OnRestart(SharedEvent event)
     m_oExitSync.notify_all();
 }
 
-void CSloongBaseService::OnStop(SharedEvent event)
+void CSloongBaseService::OnProgramStopEventHandler(SharedEvent event)
 {
     m_oExitSync.notify_all();
-    m_pControl->Exit();
+    m_iC->Exit();
     m_pLog->End();
     CThreadPool::Exit();
     if (m_pModule)
         dlclose(m_pModule);
+}
+
+
+void CSloongBaseService::OnSendPackageToManagerEventHandler(SharedEvent e)
+{
+    auto event = dynamic_pointer_cast<SendPackageToManagerEvent>(e);
+    
+    auto req = make_shared<CSendPackageEvent>();
+    req->SetCallbackFunc([event](IEvent* e, CDataTransPackage* p){
+        event->CallCallbackFunc(p->GetDataPackage());
+    });
+    req->SetRequest( m_pManagerConnect->GetSocketID() , IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event->GetFunctionID() ,event->GetContent() );
+    m_iC->SendMessage(req);
+}
+
+
+void CSloongBaseService::OnGetManagerSocketEventHandler(SharedEvent e)
+{
 }

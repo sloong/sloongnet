@@ -7,13 +7,8 @@
  */
 #include "firewall.h"
 
-#include "NetworkEvent.hpp"
-
 #include "protocol/manager.pb.h"
 using namespace Manager;
-
-using namespace Sloong;
-using namespace Sloong::Events;
 
 
 unique_ptr<SloongNetFirewall> Sloong::SloongNetFirewall::Instance = nullptr;
@@ -34,7 +29,7 @@ extern "C" CResult EventPackageProcesser(CDataTransPackage* pack)
 	return CResult::Succeed();
 }
 
-extern "C" CResult NewConnectAcceptProcesser(ConnectSession* info)
+extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 {
 	return CResult::Succeed();
 }
@@ -57,8 +52,8 @@ extern "C" CResult CreateProcessEnvironment(void** out_env)
 
 CResult SloongNetFirewall::Initialized(IControl* ic)
 {
-	m_pControl = ic;
-	m_pControl->RegisterEventHandler(SocketClose, std::bind(&SloongNetFirewall::OnSocketClose, this, std::placeholders::_1));
+	m_iC = ic;
+	m_iC->RegisterEventHandler(SocketClose, std::bind(&SloongNetFirewall::OnSocketClose, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
