@@ -8,32 +8,32 @@
 
 #include "manager.h"
 #include "utility.h"
-#include "events/NetworkEvent.hpp"
+#include "events/ConnectionBreak.hpp"
 #include "fstream_ex.hpp"
 
 using namespace Sloong::Events;
 
 unique_ptr<SloongControlService> Sloong::SloongControlService::Instance = nullptr;
 
-extern "C" CResult RequestPackageProcesser(void *pEnv, CDataTransPackage *pack)
+extern "C" PackageResult RequestPackageProcesser(void *pEnv, DataPackage *pack)
 {
 	auto pServer = STATIC_TRANS<CServerManage *>(pEnv);
 	if (pServer)
 		return pServer->ProcessHandler(pack);
 	else
-		return CResult::Make_Error("Environment convert error. cannot process message.");
+		return PackageResult::Make_Error("Environment convert error. cannot process message.");
 }
 
-extern "C" CResult ResponsePackageProcesser(void *pEnv, CDataTransPackage *pack)
+extern "C" PackageResult ResponsePackageProcesser(void *pEnv, DataPackage *pack)
 {
 	auto pServer = STATIC_TRANS<CServerManage *>(pEnv);
 	if (pServer)
 		return pServer->ProcessHandler(pack);
 	else
-		return CResult::Make_Error("Environment convert error. cannot process message.");
+		return PackageResult::Make_Error("Environment convert error. cannot process message.");
 }
 
-extern "C" CResult EventPackageProcesser(CDataTransPackage *pack)
+extern "C" CResult EventPackageProcesser(DataPackage *pack)
 {
 	SloongControlService::Instance->EventPackageProcesser(pack);
 	return CResult::Succeed();
@@ -108,7 +108,7 @@ CResult SloongControlService::Initialized(IControl *iC)
 	IData::Initialize(iC);
 	m_pConfig = IData::GetGlobalConfig();
 	m_pLog = IData::GetLog();
-	m_iC->RegisterEventHandler(SocketClose, std::bind(&SloongControlService::OnSocketClose, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::ConnectionBreak, std::bind(&SloongControlService::OnConnectionBreak, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
@@ -123,12 +123,12 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG *config)
 	config->set_receivetime(3);
 }
 
-void Sloong::SloongControlService::OnSocketClose(SharedEvent event)
+void Sloong::SloongControlService::OnConnectionBreak(SharedEvent e)
 {
-	auto net_evt = DYNAMIC_TRANS<CNetworkEvent *>(event.get());
-	auto sock = net_evt->GetSocketID();
+	auto event = DYNAMIC_TRANS<ConnectionBreakEvent *>(e.get());
+	auto id = event->GetSessionID();
 	for (auto &item : m_listServerManage)
-		item->OnSocketClosed(sock);
+		item->OnSocketClosed(id);
 }
 
 inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(void **out_env)
@@ -142,7 +142,7 @@ inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(voi
 	return CResult::Succeed();
 }
 
-void Sloong::SloongControlService::EventPackageProcesser(CDataTransPackage *pack)
+void Sloong::SloongControlService::EventPackageProcesser(DataPackage *pack)
 {
 	m_pLog->Info("EventPackageProcesser is called.");
 }

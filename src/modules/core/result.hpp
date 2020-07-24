@@ -5,11 +5,21 @@
  * @LastEditTime: 2020-05-18 20:00:37
  * @Description: file content
  */
-#ifndef SLOONGNET_RESULT_H
-#define SLOONGNET_RESULT_H
+#pragma once
 
-#include "core.h"
+#include <queue>
+#include <vector>
+#include <string>
+#include <memory>
+#include <map>
+using namespace std;
+
+#include "protocol/base.pb.h"
+using namespace Base;
+
+#include "protocol/core.pb.h"
 using namespace Core;
+
 namespace Sloong
 {
     class CResult
@@ -66,23 +76,39 @@ namespace Sloong
     class TResult : public CResult
     {
     public:
+        TResult(ResultType res):CResult(res) {}
         TResult(ResultType res, const string& what):CResult(res,what){}
         TResult(ResultType res, const string& what, T result) :CResult(res, what) {
-            m_tResultObject = result;
+            m_HaveResultObject = true;
+            m_tResultObject = move(result);
         }
         inline T& GetResultObject() {
             return m_tResultObject;
         }
+        inline T MoveResultObject(){
+            return std::move(m_tResultObject);
+        }
+        inline bool HaveResultObject(){
+            return m_HaveResultObject;
+        }
+    public:
+        static inline TResult Succeed(){
+            return TResult(ResultType::Succeed);
+        }
+        static inline TResult Invalid(){
+            return TResult(ResultType::Invalid);
+        }
+        static inline TResult Ignore(){
+            return TResult(ResultType::Ignore);
+        }
         static inline TResult Make_Error(const string& what) {
             return TResult(ResultType::Error, what );
         }
-        static inline TResult Make_OK(T& result, const string& msg = "") {
-            return TResult(ResultType::Succeed, msg, result);
-        }
-        static inline TResult Make_OK(T&& result, const string& msg = "" ){
-            return TResult(ResultType::Succeed, msg, result);
+        static inline TResult Make_OK(T result, const string& msg = "") {
+            return TResult(ResultType::Succeed, msg, move(result));
         }
     protected:
+        bool m_HaveResultObject = false;
         T m_tResultObject;
     };
 
@@ -90,7 +116,5 @@ namespace Sloong
 	typedef TResult<std::pair<char*,int>> PResult;
     typedef TResult<string> SResult;
     typedef TResult<vector<string>> VStrResult;
+    typedef TResult<unique_ptr<DataPackage>> PackageResult;
 } // namespace  Sloong
-
-
-#endif

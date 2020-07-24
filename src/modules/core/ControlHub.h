@@ -114,9 +114,9 @@ namespace Sloong
 
 		void AddTempString(const string &key, const string &value)
 		{
-			m_oTempDataList[key] = new StringData( value);
+			m_oTempDataList[key] = make_shared<StringData>(value);
 		}
-		string GetTempString(const string &);
+		string GetTempString(const string &,bool = true);
 		inline bool ExistTempString(const string &key)
 		{
 			auto i = m_oTempDataList.try_get(key);
@@ -128,9 +128,9 @@ namespace Sloong
 
 		void AddTempObject(const string &key, const void *object, int size)
 		{
-			m_oTempDataList[key] = new ObjectData(const_cast<void *>(object), size);
+			m_oTempDataList[key] = make_shared<ObjectData>(const_cast<void *>(object), size);
 		}
-		void *GetTempObject(const string &, int *);
+		void *GetTempObject(const string &, int *,bool = true);
 		inline bool ExistTempObject(const string &key) 
 		{
 			auto i = m_oTempDataList.try_get(key);
@@ -142,7 +142,7 @@ namespace Sloong
 
 		void AddTempBytes(const string &key, unique_ptr<char[]> &bytes, int size)
 		{
-			m_oTempDataList[key] = new BytesData( bytes, size);
+			m_oTempDataList[key] = make_shared<BytesData>( bytes, size);
 		}
 
 		unique_ptr<char[]> GetTempBytes(const string &, int *);
@@ -157,9 +157,9 @@ namespace Sloong
 
 		void AddTempSharedPtr(const string &key, shared_ptr<void> ptr)
 		{
-			m_oTempDataList[key] = new SharedPtrData( ptr);
+			m_oTempDataList[key] = make_shared<SharedPtrData>( ptr);
 		}
-		shared_ptr<void> GetTempSharedPtr(const string &);
+		shared_ptr<void> GetTempSharedPtr(const string &,bool = true);
 		inline bool ExistTempSharedPtr(const string &key)
 		{
 			auto i = m_oTempDataList.try_get(key);
@@ -172,7 +172,7 @@ namespace Sloong
 	protected:
 		// Data
 		map<DATA_ITEM, void *> m_oDataList;
-		map_ex<string, TempDataItem *> m_oTempDataList;
+		map_ex<string, shared_ptr<TempDataItem>> m_oTempDataList;
 
 		// Message
 		map_ex<EVENT_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;

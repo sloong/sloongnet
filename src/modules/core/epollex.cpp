@@ -1,17 +1,24 @@
-// load system file
+/*** 
+ * @Author: Chuanbin Wang
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditTime: 2020-07-24 16:47:53
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/core/epollex.cpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: Epoll extend object. 
+ */
 
+// load system file
 #include "epollex.h"
 #include "EasyConnect.h"
 #include "ConnectSession.h"
 #include "IData.h"
+#include "utility.h"
 // System file
 #include <arpa/inet.h>
 #include <netdb.h>
 // for TCP_NODELAY
 #include <netinet/tcp.h>
-
-#include "events/NetworkEvent.hpp"
-using namespace Sloong::Events;
 
 Sloong::CEpollEx::CEpollEx()
 {
@@ -272,13 +279,6 @@ void Sloong::CEpollEx::MainWorkLoop()
 		}
 	}
 	m_pLog->Info("epoll work thread is exit " + spid);
-}
-
-void Sloong::CEpollEx::CloseConnectEventHandler(IEvent* event)
-{
-	auto net_evt = DYNAMIC_TRANS<CNetworkEvent*>(event);
-	auto socket = net_evt->GetSocketID();
-	DeleteMonitorSocket(socket);
 }
 
 void Sloong::CEpollEx::Exit()

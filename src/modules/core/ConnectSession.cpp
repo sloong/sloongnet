@@ -1,18 +1,25 @@
+/*** 
+ * @Author: Chuanbin Wang
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditTime: 2020-07-24 14:58:32
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/core/ConnectSession.cpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: Connect session object. 
+ */
+
 #include "ConnectSession.h"
-#include "DataTransPackage.h"
-#include "events/NetworkEvent.hpp"
+
 #include "IData.h"
-using namespace Sloong;
-using namespace Sloong::Universal;
-using namespace Sloong::Events;
+
 Sloong::ConnectSession::ConnectSession()
 {
-	m_pSendList = new queue_ex<UniqueTransPackage>[s_PriorityLevel]();
+	m_pSendList = new queue_ex<UniquePackage>[s_PriorityLevel]();
 }
 
 ConnectSession::~ConnectSession()
 {
-	if( m_pConnection)
+	if (m_pConnection)
 		m_pConnection->Close();
 	for (int i = 0; i < s_PriorityLevel; i++)
 	{
@@ -36,94 +43,138 @@ void Sloong::ConnectSession::Initialize(IControl *iMsg, UniqueConnection conn)
 	m_pConnection = std::move(conn);
 }
 
-ResultType Sloong::ConnectSession::SendDataPackage(UniqueTransPackage pack)
+size_t g_max_package_size = 5 * 1024 * 1024;
+
+bool IsOverflowPackage(DataPackage *pack)
 {
-	if (pack->GetConnection() == nullptr)
-		pack->SetConnection(this->m_pConnection.get());
-	// if have exdata, directly add to epoll list.
-	if (pack->IsBigPackage() || m_pSendingPackage != nullptr || (m_bIsSendListEmpty == false && !m_oPrepareSendList.empty()) || m_oSockSendMutex.try_lock() == false)
+	if (pack->extend().size() + pack->content().size() > g_max_package_size)
+		return true;
+	else
+		return false;
+}
+
+bool IsBigPackage(DataPackage *pack)
+{
+	if (pack->extend().size() > 0 || pack->content().size() > 500000)
+		return true;
+	else
+		return false;
+}
+
+ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
+{
+	if (IsOverflowPackage(pack.get()))
 	{
-		AddToSendList(std::move(pack));
+		m_pLog->Assert("The package size is to bigger, this's returned and replaced with an error message package.");
+		pack->set_result(ResultType::Error);
+		pack->set_content("The package size is to bigger.");
+		pack->clear_extend();
+	}
+
+	m_pLog->Debug(Helper::Format("SEND>>>[%d]>>No[%llu]>>[%d]byte", pack->priority(), pack->id(), pack->ByteSize()));
+
+	// if have exdata, directly add to epoll list.
+	if (IsBigPackage(pack.get()) || m_pConnection->IsSending() || (m_bIsSendListEmpty == false && !m_oPrepareSendList.empty()) || m_oSockSendMutex.try_lock() == false)
+	{
+		AddToSendList(move(pack));
 		return ResultType::Retry;
 	}
 
 	unique_lock<mutex> lck(m_oSockSendMutex, std::adopt_lock);
 	// if code run here. the all list is empty. and no have exdata. try send message
-	m_pSendingPackage = std::move(pack);
-	auto res = m_pSendingPackage->SendPackage();
+	auto res = m_pConnection->SendPackage(std::move(pack));
 	lck.unlock();
-	if (res == ResultType::Succeed)	{
-		m_pSendingPackage = nullptr;
+	if (res.GetResult() == ResultType::Succeed)
+	{
 		return ResultType::Succeed;
-	}else if( res == ResultType::Error)
+	}
+	else if (res.GetResult() == ResultType::Error)
 	{
 		m_pLog->Warn(Helper::Format("Send data failed.[%s]", m_pConnection->m_strAddress.c_str()));
 		return ResultType::Error;
-	}else if (res == ResultType::Retry)
+	}
+	else if (res.GetResult() == ResultType::Retry)
 	{
-		m_pLog->Verbos(Helper::Format("Send data done. wait next send time.[%d/%d]", m_pSendingPackage->GetPackageSize(), m_pSendingPackage->GetSentSize()));
+		m_pLog->Verbos(Helper::Format("Send data done. wait next send time.[%d/%d]", m_pConnection->m_SendPackageSize, m_pConnection->m_SentSize));
 		return ResultType::Retry;
-	}else{
-		m_pLog->Error(Helper::Format("Unintended result[%s] in SendDataPackage in SockInfo.",ResultType_Name(res)));
+	}
+	else
+	{
+		m_pLog->Error(Helper::Format("Unintended result[%s] in SendDataPackage in SockInfo.", ResultType_Name(res.GetResult())));
 		return ResultType::Error;
 	}
 }
 
-void Sloong::ConnectSession::AddToSendList(UniqueTransPackage pack)
+void Sloong::ConnectSession::AddToSendList(UniquePackage pack)
 {
 	m_oPrepareSendList.push_move(std::move(pack));
 	m_pLog->Debug(Helper::Format("Add send package to prepare send list. list size:[%d]", m_oPrepareSendList.size()));
 	m_bIsSendListEmpty = false;
 }
 
-ResultType Sloong::ConnectSession::OnDataCanReceive(queue<UniqueTransPackage> &readList)
+ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 {
 	unique_lock<mutex> srlck(m_oSockReadMutex, std::adopt_lock);
 
-	// 已经连接的用户,收到数据,可以开始读入
+	ReceivePackageList readList;
 	bool bLoop = false;
 	do
 	{
-		UniqueTransPackage pack = nullptr;
-		if (m_pReceiving == nullptr)
-			pack = make_unique<CDataTransPackage>(m_pConnection.get());
-		else
-			pack = std::move(m_pReceiving);
-
-		auto res = pack->RecvPackage();
-		if (res == ResultType::Succeed)
+		auto res = m_pConnection->RecvPackage();
+		if (res.GetResult() == ResultType::Succeed)
 		{
-			bLoop = true;
-			m_ActiveTime = time(NULL);
-			readList.push(std::move(pack));
-		} else if (res == ResultType::Warning && bLoop)
+			auto package = res.MoveResultObject();
+
+			if (IsOverflowPackage(package.get()))
+			{
+				m_pLog->Warn("The package size is to bigger.");
+				AddToSendList(Package::MakeErrorResponse(package.get(),"The package size is to bigger."));
+			}
+			else
+			{
+				m_pLog->Debug(Helper::Format("RECV<<<[%d]<<No[%llu]<<[%d]byte", package->priority(), package->id(), package->ByteSize()));
+				package->add_clocks(GetClock());
+
+				if (package->priority() > s_PriorityLevel || package->priority() < 0)
+				{
+					m_pLog->Error(Helper::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", package->priority(), s_PriorityLevel));
+					package->set_priority(s_PriorityLevel);
+				}
+				if (package->hash().length() > 0)
+				{
+					m_pLog->Warn("Now don't support hash check, So the hash string will ignored.");
+				}
+
+				bLoop = true;
+				m_ActiveTime = time(NULL);
+				readList.push(std::move(package));
+			}
+		}
+		else if (res.GetResult() == ResultType::Warning && bLoop)
 		{
 			// Receive data pageage length return 11(EAGAIN) error. so if in bLoop mode, this is OK.
-			return ResultType::Succeed;
+			break;
 		}
-		else if(res == ResultType::Retry)
+		else if (res.GetResult() == ResultType::Retry)
 		{
-			m_pReceiving = std::move(pack);
-			return res;
+			// Package is no receive done. need receive in next time.
+			m_pLog->Verbos(res.GetMessage());
+			break;
 		}
-		else if (res == ResultType::Error && !bLoop)
+		else if (res.GetResult() == ResultType::Error && !bLoop)
+		{
 			// Receive error, this connect weill be closed.
-			return ResultType::Error;
-		else if (res == ResultType::Invalid)
+			return ReceivePackageListResult::Make_Error(res.GetMessage());
+		}
+		else
 		{
-			// The data package is invalid(Hash check error.)
-			auto event = make_unique<CNetworkEvent>(EVENT_TYPE::MonitorSendStatus);
-			event->SetSocketID(m_pConnection->GetSocketID());
-			m_iC->SendMessage(std::move(event));
-			AddToSendList(std::move(pack));
-		}else
-		{
-			m_pLog->Error(Helper::Format("Unintended result[%s].Loop[%s].",ResultType_Name(res),bLoop?"true":"false"));
+			m_pLog->Error(Helper::Format("Unintended result[%s].Loop[%s].", ResultType_Name(res.GetResult()), bLoop ? "true" : "false"));
+			break;
 		}
 	} while (bLoop);
 
 	srlck.unlock();
-	return ResultType::Succeed;
+	return ReceivePackageListResult::Make_OK(std::move(readList));
 }
 
 ResultType Sloong::ConnectSession::OnDataCanSend()
@@ -135,35 +186,37 @@ ResultType Sloong::ConnectSession::OnDataCanSend()
 void Sloong::ConnectSession::ProcessPrepareSendList()
 {
 	// progress the prepare send list first
-	UniqueTransPackage pack = nullptr;
-	while (m_oPrepareSendList.TryMovePop(pack))
+	auto pack = m_oPrepareSendList.TryMovePop();
+	while (pack != nullptr)
 	{
-		auto priority = pack->GetPriority();
+		auto priority = pack->priority();
 		m_pSendList[priority].push_move(std::move(pack));
 		m_pLog->Debug(Helper::Format("Add package to send list[%d]. send list size[%d], prepare send list size[%d]",
 									 priority, m_pSendList[priority].size(), m_oPrepareSendList.size()));
+
+		pack = m_oPrepareSendList.TryMovePop();
 	}
 }
 
 ResultType Sloong::ConnectSession::ProcessSendList()
 {
 	unique_lock<mutex> srlck(m_oSockSendMutex, std::adopt_lock);
-	if (m_pSendingPackage != nullptr)
+	if (m_pConnection->IsSending())
 	{
-		auto res = m_pSendingPackage->SendPackage();
-		if (res == ResultType::Error)
+		m_pLog->Debug(Helper::Format("Start send package : AllSize[%d],Sent[%d]", m_pConnection->m_SendPackageSize, m_pConnection->m_SentSize));
+		auto res = m_pConnection->SendPackage(nullptr);
+		if (res.GetResult() == ResultType::Error)
 		{
 			m_pLog->Error(Helper::Format("Send data package error. close connect:[%s:%d]", m_pConnection->m_strAddress.c_str(), m_pConnection->m_nPort));
 			return ResultType::Error;
 		}
-		else if (res == ResultType::Retry)
+		else if (res.GetResult() == ResultType::Retry)
 		{
-			m_pLog->Debug(Helper::Format("Send data package done but not all data is send All[%d]:Sent[%d]. wait next write sign.", m_pSendingPackage->GetPackageSize(), m_pSendingPackage->GetSentSize()));
+			m_pLog->Debug(Helper::Format("Send data package done but not all data is send All[%d]:Sent[%d]. wait next write sign.", m_pConnection->m_SendPackageSize, m_pConnection->m_SentSize));
 			return ResultType::Retry;
 		}
 		else
 		{
-			m_pSendingPackage = nullptr;
 		}
 	}
 
@@ -178,26 +231,27 @@ ResultType Sloong::ConnectSession::ProcessSendList()
 			return ResultType::Succeed;
 		}
 
-		while (list->TryMovePop(m_pSendingPackage))
+		auto pack = list->TryMovePop();
+		if (pack == nullptr)
+			return ResultType::Retry;
+
+		m_pLog->Debug(Helper::Format("Send new package, the list size[%d],Size[%d],", list->size(), pack->ByteSize()));
+		auto res = m_pConnection->SendPackage(move(pack));
+
+		if (res.GetResult() == ResultType::Error)
 		{
-			m_pLog->Debug(Helper::Format("Send new package, the list size[%d]", list->size()));
-			auto res = m_pSendingPackage->SendPackage();
-			if (res == ResultType::Error)
-			{
-				m_pLog->Error(Helper::Format("Send data package error. close connect:[%s:%d]", m_pConnection->m_strAddress.c_str(), m_pConnection->m_nPort));
-				return ResultType::Error;
-			}
-			else if (res == ResultType::Retry)
-			{
-				m_pLog->Debug(Helper::Format("Send data package done but not all data is send All[%d]:Sent[%d]. wait next write sign.", m_pSendingPackage->GetPackageSize(), m_pSendingPackage->GetSentSize()));
-				bTrySend = false;
-				return ResultType::Retry;
-			}
-			else
-			{
-				m_pSendingPackage = nullptr;
-				bTrySend = true;
-			}
+			m_pLog->Error(Helper::Format("Send data package error. close connect:[%s:%d]", m_pConnection->m_strAddress.c_str(), m_pConnection->m_nPort));
+			return ResultType::Error;
+		}
+		else if (res.GetResult() == ResultType::Retry)
+		{
+			m_pLog->Debug(Helper::Format("Send data package done but not all data is send All[%d]:Sent[%d]. wait next write sign.", m_pConnection->m_SendPackageSize, m_pConnection->m_SentSize));
+			bTrySend = false;
+			return ResultType::Retry;
+		}
+		else
+		{
+			bTrySend = true;
 		}
 	}
 	return ResultType::Error;
@@ -206,7 +260,7 @@ ResultType Sloong::ConnectSession::ProcessSendList()
 /// 获取发送信息列表
 // 首先判断上次发送标志，如果不为-1，表示上次的发送列表没有发送完成。直接返回指定的列表
 // 如果为-1，表示需要发送新的列表。按照优先级逐级的进行寻找。
-queue_ex<UniqueTransPackage> *Sloong::ConnectSession::GetSendPackage()
+queue_ex<UniquePackage> *Sloong::ConnectSession::GetSendPackage()
 {
 	for (int i = 0; i < s_PriorityLevel; i++)
 	{

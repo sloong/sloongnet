@@ -10,7 +10,6 @@
 #include "protocol/core.pb.h"
 namespace Sloong
 {
-	class CDataTransPackage;
 	namespace Events
 	{
 		class SendPackageEvent : public NormalEvent
@@ -21,14 +20,14 @@ namespace Sloong
 			}
 			virtual	~SendPackageEvent(){}
 
-			inline void SetCallbackFunc(std::function<void(IEvent*,CDataTransPackage*)> p){ m_pCallback = p; }
-			inline void CallCallbackFunc(CDataTransPackage* p){ 
+			inline void SetCallbackFunc(std::function<void(IEvent*,DataPackage*)> p){ m_pCallback = p; }
+			inline void CallCallbackFunc(DataPackage* p){ 
 				if(m_pCallback) 
 					m_pCallback(this,p); 
 			}
 			inline bool HaveCallbackFunc(){ return m_pCallback != nullptr; }
 			
-			void SetRequest( uint64_t sender, uint64_t serialnumber, int32_t priority, int32_t func, string content,  string extend = "", DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_RequestPackage)
+			void SetRequest( uint64_t sender, uint64_t serialnumber, int32_t priority, int32_t func, string content,  string extend = "", DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_NormalPackage)
 			{
 				m_pData = make_unique<DataPackage>();
 				m_pData->set_sender(sender);
@@ -55,7 +54,7 @@ namespace Sloong
 		protected:
 			int64_t m_ConnectionHashCode = 0;
 			unique_ptr<DataPackage> m_pData = nullptr;
-			std::function<void(IEvent*,CDataTransPackage*)>		m_pCallback = nullptr;
+			std::function<void(IEvent*,DataPackage*)>		m_pCallback = nullptr;
 		};
 
 	}

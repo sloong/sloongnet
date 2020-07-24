@@ -15,29 +15,29 @@ using namespace Sloong::Events;
 
 unique_ptr<LuaMiddleLayer> Sloong::LuaMiddleLayer::Instance = nullptr;
 
-extern "C" CResult RequestPackageProcesser(void *pEnv, CDataTransPackage *pack)
+extern "C" PackageResult RequestPackageProcesser(void *pEnv, DataPackage *pack)
 {
 	auto pProcess = STATIC_TRANS<CLuaProcessCenter *>(pEnv);
 	if (!pProcess)
 	{
 		LuaMiddleLayer::Instance->GetLog()->Error("Environment convert error. cannot process message.");
-		return CResult::Invalid();
+		return PackageResult::Invalid();
 	}
 	return LuaMiddleLayer::Instance->RequestPackageProcesser(pProcess, pack);
 }
 
-extern "C" CResult ResponsePackageProcesser(void *pEnv, CDataTransPackage *pack)
+extern "C" PackageResult ResponsePackageProcesser(void *pEnv, DataPackage *pack)
 {
 	auto pProcess = STATIC_TRANS<CLuaProcessCenter *>(pEnv);
 	if (!pProcess)
 	{
 		LuaMiddleLayer::Instance->GetLog()->Error("Environment convert error. cannot process message.");
-		return CResult::Invalid();
+		return PackageResult::Invalid();
 	}
 	return LuaMiddleLayer::Instance->ResponsePackageProcesser(pProcess, pack);
 }
 
-extern "C" CResult EventPackageProcesser(CDataTransPackage *pack)
+extern "C" CResult EventPackageProcesser(DataPackage *pack)
 {
 	LuaMiddleLayer::Instance->EventPackageProcesser(pack);
 	return CResult::Succeed();
@@ -74,27 +74,26 @@ CResult LuaMiddleLayer::Initialized(IControl *iC)
 	{
 		return CResult::Make_Error("No set module config. cannot go on.");
 	}
-	m_iC->RegisterEventHandler(SocketClose, std::bind(&LuaMiddleLayer::OnSocketClose, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::ConnectionBreak, std::bind(&LuaMiddleLayer::OnConnectionBreak, this, std::placeholders::_1));
 	return CGlobalFunction::Instance->Initialize(m_iC);
 }
 
-CResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter *pProcess, CDataTransPackage *pack)
+PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter *pProcess, DataPackage *pack)
 {
-	auto msg = pack->GetDataPackage();
 	CLuaPacket *info = nullptr;
-	if (!m_mapUserInfoList.exist(msg->sender()))
-		m_mapUserInfoList[msg->sender()] = make_unique<CLuaPacket>();
+	if (!m_mapUserInfoList.exist(pack->sender()))
+		m_mapUserInfoList[pack->sender()] = make_unique<CLuaPacket>();
 
-	info = m_mapUserInfoList[msg->sender()].get();
-	auto function = msg->function();
-	auto& content =msg->content();
-	auto& extend = msg->extend();
+	info = m_mapUserInfoList[pack->sender()].get();
+	auto function = pack->function();
+	auto& content =pack->content();
+	auto& extend = pack->extend();
 	m_pLog->Verbos(Helper::Format("Request [%d]:[%d][%d]", function, content.length(), extend.length()));
 	auto res = pProcess->MsgProcess(function, info, content, extend);
 	if( res.IsFialed() )
 	{
 		m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%s].", function, ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
-		pack->ResponsePackage(res);
+		return PackageResult::Make_OK(Package::MakeResponse(pack,res));
 	}
 	else
 	{
@@ -107,37 +106,36 @@ CResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter *pProc
 				int size = 0;
 				auto ptr = m_iC->GetTempBytes(extendUUID, &size);
 				m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length(), size));
-				pack->ResponsePackage(res.GetResult(), content,ptr.get(), size);
+				return PackageResult::Make_OK(Package::MakeResponse(pack,res.GetResult(), content, ptr.get(), size));
 			}
 			else if (m_iC->ExistTempString(extendUUID))
 			{
 				auto extend = m_iC->GetTempString(extendUUID);
 				m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length(), extend.length()));
-				pack->ResponsePackage(res.GetResult(), content, extend);
+				return PackageResult::Make_OK(Package::MakeResponse(pack,res.GetResult(), content, extend));
 			}
 			else
 			{
 				m_pLog->Error(Helper::Format("Response [%d]:[%s][%d][Message is required an extend UUID. but not find in IControl. Ignore.]", function, ResultType_Name(res.GetResult()).c_str(), content.length()));
-				pack->ResponsePackage(res.GetResult(),content);
+				return PackageResult::Make_OK(Package::MakeResponse(pack,res));
 			}
 		}
 		else
 		{
 			m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length()));
-			pack->ResponsePackage(res);
+			return PackageResult::Make_OK(Package::MakeResponse(pack,res));
 		}
 	}
-	return CResult::Succeed();
 }
 
-CResult Sloong::LuaMiddleLayer::ResponsePackageProcesser(CLuaProcessCenter *pProcess, CDataTransPackage *pack)
+PackageResult Sloong::LuaMiddleLayer::ResponsePackageProcesser(CLuaProcessCenter *pProcess, DataPackage *pack)
 {
 	m_pLog->Info("ResponsePackageProcesser event");
 
-	return CResult::Succeed();
+	return PackageResult::Succeed();
 }
 
-void Sloong::LuaMiddleLayer::OnSocketClose(SharedEvent event)
+void Sloong::LuaMiddleLayer::OnConnectionBreak(SharedEvent event)
 {
 }
 
@@ -153,7 +151,7 @@ inline CResult Sloong::LuaMiddleLayer::CreateProcessEnvironmentHandler(void **ou
 }
 
 
-void Sloong::LuaMiddleLayer::OnReferenceModuleOnlineEvent(const string &str_req, CDataTransPackage *trans_pack)
+void Sloong::LuaMiddleLayer::OnReferenceModuleOnlineEvent(const string &str_req, DataPackage *trans_pack)
 {
 	m_pLog->Info("Receive ReferenceModuleOnline event");
 	/*auto req = ConvertStrToObj<Manager::EventReferenceModuleOnline>(str_req);
@@ -165,18 +163,17 @@ void Sloong::LuaMiddleLayer::OnReferenceModuleOnlineEvent(const string &str_req,
 	AddConnection(item.uuid(), item.address(), item.port());*/
 }
 
-void Sloong::LuaMiddleLayer::OnReferenceModuleOfflineEvent(const string &str_req, CDataTransPackage *trans_pack)
+void Sloong::LuaMiddleLayer::OnReferenceModuleOfflineEvent(const string &str_req, DataPackage *trans_pack)
 {
 	m_pLog->Info("Receive ReferenceModuleOffline event");
 }
 
-void Sloong::LuaMiddleLayer::EventPackageProcesser(CDataTransPackage *trans_pack)
+void Sloong::LuaMiddleLayer::EventPackageProcesser(DataPackage *pack)
 {
-	auto data_pack = trans_pack->GetDataPackage();
-	auto event = (Manager::Events)data_pack->function();
+	auto event = (Manager::Events)pack->function();
 	if (!Manager::Events_IsValid(event))
 	{
-		m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]", data_pack->content().c_str()));
+		m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]", pack->content().c_str()));
 		return;
 	}
 
@@ -184,12 +181,12 @@ void Sloong::LuaMiddleLayer::EventPackageProcesser(CDataTransPackage *trans_pack
 	{
 	case Manager::Events::ReferenceModuleOnline:
 	{
-		OnReferenceModuleOnlineEvent(data_pack->content(), trans_pack);
+		OnReferenceModuleOnlineEvent(pack->content(), pack);
 	}
 	break;
 	case Manager::Events::ReferenceModuleOffline:
 	{
-		OnReferenceModuleOfflineEvent(data_pack->content(), trans_pack);
+		OnReferenceModuleOfflineEvent(pack->content(), pack);
 	}
 	break;
 	default:

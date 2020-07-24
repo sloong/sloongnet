@@ -2,8 +2,8 @@
 #include "gateway.h"
 #include "utility.h"
 #include "IData.h"
-#include "events/SendPackageToManagerEvent.hpp"
-#include "events/RegisteConnectionEvent.hpp"
+#include "events/SendPackageToManager.hpp"
+#include "events/RegisteConnection.hpp"
 using namespace Sloong;
 using namespace Sloong::Events;
 
@@ -14,31 +14,35 @@ using namespace Manager;
 
 unique_ptr<SloongNetGateway> Sloong::SloongNetGateway::Instance = nullptr;
 
-extern "C" CResult RequestPackageProcesser(void *env, CDataTransPackage *pack)
+extern "C" PackageResult RequestPackageProcesser(void *env, DataPackage *pack)
 {
 	auto pTranspond = STATIC_TRANS<GatewayTranspond*>(env);
 	if( pTranspond)
 		return pTranspond->RequestPackageProcesser(pack);
 	else
-		return CResult::Make_Error("RequestPackageProcesser error, Environment convert failed.");
+		return PackageResult::Make_Error("RequestPackageProcesser error, Environment convert failed.");
 }
 
-extern "C" CResult ResponsePackageProcesser(void *env, CDataTransPackage *pack)
+extern "C" PackageResult ResponsePackageProcesser(void *env, DataPackage *pack)
 {
-	auto num = pack->GetSerialNumber();
+	auto num = pack->id();
 	if( SloongNetGateway::Instance->m_mapSerialToRequest.exist(num) )
 	{
 		auto pTranspond = STATIC_TRANS<GatewayTranspond*>(env);
 		if( pTranspond)
-			return pTranspond->ResponsePackageProcesser(&SloongNetGateway::Instance->m_mapSerialToRequest[num],pack);
+		{
+			auto info = move(SloongNetGateway::Instance->m_mapSerialToRequest[num]);
+			SloongNetGateway::Instance->m_mapSerialToRequest.erase(num);
+			return pTranspond->ResponsePackageProcesser(move(info),pack);
+		}
 		else
-			return CResult::Make_Error("ResponsePackageProcesser error, Environment convert failed.");
+			return PackageResult::Make_Error("ResponsePackageProcesser error, Environment convert failed.");
 	}
 
 	return SloongNetGateway::Instance->ResponsePackageProcesser(pack);
 }
 
-extern "C" CResult EventPackageProcesser(CDataTransPackage *pack)
+extern "C" CResult EventPackageProcesser(DataPackage *pack)
 {
 	SloongNetGateway::Instance->EventPackageProcesser(pack);
 	return CResult::Succeed();
@@ -86,15 +90,14 @@ CResult SloongNetGateway::Initialized(SOCKET sock, IControl *iC)
 	}
 	m_nManagerConnection = sock;
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
-	m_iC->RegisterEventHandler(EVENT_TYPE::SocketClose, std::bind(&SloongNetGateway::OnSocketClose, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
 
-CResult SloongNetGateway::ResponsePackageProcesser( CDataTransPackage *trans_pack)
+PackageResult SloongNetGateway::ResponsePackageProcesser( DataPackage *trans_pack)
 {
 	m_pLog->Error("ResponsePackageProcesser no find the package.");
-	return CResult::Make_Error("ResponsePackageProcesser no find the package.");
+	return PackageResult::Make_Error("ResponsePackageProcesser no find the package.");
 }
 
 
@@ -189,12 +192,7 @@ void SloongNetGateway::OnStart(SharedEvent evt)
 	QueryReferenceInfo();
 }
 
-void Sloong::SloongNetGateway::OnSocketClose(SharedEvent event)
-{
-
-}
-
-void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_req, CDataTransPackage *trans_pack)
+void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_req, DataPackage *trans_pack)
 {
 	m_pLog->Info("Receive ReferenceModuleOnline event");
 	auto req = ConvertStrToObj<Manager::EventReferenceModuleOnline>(str_req);
@@ -206,7 +204,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_re
 	AddConnection(item.uuid(), item.address(), item.port());
 }
 
-void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_req, CDataTransPackage *trans_pack)
+void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_req, DataPackage *trans_pack)
 {
 	m_pLog->Info("Receive ReferenceModuleOffline event");
 	auto req = ConvertStrToObj<Manager::EventReferenceModuleOffline>(str_req);
@@ -217,10 +215,9 @@ void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_r
 	m_mapUUIDToNode.erase(uuid);
 }
 
-void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pack)
+void Sloong::SloongNetGateway::EventPackageProcesser(DataPackage *pack)
 {
-	auto data_pack = trans_pack->GetDataPackage();
-	auto event = (Manager::Events)data_pack->function();
+	auto event = (Manager::Events)pack->function();
 	if (!Manager::Events_IsValid(event))
 	{
 		m_pLog->Error(Helper::Format("EventPackageProcesser is called.but the fucntion[%d] check error.", event));
@@ -231,12 +228,12 @@ void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pa
 	{
 	case Manager::Events::ReferenceModuleOnline:
 	{
-		OnReferenceModuleOnlineEvent(data_pack->content(), trans_pack);
+		OnReferenceModuleOnlineEvent(pack->content(), pack);
 	}
 	break;
 	case Manager::Events::ReferenceModuleOffline:
 	{
-		OnReferenceModuleOfflineEvent(data_pack->content(), trans_pack);
+		OnReferenceModuleOfflineEvent(pack->content(), pack);
 	}
 	break;
 	default:

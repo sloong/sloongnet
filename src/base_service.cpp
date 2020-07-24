@@ -10,9 +10,9 @@
 #include "utility.h"
 #include "snowflake.h"
 
-#include "events/SendPackageEvent.hpp"
-#include "events/SendPackageToManagerEvent.hpp"
-#include "events/RegisteConnectionEvent.hpp"
+#include "events/SendPackage.hpp"
+#include "events/SendPackageToManager.hpp"
+#include "events/RegisteConnection.hpp"
 using namespace Sloong::Events;
 
 #include "protocol/manager.pb.h"
@@ -61,9 +61,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
     int64_t uuid = 0;
     while (true)
     {
-        CDataTransPackage dataPackage(m_pManagerConnect.get());
-        auto req = dataPackage.GetDataPackage();
-        req->set_type(DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+        auto req = Package::GetRequestPackage();
         req->set_function(Manager::Functions::RegisteWorker);
         req->set_sender(uuid);
         if (forceTempID > 0)
@@ -72,14 +70,12 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
             sub_req.set_forcetargettemplateid(forceTempID);
             req->set_content(ConvertObjToStr(&sub_req));
         }
-        dataPackage.RequestPackage();
-        ResultType result = dataPackage.SendPackage();
-        if (result != ResultType::Succeed)
+        if (m_pManagerConnect->SendPackage(move(req)).IsFialed())
             return CResult::Make_Error("Send get config request error.");
-        result = dataPackage.RecvPackage(true);
-        if (result != ResultType::Succeed)
+        auto res = m_pManagerConnect->RecvPackage(true);
+        if (res.IsFialed())
             return CResult::Make_Error("Receive get config result error.");
-        auto response = dataPackage.GetDataPackage();
+        auto response = res.MoveResultObject();
         if (!response)
             return CResult::Make_Error("Parse the get config response data error.");
 
@@ -174,7 +170,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     pConfig->set_logoperation(pConfig->logoperation() | LOGOPT::WriteToSTDOut);
 #endif
     m_pLog->Initialize(pConfig->logpath(), "", LOGOPT(pConfig->logoperation()), LOGLEVEL(pConfig->loglevel()), LOGTYPE::DAY);
-    CDataTransPackage::InitializeLog(m_pLog.get());
+
     res = InitModule();
     if (res.IsFialed())
         return res;
@@ -317,25 +313,22 @@ CResult CSloongBaseService::RegisteNode()
     RegisteNodeRequest req_pack;
     req_pack.set_templateid(m_oServerConfig.templateid());
 
-    CDataTransPackage dataPackage(m_pManagerConnect.get());
-    auto req = dataPackage.GetDataPackage();
-    req->set_type(DataPackage_PackageType::DataPackage_PackageType_RequestPackage);
+    auto req = Package::GetRequestPackage();
     req->set_function(Manager::Functions::RegisteNode);
     req->set_sender(m_oServerConfig.nodeuuid());
     req->set_content(ConvertObjToStr(&req_pack));
-    dataPackage.RequestPackage();
 
-    ResultType result = dataPackage.SendPackage();
-    if (result != ResultType::Succeed)
-        return CResult::Make_Error("Send RegisteNode request error.");
-    result = dataPackage.RecvPackage(true);
-    if (result != ResultType::Succeed)
-        return CResult::Make_Error(" Get RegisteNode result error.");
-    auto response = dataPackage.GetDataPackage();
-    if (!response)
+    auto result = m_pManagerConnect->SendPackage(move(req));
+    if (result.IsFialed())
+        return CResult::Make_Error("Send RegisteNode request error." + result.GetMessage());
+    auto response = m_pManagerConnect->RecvPackage(true);
+    if (response.IsFialed())
+        return CResult::Make_Error(" Get RegisteNode result error." + response.GetMessage());
+    auto response_package = response.MoveResultObject();
+    if (!response_package)
         return CResult::Make_Error("Parse the get config response data error.");
-    if (response->result() != ResultType::Succeed)
-        return CResult::Make_Error(Helper::Format("RegisteNode request return error. message: %s", response->content().c_str()));
+    if (response_package->result() != ResultType::Succeed)
+        return CResult::Make_Error(Helper::Format("RegisteNode request return error. message: %s", response_package->content().c_str()));
     return CResult::Succeed();
 }
 
@@ -410,8 +403,8 @@ void CSloongBaseService::OnSendPackageToManagerEventHandler(SharedEvent e)
     auto event = dynamic_pointer_cast<SendPackageToManagerEvent>(e);
     
     auto req = make_shared<SendPackageEvent>(m_pManagerConnect->GetHashCode() );
-    req->SetCallbackFunc([event](IEvent* e, CDataTransPackage* p){
-        event->CallCallbackFunc(p->GetDataPackage());
+    req->SetCallbackFunc([event](IEvent* e, DataPackage* p){
+        event->CallCallbackFunc(p);
     });
     req->SetRequest(  IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event->GetFunctionID() ,event->GetContent() );
     m_iC->SendMessage(req);

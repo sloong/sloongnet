@@ -3,15 +3,17 @@
 #include "ConnectSession.h"
 #include "IData.h"
 
-#include "events/NetworkEvent.hpp"
-#include "events/SendPackageEvent.hpp"
-#include "events/RegisteConnectionEvent.hpp"
+#include "events/SendPackage.hpp"
+#include "events/ConnectionBreak.hpp"
+#include "events/MonitorSendStatus.hpp"
+#include "events/RegisteConnection.hpp"
+#include "events/GetConnectionInfo.hpp"
 using namespace Sloong::Events;
 
 Sloong::CNetworkHub::CNetworkHub()
 {
 	m_pEpoll = make_unique<CEpollEx>();
-	m_pWaitProcessList = new queue_ex<UniqueTransPackage>[s_PriorityLevel]();
+	m_pWaitProcessList = new queue_ex<UniquePackage>[s_PriorityLevel]();
 }
 
 Sloong::CNetworkHub::~CNetworkHub()
@@ -51,9 +53,10 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&CNetworkHub::Run, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStop, std::bind(&CNetworkHub::Exit, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::SendPackage, std::bind(&CNetworkHub::SendPackageEventHandler, this, std::placeholders::_1));
-	m_iC->RegisterEventHandler(EVENT_TYPE::SocketClose, std::bind(&CNetworkHub::CloseConnectEventHandler, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::ConnectionBreak, std::bind(&CNetworkHub::OnConnectionBreakEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::MonitorSendStatus, std::bind(&CNetworkHub::MonitorSendStatusEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::RegisteConnection, std::bind(&CNetworkHub::RegisteConnectionEventHandler, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::GetConnectionInfo, std::bind(&CNetworkHub::OnGetConnectionInfoEventHandler, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
@@ -93,71 +96,75 @@ void Sloong::CNetworkHub::SendPackageEventHandler(SharedEvent event)
 		m_pLog->Error(Helper::Format("SendPackageEventHandler function called, but the session[%lld] is no regiestd in NetworkHub.", socket));
 		return;
 	}
-	auto info = m_mapHashToConnectSession[id].get();
+
 	if (send_evt->HaveCallbackFunc())
 		m_iC->AddTempSharedPtr(Helper::ntos(send_evt->GetDataPackage()->id()), event);
 
-	auto transPack = make_unique<CDataTransPackage>(info->m_pConnection.get());
-	transPack->RequestPackage(*send_evt->GetDataPackage());
-
-	AddMessageToSendList(transPack);
+	AddMessageToSendList(send_evt->MoveDataPackage());
 }
 
-void Sloong::CNetworkHub::AddMessageToSendList(UniqueTransPackage &pack)
+void Sloong::CNetworkHub::AddMessageToSendList(UniquePackage pack)
 {
-	int socket = pack->GetSocketID();
-	if (!m_mapSocketIDToHash.exist(socket))
+	auto sessionid = pack->sessionid();
+	if (!m_mapHashToConnectSession.exist(sessionid))
 	{
-		m_pLog->Error(Helper::Format("AddMessageToSendList function called, but the socket[%d] is no regiestd in NetworkHub.", socket));
+		m_pLog->Error(Helper::Format("AddMessageToSendList function called, but the session[%lld] is no regiestd in NetworkHub.", sessionid));
 		return;
 	}
 
-	auto info = m_mapHashToConnectSession[m_mapSocketIDToHash[socket]].get();
-	auto res = info->SendDataPackage(std::move(pack));
+	auto session = m_mapHashToConnectSession[sessionid].get();
+	auto res = session->SendDataPackage(std::move(pack));
 	if (res == ResultType::Retry)
 	{
-		m_pEpoll->MonitorSendStatus(socket);
+		m_pEpoll->MonitorSendStatus(sessionid);
 	}
 	if (res == ResultType::Error)
 	{
-		SendCloseConnectEvent(socket);
+		SendConnectionBreak(sessionid);
 	}
 }
 
-void Sloong::CNetworkHub::CloseConnectEventHandler(SharedEvent event)
+void Sloong::CNetworkHub::OnConnectionBreakEventHandler(SharedEvent e)
 {
-	auto net_evt = DYNAMIC_TRANS<CNetworkEvent *>(event.get());
-	auto id = net_evt->GetSocketID();
-	if (!m_mapSocketIDToHash.exist(id))
+	auto event = DYNAMIC_TRANS<ConnectionBreakEvent *>(e.get());
+	auto id = event->GetSessionID();
+	if (!m_mapHashToConnectSession.exist(id))
 		return;
 
-	auto hash_id = m_mapSocketIDToHash[id];
-	auto info = m_mapHashToConnectSession[hash_id].get();
+	auto info = m_mapHashToConnectSession[id].get();
 	m_pLog->Info(Helper::Format("close connect:%s:%d.", info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
-	m_pEpoll->DeleteMonitorSocket(id);
+	auto socket = info->m_pConnection->GetSocketID();
+
 	unique_lock<mutex> sockLck(m_oSockListMutex);
-	m_mapHashToConnectSession.erase(hash_id);
-	m_mapSocketIDToHash.erase(id);
+	m_mapHashToConnectSession.erase(id);
 	sockLck.unlock();
+
+	m_pEpoll->DeleteMonitorSocket(socket);
 }
 
-void Sloong::CNetworkHub::MonitorSendStatusEventHandler(SharedEvent event)
+void Sloong::CNetworkHub::MonitorSendStatusEventHandler(SharedEvent e)
 {
-	auto net_evt = DYNAMIC_TRANS<CNetworkEvent *>(event.get());
-	m_pEpoll->MonitorSendStatus(net_evt->GetSocketID());
+	auto event = DYNAMIC_TRANS<MonitorSendStatusEvent *>(e.get());
+	auto id = event->GetSessionID();
+	if (!m_mapHashToConnectSession.exist(id))
+		return;
+
+	auto info = m_mapHashToConnectSession[id].get();
+	m_pLog->Info(Helper::Format("MonitorSendStatus:%s:%d.", info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
+	m_pEpoll->MonitorSendStatus(info->m_pConnection->GetSocketID());
 }
 
-void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent event)
+void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
 {
-	auto net_evt = DYNAMIC_TRANS<RegisteConnectionEvent *>(event.get());
-	if (net_evt == nullptr)
+	auto event = DYNAMIC_TRANS<RegisteConnectionEvent *>(e.get());
+	if (event == nullptr)
 	{
 		m_pLog->Error("RegisteConnectionEventHandler is called, but param type error.");
 		return;
 	}
 
 	auto connect = make_unique<EasyConnect>();
-	connect->InitializeAsClient(net_evt->GetAddress(), net_evt->GetPort() , m_pCTX);
+	connect->InitializeAsClient(event->GetAddress(), event->GetPort(), m_pCTX);
 	connect->Connect();
 
 	auto info = make_unique<ConnectSession>();
@@ -166,20 +173,30 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent event)
 
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_mapHashToConnectSession[connect->GetHashCode()] = std::move(info);
-	m_mapSocketIDToHash[connect->GetSocketID()] = connect->GetHashCode();
 	sockLck.unlock();
 	m_pEpoll->AddMonitorSocket(connect->GetSocketID());
 }
 
-void Sloong::CNetworkHub::SendCloseConnectEvent(int socket)
+void Sloong::CNetworkHub::OnGetConnectionInfoEventHandler(SharedEvent e)
 {
-	if (!m_mapSocketIDToHash.exist(socket))
+	auto event = DYNAMIC_TRANS<GetConnectionInfoEvent *>(e.get());
+	if (event == nullptr)
 		return;
 
-	auto event = make_shared<CNetworkEvent>(EVENT_TYPE::SocketClose);
-	event->SetSocketID(socket);
+	auto info = m_mapHashToConnectSession.try_get(event->GetSessionID());
+	if (info == nullptr)
+		return;
 
-	m_iC->SendMessage(event);
+	auto pConn = (*info)->m_pConnection.get();
+	event->CallCallbackFunc(ConnectionInfo{Address : pConn->m_strAddress, Port : pConn->m_nPort});
+}
+
+inline void Sloong::CNetworkHub::SendConnectionBreak(int64_t sessionid)
+{
+	if (!m_mapHashToConnectSession.exist(sessionid))
+		return;
+
+	m_iC->SendMessage(make_shared<ConnectionBreakEvent>(sessionid));
 }
 
 void Sloong::CNetworkHub::EnableClientCheck(const string &clientCheckKey, int clientCheckTime)
@@ -227,7 +244,7 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
 			if (it->second != NULL && time(NULL) - it->second->m_ActiveTime > tout)
 			{
 				m_pLog->Info(Helper::Format("[Timeout]:[Close connect:%s]", it->second->m_pConnection->m_strAddress.c_str()));
-				SendCloseConnectEvent(it->first);
+				SendConnectionBreak(it->first);
 				goto RecheckTimeout;
 			}
 		}
@@ -261,8 +278,6 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 		m_pLog->Verbos("Create called succeed.");
 	}
 
-	UniqueTransPackage pack;
-	DataPackage *data_pack = nullptr;
 	while (m_bIsRunning)
 	{
 		try
@@ -273,19 +288,20 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 				if (m_pWaitProcessList[i].empty())
 					continue;
 
-				while (m_pWaitProcessList[i].TryMovePop(pack))
+				PackageResult result(ResultType::Ignore);
+				UniquePackage package = m_pWaitProcessList[i].TryMovePop();
+				while (package != nullptr)
 				{
 					// In here, the result no the result for this request.
 					// it just for is need add the pack obj to send list.
-					res.SetResult(ResultType::Ignore);
+					result.SetResult(ResultType::Ignore);
 
-					pack->Record();
-					data_pack = pack->GetDataPackage();
-					switch (data_pack->type())
+					package->add_clocks(GetClock());
+					switch (package->type())
 					{
 					case DataPackage_PackageType::DataPackage_PackageType_EventPackage:
 					{
-						switch (data_pack->function())
+						switch (package->function())
 						{
 						case ControlEvent::Restart:
 							m_pLog->Info("Received restart control event. application will restart.");
@@ -296,28 +312,40 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 							m_iC->SendMessage(EVENT_TYPE::ProgramStop);
 							break;
 						default:
-							m_pEventFunc(pack.get());
+							m_pEventFunc(package.get());
 							break;
 						}
 					}
 					break;
-					case DataPackage_PackageType::DataPackage_PackageType_RequestPackage:
+					case DataPackage_PackageType::DataPackage_PackageType_NormalPackage:
 					{
-						if (data_pack->status() == DataPackage_StatusType::DataPackage_StatusType_Request)
-							res = m_pRequestFunc(pEnv, pack.get());
+						if (package->status() == DataPackage_StatusType::DataPackage_StatusType_Request)
+							result = m_pRequestFunc(pEnv, package.get());
 						else
-							res = m_pResponseFunc(pEnv, pack.get());
+							result = m_pResponseFunc(pEnv, package.get());
 					}
 					break;
 					default:
 						m_pLog->Warn("Data package check type error. cannot process.");
 					}
-					pack->Record();
-					data_pack = nullptr;
-					if (res.IsSucceed())
-						AddMessageToSendList(pack);
+					package->add_clocks(GetClock());
+
+					if (result.HaveResultObject())
+					{
+						AddMessageToSendList(result.MoveResultObject());
+					}
+					else if (result.GetResult() != ResultType::Ignore)
+					{
+						auto response = Package::MakeResponse(package.get());
+						response->set_result(result.GetResult());
+						response->set_content(result.GetMessage());
+						AddMessageToSendList(move(response));
+					}
 					else
-						pack = nullptr;
+					{
+						m_pLog->Error(Helper::Format("Result[%s]", ResultType_Name(result.GetResult()).c_str()));
+					}
+					package = nullptr;
 				}
 				goto MessagePorcessListRetry;
 			}
@@ -355,7 +383,7 @@ ResultType Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 	if (m_pAcceptFunc)
 	{
 		auto res = m_pAcceptFunc(conn_sock);
-		if( res.IsFialed() )
+		if (res.IsFialed())
 		{
 			return ResultType::Error;
 		}
@@ -365,81 +393,80 @@ ResultType Sloong::CNetworkHub::OnNewAccept(int conn_sock)
 	conn->InitializeAsServer(conn_sock, m_pCTX);
 
 	auto info = make_unique<ConnectSession>();
-	info->Initialize(m_iC, std::move(conn));	
+	info->Initialize(m_iC, std::move(conn));
 
 	m_pLog->Info(Helper::Format("Accept client:[%d][%d][%s:%d].", info->m_pConnection->GetHashCode(), info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
 	unique_lock<mutex> sockLck(m_oSockListMutex);
-	m_mapSocketIDToHash[info->m_pConnection->GetSocketID()] = info->m_pConnection->GetHashCode();
 	m_mapHashToConnectSession[info->m_pConnection->GetHashCode()] = std::move(info);
 	sockLck.unlock();
 	return ResultType::Succeed;
 }
 
-ResultType Sloong::CNetworkHub::OnDataCanReceive(int nSocket)
+ResultType Sloong::CNetworkHub::OnDataCanReceive(int64_t sessionid)
 {
-	if (!m_mapSocketIDToHash.exist(nSocket))
+	if (!m_mapHashToConnectSession.exist(sessionid))
 	{
 		m_pLog->Error("OnDataCanReceive called, but SockInfo is null.");
 		return ResultType::Error;
 	}
-	auto info = m_mapHashToConnectSession[m_mapSocketIDToHash[nSocket]].get();
+	auto info = m_mapHashToConnectSession[sessionid].get();
 	if (!info->TryReceiveLock())
 		return ResultType::Invalid;
 
 	m_pLog->Verbos("OnDataCanReceive called, start receiving package.");
-	queue<unique_ptr<CDataTransPackage>> readList;
-	auto res = info->OnDataCanReceive(readList);
-	if (res == ResultType::Error)
-		SendCloseConnectEvent(nSocket);
+	auto res = info->OnDataCanReceive();
+	if (res.IsFialed())
+		SendConnectionBreak(sessionid);
 
-	m_pLog->Verbos(Helper::Format("OnDataCanReceive done. received [%d] packages.", readList.size()));
-	while (!readList.empty())
+	auto pReadList = res.MoveResultObject();
+	m_pLog->Verbos(Helper::Format("OnDataCanReceive done. received [%d] packages.", pReadList.size()));
+	while (!pReadList.empty())
 	{
-		auto t = std::move(readList.front());
-		readList.pop();
-		auto pack = t->GetDataPackage();
-		if (pack->type() == DataPackage_PackageType::DataPackage_PackageType_RequestPackage && pack->status() == DataPackage_StatusType::DataPackage_StatusType_Response)
+		auto pack = std::move(pReadList.front());
+		pReadList.pop();
+		// Check the package is not a response package.
+		// If is normal package, and status is response, and it saved in control center. add a task to call the callback function.
+		if (pack->type() == DataPackage_PackageType::DataPackage_PackageType_NormalPackage && pack->status() == DataPackage_StatusType::DataPackage_StatusType_Response)
 		{
-			auto event = static_pointer_cast<IEvent>(m_iC->GetTempSharedPtr(Helper::ntos(t->GetSerialNumber())));
-			shared_ptr<SendPackageEvent> send_evt = nullptr;
+			auto e = static_pointer_cast<IEvent>(m_iC->GetTempSharedPtr(Helper::ntos(pack->id())));
+			shared_ptr<SendPackageEvent> event = nullptr;
+			if (e != nullptr)
+				event = dynamic_pointer_cast<SendPackageEvent>(e);
 			if (event != nullptr)
-				send_evt = dynamic_pointer_cast<SendPackageEvent>(event);
-			if (send_evt != nullptr)
 			{
-				auto shared_pack = shared_ptr<CDataTransPackage>(move(t));
-				CThreadPool::EnqueTask([send_evt, shared_pack](SMARTER p) {
-					send_evt->CallCallbackFunc(shared_pack.get());
+				auto shared_pack = shared_ptr<DataPackage>(move(pack));
+				CThreadPool::EnqueTask([event, shared_pack](SMARTER p) {
+					event->CallCallbackFunc(shared_pack.get());
 					return (SMARTER) nullptr;
 				});
 				continue;
 			}
 		}
-		m_pWaitProcessList[t->GetPriority()].push_move(std::move(t));
+		m_pWaitProcessList[pack->priority()].push_move(std::move(pack));
 	}
 	m_oProcessThreadSync.notify_all();
-	return res;
+	return res.GetResult();
 }
 
-ResultType Sloong::CNetworkHub::OnCanWriteData(int nSocket)
+ResultType Sloong::CNetworkHub::OnCanWriteData(int64_t sessionid)
 {
-	if (!m_mapSocketIDToHash.exist(nSocket))
+	if (!m_mapHashToConnectSession.exist(sessionid))
 	{
 		m_pLog->Error("OnCanWriteData called, but SockInfo is null.");
 		return ResultType::Error;
 	}
-	auto info = m_mapHashToConnectSession[m_mapSocketIDToHash[nSocket]].get();
-
+	auto info = m_mapHashToConnectSession[sessionid].get();
 	if (!info->TrySendLock())
 		return ResultType::Invalid;
 
 	auto res = info->OnDataCanSend();
 	if (res == ResultType::Error)
-		SendCloseConnectEvent(nSocket);
+		SendConnectionBreak(sessionid);
 	return res;
 }
 
-ResultType Sloong::CNetworkHub::OnOtherEventHappened(int nSocket)
+ResultType Sloong::CNetworkHub::OnOtherEventHappened(int64_t sessionid)
 {
-	SendCloseConnectEvent(nSocket);
+	SendConnectionBreak(sessionid);
 	return ResultType::Succeed;
 }

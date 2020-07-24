@@ -7,6 +7,7 @@
  */
 #include "main.h"
 #include "base_service.h"
+#include "utility.h"
 #include "version.h"
 
 void PrientHelp()

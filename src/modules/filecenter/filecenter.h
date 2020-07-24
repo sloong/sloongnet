@@ -7,9 +7,9 @@
 
 extern "C"
 {
-    CResult RequestPackageProcesser(void *, CDataTransPackage *);
-    CResult ResponsePackageProcesser(void *, CDataTransPackage *);
-    CResult EventPackageProcesser(CDataTransPackage *);
+    PackageResult RequestPackageProcesser(void *, DataPackage *);
+    PackageResult ResponsePackageProcesser(void *, DataPackage *);
+    CResult EventPackageProcesser(DataPackage *);
     CResult NewConnectAcceptProcesser(SOCKET);
     CResult ModuleInitialization(GLOBAL_CONFIG *);
     CResult ModuleInitialized(SOCKET,IControl *);
@@ -27,9 +27,7 @@ namespace Sloong
 
         CResult CreateProcessEnvironmentHandler(void **);
 
-        void EventPackageProcesser(CDataTransPackage *);
-
-        void OnSocketClose(SharedEvent);
+        void EventPackageProcesser(DataPackage *);
 
     protected:
         list<unique_ptr<FileManager>> m_listManage;

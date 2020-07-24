@@ -9,7 +9,7 @@
 #define SLOONGNET_MANAGER_SERVERMANAGE_h
 
 #include "configuation.h"
-#include "DataTransPackage.h"
+
 #include "protocol/manager.pb.h"
 using namespace Manager;
 
@@ -124,20 +124,20 @@ namespace Sloong
         
         void OnSocketClosed(int64_t);
 
-        CResult ProcessHandler(CDataTransPackage *);
+        PackageResult ProcessHandler(DataPackage *);
 
-        CResult EventRecorderHandler(const string &, CDataTransPackage *);
-        CResult RegisteWorkerHandler(const string &, CDataTransPackage *);
-        CResult RegisteNodeHandler(const string &, CDataTransPackage *);
-        CResult AddTemplateHandler(const string &, CDataTransPackage *);
-        CResult DeleteTemplateHandler(const string &, CDataTransPackage *);
-        CResult SetTemplateHandler(const string &, CDataTransPackage *);
-        CResult QueryTemplateHandler(const string &, CDataTransPackage *);
-        CResult QueryNodeHandler(const string &, CDataTransPackage *);
-        CResult StopNodeHandler(const string &, CDataTransPackage *);
-        CResult RestartNodeHandler(const string &, CDataTransPackage *);
-        CResult QueryReferenceInfoHandler(const string &, CDataTransPackage *);
-        CResult ReportLoadStatusHandler(const string &, CDataTransPackage *);
+        CResult EventRecorderHandler(const string &, DataPackage *);
+        CResult RegisteWorkerHandler(const string &, DataPackage *);
+        CResult RegisteNodeHandler(const string &, DataPackage *);
+        CResult AddTemplateHandler(const string &, DataPackage *);
+        CResult DeleteTemplateHandler(const string &, DataPackage *);
+        CResult SetTemplateHandler(const string &, DataPackage *);
+        CResult QueryTemplateHandler(const string &, DataPackage *);
+        CResult QueryNodeHandler(const string &, DataPackage *);
+        CResult StopNodeHandler(const string &, DataPackage *);
+        CResult RestartNodeHandler(const string &, DataPackage *);
+        CResult QueryReferenceInfoHandler(const string &, DataPackage *);
+        CResult ReportLoadStatusHandler(const string &, DataPackage *);
 
     public:
         static CResult LoadManagerConfig(const string&);

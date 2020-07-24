@@ -1,3 +1,12 @@
+/*** 
+ * @Author: Chuanbin Wang
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditTime: 2020-07-24 17:39:48
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/referenced/libuniv/include/univ/threadpool.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
+ */
 
 #ifndef THREADPOOL_H
 #define THREADPOOL_H
@@ -24,10 +33,7 @@ namespace Sloong
 
 		/// C++ std style define 
 		typedef shared_ptr<void> SMARTER;
-		typedef SMARTER(*pSmartJobFunc)(SMARTER);
 		typedef void(*pSmartCallBack)(int64_t, SMARTER);
-		typedef pSmartJobFunc LPSMARTFUNC;
-		typedef pSmartCallBack LPSMARTCALLBACK;
 		typedef std::function<SMARTER(SMARTER)> SmartFunction;
 		typedef std::function<SMARTER(int64_t,SMARTER)> SmartCallbackFunction;
 		enum TaskType {
@@ -43,10 +49,6 @@ namespace Sloong
 			LPTASKFUNC		pJob = nullptr;
 			LPTASKCALLBACK	pCallBack = nullptr;
 			LPVOID			pParam = nullptr;
-			// Only C++ style
-			LPSMARTFUNC		pSmartJob;
-			LPSMARTCALLBACK pSmartCallBack;
-			SMARTER pSmartParam;
 			// std::function style
 			SmartFunction		pSmartFuncJob;
 			SmartCallbackFunction		pSmartFuncCallback;
@@ -70,7 +72,6 @@ namespace Sloong
 
 			static ULONG EnqueTask(LPTASKFUNC pJob, LPVOID pParam = nullptr, LPTASKCALLBACK pCallBack = nullptr);
 
-			static ULONG EnqueTask(LPSMARTFUNC pJob, SMARTER pParam = nullptr, LPSMARTCALLBACK pCallBack = nullptr);
 
             // Add a work thread to the threadlist.
             // return the thread index in threadlist. if the nNum param is not 1, the other

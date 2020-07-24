@@ -5,12 +5,6 @@
 
 namespace Sloong
 {
-	namespace Universal
-	{
-		class CLog;
-	}
-	using namespace Universal;
-
 	enum ConnectStatus
 	{
 		Disconnect,
@@ -50,7 +44,16 @@ namespace Sloong
 		    Error	-> Error happened. need close socket.
 		    Retry	-> Part of the package was received, and it's happened EAGAIN error. need call this function again when socket is can received.
 		*/
-		ResultType RecvPackage(string&, int&, int&, bool=false);
+		ResultType RecvPackage(string &, int &, int &, bool = false);
+
+		/**
+         * @Remarks: Receive and create data package. 
+         * @Params: 
+         * @Return: if package receive succeed, return Succed.
+         *          if other error happened else return Error 
+         *          if md5 check failed, return Invalied.
+         */
+		PackageResult RecvPackage(bool = false);
 
 		/* Send the data package.
 		   Params:
@@ -62,7 +65,14 @@ namespace Sloong
 		  	Error	-> Error happened. need close socket.
 		  	Retry	-> Part of the package was sent. and it's happened EAGAIN error. need call this function again when socket is can sent.
 		*/
-		ResultType SendPackage(const string &, int&);
+		ResultType SendPackage(const string &, int &);
+
+		/**
+         * @Remarks: send this package
+         * @Params: 
+         * @Return: if send fialed, return Error.
+         */
+		CResult SendPackage(UniquePackage);
 
 		void Close();
 
@@ -71,6 +81,10 @@ namespace Sloong
 		inline int GetErrno() { return m_nErrno; }
 
 		inline int64_t GetHashCode() { return m_nHashCode; }
+
+		inline bool IsReceiving() { return !m_strReceiving.empty(); }
+
+		inline bool IsSending() { return !m_strSending.empty(); }
 
 	protected:
 		int Read(char *, int, bool, bool);
@@ -84,7 +98,7 @@ namespace Sloong
 		string GetLengthData(int64_t);
 
 	public:
-		static unsigned long G_InitializeSSL(LPVOID*, const string &, const string &, const string &);
+		static unsigned long G_InitializeSSL(LPVOID *, const string &, const string &, const string &);
 		static void G_FreeSSL(LPVOID);
 		static string G_FormatSSLErrorMsg(int);
 
@@ -100,6 +114,14 @@ namespace Sloong
 		int m_nPort;
 		bool m_bReconnect = false;
 		int64_t m_nHashCode;
+
+		string m_strReceiving;
+		int m_RecvPackageSize;
+		int m_ReceivedSize;
+
+		string m_strSending;
+		int m_SendPackageSize;
+		int m_SentSize;
 
 	private:
 		int m_nErrno;

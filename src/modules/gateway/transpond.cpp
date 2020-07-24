@@ -17,57 +17,52 @@ CResult Sloong::GatewayTranspond::Initialize(IControl* ic)
     return CResult::Succeed();
 }
 
-CResult GatewayTranspond::RequestPackageProcesser(CDataTransPackage *trans_pack)
+PackageResult GatewayTranspond::RequestPackageProcesser(DataPackage *trans_pack)
 {
 	return MessageToProcesser(trans_pack);
 }
 
-CResult GatewayTranspond::ResponsePackageProcesser( RequestInfo* info, CDataTransPackage *trans_pack)
+PackageResult GatewayTranspond::ResponsePackageProcesser( UniquePackage info, DataPackage *trans_pack)
 {
-	return MessageToClient(info,trans_pack);
+	return MessageToClient(move(info),trans_pack);
 }
 
 
-CResult Sloong::GatewayTranspond::MessageToProcesser(CDataTransPackage *pack)
+PackageResult Sloong::GatewayTranspond::MessageToProcesser(DataPackage *pack)
 {
 	m_pLog->Debug("Receive new request package.");
-	auto data_pack = pack->GetDataPackage();
-	auto target = SloongNetGateway::Instance->GetPorcessConnect(data_pack->function());
+	auto target = SloongNetGateway::Instance->GetPorcessConnect(pack->function());
 	if( target == INVALID_SOCKET )
 	{
-		pack->ResponsePackage(ResultType::Error,"No process service online .");
-		m_pLog->Debug(Helper::Format("No find process service for function[%d]. package [%d][%llu]", data_pack->function(),  pack->GetSocketID(), pack->GetSerialNumber() ));
-		return CResult::Succeed();
+		m_pLog->Debug(Helper::Format("No find process service for function[%d]. package [%d][%llu]", pack->function(),  pack->sessionid(), pack->id() ));
+		return PackageResult::Make_Error(Helper::Format("No find process service for function[%d]. package [%d][%llu]", pack->function(),  pack->sessionid(), pack->id() ));
 	}
 
-	RequestInfo info;
-	info.RequestConnect = pack->GetConnection();
-	info.SerialNumber = data_pack->id();
-	info.tStart = pack->GetRecord()->front();	
-	info.tProcess = pack->GetTimeval();
-		
-	auto serialNumber = snowflake::Instance->nextid();
-	data_pack->set_id(serialNumber);
-	pack->ClearConnection();
-	pack->SetSocket(target);
-	pack->RequestPackage();
+	auto response = Package::MakeResponse(pack);
+	for( auto i : pack->clocks() )
+	{
+		response->add_clocks(i);
+	}
+	response->add_clocks(GetClock());
 
-	m_pLog->Debug(Helper::Format("Trans package [%d][%llu] -> [%d][%llu]", info.RequestConnect->GetSocketID(), info.SerialNumber, target, serialNumber));
+	auto trans_pack = Package::MakeResponse(pack);
+	
+	auto id = snowflake::Instance->nextid();
+	trans_pack->set_id(id);
+	trans_pack->set_sessionid(target);
+	
+	m_pLog->Debug(Helper::Format("Trans package [%lld][%llu] -> [%d][%llu]", pack->sessionid(), pack->id(), trans_pack->sessionid(), trans_pack->id()));
 
-	SloongNetGateway::Instance->m_mapSerialToRequest[serialNumber] = info;
-	return CResult::Succeed();
+	SloongNetGateway::Instance->m_mapSerialToRequest[trans_pack->sessionid()] = move(response);
+	return PackageResult::Make_OK(move(trans_pack));
 }
 
-CResult Sloong::GatewayTranspond::MessageToClient(RequestInfo *req_info, CDataTransPackage *res_pack)
+PackageResult Sloong::GatewayTranspond::MessageToClient(UniquePackage info, DataPackage *pack)
 {
-	auto res_data = res_pack->GetDataPackage();
-	res_data->set_id(req_info->SerialNumber);
-	res_pack->SetConnection(req_info->RequestConnect);
-	res_pack->ResponsePackage(res_data);
-
-	auto t = res_pack->GetRecord();
-	t->push_front(req_info->tProcess);
-	t->push_front(req_info->tStart);
-
-	return CResult::Succeed();
+	info->add_clocks(GetClock());
+	info->set_result(pack->result());
+	info->set_content(pack->content());
+	info->set_extend(pack->extend());
+	
+	return PackageResult::Make_OK(move(info));
 }

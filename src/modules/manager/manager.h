@@ -1,12 +1,14 @@
-/*
- * @Author: WCB
+/*** 
+ * @Author: Chuanbin Wang
  * @Date: 2019-11-05 08:59:19
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 14:13:35
- * @Description: file content
+ * @LastEditTime: 2020-07-24 16:30:35
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/manager/manager.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
-#ifndef SLOONGNET_MODULE_MANAGER_MAIN_H
-#define SLOONGNET_MODULE_MANAGER_MAIN_H
+
+#pragma once
 
 #include "core.h"
 #include "export.h"
@@ -14,9 +16,9 @@
 
 extern "C"
 {
-	CResult RequestPackageProcesser(void *, CDataTransPackage *);
-	CResult ResponsePackageProcesser(void *, CDataTransPackage *);
-	CResult EventPackageProcesser(CDataTransPackage *);
+	PackageResult RequestPackageProcesser(void *, DataPackage *);
+	PackageResult ResponsePackageProcesser(void *, DataPackage *);
+	CResult EventPackageProcesser(DataPackage *);
 	CResult NewConnectAcceptProcesser(SOCKET);
 	CResult ModuleInitialization(GLOBAL_CONFIG *);
 	CResult ModuleInitialized(SOCKET, IControl *);
@@ -36,12 +38,12 @@ namespace Sloong
 		CResult Initialized(IControl *);
 
 		inline CResult CreateProcessEnvironmentHandler(void **);
-		void EventPackageProcesser(CDataTransPackage *);
+		void EventPackageProcesser(DataPackage *);
 
 	protected:
 		void ResetControlConfig(GLOBAL_CONFIG *);
 
-		void OnSocketClose(SharedEvent);
+		void OnConnectionBreak(SharedEvent);
 
 	protected:
 		list<unique_ptr<CServerManage>> m_listServerManage;
@@ -55,5 +57,3 @@ namespace Sloong
 	};
 
 } // namespace Sloong
-
-#endif //SLOONGNET_MODULE_MANAGER_MAIN_H

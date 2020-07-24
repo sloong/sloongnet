@@ -2,7 +2,7 @@
 #define SLOONGNET_MODULE_DATACENTER_DBHUB_H
 
 #include "mysqlex.h"
-#include "DataTransPackage.h"
+
 
 #include "IData.h"
 #include "IObject.h"
@@ -18,13 +18,13 @@ namespace Sloong
     public:
         CResult Initialize(IControl *ic);
 
-        CResult RequestPackageProcesser(CDataTransPackage *);
+        PackageResult RequestPackageProcesser(DataPackage *);
 
-        CResult ConnectDatabaseHandler(const string &req_obj, CDataTransPackage *pack);
-        CResult QuerySQLCmdHandler(const string &req_obj, CDataTransPackage *pack);
-        CResult InsertSQLCmdHandler(const string &req_obj, CDataTransPackage *pack);
-        CResult UpdateSQLCmdHandler(const string &req_obj, CDataTransPackage *pack);
-        CResult DeleteSQLCmdHandler(const string &req_obj, CDataTransPackage *pack);
+        CResult ConnectDatabaseHandler(const string &req_obj, DataPackage *pack);
+        CResult QuerySQLCmdHandler(const string &req_obj, DataPackage *pack);
+        CResult InsertSQLCmdHandler(const string &req_obj, DataPackage *pack);
+        CResult UpdateSQLCmdHandler(const string &req_obj, DataPackage *pack);
+        CResult DeleteSQLCmdHandler(const string &req_obj, DataPackage *pack);
 
     protected:
         map_ex<DataCenter::Functions, FunctionHandler> m_mapFuncToHandler;

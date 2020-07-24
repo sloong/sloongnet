@@ -1,5 +1,5 @@
 #include "filemanager.h"
-
+#include "utility.h"
 using namespace Sloong;
 
 CResult Sloong::FileManager::Initialize(IControl *ic)
@@ -15,31 +15,36 @@ CResult Sloong::FileManager::Initialize(IControl *ic)
     return CResult::Succeed();
 }
 
-CResult Sloong::FileManager::RequestPackageProcesser(CDataTransPackage *tans_pack)
+PackageResult Sloong::FileManager::RequestPackageProcesser(DataPackage *pack)
 {
-    auto function = (Functions)tans_pack->GetFunction();
+    auto function = (Functions)pack->function();
     if (!Functions_IsValid(function))
     {
-        tans_pack->ResponsePackage(ResultType::Error, Helper::Format("FileCenter no provide [%d] function.", function));
-        return CResult::Succeed();
+        return PackageResult::Make_OK(Package::MakeErrorResponse(pack, Helper::Format("FileCenter no provide [%d] function.", function)));
     }
 
-    auto req_obj = tans_pack->GetRecvMessage();
+    auto req_obj = pack->content();
     auto func_name = Functions_Name(function);
     m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), req_obj.c_str()));
     if (!m_mapFuncToHandler.exist(function))
     {
-        tans_pack->ResponsePackage(ResultType::Error, Helper::Format("Function [%s] no handler.", func_name.c_str()));
-        return CResult::Succeed();
+        return PackageResult::Make_OK(Package::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
     }
 
-    auto res = m_mapFuncToHandler[function](req_obj, tans_pack);
-    m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
-    tans_pack->ResponsePackage(res);
-    return CResult::Succeed();
+    auto res = m_mapFuncToHandler[function](req_obj, pack);
+    auto response = Package::MakeResponse(pack, res);
+    if (res.HaveResultObject())
+    {
+        auto extend = res.GetResultObject();
+        response->set_extend(extend);
+        m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].[%d]", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str(), extend.size()));
+    }
+    else
+        m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
+    return PackageResult::Make_OK(move(response));
 }
 
-CResult Sloong::FileManager::MergeFile(const map_ex<int,string> &fileList, const string &saveFile)
+CResult Sloong::FileManager::MergeFile(const map_ex<int, string> &fileList, const string &saveFile)
 {
     string files;
     for (auto &item : fileList)
@@ -48,19 +53,28 @@ CResult Sloong::FileManager::MergeFile(const map_ex<int,string> &fileList, const
     return CResult::Succeed();
 }
 
-CResult Sloong::FileManager::SplitFile(const string &saveFile, map_ex<int,string> &fileList)
+CResult Sloong::FileManager::SplitFile(const string &filepath, int splitSize, map_ex<int, string> &pReadList, int* out_all_size)
 {
-    /*
-    split [选项]... [要切割的文件 [输出文件前缀]]
-    -a, --suffix-length=N   使用长度为 N 的后缀 (默认 2)
-    -b, --bytes=SIZE        设置输出文件的大小。支持单位：m,k
-    -C, --line-bytes=SIZE   设置输出文件的最大行数。与 -b 类似，但会尽量维持每行的完整性
-    -d, --numeric-suffixes  使用数字后缀代替字母
-    -l, --lines=NUMBER      设备输出文件的行数
-        --help     显示版本信息
-        --version  输出版本信息
-    */
-   return CResult::Make_Error("No readlize");
+    if (-1 == access(filepath.c_str(), R_OK))
+	{
+		return CResult::Make_Error("Cannot access file.");
+	}
+
+	ifstream in(filepath.c_str(), ios::in | ios::binary);
+	streampos pos = in.tellg();
+	in.seekg(0, ios::end);
+	int nSize = in.tellg();
+	in.seekg(pos);
+	for( int i = 0; i<nSize; i+= splitSize)
+	{
+		string str;
+		str.resize(splitSize);
+		in.read(str.data(), splitSize);
+		pReadList[i] = move(str);
+	}
+	in.close();
+	*out_all_size = nSize;
+	return CResult::Succeed();
 }
 
 CResult Sloong::FileManager::MoveFile(const string &source, const string &target)
@@ -104,7 +118,6 @@ CResult Sloong::FileManager::MoveFile(const string &source, const string &target
 void Sloong::FileManager::ClearCache(const string &folder)
 {
     // TODO:
-    
 }
 CResult Sloong::FileManager::GetFileSize(const string &source, int *out_size)
 {
@@ -116,7 +129,7 @@ CResult Sloong::FileManager::QueryFilePath(const string &hash_md5)
     return CResult::Make_Error("No readlize");
 }
 
-CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, CDataTransPackage *trans_pack)
+SResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, DataPackage *trans_pack)
 {
     auto req = ConvertStrToObj<PrepareUploadRequest>(str_req);
 
@@ -128,135 +141,132 @@ CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, CDataTr
 
     PrepareUploadResponse res;
     res.set_token(token);
-    return CResult::Make_OK(ConvertObjToStr(&res));
+    return SResult::Make_OK(ConvertObjToStr(&res));
 }
 
-CResult Sloong::FileManager::UploadingHandler(const string &str_req, CDataTransPackage *trans_pack)
+SResult Sloong::FileManager::UploadingHandler(const string &str_req, DataPackage *pack)
 {
     auto req = ConvertStrToObj<UploadingRequest>(str_req);
-auto& token = req->token();
+    auto &token = req->token();
     if (!m_mapTokenToUploadInfo.exist(token))
-        return CResult::Make_Error("Need request PrepareUpload firest.");
+        return SResult::Make_Error("Need request PrepareUpload firest.");
 
-    auto extend = trans_pack->GetExtendData();
+    auto extend = pack->extend();
     if (extend.length() == 0)
     {
-        return CResult::Make_Error("The package extend length is 0.");
+        return SResult::Make_Error("The package extend length is 0.");
     }
     if (req->hash_md5() != CMD5::Encode(extend))
     {
-        return CResult::Make_Error("Hasd check error.");
+        return SResult::Make_Error("Hasd check error.");
     }
 
     auto info = m_mapTokenToUploadInfo.try_get(token);
-    auto fileName = Helper::Format("%s%s.%d", info->Path, info->Name, req->splitpackageid());
-    CUtility::WriteFile(fileName, extend.c_str(),extend.size());
-    info->SplitPackageFile[req->splitpackageid()] = fileName;
+    info->SplitPackage[req->splitpackageid()] = extend;
 
-    return CResult::Succeed();
+    return SResult::Succeed();
 }
 
-CResult Sloong::FileManager::UploadedHandler(const string &str_req, CDataTransPackage *trans_pack)
+SResult Sloong::FileManager::UploadedHandler(const string &str_req, DataPackage *pack)
 {
     auto req = ConvertStrToObj<UploadedRequest>(str_req);
-    auto& token = req->token();
+    auto &token = req->token();
     if (!m_mapTokenToUploadInfo.exist(token))
-        return CResult::Make_Error("Need request PrepareUpload firest.");
+        return SResult::Make_Error("Need request PrepareUpload firest.");
 
     auto info = m_mapTokenToUploadInfo.try_get(token);
     auto full_path = info->Path + info->Name;
-    auto res = MergeFile(info->SplitPackageFile, full_path);
+    auto res = MergeFile(info->SplitPackage, full_path);
     if (res.IsFialed())
-        return res;
+        return SResult::Make_Error(res.GetMessage());
 
     if (info->Hash_MD5 != CMD5::Encode(full_path, true))
-        return CResult::Make_Error("Hasd check error.");
+        return SResult::Make_Error("Hasd check error.");
 
-    
     res = MoveFile(full_path, m_strArchiveFolder);
     if (res.IsFialed())
-        return res;
+        return SResult::Make_Error(res.GetMessage());
 
-    return CResult::Succeed();
+    return SResult::Succeed();
 }
 
-CResult Sloong::FileManager::PrepareDownloadHandler(const string &str_req, CDataTransPackage *trans_pack)
+SResult Sloong::FileManager::PrepareDownloadHandler(const string &str_req, DataPackage *pack)
 {
     auto req = ConvertStrToObj<PrepareDownloadRequest>(str_req);
 
     auto res = QueryFilePath(req->hash_md5());
-    if( res.IsFialed())
-        return res;
+    if (res.IsFialed())
+        return SResult::Make_Error(res.GetMessage());
 
     string real_path = res.GetMessage();
     if (access(real_path.c_str(), ACC_R) != 0)
     {
-        return CResult::Make_Error("Cann't access to target file.");
+        return SResult::Make_Error("Cann't access to target file.");
     }
 
+    // 怎样来避免文件内容被拷贝的同时，满足拆分读取的需求？
+    // 这里准备使用list的方式，读取时指定一个大小，将文件内容读取到一个string的list中
+    // 每个string都是指定的长度。然后外界根据索引来读取指定的string
+    // 这个list使用shared_ptr来进行包装，然后存储在IC中，这样使用者也不需要带着这个列表到处传递
+    auto packageSize = req->splitpackagesize();
+    int filesize = 0;
     auto token = CUtility::GenUUID();
-    string cacheFolder = Helper::Format("%s%s",m_strCacheFolder.c_str(), token.c_str());
     // TODO. need process the pialed case.
-    auto& file_list = m_mapTokenToDownloadInfo[token].SplitPackageFile;
-    res = SplitFile(real_path, file_list);
+    auto &file_list = m_mapTokenToDownloadInfo[token].SplitPackage;
+    res = SplitFile(real_path,packageSize, file_list, &filesize);
     if (res.IsFialed())
-        return res;
-
-    int size = 0;
-    res = GetFileSize(real_path, &size);
-    if (res.IsFialed())
-        return res;
+        return SResult::Make_Error(res.GetMessage());
 
     m_mapTokenToDownloadInfo[token].RealPath = real_path;
-    m_mapTokenToDownloadInfo[token].CacheFolder = cacheFolder;
     m_mapTokenToDownloadInfo[token].Hash_MD5 = CMD5::Encode(real_path, true);
-    m_mapTokenToDownloadInfo[token].Size = size;
+    m_mapTokenToDownloadInfo[token].Size = filesize;
 
     PrepareDownloadResponse response;
     response.set_token(token);
-    response.set_filesize(size);
+    response.set_filesize(filesize);
     auto infoMap = response.mutable_splitpackageinfos();
-    for( auto &item : file_list)
+    for (auto &item : file_list)
     {
-        infoMap->operator[](item.first) = CMD5::Encode(item.second,true);
+        infoMap->operator[](item.first) = CMD5::Encode(item.second, true);
     }
-    
-    return CResult::Make_OK(ConvertObjToStr(&response));
+
+    return SResult::Make_OK(ConvertObjToStr(&response));
 }
 
-CResult Sloong::FileManager::DownloadingHandler(const string &str_req, CDataTransPackage *trans_pack)
+SResult Sloong::FileManager::DownloadingHandler(const string &str_req, DataPackage *pack)
 {
     auto req = ConvertStrToObj<DownloadingRequest>(str_req);
-    auto& token = req->token();
+    auto &token = req->token();
     if (!m_mapTokenToUploadInfo.exist(token))
-        return CResult::Make_Error("Need request PrepareDownload firest.");
+        return SResult::Make_Error("Need request PrepareDownload firest.");
 
     auto info = m_mapTokenToDownloadInfo.try_get(token);
-    auto path = info->SplitPackageFile.try_get(req->splitpackageid());
-    int size = 0;
-    auto buf = CUtility::ReadFile(*path,&size);
-    auto data_package = trans_pack->GetDataPackage();
-    data_package->set_extend(buf.get(),size);
+    auto path = info->SplitPackage.try_get(req->splitpackageid());
+    
+
+    // 这里的extend将会从前面读取的列表中获取
+    string extend = "";
+
     DownloadingResponse res;
-    res.set_hash_md5(CMD5::Encode(*path,true));
-    return CResult::Make_OK(ConvertObjToStr(&res));
+    res.set_hash_md5(CMD5::Encode(*path));
+
+    return SResult::Make_OK(ConvertObjToStr(&res), extend);
 }
 
-CResult Sloong::FileManager::DownloadedHandler(const string &str_req, CDataTransPackage *trans_pack)
+SResult Sloong::FileManager::DownloadedHandler(const string &str_req, DataPackage *trans_pack)
 {
     auto req = ConvertStrToObj<DownloadedRequest>(str_req);
-    auto& token = req->token();
+    auto &token = req->token();
     if (m_mapTokenToUploadInfo.exist(token))
     {
-        auto info = m_mapTokenToDownloadInfo.try_get(token);
-        ClearCache(info->CacheFolder);
+        //auto info = m_mapTokenToDownloadInfo.try_get(token);
         m_mapTokenToDownloadInfo.erase(token);
     }
 
-    return CResult::Succeed();
+    return SResult::Succeed();
 }
 
-CResult Sloong::FileManager::TestSpeedHandler(const string &str_req, CDataTransPackage *trans_pack)
+SResult Sloong::FileManager::TestSpeedHandler(const string &str_req, DataPackage *trans_pack)
 {
-    return CResult::Succeed();
+    return SResult::Succeed();
 }

@@ -5,6 +5,8 @@
  * @LastEditTime: 2020-05-18 19:19:43
  * @Description: file content
  */
+#pragma once
+
 #include <map>
 #include <memory>
 #include <shared_mutex>
@@ -30,7 +32,7 @@ namespace Sloong
 			return &it->second;
 		}
 
-		V &try_get(const K &key, const K &def)
+		V &try_get(const K &key, V &def)
 		{
 			shared_lock<shared_mutex> lock(m_mut);
 			auto it = this->find(key);

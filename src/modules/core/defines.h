@@ -5,8 +5,9 @@
  * @LastEditTime: 2020-05-19 17:40:15
  * @Description: file content
  */
-#ifndef SLOONGNET_DEFINES_H
-#define SLOONGNET_DEFINES_H
+#pragma once
+
+#include <sys/time.h>
 
 // univ head file
 #include "univ/defines.h"
@@ -19,20 +20,38 @@
 using namespace Sloong;
 using namespace Sloong::Universal;
 
-#include <memory>
-using namespace std;
-
-#include "protocol/core.pb.h"
-using namespace Core;
-
 #include "result.hpp"
-	
+
 #define ARRAYSIZE(a) (sizeof(a) / sizeof(a[0]))
 
 namespace Sloong
 {
-	class CDataTransPackage;
-	typedef std::function<CResult(const string &, CDataTransPackage *)> FunctionHandler;
+	typedef std::function<CResult(const string &, DataPackage *)> FunctionHandler;
+
+	inline timeval GetTimeval()
+	{
+		struct timeval cur;
+		gettimeofday(&cur, NULL);
+		return cur;
+	}
+
+	inline double GetClock()
+	{
+		auto cur = GetTimeval();
+		return cur.tv_sec * 1000 + cur.tv_usec / 1000.0;
+	}
+
+	inline string FormatRecord(DataPackage *pack)
+	{
+		string str;
+		auto clocks = pack->clocks();
+		auto start = clocks.begin();
+		for (auto item = start+1 ; item != clocks.end(); item++)
+		{
+			str = Helper::Format("%s[%.2f]", str.c_str(), *item - *start);
+		}
+		return str;
+	}
 
 	template <typename T, typename K>
 	inline T STATIC_TRANS(K p)
@@ -49,7 +68,6 @@ namespace Sloong
 		assert(tmp);
 		return tmp;
 	}
-
 
 	const int s_PriorityLevel = 3;
 
@@ -108,5 +126,3 @@ namespace Sloong
 		return str;
 	}
 } // namespace Sloong
-
-#endif

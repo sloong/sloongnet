@@ -13,17 +13,17 @@ using namespace Manager;
 
 unique_ptr<SloongNetFirewall> Sloong::SloongNetFirewall::Instance = nullptr;
 
-extern "C" CResult RequestPackageProcesser(void* pEnv,CDataTransPackage* pack)
+extern "C" PackageResult RequestPackageProcesser(void* pEnv,DataPackage* pack)
 {
 	return SloongNetFirewall::Instance->RequestPackageProcesser(pack);
 }
 
-extern "C" CResult ResponsePackageProcesser(void* pEnv,CDataTransPackage* pack)
+extern "C" PackageResult ResponsePackageProcesser(void* pEnv,DataPackage* pack)
 {
 	return SloongNetFirewall::Instance->ResponsePackageProcesser(pack);
 }
 	
-extern "C" CResult EventPackageProcesser(CDataTransPackage* pack)
+extern "C" CResult EventPackageProcesser(DataPackage* pack)
 {
 	SloongNetFirewall::Instance->EventPackageProcesser(pack);
 	return CResult::Succeed();
@@ -53,35 +53,27 @@ extern "C" CResult CreateProcessEnvironment(void** out_env)
 CResult SloongNetFirewall::Initialized(IControl* ic)
 {
 	m_iC = ic;
-	m_iC->RegisterEventHandler(SocketClose, std::bind(&SloongNetFirewall::OnSocketClose, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
 
-CResult Sloong::SloongNetFirewall::RequestPackageProcesser(CDataTransPackage* pack)
+PackageResult Sloong::SloongNetFirewall::RequestPackageProcesser(DataPackage* pack)
 {
-    auto msgPack = pack->GetDataPackage();
-    auto sender = msgPack->sender();
-    auto func = (Functions)msgPack->function();
+    auto sender = pack->sender();
+    auto func = (Functions)pack->function();
     m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%llu]", Functions_Name(func).c_str(), sender));
 
-	return CResult::Succeed();
+	return PackageResult::Succeed();
 }
 
-CResult Sloong::SloongNetFirewall::ResponsePackageProcesser(CDataTransPackage* pack)
+PackageResult Sloong::SloongNetFirewall::ResponsePackageProcesser(DataPackage* pack)
 {
-    auto msgPack = pack->GetDataPackage();
-    auto sender = msgPack->sender();
-    auto func = (Functions)msgPack->function();
+    auto sender = pack->sender();
+    auto func = (Functions)pack->function();
     m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%llu]", Functions_Name(func).c_str(), sender));
 
-	return CResult::Succeed();
+	return PackageResult::Succeed();
 }
-
-void Sloong::SloongNetFirewall::OnSocketClose(SharedEvent event)
-{
-}
-
 
 inline CResult Sloong::SloongNetFirewall::CreateProcessEnvironmentHandler(void** out_env)
 {
@@ -90,13 +82,12 @@ inline CResult Sloong::SloongNetFirewall::CreateProcessEnvironmentHandler(void**
 
 
 
-void Sloong::SloongNetFirewall::EventPackageProcesser(CDataTransPackage* trans_pack)
+void Sloong::SloongNetFirewall::EventPackageProcesser(DataPackage* pack)
 {
 	auto event = Events_MIN;
-	auto data_pack = trans_pack->GetDataPackage();
-	if(!Manager::Events_Parse(data_pack->content(),&event))
+	if(!Manager::Events_Parse(pack->content(),&event))
 	{
-		m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]",data_pack->content().c_str()));
+		m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]",pack->content().c_str()));
 		return;
 	}
 

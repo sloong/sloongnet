@@ -9,17 +9,19 @@
 #define SOCKINFO_H
 
 #include "IObject.h"
-#include "DataTransPackage.h"
 
+#include "EasyConnect.h"
 namespace Sloong
 {
+    typedef queue<unique_ptr<DataPackage>> ReceivePackageList;
+    typedef TResult<ReceivePackageList> ReceivePackageListResult;
 	class ConnectSession : IObject
 	{
 	public:
 		ConnectSession();
 		~ConnectSession();
 
-		void Initialize(IControl *, UniqueConnection);
+		void Initialize(IControl *, UniqueConnection); 
 
 		/**
 		 * @Remarks: When data can receive, should call this function to receive the package.
@@ -28,7 +30,7 @@ namespace Sloong
 		 * 		if happened errors, return Error.
 		 * @Note: It always read all data in one time, so no return Retry.
 		 */
-		ResultType OnDataCanReceive(queue<UniqueTransPackage> &);
+		ReceivePackageListResult OnDataCanReceive();
 
 		/**
 		 * @Remarks: When data can send, should call this function to send the package.
@@ -46,7 +48,9 @@ namespace Sloong
 		 * 			if happened erros, return Error.
 		 * 			if have extend data or all data is no send and have EAGAIN sinal , return Retry.
 		 */
-		ResultType SendDataPackage(UniqueTransPackage);
+		ResultType SendDataPackage(UniquePackage);
+
+
 
 		inline bool TrySendLock()
 		{
@@ -60,20 +64,18 @@ namespace Sloong
 	protected:
 		void ProcessPrepareSendList();
 		ResultType ProcessSendList();
-		queue_ex<UniqueTransPackage> *GetSendPackage();
-		void AddToSendList(UniqueTransPackage);
+		queue_ex<UniquePackage> *GetSendPackage();
+		void AddToSendList(UniquePackage);
 
 	public:
-		queue_ex<UniqueTransPackage> *m_pSendList; // the send list of the bytes.
-		queue_ex<UniqueTransPackage> m_oPrepareSendList;
+		queue_ex<UniquePackage> *m_pSendList; // the send list of the bytes.
+		queue_ex<UniquePackage> m_oPrepareSendList;
 
 		time_t m_ActiveTime;
 		UniqueConnection m_pConnection = nullptr;
 
 		mutex m_oSockReadMutex;
 		mutex m_oSockSendMutex;
-		UniqueTransPackage m_pSendingPackage = nullptr;
-		UniqueTransPackage m_pReceiving = nullptr;
 		bool m_bIsSendListEmpty = true;
 	};
 

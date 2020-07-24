@@ -1,10 +1,13 @@
-/*
- * @Author: WCB
+/*** 
+ * @Author: Chuanbin Wang
  * @Date: 1970-01-01 08:00:00
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-08 10:59:47
- * @Description: file content
+ * @LastEditTime: 2020-07-24 16:34:30
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/core/epollex.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
+
 #ifndef CEPOLLEX_H
 #define CEPOLLEX_H
 
@@ -15,14 +18,14 @@
 typedef unsigned char byte;
 
 namespace Sloong
-{	
+{
 	typedef std::function<ResultType(int)> EpollEventHandlerFunc;
 	class CEpollEx : IObject
 	{
 	public:
-        CEpollEx();
+		CEpollEx();
 		virtual ~CEpollEx();
-        CResult Initialize(IControl*);
+		CResult Initialize(IControl *);
 		CResult Run();
 		void Exit();
 
@@ -32,18 +35,15 @@ namespace Sloong
 		void MonitorSendStatus(int);
 		void UnmonitorSendStatus(int);
 
-		void SetEventHandler(EpollEventHandlerFunc,EpollEventHandlerFunc,EpollEventHandlerFunc,EpollEventHandlerFunc);
+		void SetEventHandler(EpollEventHandlerFunc, EpollEventHandlerFunc, EpollEventHandlerFunc, EpollEventHandlerFunc);
+
 	protected:
 		/// 设置socket到非阻塞模式
 		int SetSocketNonblocking(int);
-		NResult CreateListenSocket( const string&, int);
+		NResult CreateListenSocket(const string &, int);
 
 		/// 修改socket的epoll监听事件
 		void CtlEpollEvent(int, int, int);
-		
-		// event function
-		void CloseConnectEventHandler(IEvent*);
-
 		void MainWorkLoop();
 
 	protected:
@@ -51,18 +51,17 @@ namespace Sloong
 		EpollEventHandlerFunc OnNewAccept = nullptr;
 		EpollEventHandlerFunc OnCanWriteData = nullptr;
 		EpollEventHandlerFunc OnOtherEventHappened = nullptr;
-		
+
 	protected:
-		int 	m_EpollHandle;
-		map_ex<int,thread::id> m_mapAcceptSocketToPID;
-		mutex	m_acceptMutex;
+		int m_EpollHandle;
+		map_ex<int, thread::id> m_mapAcceptSocketToPID;
+		mutex m_acceptMutex;
 		//struct epoll_event m_Event;
 		epoll_event m_Events[1024];
+
 	public:
-		
 		RUN_STATUS m_emStatus;
 	};
-}
-
+} // namespace Sloong
 
 #endif // CEPOLLEX_H

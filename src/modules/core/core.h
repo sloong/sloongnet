@@ -5,8 +5,7 @@
  * @LastEditTime: 2020-05-13 16:01:24
  * @Description: file content
  */
-#ifndef SLOONGNET_MODULE_CORE_CORE_H
-#define SLOONGNET_MODULE_CORE_CORE_H
+#pragma once
 
 // std c head file
 #include <errno.h> // for errno
@@ -47,7 +46,6 @@ using namespace Core;
 #include "queue_ex.hpp"
 #include "map_ex.hpp"
 #include "list_ex.hpp"
+#include "package.hpp"
 
 using namespace Sloong;
-
-#endif //SLOONGNET_MODULE_CORE_CORE_H

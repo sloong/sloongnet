@@ -8,10 +8,10 @@
 #include "servermanage.h"
 
 #include "utility.h"
-#include "events/SendPackageEvent.hpp"
-
 #include "snowflake.h"
 
+#include "events/SendPackage.hpp"
+#include "events/GetConnectionInfo.hpp"
 using namespace Sloong::Events;
 
 CResult Sloong::CServerManage::Initialize(IControl *ic, const string &db_path)
@@ -159,40 +159,38 @@ void Sloong::CServerManage::OnSocketClosed(int64_t con)
 	m_mapIDToTemplateItem[id].Created.remove(target);
 }
 
-CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
+PackageResult Sloong::CServerManage::ProcessHandler(DataPackage *pack)
 {
-	auto function = (Functions)pack->GetFunction();
+	auto function = (Functions)pack->function();
 	if (!Manager::Functions_IsValid(function))
 	{
-		pack->ResponsePackage(ResultType::Error, Helper::Format("Parser request package function[%s] error.", pack->GetRecvMessage().c_str()));
-		return CResult::Succeed();
+		return PackageResult::Make_OK(Package::MakeErrorResponse(pack,Helper::Format("Parser request package function[%s] error.", pack->content().c_str())));
 	}
 
-	auto req_str = pack->GetRecvMessage();
+	auto req_str = pack->content();
 	auto func_name = Functions_Name(function);
 	m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), CBase64::Encode(req_str).c_str()));
 	if (!m_mapFuncToHandler.exist(function))
 	{
-		pack->ResponsePackage(ResultType::Error, Helper::Format("Function [%s] no handler.", func_name.c_str()));
-		return CResult::Succeed();
+		return PackageResult::Make_OK(Package::MakeErrorResponse(pack,Helper::Format("Function [%s] no handler.", func_name.c_str())));
 	}
 
 	auto res = m_mapFuncToHandler[function](req_str, pack);
 	m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), CBase64::Encode(res.GetMessage()).c_str()));
 	if (res.GetResult() == ResultType::Ignore)
-		return res;
-	pack->ResponsePackage(res);
-	return CResult::Succeed();
+		return PackageResult::Ignore();
+	
+	return PackageResult::Make_OK(Package::MakeResponse(pack,res));
 }
 
-CResult Sloong::CServerManage::EventRecorderHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::EventRecorderHandler(const string &req_str, DataPackage *pack)
 {
 	return CResult::Succeed();
 }
 
-CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, DataPackage *pack)
 {
-	auto sender = pack->GetSender();
+	auto sender = pack->sender();
 	if (sender == 0)
 	{
 		sender = snowflake::Instance->nextid();
@@ -201,9 +199,12 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CData
 	if (sender_info == nullptr)
 	{
 		NodeItem item;
-		item.Address = pack->GetSocketIP();
 		item.UUID = sender;
 		m_mapUUIDToNodeItem[sender] = item;
+		auto event = make_shared<GetConnectionInfoEvent>(pack->sessionid());
+		event->SetCallbackFunc([item=&m_mapUUIDToNodeItem[sender]](IEvent *e, ConnectionInfo info){
+			item->Address = info.Address;
+		});
 		m_pLog->Debug(Helper::Format("Module[%s:%d] regist to system. Allocating uuid [%llu].", item.Address.c_str(), item.Port, item.UUID));
 		char m_pMsgBuffer[8] = {0};
 		char *pCpyPoint = m_pMsgBuffer;
@@ -261,9 +262,9 @@ void Sloong::CServerManage::RefreshModuleReference(int id)
 	}
 }
 
-CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, DataPackage *pack)
 {
-	auto sender = pack->GetSender();
+	auto sender = pack->sender();
 	auto req = ConvertStrToObj<RegisteNodeRequest>(req_str);
 	if (!req || sender == 0)
 		return CResult::Make_Error("The required parameter check error.");
@@ -284,9 +285,9 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, CDataTr
 	item.TemplateName = tpl.Name;
 	item.TemplateID = tpl.ID;
 	item.Port = tpl.ConfiguationObj->listenport();
-	item.ConnectionHashCode = pack->GetConnectionHashCode();
+	item.ConnectionHashCode = pack->sessionid();
 	tpl.Created.unique_insert(sender);
-	m_mapConnectionToUUID[pack->GetConnectionHashCode()] = sender;
+	m_mapConnectionToUUID[pack->sessionid()] = sender;
 
 	// Find reference node and notify them
 	list<uint64_t> notifyList;
@@ -309,7 +310,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, CDataTr
 	return CResult::Succeed();
 }
 
-CResult Sloong::CServerManage::AddTemplateHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::AddTemplateHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<AddTemplateRequest>(req_str);
 	auto info = req->addinfo();
@@ -336,7 +337,7 @@ CResult Sloong::CServerManage::AddTemplateHandler(const string &req_str, CDataTr
 	return CResult::Succeed();
 }
 
-CResult Sloong::CServerManage::DeleteTemplateHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::DeleteTemplateHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<DeleteTemplateRequest>(req_str);
 
@@ -359,7 +360,7 @@ CResult Sloong::CServerManage::DeleteTemplateHandler(const string &req_str, CDat
 	return CResult::Succeed();
 }
 
-CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<SetTemplateRequest>(req_str);
 	auto info = req->setinfo();
@@ -393,7 +394,7 @@ CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, CDataTr
 	return CResult::Succeed();
 }
 
-CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<QueryTemplateRequest>(req_str);
 
@@ -437,7 +438,7 @@ CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, CData
 	return CResult::Make_OK(str_res);
 }
 
-CResult Sloong::CServerManage::QueryNodeHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::QueryNodeHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<QueryNodeRequest>(req_str);
 	if (!req)
@@ -466,7 +467,7 @@ CResult Sloong::CServerManage::QueryNodeHandler(const string &req_str, CDataTran
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
-CResult Sloong::CServerManage::StopNodeHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::StopNodeHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<StopNodeRequest>(req_str);
 	if (!req)
@@ -483,7 +484,7 @@ CResult Sloong::CServerManage::StopNodeHandler(const string &req_str, CDataTrans
 	return CResult::Succeed();
 }
 
-CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<RestartNodeRequest>(req_str);
 	if (!req)
@@ -500,9 +501,9 @@ CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, CDataTr
 	return CResult::Succeed();
 }
 
-CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, DataPackage *pack)
 {
-	auto uuid = pack->GetSender();
+	auto uuid = pack->sender();
 	if (!m_mapUUIDToNodeItem.exist(uuid))
 		return CResult::Make_Error(Helper::Format("The node is no registed. [%llu]", uuid));
 
@@ -528,11 +529,11 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
-CResult Sloong::CServerManage::ReportLoadStatusHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::ReportLoadStatusHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<ReportLoadStatusRequest>(req_str);
 
-	m_pLog->Info(Helper::Format("Node[%lld] load status :CPU[%lf]Mem[%lf]", pack->GetSender(), req->cpuload(), req->memroyused()));
+	m_pLog->Info(Helper::Format("Node[%lld] load status :CPU[%lf]Mem[%lf]", pack->sender(), req->cpuload(), req->memroyused()));
 
 	return CResult(ResultType::Ignore);
 }

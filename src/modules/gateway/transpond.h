@@ -9,17 +9,11 @@
 #ifndef SLOONGNET_GATEWAY_TRANSPOND_H
 #define SLOONGNET_GATEWAY_TRANSPOND_H
 
-#include "DataTransPackage.h"
-#include "IControl.h"
+
+#include "IObject.h"
 
 namespace Sloong
 {
-	struct RequestInfo{
-		timeval tStart;
-		timeval tProcess;
-		uint64_t SerialNumber;
-        EasyConnect*    RequestConnect = nullptr;
-    };
 	class GatewayTranspond
 	{
 	public:
@@ -27,11 +21,11 @@ namespace Sloong
 
 		CResult Initialize(IControl*);
 
-        CResult RequestPackageProcesser( CDataTransPackage *);
-        CResult ResponsePackageProcesser( RequestInfo*, CDataTransPackage *);
+        PackageResult RequestPackageProcesser( DataPackage *);
+        PackageResult ResponsePackageProcesser( UniquePackage, DataPackage *);
 	private:
-        CResult MessageToProcesser(CDataTransPackage *);
-		CResult MessageToClient(RequestInfo*, CDataTransPackage *);
+        PackageResult MessageToProcesser(DataPackage *);
+		PackageResult MessageToClient(UniquePackage, DataPackage *);
 
     protected:
 		IControl* 	m_iC = nullptr;

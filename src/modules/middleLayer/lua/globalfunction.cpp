@@ -3,16 +3,16 @@
 #include "utility.h"
 #include "version.h"
 #include "epollex.h"
-#include "DataTransPackage.h"
+
 #include "IData.h"
 #include "snowflake.h"
 
 #include "protocol/datacenter.pb.h"
 #include "protocol/manager.pb.h"
 
-#include "events/SendPackageToManagerEvent.hpp"
-#include "events/RegisteConnectionEvent.hpp"
-#include "events/SendPackageEvent.hpp"
+#include "events/SendPackageToManager.hpp"
+#include "events/RegisteConnection.hpp"
+#include "events/SendPackage.hpp"
 using namespace Sloong::Events;
 
 unique_ptr<CGlobalFunction> Sloong::CGlobalFunction::Instance = make_unique<CGlobalFunction>();
@@ -298,8 +298,8 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
     auto req = make_shared<SendPackageEvent>(CGlobalFunction::Instance->m_SocketDBCenter);
     auto sync = make_shared<EasySync>();
     // TODO: If connect error, how process it?
-    req->SetCallbackFunc([DBName, sync](IEvent *event, CDataTransPackage *pack) {
-        auto res_str = pack->GetRecvMessage();
+    req->SetCallbackFunc([DBName, sync](IEvent *event, DataPackage *pack) {
+        auto res_str = pack->content();
         auto res = ConvertStrToObj<DataCenter::ConnectDatabaseResponse>(res_str);
 
         CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName] = res->sessionid();
@@ -351,8 +351,7 @@ CResult CGlobalFunction::RunSQLFunction(const string &request_str, int func)
     auto req = make_shared<SendPackageEvent>(CGlobalFunction::Instance->m_SocketDBCenter);
     auto result = make_shared<ResultType>(ResultType::Invalid);
     auto sync = make_shared<EasySync>();
-    req->SetCallbackFunc([result, sync, response_str](IEvent *event, CDataTransPackage *trans_pack) {
-        auto pack = trans_pack->GetDataPackage();
+    req->SetCallbackFunc([result, sync, response_str](IEvent *event, DataPackage *pack) {
         (*result) = pack->result();
 
         *response_str = pack->content();

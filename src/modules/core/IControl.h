@@ -29,13 +29,13 @@ namespace Sloong
 		// Get temp string, the param is key.
 		// If key not exist, return empty string
 		// If exist, return the value and remove from dictory.
-		virtual string GetTempString(const string &) = 0;
-		virtual void *GetTempObject(const string &, int *) = 0;
+		virtual string GetTempString(const string &, bool = true) = 0;
+		virtual void *GetTempObject(const string &, int *, bool = true) = 0;
 		virtual unique_ptr<char[]> GetTempBytes(const string &, int *) = 0;
 
 		// The return value is shared_ptr<void>, so must use the static_pointer_case to convert the type.
 		// and if want convert shared_ptr from base class to chiled class, should use dynamic_pointer_case , not static_pointer_case.
-		virtual shared_ptr<void> GetTempSharedPtr(const string &) = 0;
+		virtual shared_ptr<void> GetTempSharedPtr(const string &, bool = true) = 0;
 
 		virtual bool ExistTempBytes(const string &) = 0;
 		virtual bool ExistTempObject(const string &) = 0;

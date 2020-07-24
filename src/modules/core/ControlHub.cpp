@@ -30,31 +30,33 @@ void *Sloong::CControlHub::Get(DATA_ITEM item)
 	return (*data).second;
 }
 
-string Sloong::CControlHub::GetTempString(const string &key)
+string Sloong::CControlHub::GetTempString(const string &key, bool erase)
 {
 	auto baseitem = m_oTempDataList.try_get(key);
 	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::String)
 		return string();
 
-	auto item = dynamic_cast<StringData *>(*baseitem);
+	auto item = dynamic_pointer_cast<StringData>(*baseitem);
 	auto res = item->Data;
-	m_oTempDataList.erase(key);
-	SAFE_DELETE(item);
+	if( erase )
+		m_oTempDataList.erase(key);
+	
 	return res;
 }
 
-void *Sloong::CControlHub::GetTempObject(const string &key, int *out_size)
+void *Sloong::CControlHub::GetTempObject(const string &key, int *out_size, bool erase)
 {
 	auto baseitem = m_oTempDataList.try_get(key);
 	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::Object)
 		return nullptr;
 
-	auto item = dynamic_cast<ObjectData *>(*baseitem);
+	auto item = dynamic_pointer_cast<ObjectData>(*baseitem);
 	if (out_size)
 		*out_size = item->Size;
 	auto ptr = item->Ptr;
-	m_oTempDataList.erase(key);
-	SAFE_DELETE(item);
+	if( erase )
+		m_oTempDataList.erase(key);
+
 	return ptr;
 }
 
@@ -64,27 +66,26 @@ unique_ptr<char[]> Sloong::CControlHub::GetTempBytes(const string &key, int *out
 	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::Bytes)
 		return nullptr;
 
-	auto item = dynamic_cast<BytesData *>(*baseitem);
+	auto item = dynamic_pointer_cast<BytesData>(*baseitem);
 	if (out_in_size)
 		*out_in_size = item->Size;
 
 	auto ptr = std::move(item->Ptr);
 	m_oTempDataList.erase(key);
-	SAFE_DELETE(item);
 	return ptr;
 }
 
-shared_ptr<void> Sloong::CControlHub::GetTempSharedPtr(const string &key)
+shared_ptr<void> Sloong::CControlHub::GetTempSharedPtr(const string &key, bool erase)
 {
 	auto baseitem = m_oTempDataList.try_get(key);
 	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::SharedPtr)
 		return nullptr;
 
-	auto item = dynamic_cast<SharedPtrData *>(*baseitem);
+	auto item = dynamic_pointer_cast<SharedPtrData>(*baseitem);
+	auto ptr = item->Ptr;	
+	if( erase )
+		m_oTempDataList.erase(key);
 
-	auto ptr = item->Ptr;
-	m_oTempDataList.erase(key);
-	SAFE_DELETE(item);
 	return ptr;
 }
 
@@ -157,7 +158,8 @@ void Sloong::CControlHub::MessageWorkLoop()
 				continue;
 			}
 
-			if (m_oMsgList.TryMovePop(event) && event != nullptr)
+			event = m_oMsgList.TryMovePop();
+			if ( event != nullptr)
 			{
 				// Get the message handler list.
 				CallMessage(event);

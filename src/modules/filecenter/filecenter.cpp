@@ -8,25 +8,25 @@ using namespace Sloong;
 
 unique_ptr<CFileCenter> Sloong::CFileCenter::Instance = nullptr;
 
-extern "C" CResult RequestPackageProcesser(void *pEnv, CDataTransPackage *pack)
+extern "C" PackageResult RequestPackageProcesser(void *pEnv, DataPackage *pack)
 {
     auto pManager = STATIC_TRANS<FileManager *>(pEnv);
     if (pManager)
         return pManager->RequestPackageProcesser(pack);
     else
-        return CResult::Make_Error("Environment convert error. cannot process message.");
+        return PackageResult::Make_Error("Environment convert error. cannot process message.");
 }
 
-extern "C" CResult ResponsePackageProcesser(void *pEnv, CDataTransPackage *pack)
+extern "C" PackageResult ResponsePackageProcesser(void *pEnv, DataPackage *pack)
 {
     auto pManager = STATIC_TRANS<FileManager *>(pEnv);
     if (pManager)
         return pManager->ResponsePackageProcesser(pack);
     else
-        return CResult::Make_Error("Environment convert error. cannot process message.");
+        return PackageResult::Make_Error("Environment convert error. cannot process message.");
 }
 
-extern "C" CResult EventPackageProcesser(CDataTransPackage *pack)
+extern "C" CResult EventPackageProcesser(DataPackage *pack)
 {
     CFileCenter::Instance->EventPackageProcesser(pack);
     return CResult::Succeed();
@@ -61,12 +61,7 @@ CResult CFileCenter::Initialization(GLOBAL_CONFIG *config)
 CResult CFileCenter::Initialized(IControl *ic)
 {
     IObject::Initialize(ic);
-    m_iC->RegisterEventHandler(SocketClose, std::bind(&CFileCenter::OnSocketClose, this, std::placeholders::_1));
     return CResult::Succeed();
-}
-
-void Sloong::CFileCenter::OnSocketClose(SharedEvent event)
-{
 }
 
 CResult Sloong::CFileCenter::CreateProcessEnvironmentHandler(void **out_env)
@@ -80,13 +75,12 @@ CResult Sloong::CFileCenter::CreateProcessEnvironmentHandler(void **out_env)
 	return CResult::Succeed();
 }
 
-void Sloong::CFileCenter::EventPackageProcesser(CDataTransPackage *trans_pack)
+void Sloong::CFileCenter::EventPackageProcesser(DataPackage *pack)
 {
     auto event = Events_MIN;
-    auto data_pack = trans_pack->GetDataPackage();
-    if (!Manager::Events_Parse(data_pack->content(), &event))
+    if (!Manager::Events_Parse(pack->content(), &event))
     {
-        m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]", data_pack->content().c_str()));
+        m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]", pack->content().c_str()));
         return;
     }
 

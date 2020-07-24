@@ -40,6 +40,7 @@ message UploadedRequest{
 
 message PrepareDownloadRequest{
     string Hash_MD5=1;
+    int32 SplitPackageSize=2;
 }
 
 message PrepareDownloadResponse{

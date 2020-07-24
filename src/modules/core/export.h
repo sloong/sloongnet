@@ -6,20 +6,20 @@
  * @Description: file content
  */
 
-#ifndef SLOONGNET_MODULE_CORE_EXPORT_H
-#define SLOONGNET_MODULE_CORE_EXPORT_H
+#pragma once
+
+#include "result.hpp"
+typedef TResult<unique_ptr<DataPackage>> PackageResult;
 
 #include "protocol/base.pb.h"
 using namespace Base;
 #include "protocol/core.pb.h"
 using namespace Core;
-#include "DataTransPackage.h"
 #include "IControl.h"
 typedef CResult (*CreateProcessEnvironmentFunction)(void**);
-typedef CResult (*RequestPackageProcessFunction)(void*,CDataTransPackage*);
-typedef CResult (*ResponsePackageProcessFunction)(void*,CDataTransPackage*);
-typedef CResult (*EventPackageProcessFunction)(CDataTransPackage*);
+typedef PackageResult (*RequestPackageProcessFunction)(void*,DataPackage*);
+typedef PackageResult (*ResponsePackageProcessFunction)(void*,DataPackage*);
+typedef CResult (*EventPackageProcessFunction)(DataPackage*);
 typedef CResult (*NewConnectAcceptProcessFunction)(SOCKET);
 typedef CResult (*ModuleInitializationFunction)(GLOBAL_CONFIG*);
 typedef CResult (*ModuleInitializedFunction)(IControl*);
-#endif //SLOONGNET_MODULE_CORE_EXPORT_H

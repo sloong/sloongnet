@@ -9,6 +9,7 @@
 #define SLOONGNET_INTERFACE_OBJECT_H
 
 #include "IControl.h"
+#include "core.h"
 
 namespace Sloong
 {

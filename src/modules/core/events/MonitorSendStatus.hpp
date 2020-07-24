@@ -1,9 +1,9 @@
 /*** 
  * @Author: Chuanbin Wang
- * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-07-24 16:48:24
+ * @Date: 2020-05-14 17:43:08
+ * @LastEditTime: 2020-07-24 16:45:15
  * @LastEditors: Chuanbin Wang
- * @FilePath: /engine/src/modules/core/NetworkHub.h
+ * @FilePath: /engine/src/modules/core/events/MonitorSendStatus.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
  * @Description: 
  */
@@ -59,94 +59,24 @@
 
 
 #pragma once
-
-#include "IObject.h"
-#include "export.h"
+#include "NormalEvent.hpp"
 namespace Sloong
 {
-    class ConnectSession;
-    class CEpollEx;
-    class CNetworkHub : IObject
-    {
-    public:
-        CNetworkHub();
-        ~CNetworkHub();
+	namespace Events
+	{
+		class MonitorSendStatusEvent : public NormalEvent
+		{
+		public:
+			MonitorSendStatusEvent(int64_t session):NormalEvent( EVENT_TYPE::MonitorSendStatus ){
+				m_SessionID = session;
+			}
+			virtual	~MonitorSendStatusEvent(){}
 
-        CResult Initialize(IControl *);
+			inline int64_t GetSessionID() { return m_SessionID; }
+		protected:
+			int64_t m_SessionID;
+		};
 
-        void EnableClientCheck(const string &, int);
-        void EnableTimeoutCheck(int, int);
-        void EnableSSL(const string &, const string &, const string &);
+	}
+}
 
-        // event handler
-        void Run(SharedEvent);
-        void Exit(SharedEvent);
-        void SendPackageEventHandler(SharedEvent);
-        void OnConnectionBreakEventHandler(SharedEvent);
-        void MonitorSendStatusEventHandler(SharedEvent);
-        void RegisteConnectionEventHandler(SharedEvent);
-        void OnGetConnectionInfoEventHandler(SharedEvent);
-
-        inline void RegisterProcesser(RequestPackageProcessFunction req, ResponsePackageProcessFunction res, EventPackageProcessFunction event)
-        {
-            m_pRequestFunc = req;
-            m_pResponseFunc = res;
-            m_pEventFunc = event;
-        }
-        inline void RegisterEnvCreateProcesser(CreateProcessEnvironmentFunction value)
-        {
-            m_pCreateEnvFunc = value;
-        }
-
-        /**
-         * @Remarks: In default case, the connect just accept and add to epoll watch list. 
-         *       if want do other operation, call this function and set the process, when accpet ent, will call this function .
-         * @Params: the function bind for processer
-         * @Return: NO
-         */
-        void RegisterAccpetConnectProcesser(NewConnectAcceptProcessFunction value)
-        {
-            m_pAcceptFunc = value;
-        }
-
-        // Work thread.
-        void CheckTimeoutWorkLoop();
-        void MessageProcessWorkLoop();
-
-        // Callback function
-        ResultType OnNewAccept(int);
-        ResultType OnDataCanReceive(int64_t);
-        ResultType OnCanWriteData(int64_t);
-        ResultType OnOtherEventHappened(int64_t);
-
-    protected:
-        void SendConnectionBreak(int64_t);
-        void AddMessageToSendList(UniquePackage);
-
-    protected:
-        map_ex<int64_t, unique_ptr<ConnectSession>> m_mapHashToConnectSession;
-        mutex m_oSockListMutex;
-        bool m_bIsRunning;
-        unique_ptr<CEpollEx> m_pEpoll;
-        EasySync m_oCheckTimeoutThreadSync;
-
-        LPVOID m_pCTX = nullptr;
-        GLOBAL_CONFIG *m_pConfig = nullptr;
-
-        // Timeout check
-        int m_nConnectTimeoutTime = 0;
-        int m_nCheckTimeoutInterval = 0;
-        // Client check
-        string m_strClientCheckKey = "";
-        int m_nClientCheckKeyLength = 0;
-        int m_nClientCheckTime = 0;
-        // For message process
-        EasySync m_oProcessThreadSync;
-        CreateProcessEnvironmentFunction m_pCreateEnvFunc = nullptr;
-        RequestPackageProcessFunction m_pRequestFunc = nullptr;
-        ResponsePackageProcessFunction m_pResponseFunc = nullptr;
-        EventPackageProcessFunction m_pEventFunc = nullptr;
-        NewConnectAcceptProcessFunction m_pAcceptFunc = nullptr;
-        queue_ex<UniquePackage> *m_pWaitProcessList;
-    };
-} // namespace Sloong

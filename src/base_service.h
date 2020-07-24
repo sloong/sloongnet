@@ -1,9 +1,11 @@
-/*
- * @Author: WCB
+/*** 
+ * @Author: Chuanbin Wang
  * @Date: 1970-01-01 08:00:00
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 19:40:31
- * @Description: file content
+ * @LastEditTime: 2020-07-24 17:53:00
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/base_service.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
 
 #ifndef SLOONGNET_BASE_SERVICE_H
@@ -13,9 +15,10 @@
 #include "IData.h"
 #include "IEvent.h"
 #include "IControl.h"
-#include "DataTransPackage.h"
+
 #include "ControlHub.h"
 #include "NetworkHub.h"
+#include "EasyConnect.h"
 #include <dlfcn.h>
 namespace Sloong
 {

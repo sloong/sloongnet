@@ -61,7 +61,7 @@ enum EVENT_TYPE
 	// 当连接关闭时会发送该消息
 	// 需要在处理完成后调用回调函数以清除连接信息。
 	// 参数类型为CNetworkEvent
-	SocketClose=11;
+	ConnectionBreak=11;
 
 	// 需要发送数据给客户端时，使用该消息
 	SendPackage=12;
@@ -85,6 +85,9 @@ enum EVENT_TYPE
     // 注册一个已经存在的连接到EPOLL
     // 参数类型为类型为CNetworkEvent
     RegisteConnection=16;
+
+    // 获取一个连接的信息
+    GetConnectionInfo=17;
 	
     //////////////////////////////////////////////////////////////////////////
 	// 由 * LuaMiddleLayer * 模块提供的消息 (21-30)

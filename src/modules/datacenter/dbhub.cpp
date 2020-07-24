@@ -20,31 +20,28 @@ CResult Sloong::DBHub::Initialize(IControl *ic)
     return CResult::Succeed();
 }
 
-CResult Sloong::DBHub::RequestPackageProcesser(CDataTransPackage *pack)
+PackageResult Sloong::DBHub::RequestPackageProcesser(DataPackage *pack)
 {
-    auto function = (Functions)pack->GetFunction();
+    auto function = (Functions)pack->function();
     if (!DataCenter::Functions_IsValid(function))
     {
-        pack->ResponsePackage(ResultType::Error, Helper::Format("Parser request package function[%s] error.", pack->GetRecvMessage().c_str()));
-        return CResult::Succeed();
+        return PackageResult::Make_Error(Helper::Format("Parser request package function[%s] error.", pack->content().c_str()));
     }
 
-    auto req_str = pack->GetRecvMessage();
+    auto req_str = pack->content();
     auto func_name = Functions_Name(function);
     m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), CBase64::Encode(req_str).c_str()));
     if (!m_mapFuncToHandler.exist(function))
     {
-        pack->ResponsePackage(ResultType::Error, Helper::Format("Function [%s] no handler.", func_name.c_str()));
-        return CResult::Succeed();
+        return PackageResult::Make_Error(Helper::Format("Function [%s] no handler.", func_name.c_str()));
     }
 
     auto res = m_mapFuncToHandler[function](req_str, pack);
     m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
-    pack->ResponsePackage(res);
-    return CResult::Succeed();
+    return PackageResult::Make_OK(Package::MakeResponse(pack,res));
 }
 
-CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, CDataTransPackage *pack)
+CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, DataPackage *pack)
 {
     auto req = ConvertStrToObj<ConnectDatabaseRequest>(req_obj);
 
@@ -72,7 +69,7 @@ CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, CDataTransP
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
-CResult Sloong::DBHub::QuerySQLCmdHandler(const string &req_obj, CDataTransPackage *pack)
+CResult Sloong::DBHub::QuerySQLCmdHandler(const string &req_obj, DataPackage *pack)
 {
     auto req = ConvertStrToObj<QuerySQLCmdRequest>(req_obj);
 
@@ -97,7 +94,7 @@ CResult Sloong::DBHub::QuerySQLCmdHandler(const string &req_obj, CDataTransPacka
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
-CResult Sloong::DBHub::InsertSQLCmdHandler(const string &req_obj, CDataTransPackage *pack)
+CResult Sloong::DBHub::InsertSQLCmdHandler(const string &req_obj, DataPackage *pack)
 {
     auto req = ConvertStrToObj<InsertSQLCmdRequest>(req_obj);
 
@@ -131,7 +128,7 @@ CResult Sloong::DBHub::InsertSQLCmdHandler(const string &req_obj, CDataTransPack
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
-CResult Sloong::DBHub::DeleteSQLCmdHandler(const string &req_obj, CDataTransPackage *pack)
+CResult Sloong::DBHub::DeleteSQLCmdHandler(const string &req_obj, DataPackage *pack)
 {
     auto req = ConvertStrToObj<DeleteSQLCmdRequest>(req_obj);
 
@@ -149,7 +146,7 @@ CResult Sloong::DBHub::DeleteSQLCmdHandler(const string &req_obj, CDataTransPack
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
-CResult Sloong::DBHub::UpdateSQLCmdHandler(const string &req_obj, CDataTransPackage *pack)
+CResult Sloong::DBHub::UpdateSQLCmdHandler(const string &req_obj, DataPackage *pack)
 {
     auto req = ConvertStrToObj<UpdateSQLCmdRequest>(req_obj);
 
