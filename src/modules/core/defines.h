@@ -44,7 +44,7 @@ namespace Sloong
 	inline string FormatRecord(DataPackage *pack)
 	{
 		string str;
-		auto clocks = pack->clocks();
+		auto clocks = pack->reserved().clocks();
 		auto start = clocks.begin();
 		for (auto item = start+1 ; item != clocks.end(); item++)
 		{

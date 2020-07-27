@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-24 14:58:32
+ * @LastEditTime: 2020-07-27 15:18:18
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -71,7 +71,9 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 		pack->clear_extend();
 	}
 
-	m_pLog->Debug(Helper::Format("SEND>>>[%d]>>No[%llu]>>[%d]byte", pack->priority(), pack->id(), pack->ByteSize()));
+	
+	pack->clear_reserved();
+	m_pLog->Debug(Helper::Format("SEND>>>[%d]>>No[%llu]>>[%d]byte", m_pConnection->GetSocketID() , pack->id(), pack->ByteSize()));
 
 	// if have exdata, directly add to epoll list.
 	if (IsBigPackage(pack.get()) || m_pConnection->IsSending() || (m_bIsSendListEmpty == false && !m_oPrepareSendList.empty()) || m_oSockSendMutex.try_lock() == false)
@@ -132,8 +134,9 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 			}
 			else
 			{
-				m_pLog->Debug(Helper::Format("RECV<<<[%d]<<No[%llu]<<[%d]byte", package->priority(), package->id(), package->ByteSize()));
-				package->add_clocks(GetClock());
+				m_pLog->Debug(Helper::Format("RECV<<<[%d]<<No[%llu]<<[%d]byte", m_pConnection->GetSocketID(), package->id(), package->ByteSize()));
+				package->mutable_reserved()->add_clocks(GetClock());
+				package->mutable_reserved()->set_sessionid(m_pConnection->GetHashCode());
 
 				if (package->priority() > s_PriorityLevel || package->priority() < 0)
 				{

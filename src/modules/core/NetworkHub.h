@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-07-24 16:48:24
+ * @LastEditTime: 2020-07-24 19:13:50
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -82,7 +82,7 @@ namespace Sloong
         void Run(SharedEvent);
         void Exit(SharedEvent);
         void SendPackageEventHandler(SharedEvent);
-        void OnConnectionBreakEventHandler(SharedEvent);
+        void OnConnectionBreakedEventHandler(SharedEvent);
         void MonitorSendStatusEventHandler(SharedEvent);
         void RegisteConnectionEventHandler(SharedEvent);
         void OnGetConnectionInfoEventHandler(SharedEvent);
@@ -114,17 +114,18 @@ namespace Sloong
         void MessageProcessWorkLoop();
 
         // Callback function
-        ResultType OnNewAccept(int);
-        ResultType OnDataCanReceive(int64_t);
-        ResultType OnCanWriteData(int64_t);
-        ResultType OnOtherEventHappened(int64_t);
+        ResultType OnNewAccept(SOCKET);
+        ResultType OnDataCanReceive(SOCKET);
+        ResultType OnCanWriteData(SOCKET);
+        ResultType OnOtherEventHappened(SOCKET);
 
     protected:
         void SendConnectionBreak(int64_t);
         void AddMessageToSendList(UniquePackage);
 
     protected:
-        map_ex<int64_t, unique_ptr<ConnectSession>> m_mapHashToConnectSession;
+        map_ex<int64_t, unique_ptr<ConnectSession>> m_mapConnectIDToSession;
+        map_ex<SOCKET,int64_t> m_mapSocketToSessionID;
         mutex m_oSockListMutex;
         bool m_bIsRunning;
         unique_ptr<CEpollEx> m_pEpoll;

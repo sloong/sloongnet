@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-07-24 16:30:35
+ * @LastEditTime: 2020-07-24 19:29:28
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/manager.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -43,7 +43,7 @@ namespace Sloong
 	protected:
 		void ResetControlConfig(GLOBAL_CONFIG *);
 
-		void OnConnectionBreak(SharedEvent);
+		void OnConnectionBreaked(SharedEvent);
 
 	protected:
 		list<unique_ptr<CServerManage>> m_listServerManage;

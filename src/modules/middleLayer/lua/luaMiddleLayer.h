@@ -100,7 +100,7 @@ namespace Sloong
 		void OnReferenceModuleOnlineEvent(const string &, DataPackage *);
 		void OnReferenceModuleOfflineEvent(const string &, DataPackage *);
 
-		void OnConnectionBreak(SharedEvent);
+		void OnConnectionBreaked(SharedEvent);
 
 		inline CLog* GetLog(){ return m_pLog; }
 

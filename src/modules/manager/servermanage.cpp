@@ -201,7 +201,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, DataP
 		NodeItem item;
 		item.UUID = sender;
 		m_mapUUIDToNodeItem[sender] = item;
-		auto event = make_shared<GetConnectionInfoEvent>(pack->sessionid());
+		auto event = make_shared<GetConnectionInfoEvent>(pack->reserved().sessionid());
 		event->SetCallbackFunc([item=&m_mapUUIDToNodeItem[sender]](IEvent *e, ConnectionInfo info){
 			item->Address = info.Address;
 		});
@@ -285,9 +285,9 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, DataPac
 	item.TemplateName = tpl.Name;
 	item.TemplateID = tpl.ID;
 	item.Port = tpl.ConfiguationObj->listenport();
-	item.ConnectionHashCode = pack->sessionid();
+	item.ConnectionHashCode = pack->reserved().sessionid();
 	tpl.Created.unique_insert(sender);
-	m_mapConnectionToUUID[pack->sessionid()] = sender;
+	m_mapConnectionToUUID[pack->reserved().sessionid()] = sender;
 
 	// Find reference node and notify them
 	list<uint64_t> notifyList;

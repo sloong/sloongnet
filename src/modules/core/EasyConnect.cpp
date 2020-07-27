@@ -141,6 +141,10 @@ CResult Sloong::EasyConnect::SendPackage(UniquePackage pack)
 		m_SendPackageSize = m_strSending.size();
 		m_SentSize = 0;
 	}
+	else if( !m_strSending.empty() && pack != nullptr )
+	{
+		return CResult::Make_Error("Prev package is no sending done! Make sure the send status is checked before sending new package.");
+	}
 
 	if (m_SendPackageSize == 0)
 	{
@@ -235,7 +239,6 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 		{
 			return PackageResult::Make_Error("Parser receive data error.");
 		}
-		package->set_sessionid(GetHashCode());
 		m_strReceiving.clear();
 		m_RecvPackageSize = 0;
 		m_ReceivedSize = 0;
@@ -262,12 +265,14 @@ ResultType Sloong::EasyConnect::RecvPackage(string &res, int &nPackage, int &nRe
 {
 	if (nPackage == 0)
 	{
-		nPackage = RecvLengthData(block);
-
-		if (nPackage == -11)
+		auto len = RecvLengthData(block);
+	
+		if (len == -11)
 			return ResultType::Warning;
-		else if (nPackage <= 0)
+		else if (len <= 0)
 			return ResultType::Error;
+		else
+			nPackage = len;
 	}
 
 	string buf;

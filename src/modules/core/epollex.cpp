@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-24 16:47:53
+ * @LastEditTime: 2020-07-27 15:21:59
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/epollex.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -29,7 +29,7 @@ Sloong::CEpollEx::~CEpollEx()
 {
 }
 
-NResult Sloong::CEpollEx::CreateListenSocket(const string& addr, int port)
+NResult Sloong::CEpollEx::CreateListenSocket(const string &addr, int port)
 {
 	// 初始化socket
 	auto listen_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -73,9 +73,9 @@ CResult Sloong::CEpollEx::Initialize(IControl *iMsg)
 	m_pLog->Info(Helper::Format("epollex is initialize.license port is %d", nPort));
 
 	// For Test the port cannot used. when test done, close it.
-	auto nRes = CreateListenSocket("0.0.0.0",nPort);
-	if( nRes.IsFialed() )
-		return CResult(nRes.GetResult(),nRes.GetMessage());
+	auto nRes = CreateListenSocket("0.0.0.0", nPort);
+	if (nRes.IsFialed())
+		return CResult(nRes.GetResult(), nRes.GetMessage());
 	else
 	{
 		shutdown(nRes.GetResultObject(), SHUT_RDWR);
@@ -153,10 +153,10 @@ int Sloong::CEpollEx::SetSocketNonblocking(int socket)
 	int op;
 
 	op = fcntl(socket, F_GETFL, 0);
-	fcntl(socket, F_SETFL, op | O_NONBLOCK );
+	fcntl(socket, F_SETFL, op | O_NONBLOCK);
 
 	int enable = 1;
-    setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (void*)&enable,sizeof(enable));
+	setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (void *)&enable, sizeof(enable));
 
 	return op;
 }
@@ -172,13 +172,14 @@ void Sloong::CEpollEx::MainWorkLoop()
 {
 	auto pid = this_thread::get_id();
 	string spid = Helper::ntos(pid);
-	m_pLog->Info("epoll work thread is running. PID:" + spid);
+	
+	m_pLog->Info("epoll work thread is started. PID:" + spid);
 	int port = IData::GetGlobalConfig()->listenport();
 	auto res = CreateListenSocket("0.0.0.0", port);
 	if (res.IsFialed())
 	{
 		m_pLog->Fatal(res.GetMessage());
-		m_iC->SendMessage(EVENT_TYPE::ProgramStop );
+		m_iC->SendMessage(EVENT_TYPE::ProgramStop);
 		return;
 	}
 	int sock = res.GetResultObject();
@@ -189,17 +190,18 @@ void Sloong::CEpollEx::MainWorkLoop()
 	// 创建epoll事件对象
 	CtlEpollEvent(EPOLL_CTL_ADD, sock, EPOLLIN | EPOLLOUT);
 
+	while (m_emStatus == RUN_STATUS::Created)
+	{
+		this_thread::sleep_for(std::chrono::microseconds(100));
+	}
+
+	m_pLog->Info("epoll work thread is running. PID:" + spid);
+
 	int n, i;
-	while (m_emStatus != RUN_STATUS::Exit)
+	while (m_emStatus == RUN_STATUS::Running)
 	{
 		try
 		{
-			if (m_emStatus == RUN_STATUS::Created)
-			{
-				this_thread::sleep_for( std::chrono::microseconds(100) );
-				continue;
-			}
-
 			// 返回需要处理的事件数
 			n = epoll_wait(m_EpollHandle, m_Events, 1024, 500);
 
@@ -209,7 +211,7 @@ void Sloong::CEpollEx::MainWorkLoop()
 			for (i = 0; i < n; ++i)
 			{
 				int fd = m_Events[i].data.fd;
-				if ( m_mapAcceptSocketToPID.exist(fd))
+				if (m_mapAcceptSocketToPID.exist(fd))
 				{
 					m_pLog->Debug("EPoll Accept event happened.");
 					// accept the connect and add it to the list
@@ -220,13 +222,9 @@ void Sloong::CEpollEx::MainWorkLoop()
 						if (conn_sock == -1)
 						{
 							if (errno == EAGAIN)
-							{
 								m_pLog->Debug("Accept end.");
-							}
 							else
-							{
 								m_pLog->Warn("Accept error.");
-							}
 							continue;
 						}
 						auto res = OnNewAccept(conn_sock);
@@ -237,8 +235,6 @@ void Sloong::CEpollEx::MainWorkLoop()
 						}
 						else
 						{
-							//将接受的连接添加到Epoll的事件中.
-							// Add the recv event to epoll;
 							SetSocketNonblocking(conn_sock);
 							// 刚接收连接，所以只关心可读状态。
 							CtlEpollEvent(EPOLL_CTL_ADD, conn_sock, EPOLLIN);
@@ -248,15 +244,15 @@ void Sloong::CEpollEx::MainWorkLoop()
 				// EPOLLIN 可读消息
 				else if (m_Events[i].events & EPOLLIN)
 				{
-					m_pLog->Debug(Helper::Format("EPoll EPOLLIN event happened. Socket[%d][%s] Data Can Receive.",fd, CUtility::GetSocketAddress(fd).c_str()));
+					m_pLog->Debug(Helper::Format("EPoll EPOLLIN event happened. Socket[%d][%s] Data Can Receive.", fd, CUtility::GetSocketAddress(fd).c_str()));
 					auto res = OnDataCanReceive(fd);
-					if( res == ResultType::Error )
+					if (res == ResultType::Error)
 						DeleteMonitorSocket(fd);
 				}
 				// EPOLLOUT 可写消息
 				else if (m_Events[i].events & EPOLLOUT)
 				{
-					m_pLog->Debug(Helper::Format("EPoll EPOLLOUT event happened.Socket[%d][%s] Can Write Data.", fd,CUtility::GetSocketAddress(fd).c_str()));
+					m_pLog->Debug(Helper::Format("EPoll EPOLLOUT event happened.Socket[%d][%s] Can Write Data.", fd, CUtility::GetSocketAddress(fd).c_str()));
 					auto res = OnCanWriteData(fd);
 					// 所有消息全部发送完毕后只需要监听可读消息就可以了。
 					if (res == ResultType::Succeed)
@@ -264,7 +260,7 @@ void Sloong::CEpollEx::MainWorkLoop()
 				}
 				else
 				{
-					m_pLog->Debug(Helper::Format("EPoll unkuown event happened. Socket[%d][%s] close this connnect.",fd, CUtility::GetSocketAddress(fd).c_str()));
+					m_pLog->Debug(Helper::Format("EPoll unkuown event happened. Socket[%d][%s] close this connnect.", fd, CUtility::GetSocketAddress(fd).c_str()));
 					OnOtherEventHappened(fd);
 				}
 			}

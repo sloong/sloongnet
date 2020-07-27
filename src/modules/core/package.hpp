@@ -38,8 +38,9 @@ namespace Sloong
             response_pack->set_priority(request_pack->priority());
             response_pack->set_function(request_pack->function());
             response_pack->set_id(request_pack->id());
-            response_pack->set_sessionid(request_pack->sessionid());
             response_pack->set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
+            
+            response_pack->mutable_reserved()->set_sessionid(request_pack->reserved().sessionid());
             return response_pack;
         }
 

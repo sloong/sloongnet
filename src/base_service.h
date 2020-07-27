@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-24 17:53:00
+ * @LastEditTime: 2020-07-27 15:25:02
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -32,13 +32,13 @@ namespace Sloong
 		// Just call it without Control module.
 		virtual CResult Initialize(bool, string, int, int=0);
 
-		virtual CResult Run();
+		virtual CResult Run(bool);
 		virtual void Stop();
 
 		TResult<shared_ptr<DataPackage>> RegisteToControl(EasyConnect *con, string uuid);
 
 	protected:
-		virtual CResult InitlializeForWorker(RuntimeDataPackage *, int);
+		virtual CResult InitlializeForWorker(RuntimeDataPackage *, int, EasyConnect *);
 		virtual CResult InitlializeForManager(RuntimeDataPackage *);
 
 		CResult RegisteNode();
@@ -62,7 +62,7 @@ namespace Sloong
 		unique_ptr<CControlHub> m_iC = make_unique<CControlHub>();
 		unique_ptr<CLog> m_pLog = make_unique<CLog>();
 		RuntimeDataPackage m_oServerConfig;
-		UniqueConnection m_pManagerConnect = nullptr;
+		int64_t m_ManagerSession;
 		Json::Value m_oModuleConfig;
 		EasySync m_oExitSync;
 		CResult m_oExitResult = CResult::Succeed();

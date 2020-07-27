@@ -1,11 +1,11 @@
 /*** 
  * @Author: Chuanbin Wang
  * @Date: 2020-05-14 17:43:08
- * @LastEditTime: 2020-07-24 16:03:12
+ * @LastEditTime: 2020-07-24 19:29:44
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/events/ConnectionBreak.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: ConnectionBreakEvent object
+ * @Description: ConnectionBreakedEventn object
  */
 
 
@@ -16,13 +16,13 @@ namespace Sloong
 {
 	namespace Events
 	{
-		class ConnectionBreakEvent : public NormalEvent
+		class ConnectionBreakedEventn : public NormalEvent
 		{
 		public:
-			ConnectionBreakEvent(int64_t session):NormalEvent( EVENT_TYPE::ConnectionBreak ){
+			ConnectionBreakedEventn(int64_t session):NormalEvent( EVENT_TYPE::ConnectionBreaked ){
 				m_SessionID = session;
 			}
-			virtual	~ConnectionBreakEvent(){}
+			virtual	~ConnectionBreakedEventn(){}
 
 			inline int64_t GetSessionID() { return m_SessionID; }
 		protected:

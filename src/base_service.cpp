@@ -48,14 +48,8 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
     Instance->Stop();
 }
 
-CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int forceTempID)
+CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int forceTempID, EasyConnect *con)
 {
-    m_pManagerConnect = make_unique<EasyConnect>();
-    m_pManagerConnect->InitializeAsClient(data->manageraddress(), data->managerport(), nullptr);
-    if (!m_pManagerConnect->Connect())
-    {
-        return CResult::Make_Error("Connect to control fialed.");
-    }
     cout << "Connect to control succeed. Start registe and get configuation." << endl;
 
     int64_t uuid = 0;
@@ -70,9 +64,9 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
             sub_req.set_forcetargettemplateid(forceTempID);
             req->set_content(ConvertObjToStr(&sub_req));
         }
-        if (m_pManagerConnect->SendPackage(move(req)).IsFialed())
+        if (con->SendPackage(move(req)).IsFialed())
             return CResult::Make_Error("Send get config request error.");
-        auto res = m_pManagerConnect->RecvPackage(true);
+        auto res = con->RecvPackage(true);
         if (res.IsFialed())
             return CResult::Make_Error("Receive get config result error.");
         auto response = res.MoveResultObject();
@@ -151,13 +145,21 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     InitSystem();
 
     CResult res = CResult::Succeed();
+    UniqueConnection pManagerConnect = nullptr;
+
     if (ManagerMode)
     {
         res = InitlializeForManager(&m_oServerConfig);
     }
     else
     {
-        res = InitlializeForWorker(&m_oServerConfig, forceTempID);
+        pManagerConnect = make_unique<EasyConnect>();
+        pManagerConnect->InitializeAsClient(m_oServerConfig.manageraddress(), m_oServerConfig.managerport(), nullptr);
+        if (!pManagerConnect->Connect())
+        {
+            return CResult::Make_Error("Connect to control fialed.");
+        }
+        res = InitlializeForWorker(&m_oServerConfig, forceTempID, pManagerConnect.get());
     }
     if (res.IsFialed())
         return res;
@@ -208,7 +210,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     m_iC->RegisterEventHandler(EVENT_TYPE::ProgramRestart, std::bind(&CSloongBaseService::OnProgramRestartEventHandler, this, std::placeholders::_1));
     m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStop, std::bind(&CSloongBaseService::OnProgramStopEventHandler, this, std::placeholders::_1));
     m_iC->RegisterEventHandler(EVENT_TYPE::SendPackageToManager, std::bind(&CSloongBaseService::OnSendPackageToManagerEventHandler, this, std::placeholders::_1));
-    
+
     IData::Initialize(m_iC.get());
     res = m_pNetwork->Initialize(m_iC.get());
     if (res.IsFialed())
@@ -221,25 +223,19 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     m_pNetwork->RegisterEnvCreateProcesser(m_pModuleCreateProcessEvnFunc);
     m_pNetwork->RegisterProcesser(m_pModuleRequestHandler, m_pModuleResponseHandler, m_pModuleEventHandler);
     m_pNetwork->RegisterAccpetConnectProcesser(m_pModuleAcceptHandler);
-    if (m_pManagerConnect)
+    if (pManagerConnect)
     {
-        auto event = make_shared<Events::RegisteConnectionEvent>(m_pManagerConnect->m_strAddress, m_pManagerConnect->m_nPort);
-        m_iC->SendMessage(event);
+        auto event = make_shared<Events::RegisteConnectionEvent>(pManagerConnect->m_strAddress, pManagerConnect->m_nPort);
+        event->SetCallbackFunc([s=&m_ManagerSession](IEvent* e,int64_t sessionid) {
+            *s = sessionid;
+        });
+        m_iC->CallMessage(event);
     }
 
     res = m_pModuleInitializedFunc(m_iC.get());
     if (res.IsFialed())
         m_pLog->Fatal(res.GetMessage());
     m_pLog->Debug("Module initialized succeed.");
-    if (!ManagerMode)
-    {
-        res = RegisteNode();
-        if (res.IsFialed())
-        {
-            m_pLog->Fatal(res.GetMessage());
-            return res;
-        }
-    }
 
     return CResult::Succeed();
 }
@@ -313,30 +309,43 @@ CResult CSloongBaseService::RegisteNode()
     RegisteNodeRequest req_pack;
     req_pack.set_templateid(m_oServerConfig.templateid());
 
-    auto req = Package::GetRequestPackage();
-    req->set_function(Manager::Functions::RegisteNode);
-    req->set_sender(m_oServerConfig.nodeuuid());
-    req->set_content(ConvertObjToStr(&req_pack));
+    auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::RegisteNode, ConvertObjToStr(&req_pack));
+    auto response_str = make_shared<string>();
+    auto result = make_shared<ResultType>(ResultType::Invalid);
+    auto sync = make_shared<EasySync>();
+    event->SetCallbackFunc([result, sync, response_str](IEvent *e, DataPackage *p) {
+        (*result) = p->result();
+        *response_str = p->content();
+        sync->notify_one();
+    });
+    m_iC->CallMessage(event);
 
-    auto result = m_pManagerConnect->SendPackage(move(req));
-    if (result.IsFialed())
-        return CResult::Make_Error("Send RegisteNode request error." + result.GetMessage());
-    auto response = m_pManagerConnect->RecvPackage(true);
-    if (response.IsFialed())
-        return CResult::Make_Error(" Get RegisteNode result error." + response.GetMessage());
-    auto response_package = response.MoveResultObject();
-    if (!response_package)
-        return CResult::Make_Error("Parse the get config response data error.");
-    if (response_package->result() != ResultType::Succeed)
-        return CResult::Make_Error(Helper::Format("RegisteNode request return error. message: %s", response_package->content().c_str()));
+    //if (!sync->wait_for(5000))
+    sync->wait();
+    
+     if (*result != ResultType::Succeed)
+    {
+        return CResult::Make_Error(*response_str);
+    }
     return CResult::Succeed();
 }
 
-CResult CSloongBaseService::Run()
+CResult CSloongBaseService::Run(bool ManagerMode)
 {
     m_pLog->Info("Application begin running.");
     m_iC->SendMessage(EVENT_TYPE::ProgramStart);
     m_emStatus = RUN_STATUS::Running;
+
+    if (!ManagerMode)
+    {
+        auto res = RegisteNode();
+        if (res.IsFialed())
+        {
+            m_pLog->Fatal(res.GetMessage());
+            return res;
+        }
+    }
+
     bool enableReport = false;
     if (enableReport)
     {
@@ -354,8 +363,8 @@ CResult CSloongBaseService::Run()
 
             if (m_oServerConfig.templateid() != 1) // Manager module
             {
-                auto event = make_shared<Events::SendPackageEvent>(m_pManagerConnect->GetHashCode());
-                event->SetRequest( m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(), Base::PRIORITY_LEVEL::LOW_LEVEL, (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
+                auto event = make_shared<Events::SendPackageEvent>(m_ManagerSession);
+                event->SetRequest(m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(), Base::PRIORITY_LEVEL::LOW_LEVEL, (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
                 m_iC->SendMessage(event);
             }
 
@@ -397,20 +406,18 @@ void CSloongBaseService::OnProgramStopEventHandler(SharedEvent event)
         dlclose(m_pModule);
 }
 
-
 void CSloongBaseService::OnSendPackageToManagerEventHandler(SharedEvent e)
 {
     auto event = dynamic_pointer_cast<SendPackageToManagerEvent>(e);
-    
-    auto req = make_shared<SendPackageEvent>(m_pManagerConnect->GetHashCode() );
-    req->SetCallbackFunc([event](IEvent* e, DataPackage* p){
+
+    auto req = make_shared<SendPackageEvent>(m_ManagerSession);
+    req->SetCallbackFunc([event](IEvent *e, DataPackage *p) {
         event->CallCallbackFunc(p);
     });
-    req->SetRequest(  IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event->GetFunctionID() ,event->GetContent() );
+    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event->GetFunctionID(), event->GetContent());
     m_iC->SendMessage(req);
 }
 
-
 void CSloongBaseService::OnGetManagerSocketEventHandler(SharedEvent e)
-{ 
+{
 }

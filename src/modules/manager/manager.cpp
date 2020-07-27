@@ -108,7 +108,7 @@ CResult SloongControlService::Initialized(IControl *iC)
 	IData::Initialize(iC);
 	m_pConfig = IData::GetGlobalConfig();
 	m_pLog = IData::GetLog();
-	m_iC->RegisterEventHandler(EVENT_TYPE::ConnectionBreak, std::bind(&SloongControlService::OnConnectionBreak, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::ConnectionBreaked, std::bind(&SloongControlService::OnConnectionBreaked, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
 
@@ -123,9 +123,9 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG *config)
 	config->set_receivetime(3);
 }
 
-void Sloong::SloongControlService::OnConnectionBreak(SharedEvent e)
+void Sloong::SloongControlService::OnConnectionBreaked(SharedEvent e)
 {
-	auto event = DYNAMIC_TRANS<ConnectionBreakEvent *>(e.get());
+	auto event = DYNAMIC_TRANS<ConnectionBreakedEventn *>(e.get());
 	auto id = event->GetSessionID();
 	for (auto &item : m_listServerManage)
 		item->OnSocketClosed(id);

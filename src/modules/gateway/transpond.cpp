@@ -1,9 +1,11 @@
-/*
- * @Author: WCB
+/*** 
+ * @Author: Chuanbin Wang
  * @Date: 2020-04-28 14:43:16
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 20:39:20
- * @Description: file content
+ * @LastEditTime: 2020-07-27 15:00:48
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/gateway/transpond.cpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
 #include "transpond.h"
 #include "IData.h"
@@ -34,32 +36,32 @@ PackageResult Sloong::GatewayTranspond::MessageToProcesser(DataPackage *pack)
 	auto target = SloongNetGateway::Instance->GetPorcessConnect(pack->function());
 	if( target == INVALID_SOCKET )
 	{
-		m_pLog->Debug(Helper::Format("No find process service for function[%d]. package [%d][%llu]", pack->function(),  pack->sessionid(), pack->id() ));
-		return PackageResult::Make_Error(Helper::Format("No find process service for function[%d]. package [%d][%llu]", pack->function(),  pack->sessionid(), pack->id() ));
+		m_pLog->Debug(Helper::Format("No find process service for function[%d]. package [%d][%llu]", pack->function(),  pack->reserved().sessionid(), pack->id() ));
+		return PackageResult::Make_Error(Helper::Format("No find process service for function[%d]. package [%d][%llu]", pack->function(),  pack->reserved().sessionid(), pack->id() ));
 	}
 
 	auto response = Package::MakeResponse(pack);
-	for( auto i : pack->clocks() )
+	for( auto i : pack->reserved().clocks() )
 	{
-		response->add_clocks(i);
+		response->mutable_reserved()->add_clocks(i);
 	}
-	response->add_clocks(GetClock());
+	response->mutable_reserved()->add_clocks(GetClock());
 
 	auto trans_pack = Package::MakeResponse(pack);
 	
 	auto id = snowflake::Instance->nextid();
 	trans_pack->set_id(id);
-	trans_pack->set_sessionid(target);
+	trans_pack->mutable_reserved()->set_sessionid(target);
 	
-	m_pLog->Debug(Helper::Format("Trans package [%lld][%llu] -> [%d][%llu]", pack->sessionid(), pack->id(), trans_pack->sessionid(), trans_pack->id()));
+	m_pLog->Debug(Helper::Format("Trans package [%lld][%llu] -> [%d][%llu]", pack->reserved().sessionid(), pack->id(), trans_pack->reserved().sessionid(), trans_pack->id()));
 
-	SloongNetGateway::Instance->m_mapSerialToRequest[trans_pack->sessionid()] = move(response);
+	SloongNetGateway::Instance->m_mapSerialToRequest[trans_pack->reserved().sessionid()] = move(response);
 	return PackageResult::Make_OK(move(trans_pack));
 }
 
 PackageResult Sloong::GatewayTranspond::MessageToClient(UniquePackage info, DataPackage *pack)
 {
-	info->add_clocks(GetClock());
+	info->mutable_reserved()->add_clocks(GetClock());
 	info->set_result(pack->result());
 	info->set_content(pack->content());
 	info->set_extend(pack->extend());

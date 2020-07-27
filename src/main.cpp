@@ -113,7 +113,7 @@ int main(int argc, char **args)
 				return -5;
 			}
 
-			res = Sloong::CSloongBaseService::Instance->Run();
+			res = Sloong::CSloongBaseService::Instance->Run(info.ManagerMode);
 		} while (res.GetResult() == ResultType::Retry);
 		Sloong::CSloongBaseService::Instance = nullptr;
 		return 0;

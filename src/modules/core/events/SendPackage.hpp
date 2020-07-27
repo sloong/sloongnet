@@ -1,10 +1,13 @@
-/*
- * @Author: WCB
+/*** 
+ * @Author: Chuanbin Wang
  * @Date: 1970-01-01 08:00:00
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-18 20:03:43
- * @Description: file content
+ * @LastEditTime: 2020-07-27 14:58:28
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/core/events/SendPackage.hpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
+
 #pragma once
 #include "NormalEvent.hpp"
 #include "protocol/core.pb.h"
@@ -37,6 +40,7 @@ namespace Sloong
 				m_pData->set_extend(extend);
 				m_pData->set_priority(priority);
 				m_pData->set_id(serialnumber);
+				m_pData->mutable_reserved()->set_sessionid(m_ConnectionHashCode);
 			}
 
 			inline DataPackage* GetDataPackage()
