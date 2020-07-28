@@ -323,9 +323,10 @@ CResult CSloongBaseService::RegisteNode()
     });
     m_iC->CallMessage(event);
 
-    //if (!sync->wait_for(5000))
-    sync->wait();
-    
+    if (!sync->wait_for(5000))
+    {
+        return CResult::Make_Error("RegisteNode timeout");
+    }
      if (*result != ResultType::Succeed)
     {
         return CResult::Make_Error(*response_str);
