@@ -53,7 +53,8 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
     cout << "Connect to control succeed. Start registe and get configuation." << endl;
 
     int64_t uuid = 0;
-    while (true)
+    auto result = CResult::Make_Error("Cancelled by User.");
+    while ( m_emStatus != RUN_STATUS::Exit )
     {
         auto req = Package::GetRequestPackage();
         req->set_function(Manager::Functions::RegisteWorker);
@@ -99,6 +100,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
 
             data->set_templateid(res_pack->templateid());
             data->set_nodeuuid(uuid);
+            result = CResult::Succeed();
             break;
         }
         else
@@ -106,8 +108,8 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
             return CResult::Make_Error(Helper::Format("Control return an unexpected result [%s]. Message [%s].", ResultType_Name(response->result()).c_str(), response->content().c_str()));
         }
     };
-    cout << "Get configuation succeed." << endl;
-    return CResult::Succeed();
+    cout << "Get configuation done." << endl;
+    return result;
 }
 
 CResult CSloongBaseService::InitlializeForManager(RuntimeDataPackage *data)
@@ -385,6 +387,8 @@ void CSloongBaseService::Stop()
 {
     m_pLog->Info("Application will exit.");
     m_iC->SendMessage(EVENT_TYPE::ProgramStop);
+    if( m_emStatus == RUN_STATUS::Created )
+        m_emStatus = RUN_STATUS::Exit;
 }
 
 void CSloongBaseService::OnProgramRestartEventHandler(SharedEvent event)
@@ -399,7 +403,7 @@ void CSloongBaseService::OnProgramStopEventHandler(SharedEvent event)
 {
     if (m_emStatus == RUN_STATUS::Exit)
         return;
-     m_emStatus = RUN_STATUS::Exit;
+    m_emStatus = RUN_STATUS::Exit;
     m_pLog->Info("Application receive ProgramStopEvent.");
     m_oExitSync.notify_all();
     m_iC->Exit();
