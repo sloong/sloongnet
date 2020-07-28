@@ -508,6 +508,8 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 		return CResult::Make_Error(Helper::Format("The node is no registed. [%llu]", uuid));
 
 	auto id = m_mapUUIDToNodeItem[uuid].TemplateID;
+	if( !m_mapIDToTemplateItem.exist(id))
+		return CResult::Make_Error(Helper::Format("The template id error. UUID[%llu];ID[%d]", uuid, id));
 
 	QueryReferenceInfoResponse res;
 	auto references = Helper::split(m_mapIDToTemplateItem[id].ConfiguationObj->modulereference(), ',');
