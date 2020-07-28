@@ -338,27 +338,26 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 							result = m_pRequestFunc(pEnv, package.get());
 						else
 							result = m_pResponseFunc(pEnv, package.get());
+
+						if (result.HaveResultObject())
+						{
+							AddMessageToSendList(result.MoveResultObject());
+						}
+						else if (result.GetResult() != ResultType::Ignore)
+						{
+							auto response = Package::MakeResponse(package.get());
+							response->set_result(result.GetResult());
+							response->set_content(result.GetMessage());
+							AddMessageToSendList(move(response));
+						}
+						else
+						{
+							m_pLog->Error(Helper::Format("Result[%s]", ResultType_Name(result.GetResult()).c_str()));
+						}
 					}
 					break;
 					default:
 						m_pLog->Warn("Data package check type error. cannot process.");
-					}
-					package->mutable_reserved()->add_clocks(GetClock());
-
-					if (result.HaveResultObject())
-					{
-						AddMessageToSendList(result.MoveResultObject());
-					}
-					else if (result.GetResult() != ResultType::Ignore)
-					{
-						auto response = Package::MakeResponse(package.get());
-						response->set_result(result.GetResult());
-						response->set_content(result.GetMessage());
-						AddMessageToSendList(move(response));
-					}
-					else
-					{
-						m_pLog->Error(Helper::Format("Result[%s]", ResultType_Name(result.GetResult()).c_str()));
 					}
 					package = nullptr;
 				}
@@ -442,7 +441,6 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(SOCKET socket)
 		m_pLog->Error(res.GetMessage());
 		SendConnectionBreak(sessionid);
 	}
-		
 
 	auto pReadList = res.MoveResultObject();
 	m_pLog->Verbos(Helper::Format("OnDataCanReceive done. received [%d] packages.", pReadList.size()));
