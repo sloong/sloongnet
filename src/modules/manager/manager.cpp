@@ -14,6 +14,7 @@
 using namespace Sloong::Events;
 
 unique_ptr<SloongControlService> Sloong::SloongControlService::Instance = nullptr;
+string Sloong::SloongControlService::g_strDBFilePath = "./configuation.db";
 
 extern "C" PackageResult RequestPackageProcesser(void *pEnv, DataPackage *pack)
 {
@@ -39,15 +40,20 @@ extern "C" CResult EventPackageProcesser(DataPackage *pack)
 	return CResult::Succeed();
 }
 
-extern "C" CResult ModuleInitialization(GLOBAL_CONFIG *config)
+extern "C" CResult PrepareInitialize(GLOBAL_CONFIG *config)
 {
-	SloongControlService::Instance = make_unique<SloongControlService>();
-	return SloongControlService::Instance->Initialization(config);
+	return SloongControlService::PrepareInitialize(config);
 }
 
-extern "C" CResult ModuleInitialized(SOCKET sock, IControl *iC)
+extern "C" CResult ModuleInitialization(IControl *ic)
 {
-	return SloongControlService::Instance->Initialized(iC);
+	SloongControlService::Instance = make_unique<SloongControlService>();
+	return SloongControlService::Instance->Initialization(ic);
+}
+
+extern "C" CResult ModuleInitialized()
+{
+	return SloongControlService::Instance->Initialized();
 }
 
 extern "C" CResult CreateProcessEnvironment(void **out_env)
@@ -55,32 +61,19 @@ extern "C" CResult CreateProcessEnvironment(void **out_env)
 	return SloongControlService::Instance->CreateProcessEnvironmentHandler(out_env);
 }
 
-/**
- * @Remarks: If have errors, the error message will print to standard output device.
- * @Params: CMD line. from System.
- * @Return: return true if no error, service can continue to run.
- * 			return false if error. service must exit. 
- * 
- * 
- */
-CResult SloongControlService::Initialization(GLOBAL_CONFIG *config)
+CResult SloongControlService::PrepareInitialize(GLOBAL_CONFIG *config)
 {
-	if (config == nullptr)
-	{
-		return CResult::Make_Error("Config object is nullptr.");
-	}
-
 	auto path = std::getenv("ManagerConfiguationDBFilePath");
-	if(path != nullptr )
+	if (path != nullptr)
 	{
-		m_strDBFilePath = path;
+		g_strDBFilePath = path;
 	}
-	auto res = CServerManage::LoadManagerConfig(m_strDBFilePath);
-	if( res.GetResult() != ResultType::Warning && res.GetResult() != ResultType::Succeed )
+	auto res = CServerManage::LoadManagerConfig(g_strDBFilePath);
+	if (res.GetResult() != ResultType::Warning && res.GetResult() != ResultType::Succeed)
 		return res;
-	
+
 	auto config_str = res.GetMessage();
-	
+
 	// Here, this port is came from COMMAND LINE.
 	// So we need save it before parse other setting.
 	auto port = config->listenport();
@@ -102,12 +95,31 @@ CResult SloongControlService::Initialization(GLOBAL_CONFIG *config)
 	return CResult::Succeed();
 }
 
-CResult SloongControlService::Initialized(IControl *iC)
+/**
+ * @Remarks: If have errors, the error message will print to standard output device.
+ * @Params: CMD line. from System.
+ * @Return: return true if no error, service can continue to run.
+ * 			return false if error. service must exit. 
+ * 
+ * 
+ */
+CResult SloongControlService::Initialization(IControl *iC)
 {
-	m_iC = iC;
+	if (iC == nullptr)
+	{
+		return CResult::Make_Error("Config object is nullptr.");
+	}
+
+	IObject::Initialize(iC);
 	IData::Initialize(iC);
+
 	m_pConfig = IData::GetGlobalConfig();
-	m_pLog = IData::GetLog();
+
+	return CResult::Succeed();
+}
+
+CResult SloongControlService::Initialized()
+{
 	m_iC->RegisterEventHandler(EVENT_TYPE::ConnectionBreaked, std::bind(&SloongControlService::OnConnectionBreaked, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
@@ -134,7 +146,7 @@ void Sloong::SloongControlService::OnConnectionBreaked(SharedEvent e)
 inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(void **out_env)
 {
 	auto item = make_unique<CServerManage>();
-	auto res = item->Initialize(m_iC,m_strDBFilePath);
+	auto res = item->Initialize(m_iC, g_strDBFilePath);
 	if (res.IsFialed())
 		return res;
 	(*out_env) = item.get();

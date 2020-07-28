@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-27 15:21:59
+ * @LastEditTime: 2020-07-28 19:33:08
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/epollex.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -96,13 +96,13 @@ CResult Sloong::CEpollEx::Initialize(IControl *iMsg)
 
 	// Init the thread pool
 	CThreadPool::AddWorkThread(std::bind(&CEpollEx::MainWorkLoop, this), workThread);
-
+	m_emStatus = RUN_STATUS::Running;
+	
 	return CResult::Succeed();
 }
 
 CResult Sloong::CEpollEx::Run()
 {
-	m_emStatus = RUN_STATUS::Running;
 	return CResult::Succeed();
 }
 

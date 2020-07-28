@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-24 16:29:23
+ * @LastEditTime: 2020-07-28 19:55:26
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/gateway.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -32,8 +32,8 @@ extern "C"
 	PackageResult ResponsePackageProcesser(void *, DataPackage *);
 	CResult EventPackageProcesser(DataPackage *);
 	CResult NewConnectAcceptProcesser(SOCKET);
-	CResult ModuleInitialization(GLOBAL_CONFIG *);
-	CResult ModuleInitialized(SOCKET, IControl *);
+	CResult ModuleInitialization(IControl *);
+	CResult ModuleInitialized();
 	CResult CreateProcessEnvironment(void **);
 }
 
@@ -44,8 +44,8 @@ namespace Sloong
 	public:
 		SloongNetGateway() {}
 
-		CResult Initialization(GLOBAL_CONFIG *);
-		CResult Initialized(SOCKET, IControl *);
+		CResult Initialization(IControl *);
+		CResult Initialized();
 
 		PackageResult ResponsePackageProcesser(DataPackage *);
 
@@ -81,7 +81,6 @@ namespace Sloong
 		GLOBAL_CONFIG *m_pConfig;
 		Json::Value *m_pModuleConfig;
 		RuntimeDataPackage *m_pRuntimeData = nullptr;
-		SOCKET m_nManagerConnection = -1;
 
 	public:
 		static unique_ptr<SloongNetGateway> Instance;

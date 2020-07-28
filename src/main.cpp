@@ -116,7 +116,7 @@ int main(int argc, char **args)
 
 			
 			cout << "Run base service instance." << endl;
-			res = Sloong::CSloongBaseService::Instance->Run(info.ManagerMode);
+			res = Sloong::CSloongBaseService::Instance->Run();
 			
 			cout << "Base service instance is end with result " << ResultType_Name(res.GetResult()) << endl;
 		} while (res.GetResult() == ResultType::Retry);

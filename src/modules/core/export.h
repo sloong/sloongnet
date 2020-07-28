@@ -1,3 +1,12 @@
+/*** 
+ * @Author: Chuanbin Wang
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditTime: 2020-07-28 20:31:47
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/core/export.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
+ */
 /*
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
@@ -21,5 +30,6 @@ typedef PackageResult (*RequestPackageProcessFunction)(void*,DataPackage*);
 typedef PackageResult (*ResponsePackageProcessFunction)(void*,DataPackage*);
 typedef CResult (*EventPackageProcessFunction)(DataPackage*);
 typedef CResult (*NewConnectAcceptProcessFunction)(SOCKET);
-typedef CResult (*ModuleInitializationFunction)(GLOBAL_CONFIG*);
-typedef CResult (*ModuleInitializedFunction)(IControl*);
+typedef CResult (*PrepareInitializeFunction)(GLOBAL_CONFIG*);
+typedef CResult (*ModuleInitializationFunction)(IControl*);
+typedef CResult (*ModuleInitializedFunction)();

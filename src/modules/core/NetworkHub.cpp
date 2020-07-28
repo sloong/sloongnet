@@ -68,15 +68,18 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 		m_pLog->Fatal("the config value for process work quantity is invalid, please check.");
 
 	CThreadPool::AddWorkThread(std::bind(&CNetworkHub::MessageProcessWorkLoop, this), m_pConfig->processthreadquantity());
+
+	m_emStatus = RUN_STATUS::Running;
+	m_pEpoll->Run();
+	if (m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0)
+		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this));
+		
 	return CResult::Succeed();
 }
 
 void Sloong::CNetworkHub::Run(SharedEvent event)
 {
-	m_emStatus = RUN_STATUS::Running;
-	m_pEpoll->Run();
-	if (m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0)
-		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this));
+	
 }
 
 void Sloong::CNetworkHub::Exit(SharedEvent event)
@@ -311,11 +314,14 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					// it just for is need add the pack obj to send list.
 					result.SetResult(ResultType::Ignore);
 
+					
+
 					package->mutable_reserved()->add_clocks(GetClock());
 					switch (package->type())
 					{
 					case DataPackage_PackageType::DataPackage_PackageType_EventPackage:
 					{
+						m_pLog->Verbos( "Event package <<< " +  package->ShortDebugString() );
 						switch (package->function())
 						{
 						case ControlEvent::Restart:
@@ -334,6 +340,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					break;
 					case DataPackage_PackageType::DataPackage_PackageType_NormalPackage:
 					{
+						m_pLog->Verbos( "Process package <<< " +  package->ShortDebugString() );
 						if (package->status() == DataPackage_StatusType::DataPackage_StatusType_Request)
 							result = m_pRequestFunc(pEnv, package.get());
 						else
@@ -341,13 +348,16 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 
 						if (result.HaveResultObject())
 						{
-							AddMessageToSendList(result.MoveResultObject());
+							auto response = result.MoveResultObject();
+							m_pLog->Verbos( "Response package >>> " +  response->ShortDebugString() );
+							AddMessageToSendList(move(response));
 						}
 						else if (result.GetResult() != ResultType::Ignore)
 						{
 							auto response = Package::MakeResponse(package.get());
 							response->set_result(result.GetResult());
 							response->set_content(result.GetMessage());
+							m_pLog->Verbos( "Response package >>> " +  response->ShortDebugString());
 							AddMessageToSendList(move(response));
 						}
 						else

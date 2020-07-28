@@ -48,15 +48,15 @@ extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 	return CResult::Succeed();
 }
 
-extern "C" CResult ModuleInitialization(GLOBAL_CONFIG *confiog)
+extern "C" CResult ModuleInitialization(IControl* ic)
 {
 	LuaMiddleLayer::Instance = make_unique<LuaMiddleLayer>();
-	return CResult::Succeed();
+	return LuaMiddleLayer::Instance->Initialization(ic);
 }
 
-extern "C" CResult ModuleInitialized(IControl *iC)
+extern "C" CResult ModuleInitialized()
 {
-	return LuaMiddleLayer::Instance->Initialized( iC);
+	return LuaMiddleLayer::Instance->Initialized();
 }
 
 extern "C" CResult CreateProcessEnvironment(void **out_env)
@@ -64,10 +64,16 @@ extern "C" CResult CreateProcessEnvironment(void **out_env)
 	return LuaMiddleLayer::Instance->CreateProcessEnvironmentHandler(out_env);
 }
 
-CResult LuaMiddleLayer::Initialized(IControl *iC)
+
+CResult LuaMiddleLayer::Initialization(IControl *ic)
 {
-	IObject::Initialize(iC);
-	IData::Initialize(iC);
+	IObject::Initialize(ic);
+	IData::Initialize(ic);
+	return CResult::Succeed();
+}
+
+CResult LuaMiddleLayer::Initialized()
+{
 	m_pConfig = IData::GetGlobalConfig();
 	m_pModuleConfig = IData::GetModuleConfig();
 	if (m_pModuleConfig == nullptr)

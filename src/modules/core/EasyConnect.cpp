@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2020-07-28 15:30:05
+ * @LastEditTime: 2020-07-28 16:37:24
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -310,9 +310,13 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 	{
 		return PackageResult(ResultType::Warning);
 	}
-	else if (net_res == ResultType::Retry)
+	else if (net_res == ResultType::Ignore)
 	{
 		// If the data length received 11 error, ignore it.
+		return PackageResult(ResultType::Ignore);
+	}
+	else if (net_res == ResultType::Retry)
+	{
 		return PackageResult(ResultType::Retry,Helper::Format("Receive package returned [Retry]. Package size[%d], Received[%d]", m_RecvPackageSize, m_ReceivedSize));
 	}
 	else if (net_res == ResultType::Error)
@@ -329,7 +333,7 @@ ResultType Sloong::EasyConnect::RecvPackage(string &res, int &nPackage, int &nRe
 		auto len = RecvLengthData(block);
 	
 		if (len == -11)
-			return ResultType::Retry;
+			return ResultType::Ignore;
 		else if (len < 0)
 			return ResultType::Error;
 		else if (len == 0 )

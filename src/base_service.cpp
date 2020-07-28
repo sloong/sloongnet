@@ -179,14 +179,16 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     if (res.IsFialed())
         return res;
 
-    res = m_pModuleInitializationFunc(pConfig);
-    if (res.IsFialed())
+    if(m_pPrepareInitializeFunc )
     {
-        m_pLog->Fatal(res.GetMessage());
-        return res;
+        res = m_pPrepareInitializeFunc(pConfig);
+        if (res.IsFialed())
+        {
+            m_pLog->Fatal(res.GetMessage());
+            return res;
+        }
     }
-    m_pLog->Debug("Module initialization succeed.");
-
+    
     res = m_iC->Initialize(pConfig->mqthreadquantity(), m_pLog.get() );
     if (res.IsFialed())
     {
@@ -208,6 +210,14 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     {
         m_iC->Add(DATA_ITEM::ModuleConfiguation, nullptr);
     }
+
+    res = m_pModuleInitializationFunc(m_iC.get());
+    if (res.IsFialed())
+    {
+        m_pLog->Fatal(res.GetMessage());
+        return res;
+    }
+    m_pLog->Debug("Module initialization succeed.");
 
     m_iC->RegisterEventHandler(EVENT_TYPE::ProgramRestart, std::bind(&CSloongBaseService::OnProgramRestartEventHandler, this, std::placeholders::_1));
     m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStop, std::bind(&CSloongBaseService::OnProgramStopEventHandler, this, std::placeholders::_1));
@@ -235,10 +245,20 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
         m_iC->CallMessage(event);
     }
 
-    res = m_pModuleInitializedFunc(m_iC.get());
+    res = m_pModuleInitializedFunc();
     if (res.IsFialed())
         m_pLog->Fatal(res.GetMessage());
     m_pLog->Debug("Module initialized succeed.");
+
+    if (!ManagerMode)
+    {
+        auto res = RegisteNode();
+        if (res.IsFialed())
+        {
+            m_pLog->Fatal(res.GetMessage());
+            return res;
+        }
+    }
 
     return CResult::Succeed();
 }
@@ -291,6 +311,12 @@ CResult CSloongBaseService::InitModule()
         string errMsg = Helper::Format("Load function NewConnectAcceptProcesser error[%s]. Use default function.", errmsg);
         m_pLog->Warn(errMsg);
     }
+    m_pModuleInitializationFunc = (ModuleInitializationFunction)dlsym(m_pModule, "PrepareInitialize");
+    if ((errmsg = dlerror()) != NULL)
+    {
+        string errMsg = Helper::Format("Load function PrepareInitialize error[%s]. maybe module no need.", errmsg);
+        m_pLog->Warn(errMsg);
+    }
     m_pModuleInitializationFunc = (ModuleInitializationFunction)dlsym(m_pModule, "ModuleInitialization");
     if ((errmsg = dlerror()) != NULL)
     {
@@ -334,21 +360,11 @@ CResult CSloongBaseService::RegisteNode()
     return CResult::Succeed();
 }
 
-CResult CSloongBaseService::Run(bool ManagerMode)
+CResult CSloongBaseService::Run()
 {
     m_pLog->Info("Application begin running.");
     m_iC->SendMessage(EVENT_TYPE::ProgramStart);
     m_emStatus = RUN_STATUS::Running;
-
-    if (!ManagerMode)
-    {
-        auto res = RegisteNode();
-        if (res.IsFialed())
-        {
-            m_pLog->Fatal(res.GetMessage());
-            return res;
-        }
-    }
 
     bool enableReport = false;
     if (enableReport)

@@ -6,6 +6,7 @@
  * @Description: file content
  */
 #include "firewall.h"
+#include "IData.h"
 
 #include "protocol/manager.pb.h"
 using namespace Manager;
@@ -34,13 +35,13 @@ extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 	return CResult::Succeed();
 }
 	
-extern "C" CResult ModuleInitialization(GLOBAL_CONFIG* confiog){
+extern "C" CResult ModuleInitialization(IControl* ic){
 	SloongNetFirewall::Instance = make_unique<SloongNetFirewall>();
-	return CResult::Succeed();
+	return SloongNetFirewall::Instance->Initialization(ic);
 }
 
-extern "C" CResult ModuleInitialized(SOCKET sock, IControl* iC){
-	return SloongNetFirewall::Instance->Initialized(iC);
+extern "C" CResult ModuleInitialized(){
+	return SloongNetFirewall::Instance->Initialized();
 }
 
 
@@ -49,10 +50,16 @@ extern "C" CResult CreateProcessEnvironment(void** out_env)
 	return SloongNetFirewall::Instance->CreateProcessEnvironmentHandler(out_env);
 }
 
-
-CResult SloongNetFirewall::Initialized(IControl* ic)
+CResult SloongNetFirewall::Initialization(IControl* ic)
 {
-	m_iC = ic;
+	IObject::Initialize(ic);
+	IData::Initialize(ic);
+	return CResult::Succeed();
+}
+
+
+CResult SloongNetFirewall::Initialized()
+{
 	return CResult::Succeed();
 }
 

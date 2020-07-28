@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-27 15:25:02
+ * @LastEditTime: 2020-07-28 20:24:02
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -32,7 +32,7 @@ namespace Sloong
 		// Just call it without Control module.
 		virtual CResult Initialize(bool, string, int, int=0);
 
-		virtual CResult Run(bool);
+		virtual CResult Run();
 		virtual void Stop();
 
 		TResult<shared_ptr<DataPackage>> RegisteToControl(EasyConnect *con, string uuid);
@@ -76,6 +76,7 @@ namespace Sloong
 		NewConnectAcceptProcessFunction m_pModuleAcceptHandler = nullptr;
 		ModuleInitializationFunction m_pModuleInitializationFunc = nullptr;
 		ModuleInitializedFunction m_pModuleInitializedFunc = nullptr;
+		PrepareInitializeFunction m_pPrepareInitializeFunc = nullptr;
 
 		static constexpr int REPORT_LOAD_STATUS_INTERVAL = 1000*60; // one mintue
 	public:

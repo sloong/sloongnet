@@ -53,15 +53,15 @@ extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 	return CResult::Succeed();
 }
 
-extern "C" CResult ModuleInitialization(GLOBAL_CONFIG *confiog)
+extern "C" CResult ModuleInitialization(IControl *ic)
 {
 	SloongNetGateway::Instance = make_unique<SloongNetGateway>();
-	return CResult::Succeed();
+	return SloongNetGateway::Instance->Initialization(ic);
 }
 
-extern "C" CResult ModuleInitialized(SOCKET sock, IControl *iC)
+extern "C" CResult ModuleInitialized()
 {
-	return SloongNetGateway::Instance->Initialized(sock, iC);
+	return SloongNetGateway::Instance->Initialized();
 }
 
 extern "C" CResult CreateProcessEnvironment(void **out_env)
@@ -69,10 +69,15 @@ extern "C" CResult CreateProcessEnvironment(void **out_env)
 	return SloongNetGateway::Instance->CreateProcessEnvironmentHandler(out_env);
 }
 
-CResult SloongNetGateway::Initialized(SOCKET sock, IControl *iC)
+CResult SloongNetGateway::Initialization(IControl *iC)
 {
 	IObject::Initialize(iC);
 	IData::Initialize(iC);
+	return CResult::Succeed();
+}
+
+CResult SloongNetGateway::Initialized()
+{
 	m_pConfig = IData::GetGlobalConfig();
 	m_pModuleConfig = IData::GetModuleConfig();
 	m_pRuntimeData = IData::GetRuntimeData();
@@ -88,7 +93,6 @@ CResult SloongNetGateway::Initialized(SOCKET sock, IControl *iC)
 		event->SetMessage(Helper::Format("{\"ClientCheckKey\":\"%s\", \"ClientCheckTime\":%d}", (*m_pModuleConfig)["ClientCheckKey"].asString().c_str(), (*m_pModuleConfig)["ClientCheckKey"].asInt()));
 		m_iC->SendMessage(event);*/
 	}
-	m_nManagerConnection = sock;
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
 	return CResult::Succeed();
 }
@@ -105,7 +109,7 @@ void SloongNetGateway::QueryReferenceInfo()
 {
 	auto event = make_shared<SendPackageToManagerEvent>(Functions::QueryReferenceInfo, "");
 	event->SetCallbackFunc(std::bind(&SloongNetGateway::QueryReferenceInfoResponseHandler, this, std::placeholders::_1, std::placeholders::_2));
-	m_iC->CallMessage(event);
+	m_iC->SendMessage(event);
 }
 
 // process the provied function string to list.

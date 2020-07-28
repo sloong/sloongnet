@@ -176,7 +176,10 @@ PackageResult Sloong::CServerManage::ProcessHandler(DataPackage *pack)
 	}
 
 	auto res = m_mapFuncToHandler[function](req_str, pack);
-	m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), CBase64::Encode(res.GetMessage()).c_str()));
+	if( res.IsError() )
+		m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
+	else
+		m_pLog->Warn(Helper::Format("Response [%s]:[%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
 	if (res.GetResult() == ResultType::Ignore)
 		return PackageResult::Ignore();
 	
@@ -504,6 +507,7 @@ CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, DataPac
 
 CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, DataPackage *pack)
 {
+	m_pLog->Verbos("QueryReferenceInfoHandler <<< " );
 	auto uuid = pack->sender();
 	if (!m_mapUUIDToNodeItem.exist(uuid))
 		return CResult::Make_Error(Helper::Format("The node is no registed. [%llu]", uuid));
@@ -528,7 +532,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 			m_mapUUIDToNodeItem[node].ToProtobuf(item->add_nodeinfos());
 		}
 	}
-
+	m_pLog->Verbos("QueryReferenceInfoHandler response >>> " + res.ShortDebugString() );
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 

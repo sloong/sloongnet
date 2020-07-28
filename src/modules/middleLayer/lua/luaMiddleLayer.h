@@ -75,8 +75,8 @@ extern "C"
 	PackageResult ResponsePackageProcesser(void *, DataPackage *);
 	CResult EventPackageProcesser(DataPackage *);
 	CResult NewConnectAcceptProcesser(SOCKET);
-	CResult ModuleInitialization(GLOBAL_CONFIG *);
-	CResult ModuleInitialized( IControl *);
+	CResult ModuleInitialization(IControl*);
+	CResult ModuleInitialized();
 	CResult CreateProcessEnvironment(void **);
 }
 
@@ -85,11 +85,11 @@ namespace Sloong
 	class LuaMiddleLayer : public IObject
 	{
 	public:
-		LuaMiddleLayer() {}
+		LuaMiddleLayer() {  }
 		~LuaMiddleLayer() {}
 
-		CResult Initialization(GLOBAL_CONFIG *);
-		CResult Initialized( IControl *);
+		CResult Initialization(IControl*);
+		CResult Initialized();
 
 		PackageResult RequestPackageProcesser(CLuaProcessCenter *, DataPackage *);
 		PackageResult ResponsePackageProcesser(CLuaProcessCenter *, DataPackage *);

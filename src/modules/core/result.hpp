@@ -38,6 +38,9 @@ namespace Sloong
         inline void SetResult(ResultType res){
             m_emResult = res;
         }
+        inline bool IsError() const {
+            return m_emResult == ResultType::Error ? true : false;
+        }
         inline bool IsSucceed() const {
             return m_emResult == ResultType::Succeed ? true : false;
         }

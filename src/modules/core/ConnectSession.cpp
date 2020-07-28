@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2020-07-28 15:32:58
+ * @LastEditTime: 2020-07-28 16:38:15
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -210,11 +210,14 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 			// In here we look as socket is closed. 
 			return ReceivePackageListResult::Make_Error("Socket rece function returned 0, so may it is closed.");
 		}
+		else if (res.GetResult() == ResultType::Ignore)
+		{
+			// Receive data pageage length return 11(EAGAIN) error. so if in bLoop mode, this is OK.
+			break;
+		}
 		else if (res.GetResult() == ResultType::Retry && bLoop )
 		{
 			// Package is no receive done. need receive in next time.
-			// Receive data pageage length return 11(EAGAIN) error. so if in bLoop mode, this is OK.
-			m_pLog->Verbos(res.GetMessage());
 			break;
 		}
 		else if (res.GetResult() == ResultType::Error)
