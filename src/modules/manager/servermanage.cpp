@@ -205,6 +205,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, DataP
 		event->SetCallbackFunc([item=&m_mapUUIDToNodeItem[sender]](IEvent *e, ConnectionInfo info){
 			item->Address = info.Address;
 		});
+		m_iC->SendMessage(event);
 		m_pLog->Debug(Helper::Format("Module[%s:%d] regist to system. Allocating uuid [%llu].", item.Address.c_str(), item.Port, item.UUID));
 		char m_pMsgBuffer[8] = {0};
 		char *pCpyPoint = m_pMsgBuffer;
