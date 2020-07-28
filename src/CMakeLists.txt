@@ -20,7 +20,7 @@ link_directories(
 SET(LIBRARY_OUTPUT_PATH "../")
 
 #允许gdb调试
-set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -g -ggdb -DDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -g -ggdb -DDEBUG -rdynamic")
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -DNODEBUG -DRELASE")
 
 add_definitions(-DLUA_USE_READLINE)

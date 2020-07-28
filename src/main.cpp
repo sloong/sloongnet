@@ -106,6 +106,7 @@ int main(int argc, char **args)
 		Sloong::CSloongBaseService::Instance = make_unique<Sloong::CSloongBaseService>();
 		do
 		{
+			cout << "Initialize base service instance." << endl;
 			res = Sloong::CSloongBaseService::Instance->Initialize(info.ManagerMode, info.Address, info.Port, info.ForceTargetTemplateID);
 			if (!res.IsSucceed())
 			{
@@ -113,8 +114,14 @@ int main(int argc, char **args)
 				return -5;
 			}
 
+			
+			cout << "Run base service instance." << endl;
 			res = Sloong::CSloongBaseService::Instance->Run(info.ManagerMode);
+			
+			cout << "Base service instance is end with result " << ResultType_Name(res.GetResult()) << endl;
 		} while (res.GetResult() == ResultType::Retry);
+
+		cout << "Application exit." << endl;
 		Sloong::CSloongBaseService::Instance = nullptr;
 		return 0;
 	}
@@ -134,4 +141,5 @@ int main(int argc, char **args)
 		cout << CUtility::GetCallStack();
 		return -4;
 	}
+	cout << "Application exit with exception." << endl;
 }

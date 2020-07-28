@@ -185,7 +185,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     }
     m_pLog->Debug("Module initialization succeed.");
 
-    res = m_iC->Initialize(pConfig->mqthreadquantity());
+    res = m_iC->Initialize(pConfig->mqthreadquantity(), m_pLog.get() );
     if (res.IsFialed())
     {
         m_pLog->Fatal(res.GetMessage());
@@ -212,6 +212,10 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     m_iC->RegisterEventHandler(EVENT_TYPE::SendPackageToManager, std::bind(&CSloongBaseService::OnSendPackageToManagerEventHandler, this, std::placeholders::_1));
 
     IData::Initialize(m_iC.get());
+    m_pNetwork->RegisterEnvCreateProcesser(m_pModuleCreateProcessEvnFunc);
+    m_pNetwork->RegisterProcesser(m_pModuleRequestHandler, m_pModuleResponseHandler, m_pModuleEventHandler);
+    m_pNetwork->RegisterAccpetConnectProcesser(m_pModuleAcceptHandler);
+
     res = m_pNetwork->Initialize(m_iC.get());
     if (res.IsFialed())
     {
@@ -220,9 +224,6 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     }
     m_pLog->Debug("Network initialization succeed.");
 
-    m_pNetwork->RegisterEnvCreateProcesser(m_pModuleCreateProcessEvnFunc);
-    m_pNetwork->RegisterProcesser(m_pModuleRequestHandler, m_pModuleResponseHandler, m_pModuleEventHandler);
-    m_pNetwork->RegisterAccpetConnectProcesser(m_pModuleAcceptHandler);
     if (pManagerConnect)
     {
         auto event = make_shared<Events::RegisteConnectionEvent>(pManagerConnect->m_strAddress, pManagerConnect->m_nPort);
@@ -371,20 +372,18 @@ CResult CSloongBaseService::Run(bool ManagerMode)
             CUtility::RecordCPUStatus(prev_status.get());
         }
     }
-    else
-    {
-        m_oExitSync.wait();
+    while(  m_emStatus != RUN_STATUS::Exit)
+    {        
+        m_oExitSync.wait_for(1000);
     }
+    m_pLog->Info("Application main work loop end with result " + ResultType_Name(m_oExitResult.GetResult()) );
 
     return m_oExitResult;
 }
 
 void CSloongBaseService::Stop()
 {
-    if (m_emStatus == RUN_STATUS::Exit)
-        return;
     m_pLog->Info("Application will exit.");
-    m_emStatus = RUN_STATUS::Exit;
     m_iC->SendMessage(EVENT_TYPE::ProgramStop);
 }
 
@@ -398,10 +397,13 @@ void CSloongBaseService::OnProgramRestartEventHandler(SharedEvent event)
 
 void CSloongBaseService::OnProgramStopEventHandler(SharedEvent event)
 {
+    if (m_emStatus == RUN_STATUS::Exit)
+        return;
+     m_emStatus = RUN_STATUS::Exit;
+    m_pLog->Info("Application receive ProgramStopEvent.");
     m_oExitSync.notify_all();
     m_iC->Exit();
     m_pLog->End();
-    CThreadPool::Exit();
     if (m_pModule)
         dlclose(m_pModule);
 }

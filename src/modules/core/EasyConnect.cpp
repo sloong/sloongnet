@@ -247,11 +247,11 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 	}
 	if (net_res == ResultType::Warning)
 	{
-		// If the data length received 11 error, ignore it.
 		return PackageResult(ResultType::Warning);
 	}
 	else if (net_res == ResultType::Retry)
 	{
+		// If the data length received 11 error, ignore it.
 		return PackageResult(ResultType::Retry,Helper::Format("Receive package returned [Retry]. Package size[%d], Received[%d]", m_RecvPackageSize, m_ReceivedSize));
 	}
 	else if (net_res == ResultType::Error)
@@ -268,9 +268,11 @@ ResultType Sloong::EasyConnect::RecvPackage(string &res, int &nPackage, int &nRe
 		auto len = RecvLengthData(block);
 	
 		if (len == -11)
-			return ResultType::Warning;
-		else if (len <= 0)
+			return ResultType::Retry;
+		else if (len < 0)
 			return ResultType::Error;
+		else if (len == 0 )
+			return ResultType::Warning;
 		else
 			nPackage = len;
 	}

@@ -73,8 +73,13 @@ namespace Sloong
 	class CControlHub : public IControl
 	{
 	public:
+		virtual ~CControlHub()
+		{
+			m_oMsgHandlerList.clear();
+			CThreadPool::Exit();
+		}
 		// Always return true
-		CResult Initialize(int);
+		CResult Initialize(int, CLog*);
 
 		void Run()
 		{
@@ -179,6 +184,8 @@ namespace Sloong
 		queue_ex<SharedEvent> m_oMsgList;
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;
 		EasySync m_oSync;
+
+		CLog* m_pLog = nullptr;
 	};
 } // namespace Sloong
 

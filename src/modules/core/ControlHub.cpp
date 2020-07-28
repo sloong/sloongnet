@@ -4,10 +4,11 @@
 #include "events/NormalEvent.hpp"
 using namespace Sloong::Events;
 
-CResult Sloong::CControlHub::Initialize(int quantity)
+CResult Sloong::CControlHub::Initialize(int quantity, CLog* log)
 {
 	if (quantity < 1)
 		return CResult::Make_Error("CControlHub work quantity must big than 0.");
+	m_pLog = log;
 	CThreadPool::AddWorkThread(std::bind(&CControlHub::MessageWorkLoop, this), quantity);
 	CThreadPool::Initialize(3);
 	CThreadPool::Run();
@@ -18,7 +19,6 @@ CResult Sloong::CControlHub::Initialize(int quantity)
 void Sloong::CControlHub::Exit()
 {
 	m_emStatus = RUN_STATUS::Exit;
-	m_oMsgHandlerList.clear();
 }
 
 void *Sloong::CControlHub::Get(DATA_ITEM item)
@@ -38,9 +38,9 @@ string Sloong::CControlHub::GetTempString(const string &key, bool erase)
 
 	auto item = dynamic_pointer_cast<StringData>(*baseitem);
 	auto res = item->Data;
-	if( erase )
+	if (erase)
 		m_oTempDataList.erase(key);
-	
+
 	return res;
 }
 
@@ -54,7 +54,7 @@ void *Sloong::CControlHub::GetTempObject(const string &key, int *out_size, bool 
 	if (out_size)
 		*out_size = item->Size;
 	auto ptr = item->Ptr;
-	if( erase )
+	if (erase)
 		m_oTempDataList.erase(key);
 
 	return ptr;
@@ -82,8 +82,8 @@ shared_ptr<void> Sloong::CControlHub::GetTempSharedPtr(const string &key, bool e
 		return nullptr;
 
 	auto item = dynamic_pointer_cast<SharedPtrData>(*baseitem);
-	auto ptr = item->Ptr;	
-	if( erase )
+	auto ptr = item->Ptr;
+	if (erase)
 		m_oTempDataList.erase(key);
 
 	return ptr;
@@ -113,7 +113,7 @@ void Sloong::CControlHub::RegisterEventHandler(EVENT_TYPE t, MsgHandlerFunc func
 {
 	if (!m_oMsgHandlerList.exist(t))
 		m_oMsgHandlerList[t] = vector<MsgHandlerFunc>();
-	
+
 	m_oMsgHandlerList[t].push_back(func);
 }
 
@@ -142,24 +142,29 @@ void Sloong::CControlHub::CallMessage(SharedEvent event)
 
 void Sloong::CControlHub::MessageWorkLoop()
 {
-	SharedEvent event = nullptr;
+	auto pid = this_thread::get_id();
+	string spid = Helper::ntos(pid);
+	
+	m_pLog->Info("Control hub work thread is started. PID:" + spid);
+
+	while (m_emStatus == RUN_STATUS::Created)
+	{
+		this_thread::sleep_for(std::chrono::microseconds(100));
+	}
+
+	m_pLog->Info("Control hub work thread is running. PID:" + spid);
 	while (m_emStatus != RUN_STATUS::Exit)
 	{
 		try
 		{
-			if (m_emStatus == RUN_STATUS::Created)
-			{
-				this_thread::sleep_for(std::chrono::microseconds(100));
-				continue;
-			}
 			if (m_oMsgList.empty())
 			{
 				m_oSync.wait_for(1000);
 				continue;
 			}
 
-			event = m_oMsgList.TryMovePop();
-			if ( event != nullptr)
+			auto event = m_oMsgList.TryMovePop();
+			if (event != nullptr)
 			{
 				// Get the message handler list.
 				CallMessage(event);
@@ -170,4 +175,5 @@ void Sloong::CControlHub::MessageWorkLoop()
 			cerr << "Unhandle exception in CControlHub work loop." << endl;
 		}
 	}
+	m_pLog->Info("Control hub work thread is exit " + spid);
 }

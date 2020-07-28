@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-27 15:18:18
+ * @LastEditTime: 2020-07-28 14:01:49
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -164,14 +164,14 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 			m_pLog->Verbos(res.GetMessage());
 			break;
 		}
-		else if (res.GetResult() == ResultType::Error && !bLoop)
+		else if (res.GetResult() == ResultType::Error)
 		{
 			// Receive error, this connect weill be closed.
 			return ReceivePackageListResult::Make_Error(res.GetMessage());
 		}
 		else
 		{
-			m_pLog->Error(Helper::Format("Unintended result[%s].Loop[%s].", ResultType_Name(res.GetResult()), bLoop ? "true" : "false"));
+			m_pLog->Error(Helper::Format("Unintended result[%s].Loop[%s].", ResultType_Name(res.GetResult()).c_str(), bLoop ? "true" : "false"));
 			break;
 		}
 	} while (bLoop);

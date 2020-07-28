@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-07-24 19:13:50
+ * @LastEditTime: 2020-07-28 11:01:13
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -127,7 +127,7 @@ namespace Sloong
         map_ex<int64_t, unique_ptr<ConnectSession>> m_mapConnectIDToSession;
         map_ex<SOCKET,int64_t> m_mapSocketToSessionID;
         mutex m_oSockListMutex;
-        bool m_bIsRunning;
+        RUN_STATUS m_emStatus = RUN_STATUS::Created;
         unique_ptr<CEpollEx> m_pEpoll;
         EasySync m_oCheckTimeoutThreadSync;
 

@@ -142,7 +142,7 @@ string Sloong::CUtility::GenUUID()
 	return uuid;
 }
 
-#define MAX_STACK_LAYERS 256
+#define MAX_STACK_LAYERS 20
 
 string Sloong::CUtility::GetCallStack()
 {

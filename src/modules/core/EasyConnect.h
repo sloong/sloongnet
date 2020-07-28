@@ -86,6 +86,11 @@ namespace Sloong
 
 		inline bool IsSending() { return !m_strSending.empty(); }
 
+		inline void SetOnReconnectCallback(std::function<void(int)> func)
+		{
+			m_pOnReconnect = func;
+		}
+
 	protected:
 		int Read(char *, int, bool, bool);
 
@@ -130,6 +135,7 @@ namespace Sloong
 		bool m_bSupportReconnect = false;
 		string m_strErrorMsg;
 		int m_nErrorCode;
+		std::function<void(int)> m_pOnReconnect = nullptr;
 		ConnectStatus m_stStatus = ConnectStatus::Disconnect;
 	};
 

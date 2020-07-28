@@ -57,15 +57,6 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	m_iC->RegisterEventHandler(EVENT_TYPE::MonitorSendStatus, std::bind(&CNetworkHub::MonitorSendStatusEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::RegisteConnection, std::bind(&CNetworkHub::RegisteConnectionEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::GetConnectionInfo, std::bind(&CNetworkHub::OnGetConnectionInfoEventHandler, this, std::placeholders::_1));
-	return CResult::Succeed();
-}
-
-void Sloong::CNetworkHub::Run(SharedEvent event)
-{
-	m_bIsRunning = true;
-	m_pEpoll->Run();
-	if (m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0)
-		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this));
 
 	if (m_pRequestFunc == nullptr)
 	{
@@ -77,11 +68,20 @@ void Sloong::CNetworkHub::Run(SharedEvent event)
 		m_pLog->Fatal("the config value for process work quantity is invalid, please check.");
 
 	CThreadPool::AddWorkThread(std::bind(&CNetworkHub::MessageProcessWorkLoop, this), m_pConfig->processthreadquantity());
+	return CResult::Succeed();
+}
+
+void Sloong::CNetworkHub::Run(SharedEvent event)
+{
+	m_emStatus = RUN_STATUS::Running;
+	m_pEpoll->Run();
+	if (m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0)
+		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this));
 }
 
 void Sloong::CNetworkHub::Exit(SharedEvent event)
 {
-	m_bIsRunning = false;
+	m_emStatus = RUN_STATUS::Exit;
 	m_oCheckTimeoutThreadSync.notify_all();
 	m_oProcessThreadSync.notify_all();
 	m_pEpoll->Exit();
@@ -132,8 +132,8 @@ void Sloong::CNetworkHub::OnConnectionBreakedEventHandler(SharedEvent e)
 		return;
 
 	auto info = m_mapConnectIDToSession[id].get();
-	m_pLog->Info(Helper::Format("close connect:%s:%d.", info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
 	auto socket = info->m_pConnection->GetSocketID();
+	m_pLog->Info(Helper::Format("close connect:[%d]%s:%d.", socket, info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
 
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_mapConnectIDToSession.erase(id);
@@ -172,13 +172,13 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
 	auto socket = info->m_pConnection->GetSocketID();
 	auto sessionid = info->m_pConnection->GetHashCode();
 	m_pLog->Info(Helper::Format("Registe connection:[%d][%s:%d].", socket, info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
-	
+
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_mapSocketToSessionID[socket] = sessionid;
 	m_mapConnectIDToSession[sessionid] = std::move(info);
 	m_pEpoll->AddMonitorSocket(socket);
 	sockLck.unlock();
-	
+
 	event->CallCallbackFunc(sessionid);
 }
 
@@ -240,7 +240,7 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
 	int tinterval = m_nCheckTimeoutInterval * 60 * 1000;
 
 	m_pLog->Debug("Check connect timeout thread is running.");
-	while (m_bIsRunning)
+	while (m_emStatus != RUN_STATUS::Exit)
 	{
 		m_pLog->Debug("Check connect timeout start.");
 	RecheckTimeout:
@@ -264,7 +264,16 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
 // 为了避免影响接收时的效率，将队列操作放松到最低。以每次一定数量的处理来逐级加锁。
 void Sloong::CNetworkHub::MessageProcessWorkLoop()
 {
-	m_pLog->Debug("MessageProcessWorkLoop thread is running.");
+	auto pid = this_thread::get_id();
+	string spid = Helper::ntos(pid);
+
+	m_pLog->Info("Network hub work thread is started. PID:" + spid);
+
+	while (m_emStatus == RUN_STATUS::Created)
+	{
+		this_thread::sleep_for(std::chrono::microseconds(100));
+	}
+
 	void *pEnv;
 	m_pLog->Verbos("Call module create process environment function.");
 	auto res = m_pCreateEnvFunc(&pEnv);
@@ -283,7 +292,8 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 		m_pLog->Verbos("Create called succeed.");
 	}
 
-	while (m_bIsRunning)
+	m_pLog->Info("Network hub work thread is running. PID:" + spid);
+	while (m_emStatus != RUN_STATUS::Exit)
 	{
 		try
 		{
@@ -361,7 +371,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 			m_pLog->Error("Unknown exception happened in MessageProcessWorkLoop");
 		}
 	}
-	m_pLog->Info("MessageProcessWorkLoop thread is exit ");
+	m_pLog->Info("Network hub work thread is exit " + spid);
 }
 
 /// 有新链接到达。
@@ -428,7 +438,11 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(SOCKET socket)
 	m_pLog->Verbos("OnDataCanReceive called, start receiving package.");
 	auto res = info->OnDataCanReceive();
 	if (res.IsFialed())
+	{
+		m_pLog->Error(res.GetMessage());
 		SendConnectionBreak(sessionid);
+	}
+		
 
 	auto pReadList = res.MoveResultObject();
 	m_pLog->Verbos(Helper::Format("OnDataCanReceive done. received [%d] packages.", pReadList.size()));
