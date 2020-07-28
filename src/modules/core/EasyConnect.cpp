@@ -1,11 +1,13 @@
 /*** 
  * @Author: Chuanbin Wang
- * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-28 14:51:34
+ * @Date: 2018-01-12 15:25:16
+ * @LastEditTime: 2020-07-28 15:30:05
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description: 封装Socket连接的细节信息。并将Socket进行隔离，上层使用特征码而不需要关心实际的连接Socket句柄。
+ * 支持TCP 和 TCP over SSL。提供主动连接模式下的自动重连。
+ * 将数据流的收发过程进行数据包的封装，上层只需要关心数据包的收发结果而不需要处理数据流可能导致的各种沾包拆包等复杂问题。
  */
 /*** 
  * @......................................&&.........................
