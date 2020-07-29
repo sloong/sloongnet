@@ -164,7 +164,7 @@ void Sloong::LuaMiddleLayer::OnReferenceModuleOnlineEvent(const string &str_req,
 	auto item = req->item();
 	m_mapUUIDToNode[item.uuid()] = item;
 	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
-	m_pLog->Debug(Helper::Format("New module is online:[%llu][%s:%d]", item.uuid(), item.address().c_str(), item.port()));
+	m_pLog->Debug(Helper::Format("New module is online:[%lld][%s:%d]", item.uuid(), item.address().c_str(), item.port()));
 
 	AddConnection(item.uuid(), item.address(), item.port());*/
 }
@@ -200,5 +200,14 @@ void Sloong::LuaMiddleLayer::EventPackageProcesser(DataPackage *pack)
 		m_pLog->Error(Helper::Format("Event is no processed. [%s][%d].", Manager::Events_Name(event).c_str(), event));
 	}
 	break;
+	}
+}
+
+
+void Sloong::LuaMiddleLayer::SetReloadScriptFlag()
+{
+	for( auto& item : m_listProcess)
+	{
+		item->ReloadContext();
 	}
 }

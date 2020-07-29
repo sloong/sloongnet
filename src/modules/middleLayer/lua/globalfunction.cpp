@@ -7,6 +7,8 @@
 #include "IData.h"
 #include "snowflake.h"
 
+#include "luaMiddleLayer.h"
+
 #include "protocol/datacenter.pb.h"
 #include "protocol/manager.pb.h"
 
@@ -43,8 +45,13 @@ CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
     IObject::Initialize(ic);
     IData::Initialize(ic);
     m_pModuleConfig = IData::GetModuleConfig();
-    ReferenceDataCenterConnection();
+    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&CGlobalFunction::OnStart, this, std::placeholders::_1) );
     return CResult::Succeed;
+}
+
+void Sloong::CGlobalFunction::OnStart(SharedEvent e)
+{
+    ReferenceDataCenterConnection();
 }
 
 void Sloong::CGlobalFunction::ReferenceDataCenterConnection()
@@ -155,7 +162,7 @@ int Sloong::CGlobalFunction::Lua_Hash_Encode(lua_State *l)
 
 int Sloong::CGlobalFunction::Lua_ReloadScript(lua_State *l)
 {
-    CGlobalFunction::Instance->m_iC->SendMessage(EVENT_TYPE::ReloadLuaContext);
+    LuaMiddleLayer::Instance->SetReloadScriptFlag();
     return 0;
 }
 

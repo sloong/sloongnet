@@ -1,3 +1,12 @@
+/*** 
+ * @Author: Chuanbin Wang
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditTime: 2020-07-29 17:37:01
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/middleLayer/lua/globalfunction.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
+ */
 #ifndef CGLOBALFUNCTION_H
 #define CGLOBALFUNCTION_H
 
@@ -44,6 +53,7 @@ namespace Sloong
         static int Lua_SQLUpdateToDBCenter(lua_State *l);
 
     protected:
+        void OnStart(SharedEvent);
         void ReferenceDataCenterConnection();
         void OnQueryDBCenterTemplateResponse(IEvent *event, DataPackage *pack);
         static CResult RunSQLFunction( const string& req, int func );

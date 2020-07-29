@@ -85,15 +85,6 @@ enum EVENT_TYPE
     // 获取一个连接的信息
     // 参数类型为GetConnectionInfoEvent
     GetConnectionInfo=18;
-
-	
-    //////////////////////////////////////////////////////////////////////////
-	// 由 * LuaMiddleLayer * 模块提供的消息 (21-30)
-	//////////////////////////////////////////////////////////////////////////
-	// 请求重新载入Lua环境
-	// 当需要重新载入Lua Context的时候发送该请求。
-	// 请求类型为NormalEvent
-	ReloadLuaContext=21;
 }
 
 enum ControlEvent{

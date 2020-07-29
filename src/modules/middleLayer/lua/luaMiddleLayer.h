@@ -102,6 +102,8 @@ namespace Sloong
 
 		void OnConnectionBreaked(SharedEvent);
 
+		void SetReloadScriptFlag();
+
 		inline CLog* GetLog(){ return m_pLog; }
 
 	protected:
