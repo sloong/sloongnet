@@ -311,7 +311,7 @@ CResult CSloongBaseService::InitModule()
         string errMsg = Helper::Format("Load function NewConnectAcceptProcesser error[%s]. Use default function.", errmsg);
         m_pLog->Warn(errMsg);
     }
-    m_pModuleInitializationFunc = (ModuleInitializationFunction)dlsym(m_pModule, "PrepareInitialize");
+    m_pPrepareInitializeFunc = (PrepareInitializeFunction)dlsym(m_pModule, "PrepareInitialize");
     if ((errmsg = dlerror()) != NULL)
     {
         string errMsg = Helper::Format("Load function PrepareInitialize error[%s]. maybe module no need.", errmsg);
