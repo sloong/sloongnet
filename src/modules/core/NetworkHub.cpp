@@ -174,7 +174,7 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
 	info->Initialize(m_iC, std::move(connect));
 	auto socket = info->m_pConnection->GetSocketID();
 	auto sessionid = info->m_pConnection->GetHashCode();
-	m_pLog->Info(Helper::Format("Registe connection:[%d][%s:%d].", socket, info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
+	m_pLog->Info(Helper::Format("Registe connection:[%d][%lld][%s:%d].", socket, sessionid, info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
 
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_mapSocketToSessionID[socket] = sessionid;

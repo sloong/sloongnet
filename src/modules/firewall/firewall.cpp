@@ -68,7 +68,7 @@ PackageResult Sloong::SloongNetFirewall::RequestPackageProcesser(DataPackage* pa
 {
     auto sender = pack->sender();
     auto func = (Functions)pack->function();
-    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%llu]", Functions_Name(func).c_str(), sender));
+    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%lld]", Functions_Name(func).c_str(), sender));
 
 	return PackageResult::Succeed();
 }
@@ -77,7 +77,7 @@ PackageResult Sloong::SloongNetFirewall::ResponsePackageProcesser(DataPackage* p
 {
     auto sender = pack->sender();
     auto func = (Functions)pack->function();
-    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%llu]", Functions_Name(func).c_str(), sender));
+    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%lld]", Functions_Name(func).c_str(), sender));
 
 	return PackageResult::Succeed();
 }

@@ -209,7 +209,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, DataP
 			item->Address = info.Address;
 		});
 		m_iC->SendMessage(event);
-		m_pLog->Debug(Helper::Format("Module[%s:%d] regist to system. Allocating uuid [%llu].", item.Address.c_str(), item.Port, item.UUID));
+		m_pLog->Debug(Helper::Format("Module[%s:%d] regist to system. Allocating uuid [%lld].", item.Address.c_str(), item.Port, item.UUID));
 		char m_pMsgBuffer[8] = {0};
 		char *pCpyPoint = m_pMsgBuffer;
 		Helper::Int64ToBytes(sender, pCpyPoint);
@@ -247,7 +247,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, DataP
 	res.set_templateid(tpl.ID);
 	res.set_configuation(m_mapIDToTemplateItem[tpl.ID].Configuation);
 
-	m_pLog->Debug(Helper::Format("Allocating module[%llu] Type to [%s]", sender_info->UUID, tpl.Name.c_str()));
+	m_pLog->Debug(Helper::Format("Allocating module[%lld] Type to [%s]", sender_info->UUID, tpl.Name.c_str()));
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
@@ -278,7 +278,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, DataPac
 		return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
 
 	if (!m_mapUUIDToNodeItem.exist(sender))
-		return CResult::Make_Error(Helper::Format("The sender [%llu] is no regitser.", sender));
+		return CResult::Make_Error(Helper::Format("The sender [%lld] is no regitser.", sender));
 
 	if (id == 1)
 		return CResult::Make_Error("Template id error.");
@@ -510,11 +510,11 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 	m_pLog->Verbos("QueryReferenceInfoHandler <<< " );
 	auto uuid = pack->sender();
 	if (!m_mapUUIDToNodeItem.exist(uuid))
-		return CResult::Make_Error(Helper::Format("The node is no registed. [%llu]", uuid));
+		return CResult::Make_Error(Helper::Format("The node is no registed. [%lld]", uuid));
 
 	auto id = m_mapUUIDToNodeItem[uuid].TemplateID;
 	if( !m_mapIDToTemplateItem.exist(id))
-		return CResult::Make_Error(Helper::Format("The template id error. UUID[%llu];ID[%d]", uuid, id));
+		return CResult::Make_Error(Helper::Format("The template id error. UUID[%lld];ID[%d]", uuid, id));
 
 	QueryReferenceInfoResponse res;
 	auto references = Helper::split(m_mapIDToTemplateItem[id].ConfiguationObj->modulereference(), ',');
