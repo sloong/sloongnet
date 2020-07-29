@@ -17,7 +17,7 @@ CResult Sloong::DBHub::Initialize(IControl *ic)
     m_mapFuncToHandler[DataCenter::Functions::UpdateSQLCmd] = std::bind(&DBHub::UpdateSQLCmdHandler, this, std::placeholders::_1, std::placeholders::_2);
     m_mapFuncToHandler[DataCenter::Functions::DeleteSQLCmd] = std::bind(&DBHub::DeleteSQLCmdHandler, this, std::placeholders::_1, std::placeholders::_2);
 
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 PackageResult Sloong::DBHub::RequestPackageProcesser(DataPackage *pack)

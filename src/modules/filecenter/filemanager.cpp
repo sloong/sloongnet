@@ -12,7 +12,7 @@ CResult Sloong::FileManager::Initialize(IControl *ic)
     m_mapFuncToHandler[Functions::PrepareDownload] = std::bind(&FileManager::PrepareDownloadHandler, this, std::placeholders::_1, std::placeholders::_2);
     m_mapFuncToHandler[Functions::Downloading] = std::bind(&FileManager::DownloadingHandler, this, std::placeholders::_1, std::placeholders::_2);
     m_mapFuncToHandler[Functions::Downloaded] = std::bind(&FileManager::DownloadedHandler, this, std::placeholders::_1, std::placeholders::_2);
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 PackageResult Sloong::FileManager::RequestPackageProcesser(DataPackage *pack)
@@ -50,7 +50,7 @@ CResult Sloong::FileManager::MergeFile(const map_ex<int, string> &fileList, cons
     for (auto &item : fileList)
         files += item.second + " ";
     auto res = CUniversal::RunSystemCmdAndGetResult(Helper::Format("cat %s > %s", files.c_str(), saveFile.c_str()));
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 CResult Sloong::FileManager::SplitFile(const string &filepath, int splitSize, map_ex<int, string> &pReadList, int* out_all_size)
@@ -74,7 +74,7 @@ CResult Sloong::FileManager::SplitFile(const string &filepath, int splitSize, ma
 	}
 	in.close();
 	*out_all_size = nSize;
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult Sloong::FileManager::MoveFile(const string &source, const string &target)
@@ -104,7 +104,7 @@ CResult Sloong::FileManager::MoveFile(const string &source, const string &target
             {
                 return CResult::Make_Error("Move File and try copy file error.");
             }
-            return CResult::Succeed();
+            return CResult::Succeed;
         }
     }
     catch (const exception &e)
@@ -113,7 +113,7 @@ CResult Sloong::FileManager::MoveFile(const string &source, const string &target
         return CResult::Make_Error(e.what());
     }
 
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 void Sloong::FileManager::ClearCache(const string &folder)
 {

@@ -42,7 +42,7 @@ using namespace Core;
 #include <jsoncpp/json/json.h>
 
 #include "defines.h"
-#include "result.hpp"
+#include "result.h"
 #include "queue_ex.hpp"
 #include "map_ex.hpp"
 #include "list_ex.hpp"

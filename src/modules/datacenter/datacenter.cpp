@@ -86,12 +86,12 @@ extern "C" CResult ResponsePackageProcesser(void *env, DataPackage *pack)
 extern "C" CResult EventPackageProcesser(DataPackage *pack)
 {
 	CDataCenter::Instance->EventPackageProcesser(pack);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 {
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 extern "C" CResult ModuleInitialization(IControl *ic)
@@ -114,7 +114,7 @@ CResult CDataCenter::Initialization(IControl *ic)
 {
 	IObject::Initialize(ic);
 	IData::Initialize(ic);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult CDataCenter::Initialized()
@@ -128,7 +128,7 @@ CResult CDataCenter::Initialized()
 		return CResult::Make_Error("Initialize error. no config data.");
 	}
 
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult CDataCenter::CreateProcessEnvironmentHandler(void **out_env)
@@ -139,7 +139,7 @@ CResult CDataCenter::CreateProcessEnvironmentHandler(void **out_env)
 		return res;
 	(*out_env) = item.get();
 	m_listDBHub.push_back(std::move(item));
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 void Sloong::CDataCenter::EventPackageProcesser(DataPackage *data_pack)

@@ -27,12 +27,12 @@ extern "C" PackageResult ResponsePackageProcesser(void* pEnv,DataPackage* pack)
 extern "C" CResult EventPackageProcesser(DataPackage* pack)
 {
 	SloongNetFirewall::Instance->EventPackageProcesser(pack);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 {
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 	
 extern "C" CResult ModuleInitialization(IControl* ic){
@@ -54,13 +54,13 @@ CResult SloongNetFirewall::Initialization(IControl* ic)
 {
 	IObject::Initialize(ic);
 	IData::Initialize(ic);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 
 CResult SloongNetFirewall::Initialized()
 {
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 
@@ -84,7 +84,7 @@ PackageResult Sloong::SloongNetFirewall::ResponsePackageProcesser(DataPackage* p
 
 inline CResult Sloong::SloongNetFirewall::CreateProcessEnvironmentHandler(void** out_env)
 {
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 

@@ -37,7 +37,7 @@ extern "C" PackageResult ResponsePackageProcesser(void *pEnv, DataPackage *pack)
 extern "C" CResult EventPackageProcesser(DataPackage *pack)
 {
 	SloongControlService::Instance->EventPackageProcesser(pack);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 extern "C" CResult PrepareInitialize(GLOBAL_CONFIG *config)
@@ -92,7 +92,7 @@ CResult SloongControlService::PrepareInitialize(GLOBAL_CONFIG *config)
 	// When config parse done, revert the port setting. Because we always use the command line port.
 	config->set_listenport(port);
 
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 /**
@@ -115,13 +115,13 @@ CResult SloongControlService::Initialization(IControl *iC)
 
 	m_pConfig = IData::GetGlobalConfig();
 
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult SloongControlService::Initialized()
 {
 	m_iC->RegisterEventHandler(EVENT_TYPE::ConnectionBreaked, std::bind(&SloongControlService::OnConnectionBreaked, this, std::placeholders::_1));
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG *config)
@@ -151,7 +151,7 @@ inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(voi
 		return res;
 	(*out_env) = item.get();
 	m_listServerManage.push_back(std::move(item));
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 void Sloong::SloongControlService::EventPackageProcesser(DataPackage *pack)

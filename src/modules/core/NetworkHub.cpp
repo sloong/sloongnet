@@ -74,7 +74,7 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	if (m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0)
 		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this));
 		
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 void Sloong::CNetworkHub::Run(SharedEvent event)

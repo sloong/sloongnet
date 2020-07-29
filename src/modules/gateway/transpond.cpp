@@ -16,7 +16,7 @@ CResult Sloong::GatewayTranspond::Initialize(IControl* ic)
 {
     m_pLog = IData::GetLog();
     m_iC = ic;
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 PackageResult GatewayTranspond::RequestPackageProcesser(DataPackage *trans_pack)

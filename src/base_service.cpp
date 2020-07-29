@@ -100,7 +100,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
 
             data->set_templateid(res_pack->templateid());
             data->set_nodeuuid(uuid);
-            result = CResult::Succeed();
+            result = CResult::Succeed;
             break;
         }
         else
@@ -120,7 +120,7 @@ CResult CSloongBaseService::InitlializeForManager(RuntimeDataPackage *data)
     config->set_listenport(data->managerport());
     config->set_modulepath("./modules/");
     config->set_modulename("libmanager.so");
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 void CSloongBaseService::InitSystem()
@@ -142,11 +142,11 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
 {
     m_oServerConfig.set_manageraddress(address);
     m_oServerConfig.set_managerport(port);
-    m_oExitResult = CResult::Succeed();
+    m_oExitResult = CResult::Succeed;
 
     InitSystem();
 
-    CResult res = CResult::Succeed();
+    CResult res = CResult::Succeed;
     UniqueConnection pManagerConnect = nullptr;
 
     if (ManagerMode)
@@ -260,7 +260,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
         }
     }
 
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 CResult CSloongBaseService::InitModule()
@@ -330,7 +330,7 @@ CResult CSloongBaseService::InitModule()
         m_pLog->Warn(errMsg);
     }
     m_pLog->Debug("load module functions done.");
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 CResult CSloongBaseService::RegisteNode()
@@ -357,7 +357,7 @@ CResult CSloongBaseService::RegisteNode()
     {
         return CResult::Make_Error(*response_str);
     }
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 CResult CSloongBaseService::Run()

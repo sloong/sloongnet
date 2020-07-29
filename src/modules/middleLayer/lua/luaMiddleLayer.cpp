@@ -40,12 +40,12 @@ extern "C" PackageResult ResponsePackageProcesser(void *pEnv, DataPackage *pack)
 extern "C" CResult EventPackageProcesser(DataPackage *pack)
 {
 	LuaMiddleLayer::Instance->EventPackageProcesser(pack);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 {
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 extern "C" CResult ModuleInitialization(IControl* ic)
@@ -69,7 +69,7 @@ CResult LuaMiddleLayer::Initialization(IControl *ic)
 {
 	IObject::Initialize(ic);
 	IData::Initialize(ic);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult LuaMiddleLayer::Initialized()
@@ -153,7 +153,7 @@ inline CResult Sloong::LuaMiddleLayer::CreateProcessEnvironmentHandler(void **ou
 		return res;
 	m_listProcess.push_back(item);
 	(*out_env) = item.get();
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 

@@ -25,7 +25,7 @@ CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 		if (res.IsFialed())
 			return res;
 	}
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 void Sloong::CLuaProcessCenter::HandleError(const string &err)
@@ -56,7 +56,7 @@ CResult Sloong::CLuaProcessCenter::NewThreadInit()
 	m_listLuaContent.push_back(lua);
 	int id = (int)m_listLuaContent.size() - 1;
 	FreeLuaContext(id);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult Sloong::CLuaProcessCenter::InitLua(CLua *pLua, string folder)
@@ -69,7 +69,7 @@ CResult Sloong::CLuaProcessCenter::InitLua(CLua *pLua, string folder)
 	{
 		return CResult::Make_Error("Run Function Fialed.");
 	}
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket *uinfo)

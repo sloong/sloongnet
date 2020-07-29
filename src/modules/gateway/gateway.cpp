@@ -45,12 +45,12 @@ extern "C" PackageResult ResponsePackageProcesser(void *env, DataPackage *pack)
 extern "C" CResult EventPackageProcesser(DataPackage *pack)
 {
 	SloongNetGateway::Instance->EventPackageProcesser(pack);
-	return CResult::Succeed();
+	return CResult::Succeed;
 } 
 
 extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 {
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 extern "C" CResult ModuleInitialization(IControl *ic)
@@ -73,7 +73,7 @@ CResult SloongNetGateway::Initialization(IControl *iC)
 {
 	IObject::Initialize(iC);
 	IData::Initialize(iC);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult SloongNetGateway::Initialized()
@@ -94,7 +94,7 @@ CResult SloongNetGateway::Initialized()
 		m_iC->SendMessage(event);*/
 	}
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 
@@ -188,7 +188,7 @@ CResult SloongNetGateway::CreateProcessEnvironmentHandler(void **out_env)
 		return res;
 	(*out_env) = item.get();
 	m_listTranspond.push_back(std::move(item));
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 void SloongNetGateway::OnStart(SharedEvent evt)

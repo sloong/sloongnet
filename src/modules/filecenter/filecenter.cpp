@@ -88,12 +88,12 @@ extern "C" PackageResult ResponsePackageProcesser(void *pEnv, DataPackage *pack)
 extern "C" CResult EventPackageProcesser(DataPackage *pack)
 {
     CFileCenter::Instance->EventPackageProcesser(pack);
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 {
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 extern "C" CResult ModuleInitialization(IControl *ic)
@@ -115,12 +115,12 @@ extern "C" CResult CreateProcessEnvironment(void **out_env)
 CResult CFileCenter::Initialization(IControl *ic)
 {
     IObject::Initialize(ic);
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 CResult CFileCenter::Initialized()
 {
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 CResult Sloong::CFileCenter::CreateProcessEnvironmentHandler(void **out_env)
@@ -131,7 +131,7 @@ CResult Sloong::CFileCenter::CreateProcessEnvironmentHandler(void **out_env)
 		return res;
 	(*out_env) = item.get();
 	m_listManage.push_back(std::move(item));
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 void Sloong::CFileCenter::EventPackageProcesser(DataPackage *pack)

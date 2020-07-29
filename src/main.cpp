@@ -102,7 +102,7 @@ int main(int argc, char **args)
 			return -2;
 		}
 
-		CResult res = CResult::Succeed();
+		CResult res = CResult::Succeed;
 		Sloong::CSloongBaseService::Instance = make_unique<Sloong::CSloongBaseService>();
 		do
 		{

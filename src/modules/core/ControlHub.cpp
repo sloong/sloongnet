@@ -13,7 +13,7 @@ CResult Sloong::CControlHub::Initialize(int quantity, CLog* log)
 	CThreadPool::Initialize(3);
 	CThreadPool::Run();
 	Run();
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 void Sloong::CControlHub::Exit()

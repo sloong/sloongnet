@@ -57,22 +57,19 @@ namespace Sloong
         static inline CResult Make_Error(const string& what) {
             return CResult(ResultType::Error, what);
         }
+        static inline CResult Make_Warning(const string& what) {
+            return CResult(ResultType::Warning, what);
+        }
         static inline CResult Make_OK(const string& result) {
             return CResult(ResultType::Succeed, result);
         }
-        static inline CResult Succeed(){
-            return CResult(ResultType::Succeed);
-        }
-        static inline CResult Invalid(){
-            return CResult(ResultType::Invalid);
-        }
-        static inline CResult Ignore(){
-            return CResult(ResultType::Ignore);
-        }
+        static CResult Succeed;
+        static CResult Invalid;
+        static CResult Ignore;
+        static CResult Retry;
     protected:
         ResultType m_emResult;
         string m_strMessage;
-        
     };
 
     template<class T>
@@ -96,16 +93,22 @@ namespace Sloong
         }
     public:
         static inline TResult Succeed(){
-            return TResult(ResultType::Succeed);
+            return TResult(ResultType::Succeed );
         }
         static inline TResult Invalid(){
-            return TResult(ResultType::Invalid);
+            return TResult(ResultType::Invalid );
         }
         static inline TResult Ignore(){
-            return TResult(ResultType::Ignore);
+            return TResult(ResultType::Ignore );
+        }
+        static inline TResult Retry(){
+            return TResult(ResultType::Retry );
         }
         static inline TResult Make_Error(const string& what) {
             return TResult(ResultType::Error, what );
+        }
+        static inline TResult Make_Warning(const string& what) {
+            return TResult(ResultType::Warning, what);
         }
         static inline TResult Make_OK(T result, const string& msg = "") {
             return TResult(ResultType::Succeed, msg, move(result));

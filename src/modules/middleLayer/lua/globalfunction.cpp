@@ -44,7 +44,7 @@ CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
     IData::Initialize(ic);
     m_pModuleConfig = IData::GetModuleConfig();
     ReferenceDataCenterConnection();
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 void Sloong::CGlobalFunction::ReferenceDataCenterConnection()

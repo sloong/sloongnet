@@ -60,7 +60,7 @@ CResult Sloong::FileManager::EnableDataReceive(int port, int timtout)
 
     m_nRecvDataTimeoutTime = timtout;
     CThreadPool::AddWorkThread(std::bind(&FileManager::RecvDataConnFunc, this), 1);
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 void FileManager::ClearReceiveInfoByUUID(string uuid)

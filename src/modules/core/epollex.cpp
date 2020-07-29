@@ -98,12 +98,12 @@ CResult Sloong::CEpollEx::Initialize(IControl *iMsg)
 	CThreadPool::AddWorkThread(std::bind(&CEpollEx::MainWorkLoop, this), workThread);
 	m_emStatus = RUN_STATUS::Running;
 	
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult Sloong::CEpollEx::Run()
 {
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 void Sloong::CEpollEx::AddMonitorSocket(int nSocket)

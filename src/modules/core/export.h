@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "result.hpp"
+#include "result.h"
 typedef TResult<unique_ptr<DataPackage>> PackageResult;
 
 #include "protocol/base.pb.h"

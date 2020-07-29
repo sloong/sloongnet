@@ -65,7 +65,7 @@ namespace Sloong
 		int64_t m_ManagerSession;
 		Json::Value m_oModuleConfig;
 		EasySync m_oExitSync;
-		CResult m_oExitResult = CResult::Succeed();
+		CResult m_oExitResult = CResult::Succeed;
 		void *m_pModule = nullptr;
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;
 

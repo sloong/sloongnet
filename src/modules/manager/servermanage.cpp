@@ -47,7 +47,7 @@ CResult Sloong::CServerManage::Initialize(IControl *ic, const string &db_path)
 		RefreshModuleReference(addItem.ID);
 	}
 	m_mapIDToTemplateItem[1].Created.push_back(0);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult Sloong::CServerManage::LoadManagerConfig(const string &db_path)
@@ -188,7 +188,7 @@ PackageResult Sloong::CServerManage::ProcessHandler(DataPackage *pack)
 
 CResult Sloong::CServerManage::EventRecorderHandler(const string &req_str, DataPackage *pack)
 {
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, DataPackage *pack)
@@ -311,7 +311,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, DataPac
 		SendEvent(notifyList, Manager::Events::ReferenceModuleOnline, &online_event);
 	}
 
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult Sloong::CServerManage::AddTemplateHandler(const string &req_str, DataPackage *pack)
@@ -338,7 +338,7 @@ CResult Sloong::CServerManage::AddTemplateHandler(const string &req_str, DataPac
 	item.ID = id;
 	m_mapIDToTemplateItem[id] = item;
 	RefreshModuleReference(id);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult Sloong::CServerManage::DeleteTemplateHandler(const string &req_str, DataPackage *pack)
@@ -361,7 +361,7 @@ CResult Sloong::CServerManage::DeleteTemplateHandler(const string &req_str, Data
 		return res;
 	}
 	m_mapIDToTemplateItem.erase(id);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, DataPackage *pack)
@@ -395,7 +395,7 @@ CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, DataPac
 
 	m_mapIDToTemplateItem[tplInfo.ID] = tplInfo;
 	RefreshModuleReference(tplInfo.ID);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, DataPackage *pack)
@@ -485,7 +485,7 @@ CResult Sloong::CServerManage::StopNodeHandler(const string &req_str, DataPackag
 	l.push_back(id);
 	SendEvent(l, Core::ControlEvent::Stop, nullptr);
 
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, DataPackage *pack)
@@ -502,7 +502,7 @@ CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, DataPac
 	l.push_back(id);
 	SendEvent(l, Core::ControlEvent::Restart, nullptr);
 
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, DataPackage *pack)

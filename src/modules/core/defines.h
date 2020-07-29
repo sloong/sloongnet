@@ -20,7 +20,7 @@
 using namespace Sloong;
 using namespace Sloong::Universal;
 
-#include "result.hpp"
+#include "result.h"
 
 #define ARRAYSIZE(a) (sizeof(a) / sizeof(a[0]))
 

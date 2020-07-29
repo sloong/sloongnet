@@ -219,7 +219,7 @@ CResult Sloong::EasyConnect::SendPackage(UniquePackage pack)
 		m_strSending.clear();
 		m_SendPackageSize = 0;
 		m_SentSize = 0;
-		return CResult::Succeed();
+		return CResult::Succeed;
 	}
 	else if (res == ResultType::Retry)
 	{

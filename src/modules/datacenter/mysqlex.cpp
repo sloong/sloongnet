@@ -9,7 +9,7 @@ CResult Sloong::MySqlEx::Connect(const string &Address, int Port, const string &
 	}
 	mysql_set_character_set(&m_MySql, "utf8");
 	m_bIsConnect = true;
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 DResult Sloong::MySqlEx::Query(const string &sqlCmd)
