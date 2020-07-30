@@ -1,12 +1,14 @@
-/*
- * @Author: WCB
- * @Date: 1970-01-01 08:00:00
- * @LastEditors: WCB
- * @LastEditTime: 2020-04-17 12:30:12
- * @Description: file content
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 2015-12-04 17:40:06
+ * @LastEditTime: 2020-07-30 10:48:01
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/core/ConnectSession.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
-#ifndef SOCKINFO_H
-#define SOCKINFO_H
+
+#pragma once 
 
 #include "IObject.h"
 
@@ -80,5 +82,3 @@ namespace Sloong
 	};
 
 } // namespace Sloong
-
-#endif // SOCKINFO_H
