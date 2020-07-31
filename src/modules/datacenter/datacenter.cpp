@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-28 20:01:22
+ * @LastEditTime: 2020-07-31 17:15:58
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/datacenter/datacenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -64,23 +64,23 @@
 
 unique_ptr<CDataCenter> Sloong::CDataCenter::Instance = nullptr;
 
-extern "C" CResult RequestPackageProcesser(void *env, DataPackage *pack)
+extern "C" PackageResult RequestPackageProcesser(void *env, DataPackage *pack)
 {
 	auto pDB = STATIC_TRANS<DBHub *>(env);
 	if (pDB)
 		return pDB->RequestPackageProcesser(pack);
 	else
-		return CResult::Make_Error("RequestPackageProcesser error, Environment convert failed.");
+		return PackageResult::Make_Error("RequestPackageProcesser error, Environment convert failed.");
 }
 
-extern "C" CResult ResponsePackageProcesser(void *env, DataPackage *pack)
+extern "C" PackageResult ResponsePackageProcesser(void *env, DataPackage *pack)
 {
 	/*auto pDB = STATIC_TRANS<DBHub *>(env);
 	if (pDB)
 		return pDB->ResponsePackageProcesser(pack);
 	else
 		return CResult::Make_Error("ResponsePackageProcesser error, Environment convert failed.");*/
-	return CResult::Make_Error("NO SUPPORT!");
+	return PackageResult::Make_Error("NO SUPPORT!");
 }
 
 extern "C" CResult EventPackageProcesser(DataPackage *pack)

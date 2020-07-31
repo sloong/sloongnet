@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-28 19:58:54
+ * @LastEditTime: 2020-07-31 17:16:49
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/datacenter/datacenter.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -68,8 +68,8 @@
 #include "dbhub.h"
 
 extern "C" {
-	CResult RequestPackageProcesser(void *, DataPackage *);
-	CResult ResponsePackageProcesser(void *, DataPackage *);
+	PackageResult RequestPackageProcesser(void *, DataPackage *);
+	PackageResult ResponsePackageProcesser(void *, DataPackage *);
 	CResult EventPackageProcesser(DataPackage *);
 	CResult NewConnectAcceptProcesser(SOCKET);
 	CResult ModuleInitialization(IControl *);
