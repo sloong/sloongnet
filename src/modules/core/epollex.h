@@ -1,9 +1,9 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-07-31 14:25:59
+ * @LastEditTime: 2020-07-31 15:00:04
  * @LastEditors: Chuanbin Wang
- * @FilePath: /engine/src/modules/core/epollex.h
+ * @FilePath: /engine/src/modules/core/EpollEx.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
  * @Description: 
  */
@@ -77,21 +77,80 @@ namespace Sloong
 		CResult Run();
 		void Exit();
 
-		void AddMonitorSocket(int);
-		void DeleteMonitorSocket(int);
+		/*** 
+		 * @description: Registe a socket to epoll with data can receive event(EPOLLIN).
+		 * @param: 
+		 * 		1 > Socket handle.
+		 */
+		void AddMonitorSocket(SOCKET);
 
-		void MonitorSendStatus(int);
-		void UnmonitorSendStatus(int);
+		/*** 
+		 * @description: Unregiste the epoll socket.
+		 * @param:
+		 * 		1 > Socket handle.
+		 */
+		void DeleteMonitorSocket(SOCKET);
 
-		void SetEventHandler(EpollEventHandlerFunc, EpollEventHandlerFunc, EpollEventHandlerFunc, EpollEventHandlerFunc);
+		/*** 
+		 * @description: Monitor the socket cannot send status in epoll.
+		 * @param:
+		 * 		1 > Socket handle.
+		 */
+		void MonitorSendStatus(SOCKET);
+
+		/*** 
+		 * @description: Cancel the send status monitor.
+		 * @param:
+		 * 		1 > Socket handle.
+		 */
+		void UnmonitorSendStatus(SOCKET);
+
+		/*** 
+		 * @description: Set event callback function. Epoll will call it in epoll work thread when the event is happened.
+		 * @param:
+		 * 		1 > Accept new connection function.
+		 * 		2 > Data can receive function.
+		 * 		3 > Can send data function.
+		 * 		4 > Other event function.
+		 */
+		inline void SetEventHandler(EpollEventHandlerFunc accept, EpollEventHandlerFunc recv, EpollEventHandlerFunc send, EpollEventHandlerFunc other)
+		{
+			OnNewAccept = accept;
+			OnCanWriteData = send;
+			OnDataCanReceive = recv;
+			OnOtherEventHappened = other;
+		}
 
 	protected:
-		/// 设置socket到非阻塞模式
-		int SetSocketNonblocking(int);
+		/*** 
+		 * @description: Set socket to no blocking mode.
+		 * @param：
+		 * 		1 > the socket handle.
+		 * @return: 
+		 * 		0 for succeed, -1 for erros. it's same as setsockopt function.
+		 */
+		int SetSocketNonblocking(SOCKET);
+
+		/*** 
+		 * @description: Create new listen socket.
+		 * @param: 
+		 * 		1 > address for listen socket bind.
+		 * 		2 > listen port.
+		 * @return: 
+		 * 		New listen socket handle in TResult<int>
+		 */
 		NResult CreateListenSocket(const string &, int);
 
-		/// 修改socket的epoll监听事件
-		void CtlEpollEvent(int, int, int);
+		/*** 
+		 * @description: Control socket in epoll operation.
+		 * @param:
+		 * 		1 > Valid opcodes ( "op" parameter ) to issue to epoll_ctl() 
+		 * 			EPOLL_CTL_ADD/EPOLL_CTL_DEL/EPOLL_CTL_MOD
+		 * 		2 > Socket handle for contorled
+		 * 		3 > Enum for epoll events. 
+		 * 			EPOLL_EVENTS
+		 */
+		void CtlEpollEvent(int, SOCKET, int);
 		void MainWorkLoop();
 
 	protected:
@@ -111,4 +170,3 @@ namespace Sloong
 		RUN_STATUS m_emStatus;
 	};
 } // namespace Sloong
-

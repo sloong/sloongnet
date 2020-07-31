@@ -1,15 +1,15 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-07-31 14:26:16
+ * @LastEditTime: 2020-07-31 15:00:49
  * @LastEditors: Chuanbin Wang
- * @FilePath: /engine/src/modules/core/epollex.cpp
+ * @FilePath: /engine/src/modules/core/EpollEx.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
  * @Description: Epoll extend object. 
  */
 
 // load system file
-#include "epollex.h"
+#include "EpollEx.h"
 #include "EasyConnect.h"
 #include "ConnectSession.h"
 #include "IData.h"
@@ -106,36 +106,29 @@ CResult Sloong::CEpollEx::Run()
 	return CResult::Succeed;
 }
 
-void Sloong::CEpollEx::AddMonitorSocket(int nSocket)
+void Sloong::CEpollEx::AddMonitorSocket(SOCKET nSocket)
 {
 	SetSocketNonblocking(nSocket);
 	CtlEpollEvent(EPOLL_CTL_ADD, nSocket, EPOLLIN);
 }
 
-void Sloong::CEpollEx::DeleteMonitorSocket(int nSocket)
+void Sloong::CEpollEx::DeleteMonitorSocket(SOCKET nSocket)
 {
 	CtlEpollEvent(EPOLL_CTL_DEL, nSocket, 0);
 }
 
-void Sloong::CEpollEx::SetEventHandler(EpollEventHandlerFunc accept, EpollEventHandlerFunc recv, EpollEventHandlerFunc send, EpollEventHandlerFunc other)
-{
-	OnNewAccept = accept;
-	OnCanWriteData = send;
-	OnDataCanReceive = recv;
-	OnOtherEventHappened = other;
-}
 
-void Sloong::CEpollEx::MonitorSendStatus(int socket)
+void Sloong::CEpollEx::MonitorSendStatus(SOCKET socket)
 {
 	CtlEpollEvent(EPOLL_CTL_MOD, socket, EPOLLIN | EPOLLOUT);
 }
 
-void Sloong::CEpollEx::UnmonitorSendStatus(int socket)
+void Sloong::CEpollEx::UnmonitorSendStatus(SOCKET socket)
 {
 	CtlEpollEvent(EPOLL_CTL_MOD, socket, EPOLLIN);
 }
 
-void Sloong::CEpollEx::CtlEpollEvent(int opt, int sock, int events)
+void Sloong::CEpollEx::CtlEpollEvent(int opt, SOCKET sock, int events)
 {
 	struct epoll_event ent;
 	memset(&ent, 0, sizeof(ent));
@@ -148,7 +141,7 @@ void Sloong::CEpollEx::CtlEpollEvent(int opt, int sock, int events)
 }
 
 // 设置套接字为非阻塞模式
-int Sloong::CEpollEx::SetSocketNonblocking(int socket)
+int Sloong::CEpollEx::SetSocketNonblocking(SOCKET socket)
 {
 	int op;
 
@@ -156,7 +149,7 @@ int Sloong::CEpollEx::SetSocketNonblocking(int socket)
 	fcntl(socket, F_SETFL, op | O_NONBLOCK);
 
 	int enable = 1;
-	setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (void *)&enable, sizeof(enable));
+	op = setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (void *)&enable, sizeof(enable));
 
 	return op;
 }
