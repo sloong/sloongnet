@@ -21,7 +21,7 @@ namespace Sloong
         CConfiguation();
 
         /**
-         * @Remarks: Init db and load all configuation template.
+         * @Description: Init db and load all configuation template.
          * @Params: dbPath : the path of sqlite file.
          *          uuid : uuid string of the owner.
          * @Return: 

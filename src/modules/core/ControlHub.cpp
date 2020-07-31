@@ -164,7 +164,7 @@ void Sloong::CControlHub::SendMessage(SharedEvent evt)
 }
 
 /**
- * @Remarks: One message only have one handler. so cannot register handled message again.
+ * @Description: One message only have one handler. so cannot register handled message again.
  * @Params: 
  * @Return: 
  */

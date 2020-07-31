@@ -23,7 +23,7 @@ namespace Sloong
         }
 
         /**
-         * @Summary: 
+         * @Description: 
          *      Response datapackage with an exist DataPackage object.
          * @Params: 
          *      1 > The DataPackage object.
@@ -45,7 +45,7 @@ namespace Sloong
         }
 
         /**
-         * @Summary: 
+         * @Description: 
          *      Response datapackage only with an result code. 
          * @Params: 
          *      Result type. 
@@ -61,7 +61,7 @@ namespace Sloong
         }
 
         /**
-         * @Summary: 
+         * @Description: 
          *      Response datapackage with content.
          * @Params: 
          *      1 > Result type. 
@@ -79,7 +79,7 @@ namespace Sloong
         }
 
         /**
-         * @Summary: 
+         * @Description: 
          *      Response datapackage with content and extend data.
          * @Params: 
          *      1 > Result type. 
@@ -99,7 +99,7 @@ namespace Sloong
         }
 
         /**
-         * @Summary: 
+         * @Description: 
          *      Response datapackage with content and extend data.
          * @Params: 
          *      1 > Result type. 
@@ -120,7 +120,7 @@ namespace Sloong
         }
 
         /**
-         * @Summary: 
+         * @Description: 
          *      Response datapackage with content (Recommend)
          * @Params: 
          *      1 > Result object

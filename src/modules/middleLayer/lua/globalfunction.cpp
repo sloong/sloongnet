@@ -125,7 +125,7 @@ int Sloong::CGlobalFunction::Lua_Base64_Decode(lua_State *l)
 }
 
 /**
- * @Remarks: 
+ * @Description: 
  * @Params: 1 string > string data. if file mode, is the file path
  * 			2 string > hash type. support : 0(MD5), 1(SHA-1),2(SHA-256), 3(SHA-512). default by SHA-1
  * 			3 boolen > file mode. default by false

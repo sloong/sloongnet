@@ -26,16 +26,16 @@ namespace Sloong
 		void Initialize(IControl *, UniqueConnection); 
 
 		/**
-		 * @Remarks: When data can receive, should call this function to receive the package.
+		 * @Description: When data can receive, should call this function to receive the package.
 		 * @Params: 
 		 * @Return: if receive done, return Succeed.
 		 * 		if happened errors, return Error.
-		 * @Note: It always read all data in one time, so no return Retry.
+		 * @Remarks: It always read all data in one time, so no return Retry.
 		 */
 		ReceivePackageListResult OnDataCanReceive();
 
 		/**
-		 * @Remarks: When data can send, should call this function to send the package.
+		 * @Description: When data can send, should call this function to send the package.
 		 * @Params: 
 		 * @Return: if send done, return Succeed.
 		 * 			if happened erros, return Error.
@@ -44,7 +44,7 @@ namespace Sloong
 		ResultType OnDataCanSend();
 
 		/**
-		 * @Remarks: When need response data package,call this function. 
+		 * @Description: When need response data package,call this function. 
 		 * @Params: 
 		 * @Return: if send data succeed, return Succeed.
 		 * 			if happened erros, return Error.

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2020-07-28 16:37:24
+ * @LastEditTime: 2020-07-30 11:25:53
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -186,7 +186,7 @@ string Sloong::EasyConnect::GetLengthData(int64_t lengthData)
 }
 
 /**
- * @Remarks: 
+ * @Description: 
  * @Params: 
  * @Return: if send succeed, return true. need listen read message. 
  *          else return false, need listen write message.

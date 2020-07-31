@@ -47,7 +47,7 @@ namespace Sloong
 		ResultType RecvPackage(string &, int &, int &, bool = false);
 
 		/**
-         * @Remarks: Receive and create data package. 
+         * @Description: Receive and create data package. 
          * @Params: 
          * @Return: if package receive succeed, return Succed.
          *          if other error happened else return Error 
@@ -68,7 +68,7 @@ namespace Sloong
 		ResultType SendPackage(const string &, int &);
 
 		/**
-         * @Remarks: send this package
+         * @Description: send this package
          * @Params: 
          * @Return: if send fialed, return Error.
          */

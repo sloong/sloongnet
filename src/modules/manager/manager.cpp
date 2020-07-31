@@ -96,7 +96,7 @@ CResult SloongControlService::PrepareInitialize(GLOBAL_CONFIG *config)
 }
 
 /**
- * @Remarks: If have errors, the error message will print to standard output device.
+ * @Description: If have errors, the error message will print to standard output device.
  * @Params: CMD line. from System.
  * @Return: return true if no error, service can continue to run.
  * 			return false if error. service must exit. 
