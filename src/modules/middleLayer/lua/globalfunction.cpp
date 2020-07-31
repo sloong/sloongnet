@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-11 15:05:40
- * @LastEditTime: 2020-07-31 14:28:32
+ * @LastEditTime: 2020-07-31 17:20:00
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/globalfunction.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -363,12 +363,22 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
 
     auto req = make_shared<SendPackageEvent>(CGlobalFunction::Instance->m_SocketDBCenter);
     auto sync = make_shared<EasySync>();
+    auto result = make_shared<CResult>(ResultType::Invalid);
+    auto session = make_shared<int>();
     // TODO: If connect error, how process it?
-    req->SetCallbackFunc([DBName, sync](IEvent *event, DataPackage *pack) {
+    req->SetCallbackFunc([DBName, sync, session,result](IEvent *event, DataPackage *pack) {
         auto res_str = pack->content();
-        auto res = ConvertStrToObj<DataCenter::ConnectDatabaseResponse>(res_str);
-
-        CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName] = res->sessionid();
+        if( res_str.length() == 0 )
+        {
+            result->SetResult(ResultType::Error);
+            result->SetMessage("Response content is empty.");
+        }
+        else
+        {
+            result->SetResult(ResultType::Succeed);
+            auto res = ConvertStrToObj<DataCenter::ConnectDatabaseResponse>(res_str);
+            *session = res->session();
+        }
         sync->notify_one();
     });
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request));
@@ -381,8 +391,16 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
         return 2;
     }
 
+    if( result->IsFialed() )
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, result->GetMessage());
+    }
+    CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName] = *session;
+
     CLua::PushInteger(l, Base::ResultType::Succeed);
-    CLua::PushInteger(l, CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName]);
+    CLua::PushInteger(l, *session);
+    
     return 2;
 }
 
@@ -419,8 +437,7 @@ CResult CGlobalFunction::RunSQLFunction(const string &request_str, int func)
     auto sync = make_shared<EasySync>();
     req->SetCallbackFunc([result, sync, response_str](IEvent *event, DataPackage *pack) {
         (*result) = pack->result();
-
-        *response_str = pack->content();
+        (*response_str) = pack->content();
         sync->notify_one();
     });
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, func, request_str);
@@ -430,7 +447,7 @@ CResult CGlobalFunction::RunSQLFunction(const string &request_str, int func)
     {
         return CResult::Make_Error("Timeout");
     }
-    return CResult::Make_OK(*response_str);
+    return CResult(*result, *response_str);
 }
 
 // Request sql query cmd to dbcenter.
@@ -445,7 +462,7 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
         return 2;
 
     DataCenter::QuerySQLCmdRequest request;
-    request.set_sessionid(SessionID);
+    request.set_session(SessionID);
     request.set_sqlcmd(query_cmd);
 
     auto res = RunSQLFunction(ConvertObjToStr(&request), (int)DataCenter::Functions::QuerySQLCmd);
@@ -484,7 +501,7 @@ int CGlobalFunction::Lua_SQLInsertToDBCenter(lua_State *l)
         return 2;
 
     DataCenter::InsertSQLCmdRequest request;
-    request.set_sessionid(SessionID);
+    request.set_session(SessionID);
     request.set_sqlcmd(sql_cmd);
 
     auto res = RunSQLFunction(ConvertObjToStr(&request), (int)DataCenter::Functions::InsertSQLCmd);
@@ -519,7 +536,7 @@ int CGlobalFunction::Lua_SQLDeleteToDBCenter(lua_State *l)
         return 2;
 
     DataCenter::DeleteSQLCmdRequest request;
-    request.set_sessionid(SessionID);
+    request.set_session(SessionID);
     request.set_sqlcmd(sql_cmd);
 
     auto res = RunSQLFunction(ConvertObjToStr(&request), (int)DataCenter::Functions::DeleteSQLCmd);
@@ -546,7 +563,7 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
         return 2;
 
     DataCenter::UpdateSQLCmdRequest request;
-    request.set_sessionid(SessionID);
+    request.set_session(SessionID);
     request.set_sqlcmd(sql_cmd);
 
 

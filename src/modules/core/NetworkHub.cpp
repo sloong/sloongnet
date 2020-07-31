@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-07-31 14:37:54
+ * @LastEditTime: 2020-07-31 16:36:15
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -478,7 +478,7 @@ ResultType Sloong::CNetworkHub::OnNewAccept(SOCKET conn_sock)
 	auto info = make_unique<ConnectSession>();
 	info->Initialize(m_iC, std::move(conn));
 
-	m_pLog->Info(Helper::Format("Accept client:[%d][%d][%s:%d].", info->m_pConnection->GetHashCode(), info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
+	m_pLog->Info(Helper::Format("Accept client:[%lld][%d][%s:%d].", info->m_pConnection->GetHashCode(), info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_mapSocketToSessionID[conn_sock] = info->m_pConnection->GetHashCode();
 	m_mapConnectIDToSession[info->m_pConnection->GetHashCode()] = std::move(info);

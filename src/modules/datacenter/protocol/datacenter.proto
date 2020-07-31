@@ -39,11 +39,11 @@ message ConnectDatabaseRequest{
 }
 
 message ConnectDatabaseResponse{
-    int32 SessionID=1;
+    int32 Session=1;
 }
 
 message QuerySQLCmdRequest{
-    int32 SessionID=1;
+    int32 Session=1;
     string SQLCMD=2;
 }
 
@@ -56,7 +56,7 @@ message QuerySQLCmdResponse{
 }
 
 message InsertSQLCmdRequest{
-    int32 SessionID=1;
+    int32 Session=1;
     string SQLCMD=2;
     // If set true, will return "SELECT @@IDENTITY" value.
     bool GetIdentity=3;
@@ -69,7 +69,7 @@ message InsertSQLCmdResponse{
 }
 
 message UpdateSQLCmdRequest{
-    int32 SessionID=1;
+    int32 Session=1;
     string SQLCMD=2;
 }
 
@@ -78,7 +78,7 @@ message UpdateSQLCmdResponse{
 }
 
 message DeleteSQLCmdRequest{
-    int32 SessionID=1;
+    int32 Session=1;
     string SQLCMD=2;
 }
 

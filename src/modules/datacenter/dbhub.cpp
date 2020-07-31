@@ -37,7 +37,10 @@ PackageResult Sloong::DBHub::RequestPackageProcesser(DataPackage *pack)
     }
 
     auto res = m_mapFuncToHandler[function](req_str, pack);
-    m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
+   if (res.IsError())
+		m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
+	else
+		m_pLog->Verbos(Helper::Format("Response [%s]:[%s]", func_name.c_str(), ResultType_Name(res.GetResult()).c_str()));
     return PackageResult::Make_OK(Package::MakeResponse(pack,res));
 }
 
@@ -65,7 +68,8 @@ CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, DataPackage
         return CResult::Make_Error("Get session id fialed.");
 
     ConnectDatabaseResponse response;
-    response.set_sessionid(*id);
+    response.set_session(*id);
+    m_pLog->Verbos( Helper::Format("Connect to database [%s] succeed. session id [%d]", req->database().c_str(), response.session() ));
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
@@ -73,7 +77,7 @@ CResult Sloong::DBHub::QuerySQLCmdHandler(const string &req_obj, DataPackage *pa
 {
     auto req = ConvertStrToObj<QuerySQLCmdRequest>(req_obj);
 
-    auto session = m_mapSessionIDToDBConnection.try_get(req->sessionid());
+    auto session = m_mapSessionIDToDBConnection.try_get(req->session());
     if (session == nullptr)
         return CResult::Make_Error("SessionID is invaild.");
 
@@ -98,7 +102,7 @@ CResult Sloong::DBHub::InsertSQLCmdHandler(const string &req_obj, DataPackage *p
 {
     auto req = ConvertStrToObj<InsertSQLCmdRequest>(req_obj);
 
-    auto session = m_mapSessionIDToDBConnection.try_get(req->sessionid());
+    auto session = m_mapSessionIDToDBConnection.try_get(req->session());
     if (session == nullptr)
         return CResult::Make_Error("SessionID is invaild.");
 
@@ -132,7 +136,7 @@ CResult Sloong::DBHub::DeleteSQLCmdHandler(const string &req_obj, DataPackage *p
 {
     auto req = ConvertStrToObj<DeleteSQLCmdRequest>(req_obj);
 
-    auto session = m_mapSessionIDToDBConnection.try_get(req->sessionid());
+    auto session = m_mapSessionIDToDBConnection.try_get(req->session());
     if (session == nullptr)
         return CResult::Make_Error("SessionID is invaild.");
 
@@ -150,7 +154,7 @@ CResult Sloong::DBHub::UpdateSQLCmdHandler(const string &req_obj, DataPackage *p
 {
     auto req = ConvertStrToObj<UpdateSQLCmdRequest>(req_obj);
 
-    auto session = m_mapSessionIDToDBConnection.try_get(req->sessionid());
+    auto session = m_mapSessionIDToDBConnection.try_get(req->session());
     if (session == nullptr)
         return CResult::Make_Error("SessionID is invaild.");
         
