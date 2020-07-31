@@ -1,10 +1,13 @@
-﻿/*
- * @Author: WCB
- * @Date: 2020-04-26 17:33:59
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-17 15:55:00
+﻿/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 2015-11-12 15:56:50
+ * @LastEditTime: 2020-07-31 14:26:38
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/main.cpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
  * @Description: Main function for apps. just for create and run gloabl apps.
  */
+
 #include "main.h"
 #include "base_service.h"
 #include "utility.h"
