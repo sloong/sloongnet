@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-11 15:05:40
- * @LastEditTime: 2020-07-31 17:20:00
+ * @LastEditTime: 2020-07-31 18:17:21
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/globalfunction.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -469,17 +469,26 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
     if (res.IsSucceed())
     {
         auto response = ConvertStrToObj<DataCenter::QuerySQLCmdResponse>(res.GetMessage());
-        CLua::PushInteger(l, response->lines_size());
-        list<list<string>> res;
-        for (auto &item : response->lines())
+        if( response->lines_size() == 0 )
         {
-            list<string> row;
-            for (auto &j : item.rawdataitem())
-                row.push_back(j);
-            res.push_back(row);
+            CLua::PushInteger(l, 0);
+            CLua::PushNil(l);
+            return 2;
         }
-        CLua::Push2DTable(l, res);
-        return 2;
+        else
+        {
+            CLua::PushInteger(l, response->lines_size());
+            list<list<string>> res;
+            for (auto &item : response->lines())
+            {
+                list<string> row;
+                for (auto &j : item.rawdataitem())
+                    row.push_back(j);
+                res.push_back(row);
+            }
+            CLua::Push2DTable(l, res);
+            return 2;
+        }
     }
     else
     {
