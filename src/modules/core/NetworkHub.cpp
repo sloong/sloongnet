@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-07-31 16:36:15
+ * @LastEditTime: 2020-08-04 11:13:31
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -78,7 +78,7 @@ Sloong::CNetworkHub::CNetworkHub()
 Sloong::CNetworkHub::~CNetworkHub()
 {
 	if (m_pCTX)
-		EasyConnect::G_FreeSSL(m_pCTX);
+		SSLHelper::G_FreeSSL(m_pCTX);
 	for (int i = 0; i < s_PriorityLevel; i++)
 	{
 		while (!m_pWaitProcessList[i].empty())
@@ -226,8 +226,11 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
 	}
 
 	auto connect = make_unique<EasyConnect>();
-	connect->InitializeAsClient(event->GetAddress(), event->GetPort(), m_pCTX);
-	connect->Connect();
+	auto res = connect->InitializeAsClient(event->GetAddress(), event->GetPort(), m_pCTX);
+	if( res.IsFialed() )
+	{
+		m_pLog->Warn(res.GetMessage());
+	}
 
 	auto info = make_unique<ConnectSession>();
 	info->Initialize(m_iC, std::move(connect));
@@ -281,11 +284,11 @@ void Sloong::CNetworkHub::EnableTimeoutCheck(int timeoutTime, int checkInterval)
 
 void Sloong::CNetworkHub::EnableSSL(const string &certFile, const string &keyFile, const string &passwd)
 {
-	auto ret = EasyConnect::G_InitializeSSL(&m_pCTX, certFile, keyFile, passwd);
+	auto ret = SSLHelper::G_InitializeSSL(&m_pCTX, certFile, keyFile, passwd);
 	if (ret != S_OK)
 	{
 		m_pLog->Error("Initialize SSL environment error.");
-		m_pLog->Error(EasyConnect::G_FormatSSLErrorMsg(ret));
+		m_pLog->Error(SSLHelper::G_FormatSSLErrorMsg(ret));
 	}
 }
 

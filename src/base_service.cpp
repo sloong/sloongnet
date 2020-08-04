@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-07-31 14:27:03
+ * @LastEditTime: 2020-08-04 11:26:08
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -208,8 +208,8 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     else
     {
         pManagerConnect = make_unique<EasyConnect>();
-        pManagerConnect->InitializeAsClient(m_oServerConfig.manageraddress(), m_oServerConfig.managerport(), nullptr);
-        if (!pManagerConnect->Connect())
+        auto res = pManagerConnect->InitializeAsClient(m_oServerConfig.manageraddress(), m_oServerConfig.managerport(), nullptr);
+        if (res.IsFialed())
         {
             return CResult::Make_Error("Connect to control fialed.");
         }

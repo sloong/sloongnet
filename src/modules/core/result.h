@@ -47,6 +47,9 @@ namespace Sloong
         inline bool IsFialed() const {
             return m_emResult == ResultType::Succeed ? false : true;
         }
+        inline bool IsWarn() const {
+            return m_emResult == ResultType::Warning ? true : false;
+        }
         inline void SetMessage(const string& str){
             m_strMessage = str;
         }
