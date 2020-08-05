@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2020-08-03 20:41:08
+ * @LastEditTime: 2020-08-05 17:23:49
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -73,11 +73,12 @@ constexpr int s_lLen = 4;
 
 CResult Sloong::EasyConnect::InitializeAsServer(SOCKET sock, LPVOID ctx)
 {
-	m_bReconnect = false;
+	m_bSupportReconnect = false;
 	m_nSocket = sock;
 	m_strAddress = CUtility::GetSocketIP(m_nSocket);
 	m_nPort = CUtility::GetSocketPort(m_nSocket);
 	m_nHashCode = std::hash<string>{}(Helper::Format("%s:%d", m_strAddress.c_str(), m_nPort));
+
 	if (ctx)
 	{
 		m_pSSL = make_unique<SSLHelper>(ctx);
@@ -88,7 +89,7 @@ CResult Sloong::EasyConnect::InitializeAsServer(SOCKET sock, LPVOID ctx)
 
 CResult Sloong::EasyConnect::InitializeAsClient(const string &address, int port, LPVOID ctx)
 {
-	m_bReconnect = true;
+	m_bSupportReconnect = true;
 	m_strAddress = address;
 	m_nPort = port;
 	m_nHashCode = std::hash<string>{}(Helper::Format("%s:%d", m_strAddress.c_str(), m_nPort));
@@ -101,6 +102,11 @@ CResult Sloong::EasyConnect::InitializeAsClient(const string &address, int port,
 }
 CResult Sloong::EasyConnect::Connect()
 {
+	if( m_nSocket != INVALID_SOCKET )
+		return CResult::Make_Warning("Called connect function, but the socket isn't INVALID_SOCKET.");
+	if( !m_bSupportReconnect )
+		return CResult::Make_Error("Connection is disconnect. and this connection don't support reconnect.");
+
 	auto dns_res = CUtility::HostnameToIP(m_strAddress);
 	if (dns_res.IsFialed())
 	{
@@ -123,8 +129,12 @@ CResult Sloong::EasyConnect::Connect()
 	}
 	if (m_pSSL)
 	{
-		return m_pSSL->Initialize(m_nSocket);
+		auto res = m_pSSL->Initialize(m_nSocket);
+		if( res.IsFialed()) return res;
 	}
+	 
+	if( m_pOnReconnect )
+		m_pOnReconnect(m_nHashCode, m_nSocket);
 	return CResult::Succeed;
 }
 
@@ -153,6 +163,12 @@ string Sloong::EasyConnect::GetLengthData(int64_t lengthData)
  */
 CResult Sloong::EasyConnect::SendPackage(UniquePackage pack)
 {
+	if( m_nSocket == INVALID_SOCKET )
+	{
+		auto res = Connect();
+		if( res.IsFialed() )
+			return res;
+	}
 	if (m_strSending.empty())
 	{
 		if (!pack->SerializeToString(&m_strSending))
@@ -181,9 +197,15 @@ CResult Sloong::EasyConnect::SendPackage(UniquePackage pack)
 		nCurSent = Write(lendata, 0);
 		// In first time send. the length data must send succeed.
 		if (nCurSent >= nLen)
+		{
 			m_SentSize = nCurSent - nLen;
+		}
 		else
-			return CResult::Make_Error(Helper::Format("Error when send length data. Socket[%d][%s:%d].Errno[%d].", GetSocketID(), m_strAddress.c_str(), m_nPort, GetErrno()));
+		{
+			auto msg = Helper::Format("Error when send length data. Socket[%d][%s:%d].Errno[%d].", m_nSocket , m_strAddress.c_str(), m_nPort, GetErrno());
+			Close();
+			return CResult::Make_Error(msg);
+		}
 	}
 	else
 	{
@@ -204,9 +226,16 @@ CResult Sloong::EasyConnect::SendPackage(UniquePackage pack)
 			return CResult(ResultType::Retry);
 	}
 	else if (nCurSent == -11)
+	{
 		return CResult(ResultType::Retry);
+	}
 	else
-		return CResult::Make_Error(Helper::Format("Error when send data. Socket[%d][%s:%d].Errno[%d].", GetSocketID(), m_strAddress.c_str(), m_nPort, GetErrno()));
+	{
+		auto msg = Helper::Format("Error when send data. Socket[%d][%s:%d].Errno[%d].", m_nSocket , m_strAddress.c_str(), m_nPort, GetErrno());
+		Close();
+		return CResult::Make_Error(msg);
+	}
+		
 }
 
 // 成功返回数据包长度
@@ -235,6 +264,13 @@ decltype(auto) Sloong::EasyConnect::RecvLengthData(bool block)
 
 PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 {
+	if( m_nSocket == INVALID_SOCKET )
+	{
+		auto res = Connect();
+		if( res.IsFialed() )
+			return res;
+	}
+	
 	if (m_RecvPackageSize == 0)
 	{
 		auto len = RecvLengthData(block);
@@ -242,12 +278,16 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 		// If the data length received 11 error, ignore it.
 		if (len == -11)
 			return PackageResult(ResultType::Ignore);
-		else if (len < 0)
-			return PackageResult::Make_Error("Error when receive length data.");
 		else if (len == 0)
 			return PackageResult(ResultType::Warning);
-		else
+		else if (len > 0)
 			m_RecvPackageSize = len;
+		else
+		{
+			Close();
+			return PackageResult::Make_Error("Error when receive length data.");
+		}
+			
 	}
 
 	string buf;
@@ -262,6 +302,7 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 			auto package = make_unique<DataPackage>();
 			if (!package->ParseFromString(m_strReceiving))
 			{
+				Close();
 				return PackageResult::Make_Error("Parser receive data error.");
 			}
 			m_strReceiving.clear();
@@ -274,9 +315,14 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 			return PackageResult(ResultType::Retry, Helper::Format("Receive package returned [Retry]. Package size[%d], Received[%d]", m_RecvPackageSize, m_ReceivedSize));
 	}
 	else if (len == -11)
+	{
 		return PackageResult(ResultType::Retry, Helper::Format("Receive package returned [Retry]. Package size[%d], Received[%d]", m_RecvPackageSize, m_ReceivedSize));
+	}
 	else
+	{
+		Close();
 		return PackageResult::Make_Error(Helper::Format("Error when receive data. Socket[%d][%s:%d].Errno[%d].", m_nSocket, m_strAddress.c_str(), m_nPort, GetErrno()));
+	}
 }
 
 int Sloong::EasyConnect::Read(char *data, int len, bool block, bool bagain)
@@ -320,7 +366,7 @@ int Sloong::EasyConnect::Write(const char *data, int len, int index)
 
 void Sloong::EasyConnect::Close()
 {
-	m_pSSL = nullptr;
 	shutdown(m_nSocket, SHUT_RDWR);
 	close(m_nSocket);
+	m_nSocket = INVALID_SOCKET;
 }

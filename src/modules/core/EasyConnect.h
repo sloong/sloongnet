@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2020-08-03 20:41:16
+ * @LastEditTime: 2020-08-05 17:23:31
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -74,6 +74,7 @@ namespace Sloong
 	class EasyConnect
 	{
 	public:
+		~EasyConnect(){	m_pSSL = nullptr; }
 		// 以接受方/服务端的方式初始化。链接断开后不进行任何操作
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
 		CResult InitializeAsServer(SOCKET, LPVOID p = nullptr);
@@ -134,7 +135,6 @@ namespace Sloong
 	public:
 		string m_strAddress;
 		int m_nPort;
-		bool m_bReconnect = false;
 		int64_t m_nHashCode;
 
 		string m_strReceiving;
@@ -151,7 +151,7 @@ namespace Sloong
 		SOCKET m_nSocket = INVALID_SOCKET;
 		
 		bool m_bSupportReconnect = false;
-		std::function<void(int, int)> m_pOnReconnect = nullptr;
+		std::function<void(int64_t, int)> m_pOnReconnect = nullptr;
 	};
 
 	typedef unique_ptr<EasyConnect> UniqueConnection;

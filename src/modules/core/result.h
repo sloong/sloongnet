@@ -79,6 +79,8 @@ namespace Sloong
     class TResult : public CResult
     {
     public:
+        TResult(const CResult& res):CResult(res){}
+        TResult(CResult&& res):CResult(res){}
         TResult(ResultType res):CResult(res) {}
         TResult(ResultType res, const string& what):CResult(res,what){}
         TResult(ResultType res, const string& what, T result) :CResult(res, what) {
