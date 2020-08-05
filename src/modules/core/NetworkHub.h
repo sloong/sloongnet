@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-07-28 11:01:13
+ * @LastEditTime: 2020-08-05 18:38:14
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -114,10 +114,10 @@ namespace Sloong
         void MessageProcessWorkLoop();
 
         // Callback function
-        ResultType OnNewAccept(SOCKET);
-        ResultType OnDataCanReceive(SOCKET);
-        ResultType OnCanWriteData(SOCKET);
-        ResultType OnOtherEventHappened(SOCKET);
+        ResultType OnNewAccept(int64_t);
+        ResultType OnDataCanReceive(int64_t);
+        ResultType OnCanWriteData(int64_t);
+        ResultType OnOtherEventHappened(int64_t);
 
     protected:
         void SendConnectionBreak(int64_t);
@@ -125,7 +125,6 @@ namespace Sloong
 
     protected:
         map_ex<int64_t, unique_ptr<ConnectSession>> m_mapConnectIDToSession;
-        map_ex<SOCKET,int64_t> m_mapSocketToSessionID;
         mutex m_oSockListMutex;
         RUN_STATUS m_emStatus = RUN_STATUS::Created;
         unique_ptr<CEpollEx> m_pEpoll;

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-08-04 11:13:31
+ * @LastEditTime: 2020-08-05 19:47:40
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -178,7 +178,7 @@ void Sloong::CNetworkHub::AddMessageToSendList(UniquePackage pack)
 	auto res = session->SendDataPackage(std::move(pack));
 	if (res == ResultType::Retry)
 	{
-		m_pEpoll->MonitorSendStatus(sessionid);
+		m_pEpoll->ModifySendMonitorStatus(sessionid, true);
 	}
 	if (res == ResultType::Error)
 	{
@@ -194,14 +194,13 @@ void Sloong::CNetworkHub::OnConnectionBreakedEventHandler(SharedEvent e)
 		return;
 
 	auto info = m_mapConnectIDToSession[id].get();
-	auto socket = info->m_pConnection->GetSocketID();
-	m_pLog->Info(Helper::Format("close connect:[%d]%s:%d.", socket, info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
+	m_pLog->Info(Helper::Format("close connect:[%d]%s:%d.", info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
 
 	unique_lock<mutex> sockLck(m_oSockListMutex);
 	m_mapConnectIDToSession.erase(id);
 	sockLck.unlock();
 
-	m_pEpoll->DeleteMonitorSocket(socket);
+	m_pEpoll->UnregisteConnection(id);
 }
 
 void Sloong::CNetworkHub::MonitorSendStatusEventHandler(SharedEvent e)
@@ -213,7 +212,7 @@ void Sloong::CNetworkHub::MonitorSendStatusEventHandler(SharedEvent e)
 
 	auto info = m_mapConnectIDToSession[id].get();
 	m_pLog->Info(Helper::Format("MonitorSendStatus:%s:%d.", info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
-	m_pEpoll->MonitorSendStatus(info->m_pConnection->GetSocketID());
+	m_pEpoll->ModifySendMonitorStatus(info->m_pConnection->GetHashCode(),true);
 }
 
 void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
@@ -234,16 +233,14 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
 
 	auto info = make_unique<ConnectSession>();
 	info->Initialize(m_iC, std::move(connect));
-	auto socket = info->m_pConnection->GetSocketID();
 	auto sessionid = info->m_pConnection->GetHashCode();
-	m_pLog->Info(Helper::Format("Registe connection:[%d][%lld][%s:%d].", socket, sessionid, info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
+	m_pLog->Info(Helper::Format("Registe connection:[%d][%lld][%s:%d].", info->m_pConnection->GetSocketID(), sessionid, info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
 
 	unique_lock<mutex> sockLck(m_oSockListMutex);
-	m_mapSocketToSessionID[socket] = sessionid;
 	m_mapConnectIDToSession[sessionid] = std::move(info);
-	m_pEpoll->AddMonitorSocket(socket);
 	sockLck.unlock();
-
+	m_pEpoll->RegisteConnection(m_mapConnectIDToSession[sessionid]->m_pConnection.get());
+	
 	event->CallCallbackFunc(sessionid);
 }
 
@@ -447,9 +444,11 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 
 /// 有新链接到达。
 /// 接收链接之后，需要客户端首先发送客户端校验信息。只有校验成功之后才会进行SSL处理
-ResultType Sloong::CNetworkHub::OnNewAccept(SOCKET conn_sock)
+ResultType Sloong::CNetworkHub::OnNewAccept(int64_t sock)
 {
+	SOCKET conn_sock = (SOCKET)sock;
 	m_pLog->Debug("Accept function is called.");
+	
 
 	// start client check when acdept
 	if (m_nClientCheckKeyLength > 0)
@@ -480,23 +479,17 @@ ResultType Sloong::CNetworkHub::OnNewAccept(SOCKET conn_sock)
 
 	auto info = make_unique<ConnectSession>();
 	info->Initialize(m_iC, std::move(conn));
-
-	m_pLog->Info(Helper::Format("Accept client:[%lld][%d][%s:%d].", info->m_pConnection->GetHashCode(), info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
+	auto id = info->m_pConnection->GetHashCode();
+	m_pLog->Info(Helper::Format("Accept client:[%lld][%d][%s:%d].", id, info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
 	unique_lock<mutex> sockLck(m_oSockListMutex);
-	m_mapSocketToSessionID[conn_sock] = info->m_pConnection->GetHashCode();
-	m_mapConnectIDToSession[info->m_pConnection->GetHashCode()] = std::move(info);
+	m_mapConnectIDToSession[id] = std::move(info);
 	sockLck.unlock();
+	m_pEpoll->RegisteConnection(m_mapConnectIDToSession[id]->m_pConnection.get());
 	return ResultType::Succeed;
 }
 
-ResultType Sloong::CNetworkHub::OnDataCanReceive(SOCKET socket)
+ResultType Sloong::CNetworkHub::OnDataCanReceive(int64_t sessionid)
 {
-	if (!m_mapSocketToSessionID.exist(socket))
-	{
-		m_pLog->Error("OnDataCanReceive called, but socket is no registed.");
-		return ResultType::Error;
-	}
-	auto sessionid = m_mapSocketToSessionID[socket];
 	if (!m_mapConnectIDToSession.exist(sessionid))
 	{
 		m_pLog->Error("OnDataCanReceive called, but session is no registed.");
@@ -544,14 +537,8 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(SOCKET socket)
 	return res.GetResult();
 }
 
-ResultType Sloong::CNetworkHub::OnCanWriteData(SOCKET socket)
+ResultType Sloong::CNetworkHub::OnCanWriteData(int64_t sessionid)
 {
-	if (!m_mapSocketToSessionID.exist(socket))
-	{
-		m_pLog->Error("OnCanWriteData called, but socket is no registed.");
-		return ResultType::Error;
-	}
-	auto sessionid = m_mapSocketToSessionID[socket];
 	if (!m_mapConnectIDToSession.exist(sessionid))
 	{
 		m_pLog->Error("OnCanWriteData called, but session is no registed.");
@@ -567,8 +554,8 @@ ResultType Sloong::CNetworkHub::OnCanWriteData(SOCKET socket)
 	return res;
 }
 
-ResultType Sloong::CNetworkHub::OnOtherEventHappened(SOCKET sessionid)
+ResultType Sloong::CNetworkHub::OnOtherEventHappened(int64_t id)
 {
-	SendConnectionBreak(sessionid);
+	SendConnectionBreak(id);
 	return ResultType::Succeed;
 }

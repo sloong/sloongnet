@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-07-31 15:00:04
+ * @LastEditTime: 2020-08-05 18:40:02
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EpollEx.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -63,11 +63,13 @@
 
 #include "IObject.h"
 #include "core.h"
+
+#include "EasyConnect.h"
 typedef unsigned char byte;
 
 namespace Sloong
 {
-	typedef std::function<ResultType(int)> EpollEventHandlerFunc;
+	typedef std::function<ResultType(int64_t)> EpollEventHandlerFunc;
 	class CEpollEx : IObject
 	{
 	public:
@@ -77,6 +79,35 @@ namespace Sloong
 		CResult Run();
 		void Exit();
 
+		void RegisteConnection(EasyConnect* );
+		void UnregisteConnection(int64_t);
+
+		/*** 
+		 * @description: 
+		 * @param:
+		 * 		1 > The connection id.
+		 * 		2 > True if want monitor send status.
+		 * 			False if want unmonitor send status.
+		 */
+		void ModifySendMonitorStatus(int64_t,bool);	
+
+		/*** 
+		 * @description: Set event callback function. Epoll will call it in epoll work thread when the event is happened.
+		 * @param:
+		 * 		1 > Accept new connection function.
+		 * 		2 > Data can receive function.
+		 * 		3 > Can send data function.
+		 * 		4 > Other event function.
+		 */
+		inline void SetEventHandler(EpollEventHandlerFunc accept, EpollEventHandlerFunc recv, EpollEventHandlerFunc send, EpollEventHandlerFunc other)
+		{
+			OnNewAccept = accept;
+			OnCanWriteData = send;
+			OnDataCanReceive = recv;
+			OnOtherEventHappened = other;
+		}
+
+	protected:
 		/*** 
 		 * @description: Registe a socket to epoll with data can receive event(EPOLLIN).
 		 * @param: 
@@ -104,24 +135,7 @@ namespace Sloong
 		 * 		1 > Socket handle.
 		 */
 		void UnmonitorSendStatus(SOCKET);
-
-		/*** 
-		 * @description: Set event callback function. Epoll will call it in epoll work thread when the event is happened.
-		 * @param:
-		 * 		1 > Accept new connection function.
-		 * 		2 > Data can receive function.
-		 * 		3 > Can send data function.
-		 * 		4 > Other event function.
-		 */
-		inline void SetEventHandler(EpollEventHandlerFunc accept, EpollEventHandlerFunc recv, EpollEventHandlerFunc send, EpollEventHandlerFunc other)
-		{
-			OnNewAccept = accept;
-			OnCanWriteData = send;
-			OnDataCanReceive = recv;
-			OnOtherEventHappened = other;
-		}
-
-	protected:
+		
 		/*** 
 		 * @description: Set socket to no blocking mode.
 		 * @param：
@@ -162,6 +176,8 @@ namespace Sloong
 	protected:
 		int m_EpollHandle;
 		map_ex<int, thread::id> m_mapAcceptSocketToPID;
+		map_ex<SOCKET, int64_t> m_mapSocketToID;
+		map_ex<int64_t, EasyConnect*> m_mapIDToConnection;
 		mutex m_acceptMutex;
 		//struct epoll_event m_Event;
 		epoll_event m_Events[1024];

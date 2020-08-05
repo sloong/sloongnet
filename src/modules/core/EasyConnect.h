@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2020-08-05 17:23:31
+ * @LastEditTime: 2020-08-05 17:46:32
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -114,7 +114,7 @@ namespace Sloong
 
 		inline bool IsSending() { return !m_strSending.empty(); }
 
-		inline void SetOnReconnectCallback(std::function<void(int64_t, int)> func)
+		inline void SetOnReconnectCallback(std::function<void(int64_t, int, int)> func)
 		{
 			m_pOnReconnect = func;
 		}
@@ -132,6 +132,8 @@ namespace Sloong
 
 		string GetLengthData(int64_t);
 
+		
+
 	public:
 		string m_strAddress;
 		int m_nPort;
@@ -145,13 +147,15 @@ namespace Sloong
 		int m_SendPackageSize;
 		int m_SentSize;
 
+		SOCKET m_nInvalidSocket = INVALID_SOCKET;
+
 	private:
 		int m_nErrno;
 		unique_ptr<SSLHelper> m_pSSL = nullptr;
 		SOCKET m_nSocket = INVALID_SOCKET;
 		
 		bool m_bSupportReconnect = false;
-		std::function<void(int64_t, int)> m_pOnReconnect = nullptr;
+		std::function<void(int64_t, int, int)> m_pOnReconnect = nullptr;
 	};
 
 	typedef unique_ptr<EasyConnect> UniqueConnection;

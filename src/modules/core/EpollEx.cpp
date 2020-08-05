@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-07-31 15:00:49
+ * @LastEditTime: 2020-08-05 19:54:23
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EpollEx.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -106,6 +106,51 @@ CResult Sloong::CEpollEx::Run()
 	return CResult::Succeed;
 }
 
+
+void Sloong::CEpollEx::RegisteConnection( EasyConnect* conn )
+{
+	conn->SetOnReconnectCallback([&](int64_t id, int old_sock, int cur_sock){
+		if( m_mapSocketToID.exist(old_sock) ) 
+		{
+			DeleteMonitorSocket(old_sock);
+			m_mapSocketToID.erase(old_sock);
+		}
+		
+		AddMonitorSocket(cur_sock);
+		m_mapSocketToID[cur_sock] = id;
+	});
+	AddMonitorSocket(conn->GetSocketID());
+	m_mapSocketToID[conn->GetSocketID()] = conn->GetHashCode();
+	m_mapIDToConnection[conn->GetHashCode()] = conn;
+}
+
+void Sloong::CEpollEx::UnregisteConnection( int64_t id )
+{
+	if( !m_mapIDToConnection.exist(id) )	
+		return;
+
+	auto conn = m_mapIDToConnection[id];
+	DeleteMonitorSocket(conn->GetSocketID());
+	m_mapSocketToID.erase(conn->GetSocketID());
+	m_mapIDToConnection.erase(id);
+}
+
+void Sloong::CEpollEx::ModifySendMonitorStatus( int64_t id, bool monitor )
+{
+	if( !m_mapIDToConnection.exist(id) )	
+		return;
+	auto sock = m_mapIDToConnection[id]->GetSocketID();
+	if( monitor )
+	{
+		MonitorSendStatus(sock);
+	}
+	else
+	{
+		UnmonitorSendStatus(sock);
+	}
+}
+
+
 void Sloong::CEpollEx::AddMonitorSocket(SOCKET nSocket)
 {
 	SetSocketNonblocking(nSocket);
@@ -116,7 +161,6 @@ void Sloong::CEpollEx::DeleteMonitorSocket(SOCKET nSocket)
 {
 	CtlEpollEvent(EPOLL_CTL_DEL, nSocket, 0);
 }
-
 
 void Sloong::CEpollEx::MonitorSendStatus(SOCKET socket)
 {
@@ -226,35 +270,55 @@ void Sloong::CEpollEx::MainWorkLoop()
 							shutdown(conn_sock, SHUT_RDWR);
 							close(conn_sock);
 						}
-						else
-						{
-							SetSocketNonblocking(conn_sock);
-							// 刚接收连接，所以只关心可读状态。
-							CtlEpollEvent(EPOLL_CTL_ADD, conn_sock, EPOLLIN);
-						}
 					} while (conn_sock > 0);
 				}
 				// EPOLLIN 可读消息
 				else if (m_Events[i].events & EPOLLIN)
 				{
-					m_pLog->Debug(Helper::Format("EPoll EPOLLIN event happened. Socket[%d][%s] Data Can Receive.", fd, CUtility::GetSocketAddress(fd).c_str()));
-					auto res = OnDataCanReceive(fd);
-					if (res == ResultType::Error)
-						DeleteMonitorSocket(fd);
+					if( !m_mapSocketToID.exist(fd))
+					{
+						m_pLog->Error(Helper::Format("EPoll EPOLLIN event happened. Socket[%d][%s] Data Can Receive.", fd, CUtility::GetSocketAddress(fd).c_str()));
+					}
+					else
+					{
+						auto id = m_mapSocketToID[fd];
+						m_pLog->Debug(Helper::Format("EPoll EPOLLIN event happened. Socket[%d][%s] Data Can Receive.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						auto res = OnDataCanReceive(id);
+						if (res == ResultType::Error)
+							UnregisteConnection(id);
+					}
 				}
 				// EPOLLOUT 可写消息
 				else if (m_Events[i].events & EPOLLOUT)
 				{
-					m_pLog->Debug(Helper::Format("EPoll EPOLLOUT event happened.Socket[%d][%s] Can Write Data.", fd, CUtility::GetSocketAddress(fd).c_str()));
-					auto res = OnCanWriteData(fd);
-					// 所有消息全部发送完毕后只需要监听可读消息就可以了。
-					if (res == ResultType::Succeed)
-						UnmonitorSendStatus(fd);
+					
+					if( !m_mapSocketToID.exist(fd))
+					{
+						m_pLog->Error(Helper::Format("EPoll EPOLLOUT event happened. Socket[%d][%s] Data Can Receive.", fd, CUtility::GetSocketAddress(fd).c_str()));
+					}
+					else
+					{
+						auto id = m_mapSocketToID[fd];
+						m_pLog->Debug(Helper::Format("EPoll EPOLLOUT event happened.Socket[%d][%s] Can Write Data.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						auto res = OnCanWriteData(id);
+						// 所有消息全部发送完毕后只需要监听可读消息就可以了。
+						if (res == ResultType::Succeed)
+							ModifySendMonitorStatus(id,false);
+					}
 				}
 				else
 				{
-					m_pLog->Debug(Helper::Format("EPoll unkuown event happened. Socket[%d][%s] close this connnect.", fd, CUtility::GetSocketAddress(fd).c_str()));
-					OnOtherEventHappened(fd);
+					
+					if( !m_mapSocketToID.exist(fd))
+					{
+						m_pLog->Error(Helper::Format("EPoll EPOLLIN event happened. Socket[%d][%s] Data Can Receive.", fd, CUtility::GetSocketAddress(fd).c_str()));
+					}
+					else
+					{
+						auto id = m_mapSocketToID[fd];
+						m_pLog->Debug(Helper::Format("EPoll unkuown event happened. Socket[%d][%s] close this connnect.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						OnOtherEventHappened(id);
+					}
 				}
 			}
 		}

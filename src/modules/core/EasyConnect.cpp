@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2020-08-05 17:23:49
+ * @LastEditTime: 2020-08-05 17:47:44
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -134,7 +134,7 @@ CResult Sloong::EasyConnect::Connect()
 	}
 	 
 	if( m_pOnReconnect )
-		m_pOnReconnect(m_nHashCode, m_nSocket);
+		m_pOnReconnect(m_nHashCode, m_nInvalidSocket, m_nSocket);
 	return CResult::Succeed;
 }
 
@@ -368,5 +368,6 @@ void Sloong::EasyConnect::Close()
 {
 	shutdown(m_nSocket, SHUT_RDWR);
 	close(m_nSocket);
+	m_nInvalidSocket = m_nSocket;
 	m_nSocket = INVALID_SOCKET;
 }
