@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-11 15:05:40
- * @LastEditTime: 2020-07-31 14:30:19
+ * @LastEditTime: 2020-08-06 18:55:07
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/datacenter/mysqlex.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -102,6 +102,8 @@ namespace Sloong
 			m_strErrorMsg = mysql_error(&m_MySql);
 			return m_strErrorMsg;
 		}
+
+		unique_ptr<MySqlEx> Duplicate();
 	protected:
 		NResult RunModifySQLCmd( const string& );
 
@@ -112,6 +114,13 @@ namespace Sloong
 		bool m_bIsConnect = false;
 		static char constexpr ROW_SEP = 0x09;
 		static char constexpr LINE_SEP = 0x0A;
+
+		string Address;
+		int Port;
+		string User;
+		string Password;
+		string Database;
 	};
+	typedef unique_ptr<MySqlEx> UniqueMySQLEx;
 } // namespace Sloong
 
