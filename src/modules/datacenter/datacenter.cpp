@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-31 17:15:58
+ * @LastEditTime: 2020-08-06 14:36:12
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/datacenter/datacenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -114,12 +114,13 @@ CResult CDataCenter::Initialization(IControl *ic)
 {
 	IObject::Initialize(ic);
 	IData::Initialize(ic);
+	ic->Add( DATACENTER_DATAITEM::MapSessionIDToConnection , &m_mapSessionIDToDBConnection );
+	ic->Add( DATACENTER_DATAITEM::MapDBNameToSessionID , &m_mapDBNameToSessioinID );
 	return CResult::Succeed;
 }
 
 CResult CDataCenter::Initialized()
 {
-	
 	m_pConfig = IData::GetGlobalConfig();
 	m_pModuleConfig = IData::GetModuleConfig();
 	m_pRuntimeData = IData::GetRuntimeData();

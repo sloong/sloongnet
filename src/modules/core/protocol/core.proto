@@ -18,11 +18,14 @@ enum LogLevel{
 
 enum DATA_ITEM
 {
-    ServerConfiguation=0;
-	ModuleConfiguation=1;
-	Logger=2;
-	RuntimeData=3;
-    ReferenceTemplateInfo=4;
+    Invalid=0;
+    ServerConfiguation=1;
+	ModuleConfiguation=2;
+	Logger=3;
+	RuntimeData=4;
+    ReferenceTemplateInfo=5;
+
+    CustomMix=100;
 }
 
 enum MODULE_TYPE

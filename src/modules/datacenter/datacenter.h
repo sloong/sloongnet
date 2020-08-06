@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-31 17:16:49
+ * @LastEditTime: 2020-08-06 14:35:56
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/datacenter/datacenter.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -77,6 +77,12 @@ extern "C" {
 	CResult CreateProcessEnvironment(void **);
 }
 
+enum DATACENTER_DATAITEM
+{
+	MapSessionIDToConnection=Core::DATA_ITEM::CustomMix + 1,
+	MapDBNameToSessionID=Core::DATA_ITEM::CustomMix + 2,
+};
+
 namespace Sloong
 {	
 	class CDataCenter : public IObject
@@ -92,6 +98,9 @@ namespace Sloong
 
 	protected:
 		list<unique_ptr<DBHub>> m_listDBHub;
+		
+        map_ex<int, unique_ptr<MySqlEx>> m_mapSessionIDToDBConnection;
+		map_ex<string, int> m_mapDBNameToSessioinID;
 
 		GLOBAL_CONFIG* m_pConfig;
 		Json::Value *m_pModuleConfig;

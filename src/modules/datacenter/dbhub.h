@@ -1,3 +1,12 @@
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditTime: 2020-08-06 14:36:48
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/datacenter/dbhub.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
+ */
 #ifndef SLOONGNET_MODULE_DATACENTER_DBHUB_H
 #define SLOONGNET_MODULE_DATACENTER_DBHUB_H
 
@@ -28,8 +37,8 @@ namespace Sloong
 
     protected:
         map_ex<DataCenter::Functions, FunctionHandler> m_mapFuncToHandler;
-        map_ex<int, unique_ptr<MySqlEx>> m_mapSessionIDToDBConnection;
-        map_ex<string, int> m_mapDBNameToSessioinID;
+        map_ex<string, int>* m_pMapDBNameToSessioinID = nullptr;
+        map_ex<int, unique_ptr<MySqlEx>>* m_pMapSessionIDToConnection = nullptr;
     };
 } // namespace Sloong
 
