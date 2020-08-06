@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-07-31 14:32:42
+ * @LastEditTime: 2020-08-06 14:24:44
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ControlHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -80,7 +80,7 @@ void Sloong::CControlHub::Exit()
 	m_emStatus = RUN_STATUS::Exit;
 }
 
-void *Sloong::CControlHub::Get(DATA_ITEM item)
+void *Sloong::CControlHub::Get(int64_t item)
 {
 	auto data = m_oDataList.find(item);
 	if (data == m_oDataList.end())

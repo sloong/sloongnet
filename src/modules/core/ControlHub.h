@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-07-30 10:50:51
+ * @LastEditTime: 2020-08-06 14:24:33
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ControlHub.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -151,21 +151,21 @@ namespace Sloong
 		void MessageWorkLoop();
 
 		// Data
-		void Add(DATA_ITEM item, void *object)
+		void Add(int64_t item, void *object)
 		{
 			m_oDataList[item] = object;
 		}
-		void *Get(DATA_ITEM);
+		void *Get(int64_t);
 
 		template <typename T>
-		T GetAs(DATA_ITEM item)
+		T GetAs(int64_t item)
 		{
 			T tmp = static_cast<T>(Get(item));
 			assert(tmp);
 			return tmp;
 		}
 
-		void Remove(DATA_ITEM item)
+		void Remove(int64_t item)
 		{
 			m_oDataList.erase(item);
 		}
@@ -229,7 +229,7 @@ namespace Sloong
 
 	protected:
 		// Data
-		map<DATA_ITEM, void *> m_oDataList;
+		map<int64_t, void *> m_oDataList;
 		map_ex<string, shared_ptr<TempDataItem>> m_oTempDataList;
 
 		// Message

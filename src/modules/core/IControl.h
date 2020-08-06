@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-07-31 14:33:45
+ * @LastEditTime: 2020-08-06 14:24:23
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/IControl.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -76,9 +76,9 @@ namespace Sloong
 	public:
 		// Data
 		// Add DATE_TIME to dictory.
-		virtual void Add(DATA_ITEM, void *) = 0;
-		virtual void *Get(DATA_ITEM) = 0;
-		virtual void Remove(DATA_ITEM) = 0;
+		virtual void Add(int64_t, void *) = 0;
+		virtual void *Get(int64_t) = 0;
+		virtual void Remove(int64_t) = 0;
 		virtual void AddTempString(const string &, const string &) = 0;
 		virtual void AddTempObject(const string &, const void *, int) = 0;
 		virtual void AddTempBytes(const string &, unique_ptr<char[]> &, int) = 0;
