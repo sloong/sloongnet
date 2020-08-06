@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-28 14:43:16
- * @LastEditTime: 2020-07-29 17:23:24
+ * @LastEditTime: 2020-08-06 14:12:15
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/transpond.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -49,6 +49,8 @@ PackageResult Sloong::GatewayTranspond::MessageToProcesser(DataPackage *pack)
 
 	auto trans_pack = Package::MakeResponse(pack);
 	trans_pack->set_status(DataPackage_StatusType::DataPackage_StatusType_Request);
+	trans_pack->set_content(pack->content());
+	trans_pack->set_extend(pack->extend());
 	
 	auto id = snowflake::Instance->nextid();
 	trans_pack->set_id(id);
