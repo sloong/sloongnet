@@ -13,10 +13,10 @@ CResult Sloong::DBHub::Initialize(IControl *ic)
     if (res.IsFialed())
         return res;
 
-    auto map = ic->Get(DATACENTER_DATAITEM::MapSessionIDToConnection);
-    m_pMapSessionIDToConnection = STATIC_TRANS<map_ex<int, unique_ptr<MySqlEx>>*>(map);
-    map = ic->Get(DATACENTER_DATAITEM::MapDBNameToSessionID);
-    m_pMapDBNameToSessioinID = STATIC_TRANS<map_ex<string, int>*>(map);
+    auto m = ic->Get(DATACENTER_DATAITEM::MapSessionIDToConnection);
+    m_pMapSessionIDToConnections = STATIC_TRANS<map_ex<int, map<thread::id,UniqueMySQLEx>>*>(m);
+    m = ic->Get(DATACENTER_DATAITEM::MapDBNameToSessionID);
+    m_pMapDBNameToSessioinID = STATIC_TRANS<map_ex<string, int>*>(m);
 
     m_mapFuncToHandler[DataCenter::Functions::ConnectDatabase] = std::bind(&DBHub::ConnectDatabaseHandler, this, std::placeholders::_1, std::placeholders::_2);
     m_mapFuncToHandler[DataCenter::Functions::QuerySQLCmd] = std::bind(&DBHub::QuerySQLCmdHandler, this, std::placeholders::_1, std::placeholders::_2);
@@ -58,7 +58,10 @@ CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, DataPackage
     if (!m_pMapDBNameToSessioinID->exist(req->database()))
     {
         auto config = IData::GetModuleConfig();
-        auto connection = make_unique<MySqlEx>();
+        auto sessions = map<thread::id,UniqueMySQLEx>();
+        sessions[this_thread::get_id()] = make_unique<MySqlEx>();
+
+        auto connection = sessions[this_thread::get_id()].get();
         auto res = connection->Connect((*config)["Address"].asString().c_str(), (*config)["Port"].asInt(), (*config)["User"].asString().c_str(),
                                        (*config)["Password"].asString().c_str(), req->database());
         if (res.IsFialed())
@@ -66,8 +69,8 @@ CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, DataPackage
 
         connection->SetLog(m_pLog);
         // TODO：这里直接使用size自增来作为key是非常不保险的，在多线程的情况下很容易冲突。后续需要进行优化
-        auto id =  m_pMapSessionIDToConnection->size() + 1;
-        (*m_pMapSessionIDToConnection)[id] = std::move(connection);
+        auto id =  m_pMapSessionIDToConnections->size() + 1;
+         (*m_pMapSessionIDToConnections)[id].merge(sessions);
         (*m_pMapDBNameToSessioinID)[req->database()] = id;
     }
 
@@ -81,15 +84,26 @@ CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, DataPackage
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
+inline MySqlEx* GetCurrentThreadConnextion(  map<thread::id,UniqueMySQLEx>* sessions )
+{
+    auto id = this_thread::get_id();
+    auto it = sessions->find(id);
+    if( it == sessions->end() )
+    {
+        (*sessions)[id] = std::move(sessions->begin()->second->Duplicate());
+    }
+    return (*sessions)[id].get();
+}
+
 CResult Sloong::DBHub::QuerySQLCmdHandler(const string &req_obj, DataPackage *pack)
 {
     auto req = ConvertStrToObj<QuerySQLCmdRequest>(req_obj);
 
-    auto session = m_pMapSessionIDToConnection->try_get(req->session());
+    auto session = m_pMapSessionIDToConnections->try_get(req->session());
     if (session == nullptr)
         return CResult::Make_Error("SessionID is invaild.");
 
-    auto res = (*session)->Query(req->sqlcmd());
+    auto res = GetCurrentThreadConnextion(session)->Query(req->sqlcmd());
     if (res.IsFialed())
         return res;
 
@@ -110,11 +124,12 @@ CResult Sloong::DBHub::InsertSQLCmdHandler(const string &req_obj, DataPackage *p
 {
     auto req = ConvertStrToObj<InsertSQLCmdRequest>(req_obj);
 
-    auto session = m_pMapSessionIDToConnection->try_get(req->session());
+    auto session = m_pMapSessionIDToConnections->try_get(req->session());
     if (session == nullptr)
         return CResult::Make_Error("SessionID is invaild.");
 
-    auto res = (*session)->Insert(req->sqlcmd());
+    auto s = GetCurrentThreadConnextion(session);
+    auto res = s->Insert(req->sqlcmd());
     if (res.IsFialed())
         return res;
 
@@ -123,7 +138,7 @@ CResult Sloong::DBHub::InsertSQLCmdHandler(const string &req_obj, DataPackage *p
 
     if ( req->getidentity() )
     {
-        auto id_res = (*session)->Query("SELECT @@IDENTITY");
+        auto id_res = s->Query("SELECT @@IDENTITY");
         if( id_res.IsFialed() )
             response.set_identity(-1);
         else
@@ -144,11 +159,11 @@ CResult Sloong::DBHub::DeleteSQLCmdHandler(const string &req_obj, DataPackage *p
 {
     auto req = ConvertStrToObj<DeleteSQLCmdRequest>(req_obj);
 
-    auto session = m_pMapSessionIDToConnection->try_get(req->session());
+    auto session = m_pMapSessionIDToConnections->try_get(req->session());
     if (session == nullptr)
         return CResult::Make_Error("SessionID is invaild.");
 
-    auto res = (*session)->Delete(req->sqlcmd());
+    auto res = GetCurrentThreadConnextion(session)->Delete(req->sqlcmd());
     if (res.IsFialed())
         return res;
 
@@ -162,11 +177,11 @@ CResult Sloong::DBHub::UpdateSQLCmdHandler(const string &req_obj, DataPackage *p
 {
     auto req = ConvertStrToObj<UpdateSQLCmdRequest>(req_obj);
 
-    auto session = m_pMapSessionIDToConnection->try_get(req->session());
+    auto session = m_pMapSessionIDToConnections->try_get(req->session());
     if (session == nullptr)
         return CResult::Make_Error("SessionID is invaild.");
         
-    auto res = (*session)->Update(req->sqlcmd());
+    auto res = GetCurrentThreadConnextion(session)->Update(req->sqlcmd());
     if (res.IsFialed())
         return res;
 

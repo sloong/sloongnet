@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-08-06 14:35:56
+ * @LastEditTime: 2020-08-06 18:50:01
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/datacenter/datacenter.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -99,7 +99,7 @@ namespace Sloong
 	protected:
 		list<unique_ptr<DBHub>> m_listDBHub;
 		
-        map_ex<int, unique_ptr<MySqlEx>> m_mapSessionIDToDBConnection;
+        map_ex<int, map<thread::id,UniqueMySQLEx>> m_mapSessionIDToDBConnections;
 		map_ex<string, int> m_mapDBNameToSessioinID;
 
 		GLOBAL_CONFIG* m_pConfig;
