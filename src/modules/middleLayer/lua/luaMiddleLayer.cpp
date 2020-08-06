@@ -105,7 +105,7 @@ PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter 
 	{
 		auto& content = res.GetMessage();
 		auto& extendUUID = res.GetResultObject();
-		if (extendUUID.length() > 0)
+		if (!extendUUID.empty())
 		{
 			if (m_iC->ExistTempBytes(extendUUID))
 			{
@@ -122,7 +122,7 @@ PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter 
 			}
 			else
 			{
-				m_pLog->Error(Helper::Format("Response [%d]:[%s][%d][Message is required an extend UUID. but not find in IControl. Ignore.]", function, ResultType_Name(res.GetResult()).c_str(), content.length()));
+				m_pLog->Error(Helper::Format("Response [%d]:[%s][%d][Message is required an extend UUID[%s]. but not find in IControl. Ignore.]", function, ResultType_Name(res.GetResult()).c_str(), content.length(), extendUUID.c_str()));
 				return PackageResult::Make_OK(Package::MakeResponse(pack,res));
 			}
 		}
