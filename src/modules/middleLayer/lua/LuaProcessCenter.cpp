@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-07-31 14:34:39
+ * @LastEditTime: 2020-08-06 20:57:42
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -101,40 +101,43 @@ void Sloong::CLuaProcessCenter::ReloadContext()
 
 CResult Sloong::CLuaProcessCenter::NewThreadInit()
 {
+	auto c = InitLua();
+	if (c.IsFialed())
+		return c;
+		
 	LuaContent lua;
-	lua.Content = new CLua();
+	lua.Content = c.MoveResultObject();
 	lua.Reload = false;
-	lua.Content->SetErrorHandle(std::bind(&CLuaProcessCenter::HandleError, this, placeholders::_1));
-	lua.Content->SetScriptFolder(m_pConfig->operator[]("LuaScriptFolder").asString());
-	CGlobalFunction::Instance->RegistFuncToLua(lua.Content);
-	auto res = InitLua(lua.Content, m_pConfig->operator[]("LuaScriptFolder").asString());
-	if (res.IsFialed())
-		return res;
 	
-	m_listLuaContent.push_back(lua);
+	m_listLuaContent.push_back(move(lua));
 	int id = (int)m_listLuaContent.size() - 1;
 	FreeLuaContext(id);
 	return CResult::Succeed;
 }
 
-CResult Sloong::CLuaProcessCenter::InitLua(CLua *pLua, string folder)
+TResult<unique_ptr<CLua>> Sloong::CLuaProcessCenter::InitLua()
 {
-	if (!pLua->RunScript(m_pConfig->operator[]("LuaEntryFile").asString()))
+	auto lua = make_unique<CLua>();
+	lua->SetErrorHandle(std::bind(&CLuaProcessCenter::HandleError, this, placeholders::_1));
+	lua->SetScriptFolder(m_pConfig->operator[]("LuaScriptFolder").asString());
+	CGlobalFunction::Instance->RegistFuncToLua(lua.get());
+	
+	if (!lua->RunScript(m_pConfig->operator[]("LuaEntryFile").asString()))
 	{
-		return CResult::Make_Error("Run Script Fialed.");
+		return TResult<unique_ptr<CLua>>::Make_Error("Run Script Fialed.");
 	}
-	if (!pLua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), Helper::Format("'%s'", folder.c_str())))
+	if (!lua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), Helper::Format("'%s'", m_pConfig->operator[]("LuaScriptFolder").asString().c_str())))
 	{
-		return CResult::Make_Error("Run Function Fialed.");
+		return TResult<unique_ptr<CLua>>::Make_Error("Run Function Fialed.");
 	}
-	return CResult::Succeed;
+	return TResult<unique_ptr<CLua>>::Make_OK(move(lua));
 }
 
 void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket *uinfo)
 {
 	// call close function.
 	int id = GetFreeLuaContext();
-	auto pLua = m_listLuaContent[id].Content;
+	auto pLua = m_listLuaContent[id].Content.get();
 	pLua->RunFunction(m_pConfig->operator[]("LuaSocketCloseFunction").asString(), uinfo, 0, "", "");
 	FreeLuaContext(id);
 }
@@ -149,7 +152,10 @@ SResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 		auto &content = m_listLuaContent[id];
 		if (true == content.Reload)
 		{
-			InitLua(content.Content, m_pConfig->operator[]("LuaScriptFolder").asString());
+			auto c = InitLua();
+			if( c.IsFialed() )
+				return SResult::Make_Error("Error when reload script: " + c.GetMessage());
+			content.Content = c.MoveResultObject();
 			content.Reload = false;
 		}
 		string extendUUID("");

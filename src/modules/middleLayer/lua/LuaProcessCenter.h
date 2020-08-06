@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-07-29 19:37:48
+ * @LastEditTime: 2020-08-06 20:55:27
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -76,11 +76,8 @@ namespace Sloong
 	class LuaContent
 	{
 	public:
-		void Destory(){
-			SAFE_DELETE(Content);
-		}
 		bool Reload = false;
-		CLua* Content = nullptr;
+		unique_ptr<CLua> Content = nullptr;
 	};
 	using namespace Events;
 	class CLuaProcessCenter : IObject
@@ -88,13 +85,11 @@ namespace Sloong
 	public:
 		CLuaProcessCenter(){}
 		~CLuaProcessCenter(){
-			for( auto& i: m_listLuaContent)
-				i.Destory();
 		}
 
 		CResult Initialize(IControl* iMsg);
 		CResult NewThreadInit();
-		CResult InitLua(CLua* pLua, string folder);
+		TResult<unique_ptr<CLua>> InitLua();
 		void CloseSocket(CLuaPacket* uinfo);
 		SResult MsgProcess( int function, CLuaPacket * pUInfo, const string& msg, const string& extend );
 		int GetFreeLuaContext();
