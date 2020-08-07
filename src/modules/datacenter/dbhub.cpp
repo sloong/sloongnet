@@ -145,7 +145,7 @@ CResult Sloong::DBHub::InsertSQLCmdHandler(const string &req_obj, DataPackage *p
         {
             auto obj = id_res.GetResultObject();
             int id;
-            if( !ConvertStrToInt(obj->GetData(1,1), &id))
+            if( !ConvertStrToInt(obj->GetData(0,0), &id))
                 response.set_identity(-1);
             else
                 response.set_identity(id);
