@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-27 14:58:28
+ * @LastEditTime: 2020-08-07 16:42:39
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/events/SendPackage.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -15,7 +15,7 @@ namespace Sloong
 {
 	namespace Events
 	{
-		class SendPackageEvent : public NormalEvent
+		class SendPackageEvent : public NormalEvent, public std::enable_shared_from_this<SendPackageEvent>
 		{
 		public:
 			SendPackageEvent(int64_t id):NormalEvent(EVENT_TYPE::SendPackage){
@@ -54,6 +54,31 @@ namespace Sloong
 			}
 
 			inline int64_t GetConnectionHashCode(){ return m_ConnectionHashCode; }
+
+			CResult SyncCall( IControl* ic, int timeout )
+			{
+				auto response_str = make_shared<string>();
+				auto result = make_shared<ResultType>(ResultType::Invalid);
+				auto sync = make_shared<EasySync>();
+				SetCallbackFunc([result, sync, response_str](IEvent *event, DataPackage *pack) {
+					(*result) = pack->result();
+					(*response_str) = pack->content();
+					sync->notify_one();
+				});
+				ic->CallMessage( shared_from_this() );
+
+				if( timeout > 0 )
+				{
+					if (!sync->wait_for(timeout))
+						return CResult::Make_Error("Timeout");
+				}
+				else
+				{
+					sync->wait();
+				}
+				
+				return CResult(*result, *response_str);
+			}
 			
 		protected:
 			int64_t m_ConnectionHashCode = 0;
