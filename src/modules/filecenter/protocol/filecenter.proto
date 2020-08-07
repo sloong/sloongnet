@@ -14,14 +14,9 @@ enum Functions{
     reserved 400 to max;
 }
 
-message FileInfoItem {
-    string Name=1;
-    string Hash_MD5=2;
-    int32 FileSize=3;
-}
-
 message PrepareUploadRequest{
-    FileInfoItem info=1;
+    string Hash_MD5=1;
+    int32 FileSize=2;
 }
 
 message PrepareUploadResponse{

@@ -159,10 +159,8 @@ SResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, DataPac
     auto req = ConvertStrToObj<PrepareUploadRequest>(str_req);
 
     auto token = CUtility::GenUUID();
-    auto info = req->info();
     auto& savedInfo = (*m_mapTokenToUploadInfo)[token];
-    savedInfo.Name = info.name();
-    savedInfo.Hash_MD5 = info.hash_md5();
+    savedInfo.Hash_MD5 = req->hash_md5();
     savedInfo.Path = FormatFolderString(m_strUploadTempSaveFolder) + token + "/";
 
     PrepareUploadResponse res;
@@ -201,12 +199,12 @@ SResult Sloong::FileManager::UploadedHandler(const string &str_req, DataPackage 
     if (info == nullptr)
         return SResult::Make_Error("Need request PrepareUpload firest.");
 
-    auto full_path = info->Path + info->Name;
-    auto res = MergeFile(info->SplitPackage, full_path);
+    auto temp_path = info->Path + info->Hash_MD5;
+    auto res = MergeFile(info->SplitPackage, temp_path);
     if (res.IsFialed())
         return SResult::Make_Error(res.GetMessage());
 
-    if (info->Hash_MD5 != CMD5::Encode(full_path, true))
+    if (info->Hash_MD5 != CMD5::Encode(temp_path, true))
         return SResult::Make_Error("Hasd check error.");
 
     res = ArchiveFile(info);

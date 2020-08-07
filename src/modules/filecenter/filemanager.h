@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-08-07 15:14:26
+ * @LastEditTime: 2020-08-07 18:15:51
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filemanager.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -19,7 +19,6 @@ namespace Sloong
     typedef struct UploadInfo
     {
         string Path;
-        string Name;
         string Hash_MD5;
         map_ex<int,string> SplitPackage;
     } UploadInfo;
