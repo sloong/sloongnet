@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-11 15:05:40
- * @LastEditTime: 2020-07-31 14:29:08
+ * @LastEditTime: 2020-08-07 17:48:59
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/globalfunction.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -100,11 +100,17 @@ namespace Sloong
         static int Lua_SQLInsertToDBCenter(lua_State *l);
         static int Lua_SQLDeleteToDBCenter(lua_State *l);
         static int Lua_SQLUpdateToDBCenter(lua_State *l);
+        static int Lua_PrepareDownload(lua_State *l);
+        static int Lua_DownloadEnd(lua_State *l);
+        static int Lua_PrepareUpload(lua_State *l);
+        static int Lua_UploadEnd(lua_State *l);
 
     protected:
         void OnStart(SharedEvent);
         void ReferenceDataCenterConnection();
         void OnQueryDBCenterTemplateResponse(IEvent *event, DataPackage *pack);
+        void ReferenceFileCenterConnection();
+        void OnQueryFileCenterTemplateResponse(IEvent *event, DataPackage *pack);
         static CResult RunSQLFunction( const string& req, int func );
         static bool SQLFunctionPrepareCheck( lua_State* l, int sessionid, const string& sql );
         
@@ -112,7 +118,8 @@ namespace Sloong
         map_ex<string,string> m_mapCommData;
         map_ex<string,int> m_mapDBNameToSessionID;
         Json::Value* m_pModuleConfig = nullptr;
-        int64_t m_SocketDBCenter=0;
+        atomic_int64_t m_SocketDBCenter= ATOMIC_VAR_INIT(0);
+        atomic_int64_t m_SessionFileCenter=ATOMIC_VAR_INIT(0);
 
     public:
         static unique_ptr<CGlobalFunction> Instance;
