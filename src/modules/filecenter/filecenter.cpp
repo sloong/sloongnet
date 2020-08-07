@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-28 19:58:37
+ * @LastEditTime: 2020-08-07 14:02:58
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filecenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -115,6 +115,8 @@ extern "C" CResult CreateProcessEnvironment(void **out_env)
 CResult CFileCenter::Initialization(IControl *ic)
 {
     IObject::Initialize(ic);
+    ic->Add(FILECENTER_DATAITEM::UploadInfos, &m_mapTokenToUploadInfo);
+    ic->Add(FILECENTER_DATAITEM::DownloadInfos, &m_mapTokenToDownloadInfo);
     return CResult::Succeed;
 }
 

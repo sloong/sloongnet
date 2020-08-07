@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-28 19:58:02
+ * @LastEditTime: 2020-08-07 14:01:50
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filecenter.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -75,6 +75,12 @@ extern "C"
     CResult CreateProcessEnvironment(void **);
 }
 
+enum FILECENTER_DATAITEM
+{
+	UploadInfos=Core::DATA_ITEM::CustomMix + 1,
+	DownloadInfos=Core::DATA_ITEM::CustomMix + 2,
+};
+
 namespace Sloong
 {
     class CFileCenter : public IObject
@@ -91,6 +97,9 @@ namespace Sloong
     protected:
         list<unique_ptr<FileManager>> m_listManage;
         GLOBAL_CONFIG *m_pConfig;
+
+        map_ex<string, UploadInfo> m_mapTokenToUploadInfo;
+        map_ex<string, DownloadInfo> m_mapTokenToDownloadInfo;
 
     public:
         static unique_ptr<CFileCenter> Instance;

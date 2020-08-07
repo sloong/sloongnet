@@ -1,10 +1,17 @@
 #include "filemanager.h"
+#include "filecenter.h"
 #include "utility.h"
 using namespace Sloong;
 
 CResult Sloong::FileManager::Initialize(IControl *ic)
 {
     IObject::Initialize(ic);
+
+    auto m = ic->Get(FILECENTER_DATAITEM::UploadInfos);
+    m_mapTokenToUploadInfo = STATIC_TRANS<map_ex<string, UploadInfo>*>(m);
+    m = ic->Get(FILECENTER_DATAITEM::DownloadInfos);
+    m_mapTokenToDownloadInfo = STATIC_TRANS<map_ex<string, DownloadInfo>*>(m);
+
     m_mapFuncToHandler[Functions::TestSpeed] = std::bind(&FileManager::TestSpeedHandler, this, std::placeholders::_1, std::placeholders::_2);
     m_mapFuncToHandler[Functions::PrepareUpload] = std::bind(&FileManager::PrepareUploadHandler, this, std::placeholders::_1, std::placeholders::_2);
     m_mapFuncToHandler[Functions::Uploading] = std::bind(&FileManager::UploadingHandler, this, std::placeholders::_1, std::placeholders::_2);
@@ -46,10 +53,12 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(DataPackage *pack)
 
 CResult Sloong::FileManager::MergeFile(const map_ex<int, string> &fileList, const string &saveFile)
 {
-    string files;
+    ofstream out(saveFile.c_str(), ios::binary );
     for (auto &item : fileList)
-        files += item.second + " ";
-    auto res = CUniversal::RunSystemCmdAndGetResult(Helper::Format("cat %s > %s", files.c_str(), saveFile.c_str()));
+    {
+        out.write(item.second.c_str(),item.second.length());
+    }
+    out.close();
     return CResult::Succeed;
 }
 
@@ -77,10 +86,12 @@ CResult Sloong::FileManager::SplitFile(const string &filepath, int splitSize, ma
 	return CResult::Succeed;
 }
 
-CResult Sloong::FileManager::MoveFile(const string &source, const string &target)
+CResult Sloong::FileManager::ArchiveFile(UploadInfo* info)
 {
     try
     {
+        string target = GetPathByHashcode(info->Hash_MD5);
+        string source = info->Path;
         if (source.length() < 3 || target.length() < 3)
         {
             return CResult::Make_Error(Helper::Format("Move File error. File name cannot empty. source:%s;target:%s", source.c_str(), target.c_str()));
@@ -124,9 +135,23 @@ CResult Sloong::FileManager::GetFileSize(const string &source, int *out_size)
     // TODO:
     return CResult::Make_Error("No readlize");
 }
+
+// The filecenter no't care the file format. so in here, we saved by the hashcode, the saver should be save the format.
+string Sloong::FileManager::GetPathByHashcode( const string& hashcode )
+{
+    return Helper::Format("%s/%s/%s", m_strArchiveFolder.c_str(), hashcode.substr(0,2), hashcode );
+}
+
+// In Design, The other module no need know the file true path. 
+// So have two way:
+//  1> Use the database to save the file treu path and the file hash code.
+//     But this will make the filecenter to be complex. 
+//  2> Use the hashcode to comput the path, because when save file, the path is build with the hashcode 
+//   so we can use the hashcode to rebuild the save path.
+//     But this will fix the file tree structure for storage.
 CResult Sloong::FileManager::QueryFilePath(const string &hash_md5)
 {
-    return CResult::Make_Error("No readlize");
+    return CResult::Make_OK(GetPathByHashcode(hash_md5));
 }
 
 SResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, DataPackage *trans_pack)
@@ -135,9 +160,10 @@ SResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, DataPac
 
     auto token = CUtility::GenUUID();
     auto info = req->info();
-    m_mapTokenToUploadInfo[token].Name = info.name();
-    m_mapTokenToUploadInfo[token].Hash_MD5 = info.hash_md5();
-    m_mapTokenToUploadInfo[token].Path = FormatFolderString(m_strUploadTempSaveFolder) + token + "/";
+    auto& savedInfo = (*m_mapTokenToUploadInfo)[token];
+    savedInfo.Name = info.name();
+    savedInfo.Hash_MD5 = info.hash_md5();
+    savedInfo.Path = FormatFolderString(m_strUploadTempSaveFolder) + token + "/";
 
     PrepareUploadResponse res;
     res.set_token(token);
@@ -148,7 +174,8 @@ SResult Sloong::FileManager::UploadingHandler(const string &str_req, DataPackage
 {
     auto req = ConvertStrToObj<UploadingRequest>(str_req);
     auto &token = req->token();
-    if (!m_mapTokenToUploadInfo.exist(token))
+    auto info = m_mapTokenToUploadInfo->try_get(token);
+    if (info == nullptr)
         return SResult::Make_Error("Need request PrepareUpload firest.");
 
     auto extend = pack->extend();
@@ -161,7 +188,6 @@ SResult Sloong::FileManager::UploadingHandler(const string &str_req, DataPackage
         return SResult::Make_Error("Hasd check error.");
     }
 
-    auto info = m_mapTokenToUploadInfo.try_get(token);
     info->SplitPackage[req->splitpackageid()] = extend;
 
     return SResult::Succeed();
@@ -171,10 +197,10 @@ SResult Sloong::FileManager::UploadedHandler(const string &str_req, DataPackage 
 {
     auto req = ConvertStrToObj<UploadedRequest>(str_req);
     auto &token = req->token();
-    if (!m_mapTokenToUploadInfo.exist(token))
+    auto info = m_mapTokenToUploadInfo->try_get(token);
+    if (info == nullptr)
         return SResult::Make_Error("Need request PrepareUpload firest.");
 
-    auto info = m_mapTokenToUploadInfo.try_get(token);
     auto full_path = info->Path + info->Name;
     auto res = MergeFile(info->SplitPackage, full_path);
     if (res.IsFialed())
@@ -183,7 +209,7 @@ SResult Sloong::FileManager::UploadedHandler(const string &str_req, DataPackage 
     if (info->Hash_MD5 != CMD5::Encode(full_path, true))
         return SResult::Make_Error("Hasd check error.");
 
-    res = MoveFile(full_path, m_strArchiveFolder);
+    res = ArchiveFile(info);
     if (res.IsFialed())
         return SResult::Make_Error(res.GetMessage());
 
@@ -201,7 +227,7 @@ SResult Sloong::FileManager::PrepareDownloadHandler(const string &str_req, DataP
     string real_path = res.GetMessage();
     if (access(real_path.c_str(), ACC_R) != 0)
     {
-        return SResult::Make_Error("Cann't access to target file.");
+        return SResult::Make_Error("Cann't access to target file:" + real_path );
     }
 
     // 怎样来避免文件内容被拷贝的同时，满足拆分读取的需求？
@@ -212,22 +238,22 @@ SResult Sloong::FileManager::PrepareDownloadHandler(const string &str_req, DataP
     int filesize = 0;
     auto token = CUtility::GenUUID();
     // TODO. need process the pialed case.
-    auto &file_list = m_mapTokenToDownloadInfo[token].SplitPackage;
-    res = SplitFile(real_path,packageSize, file_list, &filesize);
+    auto &info = (*m_mapTokenToDownloadInfo)[token];
+    res = SplitFile(real_path,packageSize, info.SplitPackage, &filesize);
     if (res.IsFialed())
         return SResult::Make_Error(res.GetMessage());
 
-    m_mapTokenToDownloadInfo[token].RealPath = real_path;
-    m_mapTokenToDownloadInfo[token].Hash_MD5 = CMD5::Encode(real_path, true);
-    m_mapTokenToDownloadInfo[token].Size = filesize;
+    info.RealPath = real_path;
+    info.Hash_MD5 = CMD5::Encode(real_path, true);
+    info.Size = filesize;
 
     PrepareDownloadResponse response;
     response.set_token(token);
     response.set_filesize(filesize);
     auto infoMap = response.mutable_splitpackageinfos();
-    for (auto &item : file_list)
+    for (auto &item : info.SplitPackage)
     {
-        infoMap->operator[](item.first) = CMD5::Encode(item.second, true);
+        infoMap->operator[](item.first) = CMD5::Encode(item.second);
     }
 
     return SResult::Make_OK(ConvertObjToStr(&response));
@@ -237,32 +263,32 @@ SResult Sloong::FileManager::DownloadingHandler(const string &str_req, DataPacka
 {
     auto req = ConvertStrToObj<DownloadingRequest>(str_req);
     auto &token = req->token();
-    if (!m_mapTokenToUploadInfo.exist(token))
+    auto id = req->splitpackageid();
+    auto info = m_mapTokenToDownloadInfo->try_get(token);
+    if (info == nullptr)
         return SResult::Make_Error("Need request PrepareDownload firest.");
 
-    auto info = m_mapTokenToDownloadInfo.try_get(token);
-    auto path = info->SplitPackage.try_get(req->splitpackageid());
-    
-
-    // 这里的extend将会从前面读取的列表中获取
-    string extend = "";
+    auto data = info->SplitPackage.try_get(id);
+    if( data == nullptr )
+        return SResult::Make_Error(Helper::Format("No find the data with package id[%d], the package nums[%d]. please check.", id, info->SplitPackage.size()));
 
     DownloadingResponse res;
-    res.set_hash_md5(CMD5::Encode(*path));
+    res.set_hash_md5(CMD5::Encode(*data));
 
-    return SResult::Make_OK(ConvertObjToStr(&res), extend);
+    // TODO: Here may the copy once, the pr
+    return SResult::Make_OK(ConvertObjToStr(&res), *data);
 }
 
 SResult Sloong::FileManager::DownloadedHandler(const string &str_req, DataPackage *trans_pack)
 {
     auto req = ConvertStrToObj<DownloadedRequest>(str_req);
     auto &token = req->token();
-    if (m_mapTokenToUploadInfo.exist(token))
-    {
-        //auto info = m_mapTokenToDownloadInfo.try_get(token);
-        m_mapTokenToDownloadInfo.erase(token);
-    }
+     auto info = m_mapTokenToDownloadInfo->try_get(token);
+    if (info == nullptr)
+        return SResult::Make_Error("Need request PrepareDownload firest.");
 
+    m_mapTokenToDownloadInfo->erase(token);
+    
     return SResult::Succeed();
 }
 

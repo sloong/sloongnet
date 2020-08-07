@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-07-24 15:47:22
+ * @LastEditTime: 2020-08-07 15:14:26
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filemanager.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -50,9 +50,10 @@ namespace Sloong
         SResult TestSpeedHandler(const string &str_req, DataPackage *trans_pack);
 
     protected:
-        CResult MoveFile(const string &source, const string &target);
+        CResult ArchiveFile(UploadInfo *info);
 
         CResult QueryFilePath(const string &);
+        string GetPathByHashcode( const string& );
 
         CResult MergeFile(const map_ex<int, string> &fileList, const string &saveFile);
         CResult SplitFile(const string &saveFile, int splitSize, map_ex<int, string> &pReadList, int* out_all_size);
@@ -60,10 +61,9 @@ namespace Sloong
         void ClearCache(const string &folder);
 
     protected:
-        RUN_STATUS m_emStatus = RUN_STATUS::Created;
         map_ex<FileCenter::Functions, ExtendFunctionHandler> m_mapFuncToHandler;
-        map_ex<string, UploadInfo> m_mapTokenToUploadInfo;
-        map_ex<string, DownloadInfo> m_mapTokenToDownloadInfo;
+        map_ex<string, UploadInfo>* m_mapTokenToUploadInfo;
+        map_ex<string, DownloadInfo>* m_mapTokenToDownloadInfo;
 
         string m_strUploadTempSaveFolder;
 
