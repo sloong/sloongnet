@@ -1,33 +1,29 @@
-/*
- * @Author: WCB
- * @Date: 1970-01-01 08:00:00
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-18 20:03:43
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 2020-05-18 20:03:43
+ * @LastEditTime: 2020-08-07 16:42:30
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/core/events/SendPackageToManager.hpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
  * @Description: Event object for SendPackageToManager
  */
+
 #pragma once
-#include "NormalEvent.hpp"
+#include "SendPackage.hpp"
 namespace Sloong
 {
     namespace Events
     {
-        class SendPackageToManagerEvent : public NormalEvent
+        class SendPackageToManagerEvent : public SendPackageEvent
         {
         public:
-            SendPackageToManagerEvent(int func, string content) : NormalEvent(EVENT_TYPE::SendPackageToManager)
+            SendPackageToManagerEvent(int func, string content) : SendPackageEvent(0)
             {
+                m_emType = EVENT_TYPE::SendPackageToManager;
                 FunctionID = func;
                 Content = content;
             }
             virtual ~SendPackageToManagerEvent() {}
-
-            inline void SetCallbackFunc(std::function<void(IEvent *, DataPackage *)> p) { m_pCallback = p; }
-            inline void CallCallbackFunc(DataPackage *p)
-            {
-                if (m_pCallback)
-                    m_pCallback(this, p);
-            }
-            inline bool HaveCallbackFunc() { return m_pCallback != nullptr; }
 
             inline int GetFunctionID() { return FunctionID; }
             inline const string &GetContent() { return Content; }
@@ -35,7 +31,6 @@ namespace Sloong
         protected:
             int FunctionID = 0;
             string Content = "";
-            std::function<void(IEvent *, DataPackage *)> m_pCallback = nullptr;
         };
 
     } // namespace Events
