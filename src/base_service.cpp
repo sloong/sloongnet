@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-08-05 17:17:27
+ * @LastEditTime: 2020-08-07 16:31:40
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -391,25 +391,7 @@ CResult CSloongBaseService::RegisteNode()
     req_pack.set_templateid(m_oServerConfig.templateid());
 
     auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::RegisteNode, ConvertObjToStr(&req_pack));
-    auto response_str = make_shared<string>();
-    auto result = make_shared<ResultType>(ResultType::Invalid);
-    auto sync = make_shared<EasySync>();
-    event->SetCallbackFunc([result, sync, response_str](IEvent *e, DataPackage *p) {
-        (*result) = p->result();
-        *response_str = p->content();
-        sync->notify_one();
-    });
-    m_iC->CallMessage(event);
-
-    if (!sync->wait_for(5000))
-    {
-        return CResult::Make_Error("RegisteNode timeout");
-    }
-     if (*result != ResultType::Succeed)
-    {
-        return CResult::Make_Error(*response_str);
-    }
-    return CResult::Succeed;
+    return event->SyncCall(m_iC.get(),5000);
 }
 
 CResult CSloongBaseService::Run()
