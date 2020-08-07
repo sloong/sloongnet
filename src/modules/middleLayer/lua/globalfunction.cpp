@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-11 15:05:40
- * @LastEditTime: 2020-07-31 18:17:21
+ * @LastEditTime: 2020-08-07 16:12:00
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/globalfunction.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -362,44 +362,18 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
     request.set_database(DBName);
 
     auto req = make_shared<SendPackageEvent>(CGlobalFunction::Instance->m_SocketDBCenter);
-    auto sync = make_shared<EasySync>();
-    auto result = make_shared<CResult>(ResultType::Invalid);
-    auto session = make_shared<int>();
-    // TODO: If connect error, how process it?
-    req->SetCallbackFunc([DBName, sync, session,result](IEvent *event, DataPackage *pack) {
-        auto res_str = pack->content();
-        if( res_str.length() == 0 )
-        {
-            result->SetResult(ResultType::Error);
-            result->SetMessage("Response content is empty.");
-        }
-        else
-        {
-            result->SetResult(ResultType::Succeed);
-            auto res = ConvertStrToObj<DataCenter::ConnectDatabaseResponse>(res_str);
-            *session = res->session();
-        }
-        sync->notify_one();
-    });
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request));
-    CGlobalFunction::Instance->m_iC->SendMessage(req);
-
-    if (!sync->wait_for(5000))
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000 );
+    if( res.IsFialed() )
     {
         CLua::PushInteger(l, Base::ResultType::Error);
-        CLua::PushString(l, "timtout");
-        return 2;
+        CLua::PushString(l, res.GetMessage());
     }
-
-    if( result->IsFialed() )
-    {
-        CLua::PushInteger(l, Base::ResultType::Error);
-        CLua::PushString(l, result->GetMessage());
-    }
-    CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName] = *session;
-
+    auto response = ConvertStrToObj<DataCenter::ConnectDatabaseResponse>(res.GetMessage());
+    CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName] = response->session();
+ 
     CLua::PushInteger(l, Base::ResultType::Succeed);
-    CLua::PushInteger(l, *session);
+    CLua::PushInteger(l, response->session());
     
     return 2;
 }
@@ -431,23 +405,9 @@ bool CGlobalFunction::SQLFunctionPrepareCheck(lua_State *l, int sessionid, const
 
 CResult CGlobalFunction::RunSQLFunction(const string &request_str, int func)
 {
-    auto response_str = make_shared<string>();
     auto req = make_shared<SendPackageEvent>(CGlobalFunction::Instance->m_SocketDBCenter);
-    auto result = make_shared<ResultType>(ResultType::Invalid);
-    auto sync = make_shared<EasySync>();
-    req->SetCallbackFunc([result, sync, response_str](IEvent *event, DataPackage *pack) {
-        (*result) = pack->result();
-        (*response_str) = pack->content();
-        sync->notify_one();
-    });
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, func, request_str);
-    CGlobalFunction::Instance->m_iC->CallMessage(req);
-
-    if (!sync->wait_for(5000))
-    {
-        return CResult::Make_Error("Timeout");
-    }
-    return CResult(*result, *response_str);
+    return req->SyncCall(CGlobalFunction::Instance->m_iC,5000);
 }
 
 // Request sql query cmd to dbcenter.
@@ -512,6 +472,7 @@ int CGlobalFunction::Lua_SQLInsertToDBCenter(lua_State *l)
     DataCenter::InsertSQLCmdRequest request;
     request.set_session(SessionID);
     request.set_sqlcmd(sql_cmd);
+    request.set_getidentity(true);
 
     auto res = RunSQLFunction(ConvertObjToStr(&request), (int)DataCenter::Functions::InsertSQLCmd);
     if (res.IsSucceed())

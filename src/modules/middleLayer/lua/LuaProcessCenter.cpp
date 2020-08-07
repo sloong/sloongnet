@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-06 20:57:42
+ * @LastEditTime: 2020-08-07 13:14:15
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -95,7 +95,7 @@ void Sloong::CLuaProcessCenter::ReloadContext()
 {
 	for (auto &i : m_listLuaContent)
 	{
-		i.Reload = true;
+		i->Reload.store(true);
 	}
 }
 
@@ -105,9 +105,9 @@ CResult Sloong::CLuaProcessCenter::NewThreadInit()
 	if (c.IsFialed())
 		return c;
 		
-	LuaContent lua;
-	lua.Content = c.MoveResultObject();
-	lua.Reload = false;
+	auto lua = make_unique<LuaContent>();
+	lua->Content = c.MoveResultObject();
+	lua->Reload.store(false);
 	
 	m_listLuaContent.push_back(move(lua));
 	int id = (int)m_listLuaContent.size() - 1;
@@ -137,7 +137,7 @@ void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket *uinfo)
 {
 	// call close function.
 	int id = GetFreeLuaContext();
-	auto pLua = m_listLuaContent[id].Content.get();
+	auto pLua = m_listLuaContent[id]->Content.get();
 	pLua->RunFunction(m_pConfig->operator[]("LuaSocketCloseFunction").asString(), uinfo, 0, "", "");
 	FreeLuaContext(id);
 }
@@ -150,16 +150,16 @@ SResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 	try
 	{
 		auto &content = m_listLuaContent[id];
-		if (true == content.Reload)
+		if (content->Reload.load())
 		{
 			auto c = InitLua();
 			if( c.IsFialed() )
 				return SResult::Make_Error("Error when reload script: " + c.GetMessage());
-			content.Content = c.MoveResultObject();
-			content.Reload = false;
+			content->Content = c.MoveResultObject();
+			content->Reload.store(false);
 		}
 		string extendUUID("");
-		auto res = content.Content->RunFunction(m_pConfig->operator[]("LuaProcessFunction").asString(), pUInfo, function, msg, extend, &extendUUID);
+		auto res = content->Content->RunFunction(m_pConfig->operator[]("LuaProcessFunction").asString(), pUInfo, function, msg, extend, &extendUUID);
 		FreeLuaContext(id);
 		if (res.IsFialed())
 			return SResult::Make_Error(res.GetMessage());

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-06 20:55:27
+ * @LastEditTime: 2020-08-07 13:12:14
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -76,7 +76,7 @@ namespace Sloong
 	class LuaContent
 	{
 	public:
-		bool Reload = false;
+		atomic_bool Reload = ATOMIC_VAR_INIT(false);;
 		unique_ptr<CLua> Content = nullptr;
 	};
 	using namespace Events;
@@ -100,7 +100,7 @@ namespace Sloong
 		void HandleError(const string& err);
 		void ReloadContext();
 	protected:
-		vector<LuaContent>	m_listLuaContent;
+		vector<unique_ptr<LuaContent>>	m_listLuaContent;
 		queue_ex<int>		m_oFreeLuaContext;
 		EasySync		m_oSSync;
 		Json::Value*	m_pConfig;

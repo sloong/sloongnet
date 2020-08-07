@@ -1,10 +1,13 @@
-/*
- * @Author: WCB
- * @Date: 1970-01-01 08:00:00
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-13 16:01:24
- * @Description: file content
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 2020-08-07 12:43:05
+ * @LastEditTime: 2020-08-07 12:43:05
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/core/core.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
+
 #pragma once
 
 // std c head file
@@ -31,6 +34,7 @@
 #include <memory>
 #include <map>
 #include <mutex>
+#include <atomic>
 using namespace std;
 
 #include "protocol/base.pb.h"
