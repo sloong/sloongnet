@@ -12,6 +12,9 @@ CResult Sloong::FileManager::Initialize(IControl *ic)
     m = ic->Get(FILECENTER_DATAITEM::DownloadInfos);
     m_mapTokenToDownloadInfo = STATIC_TRANS<map_ex<string, DownloadInfo>*>(m);
 
+    FormatFolderString(m_strArchiveFolder);
+    FormatFolderString(m_strUploadTempSaveFolder);
+
     m_mapFuncToHandler[Functions::TestSpeed] = std::bind(&FileManager::TestSpeedHandler, this, std::placeholders::_1, std::placeholders::_2);
     m_mapFuncToHandler[Functions::PrepareUpload] = std::bind(&FileManager::PrepareUploadHandler, this, std::placeholders::_1, std::placeholders::_2);
     m_mapFuncToHandler[Functions::Uploading] = std::bind(&FileManager::UploadingHandler, this, std::placeholders::_1, std::placeholders::_2);
@@ -50,6 +53,13 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(DataPackage *pack)
         m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
     return PackageResult::Make_OKResult(move(response));
 }
+
+
+PackageResult Sloong::FileManager::ResponsePackageProcesser(DataPackage *pack)
+{
+    return PackageResult::Ignore();
+}
+
 
 CResult Sloong::FileManager::MergeFile(const map_ex<int, string> &fileList, const string &saveFile)
 {
@@ -91,7 +101,9 @@ CResult Sloong::FileManager::ArchiveFile(UploadInfo* info)
     try
     {
         string target = GetPathByHashcode(info->Hash_MD5);
-        string source = info->Path;
+        string source = info->Path + info->Hash_MD5;
+
+        m_pLog->Verbos(Helper::Format("Archive file: source[%s] target[%s]", source.c_str(), target.c_str()));
         if (source.length() < 3 || target.length() < 3)
         {
             return CResult::Make_Error(Helper::Format("Move File error. File name cannot empty. source:%s;target:%s", source.c_str(), target.c_str()));
@@ -111,7 +123,7 @@ CResult Sloong::FileManager::ArchiveFile(UploadInfo* info)
         if (!Helper::MoveFile(source, target))
         {
             // Move file need write access. so if move file error, try copy .
-            if (!CUniversal::RunSystemCmd(Helper::Format("mv \"%s\" \"%s\"", source.c_str(), target.c_str())))
+            if (!CUniversal::RunSystemCmd(Helper::Format("mv \"%s\" \"%s\"", source.c_str(), GetFolderByHashcode(info->Hash_MD5).c_str())))
             {
                 return CResult::Make_Error("Move File and try copy file error.");
             }
@@ -139,7 +151,13 @@ CResult Sloong::FileManager::GetFileSize(const string &source, int *out_size)
 // The filecenter no't care the file format. so in here, we saved by the hashcode, the saver should be save the format.
 string Sloong::FileManager::GetPathByHashcode( const string& hashcode )
 {
-    auto path = Helper::Format("%s/%s/%s", m_strArchiveFolder.c_str(), hashcode.substr(0,2).c_str(), hashcode.c_str() );
+    return GetFolderByHashcode(hashcode) + hashcode;
+}
+
+// The filecenter no't care the file format. so in here, we saved by the hashcode, the saver should be save the format.
+string Sloong::FileManager::GetFolderByHashcode( const string& hashcode )
+{
+    auto path = Helper::Format("%s%s/", m_strArchiveFolder.c_str(), hashcode.substr(0,2).c_str() );
     CUniversal::CheckFileDirectory(path);
     return path;
 }
@@ -163,7 +181,7 @@ SResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, DataPac
     auto token = CUtility::GenUUID();
     auto& savedInfo = (*m_mapTokenToUploadInfo)[token];
     savedInfo.Hash_MD5 = req->hash_md5();
-    savedInfo.Path = FormatFolderString(m_strUploadTempSaveFolder) + token + "/";
+    savedInfo.Path = m_strUploadTempSaveFolder + token + "/";
     CUniversal::RunSystemCmd(Helper::Format("mkdir -p %s", savedInfo.Path.c_str()));
 
     PrepareUploadResponse res;

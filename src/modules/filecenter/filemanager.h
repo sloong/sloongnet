@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-08-10 16:14:41
+ * @LastEditTime: 2020-08-11 20:16:16
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filemanager.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -53,6 +53,7 @@ namespace Sloong
 
         CResult QueryFilePath(const string &);
         string GetPathByHashcode( const string& );
+        string GetFolderByHashcode( const string& );
 
         CResult MergeFile(const map_ex<int, string> &fileList, const string &saveFile);
         CResult SplitFile(const string &saveFile, int splitSize, map_ex<int, string> &pReadList, int* out_all_size);
@@ -64,7 +65,7 @@ namespace Sloong
         map_ex<string, UploadInfo>* m_mapTokenToUploadInfo;
         map_ex<string, DownloadInfo>* m_mapTokenToDownloadInfo;
 
-        string m_strUploadTempSaveFolder = "/tmp/";
+        string m_strUploadTempSaveFolder = "./tmp/";
 
         // TODO: set the archive path.
         string m_strArchiveFolder = "./archive/";
