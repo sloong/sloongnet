@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-11 15:05:40
- * @LastEditTime: 2020-08-10 13:44:48
+ * @LastEditTime: 2020-08-11 20:26:35
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/globalfunction.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -736,7 +736,14 @@ int CGlobalFunction::Lua_UploadEnd(lua_State *l)
 
     auto req = make_shared<SendPackageEvent>(CGlobalFunction::Instance->m_SessionFileCenter.load());
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::Uploaded , ConvertObjToStr(&request));
-    CGlobalFunction::Instance->m_iC->SendMessage(req);
-    
-    return 0;
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC,5000);
+    if( res.IsFialed())
+    {
+        CLua::PushBoolen(l, false);
+        CLua::PushString(l, res.GetMessage());
+        return 2;
+    }
+    CLua::PushBoolen(l, true);
+    CLua::PushString(l, "succeed");
+    return 2;
 }
