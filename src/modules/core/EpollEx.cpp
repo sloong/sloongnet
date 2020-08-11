@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-08-05 19:54:23
+ * @LastEditTime: 2020-08-11 19:08:24
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EpollEx.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -130,8 +130,11 @@ void Sloong::CEpollEx::UnregisteConnection( int64_t id )
 		return;
 
 	auto conn = m_mapIDToConnection[id];
-	DeleteMonitorSocket(conn->GetSocketID());
-	m_mapSocketToID.erase(conn->GetSocketID());
+	if( conn != nullptr )
+	{
+		DeleteMonitorSocket(conn->GetSocketID());
+		m_mapSocketToID.erase(conn->GetSocketID());
+	}
 	m_mapIDToConnection.erase(id);
 }
 

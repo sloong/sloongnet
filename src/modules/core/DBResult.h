@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-07-31 14:36:46
+ * @LastEditTime: 2020-08-11 19:00:04
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/DBResult.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -94,6 +94,7 @@ namespace Sloong
                 return true;
             else if (res.compare(FALSE_STRING) == 0)
                 return false;
+            return false;
         }
 
         int AppendColumn( string columnName );

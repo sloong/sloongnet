@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2020-08-10 17:18:47
+ * @LastEditTime: 2020-08-11 18:49:21
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -153,7 +153,7 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 	}
 	else
 	{
-		m_pLog->Error(Helper::Format("Unintended result[%s] in SendDataPackage in SockInfo.", ResultType_Name(res.GetResult())));
+		m_pLog->Error(Helper::Format("Unintended result[%s] in SendDataPackage in SockInfo.", ResultType_Name(res.GetResult()).c_str()));
 		return ResultType::Error;
 	}
 }
