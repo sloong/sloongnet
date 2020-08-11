@@ -62,7 +62,7 @@ NResult Sloong::CEpollEx::CreateListenSocket(const string &addr, int port)
 	if (-1 == listen(listen_sock, 1024))
 		return NResult::Make_Error(Helper::Format("Listen to %d field. Error info: [%d]%s", port, errno, strerror(errno)));
 
-	return NResult::Make_OK(listen_sock);
+	return NResult::Make_OKResult(listen_sock);
 }
 
 // Initialize the epoll and the thread pool.

@@ -27,7 +27,7 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(DataPackage *pack)
     auto function = (Functions)pack->function();
     if (!Functions_IsValid(function))
     {
-        return PackageResult::Make_OK(Package::MakeErrorResponse(pack, Helper::Format("FileCenter no provide [%d] function.", function)));
+        return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("FileCenter no provide [%d] function.", function)));
     }
 
     auto req_obj = pack->content();
@@ -35,7 +35,7 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(DataPackage *pack)
     m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), req_obj.c_str()));
     if (!m_mapFuncToHandler.exist(function))
     {
-        return PackageResult::Make_OK(Package::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
+        return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
     }
 
     auto res = m_mapFuncToHandler[function](req_obj, pack);
@@ -48,7 +48,7 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(DataPackage *pack)
     }
     else
         m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
-    return PackageResult::Make_OK(move(response));
+    return PackageResult::Make_OKResult(move(response));
 }
 
 CResult Sloong::FileManager::MergeFile(const map_ex<int, string> &fileList, const string &saveFile)
@@ -274,7 +274,7 @@ SResult Sloong::FileManager::DownloadingHandler(const string &str_req, DataPacka
     res.set_hash_md5(CMD5::Encode(*data));
 
     // TODO: Here may the copy once, the pr
-    return SResult::Make_OK(ConvertObjToStr(&res), *data);
+    return SResult::Make_OKResult(ConvertObjToStr(&res), *data);
 }
 
 SResult Sloong::FileManager::DownloadedHandler(const string &str_req, DataPackage *trans_pack)

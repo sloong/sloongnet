@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2020-07-29 19:53:55
+ * @LastEditTime: 2020-08-10 16:23:32
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -216,7 +216,7 @@ PackageResult Sloong::CServerManage::ProcessHandler(DataPackage *pack)
 	auto function = (Functions)pack->function();
 	if (!Manager::Functions_IsValid(function))
 	{
-		return PackageResult::Make_OK(Package::MakeErrorResponse(pack, Helper::Format("Parser request package function[%s] error.", pack->content().c_str())));
+		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Parser request package function[%s] error.", pack->content().c_str())));
 	}
 
 	auto req_str = pack->content();
@@ -224,7 +224,7 @@ PackageResult Sloong::CServerManage::ProcessHandler(DataPackage *pack)
 	m_pLog->Debug(Helper::Format("Request [%d][%s]", function, func_name.c_str()));
 	if (!m_mapFuncToHandler.exist(function))
 	{
-		return PackageResult::Make_OK(Package::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
+		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
 	}
 
 	auto res = m_mapFuncToHandler[function](req_str, pack);
@@ -235,7 +235,7 @@ PackageResult Sloong::CServerManage::ProcessHandler(DataPackage *pack)
 	if (res.GetResult() == ResultType::Ignore)
 		return PackageResult::Ignore();
 
-	return PackageResult::Make_OK(Package::MakeResponse(pack, res));
+	return PackageResult::Make_OKResult(Package::MakeResponse(pack, res));
 }
 
 CResult Sloong::CServerManage::EventRecorderHandler(const string &req_str, DataPackage *pack)

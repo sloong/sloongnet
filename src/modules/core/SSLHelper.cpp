@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-08-03 14:38:46
- * @LastEditTime: 2020-08-04 11:13:52
+ * @LastEditTime: 2020-08-10 16:24:43
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/SSLHelper.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -49,7 +49,7 @@ NResult Sloong::SSLHelper::Read(char *data, int len, bool block, bool bagain)
     int ret = SSL_Read_Ex(data, len, 0, true);
     if (ret == len)
     {
-        return NResult::Make_OK(ret);
+        return NResult::Make_OKResult(ret);
     }
     else
     {
@@ -68,7 +68,7 @@ NResult Sloong::SSLHelper::Write(const char *data, int len, int index)
     int ret = SSL_Write_Ex(data + index, len);
     if (ret == len - index)
     {
-        return NResult::Make_OK(ret);
+        return NResult::Make_OKResult(ret);
     }
     else
     {

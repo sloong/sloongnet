@@ -1,7 +1,7 @@
 ﻿/*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-07-31 14:26:38
+ * @LastEditTime: 2020-08-10 14:09:44
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/main.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -121,7 +121,7 @@ int main(int argc, char **args)
 			cout << "Run base service instance." << endl;
 			res = Sloong::CSloongBaseService::Instance->Run();
 			
-			cout << "Base service instance is end with result " << ResultType_Name(res.GetResult()) << endl;
+			cout << "Base service instance is end with result " << ResultType_Name(res.GetResult()) << ". Message: " << res.GetMessage() << endl;
 		} while (res.GetResult() == ResultType::Retry);
 
 		cout << "Application exit." << endl;

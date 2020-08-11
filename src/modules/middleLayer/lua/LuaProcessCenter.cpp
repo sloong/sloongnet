@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-07 13:14:15
+ * @LastEditTime: 2020-08-10 16:22:06
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -130,7 +130,7 @@ TResult<unique_ptr<CLua>> Sloong::CLuaProcessCenter::InitLua()
 	{
 		return TResult<unique_ptr<CLua>>::Make_Error("Run Function Fialed.");
 	}
-	return TResult<unique_ptr<CLua>>::Make_OK(move(lua));
+	return TResult<unique_ptr<CLua>>::Make_OKResult(move(lua));
 }
 
 void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket *uinfo)
@@ -164,8 +164,8 @@ SResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 		if (res.IsFialed())
 			return SResult::Make_Error(res.GetMessage());
 		else
-			return SResult::Make_OK(extendUUID, res.GetMessage());
-	}
+			return SResult::Make_OKResult(extendUUID, res.GetMessage());
+	} 
 	catch (const exception &ex)
 	{
 		FreeLuaContext(id);

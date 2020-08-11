@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-08-07 16:31:40
+ * @LastEditTime: 2020-08-10 17:30:23
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -208,7 +208,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     else
     {
         pManagerConnect = make_unique<EasyConnect>();
-        auto res = pManagerConnect->InitializeAsClient(m_oServerConfig.manageraddress(), m_oServerConfig.managerport(), nullptr);
+        auto res = pManagerConnect->InitializeAsClient( nullptr, m_oServerConfig.manageraddress(), m_oServerConfig.managerport(), nullptr);
         if (res.IsFialed())
         {
             return CResult::Make_Error("Connect to control fialed." + res.GetMessage());
@@ -396,6 +396,11 @@ CResult CSloongBaseService::RegisteNode()
 
 CResult CSloongBaseService::Run()
 {
+    if( m_emStatus != RUN_STATUS::Created )
+    {
+        // May create evnironment error, and the application is received programstop event.
+        return CResult::Make_Error("Application run function is called, but the status not created.");
+    }
     m_pLog->Info("Application begin running.");
     m_iC->SendMessage(EVENT_TYPE::ProgramStart);
     m_emStatus = RUN_STATUS::Running;

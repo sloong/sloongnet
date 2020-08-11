@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2020-08-05 17:46:32
+ * @LastEditTime: 2020-08-10 17:28:54
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -63,7 +63,6 @@
 #define SLOONGNET_EASY_CONNECT_H
 
 #include "core.h"
-
 #include "SSLHelper.h"
 
 namespace Sloong
@@ -77,11 +76,11 @@ namespace Sloong
 		~EasyConnect(){	m_pSSL = nullptr; }
 		// 以接受方/服务端的方式初始化。链接断开后不进行任何操作
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
-		CResult InitializeAsServer(SOCKET, LPVOID p = nullptr);
+		CResult InitializeAsServer( CLog*, SOCKET, LPVOID p = nullptr);
 
 		// 以发起方/客户端的方式初始化。链接断开后会根据信息尝试重连
 		// 如果需要启用SSL支持，那么需要送入指定的ctx变量。否则保持送空即可。
-		CResult InitializeAsClient(const string &, int, LPVOID p = nullptr);
+		CResult InitializeAsClient( CLog*, const string &, int, LPVOID p = nullptr);
 
 
 		/**
@@ -153,7 +152,7 @@ namespace Sloong
 		int m_nErrno;
 		unique_ptr<SSLHelper> m_pSSL = nullptr;
 		SOCKET m_nSocket = INVALID_SOCKET;
-		
+		CLog* m_pLog = nullptr;
 		bool m_bSupportReconnect = false;
 		std::function<void(int64_t, int, int)> m_pOnReconnect = nullptr;
 	};

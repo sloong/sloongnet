@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-11 15:05:40
- * @LastEditTime: 2020-08-07 18:20:42
+ * @LastEditTime: 2020-08-10 13:44:48
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/globalfunction.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -419,6 +419,12 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
         CLua::PushString(l, res.GetMessage());
     }
     auto response = ConvertStrToObj<DataCenter::ConnectDatabaseResponse>(res.GetMessage());
+    if( response == nullptr )
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, "Parse result error.");
+        return 2;
+    }
     CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName] = response->session();
  
     CLua::PushInteger(l, Base::ResultType::Succeed);

@@ -36,7 +36,7 @@ TResult<TemplateInfo> Sloong::CConfiguation::GetTemplate(int id)
     try
     {
         auto template_item = m_oStorage->get<TemplateInfo>(id);
-        return TResult<TemplateInfo>::Make_OK(template_item);
+        return TResult<TemplateInfo>::Make_OKResult(template_item);
     }
     catch (system_error &ex)
     {

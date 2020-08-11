@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2020-08-05 17:47:44
+ * @LastEditTime: 2020-08-11 11:15:25
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -71,8 +71,9 @@
 constexpr int s_llLen = 8;
 constexpr int s_lLen = 4;
 
-CResult Sloong::EasyConnect::InitializeAsServer(SOCKET sock, LPVOID ctx)
+CResult Sloong::EasyConnect::InitializeAsServer( CLog* log, SOCKET sock, LPVOID ctx)
 {
+	m_pLog = log;
 	m_bSupportReconnect = false;
 	m_nSocket = sock;
 	m_strAddress = CUtility::GetSocketIP(m_nSocket);
@@ -87,8 +88,9 @@ CResult Sloong::EasyConnect::InitializeAsServer(SOCKET sock, LPVOID ctx)
 	return CResult::Succeed;
 }
 
-CResult Sloong::EasyConnect::InitializeAsClient(const string &address, int port, LPVOID ctx)
+CResult Sloong::EasyConnect::InitializeAsClient( CLog* log, const string &address, int port, LPVOID ctx)
 {
+	m_pLog = log;
 	m_bSupportReconnect = true;
 	m_strAddress = address;
 	m_nPort = port;
@@ -277,13 +279,23 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 
 		// If the data length received 11 error, ignore it.
 		if (len == -11)
+		{
+			if(m_pLog) m_pLog->Verbos("Receive data package return 11[EAGAIN] error.");
 			return PackageResult(ResultType::Ignore);
+		}
 		else if (len == 0)
+		{
+			if(m_pLog) m_pLog->Verbos("Receive data package return 0 error. socket may closed");
 			return PackageResult(ResultType::Warning);
+		}			
 		else if (len > 0)
+		{
+			if(m_pLog) m_pLog->Verbos("Receive data package succeed : " + Helper::ntos(len));
 			m_RecvPackageSize = len;
+		}
 		else
 		{
+			if(m_pLog) m_pLog->Verbos("Receive data package happened other error. close connection.");
 			Close();
 			return PackageResult::Make_Error("Error when receive length data.");
 		}
@@ -296,7 +308,7 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 	if (len > 0)
 	{
 		m_ReceivedSize += len;
-		m_strReceiving.append(buf);
+		m_strReceiving.append(buf, 0, len);
 		if (m_ReceivedSize == m_RecvPackageSize)
 		{
 			auto package = make_unique<DataPackage>();
@@ -309,14 +321,18 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 			m_RecvPackageSize = 0;
 			m_ReceivedSize = 0;
 
-			return PackageResult::Make_OK(std::move(package));
+			return PackageResult::Make_OKResult(std::move(package));
 		}
 		else
-			return PackageResult(ResultType::Retry, Helper::Format("Receive package returned [Retry]. Package size[%d], Received[%d]", m_RecvPackageSize, m_ReceivedSize));
+		{
+			if( m_pLog) m_pLog->Debug(Helper::Format("Receive package returned [Retry]. Package size[%d], Received[%d][%d]", m_RecvPackageSize, m_ReceivedSize, m_strReceiving.length()));
+			return PackageResult(ResultType::Retry);
+		}
 	}
 	else if (len == -11)
 	{
-		return PackageResult(ResultType::Retry, Helper::Format("Receive package returned [Retry]. Package size[%d], Received[%d]", m_RecvPackageSize, m_ReceivedSize));
+		if( m_pLog ) m_pLog->Debug(Helper::Format("Receive package returned [Retry]. Package size[%d], Received[%d]", m_RecvPackageSize, m_ReceivedSize));
+		return PackageResult(ResultType::Retry);
 	}
 	else
 	{

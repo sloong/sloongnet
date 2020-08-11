@@ -99,7 +99,7 @@ PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter 
 	if( res.IsFialed() )
 	{
 		m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%s].", function, ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
-		return PackageResult::Make_OK(Package::MakeResponse(pack,res));
+		return PackageResult::Make_OKResult(Package::MakeResponse(pack,res));
 	}
 	else
 	{
@@ -112,24 +112,24 @@ PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter 
 				int size = 0;
 				auto ptr = m_iC->GetTempBytes(extendUUID, &size);
 				m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length(), size));
-				return PackageResult::Make_OK(Package::MakeResponse(pack,res.GetResult(), content, ptr.get(), size));
+				return PackageResult::Make_OKResult(Package::MakeResponse(pack,res.GetResult(), content, ptr.get(), size));
 			}
 			else if (m_iC->ExistTempString(extendUUID))
 			{
 				auto extend = m_iC->GetTempString(extendUUID);
 				m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length(), extend.length()));
-				return PackageResult::Make_OK(Package::MakeResponse(pack,res.GetResult(), content, extend));
+				return PackageResult::Make_OKResult(Package::MakeResponse(pack,res.GetResult(), content, extend));
 			}
 			else
 			{
 				m_pLog->Error(Helper::Format("Response [%d]:[%s][%d][Message is required an extend UUID[%s]. but not find in IControl. Ignore.]", function, ResultType_Name(res.GetResult()).c_str(), content.length(), extendUUID.c_str()));
-				return PackageResult::Make_OK(Package::MakeResponse(pack,res));
+				return PackageResult::Make_OKResult(Package::MakeResponse(pack,res));
 			}
 		}
 		else
 		{
 			m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length()));
-			return PackageResult::Make_OK(Package::MakeResponse(pack,res));
+			return PackageResult::Make_OKResult(Package::MakeResponse(pack,res));
 		}
 	}
 }
@@ -138,7 +138,7 @@ PackageResult Sloong::LuaMiddleLayer::ResponsePackageProcesser(CLuaProcessCenter
 {
 	m_pLog->Info("ResponsePackageProcesser event");
 
-	return PackageResult::Succeed();
+	return PackageResult::Invalid();
 }
 
 void Sloong::LuaMiddleLayer::OnConnectionBreaked(SharedEvent event)

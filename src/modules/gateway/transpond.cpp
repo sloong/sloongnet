@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-28 14:43:16
- * @LastEditTime: 2020-08-06 14:12:15
+ * @LastEditTime: 2020-08-10 16:22:53
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/transpond.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -59,7 +59,7 @@ PackageResult Sloong::GatewayTranspond::MessageToProcesser(DataPackage *pack)
 	m_pLog->Debug(Helper::Format("Trans package [%lld][%lld] -> [%d][%lld]", pack->reserved().sessionid(), pack->id(), trans_pack->reserved().sessionid(), trans_pack->id()));
 
 	SloongNetGateway::Instance->m_mapSerialToRequest[trans_pack->id()] = move(response);
-	return PackageResult::Make_OK(move(trans_pack));
+	return PackageResult::Make_OKResult(move(trans_pack));
 }
 
 PackageResult Sloong::GatewayTranspond::MessageToClient(UniquePackage info, DataPackage *pack)
@@ -69,5 +69,5 @@ PackageResult Sloong::GatewayTranspond::MessageToClient(UniquePackage info, Data
 	info->set_content(pack->content());
 	info->set_extend(pack->extend());
 	
-	return PackageResult::Make_OK(move(info));
+	return PackageResult::Make_OKResult(move(info));
 }

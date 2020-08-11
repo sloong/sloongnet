@@ -115,7 +115,10 @@ namespace Sloong
         static inline TResult Make_Warning(const string& what) {
             return TResult(ResultType::Warning, what);
         }
-        static inline TResult Make_OK(T result, const string& msg = "") {
+        static inline TResult Make_OK(const string& msg ) {
+            return TResult(ResultType::Succeed, msg);
+        }
+        static inline TResult Make_OKResult(T result, const string& msg = "") {
             return TResult(ResultType::Succeed, msg, move(result));
         }
     protected:

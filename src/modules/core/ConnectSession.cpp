@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2020-08-05 17:20:49
+ * @LastEditTime: 2020-08-10 17:18:47
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -215,9 +215,10 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 			// Receive data pageage length return 11(EAGAIN) error. so if in bLoop mode, this is OK.
 			break;
 		}
-		else if (res.GetResult() == ResultType::Retry && bLoop )
+		else if (res.GetResult() == ResultType::Retry )
 		{
 			// Package is no receive done. need receive in next time.
+			m_pLog->Verbos(Helper::Format("Receive package happened retry event. curent list[%d] ",readList.size()));
 			break;
 		}
 		else if (res.GetResult() == ResultType::Error)
@@ -233,7 +234,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 	} while (bLoop);
 
 	srlck.unlock();
-	return ReceivePackageListResult::Make_OK(std::move(readList));
+	return ReceivePackageListResult::Make_OKResult(std::move(readList));
 }
 
 ResultType Sloong::ConnectSession::OnDataCanSend()

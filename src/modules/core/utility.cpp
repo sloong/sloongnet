@@ -198,7 +198,7 @@ VStrResult CUtility::IPToHostName(const string &ip)
 
 	freeaddrinfo(addr_res);
 	if( list.size() > 0 )
-		return VStrResult::Make_OK(list,errmsg);
+		return VStrResult::Make_OKResult(list,errmsg);
 	else
 		return VStrResult::Make_Error(errmsg);
 }
@@ -241,7 +241,7 @@ VStrResult CUtility::HostnameToIP(const string &hostname)
 
 	freeaddrinfo(hostname_res);
 	if( list.size() > 0 )
-		return VStrResult::Make_OK(list,errmsg);
+		return VStrResult::Make_OKResult(list,errmsg);
 	else
 		return VStrResult::Make_Error(errmsg);
 }

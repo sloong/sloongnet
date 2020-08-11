@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-08-05 19:47:40
+ * @LastEditTime: 2020-08-11 10:53:52
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -225,7 +225,7 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
 	}
 
 	auto connect = make_unique<EasyConnect>();
-	auto res = connect->InitializeAsClient(event->GetAddress(), event->GetPort(), m_pCTX);
+	auto res = connect->InitializeAsClient( m_pLog, event->GetAddress(), event->GetPort(), m_pCTX);
 	if( res.IsFialed() )
 	{
 		m_pLog->Warn(res.GetMessage());
@@ -380,7 +380,8 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					{
 					case DataPackage_PackageType::DataPackage_PackageType_EventPackage:
 					{
-						m_pLog->Verbos( "Event package <<< " +  package->ShortDebugString() );
+						if( package->extend().empty() )
+							m_pLog->Verbos( "Event package <<< " +  package->ShortDebugString() );
 						switch (package->function())
 						{
 						case ControlEvent::Restart:
@@ -399,7 +400,8 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					break;
 					case DataPackage_PackageType::DataPackage_PackageType_NormalPackage:
 					{
-						m_pLog->Verbos( "Process package <<< " +  package->ShortDebugString() );
+						if( package->extend().empty() )
+							m_pLog->Verbos( "Process package <<< " +  package->ShortDebugString() );
 						if (package->status() == DataPackage_StatusType::DataPackage_StatusType_Request)
 							result = m_pRequestFunc(pEnv, package.get());
 						else
@@ -408,7 +410,8 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 						if (result.HaveResultObject())
 						{
 							auto response = result.MoveResultObject();
-							m_pLog->Verbos( "Response package >>> " +  response->ShortDebugString() );
+							if( package->extend().empty() )
+								m_pLog->Verbos( "Response package >>> " +  response->ShortDebugString() );
 							AddMessageToSendList(move(response));
 						}
 						else if (result.GetResult() != ResultType::Ignore)
@@ -416,7 +419,8 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 							auto response = Package::MakeResponse(package.get());
 							response->set_result(result.GetResult());
 							response->set_content(result.GetMessage());
-							m_pLog->Verbos( "Response package >>> " +  response->ShortDebugString());
+							if( package->extend().empty() )
+								m_pLog->Verbos( "Response package >>> " +  response->ShortDebugString());
 							AddMessageToSendList(move(response));
 						}
 						else
@@ -475,7 +479,7 @@ ResultType Sloong::CNetworkHub::OnNewAccept(int64_t sock)
 	}
 
 	auto conn = make_unique<EasyConnect>();
-	conn->InitializeAsServer(conn_sock, m_pCTX);
+	conn->InitializeAsServer( m_pLog, conn_sock, m_pCTX);
 
 	auto info = make_unique<ConnectSession>();
 	info->Initialize(m_iC, std::move(conn));

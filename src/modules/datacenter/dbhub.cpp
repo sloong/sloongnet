@@ -48,7 +48,7 @@ PackageResult Sloong::DBHub::RequestPackageProcesser(DataPackage *pack)
 		m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
 	else
 		m_pLog->Verbos(Helper::Format("Response [%s]:[%s]", func_name.c_str(), ResultType_Name(res.GetResult()).c_str()));
-    return PackageResult::Make_OK(Package::MakeResponse(pack,res));
+    return PackageResult::Make_OKResult(Package::MakeResponse(pack,res));
 }
 
 CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, DataPackage *pack)

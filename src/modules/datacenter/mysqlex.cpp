@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-11 15:05:40
- * @LastEditTime: 2020-08-06 19:01:56
+ * @LastEditTime: 2020-08-10 16:22:41
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/datacenter/mysqlex.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -107,7 +107,7 @@ DResult Sloong::MySqlEx::Query(const string &sqlCmd)
 		if( mysql_errno(&m_MySql) != 0 )
 			return DResult::Make_Error(GetError());
 		else
-			return DResult::Make_OK(dbresult);;
+			return DResult::Make_OKResult(dbresult);;
 	}
 
 	if( mysql_num_rows(res) > 0)
@@ -131,7 +131,7 @@ DResult Sloong::MySqlEx::Query(const string &sqlCmd)
 	mysql_free_result(res);
 	if (m_pLog)
 		m_pLog->Verbos(Helper::Format("[SQL]:[Rows:[%d]", dbresult->GetLinesNum()));
-	return DResult::Make_OK(dbresult);
+	return DResult::Make_OKResult(dbresult);
 }
 
 NResult Sloong::MySqlEx::RunModifySQLCmd(const string &sqlCmd)
@@ -153,5 +153,5 @@ NResult Sloong::MySqlEx::RunModifySQLCmd(const string &sqlCmd)
 
 	if (m_pLog)
 		m_pLog->Verbos(Helper::Format("[SQL]:[Insert Line:[%d]", nRes));
-	return NResult::Make_OK(nRes);
+	return NResult::Make_OKResult(nRes);
 }

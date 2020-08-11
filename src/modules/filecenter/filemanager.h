@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-08-07 18:15:51
+ * @LastEditTime: 2020-08-10 16:14:41
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filemanager.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -64,10 +64,10 @@ namespace Sloong
         map_ex<string, UploadInfo>* m_mapTokenToUploadInfo;
         map_ex<string, DownloadInfo>* m_mapTokenToDownloadInfo;
 
-        string m_strUploadTempSaveFolder;
+        string m_strUploadTempSaveFolder = "/tmp/";
 
         // TODO: set the archive path.
-        string m_strArchiveFolder = "/tmp";
+        string m_strArchiveFolder = "./archive/";
     };
 
 } // namespace Sloong
