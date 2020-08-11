@@ -90,7 +90,7 @@ inline MySqlEx* GetCurrentThreadConnextion(  map<thread::id,UniqueMySQLEx>* sess
     auto it = sessions->find(id);
     if( it == sessions->end() )
     {
-        (*sessions)[id] = std::move(sessions->begin()->second->Duplicate());
+        (*sessions)[id] = sessions->begin()->second->Duplicate();
     }
     return (*sessions)[id].get();
 }
@@ -105,7 +105,7 @@ CResult Sloong::DBHub::QuerySQLCmdHandler(const string &req_obj, DataPackage *pa
 
     auto res = GetCurrentThreadConnextion(session)->Query(req->sqlcmd());
     if (res.IsFialed())
-        return res;
+        return move(res);
 
     auto sql_res = res.GetResultObject();
     QuerySQLCmdResponse response;
@@ -131,7 +131,7 @@ CResult Sloong::DBHub::InsertSQLCmdHandler(const string &req_obj, DataPackage *p
     auto s = GetCurrentThreadConnextion(session);
     auto res = s->Insert(req->sqlcmd());
     if (res.IsFialed())
-        return res;
+        return move(res);
 
     InsertSQLCmdResponse response;
     response.set_affectedrows(res.GetResultObject());
@@ -165,7 +165,7 @@ CResult Sloong::DBHub::DeleteSQLCmdHandler(const string &req_obj, DataPackage *p
 
     auto res = GetCurrentThreadConnextion(session)->Delete(req->sqlcmd());
     if (res.IsFialed())
-        return res;
+        return move(res);
 
     DeleteSQLCmdResponse response;
     response.set_affectedrows(res.GetResultObject());
@@ -183,7 +183,7 @@ CResult Sloong::DBHub::UpdateSQLCmdHandler(const string &req_obj, DataPackage *p
         
     auto res = GetCurrentThreadConnextion(session)->Update(req->sqlcmd());
     if (res.IsFialed())
-        return res;
+        return move(res);
 
     UpdateSQLCmdResponse response;
     response.set_affectedrows(res.GetResultObject());

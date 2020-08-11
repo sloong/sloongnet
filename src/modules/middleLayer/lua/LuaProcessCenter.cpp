@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-10 16:22:06
+ * @LastEditTime: 2020-08-11 18:59:31
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -103,7 +103,7 @@ CResult Sloong::CLuaProcessCenter::NewThreadInit()
 {
 	auto c = InitLua();
 	if (c.IsFialed())
-		return c;
+		return move(c);
 		
 	auto lua = make_unique<LuaContent>();
 	lua->Content = c.MoveResultObject();

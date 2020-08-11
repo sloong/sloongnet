@@ -90,11 +90,7 @@ namespace Sloong
 		inline void SetScriptFolder(const string &folder)
 		{
 			m_strScriptFolder = folder;
-			char tag = m_strScriptFolder[m_strScriptFolder.length() - 1];
-			if (tag != '/' && tag != '\\')
-			{
-				m_strScriptFolder += '/';
-			}
+			FormatFolderString(m_strScriptFolder);
 		}
 		inline vector<string> *GetSearchRouteList() { return &m_listSearchRoute; }
 

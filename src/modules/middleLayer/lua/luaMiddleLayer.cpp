@@ -138,7 +138,7 @@ PackageResult Sloong::LuaMiddleLayer::ResponsePackageProcesser(CLuaProcessCenter
 {
 	m_pLog->Info("ResponsePackageProcesser event");
 
-	return PackageResult::Invalid();
+	return PackageResult::Ignore();
 }
 
 void Sloong::LuaMiddleLayer::OnConnectionBreaked(SharedEvent event)
