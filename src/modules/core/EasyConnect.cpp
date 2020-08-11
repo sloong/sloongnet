@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2020-08-11 11:15:25
+ * @LastEditTime: 2020-08-11 11:30:28
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -280,12 +280,12 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 		// If the data length received 11 error, ignore it.
 		if (len == -11)
 		{
-			if(m_pLog) m_pLog->Verbos("Receive data package return 11[EAGAIN] error.");
+			if(m_pLog) m_pLog->Verbos("Receive data package return 11[EAGAIN].");
 			return PackageResult(ResultType::Ignore);
 		}
 		else if (len == 0)
 		{
-			if(m_pLog) m_pLog->Verbos("Receive data package return 0 error. socket may closed");
+			if(m_pLog) m_pLog->Verbos("Receive data package return 0. socket may closed");
 			return PackageResult(ResultType::Warning);
 		}			
 		else if (len > 0)

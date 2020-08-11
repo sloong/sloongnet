@@ -111,7 +111,7 @@ CResult Sloong::FileManager::ArchiveFile(UploadInfo* info)
         if (!Helper::MoveFile(source, target))
         {
             // Move file need write access. so if move file error, try copy .
-            if (!CUniversal::RunSystemCmd(Helper::Format("cp \"%s\" \"%s\"", source.c_str(), target.c_str())))
+            if (!CUniversal::RunSystemCmd(Helper::Format("mv \"%s\" \"%s\"", source.c_str(), target.c_str())))
             {
                 return CResult::Make_Error("Move File and try copy file error.");
             }
@@ -139,7 +139,9 @@ CResult Sloong::FileManager::GetFileSize(const string &source, int *out_size)
 // The filecenter no't care the file format. so in here, we saved by the hashcode, the saver should be save the format.
 string Sloong::FileManager::GetPathByHashcode( const string& hashcode )
 {
-    return Helper::Format("%s/%s/%s", m_strArchiveFolder.c_str(), hashcode.substr(0,2), hashcode );
+    auto path = Helper::Format("%s/%s/%s", m_strArchiveFolder.c_str(), hashcode.substr(0,2).c_str(), hashcode.c_str() );
+    CUniversal::CheckFileDirectory(path);
+    return path;
 }
 
 // In Design, The other module no need know the file true path. 
@@ -162,6 +164,7 @@ SResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, DataPac
     auto& savedInfo = (*m_mapTokenToUploadInfo)[token];
     savedInfo.Hash_MD5 = req->hash_md5();
     savedInfo.Path = FormatFolderString(m_strUploadTempSaveFolder) + token + "/";
+    CUniversal::RunSystemCmd(Helper::Format("mkdir -p %s", savedInfo.Path.c_str()));
 
     PrepareUploadResponse res;
     res.set_token(token);
@@ -200,9 +203,13 @@ SResult Sloong::FileManager::UploadedHandler(const string &str_req, DataPackage 
         return SResult::Make_Error("Need request PrepareUpload firest.");
 
     auto temp_path = info->Path + info->Hash_MD5;
+    CUniversal::CheckFileDirectory(temp_path);
+    
     auto res = MergeFile(info->SplitPackage, temp_path);
     if (res.IsFialed())
         return SResult::Make_Error(res.GetMessage());
+
+    m_pLog->Verbos(Helper::Format("Save file to [%s]. Hash [%s]", temp_path.c_str(), info->Hash_MD5.c_str()));
 
     if (info->Hash_MD5 != CMD5::Encode(temp_path, true))
         return SResult::Make_Error("Hasd check error.");
@@ -210,6 +217,8 @@ SResult Sloong::FileManager::UploadedHandler(const string &str_req, DataPackage 
     res = ArchiveFile(info);
     if (res.IsFialed())
         return SResult::Make_Error(res.GetMessage());
+
+    CUniversal::RunSystemCmd(Helper::Format("rm -d %s", info->Path.c_str()));
 
     return SResult::Succeed();
 }
