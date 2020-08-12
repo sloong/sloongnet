@@ -1,61 +1,61 @@
-/*** 
+/***
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-11 15:05:40
- * @LastEditTime: 2020-08-12 14:26:22
+ * @LastEditTime: 2020-08-12 20:23:53
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/globalfunction.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description:
  */
-/*** 
- * @......................................&&.........................
- * @....................................&&&..........................
- * @.................................&&&&............................
- * @...............................&&&&..............................
- * @.............................&&&&&&..............................
- * @...........................&&&&&&....&&&..&&&&&&&&&&&&&&&........
- * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............
- * @................&...&&&&&&&&&&&&&&&&&&&&&&&&&&&&.................
- * @.......................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........
- * @...................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...............
- * @..................&&&   &&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
- * @...............&&&&&@  &&&&&&&&&&..&&&&&&&&&&&&&&&&&&&...........
- * @..............&&&&&&&&&&&&&&&.&&....&&&&&&&&&&&&&..&&&&&.........
- * @..........&&&&&&&&&&&&&&&&&&...&.....&&&&&&&&&&&&&...&&&&........
- * @........&&&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&....&&&.......
- * @.......&&&&&&&&.....................&&&&&&&&&&&&&&&&.....&&......
- * @........&&&&&.....................&&&&&&&&&&&&&&&&&&.............
- * @..........&...................&&&&&&&&&&&&&&&&&&&&&&&............
- * @................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
- * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&..&&&&&............
- * @..............&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&....&&&&&............
- * @...........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&......&&&&............
- * @.........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........&&&&............
- * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&............
- * @......&&&&&&&&&&&&&&&&&&&...&&&&&&...............&&&.............
- * @.....&&&&&&&&&&&&&&&&............................&&..............
- * @....&&&&&&&&&&&&&&&.................&&...........................
- * @...&&&&&&&&&&&&&&&.....................&&&&......................
- * @...&&&&&&&&&&.&&&........................&&&&&...................
- * @..&&&&&&&&&&&..&&..........................&&&&&&&...............
- * @..&&&&&&&&&&&&...&............&&&.....&&&&...&&&&&&&.............
- * @..&&&&&&&&&&&&&.................&&&.....&&&&&&&&&&&&&&...........
- * @..&&&&&&&&&&&&&&&&..............&&&&&&&&&&&&&&&&&&&&&&&&.........
- * @..&&.&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&&&&&&&&&&&&.......
- * @...&&..&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&...&&&&&&&&&&&&......
- * @....&..&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&&&&&.....
- * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............&&&&&&&....
- * @.......&&&&&.&&&&&&&&&&&&&&&&&&..&&&&&&&&...&..........&&&&&&....
- * @........&&&.....&&&&&&&&&&&&&.....&&&&&&&&&&...........&..&&&&...
- * @.......&&&........&&&.&&&&&&&&&.....&&&&&.................&&&&...
- * @.......&&&...............&&&&&&&.......&&&&&&&&............&&&...
- * @........&&...................&&&&&&.........................&&&..
- * @.........&.....................&&&&........................&&....
- * @...............................&&&.......................&&......
- * @................................&&......................&&.......
- * @.................................&&..............................
- * @..................................&..............................
- */
+ /***
+  * @......................................&&.........................
+  * @....................................&&&..........................
+  * @.................................&&&&............................
+  * @...............................&&&&..............................
+  * @.............................&&&&&&..............................
+  * @...........................&&&&&&....&&&..&&&&&&&&&&&&&&&........
+  * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............
+  * @................&...&&&&&&&&&&&&&&&&&&&&&&&&&&&&.................
+  * @.......................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........
+  * @...................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...............
+  * @..................&&&   &&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+  * @...............&&&&&@  &&&&&&&&&&..&&&&&&&&&&&&&&&&&&&...........
+  * @..............&&&&&&&&&&&&&&&.&&....&&&&&&&&&&&&&..&&&&&.........
+  * @..........&&&&&&&&&&&&&&&&&&...&.....&&&&&&&&&&&&&...&&&&........
+  * @........&&&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&....&&&.......
+  * @.......&&&&&&&&.....................&&&&&&&&&&&&&&&&.....&&......
+  * @........&&&&&.....................&&&&&&&&&&&&&&&&&&.............
+  * @..........&...................&&&&&&&&&&&&&&&&&&&&&&&............
+  * @................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+  * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&..&&&&&............
+  * @..............&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&....&&&&&............
+  * @...........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&......&&&&............
+  * @.........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........&&&&............
+  * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&............
+  * @......&&&&&&&&&&&&&&&&&&&...&&&&&&...............&&&.............
+  * @.....&&&&&&&&&&&&&&&&............................&&..............
+  * @....&&&&&&&&&&&&&&&.................&&...........................
+  * @...&&&&&&&&&&&&&&&.....................&&&&......................
+  * @...&&&&&&&&&&.&&&........................&&&&&...................
+  * @..&&&&&&&&&&&..&&..........................&&&&&&&...............
+  * @..&&&&&&&&&&&&...&............&&&.....&&&&...&&&&&&&.............
+  * @..&&&&&&&&&&&&&.................&&&.....&&&&&&&&&&&&&&...........
+  * @..&&&&&&&&&&&&&&&&..............&&&&&&&&&&&&&&&&&&&&&&&&.........
+  * @..&&.&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&&&&&&&&&&&&.......
+  * @...&&..&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&...&&&&&&&&&&&&......
+  * @....&..&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&&&&&.....
+  * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............&&&&&&&....
+  * @.......&&&&&.&&&&&&&&&&&&&&&&&&..&&&&&&&&...&..........&&&&&&....
+  * @........&&&.....&&&&&&&&&&&&&.....&&&&&&&&&&...........&..&&&&...
+  * @.......&&&........&&&.&&&&&&&&&.....&&&&&.................&&&&...
+  * @.......&&&...............&&&&&&&.......&&&&&&&&............&&&...
+  * @........&&...................&&&&&&.........................&&&..
+  * @.........&.....................&&&&........................&&....
+  * @...............................&&&.......................&&......
+  * @................................&&......................&&.......
+  * @.................................&&..............................
+  * @..................................&..............................
+  */
 
 #include "globalfunction.h"
 #include "utility.h"
@@ -72,33 +72,34 @@
 #include "events/SendPackageToManager.hpp"
 #include "events/RegisteConnection.hpp"
 #include "events/SendPackage.hpp"
+#include "events/ModuleOnOff.hpp"
 using namespace Sloong::Events;
 
 unique_ptr<CGlobalFunction> Sloong::CGlobalFunction::Instance = make_unique<CGlobalFunction>();
 
 LuaFunctionRegistr g_LuaFunc[] =
 {
-    {"ShowLog", CGlobalFunction::Lua_ShowLog},
-    {"GetEngineVer", CGlobalFunction::Lua_GetEngineVer},
-    {"Base64Encode", CGlobalFunction::Lua_Base64_Encode},
-    {"Base64Decode", CGlobalFunction::Lua_Base64_Decode},
-    {"HashEncode", CGlobalFunction::Lua_Hash_Encode},
-    {"ReloadScript", CGlobalFunction::Lua_ReloadScript},
-    {"GetConfig", CGlobalFunction::Lua_GetConfig},
-    {"GenUUID", CGlobalFunction::Lua_GenUUID},
-    {"SetCommData", CGlobalFunction::Lua_SetCommData},
-    {"GetCommData", CGlobalFunction::Lua_GetCommData},
-    {"SetExtendData", CGlobalFunction::Lua_SetExtendData},
-    {"SetExtendDataByFile", CGlobalFunction::Lua_SetExtendDataByFile},
-    {"ConnectToDBCenter", CGlobalFunction::Lua_ConnectToDBCenter},
-    {"SQLQueryToDBCenter", CGlobalFunction::Lua_SQLQueryToDBCenter},
-    {"SQLInsertToDBCenter", CGlobalFunction::Lua_SQLInsertToDBCenter},
-    {"SQLDeleteToDBCenter", CGlobalFunction::Lua_SQLDeleteToDBCenter},
-    {"SQLUpdateToDBCenter", CGlobalFunction::Lua_SQLUpdateToDBCenter},
-    {"PrepareDownload", CGlobalFunction::Lua_PrepareDownload},
-    {"DownloadEnd", CGlobalFunction::Lua_DownloadEnd},
-    {"PrepareUpload", CGlobalFunction::Lua_PrepareUpload},
-    {"UploadEnd", CGlobalFunction::Lua_UploadEnd},
+    { "ShowLog", CGlobalFunction::Lua_ShowLog },
+    { "GetEngineVer", CGlobalFunction::Lua_GetEngineVer },
+    { "Base64Encode", CGlobalFunction::Lua_Base64_Encode },
+    { "Base64Decode", CGlobalFunction::Lua_Base64_Decode },
+    { "HashEncode", CGlobalFunction::Lua_Hash_Encode },
+    { "ReloadScript", CGlobalFunction::Lua_ReloadScript },
+    { "GetConfig", CGlobalFunction::Lua_GetConfig },
+    { "GenUUID", CGlobalFunction::Lua_GenUUID },
+    { "SetCommData", CGlobalFunction::Lua_SetCommData },
+    { "GetCommData", CGlobalFunction::Lua_GetCommData },
+    { "SetExtendData", CGlobalFunction::Lua_SetExtendData },
+    { "SetExtendDataByFile", CGlobalFunction::Lua_SetExtendDataByFile },
+    { "ConnectToDBCenter", CGlobalFunction::Lua_ConnectToDBCenter },
+    { "SQLQueryToDBCenter", CGlobalFunction::Lua_SQLQueryToDBCenter },
+    { "SQLInsertToDBCenter", CGlobalFunction::Lua_SQLInsertToDBCenter },
+    { "SQLDeleteToDBCenter", CGlobalFunction::Lua_SQLDeleteToDBCenter },
+    { "SQLUpdateToDBCenter", CGlobalFunction::Lua_SQLUpdateToDBCenter },
+    { "PrepareDownload", CGlobalFunction::Lua_PrepareDownload },
+    { "DownloadEnd", CGlobalFunction::Lua_DownloadEnd },
+    { "PrepareUpload", CGlobalFunction::Lua_PrepareUpload },
+    { "UploadEnd", CGlobalFunction::Lua_UploadEnd },
 };
 
 CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
@@ -106,115 +107,85 @@ CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
     IObject::Initialize(ic);
     IData::Initialize(ic);
     m_pModuleConfig = IData::GetModuleConfig();
-    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&CGlobalFunction::OnStart, this, std::placeholders::_1) );
-    m_iC->RegisterEventHandler( LUA_EVENT_TYPE::OnReferenceModuleOnline, std::bind(&CGlobalFunction::OnReferenceModuleOnline, this, std::placeholders::_1) );
-    m_iC->RegisterEventHandler( LUA_EVENT_TYPE::OnReferenceModuleOnline, std::bind(&CGlobalFunction::OnReferenceModuleOffline, this, std::placeholders::_1) );
+    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&CGlobalFunction::OnStart, this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(LUA_EVENT_TYPE::OnReferenceModuleOnline, std::bind(&CGlobalFunction::OnReferenceModuleOnline, this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(LUA_EVENT_TYPE::OnReferenceModuleOnline, std::bind(&CGlobalFunction::OnReferenceModuleOffline, this, std::placeholders::_1));
     return CResult::Succeed;
 }
 
 void Sloong::CGlobalFunction::OnStart(SharedEvent e)
 {
-    ReferenceDataCenterConnection();
-    ReferenceFileCenterConnection();
+    auto event = make_shared<SendPackageToManagerEvent>(Functions::QueryReferenceInfo, "");
+    event->SetCallbackFunc(std::bind(&CGlobalFunction::QueryReferenceInfoResponseHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_iC->SendMessage(event);
+}
+
+
+void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent* send_pack, DataPackage *res_pack)
+{
+    auto str_res = res_pack->content();
+    auto res = ConvertStrToObj<QueryReferenceInfoResponse>(str_res);
+    if (res == nullptr || res->templateinfos_size() == 0)
+        return;
+
+    auto templateInfos = res->templateinfos();
+    for (auto info : templateInfos)
+    {
+        if (info.type() == MODULE_TYPE::DataCenter)
+        {
+            m_DataCenterTemplateID.store(info.templateid());
+        }
+        else if (info.type() == MODULE_TYPE::FileCenter)
+        {
+            m_FileCenterTemplateID.store(info.templateid());
+        }
+        else
+        {
+            continue;
+        }
+        for (auto item : info.nodeinfos())
+        {
+            m_mapUUIDToNode[item.uuid()] = item;
+            m_mapTemplateIDToUUIDs[info.templateid()].push_back(item.uuid());
+
+            AddConnection(item.uuid(), item.address(), item.port());
+        }
+    }
+}
+
+void Sloong::CGlobalFunction::AddConnection(uint64_t uuid, const string &addr, int port)
+{
+    auto event = make_shared<RegisteConnectionEvent>(addr, port);
+    event->SetCallbackFunc([this, uuid](IEvent* e, int64_t hashcode) {
+        m_mapUUIDToConnectionID[uuid] = hashcode;
+        });
+    m_iC->SendMessage(event);
 }
 
 void Sloong::CGlobalFunction::OnReferenceModuleOnline(SharedEvent e)
 {
-    ReferenceDataCenterConnection();
-    ReferenceFileCenterConnection();
+    auto event = EVENT_TRANS<ModuleOnlineEvent>(e);
+    auto info = event->GetInfos();
+    auto item = info->item();
+    m_mapUUIDToNode[item.uuid()] = item;
+    m_mapTemplateIDToUUIDs[item.templateid()].push_back(item.uuid());
+    m_pLog->Info(Helper::Format("New node[%lld][%s:%d] is online:templateid[%d],list size[%d]", item.uuid(), item.address().c_str(), item.port(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
+
+    AddConnection(item.uuid(), item.address(), item.port());
 }
 
 
 void Sloong::CGlobalFunction::OnReferenceModuleOffline(SharedEvent e)
 {
-    ReferenceDataCenterConnection();
-    ReferenceFileCenterConnection();
-}
+    auto event = EVENT_TRANS<ModuleOfflineEvent>(e);
+    auto info = event->GetInfos();
+    auto uuid = info->uuid();
+    auto item = m_mapUUIDToNode[uuid];
 
-
-void Sloong::CGlobalFunction::ReferenceDataCenterConnection()
-{
-    Manager::QueryTemplateRequest request;
-    request.add_templatetype(Core::MODULE_TYPE::DataCenter);
-    auto req = make_shared<SendPackageToManagerEvent>(Manager::Functions::QueryTemplate, ConvertObjToStr(&request));
-    req->SetCallbackFunc(std::bind(&CGlobalFunction::OnQueryDBCenterTemplateResponse, CGlobalFunction::Instance.get(), std::placeholders::_1, std::placeholders::_2));
-    CGlobalFunction::Instance->m_iC->SendMessage(req);
-}
-
-void CGlobalFunction::OnQueryDBCenterTemplateResponse(IEvent *e, DataPackage *p)
-{
-    auto res_str = p->content(); 
-    auto res = ConvertStrToObj<Manager::QueryTemplateResponse>(res_str);
-    Manager::QueryNodeRequest query_node_req;
-    for (auto &item : res->templateinfos())
-    {
-        query_node_req.add_templateid(item.id());
-    }
-    if (query_node_req.templateid_size() > 0)
-    {
-        auto req = make_shared<SendPackageToManagerEvent>(Manager::Functions::QueryNode, ConvertObjToStr(&query_node_req));
-        req->SetCallbackFunc([](IEvent *e, DataPackage *p) {
-            auto res_str = p->content();
-            auto res = ConvertStrToObj<Manager::QueryNodeResponse>(res_str);
-            if (res->nodeinfos_size() > 0)
-            {
-                auto info = res->nodeinfos();
-                if (CGlobalFunction::Instance->m_SocketDBCenter.load() != 0 )
-                    return;
-
-                CGlobalFunction::Instance->m_pLog->Verbos(Helper::Format("Try connect to datacenter[%s:%d]", info[0].address().c_str(), info[0].port()));
-                auto reg_event = make_shared<RegisteConnectionEvent>(info[0].address(), info[0].port());
-                reg_event->SetCallbackFunc([instance=CGlobalFunction::Instance.get()](IEvent* e, int64_t hashcode){
-                    instance->m_SocketDBCenter.store(hashcode);
-                });
-                CGlobalFunction::Instance->m_iC->SendMessage(reg_event);
-            }
-        });
-        CGlobalFunction::Instance->m_iC->SendMessage(req);
-    }
-}
-
-
-void Sloong::CGlobalFunction::ReferenceFileCenterConnection()
-{
-    Manager::QueryTemplateRequest request;
-    request.add_templatetype(Core::MODULE_TYPE::FileCenter);
-    auto req = make_shared<SendPackageToManagerEvent>(Manager::Functions::QueryTemplate, ConvertObjToStr(&request));
-    req->SetCallbackFunc(std::bind(&CGlobalFunction::OnQueryFileCenterTemplateResponse, CGlobalFunction::Instance.get(), std::placeholders::_1, std::placeholders::_2));
-    CGlobalFunction::Instance->m_iC->SendMessage(req);
-}
-
-void CGlobalFunction::OnQueryFileCenterTemplateResponse(IEvent *e, DataPackage *p)
-{
-    auto res_str = p->content(); 
-    auto res = ConvertStrToObj<Manager::QueryTemplateResponse>(res_str);
-    Manager::QueryNodeRequest query_node_req;
-    for (auto &item : res->templateinfos())
-    {
-        query_node_req.add_templateid(item.id());
-    }
-    if (query_node_req.templateid_size() > 0)
-    {
-        auto req = make_shared<SendPackageToManagerEvent>(Manager::Functions::QueryNode, ConvertObjToStr(&query_node_req));
-        req->SetCallbackFunc([](IEvent *e, DataPackage *p) {
-            auto res_str = p->content();
-            auto res = ConvertStrToObj<Manager::QueryNodeResponse>(res_str);
-            if (res->nodeinfos_size() > 0)
-            {
-                auto info = res->nodeinfos();
-                if (CGlobalFunction::Instance->m_SessionFileCenter.load() != 0 )
-                    return;
-
-                CGlobalFunction::Instance->m_pLog->Verbos(Helper::Format("Try connect to file center[%s:%d]", info[0].address().c_str(), info[0].port()));
-                auto reg_event = make_shared<RegisteConnectionEvent>(info[0].address(), info[0].port());
-                reg_event->SetCallbackFunc([instance=CGlobalFunction::Instance.get()](IEvent* e, int64_t hashcode){
-                    instance->m_SessionFileCenter.store(hashcode);
-                });
-                CGlobalFunction::Instance->m_iC->SendMessage(reg_event);
-            }
-        });
-        CGlobalFunction::Instance->m_iC->SendMessage(req);
-    }
+    m_mapTemplateIDToUUIDs[item.templateid()].erase(item.uuid());
+    m_mapUUIDToConnectionID.erase(uuid);
+    m_mapUUIDToNode.erase(uuid);
+    m_pLog->Info(Helper::Format("Node is offline [%lld], template id[%d],list size[%d]", item.uuid(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
 }
 
 void Sloong::CGlobalFunction::RegistFuncToLua(CLua *pLua)
@@ -246,7 +217,7 @@ int Sloong::CGlobalFunction::Lua_Base64_Decode(lua_State *l)
 }
 
 /**
- * @Description: 
+ * @Description:
  * @Params: 1 string > string data. if file mode, is the file path
  * 			2 string > hash type. support : 0(MD5), 1(SHA-1),2(SHA-256), 3(SHA-512). default by SHA-1
  * 			3 boolen > file mode. default by false
@@ -395,6 +366,26 @@ int CGlobalFunction::Lua_SetExtendDataByFile(lua_State *l)
     return 2;
 }
 
+NResult CGlobalFunction::GetConnectionID(int templateid)
+{
+    if (CGlobalFunction::Instance->m_mapTemplateIDToUUIDs[templateid].size() == 0)
+    {
+        return NResult::Make_Error(Helper::Format("Template[%d] no node online.", templateid));
+    }
+
+    auto uuid = CGlobalFunction::Instance->m_mapTemplateIDToUUIDs[templateid].front();
+    if (!CGlobalFunction::Instance->m_mapUUIDToConnectionID.exist(uuid))
+    {
+        auto item = CGlobalFunction::Instance->m_mapUUIDToNode[uuid];
+        CGlobalFunction::Instance->AddConnection(uuid, item.address(), item.port());
+
+        return NResult::Make_Error(Helper::Format("Try connect to [%d][%lld][%s:%d], please wait and retry.", templateid, uuid, item.address().c_str(), item.port()));
+    }
+
+    return NResult::Make_OKResult(CGlobalFunction::Instance->m_mapUUIDToConnectionID[uuid]);
+
+}
+
 int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
 {
     auto DBName = CLua::GetString(l, 1, "");
@@ -405,14 +396,6 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
         return 2;
     }
 
-    if (CGlobalFunction::Instance->m_SocketDBCenter.load() == 0)
-    {
-        CGlobalFunction::Instance->ReferenceDataCenterConnection();
-        CLua::PushInteger(l, Base::ResultType::Error);
-        CLua::PushString(l, "No connect to datacenter.");
-        return 2;
-    }
-
     if (CGlobalFunction::Instance->m_mapDBNameToSessionID.exist(DBName))
     {
         CLua::PushInteger(l, Base::ResultType::Succeed);
@@ -420,62 +403,82 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
         return 2;
     }
 
+    auto templateid = CGlobalFunction::Instance->m_DataCenterTemplateID.load();
+    if (templateid == 0)
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, "No enable datacenter, please check the configuation.");
+        return 2;
+    }
+
+    auto conn = CGlobalFunction::Instance->GetConnectionID(templateid);
+    if (conn.IsFialed())
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, conn.GetMessage());
+        return 2;
+    }
+    auto session = conn.GetResultObject();
+
     DataCenter::ConnectDatabaseRequest request;
     request.set_database(DBName);
 
-    auto req = make_shared<SendPackageEvent>(CGlobalFunction::Instance->m_SocketDBCenter.load());
+    auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000 );
-    if( res.IsFialed() )
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    if (res.IsFialed())
     {
         CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, res.GetMessage());
     }
     auto response = ConvertStrToObj<DataCenter::ConnectDatabaseResponse>(res.GetMessage());
-    if( response == nullptr )
+    if (response == nullptr)
     {
         CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, "Parse result error.");
         return 2;
     }
     CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName] = response->session();
- 
+
     CLua::PushInteger(l, Base::ResultType::Succeed);
     CLua::PushInteger(l, response->session());
-    
+
     return 2;
 }
 
-bool CGlobalFunction::SQLFunctionPrepareCheck(lua_State *l, int sessionid, const string &sql)
+int CGlobalFunction::SQLFunctionPrepareCheck(lua_State *l, int sessionid, const string &sql)
 {
     if (sessionid == -1)
     {
         CLua::PushInteger(l, -1);
         CLua::PushString(l, "Database session id is invalid, call ConnectDBCenter first.");
-        return false;
+        return -1;
     }
 
     if (sql.empty())
     {
         CLua::PushInteger(l, -1);
         CLua::PushString(l, "request data is empty");
-        return false;
+        return -1;
     }
 
-    if (CGlobalFunction::Instance->m_SocketDBCenter.load() == 0)
+    auto res = CGlobalFunction::Instance->GetConnectionID(CGlobalFunction::Instance->m_DataCenterTemplateID.load());
+    if (res.IsFialed())
     {
-        CLua::PushInteger(l, -1);
-        CLua::PushString(l, "Work node no connect to DBCenter.");
-        return false;
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, res.GetMessage());
+        return -1;
     }
-    return true;
+
+    return res.GetResultObject();
+
 }
 
-CResult CGlobalFunction::RunSQLFunction(const string &request_str, int func)
+CResult CGlobalFunction::RunSQLFunction(int session, const string &request_str, int func)
 {
-    auto req = make_shared<SendPackageEvent>(CGlobalFunction::Instance->m_SocketDBCenter.load());
+    auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, func, request_str);
-    return req->SyncCall(CGlobalFunction::Instance->m_iC,5000);
+    return req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
 }
 
 // Request sql query cmd to dbcenter.
@@ -486,18 +489,19 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
 {
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto query_cmd = CLua::GetString(l, 2, "");
-    if (!SQLFunctionPrepareCheck(l, SessionID, query_cmd))
+    auto session = SQLFunctionPrepareCheck(l, SessionID, query_cmd);
+    if (session < 0)
         return 2;
 
     DataCenter::QuerySQLCmdRequest request;
     request.set_session(SessionID);
     request.set_sqlcmd(query_cmd);
 
-    auto res = RunSQLFunction(ConvertObjToStr(&request), (int)DataCenter::Functions::QuerySQLCmd);
+    auto res = RunSQLFunction(session, ConvertObjToStr(&request), (int)DataCenter::Functions::QuerySQLCmd);
     if (res.IsSucceed())
     {
         auto response = ConvertStrToObj<DataCenter::QuerySQLCmdResponse>(res.GetMessage());
-        if( response->lines_size() == 0 )
+        if (response->lines_size() == 0)
         {
             CLua::PushInteger(l, 0);
             CLua::PushNil(l);
@@ -534,7 +538,8 @@ int CGlobalFunction::Lua_SQLInsertToDBCenter(lua_State *l)
 {
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto sql_cmd = CLua::GetString(l, 2, "");
-    if (!SQLFunctionPrepareCheck(l, SessionID, sql_cmd))
+    auto session = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
+    if (session < 0)
         return 2;
 
     DataCenter::InsertSQLCmdRequest request;
@@ -542,7 +547,7 @@ int CGlobalFunction::Lua_SQLInsertToDBCenter(lua_State *l)
     request.set_sqlcmd(sql_cmd);
     request.set_getidentity(true);
 
-    auto res = RunSQLFunction(ConvertObjToStr(&request), (int)DataCenter::Functions::InsertSQLCmd);
+    auto res = RunSQLFunction(session, ConvertObjToStr(&request), (int)DataCenter::Functions::InsertSQLCmd);
     if (res.IsSucceed())
     {
         auto response = ConvertStrToObj<DataCenter::InsertSQLCmdResponse>(res.GetMessage());
@@ -570,14 +575,15 @@ int CGlobalFunction::Lua_SQLDeleteToDBCenter(lua_State *l)
 {
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto sql_cmd = CLua::GetString(l, 2, "");
-    if (!SQLFunctionPrepareCheck(l, SessionID, sql_cmd))
+    auto session = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
+    if (session < 0)
         return 2;
 
     DataCenter::DeleteSQLCmdRequest request;
     request.set_session(SessionID);
     request.set_sqlcmd(sql_cmd);
 
-    auto res = RunSQLFunction(ConvertObjToStr(&request), (int)DataCenter::Functions::DeleteSQLCmd);
+    auto res = RunSQLFunction(session, ConvertObjToStr(&request), (int)DataCenter::Functions::DeleteSQLCmd);
     if (res.IsSucceed())
     {
         auto response = ConvertStrToObj<DataCenter::DeleteSQLCmdResponse>(res.GetMessage());
@@ -597,7 +603,8 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
 {
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto sql_cmd = CLua::GetString(l, 2, "");
-    if (!SQLFunctionPrepareCheck(l, SessionID, sql_cmd))
+    auto session = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
+    if (session < 0)
         return 2;
 
     DataCenter::UpdateSQLCmdRequest request;
@@ -605,7 +612,7 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
     request.set_sqlcmd(sql_cmd);
 
 
-    auto res = RunSQLFunction(ConvertObjToStr(&request), (int)DataCenter::Functions::UpdateSQLCmd);
+    auto res = RunSQLFunction(session, ConvertObjToStr(&request), (int)DataCenter::Functions::UpdateSQLCmd);
     if (res.IsSucceed())
     {
         auto response = ConvertStrToObj<DataCenter::UpdateSQLCmdResponse>(res.GetMessage());
@@ -623,30 +630,32 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
 
 int CGlobalFunction::Lua_PrepareDownload(lua_State *l)
 {
-    if( CGlobalFunction::Instance->m_SessionFileCenter.load() == 0 )
-    {
-        CLua::PushBoolen(l, false);
-        CLua::PushString(l, "FileCenter is no connected. please retry later.");
-        return 2;
-    }
-
     auto file_hash = CLua::GetString(l, 1, "");
     auto split_size = CLua::GetInteger(l, 2, 0);
-    if( file_hash.empty() || split_size == 0 )
+    if (file_hash.empty() || split_size == 0)
     {
         CLua::PushBoolen(l, false);
         CLua::PushString(l, "request data is empty");
         return 2;
     }
 
+    auto conn = CGlobalFunction::Instance->GetConnectionID(CGlobalFunction::Instance->m_FileCenterTemplateID.load());
+    if (conn.IsFialed())
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, conn.GetMessage());
+        return 2;
+    }
+    auto session = conn.GetResultObject();
+
     FileCenter::PrepareDownloadRequest request;
     request.set_hash_md5(file_hash);
     request.set_splitpackagesize(split_size);
 
-    auto req = make_shared<SendPackageEvent>(CGlobalFunction::Instance->m_SessionFileCenter.load());
-    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::PrepareDownload , ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC,5000);
-    if( res.IsFialed())
+    auto req = make_shared<SendPackageEvent>(session);
+    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::PrepareDownload, ConvertObjToStr(&request));
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    if (res.IsFialed())
     {
         CLua::PushBoolen(l, false);
         CLua::PushString(l, res.GetMessage());
@@ -654,10 +663,10 @@ int CGlobalFunction::Lua_PrepareDownload(lua_State *l)
     }
 
     auto response = ConvertStrToObj<FileCenter::PrepareDownloadResponse>(res.GetMessage());
-    map<string,string> pack_list;
-    for( auto& i : response->splitpackageinfos())
+    map<string, string> pack_list;
+    for (auto& i : response->splitpackageinfos())
     {
-       pack_list[Helper::ntos(i.first)] = i.second;
+        pack_list[Helper::ntos(i.first)] = i.second;
     }
     CLua::PushBoolen(l, true);
     CLua::PushString(l, response->token());
@@ -669,55 +678,72 @@ int CGlobalFunction::Lua_PrepareDownload(lua_State *l)
 
 int CGlobalFunction::Lua_DownloadEnd(lua_State *l)
 {
-    if( CGlobalFunction::Instance->m_SessionFileCenter.load() == 0 )
-    {
-        return 0;
-    }
-
     auto token = CLua::GetString(l, 1, "");
-    if( token.empty() )
-    {
-        return 0;
-    }
-
-    FileCenter::DownloadedRequest request;
-    request.set_token(token);
-
-    auto req = make_shared<SendPackageEvent>(CGlobalFunction::Instance->m_SessionFileCenter.load());
-    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::Downloaded , ConvertObjToStr(&request));
-    CGlobalFunction::Instance->m_iC->SendMessage(req);
-    
-    return 0;
-}
-
-
-
-int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
-{
-    if( CGlobalFunction::Instance->m_SessionFileCenter.load() == 0 )
-    {
-        CLua::PushBoolen(l, false);
-        CLua::PushString(l, "FileCenter is no connected. please retry later.");
-        return 2;
-    }
-
-    auto file_hash = CLua::GetString(l, 1, "");
-    auto file_size = CLua::GetInteger(l, 2, 0);
-    if( file_hash.empty() || file_size == 0 )
+    if (token.empty())
     {
         CLua::PushBoolen(l, false);
         CLua::PushString(l, "request data is empty");
         return 2;
     }
 
+    auto conn = CGlobalFunction::Instance->GetConnectionID(CGlobalFunction::Instance->m_FileCenterTemplateID.load());
+    if (conn.IsFialed())
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, conn.GetMessage());
+        return 2;
+    }
+    auto session = conn.GetResultObject();
+
+    FileCenter::DownloadedRequest request;
+    request.set_token(token);
+
+    auto req = make_shared<SendPackageEvent>(session);
+    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::Downloaded, ConvertObjToStr(&request));
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    if (res.IsFialed())
+    {
+        CLua::PushBoolen(l, false);
+        CLua::PushString(l, res.GetMessage());
+        return 2;
+    }
+
+    CLua::PushBoolen(l, true);
+    CLua::PushString(l, "succeed");
+
+    return 2;
+}
+
+
+
+int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
+{
+    auto file_hash = CLua::GetString(l, 1, "");
+    auto file_size = CLua::GetInteger(l, 2, 0);
+    if (file_hash.empty() || file_size == 0)
+    {
+        CLua::PushBoolen(l, false);
+        CLua::PushString(l, "request data is empty");
+        return 2;
+    }
+
+    auto conn = CGlobalFunction::Instance->GetConnectionID(CGlobalFunction::Instance->m_FileCenterTemplateID.load());
+    if (conn.IsFialed())
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, conn.GetMessage());
+        return 2;
+    }
+    auto session = conn.GetResultObject();
+
     FileCenter::PrepareUploadRequest request;
     request.set_hash_md5(file_hash);
     request.set_filesize(file_size);
 
-    auto req = make_shared<SendPackageEvent>(CGlobalFunction::Instance->m_SessionFileCenter.load());
-    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::PrepareUpload , ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC,5000);
-    if( res.IsFialed())
+    auto req = make_shared<SendPackageEvent>(session);
+    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::PrepareUpload, ConvertObjToStr(&request));
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    if (res.IsFialed())
     {
         CLua::PushBoolen(l, false);
         CLua::PushString(l, res.GetMessage());
@@ -733,24 +759,30 @@ int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
 
 int CGlobalFunction::Lua_UploadEnd(lua_State *l)
 {
-    if( CGlobalFunction::Instance->m_SessionFileCenter.load() == 0 )
+    auto token = CLua::GetString(l, 1, "");
+    if (token.empty())
     {
-        return 0;
+        CLua::PushBoolen(l, false);
+        CLua::PushString(l, "request data is empty");
+        return 2;
     }
 
-    auto token = CLua::GetString(l, 1, "");
-    if( token.empty() )
+    auto conn = CGlobalFunction::Instance->GetConnectionID(CGlobalFunction::Instance->m_FileCenterTemplateID.load());
+    if (conn.IsFialed())
     {
-        return 0;
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, conn.GetMessage());
+        return 2;
     }
+    auto session = conn.GetResultObject();
 
     FileCenter::UploadedRequest request;
     request.set_token(token);
 
-    auto req = make_shared<SendPackageEvent>(CGlobalFunction::Instance->m_SessionFileCenter.load());
-    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::Uploaded , ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC,5000);
-    if( res.IsFialed())
+    auto req = make_shared<SendPackageEvent>(session);
+    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::Uploaded, ConvertObjToStr(&request));
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    if (res.IsFialed())
     {
         CLua::PushBoolen(l, false);
         CLua::PushString(l, res.GetMessage());

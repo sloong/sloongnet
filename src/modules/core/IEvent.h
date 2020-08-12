@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-12 11:01:24
+ * @LastEditTime: 2020-08-12 16:13:36
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/IEvent.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -80,10 +80,21 @@ namespace Sloong
 	protected:
 		int m_nRefCount = 0;
 	};
+
+	typedef shared_ptr<IEvent> SharedEvent;
+	
 	template<typename T> inline
 	T EVENT_TRANS(IEvent* p)
 	{
 		T tmp = dynamic_cast<T>(p);
+		assert(tmp);
+		return tmp;
+	}
+	
+	template<typename T> inline
+	shared_ptr<T> EVENT_TRANS(SharedEvent e)
+	{
+		auto tmp = dynamic_pointer_cast<T>(e);
 		assert(tmp);
 		return tmp;
 	}

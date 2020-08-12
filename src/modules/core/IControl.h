@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-12 10:56:36
+ * @LastEditTime: 2020-08-12 15:44:38
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/IControl.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -69,7 +69,6 @@
 #include "IEvent.h"
 namespace Sloong
 {
-	typedef shared_ptr<IEvent> SharedEvent;
 	typedef std::function<void(SharedEvent)> MsgHandlerFunc;
 	class IControl
 	{

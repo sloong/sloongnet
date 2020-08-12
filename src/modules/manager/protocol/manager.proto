@@ -1,5 +1,6 @@
 syntax = "proto3";
 import "base.proto";
+import "core.proto";
 package Manager;
 
 enum Events{
@@ -113,8 +114,9 @@ message RegisteNodeRequest{
 message ReferenceTemplateInfo
 {
    int32 TemplateID=1;
-   string ProvideFunctions=2;
-   repeated NodeItem NodeInfos=3;
+   Core.MODULE_TYPE Type=2;
+   string ProvideFunctions=3;
+   repeated NodeItem NodeInfos=4;
 }
 
 message QueryReferenceInfoResponse{
