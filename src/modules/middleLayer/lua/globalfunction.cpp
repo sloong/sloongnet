@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-11 15:05:40
- * @LastEditTime: 2020-08-11 20:26:35
+ * @LastEditTime: 2020-08-12 14:01:08
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/globalfunction.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -58,14 +58,11 @@
  */
 
 #include "globalfunction.h"
-
 #include "utility.h"
 #include "version.h"
 #include "EpollEx.h"
-
 #include "IData.h"
 #include "snowflake.h"
-
 #include "luaMiddleLayer.h"
 
 #include "protocol/datacenter.pb.h"
@@ -110,6 +107,8 @@ CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
     IData::Initialize(ic);
     m_pModuleConfig = IData::GetModuleConfig();
     m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&CGlobalFunction::OnStart, this, std::placeholders::_1) );
+    m_iC->RegisterEventhandler( LUA_EVENT_TYPE::OnReferenceModuleOnline, std::bind(&CGlobalFunction::OnReferenceModuleOnline, this, std::placeholders::_1) );
+    m_iC->RegisterEventhandler( LUA_EVENT_TYPE::OnReferenceModuleOnline, std::bind(&CGlobalFunction::OnReferenceModuleOffline, this, std::placeholders::_1) );
     return CResult::Succeed;
 }
 
@@ -118,6 +117,20 @@ void Sloong::CGlobalFunction::OnStart(SharedEvent e)
     ReferenceDataCenterConnection();
     ReferenceFileCenterConnection();
 }
+
+void Sloong::CGlobalFunction::OnReferenceModuleOnline(SharedEvent e)
+{
+    ReferenceDataCenterConnection();
+    ReferenceFileCenterConnection();
+}
+
+
+void Sloong::CGlobalFunction::OnReferenceModuleOffline(SharedEvent e)
+{
+    ReferenceDataCenterConnection();
+    ReferenceFileCenterConnection();
+}
+
 
 void Sloong::CGlobalFunction::ReferenceDataCenterConnection()
 {

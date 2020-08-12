@@ -11,6 +11,8 @@
 #include "globalfunction.h"
 #include "IData.h"
 using namespace Sloong;
+
+#include "events/ModuleOnOff.hpp"
 using namespace Sloong::Events;
 
 unique_ptr<LuaMiddleLayer> Sloong::LuaMiddleLayer::Instance = nullptr;
@@ -160,18 +162,19 @@ inline CResult Sloong::LuaMiddleLayer::CreateProcessEnvironmentHandler(void **ou
 void Sloong::LuaMiddleLayer::OnReferenceModuleOnlineEvent(const string &str_req, DataPackage *trans_pack)
 {
 	m_pLog->Info("Receive ReferenceModuleOnline event");
-	/*auto req = ConvertStrToObj<Manager::EventReferenceModuleOnline>(str_req);
-	auto item = req->item();
-	m_mapUUIDToNode[item.uuid()] = item;
-	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
-	m_pLog->Debug(Helper::Format("New module is online:[%lld][%s:%d]", item.uuid(), item.address().c_str(), item.port()));
-
-	AddConnection(item.uuid(), item.address(), item.port());*/
+	auto event = make_shared<ModuleOnlineEvent>(LUA_EVENT_TYPE::OnReferenceModuleOnline);
+	auto info = event->GetInfos();
+	info->ParseFromString(str_req);
+	m_iC->SendMessage(event);
 }
 
 void Sloong::LuaMiddleLayer::OnReferenceModuleOfflineEvent(const string &str_req, DataPackage *trans_pack)
 {
 	m_pLog->Info("Receive ReferenceModuleOffline event");
+	auto event = make_shared<ModuleOfflineEvent>(LUA_EVENT_TYPE::OnReferenceModuleOffline);
+	auto info = event->GetInfos();
+	info->ParseFromString(str_req);
+	m_iC->SendMessage(event);
 }
 
 void Sloong::LuaMiddleLayer::EventPackageProcesser(DataPackage *pack)

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-11 15:05:40
- * @LastEditTime: 2020-08-07 17:48:59
+ * @LastEditTime: 2020-08-12 14:00:37
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/globalfunction.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -107,6 +107,8 @@ namespace Sloong
 
     protected:
         void OnStart(SharedEvent);
+        void OnReferenceModuleOnline(SharedEvent);
+        void OnReferenceModuleOffline(SharedEvent);
         void ReferenceDataCenterConnection();
         void OnQueryDBCenterTemplateResponse(IEvent *event, DataPackage *pack);
         void ReferenceFileCenterConnection();

@@ -80,6 +80,12 @@ extern "C"
 	CResult CreateProcessEnvironment(void **);
 }
 
+enum LUA_EVENT_TYPE
+{
+	OnReferenceModuleOnline = EVENT_TYPE::CustomEventMix +1,
+	OnReferenceModuleOffline = EVENT_TYPE::CustomEventMix +2,
+};
+
 namespace Sloong
 {
 	class LuaMiddleLayer : public IObject
