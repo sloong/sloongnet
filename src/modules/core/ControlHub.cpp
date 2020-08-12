@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-06 14:24:44
+ * @LastEditTime: 2020-08-12 10:56:06
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ControlHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -148,7 +148,7 @@ shared_ptr<void> Sloong::CControlHub::GetTempSharedPtr(const string &key, bool e
 	return ptr;
 }
 
-void Sloong::CControlHub::SendMessage(EVENT_TYPE msgType)
+void Sloong::CControlHub::SendMessage(int msgType)
 {
 	auto event = make_unique<NormalEvent>();
 	event->SetEvent(msgType);
@@ -168,7 +168,7 @@ void Sloong::CControlHub::SendMessage(SharedEvent evt)
  * @Params: 
  * @Return: 
  */
-void Sloong::CControlHub::RegisterEventHandler(EVENT_TYPE t, MsgHandlerFunc func)
+void Sloong::CControlHub::RegisterEventHandler(int t, MsgHandlerFunc func)
 {
 	if (!m_oMsgHandlerList.exist(t))
 		m_oMsgHandlerList[t] = vector<MsgHandlerFunc>();

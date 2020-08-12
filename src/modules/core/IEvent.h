@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-07-31 14:34:01
+ * @LastEditTime: 2020-08-12 11:01:24
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/IEvent.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -76,7 +76,7 @@ namespace Sloong
 	public:
 		IEvent() {}
 		virtual ~IEvent() {}
-		virtual EVENT_TYPE GetEvent() = 0;
+		virtual int32_t GetEvent() = 0;
 	protected:
 		int m_nRefCount = 0;
 	};

@@ -1,4 +1,13 @@
 /*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 2020-05-14 17:43:08
+ * @LastEditTime: 2020-08-12 11:01:42
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/core/events/NormalEvent.hpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
+ */
+/*** 
  * @......................................&&.........................
  * @....................................&&&..........................
  * @.................................&&&&............................
@@ -48,15 +57,6 @@
  * @..................................&..............................
  */
 
-/*** 
- * @Author: Chuanbin Wang - wcb@sloong.com
- * @Date: 2020-05-14 17:43:08
- * @LastEditTime: 2020-07-24 14:54:42
- * @LastEditors: Chuanbin Wang
- * @FilePath: /engine/src/modules/core/events/NormalEvent.hpp
- * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
- */
 
 #pragma once
 #include "IEvent.h"
@@ -69,16 +69,16 @@ namespace Sloong
 		{
 		public:
 			NormalEvent(){}
-			NormalEvent(EVENT_TYPE t):m_emType(t){}
+			NormalEvent(int32_t t):m_emType(t){}
 			virtual ~NormalEvent(){}
 
-			inline void SetEvent(EVENT_TYPE t){ m_emType = t; }
-			inline EVENT_TYPE GetEvent(){ return m_emType; }
+			inline void SetEvent(int32_t t){ m_emType = t; }
+			inline int32_t GetEvent(){ return m_emType; }
 
 			inline void SetMessage(string str){ m_strMessage = str; }
 			inline string GetMessage(){ return m_strMessage; }
 		protected:
-			EVENT_TYPE m_emType;
+			int32_t m_emType;
 			string m_strMessage;
 		};
 	}	

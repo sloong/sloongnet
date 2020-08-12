@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-06 14:24:23
+ * @LastEditTime: 2020-08-12 10:56:36
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/IControl.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -100,9 +100,9 @@ namespace Sloong
 		virtual bool ExistTempString(const string &) = 0;
 		virtual bool ExistTempSharedPtr(const string &) = 0;
 		// Message
-		virtual void SendMessage(EVENT_TYPE) = 0;
+		virtual void SendMessage(int32_t) = 0;
 		virtual void SendMessage(SharedEvent) = 0;
 		virtual void CallMessage(SharedEvent) = 0;
-		virtual void RegisterEventHandler(EVENT_TYPE, MsgHandlerFunc) = 0;
+		virtual void RegisterEventHandler(int32_t, MsgHandlerFunc) = 0;
 	};
 } // namespace Sloong

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-06 14:24:33
+ * @LastEditTime: 2020-08-12 10:56:27
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ControlHub.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -141,12 +141,12 @@ namespace Sloong
 		void Exit();
 
 		// Message
-		void SendMessage(EVENT_TYPE);
+		void SendMessage(int32_t);
 		void SendMessage(SharedEvent);
 
 		void CallMessage(SharedEvent);
 
-		void RegisterEventHandler(EVENT_TYPE, MsgHandlerFunc);
+		void RegisterEventHandler(int32_t, MsgHandlerFunc);
 
 		void MessageWorkLoop();
 
@@ -233,7 +233,7 @@ namespace Sloong
 		map_ex<string, shared_ptr<TempDataItem>> m_oTempDataList;
 
 		// Message
-		map_ex<EVENT_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;
+		map_ex<int32_t, vector<MsgHandlerFunc>> m_oMsgHandlerList;
 		queue_ex<SharedEvent> m_oMsgList;
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;
 		EasySync m_oSync;
