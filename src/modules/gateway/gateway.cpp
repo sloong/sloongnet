@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-01-15 15:57:36
- * @LastEditTime: 2020-07-29 19:41:58
+ * @LastEditTime: 2020-08-12 14:23:08
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/gateway.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -257,25 +257,25 @@ void SloongNetGateway::OnStart(SharedEvent evt)
 
 void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_req, DataPackage *trans_pack)
 {
-	m_pLog->Info("Receive ReferenceModuleOnline event");
 	auto req = ConvertStrToObj<Manager::EventReferenceModuleOnline>(str_req);
 	auto item = req->item();
 	m_mapUUIDToNode[item.uuid()] = item;
 	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
-	m_pLog->Debug(Helper::Format("New module is online:templateid[%d]->node id[%lld][%s:%d],node list size[%d]", item.templateid(), item.uuid(), item.address().c_str(), item.port(), m_mapTempteIDToUUIDs.size()));
+	m_pLog->Info(Helper::Format("New node[%lld][%s:%d] is online:templateid[%d],list size[%d]", item.uuid(), item.address().c_str(), item.port(), item.templateid(), m_mapTempteIDToUUIDs[item.templateid()].size()));
 
 	AddConnection(item.uuid(), item.address(), item.port());
 }
 
 void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_req, DataPackage *trans_pack)
-{
-	m_pLog->Info("Receive ReferenceModuleOffline event");
+{	
 	auto req = ConvertStrToObj<Manager::EventReferenceModuleOffline>(str_req);
 	auto uuid = req->uuid();
 	auto item = m_mapUUIDToNode[uuid];
+	
 	m_mapTempteIDToUUIDs[item.templateid()].erase(item.uuid());
 	m_mapUUIDToConnectionID.erase(uuid);
 	m_mapUUIDToNode.erase(uuid);
+	m_pLog->Info(Helper::Format("Node is offline [%lld], template id[%d],list size[%d]", item.uuid(), item.templateid(), m_mapTempteIDToUUIDs[item.templateid()].size()));
 }
 
 void Sloong::SloongNetGateway::EventPackageProcesser(DataPackage *pack)
