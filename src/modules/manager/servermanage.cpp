@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2020-08-10 16:23:32
+ * @LastEditTime: 2020-08-12 20:37:51
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -578,6 +578,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 		auto item = res.add_templateinfos();
 		auto tpl = m_mapIDToTemplateItem[ref_id];
 		item->set_templateid(tpl.ID);
+		item->set_type(tpl.ConfiguationObj->moduletype() );
 		item->set_providefunctions(tpl.ConfiguationObj->modulefunctoins());
 		for (auto node : tpl.Created)
 		{
