@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-08-11 10:53:52
+ * @LastEditTime: 2020-08-12 13:46:57
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -255,7 +255,7 @@ void Sloong::CNetworkHub::OnGetConnectionInfoEventHandler(SharedEvent e)
 		return;
 
 	auto pConn = (*info)->m_pConnection.get();
-	event->CallCallbackFunc(ConnectionInfo{Address : pConn->m_strAddress, Port : pConn->m_nPort});
+	event->CallCallbackFunc(ConnectionInfo{ .Address = pConn->m_strAddress, .Port = pConn->m_nPort});
 }
 
 inline void Sloong::CNetworkHub::SendConnectionBreak(int64_t sessionid)
