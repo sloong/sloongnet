@@ -22,14 +22,14 @@ namespace Sloong
             }
 			virtual	~GetMessageSocketEvent(){}
 
-			inline void SetCallbackFunc(std::function<void(IEvent*,int64_t)> p){ m_pCallback = p; }
-			inline void CallCallbackFunc(int64_t hashcode){ 
+			inline void SetCallbackFunc(std::function<void(IEvent*,uint64_t)> p){ m_pCallback = p; }
+			inline void CallCallbackFunc(uint64_t hashcode){ 
 				if(m_pCallback) 
 					m_pCallback(this,hashcode); 
 			}
 			inline bool HaveCallbackFunc(){ return m_pCallback != nullptr; }
 		protected:
-			std::function<void(IEvent*,int64_t)> m_pCallback = nullptr;
+			std::function<void(IEvent*,uint64_t)> m_pCallback = nullptr;
 		};
 
 	}

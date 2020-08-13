@@ -110,7 +110,7 @@ namespace Sloong
 		unique_ptr<CControlHub> m_iC = make_unique<CControlHub>();
 		unique_ptr<CLog> m_pLog = make_unique<CLog>();
 		RuntimeDataPackage m_oServerConfig;
-		int64_t m_ManagerSession;
+		uint64_t m_ManagerSession;
 		Json::Value m_oModuleConfig;
 		EasySync m_oExitSync;
 		CResult m_oExitResult = CResult::Succeed;

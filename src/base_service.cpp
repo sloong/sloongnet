@@ -104,7 +104,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
 {
     cout << "Connect to control succeed. Start registe and get configuation." << endl;
 
-    int64_t uuid = 0;
+    uint64_t uuid = 0;
     auto result = CResult::Make_Error("Cancelled by User.");
     while ( m_emStatus != RUN_STATUS::Exit )
     {
@@ -291,7 +291,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     if (pManagerConnect)
     {
         auto event = make_shared<Events::RegisteConnectionEvent>(pManagerConnect->m_strAddress, pManagerConnect->m_nPort);
-        event->SetCallbackFunc([s=&m_ManagerSession](IEvent* e,int64_t sessionid) {
+        event->SetCallbackFunc([s=&m_ManagerSession](IEvent* e,uint64_t sessionid) {
             *s = sessionid;
         });
         m_iC->CallMessage(event);

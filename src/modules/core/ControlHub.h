@@ -151,21 +151,21 @@ namespace Sloong
 		void MessageWorkLoop();
 
 		// Data
-		void Add(int64_t item, void *object)
+		void Add(uint64_t item, void *object)
 		{
 			m_oDataList[item] = object;
 		}
-		void *Get(int64_t);
+		void *Get(uint64_t);
 
 		template <typename T>
-		T GetAs(int64_t item)
+		T GetAs(uint64_t item)
 		{
 			T tmp = static_cast<T>(Get(item));
 			assert(tmp);
 			return tmp;
 		}
 
-		void Remove(int64_t item)
+		void Remove(uint64_t item)
 		{
 			m_oDataList.erase(item);
 		}
@@ -229,7 +229,7 @@ namespace Sloong
 
 	protected:
 		// Data
-		map<int64_t, void *> m_oDataList;
+		map<uint64_t, void *> m_oDataList;
 		map_ex<string, shared_ptr<TempDataItem>> m_oTempDataList;
 
 		// Message

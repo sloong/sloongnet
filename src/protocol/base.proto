@@ -49,7 +49,7 @@ message DataPackage
     message ReservedMessage
     {
         // SessionID. 内部使用。
-        int64 SessionID=1;
+        fixed64 SessionID=1;
         // Timespan. Used for internal.
         repeated int64 Clocks=2;
     }

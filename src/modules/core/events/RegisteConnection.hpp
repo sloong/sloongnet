@@ -22,8 +22,8 @@ namespace Sloong
             }
 			virtual	~RegisteConnectionEvent(){}
 
-			inline void SetCallbackFunc(std::function<void(IEvent*,int64_t)> p){ m_pCallback = p; }
-			inline void CallCallbackFunc(int64_t hashcode){ 
+			inline void SetCallbackFunc(std::function<void(IEvent*,uint64_t)> p){ m_pCallback = p; }
+			inline void CallCallbackFunc(uint64_t hashcode){ 
 				if(m_pCallback) 
 					m_pCallback(this,hashcode); 
 			}
@@ -34,7 +34,7 @@ namespace Sloong
 		protected:
 			string Address;
             int Port;
-			std::function<void(IEvent*,int64_t)> m_pCallback = nullptr;
+			std::function<void(IEvent*,uint64_t)> m_pCallback = nullptr;
 		};
 
 	}

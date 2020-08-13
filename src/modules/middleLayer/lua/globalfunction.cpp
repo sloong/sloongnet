@@ -109,7 +109,7 @@ CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
     m_pModuleConfig = IData::GetModuleConfig();
     m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&CGlobalFunction::OnStart, this, std::placeholders::_1));
     m_iC->RegisterEventHandler(LUA_EVENT_TYPE::OnReferenceModuleOnline, std::bind(&CGlobalFunction::OnReferenceModuleOnline, this, std::placeholders::_1));
-    m_iC->RegisterEventHandler(LUA_EVENT_TYPE::OnReferenceModuleOnline, std::bind(&CGlobalFunction::OnReferenceModuleOffline, this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(LUA_EVENT_TYPE::OnReferenceModuleOffline, std::bind(&CGlobalFunction::OnReferenceModuleOffline, this, std::placeholders::_1));
     return CResult::Succeed;
 }
 
@@ -156,7 +156,7 @@ void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent* send_pac
 void Sloong::CGlobalFunction::AddConnection(uint64_t uuid, const string &addr, int port)
 {
     auto event = make_shared<RegisteConnectionEvent>(addr, port);
-    event->SetCallbackFunc([this, uuid](IEvent* e, int64_t hashcode) {
+    event->SetCallbackFunc([this, uuid](IEvent* e, uint64_t hashcode) {
         m_mapUUIDToConnectionID[uuid] = hashcode;
         });
     m_iC->SendMessage(event);
@@ -446,20 +446,20 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
     return 2;
 }
 
-int CGlobalFunction::SQLFunctionPrepareCheck(lua_State *l, int sessionid, const string &sql)
+uint64_t CGlobalFunction::SQLFunctionPrepareCheck(lua_State *l, int sessionid, const string &sql)
 {
     if (sessionid == -1)
     {
         CLua::PushInteger(l, -1);
         CLua::PushString(l, "Database session id is invalid, call ConnectDBCenter first.");
-        return -1;
+        return 0;
     }
 
     if (sql.empty())
     {
         CLua::PushInteger(l, -1);
         CLua::PushString(l, "request data is empty");
-        return -1;
+        return 0;
     }
 
     auto res = CGlobalFunction::Instance->GetConnectionID(CGlobalFunction::Instance->m_DataCenterTemplateID.load());
@@ -467,14 +467,14 @@ int CGlobalFunction::SQLFunctionPrepareCheck(lua_State *l, int sessionid, const 
     {
         CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, res.GetMessage());
-        return -1;
+        return 0;
     }
 
     return res.GetResultObject();
 
 }
 
-CResult CGlobalFunction::RunSQLFunction(int session, const string &request_str, int func)
+CResult CGlobalFunction::RunSQLFunction(uint64_t session, const string &request_str, int func)
 {
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, func, request_str);
@@ -490,7 +490,7 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto query_cmd = CLua::GetString(l, 2, "");
     auto session = SQLFunctionPrepareCheck(l, SessionID, query_cmd);
-    if (session < 0)
+    if (session == 0)
         return 2;
 
     DataCenter::QuerySQLCmdRequest request;
@@ -539,7 +539,7 @@ int CGlobalFunction::Lua_SQLInsertToDBCenter(lua_State *l)
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto sql_cmd = CLua::GetString(l, 2, "");
     auto session = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
-    if (session < 0)
+    if (session == 0)
         return 2;
 
     DataCenter::InsertSQLCmdRequest request;
@@ -576,7 +576,7 @@ int CGlobalFunction::Lua_SQLDeleteToDBCenter(lua_State *l)
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto sql_cmd = CLua::GetString(l, 2, "");
     auto session = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
-    if (session < 0)
+    if (session == 0)
         return 2;
 
     DataCenter::DeleteSQLCmdRequest request;
@@ -604,7 +604,7 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto sql_cmd = CLua::GetString(l, 2, "");
     auto session = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
-    if (session < 0)
+    if (session == 0)
         return 2;
 
     DataCenter::UpdateSQLCmdRequest request;

@@ -109,7 +109,7 @@ CResult Sloong::CEpollEx::Run()
 
 void Sloong::CEpollEx::RegisteConnection( EasyConnect* conn )
 {
-	conn->SetOnReconnectCallback([&](int64_t id, int old_sock, int cur_sock){
+	conn->SetOnReconnectCallback([&](uint64_t id, int old_sock, int cur_sock){
 		if( m_mapSocketToID.exist(old_sock) ) 
 		{
 			DeleteMonitorSocket(old_sock);
@@ -124,7 +124,7 @@ void Sloong::CEpollEx::RegisteConnection( EasyConnect* conn )
 	m_mapIDToConnection[conn->GetHashCode()] = conn;
 }
 
-void Sloong::CEpollEx::UnregisteConnection( int64_t id )
+void Sloong::CEpollEx::UnregisteConnection( uint64_t id )
 {
 	if( !m_mapIDToConnection.exist(id) )	
 		return;
@@ -138,7 +138,7 @@ void Sloong::CEpollEx::UnregisteConnection( int64_t id )
 	m_mapIDToConnection.erase(id);
 }
 
-void Sloong::CEpollEx::ModifySendMonitorStatus( int64_t id, bool monitor )
+void Sloong::CEpollEx::ModifySendMonitorStatus( uint64_t id, bool monitor )
 {
 	if( !m_mapIDToConnection.exist(id) )	
 		return;

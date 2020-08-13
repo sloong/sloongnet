@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2020-08-11 11:30:28
+ * @LastEditTime: 2020-08-13 11:18:35
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -112,7 +112,7 @@ CResult Sloong::EasyConnect::Connect()
 	auto dns_res = CUtility::HostnameToIP(m_strAddress);
 	if (dns_res.IsFialed())
 	{
-		return dns_res;
+		return move(dns_res);
 	}
 	auto list = dns_res.GetResultObject();
 
@@ -140,7 +140,7 @@ CResult Sloong::EasyConnect::Connect()
 	return CResult::Succeed;
 }
 
-string Sloong::EasyConnect::GetLengthData(int64_t lengthData)
+string Sloong::EasyConnect::GetLengthData(uint64_t lengthData)
 {
 	string szLengthData;
 #ifdef USE_INT64_LENGTH_SIZE

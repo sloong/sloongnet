@@ -107,13 +107,13 @@ namespace Sloong
 
 		inline int GetErrno() { return m_nErrno; }
 
-		inline int64_t GetHashCode() { return m_nHashCode; }
+		inline uint64_t GetHashCode() { return m_nHashCode; }
 
 		inline bool IsReceiving() { return !m_strReceiving.empty(); }
 
 		inline bool IsSending() { return !m_strSending.empty(); }
 
-		inline void SetOnReconnectCallback(std::function<void(int64_t, int, int)> func)
+		inline void SetOnReconnectCallback(std::function<void(uint64_t, int, int)> func)
 		{
 			m_pOnReconnect = func;
 		}
@@ -129,14 +129,14 @@ namespace Sloong
 
 		inline int Write(const string &sendData, int index) { return Write(sendData.c_str(), (int)sendData.length(), index); }
 
-		string GetLengthData(int64_t);
+		string GetLengthData(uint64_t);
 
 		
 
 	public:
 		string m_strAddress;
 		int m_nPort;
-		int64_t m_nHashCode;
+		uint64_t m_nHashCode;
 
 		string m_strReceiving;
 		int m_RecvPackageSize;
@@ -154,7 +154,7 @@ namespace Sloong
 		SOCKET m_nSocket = INVALID_SOCKET;
 		CLog* m_pLog = nullptr;
 		bool m_bSupportReconnect = false;
-		std::function<void(int64_t, int, int)> m_pOnReconnect = nullptr;
+		std::function<void(uint64_t, int, int)> m_pOnReconnect = nullptr;
 	};
 
 	typedef unique_ptr<EasyConnect> UniqueConnection;

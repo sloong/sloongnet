@@ -113,8 +113,8 @@ namespace Sloong
         void OnReferenceModuleOnline(SharedEvent);
         void OnReferenceModuleOffline(SharedEvent);
         void QueryReferenceInfoResponseHandler(IEvent*, DataPackage*);
-        static CResult RunSQLFunction(int,const string&, int);
-        static int SQLFunctionPrepareCheck(lua_State*, int, const string&);
+        static CResult RunSQLFunction(uint64_t,const string&, int);
+        static uint64_t SQLFunctionPrepareCheck(lua_State*, int, const string&);
         void AddConnection(uint64_t, const string &, int);
         NResult GetConnectionID(int );
 
@@ -125,7 +125,7 @@ namespace Sloong
 
         map_ex<int32_t, list_ex<uint64_t>> m_mapTemplateIDToUUIDs;
         map_ex<uint64_t, NodeItem> m_mapUUIDToNode;
-        map_ex<uint64_t, int64_t> m_mapUUIDToConnectionID;
+        map_ex<uint64_t, uint64_t> m_mapUUIDToConnectionID;
 
         atomic_int32_t m_DataCenterTemplateID = 0;
         atomic_int32_t m_FileCenterTemplateID = 0;

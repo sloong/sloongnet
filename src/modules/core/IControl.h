@@ -75,9 +75,9 @@ namespace Sloong
 	public:
 		// Data
 		// Add DATE_TIME to dictory.
-		virtual void Add(int64_t, void *) = 0;
-		virtual void *Get(int64_t) = 0;
-		virtual void Remove(int64_t) = 0;
+		virtual void Add(uint64_t, void *) = 0;
+		virtual void *Get(uint64_t) = 0;
+		virtual void Remove(uint64_t) = 0;
 		virtual void AddTempString(const string &, const string &) = 0;
 		virtual void AddTempObject(const string &, const void *, int) = 0;
 		virtual void AddTempBytes(const string &, unique_ptr<char[]> &, int) = 0;

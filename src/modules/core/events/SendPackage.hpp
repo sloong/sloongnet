@@ -18,7 +18,7 @@ namespace Sloong
 		class SendPackageEvent : public NormalEvent, public std::enable_shared_from_this<SendPackageEvent>
 		{
 		public:
-			SendPackageEvent(int64_t id):NormalEvent(EVENT_TYPE::SendPackage){
+			SendPackageEvent(uint64_t id):NormalEvent(EVENT_TYPE::SendPackage){
 				m_ConnectionHashCode = id;
 			}
 			virtual	~SendPackageEvent(){}
@@ -53,7 +53,7 @@ namespace Sloong
 				return std::move(m_pData);
 			}
 
-			inline int64_t GetConnectionHashCode(){ return m_ConnectionHashCode; }
+			inline uint64_t GetConnectionHashCode(){ return m_ConnectionHashCode; }
 
 			CResult SyncCall( IControl* ic, int timeout )
 			{
@@ -81,7 +81,7 @@ namespace Sloong
 			}
 			
 		protected:
-			int64_t m_ConnectionHashCode = 0;
+			uint64_t m_ConnectionHashCode = 0;
 			unique_ptr<DataPackage> m_pData = nullptr;
 			std::function<void(IEvent*,DataPackage*)>		m_pCallback = nullptr;
 		};

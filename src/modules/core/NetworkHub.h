@@ -114,17 +114,17 @@ namespace Sloong
         void MessageProcessWorkLoop();
 
         // Callback function
-        ResultType OnNewAccept(int64_t);
-        ResultType OnDataCanReceive(int64_t);
-        ResultType OnCanWriteData(int64_t);
-        ResultType OnOtherEventHappened(int64_t);
+        ResultType OnNewAccept(uint64_t);
+        ResultType OnDataCanReceive(uint64_t);
+        ResultType OnCanWriteData(uint64_t);
+        ResultType OnOtherEventHappened(uint64_t);
 
     protected:
-        void SendConnectionBreak(int64_t);
+        void SendConnectionBreak(uint64_t);
         void AddMessageToSendList(UniquePackage);
 
     protected:
-        map_ex<int64_t, unique_ptr<ConnectSession>> m_mapConnectIDToSession;
+        map_ex<uint64_t, unique_ptr<ConnectSession>> m_mapConnectIDToSession;
         mutex m_oSockListMutex;
         RUN_STATUS m_emStatus = RUN_STATUS::Created;
         unique_ptr<CEpollEx> m_pEpoll;

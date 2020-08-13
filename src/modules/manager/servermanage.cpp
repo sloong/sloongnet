@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2020-08-12 20:37:51
+ * @LastEditTime: 2020-08-13 10:43:07
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -182,7 +182,7 @@ void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int even
 	}
 }
 
-void Sloong::CServerManage::OnSocketClosed(int64_t con)
+void Sloong::CServerManage::OnSocketClosed(uint64_t con)
 {
 	if (!m_mapConnectionToUUID.exist(con))
 		return;
@@ -309,7 +309,7 @@ void Sloong::CServerManage::RefreshModuleReference(int id)
 	if (info == nullptr)
 		return;
 	info->Reference.clear();
-	auto references = Helper::split(info->ConfiguationObj->modulereference(), ';');
+	auto references = Helper::split(info->ConfiguationObj->modulereference(), ',');
 	for (auto &item : references)
 	{
 		int id;

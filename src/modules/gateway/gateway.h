@@ -110,11 +110,11 @@ namespace Sloong
 		void AddConnection(uint64_t, const string &, int);
 
 	public:
-		int64_t GetPorcessConnection(int function);
+		uint64_t GetPorcessConnection(int function);
 		map_ex<int, list_ex<int>> m_mapFuncToTemplateIDs;
 		map_ex<int, list_ex<uint64_t>> m_mapTempteIDToUUIDs;
 		map_ex<uint64_t, NodeItem> m_mapUUIDToNode;
-		map_ex<uint64_t, int64_t> m_mapUUIDToConnectionID;
+		map_ex<uint64_t, uint64_t> m_mapUUIDToConnectionID;
 		map_ex<uint64_t, UniquePackage> m_mapSerialToRequest;
 
 	protected:

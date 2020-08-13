@@ -126,7 +126,7 @@ namespace Sloong
         T m_tResultObject;
     };
 
-    typedef TResult<int64_t> NResult;
+    typedef TResult<uint64_t> NResult;
 	typedef TResult<std::pair<char*,int>> PResult;
     typedef TResult<string> SResult;
     typedef TResult<vector<string>> VStrResult;

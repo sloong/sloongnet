@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-08-12 13:46:57
+ * @LastEditTime: 2020-08-13 11:06:26
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -155,7 +155,7 @@ void Sloong::CNetworkHub::SendPackageEventHandler(SharedEvent event)
 	auto id = send_evt->GetConnectionHashCode();
 	if (!m_mapConnectIDToSession.exist(id))
 	{
-		m_pLog->Error(Helper::Format("SendPackageEventHandler function called, but the session[%lld] is no regiestd in NetworkHub.", socket));
+		m_pLog->Error(Helper::Format("SendPackageEventHandler function called, but the session[%lld] is no regiestd in NetworkHub.", id));
 		return;
 	}
 
@@ -167,7 +167,7 @@ void Sloong::CNetworkHub::SendPackageEventHandler(SharedEvent event)
 
 void Sloong::CNetworkHub::AddMessageToSendList(UniquePackage pack)
 {
-	auto sessionid = pack->reserved().sessionid();
+	uint64_t sessionid = pack->reserved().sessionid();
 	if (!m_mapConnectIDToSession.exist(sessionid))
 	{
 		m_pLog->Error(Helper::Format("AddMessageToSendList function called, but the session[%lld] is no regiestd in NetworkHub.", sessionid));
@@ -258,7 +258,7 @@ void Sloong::CNetworkHub::OnGetConnectionInfoEventHandler(SharedEvent e)
 	event->CallCallbackFunc(ConnectionInfo{ .Address = pConn->m_strAddress, .Port = pConn->m_nPort});
 }
 
-inline void Sloong::CNetworkHub::SendConnectionBreak(int64_t sessionid)
+inline void Sloong::CNetworkHub::SendConnectionBreak(uint64_t sessionid)
 {
 	if (!m_mapConnectIDToSession.exist(sessionid))
 		return;
@@ -448,7 +448,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 
 /// 有新链接到达。
 /// 接收链接之后，需要客户端首先发送客户端校验信息。只有校验成功之后才会进行SSL处理
-ResultType Sloong::CNetworkHub::OnNewAccept(int64_t sock)
+ResultType Sloong::CNetworkHub::OnNewAccept(uint64_t sock)
 {
 	SOCKET conn_sock = (SOCKET)sock;
 	m_pLog->Debug("Accept function is called.");
@@ -492,7 +492,7 @@ ResultType Sloong::CNetworkHub::OnNewAccept(int64_t sock)
 	return ResultType::Succeed;
 }
 
-ResultType Sloong::CNetworkHub::OnDataCanReceive(int64_t sessionid)
+ResultType Sloong::CNetworkHub::OnDataCanReceive(uint64_t sessionid)
 {
 	if (!m_mapConnectIDToSession.exist(sessionid))
 	{
@@ -541,7 +541,7 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(int64_t sessionid)
 	return res.GetResult();
 }
 
-ResultType Sloong::CNetworkHub::OnCanWriteData(int64_t sessionid)
+ResultType Sloong::CNetworkHub::OnCanWriteData(uint64_t sessionid)
 {
 	if (!m_mapConnectIDToSession.exist(sessionid))
 	{
@@ -558,7 +558,7 @@ ResultType Sloong::CNetworkHub::OnCanWriteData(int64_t sessionid)
 	return res;
 }
 
-ResultType Sloong::CNetworkHub::OnOtherEventHappened(int64_t id)
+ResultType Sloong::CNetworkHub::OnOtherEventHappened(uint64_t id)
 {
 	SendConnectionBreak(id);
 	return ResultType::Succeed;

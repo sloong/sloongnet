@@ -69,7 +69,7 @@ typedef unsigned char byte;
 
 namespace Sloong
 {
-	typedef std::function<ResultType(int64_t)> EpollEventHandlerFunc;
+	typedef std::function<ResultType(uint64_t)> EpollEventHandlerFunc;
 	class CEpollEx : IObject
 	{
 	public:
@@ -80,7 +80,7 @@ namespace Sloong
 		void Exit();
 
 		void RegisteConnection(EasyConnect* );
-		void UnregisteConnection(int64_t);
+		void UnregisteConnection(uint64_t);
 
 		/*** 
 		 * @description: 
@@ -89,7 +89,7 @@ namespace Sloong
 		 * 		2 > True if want monitor send status.
 		 * 			False if want unmonitor send status.
 		 */
-		void ModifySendMonitorStatus(int64_t,bool);	
+		void ModifySendMonitorStatus(uint64_t,bool);	
 
 		/*** 
 		 * @description: Set event callback function. Epoll will call it in epoll work thread when the event is happened.
@@ -176,8 +176,8 @@ namespace Sloong
 	protected:
 		int m_EpollHandle;
 		map_ex<int, thread::id> m_mapAcceptSocketToPID;
-		map_ex<SOCKET, int64_t> m_mapSocketToID;
-		map_ex<int64_t, EasyConnect*> m_mapIDToConnection;
+		map_ex<SOCKET, uint64_t> m_mapSocketToID;
+		map_ex<uint64_t, EasyConnect*> m_mapIDToConnection;
 		mutex m_acceptMutex;
 		//struct epoll_event m_Event;
 		epoll_event m_Events[1024];

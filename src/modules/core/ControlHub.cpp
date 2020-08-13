@@ -80,7 +80,7 @@ void Sloong::CControlHub::Exit()
 	m_emStatus = RUN_STATUS::Exit;
 }
 
-void *Sloong::CControlHub::Get(int64_t item)
+void *Sloong::CControlHub::Get(uint64_t item)
 {
 	auto data = m_oDataList.find(item);
 	if (data == m_oDataList.end())

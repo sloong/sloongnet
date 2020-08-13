@@ -233,7 +233,7 @@ void SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent* send_pack, Data
 void SloongNetGateway::AddConnection( uint64_t uuid, const string &addr, int port)
 {
 	auto event = make_shared<RegisteConnectionEvent>(addr, port);
-	event->SetCallbackFunc([this,uuid](IEvent* e, int64_t hashcode){
+	event->SetCallbackFunc([this,uuid](IEvent* e, uint64_t hashcode){
 		m_mapUUIDToConnectionID[uuid] = hashcode;
 	});
 	m_iC->SendMessage(event);
@@ -308,7 +308,7 @@ void Sloong::SloongNetGateway::EventPackageProcesser(DataPackage *pack)
 }
 
 
-int64_t Sloong::SloongNetGateway::GetPorcessConnection(int function)
+uint64_t Sloong::SloongNetGateway::GetPorcessConnection(int function)
 {
 	if (!m_mapFuncToTemplateIDs.exist(function) && !m_mapFuncToTemplateIDs.exist(-1))
 	{

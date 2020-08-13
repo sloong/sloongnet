@@ -67,14 +67,14 @@ namespace Sloong
 		class MonitorSendStatusEvent : public NormalEvent
 		{
 		public:
-			MonitorSendStatusEvent(int64_t session):NormalEvent( EVENT_TYPE::MonitorSendStatus ){
+			MonitorSendStatusEvent(uint64_t session):NormalEvent( EVENT_TYPE::MonitorSendStatus ){
 				m_SessionID = session;
 			}
 			virtual	~MonitorSendStatusEvent(){}
 
-			inline int64_t GetSessionID() { return m_SessionID; }
+			inline uint64_t GetSessionID() { return m_SessionID; }
 		protected:
-			int64_t m_SessionID;
+			uint64_t m_SessionID;
 		};
 
 	}
