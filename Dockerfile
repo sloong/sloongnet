@@ -1,5 +1,10 @@
 FROM ubuntu:20.04 AS build-env
 
+COPY ./build/sources.list /etc/apt/sources.list
+
+RUN cat /etc/apt/sources.list
+RUN rm -Rf /var/lib/apt/lists/*
+
 RUN apt update && apt install -y \
     cmake clang llvm libsqlite3-dev libprotobuf-dev protobuf-compiler uuid-dev libssl-dev libjsoncpp-dev libmariadbclient-dev libluajit-5.1-dev
 
