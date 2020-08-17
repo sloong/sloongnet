@@ -1,6 +1,7 @@
 #include "filemanager.h"
 #include "filecenter.h"
 #include "utility.h"
+#include "ImageProcesser.h"
 using namespace Sloong;
 
 CResult Sloong::FileManager::Initialize(IControl *ic)
@@ -81,9 +82,9 @@ CResult Sloong::FileManager::MergeFile(const map_ex<int, string> &fileList, cons
 
 CResult Sloong::FileManager::SplitFile(const string &filepath, int splitSize, map_ex<int, string> &pReadList, int* out_all_size)
 {
-    if (-1 == access(filepath.c_str(), R_OK))
+    if (!FileExist(filepath))
 	{
-		return CResult::Make_Error("Cannot access file.");
+		return CResult::Make_Error("File no exist.");
 	}
 
 	ifstream in(filepath.c_str(), ios::in | ios::binary);
@@ -361,15 +362,8 @@ SResult Sloong::FileManager::SimpleDownloadHandler(const string &str_req, DataPa
     auto req = ConvertStrToObj<SimpleDownloadRequest>(str_req);
     string real_path = QueryFilePath(req->hashcode());
 
-    ifstream in(real_path.c_str(), ios::in | ios::binary);
-	streampos pos = in.tellg();
-	in.seekg(0, ios::end);
-	int nSize = in.tellg();
-	in.seekg(pos);
     string data;
-    data.resize(nSize);
-	in.read(data.data(), nSize);
-	in.close();
+    auto nSize = ReadFile( real_path ,data );
 
     SimpleDownloadResponse res;
     res.set_filesize(nSize);
@@ -397,5 +391,21 @@ SResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Data
 
 SResult Sloong::FileManager::GetThumbnailHandler(const string &str_req, DataPackage *trans_pack)
 {
-    return SResult::Make_Error("No support now.");
+    auto req = ConvertStrToObj<GetThumbnailRequest>(str_req);
+    string thumb_file = Helper::Format("%s_%d_%d_%d", req->hashcode().c_str(), req->width(), req->height(), req->quality() );
+    if (!FileExist(thumb_file))
+    {
+        auto real_path = QueryFilePath(req->hashcode());
+        auto res = ImageProcesser::GetThumbnail(real_path,thumb_file,req->width(), req->height(), req->quality());
+        if( res.IsFialed() )
+            return SResult::Make_Error(res.GetMessage());
+    }
+
+    string data;
+    auto size = ReadFile(thumb_file,data);
+    GetThumbnailResponse res;
+    res.set_hashcode(CMD5::Encode(thumb_file, true));
+    res.set_filesize(size);
+
+    return SResult::Make_OKResult(ConvertObjToStr(&res), data);
 }

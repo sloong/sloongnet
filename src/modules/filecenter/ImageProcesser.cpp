@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-08-17 11:16:27
- * @LastEditTime: 2020-08-17 11:19:29
+ * @LastEditTime: 2020-08-17 12:10:07
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/ImageProcesser.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -11,7 +11,7 @@
 
 using namespace Sloong;
 
-CResult ImageProcesser::GetThumbnail(const string &sourceFile, const string &targetFile, int height, int width, int quality)
+CResult ImageProcesser::GetThumbnail(const string &sourceFile, const string &targetFile,  int width, int height, int quality)
 {
 	if (sourceFile.empty() || targetFile.empty() || height == 0 || width == 0 || quality == 0)
 	{

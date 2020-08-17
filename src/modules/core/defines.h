@@ -187,4 +187,29 @@ namespace Sloong
 #endif
 		}
 	}
+
+	inline bool FileExist( const string& path )
+	{
+		if (-1 == access(path.c_str(), R_OK))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	inline int ReadFile( const string& file, string& out_data )
+	{
+		ifstream in(file.c_str(), ios::in | ios::binary);
+		streampos pos = in.tellg();
+		in.seekg(0, ios::end);
+		int nSize = in.tellg();
+		in.seekg(pos);
+		out_data.clear();
+		out_data.resize(nSize);
+		in.read(out_data.data(), nSize);
+		in.close();
+		return nSize;
+	}
+
+	
 } // namespace Sloong

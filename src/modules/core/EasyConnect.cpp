@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2020-08-13 11:18:35
+ * @LastEditTime: 2020-08-17 12:14:44
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -65,13 +65,15 @@
 #include "utility.h"
 #include "defines.h"
 
-
 // If want use the int64 to send the length data, define this.
 //#define USE_INT64_LENGTH_SIZE	1
+#ifdef USE_INT64_LENGTH_SIZE
 constexpr int s_llLen = 8;
+#else
 constexpr int s_lLen = 4;
+#endif
 
-CResult Sloong::EasyConnect::InitializeAsServer( CLog* log, SOCKET sock, LPVOID ctx)
+CResult Sloong::EasyConnect::InitializeAsServer(CLog *log, SOCKET sock, LPVOID ctx)
 {
 	m_pLog = log;
 	m_bSupportReconnect = false;
@@ -88,7 +90,7 @@ CResult Sloong::EasyConnect::InitializeAsServer( CLog* log, SOCKET sock, LPVOID 
 	return CResult::Succeed;
 }
 
-CResult Sloong::EasyConnect::InitializeAsClient( CLog* log, const string &address, int port, LPVOID ctx)
+CResult Sloong::EasyConnect::InitializeAsClient(CLog *log, const string &address, int port, LPVOID ctx)
 {
 	m_pLog = log;
 	m_bSupportReconnect = true;
@@ -104,9 +106,9 @@ CResult Sloong::EasyConnect::InitializeAsClient( CLog* log, const string &addres
 }
 CResult Sloong::EasyConnect::Connect()
 {
-	if( m_nSocket != INVALID_SOCKET )
+	if (m_nSocket != INVALID_SOCKET)
 		return CResult::Make_Warning("Called connect function, but the socket isn't INVALID_SOCKET.");
-	if( !m_bSupportReconnect )
+	if (!m_bSupportReconnect)
 		return CResult::Make_Error("Connection is disconnect. and this connection don't support reconnect.");
 
 	auto dns_res = CUtility::HostnameToIP(m_strAddress);
@@ -132,10 +134,11 @@ CResult Sloong::EasyConnect::Connect()
 	if (m_pSSL)
 	{
 		auto res = m_pSSL->Initialize(m_nSocket);
-		if( res.IsFialed()) return res;
+		if (res.IsFialed())
+			return res;
 	}
-	 
-	if( m_pOnReconnect )
+
+	if (m_pOnReconnect)
 		m_pOnReconnect(m_nHashCode, m_nInvalidSocket, m_nSocket);
 	return CResult::Succeed;
 }
@@ -165,10 +168,10 @@ string Sloong::EasyConnect::GetLengthData(uint64_t lengthData)
  */
 CResult Sloong::EasyConnect::SendPackage(UniquePackage pack)
 {
-	if( m_nSocket == INVALID_SOCKET )
+	if (m_nSocket == INVALID_SOCKET)
 	{
 		auto res = Connect();
-		if( res.IsFialed() )
+		if (res.IsFialed())
 			return res;
 	}
 	if (m_strSending.empty())
@@ -204,7 +207,7 @@ CResult Sloong::EasyConnect::SendPackage(UniquePackage pack)
 		}
 		else
 		{
-			auto msg = Helper::Format("Error when send length data. Socket[%d][%s:%d].Errno[%d].", m_nSocket , m_strAddress.c_str(), m_nPort, GetErrno());
+			auto msg = Helper::Format("Error when send length data. Socket[%d][%s:%d].Errno[%d].", m_nSocket, m_strAddress.c_str(), m_nPort, GetErrno());
 			Close();
 			return CResult::Make_Error(msg);
 		}
@@ -233,11 +236,10 @@ CResult Sloong::EasyConnect::SendPackage(UniquePackage pack)
 	}
 	else
 	{
-		auto msg = Helper::Format("Error when send data. Socket[%d][%s:%d].Errno[%d].", m_nSocket , m_strAddress.c_str(), m_nPort, GetErrno());
+		auto msg = Helper::Format("Error when send data. Socket[%d][%s:%d].Errno[%d].", m_nSocket, m_strAddress.c_str(), m_nPort, GetErrno());
 		Close();
 		return CResult::Make_Error(msg);
 	}
-		
 }
 
 // 成功返回数据包长度
@@ -266,13 +268,13 @@ decltype(auto) Sloong::EasyConnect::RecvLengthData(bool block)
 
 PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 {
-	if( m_nSocket == INVALID_SOCKET )
+	if (m_nSocket == INVALID_SOCKET)
 	{
 		auto res = Connect();
-		if( res.IsFialed() )
+		if (res.IsFialed())
 			return res;
 	}
-	
+
 	if (m_RecvPackageSize == 0)
 	{
 		auto len = RecvLengthData(block);
@@ -280,26 +282,29 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 		// If the data length received 11 error, ignore it.
 		if (len == -11)
 		{
-			if(m_pLog) m_pLog->Verbos("Receive data package return 11[EAGAIN].");
+			if (m_pLog)
+				m_pLog->Verbos("Receive data package return 11[EAGAIN].");
 			return PackageResult(ResultType::Ignore);
 		}
 		else if (len == 0)
 		{
-			if(m_pLog) m_pLog->Verbos("Receive data package return 0. socket may closed");
+			if (m_pLog)
+				m_pLog->Verbos("Receive data package return 0. socket may closed");
 			return PackageResult(ResultType::Warning);
-		}			
+		}
 		else if (len > 0)
 		{
-			if(m_pLog) m_pLog->Verbos("Receive data package succeed : " + Helper::ntos(len));
+			if (m_pLog)
+				m_pLog->Verbos("Receive data package succeed : " + Helper::ntos(len));
 			m_RecvPackageSize = len;
 		}
 		else
 		{
-			if(m_pLog) m_pLog->Verbos("Receive data package happened other error. close connection.");
+			if (m_pLog)
+				m_pLog->Verbos("Receive data package happened other error. close connection.");
 			Close();
 			return PackageResult::Make_Error("Error when receive length data.");
 		}
-			
 	}
 
 	string buf;
@@ -325,13 +330,15 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 		}
 		else
 		{
-			if( m_pLog) m_pLog->Debug(Helper::Format("Receive package returned [Retry]. Package size[%d], Received[%d][%d]", m_RecvPackageSize, m_ReceivedSize, m_strReceiving.length()));
+			if (m_pLog)
+				m_pLog->Debug(Helper::Format("Receive package returned [Retry]. Package size[%d], Received[%d][%d]", m_RecvPackageSize, m_ReceivedSize, m_strReceiving.length()));
 			return PackageResult(ResultType::Retry);
 		}
 	}
 	else if (len == -11)
 	{
-		if( m_pLog ) m_pLog->Debug(Helper::Format("Receive package returned [Retry]. Package size[%d], Received[%d]", m_RecvPackageSize, m_ReceivedSize));
+		if (m_pLog)
+			m_pLog->Debug(Helper::Format("Receive package returned [Retry]. Package size[%d], Received[%d]", m_RecvPackageSize, m_ReceivedSize));
 		return PackageResult(ResultType::Retry);
 	}
 	else
@@ -358,7 +365,7 @@ int Sloong::EasyConnect::Read(char *data, int len, bool block, bool bagain)
 	}
 	else
 	{
-		auto res = m_pSSL->Read(data,len,block,bagain);
+		auto res = m_pSSL->Read(data, len, block, bagain);
 		return res.GetResultObject();
 	}
 }
@@ -375,7 +382,7 @@ int Sloong::EasyConnect::Write(const char *data, int len, int index)
 	}
 	else
 	{
-		auto res = m_pSSL->Write(data,len,index);
+		auto res = m_pSSL->Write(data, len, index);
 		return res.GetResultObject();
 	}
 }
