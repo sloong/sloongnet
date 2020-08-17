@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-08-11 20:16:16
+ * @LastEditTime: 2020-08-17 11:54:14
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filemanager.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -19,7 +19,7 @@ namespace Sloong
     typedef struct UploadInfo
     {
         string Path;
-        string Hash_MD5;
+        string HashCode;
         map_ex<int,string> SplitPackage;
     } UploadInfo;
     typedef struct DownloadInfo
@@ -47,11 +47,17 @@ namespace Sloong
         SResult DownloadingHandler(const string &str_req, DataPackage *trans_pack);
         SResult DownloadedHandler(const string &str_req, DataPackage *trans_pack);
         SResult TestSpeedHandler(const string &str_req, DataPackage *trans_pack);
+        SResult SimpleUploadHandler(const string &str_req, DataPackage *trans_pack);
+        SResult SimpleDownloadHandler(const string &str_req, DataPackage *trans_pack);
+        SResult BatchUploadHandler(const string &str_req, DataPackage *trans_pack);
+        SResult BatchDownloadHandler(const string &str_req, DataPackage *trans_pack);
+        SResult ConvertImageFileHandler(const string &str_req, DataPackage *trans_pack);
+        SResult GetThumbnailHandler(const string &str_req, DataPackage *trans_pack);
 
     protected:
         CResult ArchiveFile(UploadInfo *info);
 
-        CResult QueryFilePath(const string &);
+        string QueryFilePath(const string &);
         string GetPathByHashcode( const string& );
         string GetFolderByHashcode( const string& );
 
@@ -69,6 +75,8 @@ namespace Sloong
 
         // TODO: set the archive path.
         string m_strArchiveFolder = "./archive/";
+
+        string m_strCacheFolder = "./Cache/";
     };
 
 } // namespace Sloong

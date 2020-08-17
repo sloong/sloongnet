@@ -22,6 +22,13 @@ CResult Sloong::FileManager::Initialize(IControl *ic)
     m_mapFuncToHandler[Functions::PrepareDownload] = std::bind(&FileManager::PrepareDownloadHandler, this, std::placeholders::_1, std::placeholders::_2);
     m_mapFuncToHandler[Functions::Downloading] = std::bind(&FileManager::DownloadingHandler, this, std::placeholders::_1, std::placeholders::_2);
     m_mapFuncToHandler[Functions::Downloaded] = std::bind(&FileManager::DownloadedHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::SimpleUpload] = std::bind(&FileManager::SimpleUploadHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::SimpleDownload] = std::bind(&FileManager::SimpleDownloadHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::BatchUpload] = std::bind(&FileManager::BatchUploadHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::BatchDownload] = std::bind(&FileManager::BatchDownloadHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::ConvertImageFile] = std::bind(&FileManager::ConvertImageFileHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::GetThumbnail] = std::bind(&FileManager::GetThumbnailHandler, this, std::placeholders::_1, std::placeholders::_2);
+    
     return CResult::Succeed;
 }
 
@@ -100,8 +107,8 @@ CResult Sloong::FileManager::ArchiveFile(UploadInfo* info)
 {
     try
     {
-        string target = GetPathByHashcode(info->Hash_MD5);
-        string source = info->Path + info->Hash_MD5;
+        string target = GetPathByHashcode(info->HashCode);
+        string source = info->Path + info->HashCode;
 
         m_pLog->Verbos(Helper::Format("Archive file: source[%s] target[%s]", source.c_str(), target.c_str()));
         if (source.length() < 3 || target.length() < 3)
@@ -123,7 +130,7 @@ CResult Sloong::FileManager::ArchiveFile(UploadInfo* info)
         if (!Helper::MoveFile(source, target))
         {
             // Move file need write access. so if move file error, try copy .
-            if (!CUniversal::RunSystemCmd(Helper::Format("mv \"%s\" \"%s\"", source.c_str(), GetFolderByHashcode(info->Hash_MD5).c_str())))
+            if (!CUniversal::RunSystemCmd(Helper::Format("mv \"%s\" \"%s\"", source.c_str(), GetFolderByHashcode(info->HashCode).c_str())))
             {
                 return CResult::Make_Error("Move File and try copy file error.");
             }
@@ -169,9 +176,9 @@ string Sloong::FileManager::GetFolderByHashcode( const string& hashcode )
 //  2> Use the hashcode to comput the path, because when save file, the path is build with the hashcode 
 //   so we can use the hashcode to rebuild the save path.
 //     But this will fix the file tree structure for storage.
-CResult Sloong::FileManager::QueryFilePath(const string &hash_md5)
+string Sloong::FileManager::QueryFilePath(const string &hashcode)
 {
-    return CResult::Make_OK(GetPathByHashcode(hash_md5));
+    return GetPathByHashcode(hashcode);
 }
 
 SResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, DataPackage *trans_pack)
@@ -180,7 +187,7 @@ SResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, DataPac
 
     auto token = CUtility::GenUUID();
     auto& savedInfo = (*m_mapTokenToUploadInfo)[token];
-    savedInfo.Hash_MD5 = req->hash_md5();
+    savedInfo.HashCode = req->info().hashcode();
     savedInfo.Path = m_strUploadTempSaveFolder + token + "/";
     CUniversal::RunSystemCmd(Helper::Format("mkdir -p %s", savedInfo.Path.c_str()));
 
@@ -202,7 +209,7 @@ SResult Sloong::FileManager::UploadingHandler(const string &str_req, DataPackage
     {
         return SResult::Make_Error("The package extend length is 0.");
     }
-    if (req->hash_md5() != CMD5::Encode(extend))
+    if (req->hashcode() != CMD5::Encode(extend))
     {
         return SResult::Make_Error("Hasd check error.");
     }
@@ -220,16 +227,16 @@ SResult Sloong::FileManager::UploadedHandler(const string &str_req, DataPackage 
     if (info == nullptr)
         return SResult::Make_Error("Need request PrepareUpload firest.");
 
-    auto temp_path = info->Path + info->Hash_MD5;
+    auto temp_path = info->Path + info->HashCode;
     CUniversal::CheckFileDirectory(temp_path);
     
     auto res = MergeFile(info->SplitPackage, temp_path);
     if (res.IsFialed())
         return SResult::Make_Error(res.GetMessage());
 
-    m_pLog->Verbos(Helper::Format("Save file to [%s]. Hash [%s]", temp_path.c_str(), info->Hash_MD5.c_str()));
+    m_pLog->Verbos(Helper::Format("Save file to [%s]. Hash [%s]", temp_path.c_str(), info->HashCode.c_str()));
 
-    if (info->Hash_MD5 != CMD5::Encode(temp_path, true))
+    if (info->HashCode != CMD5::Encode(temp_path, true))
         return SResult::Make_Error("Hasd check error.");
 
     res = ArchiveFile(info);
@@ -245,11 +252,7 @@ SResult Sloong::FileManager::PrepareDownloadHandler(const string &str_req, DataP
 {
     auto req = ConvertStrToObj<PrepareDownloadRequest>(str_req);
 
-    auto res = QueryFilePath(req->hash_md5());
-    if (res.IsFialed())
-        return SResult::Make_Error(res.GetMessage());
-
-    string real_path = res.GetMessage();
+    string real_path = QueryFilePath(req->hashcode());
     if (access(real_path.c_str(), ACC_R) != 0)
     {
         return SResult::Make_Error("Cann't access to target file:" + real_path );
@@ -264,7 +267,7 @@ SResult Sloong::FileManager::PrepareDownloadHandler(const string &str_req, DataP
     auto token = CUtility::GenUUID();
     // TODO. need process the pialed case.
     auto &info = (*m_mapTokenToDownloadInfo)[token];
-    res = SplitFile(real_path,packageSize, info.SplitPackage, &filesize);
+    auto res = SplitFile(real_path,packageSize, info.SplitPackage, &filesize);
     if (res.IsFialed())
         return SResult::Make_Error(res.GetMessage());
 
@@ -298,7 +301,7 @@ SResult Sloong::FileManager::DownloadingHandler(const string &str_req, DataPacka
         return SResult::Make_Error(Helper::Format("No find the data with package id[%d], the package nums[%d]. please check.", id, info->SplitPackage.size()));
 
     DownloadingResponse res;
-    res.set_hash_md5(CMD5::Encode(*data));
+    res.set_hashcode(CMD5::Encode(*data));
 
     // TODO: Here may the copy once, the pr
     return SResult::Make_OKResult(ConvertObjToStr(&res), *data);
@@ -319,5 +322,80 @@ SResult Sloong::FileManager::DownloadedHandler(const string &str_req, DataPackag
 
 SResult Sloong::FileManager::TestSpeedHandler(const string &str_req, DataPackage *trans_pack)
 {
+    return SResult::Make_Error("No support now.");
+}
+
+SResult Sloong::FileManager::SimpleUploadHandler(const string &str_req, DataPackage *trans_pack)
+{
+    auto req = ConvertStrToObj<SimpleUploadRequest>(str_req);
+
+    string temp_path = m_strUploadTempSaveFolder + req->info().hashcode();
+
+    ofstream out(temp_path.c_str(), ios::binary );
+    out.write( trans_pack->extend().c_str(),trans_pack->extend().length());
+    out.close();
+
+    if(CMD5::Encode(temp_path, true) != req->info().hashcode() )
+    {
+        return SResult::Make_Error("Hasd check error.");
+    }
+
+    UploadInfo info;
+    info.Path = m_strUploadTempSaveFolder;
+    info.HashCode = req->info().hashcode();
+
+    auto res = ArchiveFile(&info);
+    if (res.IsFialed())
+        return SResult::Make_Error(res.GetMessage());
+
+    CUniversal::RunSystemCmd(Helper::Format("rm %s", temp_path.c_str()));
+
     return SResult::Succeed();
+}
+
+/*** 
+ * @description: 
+ */
+SResult Sloong::FileManager::SimpleDownloadHandler(const string &str_req, DataPackage *trans_pack)
+{
+    auto req = ConvertStrToObj<SimpleDownloadRequest>(str_req);
+    string real_path = QueryFilePath(req->hashcode());
+
+    ifstream in(real_path.c_str(), ios::in | ios::binary);
+	streampos pos = in.tellg();
+	in.seekg(0, ios::end);
+	int nSize = in.tellg();
+	in.seekg(pos);
+    string data;
+    data.resize(nSize);
+	in.read(data.data(), nSize);
+	in.close();
+
+    SimpleDownloadResponse res;
+    res.set_filesize(nSize);
+
+    return SResult::Make_OKResult(ConvertObjToStr(&res), data);
+}
+
+
+SResult Sloong::FileManager::BatchUploadHandler(const string &str_req, DataPackage *trans_pack)
+{
+    return SResult::Make_Error("No support now.");
+}
+
+
+SResult Sloong::FileManager::BatchDownloadHandler(const string &str_req, DataPackage *trans_pack)
+{
+    return SResult::Make_Error("No support now.");
+}
+
+SResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, DataPackage *trans_pack)
+{
+    return SResult::Make_Error("No support now.");
+}
+
+
+SResult Sloong::FileManager::GetThumbnailHandler(const string &str_req, DataPackage *trans_pack)
+{
+    return SResult::Make_Error("No support now.");
 }

@@ -649,7 +649,7 @@ int CGlobalFunction::Lua_PrepareDownload(lua_State *l)
     auto session = conn.GetResultObject();
 
     FileCenter::PrepareDownloadRequest request;
-    request.set_hash_md5(file_hash);
+    request.set_hashcode(file_hash);
     request.set_splitpackagesize(split_size);
 
     auto req = make_shared<SendPackageEvent>(session);
@@ -737,8 +737,8 @@ int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
     auto session = conn.GetResultObject();
 
     FileCenter::PrepareUploadRequest request;
-    request.set_hash_md5(file_hash);
-    request.set_filesize(file_size);
+    request.mutable_info()->set_hashcode(file_hash);
+    request.mutable_info()->set_filesize(file_size);
 
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::PrepareUpload, ConvertObjToStr(&request));

@@ -1,22 +1,88 @@
 syntax = "proto3";
 package FileCenter;
 
+enum SupportFormat
+{
+    JPG=0;
+    PNG=1;
+    WEBP=2;
+}
+
 enum Functions{
     Invalid=0;
     reserved 1 to 300;// FileCenter function is start by 301-400
     TestSpeed=301;
+
+    // 准备上传文件，获取上传token
+    // Request << PrepareUploadRequest
+    // Response >> PrepareUploadResponse
     PrepareUpload=302;
+
+    // 上传文件分包
+    // Request << UploadingRequest(&Extend)
+    // Response >> Result
     Uploading=303;
+
+    // 上传完成
+    // Request << UploadedRequest
+    // Response >> Result
 	Uploaded=304;
+
+    // 准备下载文件，获取下载token
+    // Request << PrepareDownloadRequest
+    // Response >> PrepareDownloadResponse
     PrepareDownload=305;
+
+    // 下载文件分包
+    // Request << DownloadingRequest
+    // Response >> DownloadingResponse(&Extend)
     Downloading=306;
+
+    // 下载完成
+    // Request << DownloadedRequest
+    // Response >> Result
     Downloaded=307;
+
+    // 简单的上传，适用于上传小文件，不支持断点续传。
+    // Request << SimpleUploadRequest(&Extend)
+    // Response >> Result
+    SimpleUpload=308;
+
+    // 简单的下载，适用于下载小文件，不支持断点续传
+    // Request << SimpleDownloadRequest
+    // Response >> SimpleDownloadResponse(&Extend)
+    SimpleDownload=309;
+
+    // 批量上传文件，在简单上传的基础上，支持批量传输。
+    // Request << BatchUploadRequest(&Extend)
+    // Response >> Result
+    BatchUpload=310;
+
+    // 批量下载文件，在简单下载的基础上，支持批量传输。
+    // Request << BatchDownloadRequest
+    // Response >> BatchDownloadResponse(&Extend)
+    BatchDownload=311;
+
+    // 尝试以图片的形式处理文件，对文件进行格式转换操作
+    // Request << ConvertImageFileRequest
+    // Response >> ConvertImageFileResponse
+    ConvertImageFile=313;
+
+    // 尝试获取文件的缩略图，仅支持图片文件
+    // Request << GetThumbnailRequest
+    // Response >> GetThumbnailResponse(&Extend)
+    GetThumbnail=314;
+
     reserved 400 to max;
 }
 
-message PrepareUploadRequest{
-    string Hash_MD5=1;
+message UploadFileInfo{
+    string HashCode=1;
     int32 FileSize=2;
+}
+
+message PrepareUploadRequest{
+    UploadFileInfo info=1;
 }
 
 message PrepareUploadResponse{
@@ -26,7 +92,7 @@ message PrepareUploadResponse{
 message UploadingRequest{
     string Token=1;
     int32 SplitPackageID=2;
-    string Hash_MD5 = 3;
+    string HashCode = 3;
 }
 
 message UploadedRequest{
@@ -34,7 +100,7 @@ message UploadedRequest{
 }
 
 message PrepareDownloadRequest{
-    string Hash_MD5=1;
+    string HashCode=1;
     int32 SplitPackageSize=2;
 }
 
@@ -50,10 +116,57 @@ message DownloadingRequest{
 }
 
 message DownloadingResponse{
-    string Hash_MD5=1;
+    string HashCode=1;
 }
 
 message DownloadedRequest{
     string Token=1;
 }
 
+message SimpleUploadRequest{
+    UploadFileInfo info=1;
+}
+
+message SimpleDownloadRequest{
+    string HashCode=1;
+}
+
+message SimpleDownloadResponse{
+    int32 FileSize=1;
+}
+
+message BatchUploadRequest{
+    repeated UploadFileInfo info=1;
+}
+
+message BatchDownloadRequest{
+    repeated string HashCode=1;
+}
+
+message BatchDownloadResponse{
+    repeated int32 FileSize=1;
+}
+
+message ConvertImageFileRequest{
+    string HashCode=1;
+    
+    SupportFormat TargetFormat=2;
+    // 保留源文件
+    bool RetainSourceFiles=3;
+}
+
+message ConvertImageFileResponse{
+    string NewFileHashCode=1;
+}
+
+message GetThumbnailRequest{
+    string HashCode=1;
+    int32 Height=2;
+    int32 Width=3;
+    int32 Quality=4;
+}
+
+message GetThumbnailResponse{
+    string HashCode=1;
+    int32 FileSize=2;
+}
