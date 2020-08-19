@@ -100,6 +100,7 @@ LuaFunctionRegistr g_LuaFunc[] =
     { "DownloadEnd", CGlobalFunction::Lua_DownloadEnd },
     { "PrepareUpload", CGlobalFunction::Lua_PrepareUpload },
     { "UploadEnd", CGlobalFunction::Lua_UploadEnd },
+    { "GetThumbnail", CGlobalFunction::Lua_GetThumbnail },
 };
 
 CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
@@ -313,9 +314,13 @@ int CGlobalFunction::Lua_ShowLog(lua_State *l)
 int CGlobalFunction::Lua_SetCommData(lua_State *l)
 {
     auto key = CLua::GetString(l, 1, "");
-    if (key.length() > 0)
+    auto value = CLua::GetString(l, 2, "");
+    if( !key.empty() )
     {
-        Instance->m_mapCommData[key] = CLua::GetString(l, 2, "");
+        if( value.empty() )
+            Instance->m_mapCommData.erase(key);
+        else
+            Instance->m_mapCommData[key] = value;
     }
     return 0;
 }
@@ -790,5 +795,53 @@ int CGlobalFunction::Lua_UploadEnd(lua_State *l)
     }
     CLua::PushBoolen(l, true);
     CLua::PushString(l, "succeed");
+    return 2;
+}
+
+
+int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
+{
+    auto hashcode = CLua::GetString(l,1,"");
+    auto height = CLua::GetInteger(l,2,0);
+    auto width = CLua::GetInteger(l,3,0);
+    auto quality = CLua::GetInteger(l,4,0);
+    if( hashcode.empty() || height == 0 || width == 0 || quality == 0 )
+    {
+        CLua::PushBoolen(l, false);
+        CLua::PushString(l, "Param error.");
+        return 2;
+    }
+
+    auto conn = CGlobalFunction::Instance->GetConnectionID(CGlobalFunction::Instance->m_FileCenterTemplateID.load());
+    if (conn.IsFialed())
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, conn.GetMessage());
+        return 2;
+    }
+
+    auto session = conn.GetResultObject();
+
+    FileCenter::GetThumbnailRequest request;
+    request.set_hashcode(hashcode);
+    request.set_height(height);
+    request.set_width(width);
+    request.set_quality(quality);
+
+    auto req = make_shared<SendPackageEvent>(session);
+    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::GetThumbnail, ConvertObjToStr(&request));
+    auto res = req->SyncCallWithExtend(CGlobalFunction::Instance->m_iC, 5000);
+    if (res.IsFialed())
+    {
+        CLua::PushBoolen(l, false);
+        CLua::PushString(l, res.GetMessage());
+        return 2;
+    }
+
+    auto extend = res.MoveResultObject();
+    auto uuid = CUtility::GenUUID();
+    CGlobalFunction::Instance->m_iC->AddTempString( uuid, extend );
+    CLua::PushBoolen(l, true);
+    CLua::PushString(l, uuid);
     return 2;
 }

@@ -107,6 +107,7 @@ namespace Sloong
         static int Lua_DownloadEnd(lua_State *l);
         static int Lua_PrepareUpload(lua_State *l);
         static int Lua_UploadEnd(lua_State *l);
+        static int Lua_GetThumbnail(lua_State *l);
 
     protected:
         void OnStart(SharedEvent);
