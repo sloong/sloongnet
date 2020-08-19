@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-11 18:59:31
+ * @LastEditTime: 2020-08-19 13:43:09
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -86,10 +86,6 @@ CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 	return CResult::Succeed;
 }
 
-void Sloong::CLuaProcessCenter::HandleError(const string &err)
-{
-	m_pLog->Error(Helper::Format("[Script]:[%s]", err.c_str()));
-}
 
 void Sloong::CLuaProcessCenter::ReloadContext()
 {
@@ -118,17 +114,18 @@ CResult Sloong::CLuaProcessCenter::NewThreadInit()
 TResult<unique_ptr<CLua>> Sloong::CLuaProcessCenter::InitLua()
 {
 	auto lua = make_unique<CLua>();
-	lua->SetErrorHandle(std::bind(&CLuaProcessCenter::HandleError, this, placeholders::_1));
 	lua->SetScriptFolder(m_pConfig->operator[]("LuaScriptFolder").asString());
 	CGlobalFunction::Instance->RegistFuncToLua(lua.get());
 	
-	if (!lua->RunScript(m_pConfig->operator[]("LuaEntryFile").asString()))
+	auto res = lua->RunScript(m_pConfig->operator[]("LuaEntryFile").asString());
+	if (res.IsFialed())
 	{
-		return TResult<unique_ptr<CLua>>::Make_Error("Run Script Fialed.");
+		return TResult<unique_ptr<CLua>>::Make_Error("Run Script Fialed." + res.GetMessage());
 	}
-	if (!lua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), Helper::Format("'%s'", m_pConfig->operator[]("LuaScriptFolder").asString().c_str())))
+	res = lua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), Helper::Format("'%s'", m_pConfig->operator[]("LuaScriptFolder").asString().c_str()));
+	if (res.IsFialed())
 	{
-		return TResult<unique_ptr<CLua>>::Make_Error("Run Function Fialed.");
+		return TResult<unique_ptr<CLua>>::Make_Error("Run Function Fialed." + res.GetMessage());
 	}
 	return TResult<unique_ptr<CLua>>::Make_OKResult(move(lua));
 }

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-07 13:12:14
+ * @LastEditTime: 2020-08-18 17:36:59
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -97,7 +97,6 @@ namespace Sloong
 			m_oFreeLuaContext.push(id);
 			m_oSSync.notify_one();
 		}
-		void HandleError(const string& err);
 		void ReloadContext();
 	protected:
 		vector<unique_ptr<LuaContent>>	m_listLuaContent;
