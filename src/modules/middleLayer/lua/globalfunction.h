@@ -103,8 +103,6 @@ namespace Sloong
         static int Lua_SQLInsertToDBCenter(lua_State *l);
         static int Lua_SQLDeleteToDBCenter(lua_State *l);
         static int Lua_SQLUpdateToDBCenter(lua_State *l);
-        static int Lua_PrepareDownload(lua_State *l);
-        static int Lua_DownloadEnd(lua_State *l);
         static int Lua_PrepareUpload(lua_State *l);
         static int Lua_UploadEnd(lua_State *l);
         static int Lua_GetThumbnail(lua_State *l);

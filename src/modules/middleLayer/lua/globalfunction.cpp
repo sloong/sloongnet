@@ -96,8 +96,6 @@ LuaFunctionRegistr g_LuaFunc[] =
     { "SQLInsertToDBCenter", CGlobalFunction::Lua_SQLInsertToDBCenter },
     { "SQLDeleteToDBCenter", CGlobalFunction::Lua_SQLDeleteToDBCenter },
     { "SQLUpdateToDBCenter", CGlobalFunction::Lua_SQLUpdateToDBCenter },
-    { "PrepareDownload", CGlobalFunction::Lua_PrepareDownload },
-    { "DownloadEnd", CGlobalFunction::Lua_DownloadEnd },
     { "PrepareUpload", CGlobalFunction::Lua_PrepareUpload },
     { "UploadEnd", CGlobalFunction::Lua_UploadEnd },
     { "GetThumbnail", CGlobalFunction::Lua_GetThumbnail },
@@ -633,94 +631,6 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
     }
 }
 
-int CGlobalFunction::Lua_PrepareDownload(lua_State *l)
-{
-    auto file_hash = CLua::GetString(l, 1, "");
-    auto split_size = CLua::GetInteger(l, 2, 0);
-    if (file_hash.empty() || split_size == 0)
-    {
-        CLua::PushBoolen(l, false);
-        CLua::PushString(l, "request data is empty");
-        return 2;
-    }
-
-    auto conn = CGlobalFunction::Instance->GetConnectionID(CGlobalFunction::Instance->m_FileCenterTemplateID.load());
-    if (conn.IsFialed())
-    {
-        CLua::PushInteger(l, Base::ResultType::Error);
-        CLua::PushString(l, conn.GetMessage());
-        return 2;
-    }
-    auto session = conn.GetResultObject();
-
-    FileCenter::PrepareDownloadRequest request;
-    request.set_hashcode(file_hash);
-    request.set_splitpackagesize(split_size);
-
-    auto req = make_shared<SendPackageEvent>(session);
-    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::PrepareDownload, ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
-    if (res.IsFialed())
-    {
-        CLua::PushBoolen(l, false);
-        CLua::PushString(l, res.GetMessage());
-        return 2;
-    }
-
-    auto response = ConvertStrToObj<FileCenter::PrepareDownloadResponse>(res.GetMessage());
-    map<string, string> pack_list;
-    for (auto& i : response->splitpackageinfos())
-    {
-        pack_list[Helper::ntos(i.first)] = i.second;
-    }
-    CLua::PushBoolen(l, true);
-    CLua::PushString(l, response->token());
-    CLua::PushInteger(l, response->filesize());
-    CLua::PushTable(l, pack_list);
-    return 4;
-}
-
-
-int CGlobalFunction::Lua_DownloadEnd(lua_State *l)
-{
-    auto token = CLua::GetString(l, 1, "");
-    if (token.empty())
-    {
-        CLua::PushBoolen(l, false);
-        CLua::PushString(l, "request data is empty");
-        return 2;
-    }
-
-    auto conn = CGlobalFunction::Instance->GetConnectionID(CGlobalFunction::Instance->m_FileCenterTemplateID.load());
-    if (conn.IsFialed())
-    {
-        CLua::PushInteger(l, Base::ResultType::Error);
-        CLua::PushString(l, conn.GetMessage());
-        return 2;
-    }
-    auto session = conn.GetResultObject();
-
-    FileCenter::DownloadedRequest request;
-    request.set_token(token);
-
-    auto req = make_shared<SendPackageEvent>(session);
-    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::Downloaded, ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
-    if (res.IsFialed())
-    {
-        CLua::PushBoolen(l, false);
-        CLua::PushString(l, res.GetMessage());
-        return 2;
-    }
-
-    CLua::PushBoolen(l, true);
-    CLua::PushString(l, "succeed");
-
-    return 2;
-}
-
-
-
 int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
 {
     auto file_hash = CLua::GetString(l, 1, "");
@@ -729,6 +639,13 @@ int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
     {
         CLua::PushBoolen(l, false);
         CLua::PushString(l, "request data is empty");
+        return 2;
+    }
+    int64_t hash;
+    if(!ConvertStrToInt64(file_hash,&hash))
+    {
+        CLua::PushBoolen(l, false);
+        CLua::PushString(l, "Convert file hash to int64 fialed.");
         return 2;
     }
 
@@ -742,8 +659,8 @@ int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
     auto session = conn.GetResultObject();
 
     FileCenter::PrepareUploadRequest request;
-    request.mutable_info()->set_hashcode(file_hash);
-    request.mutable_info()->set_filesize(file_size);
+    request.set_hashcode(  hash  );
+    request.set_filesize(file_size);
 
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::PrepareUpload, ConvertObjToStr(&request));
@@ -812,6 +729,14 @@ int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
         return 2;
     }
 
+    int64_t hash;
+    if(!ConvertStrToInt64(hashcode,&hash))
+    {
+        CLua::PushBoolen(l, false);
+        CLua::PushString(l, "Convert file hash to int64 fialed.");
+        return 2;
+    }
+
     auto conn = CGlobalFunction::Instance->GetConnectionID(CGlobalFunction::Instance->m_FileCenterTemplateID.load());
     if (conn.IsFialed())
     {
@@ -823,14 +748,14 @@ int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
     auto session = conn.GetResultObject();
 
     FileCenter::GetThumbnailRequest request;
-    request.set_hashcode(hashcode);
+    request.set_hashcode(hash);
     request.set_height(height);
     request.set_width(width);
     request.set_quality(quality);
 
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::GetThumbnail, ConvertObjToStr(&request));
-    auto res = req->SyncCallWithExtend(CGlobalFunction::Instance->m_iC, 5000);
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
     if (res.IsFialed())
     {
         CLua::PushBoolen(l, false);
@@ -838,9 +763,10 @@ int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
         return 2;
     }
 
-    auto extend = res.MoveResultObject();
+    auto response = ConvertStrToObj<FileCenter::GetThumbnailResponse>(res.GetMessage());
+    
     auto uuid = CUtility::GenUUID();
-    CGlobalFunction::Instance->m_iC->AddTempString( uuid, extend );
+    CGlobalFunction::Instance->m_iC->AddTempString( uuid, response->data() );
     CLua::PushBoolen(l, true);
     CLua::PushString(l, uuid);
     return 2;

@@ -8,7 +8,7 @@
  * @Description: 
  */
 #include "SSLHelper.h"
-#include "defines.h"
+#include "Helper.h"
 
 // openssl head file
 #include <openssl/ssl.h>

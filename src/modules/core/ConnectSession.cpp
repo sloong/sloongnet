@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2020-08-11 18:49:21
+ * @LastEditTime: 2020-08-26 17:39:02
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -94,23 +94,6 @@ void Sloong::ConnectSession::Initialize(IControl *iMsg, UniqueConnection conn)
 	m_pConnection = std::move(conn);
 }
 
-size_t g_max_package_size = 5 * 1024 * 1024;
-
-bool IsOverflowPackage(DataPackage *pack)
-{
-	if (pack->extend().size() + pack->content().size() > g_max_package_size)
-		return true;
-	else
-		return false;
-}
-
-bool IsBigPackage(DataPackage *pack)
-{
-	if (pack->extend().size() > 0 || pack->content().size() > 500000)
-		return true;
-	else
-		return false;
-}
 
 ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 {
@@ -122,7 +105,7 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 		pack->clear_extend();
 	}
 
-	
+
 	pack->clear_reserved();
 	m_pLog->Verbos(Helper::Format("SEND>>>[%d]>>No[%lld]>>[%d]byte", m_pConnection->GetSocketID() , pack->id(), pack->ByteSize()));
 

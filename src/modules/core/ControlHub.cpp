@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-12 10:56:06
+ * @LastEditTime: 2020-08-26 16:57:56
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ControlHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -59,7 +59,6 @@
 
 
 #include "ControlHub.h"
-#include "univ/exception.h"
 #include "events/NormalEvent.hpp"
 using namespace Sloong::Events;
 

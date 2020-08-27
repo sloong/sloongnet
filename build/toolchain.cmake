@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.6.3 )
+cmake_minimum_required(VERSION 3.2)
 set(CMAKE_SYSTEM_NAME Linux )
 
 SET (CMAKE_C_COMPILER             "/usr/bin/clang")

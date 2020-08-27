@@ -63,7 +63,7 @@
 #include "EasyConnect.h"
 #include <sys/socket.h>
 #include "utility.h"
-#include "defines.h"
+#include "Helper.h"
 
 // If want use the int64 to send the length data, define this.
 //#define USE_INT64_LENGTH_SIZE	1

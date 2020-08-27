@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-08-13 11:06:26
+ * @LastEditTime: 2020-08-20 14:31:17
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -367,20 +367,23 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 
 				PackageResult result(ResultType::Ignore);
 				UniquePackage package = m_pWaitProcessList[i].TryMovePop();
+
+				bool showDebug = false;
+
 				while (package != nullptr)
 				{
 					// In here, the result no the result for this request.
 					// it just for is need add the pack obj to send list.
 					result.SetResult(ResultType::Ignore);
-
-					
-
+#ifdef DEBUG
+					showDebug = IsBigPackage(package.get());
+#endif
 					package->mutable_reserved()->add_clocks(GetClock());
 					switch (package->type())
 					{
 					case DataPackage_PackageType::DataPackage_PackageType_EventPackage:
 					{
-						if( package->extend().empty() )
+						if( showDebug )
 							m_pLog->Verbos( "Event package <<< " +  package->ShortDebugString() );
 						switch (package->function())
 						{
@@ -400,7 +403,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					break;
 					case DataPackage_PackageType::DataPackage_PackageType_NormalPackage:
 					{
-						if( package->extend().empty() )
+						if( showDebug )
 							m_pLog->Verbos( "Process package <<< " +  package->ShortDebugString() );
 						if (package->status() == DataPackage_StatusType::DataPackage_StatusType_Request)
 							result = m_pRequestFunc(pEnv, package.get());
@@ -410,7 +413,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 						if (result.HaveResultObject())
 						{
 							auto response = result.MoveResultObject();
-							if( package->extend().empty() )
+							if( showDebug )
 								m_pLog->Verbos( "Response package >>> " +  response->ShortDebugString() );
 							AddMessageToSendList(move(response));
 						}
@@ -419,7 +422,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 							auto response = Package::MakeResponse(package.get());
 							response->set_result(result.GetResult());
 							response->set_content(result.GetMessage());
-							if( package->extend().empty() )
+							if( showDebug )
 								m_pLog->Verbos( "Response package >>> " +  response->ShortDebugString());
 							AddMessageToSendList(move(response));
 						}

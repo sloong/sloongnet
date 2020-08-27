@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2020-08-13 10:43:07
+ * @LastEditTime: 2020-08-27 15:55:36
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -177,7 +177,7 @@ void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int even
 		if (msg)
 			msg->SerializeToString(&msg_str);
 		auto req = make_unique<SendPackageEvent>(m_mapUUIDToNodeItem[item].ConnectionHashCode);
-		req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
+		req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event, msg_str, DataPackage_PackageType::DataPackage_PackageType_EventPackage);
 		m_iC->SendMessage(std::move(req));
 	}
 }

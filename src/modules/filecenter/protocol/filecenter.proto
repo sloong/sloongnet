@@ -11,78 +11,64 @@ enum SupportFormat
 enum Functions{
     Invalid=0;
     reserved 1 to 300;// FileCenter function is start by 301-400
-    TestSpeed=301;
 
     // 准备上传文件，获取上传token
     // Request << PrepareUploadRequest
     // Response >> PrepareUploadResponse
-    PrepareUpload=302;
+    PrepareUpload=301;
 
     // 上传文件分包
-    // Request << UploadingRequest(&Extend)
+    // Request << UploadingRequest
     // Response >> Result
-    Uploading=303;
+    Uploading=302;
 
     // 上传完成
     // Request << UploadedRequest
     // Response >> Result
-	Uploaded=304;
-
-    // 准备下载文件，获取下载token
-    // Request << PrepareDownloadRequest
-    // Response >> PrepareDownloadResponse
-    PrepareDownload=305;
-
-    // 下载文件分包
-    // Request << DownloadingRequest
-    // Response >> DownloadingResponse(&Extend)
-    Downloading=306;
-
-    // 下载完成
-    // Request << DownloadedRequest
-    // Response >> Result
-    Downloaded=307;
-
+	Uploaded=303;
+    
     // 简单的上传，适用于上传小文件，不支持断点续传。
     // Request << SimpleUploadRequest(&Extend)
     // Response >> Result
-    SimpleUpload=308;
+    SimpleUpload=304;
 
-    // 简单的下载，适用于下载小文件，不支持断点续传
-    // Request << SimpleDownloadRequest
-    // Response >> SimpleDownloadResponse(&Extend)
-    SimpleDownload=309;
+    // 下载校验,可以对已下载的信息进行校验.
+    // Request << DownloadVerifyRequest
+    // Response >> DownloadVerifyResponse
+    DownloadVerify=305;
 
-    // 批量上传文件，在简单上传的基础上，支持批量传输。
-    // Request << BatchUploadRequest(&Extend)
-    // Response >> Result
-    BatchUpload=310;
-
-    // 批量下载文件，在简单下载的基础上，支持批量传输。
-    // Request << BatchDownloadRequest
-    // Response >> BatchDownloadResponse(&Extend)
-    BatchDownload=311;
+    // 下载文件分包
+    // Request << DownloadFileRequest
+    // Response >> DownloadFileResponse(&Extend)
+    DownloadFile=306;
 
     // 尝试以图片的形式处理文件，对文件进行格式转换操作
     // Request << ConvertImageFileRequest
     // Response >> ConvertImageFileResponse
-    ConvertImageFile=313;
+    ConvertImageFile=311;
 
     // 尝试获取文件的缩略图，仅支持图片文件
     // Request << GetThumbnailRequest
     // Response >> GetThumbnailResponse(&Extend)
-    GetThumbnail=314;
+    GetThumbnail=312;
 
     reserved 400 to max;
 }
 
-message UploadFileInfo{
-    string HashCode=1;
-    int32 FileSize=2;
+message FileRange{
+    // Strat pointer for data range
+    int32 Start=1;
+    // End pointer for data range
+    int32 End=2;
+    // Hashcode for This data range. Hash function is City with 8bit
+    fixed64 HashCode=3;
+    // In download request no need set.
+    bytes Data=4;
 }
 
 message PrepareUploadRequest{
-    UploadFileInfo info=1;
+    fixed64 HashCode=1;
+    int32 FileSize=2;
 }
 
 message PrepareUploadResponse{
@@ -91,64 +77,42 @@ message PrepareUploadResponse{
 
 message UploadingRequest{
     string Token=1;
-    int32 SplitPackageID=2;
-    string HashCode = 3;
+    FileRange UploadData=2;
 }
 
 message UploadedRequest{
     string Token=1;
 }
 
-message PrepareDownloadRequest{
-    string HashCode=1;
-    int32 SplitPackageSize=2;
+message DownloadVerifyRequest{
+    fixed64 HashCode=1;
+    // Strat pointer for data range
+    int32 Start=2;
+    // End pointer for data range
+    int32 End=3;
+    // Hashcode for This data range. Hash function is City with 8bit
+    fixed64 DataHashCode=4;
 }
 
-message PrepareDownloadResponse{
-    string Token=1;
+message DownloadFileRequest{
+    fixed64 HashCode=1;
+    repeated FileRange FileData=2;
+}
+
+message DownloadFileResponse{
+    fixed64 HashCode=1;
     int32 FileSize=2;
-    map<int32,string> SplitPackageInfos=3;
-}
-
-message DownloadingRequest{
-    string Token=1;
-    int32 SplitPackageID=2;
-}
-
-message DownloadingResponse{
-    string HashCode=1;
-}
-
-message DownloadedRequest{
-    string Token=1;
+    repeated FileRange FileData=3;
 }
 
 message SimpleUploadRequest{
-    UploadFileInfo info=1;
-}
-
-message SimpleDownloadRequest{
-    string HashCode=1;
-}
-
-message SimpleDownloadResponse{
-    int32 FileSize=1;
-}
-
-message BatchUploadRequest{
-    repeated UploadFileInfo info=1;
-}
-
-message BatchDownloadRequest{
-    repeated string HashCode=1;
-}
-
-message BatchDownloadResponse{
-    repeated int32 FileSize=1;
+    fixed64 HashCode=1;
+    int32 FileSize=2;
+    bytes Data=3;
 }
 
 message ConvertImageFileRequest{
-    string HashCode=1;
+    fixed64 HashCode=1;
     
     SupportFormat TargetFormat=2;
     // 保留源文件
@@ -156,17 +120,18 @@ message ConvertImageFileRequest{
 }
 
 message ConvertImageFileResponse{
-    string NewFileHashCode=1;
+    fixed64 NewFileHashCode=1;
 }
 
 message GetThumbnailRequest{
-    string HashCode=1;
+    fixed64 HashCode=1;
     int32 Height=2;
     int32 Width=3;
     int32 Quality=4;
 }
 
 message GetThumbnailResponse{
-    string HashCode=1;
+    fixed64 HashCode=1;
     int32 FileSize=2;
+    bytes Data=3;
 }

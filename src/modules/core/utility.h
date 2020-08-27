@@ -30,6 +30,7 @@ namespace Sloong
 
 		static unique_ptr<char[]> ReadFile(const string &filepath, int* out_size );
 		static CResult WriteFile(const string &filepath, const char *buf, int size);
+		static uint64_t CityEncodeFile(const string& path);
 
 		static string GenUUID();
 

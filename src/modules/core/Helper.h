@@ -7,7 +7,7 @@
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
  * @Description:
  */
- /***
+/***
   * @......................................&&.........................
   * @....................................&&&..........................
   * @.................................&&&&............................
@@ -57,7 +57,7 @@
   * @..................................&..............................
   */
 
-  /*
+/*
    * @Author: WCB
    * @Date: 1970-01-01 08:00:00
    * @LastEditors: WCB
@@ -68,14 +68,14 @@
 
 #include <sys/time.h>
 
-   // univ head file
-#include "univ/defines.h"
-#include "univ/univ.h"
-#include "univ/univ.hpp"
-#include "univ/log.h"
-#include "univ/threadpool.h"
-#include "univ/hash.h"
-#include "univ/base64.h"
+// univ head file
+#include "defines.h"
+#include "univ.h"
+#include "univ.hpp"
+#include "log.h"
+#include "threadpool.h"
+#include "hash.h"
+#include "base64.h"
 using namespace Sloong;
 using namespace Sloong::Universal;
 
@@ -105,7 +105,7 @@ namespace Sloong
 		string str;
 		auto clocks = pack->reserved().clocks();
 		auto start = clocks.begin();
-		for (auto item = start+1; item != clocks.end(); item++)
+		for (auto item = start + 1; item != clocks.end(); item++)
 		{
 			str = Helper::Format("%s[%.2f]", str.c_str(), *item - *start);
 		}
@@ -175,6 +175,34 @@ namespace Sloong
 		}
 	}
 
+	inline bool ConvertStrToInt64(const string &str, int64_t *out_res, string *err_msg = nullptr)
+	{
+		try
+		{
+			if (out_res)
+				(*out_res) = stold(str);
+			return true;
+		}
+		catch (const invalid_argument &e)
+		{
+			if (err_msg)
+				*err_msg = "invalid_argument";
+			return false;
+		}
+		catch (const out_of_range &e)
+		{
+			if (err_msg)
+				*err_msg = "out_of_range";
+			return false;
+		}
+		catch (...)
+		{
+			if (err_msg)
+				*err_msg = "unknown";
+			return false;
+		}
+	}
+
 	inline void FormatFolderString(string &str)
 	{
 		char tag = str.at(str.length() - 1);
@@ -188,7 +216,7 @@ namespace Sloong
 		}
 	}
 
-	inline bool FileExist( const string& path )
+	inline bool FileExist(const string &path)
 	{
 		if (-1 == access(path.c_str(), R_OK))
 		{
@@ -197,7 +225,7 @@ namespace Sloong
 		return true;
 	}
 
-	inline int ReadFile( const string& file, string& out_data )
+	inline int ReadFile(const string &file, string &out_data)
 	{
 		ifstream in(file.c_str(), ios::in | ios::binary);
 		streampos pos = in.tellg();
@@ -211,5 +239,21 @@ namespace Sloong
 		return nSize;
 	}
 
-	
+	inline constexpr int g_max_package_size = 5 * 1024 * 1024;
+	inline bool IsOverflowPackage(DataPackage *pack)
+	{
+		if (pack->ByteSize() > g_max_package_size)
+			return true;
+		else
+			return false;
+	}
+
+	inline constexpr int g_big_package_size = 1 * 1024;
+	inline bool IsBigPackage(DataPackage *pack)
+	{
+		if (pack->ByteSize() > g_big_package_size)
+			return true;
+		else
+			return false;
+	}
 } // namespace Sloong

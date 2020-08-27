@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-08-19 12:29:42
+ * @LastEditTime: 2020-08-20 14:25:03
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/events/SendPackage.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -30,14 +30,13 @@ namespace Sloong
 			}
 			inline bool HaveCallbackFunc(){ return m_pCallback != nullptr; }
 			
-			void SetRequest( uint64_t sender, uint64_t serialnumber, int32_t priority, int32_t func, string content,  string extend = "", DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_NormalPackage)
+			void SetRequest( uint64_t sender, uint64_t serialnumber, int32_t priority, int32_t func, string content, DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_NormalPackage)
 			{
 				m_pData = make_unique<DataPackage>();
 				m_pData->set_sender(sender);
 				m_pData->set_type(type);
 				m_pData->set_function(func);
 				m_pData->set_content(content);
-				m_pData->set_extend(extend);
 				m_pData->set_priority(priority);
 				m_pData->set_id(serialnumber);
 				m_pData->mutable_reserved()->set_sessionid(m_ConnectionHashCode);
@@ -78,33 +77,6 @@ namespace Sloong
 				}
 				
 				return CResult(*result, *response_str);
-			}
-
-			SResult SyncCallWithExtend( IControl* ic, int timeout )
-			{
-				auto response_str = make_shared<string>();
-				auto response_extend = make_shared<string>();
-				auto result = make_shared<ResultType>(ResultType::Invalid);
-				auto sync = make_shared<EasySync>();
-				SetCallbackFunc([result, sync, response_str,response_extend](IEvent *event, DataPackage *pack) {
-					(*result) = pack->result();
-					(*response_str) = pack->content();
-					(*response_extend) = pack->extend();
-					sync->notify_one();
-				});
-				ic->CallMessage( shared_from_this() );
-
-				if( timeout > 0 )
-				{
-					if (!sync->wait_for(timeout))
-						return SResult::Make_Error("Timeout");
-				}
-				else
-				{
-					sync->wait();
-				}
-				
-				return SResult(*result, *response_str, *response_extend);
 			}
 			
 		protected:

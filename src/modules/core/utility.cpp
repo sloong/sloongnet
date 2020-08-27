@@ -128,6 +128,23 @@ unique_ptr<char[]> Sloong::CUtility::ReadFile(const string &filepath, int *out_s
 	return pBuf;
 }
 
+uint64_t Sloong::CUtility::CityEncodeFile(const string& path)
+{
+	if (-1 == access(path.c_str(), R_OK))
+		return 0;
+	ifstream in(path.c_str(), ios::in | ios::binary);
+	streampos pos = in.tellg();
+	in.seekg(0, ios::end);
+	int nSize = in.tellg();
+	in.seekg(pos);
+	string out;
+	out.resize(nSize);
+	in.read(out.data(), nSize);
+	in.close();
+
+	return CCity::Encode64(out);
+}
+
 CResult Sloong::CUtility::WriteFile(const string &filepath, const char *pBuffer, int size)
 {
 	return CResult::Make_Error("No realize.");
