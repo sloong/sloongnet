@@ -207,13 +207,14 @@ CResult CLua::RunScript(const string &strFileName)
 		return HandlerError("Load Script", "No find scritp file:" + strFullName);
 	}
 
+	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
+	auto nErr = lua_gettop(m_pScriptContext);
+
 	if (0 != luaL_loadfile(m_pScriptContext, strFullName.c_str()))
 	{
 		return HandlerError("Load Script", strFullName);
 	}
 
-	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
-	auto nErr = lua_gettop(m_pScriptContext);
 	auto res = lua_pcall(m_pScriptContext, 0, LUA_MULTRET, nErr);
 	lua_remove( m_pScriptContext, nErr );
 	if( res != LUA_OK )
@@ -225,13 +226,14 @@ CResult CLua::RunScript(const string &strFileName)
 
 CResult CLua::RunBuffer(LPCSTR pBuffer, size_t sz)
 {
+	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
+	auto nErr = lua_gettop(m_pScriptContext);
+
 	if (0 != luaL_loadbuffer(m_pScriptContext, (LPCSTR)pBuffer, sz, NULL))
 	{
 		return HandlerError("Load Buffer", pBuffer);
 	}
 
-	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
-	auto nErr = lua_gettop(m_pScriptContext);
 	auto res = lua_pcall(m_pScriptContext, 0, LUA_MULTRET, nErr);
 	lua_remove( m_pScriptContext, nErr );
 	if( res != LUA_OK )
@@ -243,13 +245,13 @@ CResult CLua::RunBuffer(LPCSTR pBuffer, size_t sz)
 
 CResult CLua::RunString(const string &strCommand)
 {
+	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
+	auto nErr = lua_gettop(m_pScriptContext);
 	if (0 != luaL_loadstring(m_pScriptContext, strCommand.c_str()))
 	{
 		return HandlerError("String Load", strCommand);
 	}
 
-	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
-	auto nErr = lua_gettop(m_pScriptContext);
 	auto res = lua_pcall(m_pScriptContext, 0, LUA_MULTRET, nErr);
 	lua_remove( m_pScriptContext, nErr );
 	if( res != LUA_OK )

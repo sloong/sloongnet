@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-19 13:43:09
+ * @LastEditTime: 2020-08-28 13:36:37
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -166,12 +166,12 @@ SResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 	catch (const exception &ex)
 	{
 		FreeLuaContext(id);
-		return SResult::Make_Error("server process error." + string(ex.what()));
+		return SResult::Make_Error("Server process error." + string(ex.what()));
 	}
 	catch (...)
 	{
 		FreeLuaContext(id);
-		return SResult::Make_Error("server process error.");
+		return SResult::Make_Error("Server process error. Unexpected exceptions happened.");
 	}
 }
 #define LUA_CONTEXT_WAIT_SECONDE 10
