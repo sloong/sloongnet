@@ -21,7 +21,8 @@ SET(LIBRARY_OUTPUT_PATH "../")
 
 #允许gdb调试
 set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -g -ggdb -DDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -DNODEBUG -DRELASE")
+# the clang with O2/O3 will happend protobuf error. so in here the release set to O1
+set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O1 -DNODEBUG -DRELASE")
 
 add_definitions(-DLUA_USE_READLINE)
 
