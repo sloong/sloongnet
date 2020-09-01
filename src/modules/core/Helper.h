@@ -256,4 +256,27 @@ namespace Sloong
 		else
 			return false;
 	}
+
+	inline constexpr int g_max_package_print_log = 512;
+	inline bool IsPrintLog(DataPackage* pack)
+	{
+		if( !pack->extend().empty())
+			return false;
+		if( pack->ByteSize() > g_max_package_print_log )
+			return false;
+		return true;
+	}
+
+	inline void PrintPackage( CLog* log, DataPackage* package, const string& title, LOGLEVEL level = LOGLEVEL::Verbos )
+	{
+		if(IsPrintLog( package))
+		{
+			log->Log( title +  package->ShortDebugString(), level );
+		}
+		else
+		{
+			log->Log( title + Helper::Format("Function: %d Priority: %d ID: %lld Content[L]: %d Extend[L]: %d",
+			 package->function(), package->priority(), package->id(), package->content().length(), package->extend().length()), level );
+		}
+	}
 } // namespace Sloong
