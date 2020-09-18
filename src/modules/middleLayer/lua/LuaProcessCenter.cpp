@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-28 13:36:37
+ * @LastEditTime: 2020-09-18 12:26:03
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -114,7 +114,10 @@ CResult Sloong::CLuaProcessCenter::NewThreadInit()
 TResult<unique_ptr<CLua>> Sloong::CLuaProcessCenter::InitLua()
 {
 	auto lua = make_unique<CLua>();
-	lua->SetScriptFolder(m_pConfig->operator[]("LuaScriptFolder").asString());
+	auto folder = m_pConfig->operator[]("LuaScriptFolder").asString();
+	m_pLog->Verbos("Init lua base on folder : " + folder);
+	lua->SetScriptFolder(folder);
+	
 	CGlobalFunction::Instance->RegistFuncToLua(lua.get());
 	
 	auto res = lua->RunScript(m_pConfig->operator[]("LuaEntryFile").asString());

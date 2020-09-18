@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
                     "Worker",
-                    "10.0.0.18:9000"
+                    "10.0.0.18:19000"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/debug/",
