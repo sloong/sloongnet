@@ -368,8 +368,6 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 				PackageResult result(ResultType::Ignore);
 				UniquePackage package = m_pWaitProcessList[i].TryMovePop();
 
-				bool showDebug = false;
-
 				while (package != nullptr)
 				{
 					// In here, the result no the result for this request.

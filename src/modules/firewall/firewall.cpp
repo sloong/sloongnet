@@ -23,7 +23,7 @@ extern "C" PackageResult ResponsePackageProcesser(void* pEnv,DataPackage* pack)
 {
 	return SloongNetFirewall::Instance->ResponsePackageProcesser(pack);
 }
-	
+
 extern "C" CResult EventPackageProcesser(DataPackage* pack)
 {
 	SloongNetFirewall::Instance->EventPackageProcesser(pack);
