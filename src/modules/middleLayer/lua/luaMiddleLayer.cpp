@@ -153,8 +153,9 @@ inline CResult Sloong::LuaMiddleLayer::CreateProcessEnvironmentHandler(void **ou
 	auto res = item->Initialize(m_iC);
 	if (res.IsFialed())
 		return res;
-	m_listProcess.push_back(move(item));
+
 	(*out_env) = item.get();
+	m_listProcess.push_back(move(item));
 	return CResult::Succeed;
 }
 
