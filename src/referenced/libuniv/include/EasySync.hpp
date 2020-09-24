@@ -1,9 +1,11 @@
-/*
- * @Author: WCB
- * @Date: 1970-01-01 08:00:00
- * @LastEditors: WCB
- * @LastEditTime: 2020-04-26 12:04:27
- * @Description: file content
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 2020-04-26 12:04:27
+ * @LastEditTime: 2020-09-23 16:11:58
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/referenced/libuniv/include/EasySync.hpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
 #pragma once
 
@@ -30,9 +32,7 @@ namespace Sloong
 		{
 			unique_lock<mutex> lck(m_oMutex);
 			if (m_oCV.wait_for(lck, chrono::milliseconds(ms)) == std::cv_status::timeout)
-			{
 				return false;
-			}
 			else
 				return true;
 		}

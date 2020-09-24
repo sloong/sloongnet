@@ -76,6 +76,7 @@
 #include "threadpool.h"
 #include "hash.h"
 #include "base64.h"
+#include "CRC.hpp"
 using namespace Sloong;
 using namespace Sloong::Universal;
 
