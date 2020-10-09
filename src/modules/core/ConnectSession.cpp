@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2020-10-09 10:23:06
+ * @LastEditTime: 2020-10-09 15:40:36
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -180,7 +180,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 				}
 				if (  package->content().data().length() > 0 )
 				{
-					auto crc = CRC::Calculate( package->content().data().c_str(), package->content().data().size(), CRC::CRC_32() );
+					auto crc = CRCEncode32( package->content().data());
 					if( crc != package->content().hash() )
 					{
 						m_pLog->Error("Content hash check error.");
@@ -190,7 +190,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 				}
 				if (  package->extend().data().length() > 0 )
 				{
-					auto crc = CRC::Calculate( package->extend().data().c_str(), package->extend().data().size(), CRC::CRC_32() );
+					auto crc = CRCEncode32( package->extend().data() );
 					if( crc != package->extend().hash() )
 					{
 						m_pLog->Error("Extend hash check error.");

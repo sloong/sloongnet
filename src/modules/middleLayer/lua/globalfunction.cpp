@@ -633,9 +633,9 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
 
 int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
 {
-    auto file_hash = CLua::GetInteger(l, 1, 0);
+    auto file_crc = CLua::GetInteger(l, 1, 0);
     auto file_size = CLua::GetInteger(l, 2, 0);
-    if (file_hash == 0 || file_size == 0)
+    if (file_crc == 0 || file_size == 0)
     {
         CLua::PushBoolen(l, false);
         CLua::PushString(l, "request data is empty");
@@ -652,7 +652,7 @@ int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
     auto session = conn.GetResultObject();
 
     FileCenter::PrepareUploadRequest request;
-    request.set_hashcode(file_hash);
+    request.set_crccode(file_crc);
     request.set_filesize(file_size);
 
     auto req = make_shared<SendPackageEvent>(session);
@@ -711,22 +711,14 @@ int CGlobalFunction::Lua_UploadEnd(lua_State *l)
 
 int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
 {
-    auto hashcode = CLua::GetString(l,1,"");
+    auto index = CLua::GetString(l,1,"");
     auto height = CLua::GetInteger(l,2,0);
     auto width = CLua::GetInteger(l,3,0);
     auto quality = CLua::GetInteger(l,4,0);
-    if( hashcode.empty() || height == 0 || width == 0 || quality == 0 )
+    if( index.empty() || height == 0 || width == 0 || quality == 0 )
     {
         CLua::PushBoolen(l, false);
         CLua::PushString(l, "Param error.");
-        return 2;
-    }
-
-    int64_t hash;
-    if(!ConvertStrToInt64(hashcode,&hash))
-    {
-        CLua::PushBoolen(l, false);
-        CLua::PushString(l, "Convert file hash to int64 fialed.");
         return 2;
     }
 
@@ -741,7 +733,7 @@ int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
     auto session = conn.GetResultObject();
 
     FileCenter::GetThumbnailRequest request;
-    request.set_hashcode(hash);
+    request.set_indexcode(index);
     request.set_height(height);
     request.set_width(width);
     request.set_quality(quality);

@@ -281,5 +281,21 @@ namespace Sloong
 		}
 	}
 
+	inline string ConvertToHexString( const char* d, int start, int end )
+	{
+		string s;
+		s.resize((end-start+1)*2);
+		char* p = s.data();
+		int i = 0;
+		for ( i=start; i<end; i++) {
+			sprintf(p+i*2, "%02x", d[i]);
+		}
+		p[i*2] = 0;
+		return s;
+	}
 
+	inline uint32_t CRCEncode32( const string& s )
+	{
+		return CRC::Calculate( s.c_str(), s.size(), CRC::CRC_32());
+	}
 } // namespace Sloong

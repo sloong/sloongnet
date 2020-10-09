@@ -13,19 +13,19 @@ namespace Sloong
     public:
         static inline void SetContent(DataPackage* pack, const string& message )
         {
-            pack->mutable_content()->set_hash( CRC::Calculate(message.c_str(), message.size(), CRC::CRC_32()));
+            pack->mutable_content()->set_hash( CRCEncode32(message));
             pack->mutable_content()->set_data( message );
         }
 
         static inline void SetExtend(DataPackage* pack, const string& message )
         {
-            pack->mutable_extend()->set_hash( CRC::Calculate(message.c_str(), message.size(), CRC::CRC_32()));
+            pack->mutable_extend()->set_hash( CRCEncode32(message));
             pack->mutable_extend()->set_data( message );
         }
 
         static inline void SetExtend(DataPackage* pack, const char *extend, int size )
         {
-            pack->mutable_extend()->set_hash( CRC::Calculate( extend, size, CRC::CRC_32()));
+            pack->mutable_extend()->set_hash( CRCEncode32( extend));
             pack->mutable_extend()->set_data( extend, size );
         }
 
