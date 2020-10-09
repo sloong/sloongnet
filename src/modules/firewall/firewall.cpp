@@ -92,9 +92,9 @@ inline CResult Sloong::SloongNetFirewall::CreateProcessEnvironmentHandler(void**
 void Sloong::SloongNetFirewall::EventPackageProcesser(DataPackage* pack)
 {
 	auto event = Events_MIN;
-	if(!Manager::Events_Parse(pack->content(),&event))
+	if(!Manager::Events_Parse(pack->content().data(),&event))
 	{
-		m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]",pack->content().c_str()));
+		m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]",pack->content().data().c_str()));
 		return;
 	}
 

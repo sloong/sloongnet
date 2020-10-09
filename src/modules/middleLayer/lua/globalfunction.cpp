@@ -122,7 +122,7 @@ void Sloong::CGlobalFunction::OnStart(SharedEvent e)
 
 void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent* send_pack, DataPackage *res_pack)
 {
-    auto str_res = res_pack->content();
+    auto str_res = res_pack->content().data();
     auto res = ConvertStrToObj<QueryReferenceInfoResponse>(str_res);
     if (res == nullptr || res->templateinfos_size() == 0)
         return;
@@ -633,19 +633,12 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
 
 int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
 {
-    auto file_hash = CLua::GetString(l, 1, "");
+    auto file_hash = CLua::GetInteger(l, 1, 0);
     auto file_size = CLua::GetInteger(l, 2, 0);
-    if (file_hash.empty() || file_size == 0)
+    if (file_hash == 0 || file_size == 0)
     {
         CLua::PushBoolen(l, false);
         CLua::PushString(l, "request data is empty");
-        return 2;
-    }
-    int64_t hash;
-    if(!ConvertStrToInt64(file_hash,&hash))
-    {
-        CLua::PushBoolen(l, false);
-        CLua::PushString(l, "Convert file hash to int64 fialed.");
         return 2;
     }
 
@@ -659,7 +652,7 @@ int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
     auto session = conn.GetResultObject();
 
     FileCenter::PrepareUploadRequest request;
-    request.set_hashcode(  hash  );
+    request.set_hashcode(file_hash);
     request.set_filesize(file_size);
 
     auto req = make_shared<SendPackageEvent>(session);

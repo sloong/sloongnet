@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-08-21 13:24:04
+ * @LastEditTime: 2020-10-09 10:28:37
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filecenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -138,9 +138,9 @@ CResult Sloong::CFileCenter::CreateProcessEnvironmentHandler(void **out_env)
 void Sloong::CFileCenter::EventPackageProcesser(DataPackage *pack)
 {
     auto event = Events_MIN;
-    if (!Manager::Events_Parse(pack->content(), &event))
+    if (!Manager::Events_Parse(pack->content().data(), &event))
     {
-        m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]", pack->content().c_str()));
+        m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]", pack->content().data().c_str()));
         return;
     }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "result.h"
+#include "CRC.hpp"
 
 namespace Sloong
 {
@@ -10,6 +11,24 @@ namespace Sloong
     class Package
     {
     public:
+        static inline void SetContent(DataPackage* pack, const string& message )
+        {
+            pack->mutable_content()->set_hash( CRC::Calculate(message.c_str(), message.size(), CRC::CRC_32()));
+            pack->mutable_content()->set_data( message );
+        }
+
+        static inline void SetExtend(DataPackage* pack, const string& message )
+        {
+            pack->mutable_extend()->set_hash( CRC::Calculate(message.c_str(), message.size(), CRC::CRC_32()));
+            pack->mutable_extend()->set_data( message );
+        }
+
+        static inline void SetExtend(DataPackage* pack, const char *extend, int size )
+        {
+            pack->mutable_extend()->set_hash( CRC::Calculate( extend, size, CRC::CRC_32()));
+            pack->mutable_extend()->set_data( extend, size );
+        }
+
         static UniquePackage GetRequestPackage( bool EventPackage = false )
         {
             auto package = make_unique<DataPackage>();
@@ -74,7 +93,7 @@ namespace Sloong
         {
             auto response_pack = MakeResponse(request_pack);
             response_pack->set_result(ResultType::Error);
-            response_pack->set_content(message);
+            SetContent(response_pack.get(), message);
             return response_pack;
         }
 
@@ -93,8 +112,8 @@ namespace Sloong
         {
             auto response_pack = MakeResponse(request_pack);
             response_pack->set_result(result);
-            response_pack->set_content(message);
-            response_pack->set_extend(extend);
+            SetContent(response_pack.get(), message);
+            SetContent(response_pack.get(), extend);
             return response_pack;
         }
 
@@ -114,8 +133,8 @@ namespace Sloong
         {
             auto response_pack = MakeResponse(request_pack);
             response_pack->set_result(result);
-            response_pack->set_content(message);
-            response_pack->set_extend(extend, size);
+            SetContent(response_pack.get(), message);
+            SetExtend(response_pack.get(), extend, size); 
             return response_pack;
         }
 
@@ -132,7 +151,7 @@ namespace Sloong
         {
             auto response_pack = MakeResponse(request_pack);
             response_pack->set_result(result.GetResult());
-            response_pack->set_content(result.GetMessage());
+            SetContent(response_pack.get(), result.GetMessage());
             return response_pack;
         }
     };

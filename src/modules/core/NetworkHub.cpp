@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-09-01 15:11:14
+ * @LastEditTime: 2020-10-09 10:41:50
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -414,7 +414,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 						{
 							auto response = Package::MakeResponse(package.get());
 							response->set_result(result.GetResult());
-							response->set_content(result.GetMessage());
+							Package::SetContent(response.get(),result.GetMessage());
 							PrintPackage( m_pLog, package.get(), "Response package <<< " );
 							AddMessageToSendList(move(response));
 						}

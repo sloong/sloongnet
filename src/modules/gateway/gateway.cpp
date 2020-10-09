@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-01-15 15:57:36
- * @LastEditTime: 2020-08-12 14:23:08
+ * @LastEditTime: 2020-10-09 10:42:38
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/gateway.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -202,7 +202,7 @@ list<int> SloongNetGateway::ProcessProviedFunction(const string &prov_func)
 
 void SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent* send_pack, DataPackage *res_pack)
 {
-	auto str_res = res_pack->content();
+	auto str_res = res_pack->content().data();
 	auto res = ConvertStrToObj<QueryReferenceInfoResponse>(str_res);
 	if (res == nullptr || res->templateinfos_size() == 0)
 		return;
@@ -291,12 +291,12 @@ void Sloong::SloongNetGateway::EventPackageProcesser(DataPackage *pack)
 	{
 	case Manager::Events::ReferenceModuleOnline:
 	{
-		OnReferenceModuleOnlineEvent(pack->content(), pack);
+		OnReferenceModuleOnlineEvent(pack->content().data(), pack);
 	}
 	break;
 	case Manager::Events::ReferenceModuleOffline:
 	{
-		OnReferenceModuleOfflineEvent(pack->content(), pack);
+		OnReferenceModuleOfflineEvent(pack->content().data(), pack);
 	}
 	break;
 	default:

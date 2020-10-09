@@ -1,13 +1,14 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-28 14:43:16
- * @LastEditTime: 2020-08-10 16:22:53
+ * @LastEditTime: 2020-10-09 10:42:09
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/transpond.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
  * @Description: 
  */
 #include "transpond.h"
+#include "package.hpp"
 #include "IData.h"
 #include "gateway.h"
 #include "snowflake.h"
@@ -49,9 +50,9 @@ PackageResult Sloong::GatewayTranspond::MessageToProcesser(DataPackage *pack)
 
 	auto trans_pack = Package::MakeResponse(pack);
 	trans_pack->set_status(DataPackage_StatusType::DataPackage_StatusType_Request);
-	trans_pack->set_content(pack->content());
-	trans_pack->set_extend(pack->extend());
-	
+	Package::SetContent(trans_pack.get(), pack->content().data() );
+	Package::SetExtend( trans_pack.get(), pack->extend().data() );
+
 	auto id = snowflake::Instance->nextid();
 	trans_pack->set_id(id);
 	trans_pack->mutable_reserved()->set_sessionid(target);
@@ -66,8 +67,8 @@ PackageResult Sloong::GatewayTranspond::MessageToClient(UniquePackage info, Data
 {
 	info->mutable_reserved()->add_clocks(GetClock());
 	info->set_result(pack->result());
-	info->set_content(pack->content());
-	info->set_extend(pack->extend());
+	Package::SetContent(info.get(), pack->content().data() );
+	Package::SetExtend( info.get(), pack->extend().data() );
 	
 	return PackageResult::Make_OKResult(move(info));
 }

@@ -61,13 +61,13 @@ message FileRange{
     // End pointer for data range
     int32 End=2;
     // Hashcode for This data range. Hash function is City with 8bit
-    fixed64 HashCode=3;
+    fixed32 HashCode=3;
     // In download request no need set.
     bytes Data=4;
 }
 
 message PrepareUploadRequest{
-    fixed64 HashCode=1;
+    fixed32 HashCode=1;
     int32 FileSize=2;
 }
 
@@ -85,34 +85,34 @@ message UploadedRequest{
 }
 
 message DownloadVerifyRequest{
-    fixed64 HashCode=1;
+    fixed32 HashCode=1;
     // Strat pointer for data range
     int32 Start=2;
     // End pointer for data range
     int32 End=3;
     // Hashcode for This data range. Hash function is City with 8bit
-    fixed64 DataHashCode=4;
+    fixed32 DataHashCode=4;
 }
 
 message DownloadFileRequest{
-    fixed64 HashCode=1;
+    fixed32 HashCode=1;
     repeated FileRange FileData=2;
 }
 
 message DownloadFileResponse{
-    fixed64 HashCode=1;
+    fixed32 HashCode=1;
     int32 FileSize=2;
     repeated FileRange FileData=3;
 }
 
 message SimpleUploadRequest{
-    fixed64 HashCode=1;
+    fixed32 HashCode=1;
     int32 FileSize=2;
     bytes Data=3;
 }
 
 message ConvertImageFileRequest{
-    fixed64 HashCode=1;
+    fixed32 HashCode=1;
     
     SupportFormat TargetFormat=2;
     // 保留源文件
@@ -120,18 +120,18 @@ message ConvertImageFileRequest{
 }
 
 message ConvertImageFileResponse{
-    fixed64 NewFileHashCode=1;
+    fixed32 NewFileHashCode=1;
 }
 
 message GetThumbnailRequest{
-    fixed64 HashCode=1;
+    fixed32 HashCode=1;
     int32 Height=2;
     int32 Width=3;
     int32 Quality=4;
 }
 
 message GetThumbnailResponse{
-    fixed64 HashCode=1;
+    fixed32 HashCode=1;
     int32 FileSize=2;
     bytes Data=3;
 }

@@ -35,7 +35,7 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(DataPackage *pack)
         return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("FileCenter no provide [%d] function.", function)));
     }
 
-    auto req_obj = pack->content();
+    auto req_obj = pack->content().data();
     auto func_name = Functions_Name(function);
     m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), req_obj.c_str()));
     if (!m_mapFuncToHandler.exist(function))
@@ -195,7 +195,7 @@ CResult Sloong::FileManager::UploadingHandler(const string &str_req, DataPackage
 
     auto &data = req->uploaddata();
 
-    if (data.hashcode() != CCity::Encode64(data.data()))
+    if (data.hashcode() != CRC::Calculate(data.data().c_str(), data.data().size(), CRC::CRC_32()));//  CCity::Encode64(data.data()))
     {
         return CResult::Make_Error("Hasd check error.");
     }
@@ -228,7 +228,7 @@ CResult Sloong::FileManager::UploadedHandler(const string &str_req, DataPackage 
     if (res.IsFialed())
         return CResult::Make_Error(res.GetMessage());
 
-    m_pLog->Verbos(Helper::Format("Save file to [%s]. Hash [%lld]", temp_path.c_str(), info->HashCode));
+    m_pLog->Verbos(Helper::Format("Save file to [%s]. Hash [%llu]", temp_path.c_str(), info->HashCode));
 
     if (info->HashCode != CUtility::CityEncodeFile(temp_path))
         return CResult::Make_Error("Hasd check error.");

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2020-08-26 17:39:02
+ * @LastEditTime: 2020-10-09 10:23:06
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -101,10 +101,9 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 	{
 		m_pLog->Assert("The package size is to bigger, this's returned and replaced with an error message package.");
 		pack->set_result(ResultType::Error);
-		pack->set_content("The package size is to bigger.");
+		Package::SetContent(pack.get(), "The package size is to bigger." );
 		pack->clear_extend();
 	}
-
 
 	pack->clear_reserved();
 	m_pLog->Verbos(Helper::Format("SEND>>>[%d]>>No[%lld]>>[%d]byte", m_pConnection->GetSocketID() , pack->id(), pack->ByteSize()));
@@ -171,19 +170,35 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 				m_pLog->Verbos(Helper::Format("RECV<<<[%d]<<No[%lld]<<[%d]byte", m_pConnection->GetSocketID(), package->id(), package->ByteSize()));
 				package->mutable_reserved()->add_clocks(GetClock());
 				package->mutable_reserved()->set_sessionid(m_pConnection->GetHashCode());
-
+				bLoop = true;
+				m_ActiveTime = time(NULL);
+				
 				if (package->priority() > s_PriorityLevel || package->priority() < 0)
 				{
 					m_pLog->Error(Helper::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", package->priority(), s_PriorityLevel));
 					package->set_priority(s_PriorityLevel);
 				}
-				if (package->hash().length() > 0)
+				if (  package->content().data().length() > 0 )
 				{
-					m_pLog->Warn("Now don't support hash check, So the hash string will ignored.");
+					auto crc = CRC::Calculate( package->content().data().c_str(), package->content().data().size(), CRC::CRC_32() );
+					if( crc != package->content().hash() )
+					{
+						m_pLog->Error("Content hash check error.");
+						AddToSendList(Package::MakeErrorResponse(package.get(), "Content hash check error."));
+						continue;
+					}
+				}
+				if (  package->extend().data().length() > 0 )
+				{
+					auto crc = CRC::Calculate( package->extend().data().c_str(), package->extend().data().size(), CRC::CRC_32() );
+					if( crc != package->extend().hash() )
+					{
+						m_pLog->Error("Extend hash check error.");
+						AddToSendList(Package::MakeErrorResponse(package.get(), "Extend hash check error."));
+						continue;
+					}
 				}
 
-				bLoop = true;
-				m_ActiveTime = time(NULL);
 				readList.push(std::move(package));
 			}
 		}

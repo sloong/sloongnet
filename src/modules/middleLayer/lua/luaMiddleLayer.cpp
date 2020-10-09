@@ -94,8 +94,8 @@ PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter 
 
 	info = m_mapUserInfoList[pack->sender()].get();
 	auto function = pack->function();
-	auto& content =pack->content();
-	auto& extend = pack->extend();
+	auto& content =pack->content().data();
+	auto& extend = pack->extend().data();
 	m_pLog->Verbos(Helper::Format("Request [%d]:[%d][%d]", function, content.length(), extend.length()));
 	auto res = pProcess->MsgProcess(function, info, content, extend);
 	if( res.IsFialed() )
@@ -183,7 +183,7 @@ void Sloong::LuaMiddleLayer::EventPackageProcesser(DataPackage *pack)
 	auto event = (Manager::Events)pack->function();
 	if (!Manager::Events_IsValid(event))
 	{
-		m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]", pack->content().c_str()));
+		m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]", pack->content().data().c_str()));
 		return;
 	}
 
@@ -191,12 +191,12 @@ void Sloong::LuaMiddleLayer::EventPackageProcesser(DataPackage *pack)
 	{
 	case Manager::Events::ReferenceModuleOnline:
 	{
-		OnReferenceModuleOnlineEvent(pack->content(), pack);
+		OnReferenceModuleOnlineEvent(pack->content().data(), pack);
 	}
 	break;
 	case Manager::Events::ReferenceModuleOffline:
 	{
-		OnReferenceModuleOfflineEvent(pack->content(), pack);
+		OnReferenceModuleOfflineEvent(pack->content().data(), pack);
 	}
 	break;
 	default:

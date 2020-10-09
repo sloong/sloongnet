@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-08-20 14:25:03
+ * @LastEditTime: 2020-10-09 10:29:30
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/events/SendPackage.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -10,6 +10,7 @@
 
 #pragma once
 #include "NormalEvent.hpp"
+#include "package.hpp"
 #include "protocol/core.pb.h"
 namespace Sloong
 {
@@ -36,7 +37,7 @@ namespace Sloong
 				m_pData->set_sender(sender);
 				m_pData->set_type(type);
 				m_pData->set_function(func);
-				m_pData->set_content(content);
+				Package::SetContent(m_pData.get(), content);
 				m_pData->set_priority(priority);
 				m_pData->set_id(serialnumber);
 				m_pData->mutable_reserved()->set_sessionid(m_ConnectionHashCode);
@@ -61,7 +62,7 @@ namespace Sloong
 				auto sync = make_shared<EasySync>();
 				SetCallbackFunc([result, sync, response_str](IEvent *event, DataPackage *pack) {
 					(*result) = pack->result();
-					(*response_str) = pack->content();
+					(*response_str) = pack->content().data();
 					sync->notify_one();
 				});
 				ic->CallMessage( shared_from_this() );

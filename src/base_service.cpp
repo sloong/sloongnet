@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-08-10 17:30:23
+ * @LastEditTime: 2020-10-09 10:45:35
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -115,7 +115,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
         {
             RegisteWorkerRequest sub_req;
             sub_req.set_forcetargettemplateid(forceTempID);
-            req->set_content(ConvertObjToStr(&sub_req));
+            Package::SetContent(req.get(),ConvertObjToStr(&sub_req));
         }
         if (con->SendPackage(move(req)).IsFialed())
             return CResult::Make_Error("Send get config request error.");
@@ -130,7 +130,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
         {
             if (uuid == 0)
             {
-                uuid = Helper::BytesToInt64(response->content().c_str());
+                uuid = Helper::BytesToInt64(response->content().data().c_str());
                 cout << "Control assigen uuid ." << uuid << endl;
             }
             else
@@ -143,7 +143,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
         }
         else if (response->result() == ResultType::Succeed)
         {
-            auto res_pack = ConvertStrToObj<RegisteWorkerResponse>(response->content());
+            auto res_pack = ConvertStrToObj<RegisteWorkerResponse>(response->content().data());
             string serverConfig = res_pack->configuation();
             if (serverConfig.size() == 0)
                 return CResult::Make_Error("Control no return config infomation.");
@@ -157,7 +157,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
         }
         else
         {
-            return CResult::Make_Error(Helper::Format("Control return an unexpected result [%s]. Message [%s].", ResultType_Name(response->result()).c_str(), response->content().c_str()));
+            return CResult::Make_Error(Helper::Format("Control return an unexpected result [%s]. Message [%s].", ResultType_Name(response->result()).c_str(), response->content().data().c_str()));
         }
     };
     cout << "Get configuation done." << endl;
