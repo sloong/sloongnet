@@ -77,7 +77,7 @@ CResult Sloong::FileManager::SplitFile(const string &filepath, int splitSize, ma
     }
 
     ifstream in(filepath.c_str(), ios::in | ios::binary);
-    in.seekg(0, ios::end);
+    in.seekg(ios_base::end);
     int nSize = in.tellg();
     in.seekg(ios_base::beg);
     for (int i = 0; i < nSize; i += splitSize)
@@ -95,7 +95,7 @@ CResult Sloong::FileManager::SplitFile(const string &filepath, int splitSize, ma
 CResult Sloong::FileManager::ArchiveFile(const string &source)
 {
     try
-    {        
+    {
         auto sha1 = CUtility::SHA1EncodeFile(source);
         string target = GetPathByHashcode(sha1);
 
@@ -145,15 +145,15 @@ CResult Sloong::FileManager::GetFileSize(const string &source, int *out_size)
 }
 
 // The filecenter no't care the file format. so in here, we saved by the hashcode, the saver should be save the format.
-string Sloong::FileManager::GetPathByHashcode(const string& hashcode)
+string Sloong::FileManager::GetPathByHashcode(const string &hashcode)
 {
     return GetFolderByHashcode(hashcode.c_str()) + ConvertToHexString(hashcode.c_str(), 0, hashcode.length());
 }
 
 // The filecenter no't care the file format. so in here, we saved by the hashcode, the saver should be save the format.
-string Sloong::FileManager::GetFolderByHashcode(const string& hashcode)
+string Sloong::FileManager::GetFolderByHashcode(const string &hashcode)
 {
-    auto path = Helper::Format("%s%s/", m_strArchiveFolder.c_str(), ConvertToHexString(hashcode.c_str(),0,3).c_str());
+    auto path = Helper::Format("%s%s/", m_strArchiveFolder.c_str(), ConvertToHexString(hashcode.c_str(), 0, 3).c_str());
     CUniversal::CheckFileDirectory(path);
     return path;
 }
@@ -165,9 +165,27 @@ string Sloong::FileManager::GetFolderByHashcode(const string& hashcode)
 //  2> Use the hashcode to comput the path, because when save file, the path is build with the hashcode
 //   so we can use the hashcode to rebuild the save path.
 //     But this will fix the file tree structure for storage.
-string Sloong::FileManager::QueryFilePath(const string& hashcode)
+string Sloong::FileManager::QueryFilePath(const string &hashcode)
 {
     return GetPathByHashcode(hashcode);
+}
+
+N32Result Sloong::FileManager::CalculateFileRangeCRC(const string &filepath, int start, int end)
+{
+    if (!FileExist(filepath))
+    {
+        return N32Result::Make_Error("File no exist.");
+    }
+
+    ifstream in(filepath.c_str(), ios::in | ios::binary);
+    in.seekg(start, ios_base::beg);
+
+    int count = end - start;
+    string str;
+    str.resize(count);
+    in.read(str.data(), count);
+    in.close();
+    return N32Result::Make_OKResult(CRC::Calculate(str.c_str(), str.length(), CRC::CRC_32()));
 }
 
 CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, DataPackage *trans_pack)
@@ -269,44 +287,27 @@ CResult Sloong::FileManager::SimpleUploadHandler(const string &str_req, DataPack
 }
 
 CResult Sloong::FileManager::DownloadVerifyHandler(const string &str_req, DataPackage *pack)
-{ /*
-    auto req = ConvertStrToObj<DownloadVerifyHandler>(str_req);
+{
+    auto req = ConvertStrToObj<DownloadVerifyRequest>(str_req);
 
-    string real_path = QueryFilePath(req->hashcode());
+    string real_path = QueryFilePath(req->indexcode());
     if (access(real_path.c_str(), ACC_R) != 0)
     {
-        return CResult::Make_Error("Cann't access to target file:" + real_path );
+        return CResult::Make_Error("Cann't access to target file:" + real_path);
     }
 
-    
+    auto crc = CalculateFileRangeCRC( real_path, req->start(), req->end());
 
-    // 怎样来避免文件内容被拷贝的同时，满足拆分读取的需求？
-    // 这里准备使用list的方式，读取时指定一个大小，将文件内容读取到一个string的list中
-    // 每个string都是指定的长度。然后外界根据索引来读取指定的string
-    // 这个list使用shared_ptr来进行包装，然后存储在IC中，这样使用者也不需要带着这个列表到处传递
-    auto packageSize = req->splitpackagesize();
-    int filesize = 0;
-    auto token = CUtility::GenUUID();
-    // TODO. need process the pialed case.
-    auto &info = (*m_mapTokenToDownloadInfo)[token];
-    auto res = SplitFile(real_path,packageSize, info.SplitPackage, &filesize);
-    if (res.IsFialed())
-        return CResult::Make_Error(res.GetMessage());
-
-    info.RealPath = real_path;
-    info.Hash_MD5 = CMD5::Encode(real_path, true);
-    info.Size = filesize;
-
-    PrepareDownloadResponse response;
-    response.set_token(token);
-    response.set_filesize(filesize);
-    auto infoMap = response.mutable_splitpackageinfos();
-    for (auto &item : info.SplitPackage)
+    if( crc.IsFialed())
     {
-        infoMap->operator[](item.first) = CMD5::Encode(item.second);
+        return CResult::Make_Error(crc.GetMessage());
     }
-
-    return CResult::Make_OK(ConvertObjToStr(&response));*/
+    auto crccode = crc.GetResultObject();
+    if(crccode != req->datacrccode() )
+    {
+        return CResult::Make_Error(Helper::Format("CRC does not match. C[%d]<->[%d]S", req->datacrccode(),crccode ));
+    }
+    
     return CResult::Succeed;
 }
 
@@ -325,7 +326,6 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, DataPack
     ifstream in(real_path.c_str(), ios::in | ios::binary);
     in.seekg(0, ios::end);
     int nSize = in.tellg();
-    
 
     DownloadFileResponse res;
     res.set_filesize(nSize);
@@ -363,7 +363,7 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Data
 CResult Sloong::FileManager::GetThumbnailHandler(const string &str_req, DataPackage *trans_pack)
 {
     auto req = ConvertStrToObj<GetThumbnailRequest>(str_req);
-    string thumb_file = Helper::Format("%s_%d_%d_%d",Helper::ntos(req->indexcode()).c_str(), req->width(), req->height(), req->quality());
+    string thumb_file = Helper::Format("%s_%d_%d_%d", Helper::ntos(req->indexcode()).c_str(), req->width(), req->height(), req->quality());
     if (!FileExist(thumb_file))
     {
         auto real_path = QueryFilePath(req->indexcode());

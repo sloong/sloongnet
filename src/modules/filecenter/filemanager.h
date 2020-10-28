@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-10-09 15:31:11
+ * @LastEditTime: 2020-10-16 14:54:01
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filemanager.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -50,7 +50,7 @@ namespace Sloong
     protected:
         CResult ArchiveFile(const string& source);
 
-
+        N32Result CalculateFileRangeCRC( const string&, int, int );
         string QueryFilePath( const string& );
         string GetPathByHashcode( const string& );
         string GetFolderByHashcode( const string& );
