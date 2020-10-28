@@ -369,11 +369,11 @@ int CGlobalFunction::Lua_SetExtendDataByFile(lua_State *l)
     return 2;
 }
 
-NResult CGlobalFunction::GetConnectionID(int templateid)
+U64Result CGlobalFunction::GetConnectionID(int templateid)
 {
     if (CGlobalFunction::Instance->m_mapTemplateIDToUUIDs[templateid].size() == 0)
     {
-        return NResult::Make_Error(Helper::Format("Template[%d] no node online.", templateid));
+        return U64Result::Make_Error(Helper::Format("Template[%d] no node online.", templateid));
     }
 
     auto uuid = CGlobalFunction::Instance->m_mapTemplateIDToUUIDs[templateid].front();
@@ -382,10 +382,10 @@ NResult CGlobalFunction::GetConnectionID(int templateid)
         auto item = CGlobalFunction::Instance->m_mapUUIDToNode[uuid];
         CGlobalFunction::Instance->AddConnection(uuid, item.address(), item.port());
 
-        return NResult::Make_Error(Helper::Format("Try connect to [%d][%lld][%s:%d], please wait and retry.", templateid, uuid, item.address().c_str(), item.port()));
+        return U64Result::Make_Error(Helper::Format("Try connect to [%d][%lld][%s:%d], please wait and retry.", templateid, uuid, item.address().c_str(), item.port()));
     }
 
-    return NResult::Make_OKResult(CGlobalFunction::Instance->m_mapUUIDToConnectionID[uuid]);
+    return U64Result::Make_OKResult(CGlobalFunction::Instance->m_mapUUIDToConnectionID[uuid]);
 
 }
 

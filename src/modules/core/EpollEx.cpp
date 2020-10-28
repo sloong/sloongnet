@@ -29,7 +29,7 @@ Sloong::CEpollEx::~CEpollEx()
 {
 }
 
-NResult Sloong::CEpollEx::CreateListenSocket(const string &addr, int port)
+U64Result Sloong::CEpollEx::CreateListenSocket(const string &addr, int port)
 {
 	// 初始化socket
 	auto listen_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -37,11 +37,11 @@ NResult Sloong::CEpollEx::CreateListenSocket(const string &addr, int port)
 	// SOL_SOCKET:在socket层面设置
 	// SO_REUSEADDR:允许套接字和一个已在使用中的地址捆绑
 	if (0 != setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &sock_op, sizeof(sock_op)))
-		return NResult::Make_Error(Helper::Format("Set socket property to [SO_REUSEADDR] field. Error info: [%d]%s", errno, strerror(errno)));
+		return U64Result::Make_Error(Helper::Format("Set socket property to [SO_REUSEADDR] field. Error info: [%d]%s", errno, strerror(errno)));
 
 #ifdef SO_REUSEPORT
 	if (0 != setsockopt(listen_sock, SOL_SOCKET, SO_REUSEPORT, &sock_op, sizeof(sock_op)))
-		return NResult::Make_Error(Helper::Format("Set socket property to [SO_REUSEPORT] field. Error info: [%d]%s", errno, strerror(errno)));
+		return U64Result::Make_Error(Helper::Format("Set socket property to [SO_REUSEPORT] field. Error info: [%d]%s", errno, strerror(errno)));
 #endif
 
 	// 初始化地址结构
@@ -56,13 +56,13 @@ NResult Sloong::CEpollEx::CreateListenSocket(const string &addr, int port)
 
 	// 绑定端口
 	if (-1 == bind(listen_sock, (struct sockaddr *)&address, sizeof(address)))
-		return NResult::Make_Error(Helper::Format("Bind to %d field. Error info: [%d]%s", port, errno, strerror(errno)));
+		return U64Result::Make_Error(Helper::Format("Bind to %d field. Error info: [%d]%s", port, errno, strerror(errno)));
 
 	// 监听端口,定义的SOMAXCONN大小为128,太小了,这里修改为1024
 	if (-1 == listen(listen_sock, 1024))
-		return NResult::Make_Error(Helper::Format("Listen to %d field. Error info: [%d]%s", port, errno, strerror(errno)));
+		return U64Result::Make_Error(Helper::Format("Listen to %d field. Error info: [%d]%s", port, errno, strerror(errno)));
 
-	return NResult::Make_OKResult(listen_sock);
+	return U64Result::Make_OKResult(listen_sock);
 }
 
 // Initialize the epoll and the thread pool.

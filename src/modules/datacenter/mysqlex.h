@@ -87,13 +87,13 @@ namespace Sloong
 
 		DResult Query(const string &);
 
-		inline NResult Insert(const string &cmd){
+		inline U64Result Insert(const string &cmd){
 			return RunModifySQLCmd(cmd);
 		}
-		inline NResult Delete(const string &cmd){
+		inline U64Result Delete(const string &cmd){
 			return RunModifySQLCmd(cmd);
 		}
-		inline NResult Update(const string &cmd){
+		inline U64Result Update(const string &cmd){
 			return RunModifySQLCmd(cmd);
 		}
 
@@ -105,7 +105,7 @@ namespace Sloong
 
 		unique_ptr<MySqlEx> Duplicate();
 	protected:
-		NResult RunModifySQLCmd( const string& );
+		U64Result RunModifySQLCmd( const string& );
 
 	private:
 		CLog *m_pLog = nullptr;

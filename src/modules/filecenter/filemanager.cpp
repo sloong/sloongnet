@@ -170,11 +170,11 @@ string Sloong::FileManager::QueryFilePath(const string &hashcode)
     return GetPathByHashcode(hashcode);
 }
 
-N32Result Sloong::FileManager::CalculateFileRangeCRC(const string &filepath, int start, int end)
+U32Result Sloong::FileManager::CalculateFileRangeCRC(const string &filepath, int start, int end)
 {
     if (!FileExist(filepath))
     {
-        return N32Result::Make_Error("File no exist.");
+        return U32Result::Make_Error("File no exist.");
     }
 
     ifstream in(filepath.c_str(), ios::in | ios::binary);
@@ -185,7 +185,7 @@ N32Result Sloong::FileManager::CalculateFileRangeCRC(const string &filepath, int
     str.resize(count);
     in.read(str.data(), count);
     in.close();
-    return N32Result::Make_OKResult(CRC::Calculate(str.c_str(), str.length(), CRC::CRC_32()));
+    return U32Result::Make_OKResult(CRC::Calculate(str.c_str(), str.length(), CRC::CRC_32()));
 }
 
 CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, DataPackage *trans_pack)
