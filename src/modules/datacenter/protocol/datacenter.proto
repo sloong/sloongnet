@@ -6,32 +6,82 @@ enum Functions{
     Invalid=0;
     reserved 1 to 200;
 
-    //
+    // Connect to Database. It will return the connect result.
     // Request:ConnectDatabaseRequest
     // Response:ConnectDatabaseResponse
     ConnectDatabase=201;
 
-    //
-    // Request:PostLogMessageRequest
-    // Response:Result
-    RunSQL=202;
+    // Run query sql.
+    // Request: QuerySQLCmdRequest
+    // Response: QuerySQLCmdResponse
+    QuerySQLCmd=202;
+
+    // Run insert sql
+    // Request: InsertSQLCmdRequest
+    // Response: InsertSQLCmdResponse
+    InsertSQLCmd=203;
+
+    // Run update sql
+    // Request: UpdateSQLCmdRequest
+    // Response: UpdateSQLCmdResponse
+    UpdateSQLCmd=204;
+
+    // Run delete sql
+    // Request: DeleteSQLCmdRequest
+    // Response: DeleteSQLCmdResponse
+    DeleteSQLCmd=205;
+
     reserved 300 to max;
 }
 
 message ConnectDatabaseRequest{
-    string DatabaseName=1;
+    string Database=1;
 }
 
 message ConnectDatabaseResponse{
-    int32 SessionID=1;
+    int32 Session=1;
 }
 
-message RunSQLRequest{
-    int32 SessionID=1;
+message QuerySQLCmdRequest{
+    int32 Session=1;
     string SQLCMD=2;
 }
 
-message RunSQLResponse{
+message SQLResultLineItem{
+    repeated string RawDataItem=1;
+}
+
+message QuerySQLCmdResponse{
+    repeated SQLResultLineItem Lines=2;
+}
+
+message InsertSQLCmdRequest{
+    int32 Session=1;
+    string SQLCMD=2;
+    // If set true, will return "SELECT @@IDENTITY" value.
+    bool GetIdentity=3;
+}
+
+message InsertSQLCmdResponse{
     int32 AffectedRows=1;
-    repeated string Results=2;
+    // If no set GetIdentity, return 0. else return the value. if get fialed, return -1;
+    int32 Identity=2;
+}
+
+message UpdateSQLCmdRequest{
+    int32 Session=1;
+    string SQLCMD=2;
+}
+
+message UpdateSQLCmdResponse{
+    int32 AffectedRows=1;
+}
+
+message DeleteSQLCmdRequest{
+    int32 Session=1;
+    string SQLCMD=2;
+}
+
+message DeleteSQLCmdResponse{
+    int32 AffectedRows=1;
 }

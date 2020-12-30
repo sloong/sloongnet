@@ -1,20 +1,72 @@
-/*
- * @Author: WCB
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-18 19:19:53
- * @Description: file content
+ * @LastEditTime: 2020-08-27 15:55:36
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/manager/servermanage.cpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
+/*** 
+ * @......................................&&.........................
+ * @....................................&&&..........................
+ * @.................................&&&&............................
+ * @...............................&&&&..............................
+ * @.............................&&&&&&..............................
+ * @...........................&&&&&&....&&&..&&&&&&&&&&&&&&&........
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............
+ * @................&...&&&&&&&&&&&&&&&&&&&&&&&&&&&&.................
+ * @.......................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @...................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...............
+ * @..................&&&   &&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @...............&&&&&@  &&&&&&&&&&..&&&&&&&&&&&&&&&&&&&...........
+ * @..............&&&&&&&&&&&&&&&.&&....&&&&&&&&&&&&&..&&&&&.........
+ * @..........&&&&&&&&&&&&&&&&&&...&.....&&&&&&&&&&&&&...&&&&........
+ * @........&&&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&....&&&.......
+ * @.......&&&&&&&&.....................&&&&&&&&&&&&&&&&.....&&......
+ * @........&&&&&.....................&&&&&&&&&&&&&&&&&&.............
+ * @..........&...................&&&&&&&&&&&&&&&&&&&&&&&............
+ * @................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&..&&&&&............
+ * @..............&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&....&&&&&............
+ * @...........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&......&&&&............
+ * @.........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........&&&&............
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&............
+ * @......&&&&&&&&&&&&&&&&&&&...&&&&&&...............&&&.............
+ * @.....&&&&&&&&&&&&&&&&............................&&..............
+ * @....&&&&&&&&&&&&&&&.................&&...........................
+ * @...&&&&&&&&&&&&&&&.....................&&&&......................
+ * @...&&&&&&&&&&.&&&........................&&&&&...................
+ * @..&&&&&&&&&&&..&&..........................&&&&&&&...............
+ * @..&&&&&&&&&&&&...&............&&&.....&&&&...&&&&&&&.............
+ * @..&&&&&&&&&&&&&.................&&&.....&&&&&&&&&&&&&&...........
+ * @..&&&&&&&&&&&&&&&&..............&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @..&&.&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&&&&&&&&&&&&.......
+ * @...&&..&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&...&&&&&&&&&&&&......
+ * @....&..&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&&&&&.....
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............&&&&&&&....
+ * @.......&&&&&.&&&&&&&&&&&&&&&&&&..&&&&&&&&...&..........&&&&&&....
+ * @........&&&.....&&&&&&&&&&&&&.....&&&&&&&&&&...........&..&&&&...
+ * @.......&&&........&&&.&&&&&&&&&.....&&&&&.................&&&&...
+ * @.......&&&...............&&&&&&&.......&&&&&&&&............&&&...
+ * @........&&...................&&&&&&.........................&&&..
+ * @.........&.....................&&&&........................&&....
+ * @...............................&&&.......................&&......
+ * @................................&&......................&&.......
+ * @.................................&&..............................
+ * @..................................&..............................
+ */
+
 #include "servermanage.h"
 
 #include "utility.h"
-#include "SendPackageEvent.hpp"
-
 #include "snowflake.h"
 
+#include "events/SendPackage.hpp"
+#include "events/GetConnectionInfo.hpp"
 using namespace Sloong::Events;
 
-CResult Sloong::CServerManage::Initialize(IControl *ic, const string& db_path )
+CResult Sloong::CServerManage::Initialize(IControl *ic, const string &db_path)
 {
 	IObject::Initialize(ic);
 
@@ -47,11 +99,10 @@ CResult Sloong::CServerManage::Initialize(IControl *ic, const string& db_path )
 		RefreshModuleReference(addItem.ID);
 	}
 	m_mapIDToTemplateItem[1].Created.push_back(0);
-	return CResult::Succeed();
-	
+	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::LoadManagerConfig( const string& db_path)
+CResult Sloong::CServerManage::LoadManagerConfig(const string &db_path)
 {
 	if (!CConfiguation::Instance->IsInituialized())
 	{
@@ -59,8 +110,8 @@ CResult Sloong::CServerManage::LoadManagerConfig( const string& db_path)
 		if (res.IsFialed())
 			return res;
 	}
-	auto res =  CConfiguation::Instance->GetTemplate(1);
-	if( res.IsFialed())
+	auto res = CConfiguation::Instance->GetTemplate(1);
+	if (res.IsFialed())
 		return CResult(ResultType::Warning);
 	return CResult::Make_OK(string(res.GetResultObject().configuation.begin(), res.GetResultObject().configuation.end()));
 }
@@ -118,7 +169,6 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 	return 0;
 }
 
-
 void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int event, ::google::protobuf::Message *msg)
 {
 	for (auto item : notifyList)
@@ -126,18 +176,18 @@ void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int even
 		string msg_str;
 		if (msg)
 			msg->SerializeToString(&msg_str);
-		auto req = make_unique<CSendPackageEvent>();
-		req->SetRequest(m_mapUUIDToNodeItem[item].ConnectionID, IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event, msg_str, "", DataPackage_PackageType::DataPackage_PackageType_EventPackage);
+		auto req = make_unique<SendPackageEvent>(m_mapUUIDToNodeItem[item].ConnectionHashCode);
+		req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event, msg_str, DataPackage_PackageType::DataPackage_PackageType_EventPackage);
 		m_iC->SendMessage(std::move(req));
 	}
 }
 
-void Sloong::CServerManage::OnSocketClosed(SOCKET sock)
+void Sloong::CServerManage::OnSocketClosed(uint64_t con)
 {
-	if (!m_mapSocketToUUID.exist(sock))
+	if (!m_mapConnectionToUUID.exist(con))
 		return;
 
-	auto target = m_mapSocketToUUID[sock];
+	auto target = m_mapConnectionToUUID[con];
 	auto id = m_mapUUIDToNodeItem[target].TemplateID;
 
 	// Find reference node and notify them
@@ -161,40 +211,41 @@ void Sloong::CServerManage::OnSocketClosed(SOCKET sock)
 	m_mapIDToTemplateItem[id].Created.remove(target);
 }
 
-CResult Sloong::CServerManage::ProcessHandler(CDataTransPackage *pack)
+PackageResult Sloong::CServerManage::ProcessHandler(DataPackage *pack)
 {
-	auto function = (Functions)pack->GetFunction();
+	auto function = (Functions)pack->function();
 	if (!Manager::Functions_IsValid(function))
 	{
-		pack->ResponsePackage(ResultType::Error, Helper::Format("Parser request package function[%s] error.", pack->GetRecvMessage().c_str()));
-		return CResult::Succeed();
+		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Parser request package function[%s] error.", pack->content().c_str())));
 	}
 
-	auto req_str = pack->GetRecvMessage();
+	auto req_str = pack->content();
 	auto func_name = Functions_Name(function);
-	m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), CBase64::Encode(req_str).c_str()));
+	m_pLog->Debug(Helper::Format("Request [%d][%s]", function, func_name.c_str()));
 	if (!m_mapFuncToHandler.exist(function))
 	{
-		pack->ResponsePackage(ResultType::Error, Helper::Format("Function [%s] no handler.", func_name.c_str()));
-		return CResult::Succeed();
+		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
 	}
 
 	auto res = m_mapFuncToHandler[function](req_str, pack);
-	m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), CBase64::Encode(res.GetMessage()).c_str()));
-	if( res.GetResult() == ResultType::Ignore )
-		return res;
-	pack->ResponsePackage(res);
-	return CResult::Succeed();
+	if (res.IsError())
+		m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
+	else
+		m_pLog->Verbos(Helper::Format("Response [%s]:[%s]", func_name.c_str(), ResultType_Name(res.GetResult()).c_str()));
+	if (res.GetResult() == ResultType::Ignore)
+		return PackageResult::Ignore();
+
+	return PackageResult::Make_OKResult(Package::MakeResponse(pack, res));
 }
 
-CResult Sloong::CServerManage::EventRecorderHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::EventRecorderHandler(const string &req_str, DataPackage *pack)
 {
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, DataPackage *pack)
 {
-	auto sender = pack->GetSender();
+	auto sender = pack->sender();
 	if (sender == 0)
 	{
 		sender = snowflake::Instance->nextid();
@@ -203,10 +254,14 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CData
 	if (sender_info == nullptr)
 	{
 		NodeItem item;
-		item.Address = pack->GetSocketIP();
 		item.UUID = sender;
 		m_mapUUIDToNodeItem[sender] = item;
-		m_pLog->Debug(Helper::Format("Module[%s:%d] regist to system. Allocating uuid [%llu].", item.Address.c_str(), item.Port, item.UUID));
+		auto event = make_shared<GetConnectionInfoEvent>(pack->reserved().sessionid());
+		event->SetCallbackFunc([item = &m_mapUUIDToNodeItem[sender]](IEvent *e, ConnectionInfo info) {
+			item->Address = info.Address;
+		});
+		m_iC->SendMessage(event);
+		m_pLog->Debug(Helper::Format("Module[%s:%d] regist to system. Allocating uuid [%lld].", item.Address.c_str(), item.Port, item.UUID));
 		char m_pMsgBuffer[8] = {0};
 		char *pCpyPoint = m_pMsgBuffer;
 		Helper::Int64ToBytes(sender, pCpyPoint);
@@ -214,16 +269,16 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CData
 	}
 
 	int index = 0;
-	if( req_str.length() > 0 )
+	if (req_str.length() > 0)
 	{
 		auto req = ConvertStrToObj<RegisteWorkerRequest>(req_str);
 		index = req->forcetargettemplateid();
 	}
-	if( index == 0 )
+	if (index == 0)
 	{
 		index = SearchNeedCreateTemplate();
 	}
-	
+
 	if (index == 0)
 	{
 		return CResult(ResultType::Retry, "Wait");
@@ -234,7 +289,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CData
 		return CResult::Make_Error("Add server info to ServerList fialed.");
 	}
 
-	if(!m_mapIDToTemplateItem.exist(index) )
+	if (!m_mapIDToTemplateItem.exist(index))
 	{
 		return CResult(ResultType::Retry, "Allocating type no exist.");
 	}
@@ -244,7 +299,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, CData
 	res.set_templateid(tpl.ID);
 	res.set_configuation(m_mapIDToTemplateItem[tpl.ID].Configuation);
 
-	m_pLog->Debug(Helper::Format("Allocating module[%llu] Type to [%s]", sender_info->UUID, tpl.Name.c_str()));
+	m_pLog->Debug(Helper::Format("Allocating module[%lld] Type to [%s]", sender_info->UUID, tpl.Name.c_str()));
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
@@ -254,7 +309,7 @@ void Sloong::CServerManage::RefreshModuleReference(int id)
 	if (info == nullptr)
 		return;
 	info->Reference.clear();
-	auto references = Helper::split(info->ConfiguationObj->modulereference(), ';');
+	auto references = Helper::split(info->ConfiguationObj->modulereference(), ',');
 	for (auto &item : references)
 	{
 		int id;
@@ -263,9 +318,9 @@ void Sloong::CServerManage::RefreshModuleReference(int id)
 	}
 }
 
-CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, DataPackage *pack)
 {
-	auto sender = pack->GetSender();
+	auto sender = pack->sender();
 	auto req = ConvertStrToObj<RegisteNodeRequest>(req_str);
 	if (!req || sender == 0)
 		return CResult::Make_Error("The required parameter check error.");
@@ -275,7 +330,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, CDataTr
 		return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
 
 	if (!m_mapUUIDToNodeItem.exist(sender))
-		return CResult::Make_Error(Helper::Format("The sender [%llu] is no regitser.", sender));
+		return CResult::Make_Error(Helper::Format("The sender [%lld] is no regitser.", sender));
 
 	if (id == 1)
 		return CResult::Make_Error("Template id error.");
@@ -286,9 +341,9 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, CDataTr
 	item.TemplateName = tpl.Name;
 	item.TemplateID = tpl.ID;
 	item.Port = tpl.ConfiguationObj->listenport();
-	item.ConnectionID = pack->GetSocketID();
+	item.ConnectionHashCode = pack->reserved().sessionid();
 	tpl.Created.unique_insert(sender);
-	m_mapSocketToUUID[pack->GetSocketID()] = sender;
+	m_mapConnectionToUUID[pack->reserved().sessionid()] = sender;
 
 	// Find reference node and notify them
 	list<uint64_t> notifyList;
@@ -308,10 +363,10 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, CDataTr
 		SendEvent(notifyList, Manager::Events::ReferenceModuleOnline, &online_event);
 	}
 
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::AddTemplateHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::AddTemplateHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<AddTemplateRequest>(req_str);
 	auto info = req->addinfo();
@@ -335,10 +390,10 @@ CResult Sloong::CServerManage::AddTemplateHandler(const string &req_str, CDataTr
 	item.ID = id;
 	m_mapIDToTemplateItem[id] = item;
 	RefreshModuleReference(id);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::DeleteTemplateHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::DeleteTemplateHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<DeleteTemplateRequest>(req_str);
 
@@ -358,10 +413,10 @@ CResult Sloong::CServerManage::DeleteTemplateHandler(const string &req_str, CDat
 		return res;
 	}
 	m_mapIDToTemplateItem.erase(id);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<SetTemplateRequest>(req_str);
 	auto info = req->setinfo();
@@ -392,15 +447,15 @@ CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, CDataTr
 
 	m_mapIDToTemplateItem[tplInfo.ID] = tplInfo;
 	RefreshModuleReference(tplInfo.ID);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<QueryTemplateRequest>(req_str);
 
 	QueryTemplateResponse res;
-	if (req->templateid_size() == 0)
+	if (req->queryall())
 	{
 		for (auto &i : m_mapIDToTemplateItem)
 		{
@@ -409,22 +464,37 @@ CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, CData
 	}
 	else
 	{
-		auto ids = req->templateid();
-		for (auto id : ids)
+		if (req->templateid_size() > 0)
 		{
-			if (!m_mapIDToTemplateItem.exist(id))
+			auto ids = req->templateid();
+			for (auto id : ids)
 			{
-				return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
+				if (m_mapIDToTemplateItem.exist(id))
+					m_mapIDToTemplateItem[id].ToProtobuf(res.add_templateinfos());
+				else
+					return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
 			}
-			m_mapIDToTemplateItem[id].ToProtobuf(res.add_templateinfos());
+		}
+		else if (req->templatetype_size() > 0)
+		{
+			auto types = req->templatetype();
+			for (auto t : types)
+			{
+				for (auto &item : m_mapIDToTemplateItem)
+				{
+					if (item.second.ConfiguationObj->moduletype() == t)
+						item.second.ToProtobuf(res.add_templateinfos());
+				}
+			}
 		}
 	}
+
 	auto str_res = ConvertObjToStr(&res);
 	m_pLog->Debug(Helper::Format("Query Template Succeed: Count[%d];[%s]", res.templateinfos_size(), CBase64::Encode(str_res).c_str()));
 	return CResult::Make_OK(str_res);
 }
 
-CResult Sloong::CServerManage::QueryNodeHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::QueryNodeHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<QueryNodeRequest>(req_str);
 	if (!req)
@@ -453,7 +523,7 @@ CResult Sloong::CServerManage::QueryNodeHandler(const string &req_str, CDataTran
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
-CResult Sloong::CServerManage::StopNodeHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::StopNodeHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<StopNodeRequest>(req_str);
 	if (!req)
@@ -467,10 +537,10 @@ CResult Sloong::CServerManage::StopNodeHandler(const string &req_str, CDataTrans
 	l.push_back(id);
 	SendEvent(l, Core::ControlEvent::Stop, nullptr);
 
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<RestartNodeRequest>(req_str);
 	if (!req)
@@ -484,16 +554,19 @@ CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, CDataTr
 	l.push_back(id);
 	SendEvent(l, Core::ControlEvent::Restart, nullptr);
 
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, DataPackage *pack)
 {
-	auto uuid = pack->GetSender();
+	m_pLog->Verbos("QueryReferenceInfoHandler <<< ");
+	auto uuid = pack->sender();
 	if (!m_mapUUIDToNodeItem.exist(uuid))
-		return CResult::Make_Error(Helper::Format("The node is no registed. [%llu]", uuid));
+		return CResult::Make_Error(Helper::Format("The node is no registed. [%lld]", uuid));
 
 	auto id = m_mapUUIDToNodeItem[uuid].TemplateID;
+	if (!m_mapIDToTemplateItem.exist(id))
+		return CResult::Make_Error(Helper::Format("The template id error. UUID[%lld];ID[%d]", uuid, id));
 
 	QueryReferenceInfoResponse res;
 	auto references = Helper::split(m_mapIDToTemplateItem[id].ConfiguationObj->modulereference(), ',');
@@ -505,21 +578,22 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 		auto item = res.add_templateinfos();
 		auto tpl = m_mapIDToTemplateItem[ref_id];
 		item->set_templateid(tpl.ID);
+		item->set_type(tpl.ConfiguationObj->moduletype() );
 		item->set_providefunctions(tpl.ConfiguationObj->modulefunctoins());
 		for (auto node : tpl.Created)
 		{
 			m_mapUUIDToNodeItem[node].ToProtobuf(item->add_nodeinfos());
 		}
 	}
-
+	m_pLog->Verbos("QueryReferenceInfoHandler response >>> " + res.ShortDebugString());
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
-CResult Sloong::CServerManage::ReportLoadStatusHandler(const string &req_str, CDataTransPackage *pack)
+CResult Sloong::CServerManage::ReportLoadStatusHandler(const string &req_str, DataPackage *pack)
 {
 	auto req = ConvertStrToObj<ReportLoadStatusRequest>(req_str);
-	
-	m_pLog->Info(Helper::Format("Node[%lld] load status :CPU[%lf]Mem[%lf]", pack->GetSender(), req->cpuload(), req->memroyused() ));
-	
+
+	m_pLog->Info(Helper::Format("Node[%lld] load status :CPU[%lf]Mem[%lf]", pack->sender(), req->cpuload(), req->memroyused()));
+
 	return CResult(ResultType::Ignore);
 }

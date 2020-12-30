@@ -1,63 +1,126 @@
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 2019-01-15 15:57:36
+ * @LastEditTime: 2020-08-12 14:23:08
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/gateway/gateway.cpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
+ */
+/*** 
+ * @......................................&&.........................
+ * @....................................&&&..........................
+ * @.................................&&&&............................
+ * @...............................&&&&..............................
+ * @.............................&&&&&&..............................
+ * @...........................&&&&&&....&&&..&&&&&&&&&&&&&&&........
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............
+ * @................&...&&&&&&&&&&&&&&&&&&&&&&&&&&&&.................
+ * @.......................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @...................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...............
+ * @..................&&&   &&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @...............&&&&&@  &&&&&&&&&&..&&&&&&&&&&&&&&&&&&&...........
+ * @..............&&&&&&&&&&&&&&&.&&....&&&&&&&&&&&&&..&&&&&.........
+ * @..........&&&&&&&&&&&&&&&&&&...&.....&&&&&&&&&&&&&...&&&&........
+ * @........&&&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&....&&&.......
+ * @.......&&&&&&&&.....................&&&&&&&&&&&&&&&&.....&&......
+ * @........&&&&&.....................&&&&&&&&&&&&&&&&&&.............
+ * @..........&...................&&&&&&&&&&&&&&&&&&&&&&&............
+ * @................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&..&&&&&............
+ * @..............&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&....&&&&&............
+ * @...........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&......&&&&............
+ * @.........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........&&&&............
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&............
+ * @......&&&&&&&&&&&&&&&&&&&...&&&&&&...............&&&.............
+ * @.....&&&&&&&&&&&&&&&&............................&&..............
+ * @....&&&&&&&&&&&&&&&.................&&...........................
+ * @...&&&&&&&&&&&&&&&.....................&&&&......................
+ * @...&&&&&&&&&&.&&&........................&&&&&...................
+ * @..&&&&&&&&&&&..&&..........................&&&&&&&...............
+ * @..&&&&&&&&&&&&...&............&&&.....&&&&...&&&&&&&.............
+ * @..&&&&&&&&&&&&&.................&&&.....&&&&&&&&&&&&&&...........
+ * @..&&&&&&&&&&&&&&&&..............&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @..&&.&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&&&&&&&&&&&&.......
+ * @...&&..&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&...&&&&&&&&&&&&......
+ * @....&..&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&&&&&.....
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............&&&&&&&....
+ * @.......&&&&&.&&&&&&&&&&&&&&&&&&..&&&&&&&&...&..........&&&&&&....
+ * @........&&&.....&&&&&&&&&&&&&.....&&&&&&&&&&...........&..&&&&...
+ * @.......&&&........&&&.&&&&&&&&&.....&&&&&.................&&&&...
+ * @.......&&&...............&&&&&&&.......&&&&&&&&............&&&...
+ * @........&&...................&&&&&&.........................&&&..
+ * @.........&.....................&&&&........................&&....
+ * @...............................&&&.......................&&......
+ * @................................&&......................&&.......
+ * @.................................&&..............................
+ * @..................................&..............................
+ */
+
 /* File Name: server.c */
 #include "gateway.h"
 #include "utility.h"
 #include "IData.h"
-#include "SendPackageEvent.hpp"
+#include "events/SendPackageToManager.hpp"
+#include "events/RegisteConnection.hpp"
 using namespace Sloong;
 using namespace Sloong::Events;
 
 #include "protocol/manager.pb.h"
 using namespace Manager;
-
 #include "snowflake.h"
 
 
 unique_ptr<SloongNetGateway> Sloong::SloongNetGateway::Instance = nullptr;
 
-extern "C" CResult RequestPackageProcesser(void *env, CDataTransPackage *pack)
+extern "C" PackageResult RequestPackageProcesser(void *env, DataPackage *pack)
 {
-	auto pTranspond = TYPE_TRANS<GatewayTranspond*>(env);
+	auto pTranspond = STATIC_TRANS<GatewayTranspond*>(env);
 	if( pTranspond)
 		return pTranspond->RequestPackageProcesser(pack);
 	else
-		return CResult::Make_Error("RequestPackageProcesser error, Environment convert failed.");
+		return PackageResult::Make_Error("RequestPackageProcesser error, Environment convert failed.");
 }
 
-extern "C" CResult ResponsePackageProcesser(void *env, CDataTransPackage *pack)
+extern "C" PackageResult ResponsePackageProcesser(void *env, DataPackage *pack)
 {
-	auto num = pack->GetSerialNumber();
+	auto num = pack->id();
 	if( SloongNetGateway::Instance->m_mapSerialToRequest.exist(num) )
 	{
-		auto pTranspond = TYPE_TRANS<GatewayTranspond*>(env);
+		auto pTranspond = STATIC_TRANS<GatewayTranspond*>(env);
 		if( pTranspond)
-			return pTranspond->ResponsePackageProcesser(&SloongNetGateway::Instance->m_mapSerialToRequest[num],pack);
+		{
+			auto info = move(SloongNetGateway::Instance->m_mapSerialToRequest[num]);
+			SloongNetGateway::Instance->m_mapSerialToRequest.erase(num);
+			return pTranspond->ResponsePackageProcesser(move(info),pack);
+		}
 		else
-			return CResult::Make_Error("ResponsePackageProcesser error, Environment convert failed.");
+			return PackageResult::Make_Error("ResponsePackageProcesser error, Environment convert failed.");
 	}
 
 	return SloongNetGateway::Instance->ResponsePackageProcesser(pack);
 }
 
-extern "C" CResult EventPackageProcesser(CDataTransPackage *pack)
+extern "C" CResult EventPackageProcesser(DataPackage *pack)
 {
 	SloongNetGateway::Instance->EventPackageProcesser(pack);
-	return CResult::Succeed();
+	return CResult::Succeed;
 } 
 
-extern "C" CResult NewConnectAcceptProcesser(CSockInfo *info)
+extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 {
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
-extern "C" CResult ModuleInitialization(GLOBAL_CONFIG *confiog)
+extern "C" CResult ModuleInitialization(IControl *ic)
 {
 	SloongNetGateway::Instance = make_unique<SloongNetGateway>();
-	return CResult::Succeed();
+	return SloongNetGateway::Instance->Initialization(ic);
 }
 
-extern "C" CResult ModuleInitialized(SOCKET sock, IControl *iC)
+extern "C" CResult ModuleInitialized()
 {
-	return SloongNetGateway::Instance->Initialized(sock, iC);
+	return SloongNetGateway::Instance->Initialized();
 }
 
 extern "C" CResult CreateProcessEnvironment(void **out_env)
@@ -65,56 +128,47 @@ extern "C" CResult CreateProcessEnvironment(void **out_env)
 	return SloongNetGateway::Instance->CreateProcessEnvironmentHandler(out_env);
 }
 
-CResult SloongNetGateway::Initialized(SOCKET sock, IControl *iC)
+CResult SloongNetGateway::Initialization(IControl *iC)
 {
 	IObject::Initialize(iC);
 	IData::Initialize(iC);
+	return CResult::Succeed;
+}
+
+CResult SloongNetGateway::Initialized()
+{
 	m_pConfig = IData::GetGlobalConfig();
 	m_pModuleConfig = IData::GetModuleConfig();
 	m_pRuntimeData = IData::GetRuntimeData();
 	if (m_pModuleConfig)
 	{
-		auto event = make_unique<CNormalEvent>();
+		/*auto event = make_shared<NormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableTimeoutCheck);
 		event->SetMessage(Helper::Format("{\"TimeoutTime\":\"%d\", \"CheckInterval\":%d}", (*m_pModuleConfig)["TimeoutTime"].asInt(), (*m_pModuleConfig)["TimeoutCheckInterval"].asInt()));
-		m_iC->SendMessage(std::move(event));
+		m_iC->SendMessage(event);
 
-		event = make_unique<CNormalEvent>();
+		event = make_shared<NormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableClientCheck);
 		event->SetMessage(Helper::Format("{\"ClientCheckKey\":\"%s\", \"ClientCheckTime\":%d}", (*m_pModuleConfig)["ClientCheckKey"].asString().c_str(), (*m_pModuleConfig)["ClientCheckKey"].asInt()));
-		m_iC->SendMessage(std::move(event));
+		m_iC->SendMessage(event);*/
 	}
-	m_nManagerConnection = sock;
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
-	m_iC->RegisterEventHandler(EVENT_TYPE::SocketClose, std::bind(&SloongNetGateway::OnSocketClose, this, std::placeholders::_1));
-	m_iC->RegisterEventHook(EVENT_TYPE::SendPackage, std::bind(&SloongNetGateway::SendPackageHook, this, std::placeholders::_1));
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 
-CResult SloongNetGateway::ResponsePackageProcesser( CDataTransPackage *trans_pack)
+PackageResult SloongNetGateway::ResponsePackageProcesser( DataPackage *trans_pack)
 {
-	auto num = trans_pack->GetSerialNumber();
-	if (!m_listSendEvent.exist(num))
-	{
-		m_pLog->Error("ResponsePackageProcesser no find the package.");
-		return CResult::Make_Error("ResponsePackageProcesser no find the package.");
-	}
-		
-
-	auto send_evt = TYPE_TRANS<CSendPackageEvent*>(m_listSendEvent[num].get());
-	auto need_send_res = send_evt->CallCallbackFunc(trans_pack);
-	m_listSendEvent.erase(num);
-	return need_send_res;
+	m_pLog->Error("ResponsePackageProcesser no find the package. Ignore package.");
+	return PackageResult::Ignore();
 }
 
 
 void SloongNetGateway::QueryReferenceInfo()
 {
-	auto event = make_unique<CSendPackageEvent>();
+	auto event = make_shared<SendPackageToManagerEvent>(Functions::QueryReferenceInfo, "");
 	event->SetCallbackFunc(std::bind(&SloongNetGateway::QueryReferenceInfoResponseHandler, this, std::placeholders::_1, std::placeholders::_2));
-	event->SetRequest(m_nManagerConnection, m_pRuntimeData->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, (int)Functions::QueryReferenceInfo, "");
-	m_iC->CallMessage(std::move(event));
+	m_iC->SendMessage(event);
 }
 
 // process the provied function string to list.
@@ -146,18 +200,21 @@ list<int> SloongNetGateway::ProcessProviedFunction(const string &prov_func)
 	return res_list;
 }
 
-CResult SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent *send_pack, CDataTransPackage *res_pack)
+void SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent* send_pack, DataPackage *res_pack)
 {
-	auto str_res = res_pack->GetRecvMessage();
+	auto str_res = res_pack->content();
 	auto res = ConvertStrToObj<QueryReferenceInfoResponse>(str_res);
 	if (res == nullptr || res->templateinfos_size() == 0)
-		return CResult::Invalid();
+		return;
 
 	auto templateInfos = res->templateinfos();
 	for (auto info : templateInfos)
 	{
 		if (info.providefunctions() == "*")
+		{
+			m_pLog->Verbos(Helper::Format("Universal processer find: template id[%d]", info.templateid()));
 			m_mapFuncToTemplateIDs[-1].unique_insert(info.templateid());
+		}
 		else
 		{
 			for (auto i : ProcessProviedFunction(info.providefunctions()))
@@ -171,18 +228,15 @@ CResult SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent *send_pack, C
 			AddConnection(item.uuid(), item.address(), item.port());
 		}
 	}
-	return CResult::Invalid();
 }
 
 void SloongNetGateway::AddConnection( uint64_t uuid, const string &addr, int port)
 {
-	EasyConnect conn;
-	conn.Initialize(addr, port);
-	conn.Connect();
-	auto event = make_unique<CNetworkEvent>(EVENT_TYPE::RegisteConnection);
-	event->SetSocketID(conn.GetSocketID());
-	m_iC->SendMessage(std::move(event));
-	m_mapUUIDToConnect[uuid] = conn.GetSocketID();
+	auto event = make_shared<RegisteConnectionEvent>(addr, port);
+	event->SetCallbackFunc([this,uuid](IEvent* e, uint64_t hashcode){
+		m_mapUUIDToConnectionID[uuid] = hashcode;
+	});
+	m_iC->SendMessage(event);
 }
 
 CResult SloongNetGateway::CreateProcessEnvironmentHandler(void **out_env)
@@ -193,56 +247,40 @@ CResult SloongNetGateway::CreateProcessEnvironmentHandler(void **out_env)
 		return res;
 	(*out_env) = item.get();
 	m_listTranspond.push_back(std::move(item));
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
-void SloongNetGateway::SendPackageHook(UniqueEvent event)
-{
-	auto send_evt = TYPE_TRANS<CSendPackageEvent*>(event.get());
-	auto pack = send_evt->GetDataPackage();
-	m_listSendEvent[pack->id()] = std::move(event);
-}
-
-void SloongNetGateway::OnStart(IEvent* evt)
+void SloongNetGateway::OnStart(SharedEvent evt)
 {
 	QueryReferenceInfo();
 }
 
-void Sloong::SloongNetGateway::OnSocketClose(IEvent* event)
+void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_req, DataPackage *trans_pack)
 {
-
-}
-
-void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_req, CDataTransPackage *trans_pack)
-{
-	m_pLog->Info("Receive ReferenceModuleOnline event");
 	auto req = ConvertStrToObj<Manager::EventReferenceModuleOnline>(str_req);
 	auto item = req->item();
 	m_mapUUIDToNode[item.uuid()] = item;
 	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
-	m_pLog->Debug(Helper::Format("New module is online:[%llu][%s:%d]", item.uuid(), item.address().c_str(), item.port()));
+	m_pLog->Info(Helper::Format("New node[%lld][%s:%d] is online:templateid[%d],list size[%d]", item.uuid(), item.address().c_str(), item.port(), item.templateid(), m_mapTempteIDToUUIDs[item.templateid()].size()));
 
 	AddConnection(item.uuid(), item.address(), item.port());
 }
 
-void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_req, CDataTransPackage *trans_pack)
-{
-	m_pLog->Info("Receive ReferenceModuleOffline event");
+void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_req, DataPackage *trans_pack)
+{	
 	auto req = ConvertStrToObj<Manager::EventReferenceModuleOffline>(str_req);
 	auto uuid = req->uuid();
 	auto item = m_mapUUIDToNode[uuid];
+	
 	m_mapTempteIDToUUIDs[item.templateid()].erase(item.uuid());
-	auto event = make_unique<CNetworkEvent>(EVENT_TYPE::SocketClose);
-	event->SetSocketID(m_mapUUIDToConnect[uuid]);
-	m_iC->SendMessage(std::move(event));
-	m_mapUUIDToConnect.erase(uuid);
+	m_mapUUIDToConnectionID.erase(uuid);
 	m_mapUUIDToNode.erase(uuid);
+	m_pLog->Info(Helper::Format("Node is offline [%lld], template id[%d],list size[%d]", item.uuid(), item.templateid(), m_mapTempteIDToUUIDs[item.templateid()].size()));
 }
 
-void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pack)
+void Sloong::SloongNetGateway::EventPackageProcesser(DataPackage *pack)
 {
-	auto data_pack = trans_pack->GetDataPackage();
-	auto event = (Manager::Events)data_pack->function();
+	auto event = (Manager::Events)pack->function();
 	if (!Manager::Events_IsValid(event))
 	{
 		m_pLog->Error(Helper::Format("EventPackageProcesser is called.but the fucntion[%d] check error.", event));
@@ -253,12 +291,12 @@ void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pa
 	{
 	case Manager::Events::ReferenceModuleOnline:
 	{
-		OnReferenceModuleOnlineEvent(data_pack->content(), trans_pack);
+		OnReferenceModuleOnlineEvent(pack->content(), pack);
 	}
 	break;
 	case Manager::Events::ReferenceModuleOffline:
 	{
-		OnReferenceModuleOfflineEvent(data_pack->content(), trans_pack);
+		OnReferenceModuleOfflineEvent(pack->content(), pack);
 	}
 	break;
 	default:
@@ -270,11 +308,12 @@ void Sloong::SloongNetGateway::EventPackageProcesser(CDataTransPackage *trans_pa
 }
 
 
-SOCKET Sloong::SloongNetGateway::GetPorcessConnect(int function)
+uint64_t Sloong::SloongNetGateway::GetPorcessConnection(int function)
 {
 	if (!m_mapFuncToTemplateIDs.exist(function) && !m_mapFuncToTemplateIDs.exist(-1))
 	{
-		return INVALID_SOCKET;
+		m_pLog->Warn(Helper::Format("Function to template map list no have function [%d] and universal processer. the map list size [%d]", function, m_mapFuncToTemplateIDs.size()));
+		return 0;
 	}
 
 	for( auto tpl : m_mapFuncToTemplateIDs[function])
@@ -284,7 +323,7 @@ SOCKET Sloong::SloongNetGateway::GetPorcessConnect(int function)
 
 		for (auto node : m_mapTempteIDToUUIDs[tpl])
 		{
-			return m_mapUUIDToConnect[node];
+			return m_mapUUIDToConnectionID[node];
 		}
 	}
 
@@ -295,10 +334,10 @@ SOCKET Sloong::SloongNetGateway::GetPorcessConnect(int function)
 
 		for (auto node : m_mapTempteIDToUUIDs[tpl])
 		{
-			return m_mapUUIDToConnect[node];
+			return m_mapUUIDToConnectionID[node];
 		}
 	}
 
-	return INVALID_SOCKET;
+	return 0;
 }
 

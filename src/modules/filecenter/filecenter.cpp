@@ -1,3 +1,62 @@
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditTime: 2020-08-21 13:24:04
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/filecenter/filecenter.cpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
+ */
+/*** 
+ * @......................................&&.........................
+ * @....................................&&&..........................
+ * @.................................&&&&............................
+ * @...............................&&&&..............................
+ * @.............................&&&&&&..............................
+ * @...........................&&&&&&....&&&..&&&&&&&&&&&&&&&........
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............
+ * @................&...&&&&&&&&&&&&&&&&&&&&&&&&&&&&.................
+ * @.......................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @...................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...............
+ * @..................&&&   &&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @...............&&&&&@  &&&&&&&&&&..&&&&&&&&&&&&&&&&&&&...........
+ * @..............&&&&&&&&&&&&&&&.&&....&&&&&&&&&&&&&..&&&&&.........
+ * @..........&&&&&&&&&&&&&&&&&&...&.....&&&&&&&&&&&&&...&&&&........
+ * @........&&&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&....&&&.......
+ * @.......&&&&&&&&.....................&&&&&&&&&&&&&&&&.....&&......
+ * @........&&&&&.....................&&&&&&&&&&&&&&&&&&.............
+ * @..........&...................&&&&&&&&&&&&&&&&&&&&&&&............
+ * @................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&..&&&&&............
+ * @..............&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&....&&&&&............
+ * @...........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&......&&&&............
+ * @.........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........&&&&............
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&............
+ * @......&&&&&&&&&&&&&&&&&&&...&&&&&&...............&&&.............
+ * @.....&&&&&&&&&&&&&&&&............................&&..............
+ * @....&&&&&&&&&&&&&&&.................&&...........................
+ * @...&&&&&&&&&&&&&&&.....................&&&&......................
+ * @...&&&&&&&&&&.&&&........................&&&&&...................
+ * @..&&&&&&&&&&&..&&..........................&&&&&&&...............
+ * @..&&&&&&&&&&&&...&............&&&.....&&&&...&&&&&&&.............
+ * @..&&&&&&&&&&&&&.................&&&.....&&&&&&&&&&&&&&...........
+ * @..&&&&&&&&&&&&&&&&..............&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @..&&.&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&&&&&&&&&&&&.......
+ * @...&&..&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&...&&&&&&&&&&&&......
+ * @....&..&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&&&&&.....
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............&&&&&&&....
+ * @.......&&&&&.&&&&&&&&&&&&&&&&&&..&&&&&&&&...&..........&&&&&&....
+ * @........&&&.....&&&&&&&&&&&&&.....&&&&&&&&&&...........&..&&&&...
+ * @.......&&&........&&&.&&&&&&&&&.....&&&&&.................&&&&...
+ * @.......&&&...............&&&&&&&.......&&&&&&&&............&&&...
+ * @........&&...................&&&&&&.........................&&&..
+ * @.........&.....................&&&&........................&&....
+ * @...............................&&&.......................&&......
+ * @................................&&......................&&.......
+ * @.................................&&..............................
+ * @..................................&..............................
+ */
+
 #include "filecenter.h"
 
 #include "protocol/manager.pb.h"
@@ -8,44 +67,44 @@ using namespace Sloong;
 
 unique_ptr<CFileCenter> Sloong::CFileCenter::Instance = nullptr;
 
-extern "C" CResult RequestPackageProcesser(void *pEnv, CDataTransPackage *pack)
+extern "C" PackageResult RequestPackageProcesser(void *pEnv, DataPackage *pack)
 {
-    auto pManager = TYPE_TRANS<FileManager *>(pEnv);
+    auto pManager = STATIC_TRANS<FileManager *>(pEnv);
     if (pManager)
         return pManager->RequestPackageProcesser(pack);
     else
-        return CResult::Make_Error("Environment convert error. cannot process message.");
+        return PackageResult::Make_Error("Environment convert error. cannot process message.");
 }
 
-extern "C" CResult ResponsePackageProcesser(void *pEnv, CDataTransPackage *pack)
+extern "C" PackageResult ResponsePackageProcesser(void *pEnv, DataPackage *pack)
 {
-    auto pManager = TYPE_TRANS<FileManager *>(pEnv);
+    auto pManager = STATIC_TRANS<FileManager *>(pEnv);
     if (pManager)
         return pManager->ResponsePackageProcesser(pack);
     else
-        return CResult::Make_Error("Environment convert error. cannot process message.");
+        return PackageResult::Make_Error("Environment convert error. cannot process message.");
 }
 
-extern "C" CResult EventPackageProcesser(CDataTransPackage *pack)
+extern "C" CResult EventPackageProcesser(DataPackage *pack)
 {
     CFileCenter::Instance->EventPackageProcesser(pack);
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
-extern "C" CResult NewConnectAcceptProcesser(CSockInfo *info)
+extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 {
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
-extern "C" CResult ModuleInitialization(GLOBAL_CONFIG *config)
+extern "C" CResult ModuleInitialization(IControl *ic)
 {
     CFileCenter::Instance = make_unique<CFileCenter>();
-    return CFileCenter::Instance->Initialization(config);
+    return CFileCenter::Instance->Initialization(ic);
 }
 
-extern "C" CResult ModuleInitialized(SOCKET sock, IControl *iC)
+extern "C" CResult ModuleInitialized()
 {
-    return CFileCenter::Instance->Initialized(iC);
+    return CFileCenter::Instance->Initialized();
 }
 
 extern "C" CResult CreateProcessEnvironment(void **out_env)
@@ -53,20 +112,16 @@ extern "C" CResult CreateProcessEnvironment(void **out_env)
     return CFileCenter::Instance->CreateProcessEnvironmentHandler(out_env);
 }
 
-CResult CFileCenter::Initialization(GLOBAL_CONFIG *config)
-{
-    return CResult::Succeed();
-}
-
-CResult CFileCenter::Initialized(IControl *ic)
+CResult CFileCenter::Initialization(IControl *ic)
 {
     IObject::Initialize(ic);
-    m_iC->RegisterEventHandler(SocketClose, std::bind(&CFileCenter::OnSocketClose, this, std::placeholders::_1));
-    return CResult::Succeed();
+    ic->Add(FILECENTER_DATAITEM::UploadInfos, &m_mapTokenToUploadInfo);
+    return CResult::Succeed;
 }
 
-void Sloong::CFileCenter::OnSocketClose(IEvent *event)
+CResult CFileCenter::Initialized()
 {
+    return CResult::Succeed;
 }
 
 CResult Sloong::CFileCenter::CreateProcessEnvironmentHandler(void **out_env)
@@ -77,16 +132,15 @@ CResult Sloong::CFileCenter::CreateProcessEnvironmentHandler(void **out_env)
 		return res;
 	(*out_env) = item.get();
 	m_listManage.push_back(std::move(item));
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
-void Sloong::CFileCenter::EventPackageProcesser(CDataTransPackage *trans_pack)
+void Sloong::CFileCenter::EventPackageProcesser(DataPackage *pack)
 {
     auto event = Events_MIN;
-    auto data_pack = trans_pack->GetDataPackage();
-    if (!Manager::Events_Parse(data_pack->content(), &event))
+    if (!Manager::Events_Parse(pack->content(), &event))
     {
-        m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]", data_pack->content().c_str()));
+        m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]", pack->content().c_str()));
         return;
     }
 

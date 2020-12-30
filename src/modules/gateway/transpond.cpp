@@ -1,77 +1,73 @@
-/*
- * @Author: WCB
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-28 14:43:16
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 20:39:20
- * @Description: file content
+ * @LastEditTime: 2020-08-10 16:22:53
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/gateway/transpond.cpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
-#include "NetworkEvent.hpp"
 #include "transpond.h"
 #include "IData.h"
 #include "gateway.h"
-
 #include "snowflake.h"
-
-using namespace Sloong::Events;
 
 CResult Sloong::GatewayTranspond::Initialize(IControl* ic)
 {
     m_pLog = IData::GetLog();
-    m_pControl = ic;
-    return CResult::Succeed();
+    m_iC = ic;
+    return CResult::Succeed;
 }
 
-CResult GatewayTranspond::RequestPackageProcesser(CDataTransPackage *trans_pack)
+PackageResult GatewayTranspond::RequestPackageProcesser(DataPackage *trans_pack)
 {
 	return MessageToProcesser(trans_pack);
 }
 
-CResult GatewayTranspond::ResponsePackageProcesser( RequestInfo* info, CDataTransPackage *trans_pack)
+PackageResult GatewayTranspond::ResponsePackageProcesser( UniquePackage info, DataPackage *trans_pack)
 {
-	return MessageToClient(info,trans_pack);
+	return MessageToClient(move(info),trans_pack);
 }
 
 
-CResult Sloong::GatewayTranspond::MessageToProcesser(CDataTransPackage *pack)
+PackageResult Sloong::GatewayTranspond::MessageToProcesser(DataPackage *pack)
 {
 	m_pLog->Debug("Receive new request package.");
-	auto data_pack = pack->GetDataPackage();
-	auto target = SloongNetGateway::Instance->GetPorcessConnect(data_pack->function());
-	if( target == INVALID_SOCKET )
+	auto target = SloongNetGateway::Instance->GetPorcessConnection(pack->function());
+	if( target == 0 )
 	{
-		pack->ResponsePackage(ResultType::Error,"No process service online .");
-		m_pLog->Debug(Helper::Format("No find process service for function[%d]. package [%d][%llu]", data_pack->function(),  pack->GetSocketID(), pack->GetSerialNumber() ));
-		return CResult::Succeed();
+		m_pLog->Debug(Helper::Format("No find process service for function[%d]. package [%d][%lld]", pack->function(),  pack->reserved().sessionid(), pack->id() ));
+		return PackageResult::Make_Error(Helper::Format("No find process service for function[%d]. package [%d][%lld]", pack->function(),  pack->reserved().sessionid(), pack->id() ));
 	}
 
-	RequestInfo info;
-	info.RequestConnect = pack->GetConnection();
-	info.SerialNumber = data_pack->id();
-	info.tStart = pack->GetRecord()->front();	
-	info.tProcess = pack->GetTimeval();
-		
-	auto serialNumber = snowflake::Instance->nextid();
-	data_pack->set_id(serialNumber);
-	pack->ClearConnection();
-	pack->SetSocket(target);
-	pack->RequestPackage();
+	auto response = Package::MakeResponse(pack);
+	for( auto i : pack->reserved().clocks() )
+	{
+		response->mutable_reserved()->add_clocks(i);
+	}
+	response->mutable_reserved()->add_clocks(GetClock());
 
-	m_pLog->Debug(Helper::Format("Trans package [%d][%llu] -> [%d][%llu]", info.RequestConnect->GetSocketID(), info.SerialNumber, target, serialNumber));
+	auto trans_pack = Package::MakeResponse(pack);
+	trans_pack->set_status(DataPackage_StatusType::DataPackage_StatusType_Request);
+	trans_pack->set_content(pack->content());
+	trans_pack->set_extend(pack->extend());
+	
+	auto id = snowflake::Instance->nextid();
+	trans_pack->set_id(id);
+	trans_pack->mutable_reserved()->set_sessionid(target);
+	
+	m_pLog->Debug(Helper::Format("Trans package [%lld][%lld] -> [%d][%lld]", pack->reserved().sessionid(), pack->id(), trans_pack->reserved().sessionid(), trans_pack->id()));
 
-	SloongNetGateway::Instance->m_mapSerialToRequest[serialNumber] = info;
-	return CResult::Succeed();
+	SloongNetGateway::Instance->m_mapSerialToRequest[trans_pack->id()] = move(response);
+	return PackageResult::Make_OKResult(move(trans_pack));
 }
 
-CResult Sloong::GatewayTranspond::MessageToClient(RequestInfo *req_info, CDataTransPackage *res_pack)
+PackageResult Sloong::GatewayTranspond::MessageToClient(UniquePackage info, DataPackage *pack)
 {
-	auto res_data = res_pack->GetDataPackage();
-	res_data->set_id(req_info->SerialNumber);
-	res_pack->SetConnection(req_info->RequestConnect);
-	res_pack->ResponsePackage(res_data);
-
-	auto t = res_pack->GetRecord();
-	t->push_front(req_info->tProcess);
-	t->push_front(req_info->tStart);
-
-	return CResult::Succeed();
+	info->mutable_reserved()->add_clocks(GetClock());
+	info->set_result(pack->result());
+	info->set_content(pack->content());
+	info->set_extend(pack->extend());
+	
+	return PackageResult::Make_OKResult(move(info));
 }

@@ -38,11 +38,11 @@ namespace Sloong
                     buff += (n);
                 else if (n == sep)
                 {
-                    res.push_back(buff);
+                    res.push_back(move(buff));
                     buff = ("");
                 }
             }
-            res.push_back(buff);
+            res.push_back(move(buff));
 
             return res;
         }

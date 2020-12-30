@@ -5,6 +5,8 @@
  * @LastEditTime: 2020-05-18 18:44:07
  * @Description: file content
  */ 
+#pragma once
+
 #include <list>
 
 namespace Sloong

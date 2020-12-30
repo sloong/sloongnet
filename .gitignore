@@ -9,3 +9,4 @@ sloongnet/modules/middleLayer/rust/target/
 !protocol/*.proto
 *.pb.cc
 *.pb.h
+configuation.db

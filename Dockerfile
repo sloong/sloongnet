@@ -1,7 +1,12 @@
-FROM gcc:9.3 AS build-env
+FROM ubuntu:20.04 AS build-env
+
+COPY ./build/sources.list /etc/apt/sources.list
+
+RUN cat /etc/apt/sources.list
+RUN rm -Rf /var/lib/apt/lists/*
 
 RUN apt update && apt install -y \
-    cmake libsqlite3-dev libprotobuf-dev protobuf-compiler uuid-dev libssl-dev libjsoncpp-dev libmariadbclient-dev libluajit-5.1-dev
+    cmake clang llvm libsqlite3-dev libprotobuf-dev protobuf-compiler uuid-dev libssl-dev libjsoncpp-dev libmariadbclient-dev libluajit-5.1-dev graphicsmagick
 
 COPY . /tmp/
 WORKDIR /tmp
@@ -14,7 +19,7 @@ FROM ubuntu:20.04
 LABEL maintainer="admin@sloong.com"
 
 RUN apt update && apt install -y \
-    libsqlite3-0 libprotobuf17 libuuid1 libssl1.1  libjsoncpp1 libmariadb3 libluajit-5.1-2
+    libsqlite3-0 libprotobuf17 libuuid1 libssl1.1  libjsoncpp1 libmariadb3 libluajit-5.1-2 graphicsmagick
 WORKDIR /usr/local/bin
 COPY --from=build-env /tmp/build/sloongnet-release /usr/local/bin
 RUN chmod +x /usr/local/bin/sloongnet

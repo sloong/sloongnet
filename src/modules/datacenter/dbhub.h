@@ -1,8 +1,17 @@
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditTime: 2020-08-06 18:50:09
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/datacenter/dbhub.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
+ */
 #ifndef SLOONGNET_MODULE_DATACENTER_DBHUB_H
 #define SLOONGNET_MODULE_DATACENTER_DBHUB_H
 
 #include "mysqlex.h"
-#include "DataTransPackage.h"
+
 
 #include "IData.h"
 #include "IObject.h"
@@ -13,21 +22,24 @@ using namespace DataCenter;
 namespace Sloong
 {
 
-
     class DBHub : public IObject
     {
-        public:
-        CResult Initialize( IControl* ic );
+    public:
+        CResult Initialize(IControl *ic);
 
-        CResult RequestPackageProcesser(CDataTransPackage *);
+        PackageResult RequestPackageProcesser(DataPackage *);
 
-        CResult RunSQLHandler(const string &req_obj, CDataTransPackage *pack);
+        CResult ConnectDatabaseHandler(const string &req_obj, DataPackage *pack);
+        CResult QuerySQLCmdHandler(const string &req_obj, DataPackage *pack);
+        CResult InsertSQLCmdHandler(const string &req_obj, DataPackage *pack);
+        CResult UpdateSQLCmdHandler(const string &req_obj, DataPackage *pack);
+        CResult DeleteSQLCmdHandler(const string &req_obj, DataPackage *pack);
 
-        protected:
+    protected:
         map_ex<DataCenter::Functions, FunctionHandler> m_mapFuncToHandler;
-        unique_ptr<MySqlEx> m_pMySql = nullptr;
+        map_ex<string, int>* m_pMapDBNameToSessioinID = nullptr;
+        map_ex<int, map<thread::id,UniqueMySQLEx>>* m_pMapSessionIDToConnections = nullptr;
     };
-}
-
+} // namespace Sloong
 
 #endif

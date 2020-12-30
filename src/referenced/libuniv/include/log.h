@@ -158,7 +158,7 @@ namespace Sloong
 			int m_nLastDate = 0;
 			LOGTYPE m_emType;
 			bool m_bInit = false;
-			CEasySync m_Sync;
+			EasySync m_Sync;
 			mutex m_mutexLogCache;
 			mutex m_mutexLogPool;
 			RUN_STATUS m_emStatus;

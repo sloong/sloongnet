@@ -128,6 +128,47 @@ unique_ptr<char[]> Sloong::CUtility::ReadFile(const string &filepath, int *out_s
 	return pBuf;
 }
 
+uint64_t Sloong::CUtility::CityEncodeFile(const string& path)
+{
+	if (-1 == access(path.c_str(), R_OK))
+		return 0;
+	ifstream in(path.c_str(), ios::in | ios::binary);
+	streampos pos = in.tellg();
+	in.seekg(0, ios::end);
+	int nSize = in.tellg();
+	in.seekg(pos);
+	string out;
+	out.resize(nSize);
+	in.read(out.data(), nSize);
+	in.close();
+
+	return CCity::Encode64(out);
+}
+
+uint32_t Sloong::CUtility::CRC32EncodeFile(const string& path)
+{
+	if (-1 == access(path.c_str(), R_OK))
+		return 0;
+	ifstream in(path.c_str(), ios::in | ios::binary);
+	streampos pos = in.tellg();
+	in.seekg(0, ios::end);
+	int nSize = in.tellg();
+	in.seekg(pos);
+	string out;
+	out.resize(nSize);
+	in.read(out.data(), nSize);
+	in.close();
+
+	return CRC::Calculate(out.c_str(), out.length(), CRC::CRC_32());
+}
+
+string Sloong::CUtility::SHA1EncodeFile(const string& path)
+{
+	unsigned char t[Sloong::Universal::SHA1_LENGTH] = {0};
+	CSHA1::Binary_Encoding(path, t, true );
+	return string((char*)t,Sloong::Universal::SHA1_LENGTH);
+}
+
 CResult Sloong::CUtility::WriteFile(const string &filepath, const char *pBuffer, int size)
 {
 	return CResult::Make_Error("No realize.");
@@ -142,7 +183,7 @@ string Sloong::CUtility::GenUUID()
 	return uuid;
 }
 
-#define MAX_STACK_LAYERS 256
+#define MAX_STACK_LAYERS 20
 
 string Sloong::CUtility::GetCallStack()
 {
@@ -198,7 +239,7 @@ VStrResult CUtility::IPToHostName(const string &ip)
 
 	freeaddrinfo(addr_res);
 	if( list.size() > 0 )
-		return VStrResult::Make_OK(list,errmsg);
+		return VStrResult::Make_OKResult(list,errmsg);
 	else
 		return VStrResult::Make_Error(errmsg);
 }
@@ -241,7 +282,7 @@ VStrResult CUtility::HostnameToIP(const string &hostname)
 
 	freeaddrinfo(hostname_res);
 	if( list.size() > 0 )
-		return VStrResult::Make_OK(list,errmsg);
+		return VStrResult::Make_OKResult(list,errmsg);
 	else
 		return VStrResult::Make_Error(errmsg);
 }

@@ -10,29 +10,16 @@ enum ResultType{
     Ignore = 5;
 }
 
-
 enum PRIORITY_LEVEL{
     HEIGHT_LEVEL=0;
     NORMAL_LEVEL=1;
     LOW_LEVEL=2;
 }
 
-enum ModuleType
-{
-    InvalidModule=0;
-    Manager=1;
-    DataCenter=2;
-    FileCenter=3;
-    Firewall=4;
-    Gateway=5;
-    Processer=6;
-}
-
-
 message DataPackage
 {
     enum PackageType{
-        RequestPackage=0;
+        NormalPackage=0;
         EventPackage=1;
     }
     PackageType Type = 1;
@@ -58,4 +45,13 @@ message DataPackage
     bytes Content = 9;
     // 扩展数据，只在FileCenter发送文件时使用。一旦设置了这个字段则认为该包是BigPackage，直接进入队列而不是直接发送
     bytes Extend = 10;
+    // 保留的结构，仅在程序内部使用，而不应该作为传输项目。发送之前首先清除这部分数据
+    message ReservedMessage
+    {
+        // SessionID. 内部使用。
+        fixed64 SessionID=1;
+        // Timespan. Used for internal.
+        repeated int64 Clocks=2;
+    }
+    ReservedMessage Reserved=11;
 }

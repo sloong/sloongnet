@@ -1,47 +1,51 @@
-/*
- * @Author: WCB
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 14:16:37
- * @Description: file content
+ * @LastEditTime: 2020-07-28 20:04:28
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/firewall/firewall.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
+
 #ifndef SLOONGNET_FIREWALL_SERVICE_H
 #define SLOONGNET_FIREWALL_SERVICE_H
 
 
 #include "core.h"
 #include "export.h"
+#include "IObject.h"
 
 extern "C" {
-	CResult RequestPackageProcesser(void*,CDataTransPackage*);
-	CResult ResponsePackageProcesser(void*,CDataTransPackage*);
-	CResult EventPackageProcesser(CDataTransPackage*);
-	CResult NewConnectAcceptProcesser(CSockInfo*);
-	CResult ModuleInitialization(GLOBAL_CONFIG*);
-	CResult ModuleInitialized(SOCKET, IControl *);
+	PackageResult RequestPackageProcesser(void*,DataPackage*);
+	PackageResult ResponsePackageProcesser(void*,DataPackage*);
+	CResult EventPackageProcesser(DataPackage*);
+	CResult NewConnectAcceptProcesser(SOCKET);
+	CResult ModuleInitialization(IControl*);
+	CResult ModuleInitialized();
 	CResult CreateProcessEnvironment(void**);
 }
 
 namespace Sloong
 {
-	class SloongNetFirewall
+	class SloongNetFirewall : public IObject
 	{
 	public:
 		SloongNetFirewall(){}
 
-		CResult Initialized(IControl*);
+		CResult Initialization(IControl*);
+		CResult Initialized();
 
-		CResult RequestPackageProcesser(CDataTransPackage*);
-		CResult ResponsePackageProcesser(CDataTransPackage*);
+		PackageResult RequestPackageProcesser(DataPackage*);
+		PackageResult ResponsePackageProcesser(DataPackage*);
 		inline CResult CreateProcessEnvironmentHandler(void**);
 
-		void EventPackageProcesser(CDataTransPackage*);
-
-		void OnSocketClose(IEvent* evt);
+		void EventPackageProcesser(DataPackage*);
+		
 	protected:
 
 	protected:
-		IControl* 	m_pControl = nullptr;
+		IControl* 	m_iC = nullptr;
 		CLog*		m_pLog =nullptr;
 		GLOBAL_CONFIG* m_pConfig;
 	public:

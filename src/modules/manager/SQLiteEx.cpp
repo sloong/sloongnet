@@ -20,7 +20,7 @@ CResult Sloong::CSQLiteEx::Initialize(const string &dbPath, const string &create
                               SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE, NULL);
     if (rc == SQLITE_OK)
     {
-        return CResult::Succeed();
+        return CResult::Succeed;
     }
     else
     {
@@ -32,7 +32,7 @@ CResult Sloong::CSQLiteEx::Initialize(const string &dbPath, const string &create
             {
                  return CResult::Make_Error("Create DBFile succeed, but prepare init db fialed: " + GetErrorMessage());
             }
-            return CResult::Succeed();
+            return CResult::Succeed;
             /*sqlite3_stmt *stmt = NULL;
             if (sqlite3_prepare_v2(m_pDB, createSQL.c_str(), -1, &stmt, NULL) != SQLITE_OK)
             {
@@ -47,7 +47,7 @@ CResult Sloong::CSQLiteEx::Initialize(const string &dbPath, const string &create
                 return CResult::Make_Error("Create DBFile succeed, but init db fialed: " + GetErrorMessage());
             }
             sqlite3_finalize(stmt);
-            return CResult::Succeed();*/
+            return CResult::Succeed;*/
         }
         else
         {

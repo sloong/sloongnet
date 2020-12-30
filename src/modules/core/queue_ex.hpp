@@ -1,3 +1,5 @@
+#pragma once
+
 #include <queue>
 #include <memory>
 #include <shared_mutex>
@@ -58,15 +60,15 @@ namespace Sloong
             return true;
         }
 
-        bool TryMovePop(T& t)
+        T TryMovePop()
         {
             unique_lock<shared_mutex> lock(m_mut);
             if (queue<T>::empty())
-                return false;
+                return nullptr;
 
-            t = std::move(queue<T>::front());
+            auto t = std::move(queue<T>::front());
             queue<T>::pop();
-            return true;
+            return t;
         }
 
         shared_ptr<T> TryPop()

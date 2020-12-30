@@ -27,7 +27,7 @@ CResult Sloong::CConfiguation::Initialize(const string &dbPath)
     unique_lock<mutex> lck(m_oMutex);
     m_oStorage = make_unique<Storage>(InitStorage(dbPath));
     m_bInitialized = true;
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 TResult<TemplateInfo> Sloong::CConfiguation::GetTemplate(int id)
@@ -36,7 +36,7 @@ TResult<TemplateInfo> Sloong::CConfiguation::GetTemplate(int id)
     try
     {
         auto template_item = m_oStorage->get<TemplateInfo>(id);
-        return TResult<TemplateInfo>::Make_OK(template_item);
+        return TResult<TemplateInfo>::Make_OKResult(template_item);
     }
     catch (system_error &ex)
     {
@@ -85,7 +85,7 @@ CResult Sloong::CConfiguation::AddTemplate(const TemplateInfo &config, int *out_
         int id = m_oStorage->insert<TemplateInfo>(config);
         if (out_id)
             *out_id = id;
-        return CResult::Succeed();
+        return CResult::Succeed;
     }
     catch (system_error &ex)
     {
@@ -99,7 +99,7 @@ CResult Sloong::CConfiguation::DeleteTemplate(int id)
     try
     {
         m_oStorage->remove<TemplateInfo>(id);
-        return CResult::Succeed();
+        return CResult::Succeed;
     }
     catch (system_error &ex)
     {
@@ -118,5 +118,5 @@ CResult Sloong::CConfiguation::SetTemplate(int id, const TemplateInfo &config)
     {
         return CResult::Make_Error(ex.what());
     }
-    return CResult::Succeed();
+    return CResult::Succeed;
 }

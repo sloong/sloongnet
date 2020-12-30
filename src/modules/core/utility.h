@@ -1,3 +1,12 @@
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditTime: 2020-12-30 15:11:44
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/core/utility.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
+ */
 #ifndef UTILITY_H
 #define UTILITY_H
 
@@ -30,6 +39,10 @@ namespace Sloong
 
 		static unique_ptr<char[]> ReadFile(const string &filepath, int* out_size );
 		static CResult WriteFile(const string &filepath, const char *buf, int size);
+		static uint64_t CityEncodeFile(const string& path);
+		static uint32_t CRC32EncodeFile(const string& path);
+
+		static string SHA1EncodeFile(const string& path);
 
 		static string GenUUID();
 

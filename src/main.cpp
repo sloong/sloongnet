@@ -1,12 +1,16 @@
-﻿/*
- * @Author: WCB
- * @Date: 2020-04-26 17:33:59
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-17 15:55:00
+﻿/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 2015-11-12 15:56:50
+ * @LastEditTime: 2020-08-10 14:09:44
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/main.cpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
  * @Description: Main function for apps. just for create and run gloabl apps.
  */
+
 #include "main.h"
 #include "base_service.h"
+#include "utility.h"
 #include "version.h"
 
 void PrientHelp()
@@ -101,10 +105,11 @@ int main(int argc, char **args)
 			return -2;
 		}
 
-		CResult res = CResult::Succeed();
+		CResult res = CResult::Succeed;
 		Sloong::CSloongBaseService::Instance = make_unique<Sloong::CSloongBaseService>();
 		do
 		{
+			cout << "Initialize base service instance." << endl;
 			res = Sloong::CSloongBaseService::Instance->Initialize(info.ManagerMode, info.Address, info.Port, info.ForceTargetTemplateID);
 			if (!res.IsSucceed())
 			{
@@ -112,8 +117,14 @@ int main(int argc, char **args)
 				return -5;
 			}
 
+			
+			cout << "Run base service instance." << endl;
 			res = Sloong::CSloongBaseService::Instance->Run();
+			
+			cout << "Base service instance is end with result " << ResultType_Name(res.GetResult()) << ". Message: " << res.GetMessage() << endl;
 		} while (res.GetResult() == ResultType::Retry);
+
+		cout << "Application exit." << endl;
 		Sloong::CSloongBaseService::Instance = nullptr;
 		return 0;
 	}
@@ -133,4 +144,5 @@ int main(int argc, char **args)
 		cout << CUtility::GetCallStack();
 		return -4;
 	}
+	cout << "Application exit with exception." << endl;
 }

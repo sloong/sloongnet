@@ -1,15 +1,66 @@
-/*
- * @Author: WCB
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-21 11:17:32
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-18 10:27:12
- * @Description: file content
+ * @LastEditTime: 2020-07-29 19:53:37
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/manager/servermanage.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
-#ifndef SLOONGNET_MANAGER_SERVERMANAGE_h
-#define SLOONGNET_MANAGER_SERVERMANAGE_h
+/*** 
+ * @......................................&&.........................
+ * @....................................&&&..........................
+ * @.................................&&&&............................
+ * @...............................&&&&..............................
+ * @.............................&&&&&&..............................
+ * @...........................&&&&&&....&&&..&&&&&&&&&&&&&&&........
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............
+ * @................&...&&&&&&&&&&&&&&&&&&&&&&&&&&&&.................
+ * @.......................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @...................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...............
+ * @..................&&&   &&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @...............&&&&&@  &&&&&&&&&&..&&&&&&&&&&&&&&&&&&&...........
+ * @..............&&&&&&&&&&&&&&&.&&....&&&&&&&&&&&&&..&&&&&.........
+ * @..........&&&&&&&&&&&&&&&&&&...&.....&&&&&&&&&&&&&...&&&&........
+ * @........&&&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&....&&&.......
+ * @.......&&&&&&&&.....................&&&&&&&&&&&&&&&&.....&&......
+ * @........&&&&&.....................&&&&&&&&&&&&&&&&&&.............
+ * @..........&...................&&&&&&&&&&&&&&&&&&&&&&&............
+ * @................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&..&&&&&............
+ * @..............&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&....&&&&&............
+ * @...........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&......&&&&............
+ * @.........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........&&&&............
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&............
+ * @......&&&&&&&&&&&&&&&&&&&...&&&&&&...............&&&.............
+ * @.....&&&&&&&&&&&&&&&&............................&&..............
+ * @....&&&&&&&&&&&&&&&.................&&...........................
+ * @...&&&&&&&&&&&&&&&.....................&&&&......................
+ * @...&&&&&&&&&&.&&&........................&&&&&...................
+ * @..&&&&&&&&&&&..&&..........................&&&&&&&...............
+ * @..&&&&&&&&&&&&...&............&&&.....&&&&...&&&&&&&.............
+ * @..&&&&&&&&&&&&&.................&&&.....&&&&&&&&&&&&&&...........
+ * @..&&&&&&&&&&&&&&&&..............&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @..&&.&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&&&&&&&&&&&&.......
+ * @...&&..&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&...&&&&&&&&&&&&......
+ * @....&..&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&&&&&.....
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............&&&&&&&....
+ * @.......&&&&&.&&&&&&&&&&&&&&&&&&..&&&&&&&&...&..........&&&&&&....
+ * @........&&&.....&&&&&&&&&&&&&.....&&&&&&&&&&...........&..&&&&...
+ * @.......&&&........&&&.&&&&&&&&&.....&&&&&.................&&&&...
+ * @.......&&&...............&&&&&&&.......&&&&&&&&............&&&...
+ * @........&&...................&&&&&&.........................&&&..
+ * @.........&.....................&&&&........................&&....
+ * @...............................&&&.......................&&......
+ * @................................&&......................&&.......
+ * @.................................&&..............................
+ * @..................................&..............................
+ */
+
+#pragma once
 
 #include "configuation.h"
-#include "DataTransPackage.h"
+
 #include "protocol/manager.pb.h"
 using namespace Manager;
 
@@ -26,7 +77,7 @@ namespace Sloong
         uint64_t UUID;
         string TemplateName;
         int TemplateID;
-        SOCKET ConnectionID;
+        uint64_t ConnectionHashCode;
         Json::Value ToJson()
         {
             Json::Value item;
@@ -61,7 +112,6 @@ namespace Sloong
             ID = info.id;
             Name = info.name;
             Note = info.note;
-            //Configuation = CBase64::Decode(this->Configuation);// string(info.configuation.begin(), info.configuation.end());
             Configuation = string(info.configuation.begin(), info.configuation.end());
             Replicas = info.replicas;
             BuildCache();
@@ -69,7 +119,6 @@ namespace Sloong
         TemplateInfo ToTemplateInfo()
         {
             TemplateInfo info;
-            //info.configuation = CBase64::Encode(this->Configuation);//   vector<char>(this->Configuation.begin(), this->Configuation.end());
             info.configuation = vector<char>(this->Configuation.begin(), this->Configuation.end());
             info.id = this->ID;
             info.name = this->Name;
@@ -120,29 +169,28 @@ namespace Sloong
     class CServerManage : public IObject
     {
     public:
-        CResult Initialize(IControl *ic, const string&);
-        
-        void OnSocketClosed(SOCKET);
+        CResult Initialize(IControl *ic, const string &);
 
-        CResult ProcessHandler(CDataTransPackage *);
+        void OnSocketClosed(uint64_t);
 
-        CResult EventRecorderHandler(const string &, CDataTransPackage *);
-        CResult RegisteWorkerHandler(const string &, CDataTransPackage *);
-        CResult RegisteNodeHandler(const string &, CDataTransPackage *);
-        CResult AddTemplateHandler(const string &, CDataTransPackage *);
-        CResult DeleteTemplateHandler(const string &, CDataTransPackage *);
-        CResult SetTemplateHandler(const string &, CDataTransPackage *);
-        CResult QueryTemplateHandler(const string &, CDataTransPackage *);
-        CResult QueryNodeHandler(const string &, CDataTransPackage *);
-        CResult StopNodeHandler(const string &, CDataTransPackage *);
-        CResult RestartNodeHandler(const string &, CDataTransPackage *);
-        CResult QueryReferenceInfoHandler(const string &, CDataTransPackage *);
-        CResult ReportLoadStatusHandler(const string &, CDataTransPackage *);
+        PackageResult ProcessHandler(DataPackage *);
+
+        CResult EventRecorderHandler(const string &, DataPackage *);
+        CResult RegisteWorkerHandler(const string &, DataPackage *);
+        CResult RegisteNodeHandler(const string &, DataPackage *);
+        CResult AddTemplateHandler(const string &, DataPackage *);
+        CResult DeleteTemplateHandler(const string &, DataPackage *);
+        CResult SetTemplateHandler(const string &, DataPackage *);
+        CResult QueryTemplateHandler(const string &, DataPackage *);
+        CResult QueryNodeHandler(const string &, DataPackage *);
+        CResult StopNodeHandler(const string &, DataPackage *);
+        CResult RestartNodeHandler(const string &, DataPackage *);
+        CResult QueryReferenceInfoHandler(const string &, DataPackage *);
+        CResult ReportLoadStatusHandler(const string &, DataPackage *);
 
     public:
-        static CResult LoadManagerConfig(const string&);
+        static CResult LoadManagerConfig(const string &);
         static CResult ResetManagerTemplate(GLOBAL_CONFIG *config);
-
 
     private:
         int SearchNeedCreateTemplate();
@@ -151,9 +199,8 @@ namespace Sloong
 
     protected:
         map_ex<Manager::Functions, FunctionHandler> m_mapFuncToHandler;
-        map_ex<int64_t, NodeItem> m_mapUUIDToNodeItem;
+        map_ex<uint64_t, NodeItem> m_mapUUIDToNodeItem;
         map_ex<int, TemplateItem> m_mapIDToTemplateItem;
-        map_ex<SOCKET, int64_t> m_mapSocketToUUID;
+        map_ex<uint64_t, uint64_t> m_mapConnectionToUUID;
     };
 } // namespace Sloong
-#endif

@@ -54,61 +54,6 @@ std::string CLua::findScript(const string &strFullName)
 	return res;
 }
 
-bool CLua::RunScript(const string &strFileName)
-{
-	std::string strFullName = findScript(strFileName);
-	if( strFullName.length() == 0)
-	{
-		HandlerError("Load Script", "No find scritp file:" + strFullName);
-		return false;
-	}
-
-	if (0 != luaL_loadfile(m_pScriptContext, strFullName.c_str()))
-	{
-		HandlerError("Load Script", strFullName);
-		return false;
-	}
-
-	if (0 != lua_pcall(m_pScriptContext, 0, LUA_MULTRET, 0))
-	{
-		HandlerError("Run Script", strFullName);
-		return false;
-	}
-	return true;
-}
-
-bool CLua::RunBuffer(LPCSTR pBuffer, size_t sz)
-{
-	if (0 != luaL_loadbuffer(m_pScriptContext, (LPCSTR)pBuffer, sz, NULL))
-	{
-		HandlerError("Load Buffer", pBuffer);
-		return false;
-	}
-
-	if (0 != lua_pcall(m_pScriptContext, 0, LUA_MULTRET, 0))
-	{
-		HandlerError("Run Buffer", pBuffer);
-		return false;
-	}
-	return true;
-}
-
-bool CLua::RunString(const string &strCommand)
-{
-	if (0 != luaL_loadstring(m_pScriptContext, strCommand.c_str()))
-	{
-		HandlerError("String Load", strCommand);
-		return false;
-	}
-
-	if (0 != lua_pcall(m_pScriptContext, 0, LUA_MULTRET, 0))
-	{
-		HandlerError("Run String", strCommand);
-		return false;
-	}
-
-	return true;
-}
 #ifndef lua_pushliteral
 #define lua_pushliteral(L, s) lua_pushlstring(L, "" s, (sizeof(s) / sizeof(char)) - 1)
 #endif
@@ -254,6 +199,68 @@ static int GlobalErrorHandler( lua_State *L)
 	return 1;
 }
 
+CResult CLua::RunScript(const string &strFileName)
+{
+	std::string strFullName = findScript(strFileName);
+	if( strFullName.length() == 0)
+	{
+		return HandlerError("Load Script", "No find scritp file:" + strFullName);
+	}
+
+	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
+	auto nErr = lua_gettop(m_pScriptContext);
+
+	if (0 != luaL_loadfile(m_pScriptContext, strFullName.c_str()))
+	{
+		return HandlerError("Load Script", strFullName);
+	}
+
+	auto res = lua_pcall(m_pScriptContext, 0, LUA_MULTRET, nErr);
+	lua_remove( m_pScriptContext, nErr );
+	if( res != LUA_OK )
+	{
+		return HandlerError("Run Script", strFullName, res);
+	}
+	return CResult::Succeed;
+}
+
+CResult CLua::RunBuffer(LPCSTR pBuffer, size_t sz)
+{
+	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
+	auto nErr = lua_gettop(m_pScriptContext);
+
+	if (0 != luaL_loadbuffer(m_pScriptContext, (LPCSTR)pBuffer, sz, NULL))
+	{
+		return HandlerError("Load Buffer", pBuffer);
+	}
+
+	auto res = lua_pcall(m_pScriptContext, 0, LUA_MULTRET, nErr);
+	lua_remove( m_pScriptContext, nErr );
+	if( res != LUA_OK )
+	{
+		return HandlerError("Run Buffer", pBuffer, res);
+	}
+	return CResult::Succeed;
+}
+
+CResult CLua::RunString(const string &strCommand)
+{
+	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
+	auto nErr = lua_gettop(m_pScriptContext);
+	if (0 != luaL_loadstring(m_pScriptContext, strCommand.c_str()))
+	{
+		return HandlerError("String Load", strCommand);
+	}
+
+	auto res = lua_pcall(m_pScriptContext, 0, LUA_MULTRET, nErr);
+	lua_remove( m_pScriptContext, nErr );
+	if( res != LUA_OK )
+	{
+		return HandlerError("Run String", strCommand, res);
+	}
+
+	return CResult::Succeed;
+}
 CResult Sloong::CLua::RunFunction(const string & strFunctionName, CLuaPacket *pUserInfo, int funcid, const string &strRequest, const string &strExtend, string* extendDataUUID)
 {
 	int nTop = lua_gettop(m_pScriptContext);
@@ -271,19 +278,7 @@ CResult Sloong::CLua::RunFunction(const string & strFunctionName, CLuaPacket *pU
 	lua_remove( m_pScriptContext, nErr );
 	if( res != LUA_OK )
 	{
-		auto str = Helper::Format("\n [%d]Error - %s\n Error Message:%s", res, strFunctionName.c_str(), GetString(m_pScriptContext,1).c_str());
-
-		if (m_pErrorHandler)
-			m_pErrorHandler( str );
-		else
-		{
-			cout << str << endl;
-			#ifdef DEBUG
-				return CResult::Make_Error(str);
-			#else
-				return CResult::Make_Error("Service internal error.");
-			#endif
-		}
+		return HandlerError("Run String", strFunctionName, res);
 	}
 	int nRes = (int)GetInteger(1,0);
 	auto strResponse = GetString(2,"");
@@ -327,6 +322,41 @@ void Sloong::CLua::PushBoolen(lua_State *l, bool b)
 void Sloong::CLua::PushPointer(lua_State *l, void *pPointer)
 {
 	lua_pushlightuserdata(l, pPointer);
+}
+
+void Sloong::CLua::PushTable( lua_State* l, const map<string,string>& mapValue)
+{
+	lua_newtable(l);
+	for( auto& item : mapValue )
+	{
+		lua_pushstring(l, item.first.c_str());
+		lua_pushstring(l, item.second.c_str());
+		lua_rawset(l,-3);
+	}
+}
+
+void Sloong::CLua::PushTable( lua_State* l, const list<string>& listValue)
+{
+	lua_newtable(l);
+	int index = 1;
+	for( auto& item : listValue)
+	{
+		lua_pushstring(l, item.c_str());
+		lua_rawseti(l, -2, index);
+		index++;
+	}
+}
+
+void Sloong::CLua::Push2DTable( lua_State* l, const list<list<string>>& listValue)
+{
+	lua_newtable(l);
+	int index = 1;
+	for( auto& item : listValue )
+	{
+		PushTable(l, item);
+		lua_rawseti(l, -2, index);
+		index++;
+	}
 }
 
 unique_ptr<map<std::string, std::string>> Sloong::CLua::GetTableParam(lua_State *l, int index)
