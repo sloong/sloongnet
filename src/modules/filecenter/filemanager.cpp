@@ -92,11 +92,11 @@ CResult Sloong::FileManager::SplitFile(const string &filepath, int splitSize, ma
     return CResult::Succeed;
 }
 
-CResult Sloong::FileManager::ArchiveFile(uint64_t hashcode, const string &source)
+CResult Sloong::FileManager::ArchiveFile(const string& index, const string &source)
 {
     try
     {
-        string target = GetPathByHashcode(hashcode);
+        string target = GetFileTruePath(index);
 
         m_pLog->Verbos(Helper::Format("Archive file: source[%s] target[%s]", source.c_str(), target.c_str()));
         if (source.length() < 3 || target.length() < 3)
@@ -118,7 +118,7 @@ CResult Sloong::FileManager::ArchiveFile(uint64_t hashcode, const string &source
         if (!Helper::MoveFile(source, target))
         {
             // Move file need write access. so if move file error, try copy .
-            if (!CUniversal::RunSystemCmd(Helper::Format("mv \"%s\" \"%s\"", source.c_str(), GetFolderByHashcode(hashcode).c_str())))
+            if (!CUniversal::RunSystemCmd(Helper::Format("mv \"%s\" \"%s\"", source.c_str(), target.c_str())))
             {
                 return CResult::Make_Error("Move File and try copy file error.");
             }
@@ -144,30 +144,19 @@ CResult Sloong::FileManager::GetFileSize(const string &source, int *out_size)
 }
 
 // The filecenter no't care the file format. so in here, we saved by the hashcode, the saver should be save the format.
-string Sloong::FileManager::GetPathByHashcode(uint64_t hashcode)
+string Sloong::FileManager::GetFileTruePath(const string& index)
 {
-    return GetFolderByHashcode(hashcode) + Helper::ntos(hashcode);
+    return GetFileFolder(index) + index;
 }
 
 // The filecenter no't care the file format. so in here, we saved by the hashcode, the saver should be save the format.
-string Sloong::FileManager::GetFolderByHashcode(uint64_t hashcode)
+string Sloong::FileManager::GetFileFolder(const string& index)
 {
-    auto path = Helper::Format("%s%s/", m_strArchiveFolder.c_str(), Helper::ntos(hashcode).substr(0, 2).c_str());
+    auto path = Helper::Format("%s%s/", m_strArchiveFolder.c_str(), index.substr(0, 3).c_str());
     CUniversal::CheckFileDirectory(path);
     return path;
 }
 
-// In Design, The other module no need know the file true path.
-// So have two way:
-//  1> Use the database to save the file treu path and the file hash code.
-//     But this will make the filecenter to be complex.
-//  2> Use the hashcode to comput the path, because when save file, the path is build with the hashcode
-//   so we can use the hashcode to rebuild the save path.
-//     But this will fix the file tree structure for storage.
-string Sloong::FileManager::QueryFilePath(uint64_t hashcode)
-{
-    return GetPathByHashcode(hashcode);
-}
 
 CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, DataPackage *trans_pack)
 {
@@ -195,13 +184,16 @@ CResult Sloong::FileManager::UploadingHandler(const string &str_req, DataPackage
 
     auto &data = req->uploaddata();
 
-    if (data.hashcode() != CCity::Encode64(data.data()))
-    {
-        return CResult::Make_Error("Hasd check error.");
-    }
+    
     if (data.end() - data.start() != data.data().length())
     {
-        return CResult::Make_Error("Length check error.");
+        return CResult::Make_Error( Helper::Format("Length check error.[%d]<->[%d]", data.end() - data.start() , data.data().length() ));
+    }
+
+    auto hash32 = CRCEncode32(data.data());
+    if (data.hashcode() != hash32 )
+    {
+        return CResult::Make_Error(Helper::Format("Hasd check error.[%lld]<->[%lld]", hash32, data.hashcode() ));
     }
 
     FileRange range;
@@ -230,10 +222,10 @@ CResult Sloong::FileManager::UploadedHandler(const string &str_req, DataPackage 
 
     m_pLog->Verbos(Helper::Format("Save file to [%s]. Hash [%lld]", temp_path.c_str(), info->HashCode));
 
-    if (info->HashCode != CUtility::CityEncodeFile(temp_path))
+    if (info->HashCode != CUtility::CRC32EncodeFile(temp_path))
         return CResult::Make_Error("Hasd check error.");
 
-    res = ArchiveFile(info->HashCode, temp_path);
+    res = ArchiveFile( req->token(), temp_path);
     if (res.IsFialed())
         return res;
 
@@ -246,7 +238,7 @@ CResult Sloong::FileManager::SimpleUploadHandler(const string &str_req, DataPack
 {
     auto req = ConvertStrToObj<SimpleUploadRequest>(str_req);
 
-    if (req->hashcode() != CCity::Encode64(req->data()))
+    if (req->hashcode() != CRCEncode32(req->data()))
     {
         return CResult::Make_Error("Hasd check error.");
     }
@@ -262,13 +254,14 @@ CResult Sloong::FileManager::SimpleUploadHandler(const string &str_req, DataPack
     if (res.IsFialed())
         return res;
 
-    res = ArchiveFile(req->hashcode(), temp_path);
+    auto token = CUtility::GenUUID();
+    res = ArchiveFile( token, temp_path);
     if (res.IsFialed())
         return res;
 
     CUniversal::RunSystemCmd(Helper::Format("rm %s", temp_path.c_str()));
 
-    return CResult::Succeed;
+    return CResult::Make_OK(token);
 }
 
 CResult Sloong::FileManager::DownloadVerifyHandler(const string &str_req, DataPackage *pack)
@@ -317,7 +310,7 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, DataPack
 {
     auto req = ConvertStrToObj<DownloadFileRequest>(str_req);
 
-    string real_path = QueryFilePath(req->hashcode());
+    string real_path = GetFileTruePath(req->index());
     if (access(real_path.c_str(), ACC_R) != 0)
     {
         return CResult::Make_Error("Cann't access to target file:" + real_path);
@@ -332,7 +325,7 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, DataPack
 
     DownloadFileResponse res;
     res.set_filesize(nSize);
-    res.set_hashcode(req->hashcode());
+    res.set_hashcode( CUtility::CRC32EncodeFile(real_path) );
 
     for (auto item : data)
     {
@@ -351,7 +344,7 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, DataPack
         auto d = res.add_filedata();
         d->set_start(item.start());
         d->set_end(item.end());
-        d->set_hashcode(CCity::Encode64(str));
+        d->set_hashcode(CRCEncode32(str));
         d->set_data(move(str));
     }
     in.close();
@@ -367,10 +360,10 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Data
 CResult Sloong::FileManager::GetThumbnailHandler(const string &str_req, DataPackage *trans_pack)
 {
     auto req = ConvertStrToObj<GetThumbnailRequest>(str_req);
-    string thumb_file = Helper::Format("%s_%d_%d_%d",Helper::ntos(req->hashcode()).c_str(), req->width(), req->height(), req->quality());
+    string thumb_file = Helper::Format("%s_%d_%d_%d",Helper::ntos(req->index()).c_str(), req->width(), req->height(), req->quality());
     if (!FileExist(thumb_file))
     {
-        auto real_path = QueryFilePath(req->hashcode());
+        auto real_path = GetFileTruePath(req->index());
         auto res = ImageProcesser::GetThumbnail(real_path, thumb_file, req->width(), req->height(), req->quality());
         if (res.IsFialed())
             return CResult::Make_Error(res.GetMessage());
@@ -379,7 +372,7 @@ CResult Sloong::FileManager::GetThumbnailHandler(const string &str_req, DataPack
     string data;
     auto size = ReadFile(thumb_file, data);
     GetThumbnailResponse res;
-    res.set_hashcode( CUtility::CityEncodeFile(thumb_file));
+    res.set_hashcode( CRCEncode32(thumb_file));
     res.set_filesize(size);
     res.set_data(move(data));
 

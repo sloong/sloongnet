@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-08-26 17:09:47
+ * @LastEditTime: 2020-12-30 16:18:26
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filemanager.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -48,12 +48,10 @@ namespace Sloong
         CResult GetThumbnailHandler(const string &str_req, DataPackage *trans_pack);
 
     protected:
-        CResult ArchiveFile(uint64_t hashcode, const string& source);
+        CResult ArchiveFile(const string& , const string& );
 
-
-        string QueryFilePath( uint64_t );
-        string GetPathByHashcode( uint64_t );
-        string GetFolderByHashcode( uint64_t );
+        string GetFileTruePath( const string&  );
+        string GetFileFolder( const string&  );
 
         CResult MergeFile(const list<FileRange> &fileList, const string &saveFile);
         CResult SplitFile(const string &saveFile, int splitSize, map_ex<int, string> &pReadList, int* out_all_size);
