@@ -36,6 +36,9 @@ VERSION_STR=$(cat $SCRIPTFOLDER/../version)
 
 clean(){
 	rm -rdf $MAKEFLAG/$PROJECT
+	if [ -d $OUTPATH  ];then
+		rm -rdf $OUTPATH
+	fi
 }
 
 build(){
@@ -55,9 +58,7 @@ build(){
 		exit 1
 	fi
 
-	if [ -d $OUTPATH  ];then
-		rm -rdf $OUTPATH
-	fi
+	
 	mkdir -p $OUTPATH/modules/
 
 	cp $CMAKE_FILE_PATH/referenced/libuniv/libuniv.so $OUTPATH/
@@ -70,7 +71,7 @@ build_debug(){
 	OUTPATH=$SCRIPTFOLDER/$PROJECT-debug
 	MAKEFLAG=debug
 	CMAKEFLAG=Debug
-	clean
+	# clean
 	build
 }
 
