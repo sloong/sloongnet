@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-10-09 10:45:35
+ * @LastEditTime: 2020-12-31 15:57:50
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -57,7 +57,6 @@
  * @..................................&..............................
  */
 
-
 #include "base_service.h"
 #include "utility.h"
 #include "snowflake.h"
@@ -100,23 +99,28 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
     Instance->Stop();
 }
 
-CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int forceTempID, EasyConnect *con)
+CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int forceTempID, MODULE_TYPE forceType, EasyConnect *con)
 {
     cout << "Connect to control succeed. Start registe and get configuation." << endl;
 
     uint64_t uuid = 0;
     auto result = CResult::Make_Error("Cancelled by User.");
-    while ( m_emStatus != RUN_STATUS::Exit )
+    while (m_emStatus != RUN_STATUS::Exit)
     {
         auto req = Package::GetRequestPackage();
         req->set_function(Manager::Functions::RegisteWorker);
         req->set_sender(uuid);
+        RegisteWorkerRequest sub_req;
         if (forceTempID > 0)
         {
-            RegisteWorkerRequest sub_req;
+
             sub_req.set_forcetargettemplateid(forceTempID);
-            Package::SetContent(req.get(),ConvertObjToStr(&sub_req));
         }
+        if (forceType != MODULE_TYPE::Manager)
+        {
+            sub_req.set_forcetargettype(forceType);
+        }
+        Package::SetContent(req.get(), ConvertObjToStr(&sub_req));
         if (con->SendPackage(move(req)).IsFialed())
             return CResult::Make_Error("Send get config request error.");
         auto res = con->RecvPackage(true);
@@ -190,10 +194,10 @@ void CSloongBaseService::InitSystem()
     signal(SIGSEGV, &on_sigint);
 }
 
-CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int port, int forceTempID)
+CResult CSloongBaseService::Initialize(RunInfo info)
 {
-    m_oServerConfig.set_manageraddress(address);
-    m_oServerConfig.set_managerport(port);
+    m_oServerConfig.set_manageraddress(info.Address);
+    m_oServerConfig.set_managerport(info.Port);
     m_oExitResult = CResult::Succeed;
 
     InitSystem();
@@ -201,19 +205,27 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     CResult res = CResult::Succeed;
     UniqueConnection pManagerConnect = nullptr;
 
-    if (ManagerMode)
+    if (info.ManagerMode)
     {
         res = InitlializeForManager(&m_oServerConfig);
     }
     else
     {
         pManagerConnect = make_unique<EasyConnect>();
-        auto res = pManagerConnect->InitializeAsClient( nullptr, m_oServerConfig.manageraddress(), m_oServerConfig.managerport(), nullptr);
+        auto res = pManagerConnect->InitializeAsClient(nullptr, m_oServerConfig.manageraddress(), m_oServerConfig.managerport(), nullptr);
         if (res.IsFialed())
         {
             return CResult::Make_Error("Connect to control fialed." + res.GetMessage());
         }
-        res = InitlializeForWorker(&m_oServerConfig, forceTempID, pManagerConnect.get());
+        MODULE_TYPE forceType = MODULE_TYPE::Manager;
+        if (!info.ForceTargetType.empty())
+        {
+            if (!MODULE_TYPE_Parse(info.ForceTargetType, &forceType))
+            {
+                return CResult::Make_Error(Helper::Format("Parse [%s] to module type error", info.ForceTargetType.c_str()));
+            }
+        }
+        res = InitlializeForWorker(&m_oServerConfig, info.ForceTargetTemplateID, forceType, pManagerConnect.get());
     }
     if (res.IsFialed())
         return res;
@@ -231,7 +243,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     if (res.IsFialed())
         return res;
 
-    if(m_pPrepareInitializeFunc )
+    if (m_pPrepareInitializeFunc)
     {
         res = m_pPrepareInitializeFunc(pConfig);
         if (res.IsFialed())
@@ -240,8 +252,8 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
             return res;
         }
     }
-    
-    res = m_iC->Initialize(pConfig->mqthreadquantity(), m_pLog.get() );
+
+    res = m_iC->Initialize(pConfig->mqthreadquantity(), m_pLog.get());
     if (res.IsFialed())
     {
         m_pLog->Fatal(res.GetMessage());
@@ -291,7 +303,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
     if (pManagerConnect)
     {
         auto event = make_shared<Events::RegisteConnectionEvent>(pManagerConnect->m_strAddress, pManagerConnect->m_nPort);
-        event->SetCallbackFunc([s=&m_ManagerSession](IEvent* e,uint64_t sessionid) {
+        event->SetCallbackFunc([s = &m_ManagerSession](IEvent *e, uint64_t sessionid) {
             *s = sessionid;
         });
         m_iC->CallMessage(event);
@@ -302,7 +314,7 @@ CResult CSloongBaseService::Initialize(bool ManagerMode, string address, int por
         m_pLog->Fatal(res.GetMessage());
     m_pLog->Debug("Module initialized succeed.");
 
-    if (!ManagerMode)
+    if (!info.ManagerMode)
     {
         auto res = RegisteNode();
         if (res.IsFialed())
@@ -391,12 +403,12 @@ CResult CSloongBaseService::RegisteNode()
     req_pack.set_templateid(m_oServerConfig.templateid());
 
     auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::RegisteNode, ConvertObjToStr(&req_pack));
-    return event->SyncCall(m_iC.get(),5000);
+    return event->SyncCall(m_iC.get(), 5000);
 }
 
 CResult CSloongBaseService::Run()
 {
-    if( m_emStatus != RUN_STATUS::Created )
+    if (m_emStatus != RUN_STATUS::Created)
     {
         // May create evnironment error, and the application is received programstop event.
         return CResult::Make_Error("Application run function is called, but the status not created.");
@@ -430,11 +442,11 @@ CResult CSloongBaseService::Run()
             CUtility::RecordCPUStatus(prev_status.get());
         }
     }
-    while(  m_emStatus != RUN_STATUS::Exit)
-    {        
+    while (m_emStatus != RUN_STATUS::Exit)
+    {
         m_oExitSync.wait_for(1000);
     }
-    m_pLog->Info("Application main work loop end with result " + ResultType_Name(m_oExitResult.GetResult()) );
+    m_pLog->Info("Application main work loop end with result " + ResultType_Name(m_oExitResult.GetResult()));
 
     return m_oExitResult;
 }
@@ -443,7 +455,7 @@ void CSloongBaseService::Stop()
 {
     m_pLog->Info("Application will exit.");
     m_iC->SendMessage(EVENT_TYPE::ProgramStop);
-    if( m_emStatus == RUN_STATUS::Created )
+    if (m_emStatus == RUN_STATUS::Created)
         m_emStatus = RUN_STATUS::Exit;
 }
 

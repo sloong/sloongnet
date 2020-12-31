@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2020-10-09 10:44:00
+ * @LastEditTime: 2020-12-31 15:59:44
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -169,6 +169,42 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 	return 0;
 }
 
+int Sloong::CServerManage::SearchNeedCreateWithType(MODULE_TYPE type)
+{
+	// First time find the no created
+	for (auto item : m_mapIDToTemplateItem)
+	{
+		if (item.second.ConfiguationObj->moduletype() != type)
+			continue;
+
+		if (item.second.Replicas == 0 || item.second.ID == 1)
+			continue;
+
+		if ((int)item.second.Created.size() >= item.second.Replicas)
+			continue;
+
+		if (item.second.Created.size() == 0)
+			return item.first;
+	}
+
+	// Sencond time find the created < replicas
+	for (auto item : m_mapIDToTemplateItem)
+	{
+		if (item.second.ConfiguationObj->moduletype() != type)
+			continue;
+
+		if (item.second.Replicas == 0 || item.second.ID == 1)
+			continue;
+
+		if ((int)item.second.Created.size() >= item.second.Replicas)
+			continue;
+
+		if ((int)item.second.Created.size() < item.second.Replicas)
+			return item.first;
+	}
+	return 0;
+}
+
 void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int event, ::google::protobuf::Message *msg)
 {
 	for (auto item : notifyList)
@@ -268,16 +304,26 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, DataP
 		return CResult(ResultType::Retry, string(m_pMsgBuffer, 8));
 	}
 
+	// 这里存在两种情况
+	// 1 指定了templateid
+	// 2 指定了type
+	// 区别处理，其中templateid的优先级高于type，即如果指定templateid，那么则一定会分配到这个templateid，会直接忽略type参数
 	int index = 0;
+	MODULE_TYPE forceType = MODULE_TYPE::Manager;
+	int forceTempID = 0;
 	if (req_str.length() > 0)
 	{
 		auto req = ConvertStrToObj<RegisteWorkerRequest>(req_str);
-		index = req->forcetargettemplateid();
+		forceTempID = req->forcetargettemplateid();
+		forceType = req->forcetargettype();
 	}
-	if (index == 0)
-	{
+
+	if (forceTempID != 0)
+		index = forceTempID;
+	else if (forceType != 0)
+		index = SearchNeedCreateWithType(forceType);
+	else
 		index = SearchNeedCreateTemplate();
-	}
 
 	if (index == 0)
 	{
@@ -578,7 +624,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 		auto item = res.add_templateinfos();
 		auto tpl = m_mapIDToTemplateItem[ref_id];
 		item->set_templateid(tpl.ID);
-		item->set_type(tpl.ConfiguationObj->moduletype() );
+		item->set_type(tpl.ConfiguationObj->moduletype());
 		item->set_providefunctions(tpl.ConfiguationObj->modulefunctoins());
 		for (auto node : tpl.Created)
 		{

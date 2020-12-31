@@ -124,7 +124,6 @@ message GLOBAL_CONFIG
 
     // Module
     string  ModuleName = 12;
-
     MODULE_TYPE ModuleType = 13;
     string  ModulePath = 14;
     bytes   ModuleConfig = 15;
