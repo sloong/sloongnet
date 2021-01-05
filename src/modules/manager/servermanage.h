@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-21 11:17:32
- * @LastEditTime: 2020-12-31 15:49:09
+ * @LastEditTime: 2021-01-05 16:29:35
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -194,7 +194,8 @@ namespace Sloong
 
     private:
         int SearchNeedCreateTemplate(  );
-        int SearchNeedCreateWithType( MODULE_TYPE  );
+        int SearchNeedCreateWithIDs( const vector<int>& );
+        int SearchNeedCreateWithType( bool, const vector<int>&  );
         void RefreshModuleReference(int id);
         void SendEvent(const list<uint64_t> &, int, ::google::protobuf::Message *);
 

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-12-31 15:41:29
+ * @LastEditTime: 2021-01-05 11:19:41
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -72,19 +72,12 @@ namespace Sloong
 {
 	typedef struct RunInfo
 	{
-		RunInfo()
-		{
-			ManagerMode = false;
-			Address = "";
-			Port = 0;
-			ForceTargetTemplateID = 0;
-			ForceTargetType = "";
-		}
-		bool ManagerMode;
-		string Address;
-		int Port;
-		int ForceTargetTemplateID;
-		string ForceTargetType;
+		bool ManagerMode = false;
+		string Address= "";
+		int Port = 0;
+		string AssignedTargetTemplateID= "";
+		string IncludeTargetType= "";
+		string ExcludeTargetType= "";
 	} RunInfo;
 
 	class CSloongBaseService
@@ -103,7 +96,7 @@ namespace Sloong
 		TResult<shared_ptr<DataPackage>> RegisteToControl(EasyConnect *con, string uuid);
 
 	protected:
-		virtual CResult InitlializeForWorker(RuntimeDataPackage *, int, MODULE_TYPE, EasyConnect *);
+		virtual CResult InitlializeForWorker(RuntimeDataPackage *, RunInfo*, EasyConnect *);
 		virtual CResult InitlializeForManager(RuntimeDataPackage *);
 
 		CResult RegisteNode();

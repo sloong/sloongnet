@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2020-12-31 15:59:44
+ * @LastEditTime: 2021-01-05 19:26:47
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -169,12 +169,12 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 	return 0;
 }
 
-int Sloong::CServerManage::SearchNeedCreateWithType(MODULE_TYPE type)
+int Sloong::CServerManage::SearchNeedCreateWithIDs(const vector<int> &ids)
 {
 	// First time find the no created
 	for (auto item : m_mapIDToTemplateItem)
 	{
-		if (item.second.ConfiguationObj->moduletype() != type)
+		if (std::find(ids.begin(), ids.end(), item.first) == ids.end())
 			continue;
 
 		if (item.second.Replicas == 0 || item.second.ID == 1)
@@ -190,7 +190,7 @@ int Sloong::CServerManage::SearchNeedCreateWithType(MODULE_TYPE type)
 	// Sencond time find the created < replicas
 	for (auto item : m_mapIDToTemplateItem)
 	{
-		if (item.second.ConfiguationObj->moduletype() != type)
+		if (std::find(ids.begin(), ids.end(), item.first) == ids.end())
 			continue;
 
 		if (item.second.Replicas == 0 || item.second.ID == 1)
@@ -203,6 +203,25 @@ int Sloong::CServerManage::SearchNeedCreateWithType(MODULE_TYPE type)
 			return item.first;
 	}
 	return 0;
+}
+
+/*** 
+ * @description: Convert type to template id. 
+ */
+int Sloong::CServerManage::SearchNeedCreateWithType(bool excludeMode, const vector<int> &type)
+{
+	auto ids = vector<int>();
+	for (auto item : m_mapIDToTemplateItem)
+	{
+		int item_id = item.second.ConfiguationObj->moduletype();
+		bool exist = std::find(type.begin(), type.end(), item_id) != type.end();
+		if ((exist && !excludeMode) || (!exist && excludeMode))
+		{
+			ids.push_back(item_id);
+		}
+	}
+
+	return SearchNeedCreateWithIDs(ids);
 }
 
 void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int event, ::google::protobuf::Message *msg)
@@ -304,26 +323,26 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, DataP
 		return CResult(ResultType::Retry, string(m_pMsgBuffer, 8));
 	}
 
-	// 这里存在两种情况
-	// 1 指定了templateid
-	// 2 指定了type
-	// 区别处理，其中templateid的优先级高于type，即如果指定templateid，那么则一定会分配到这个templateid，会直接忽略type参数
 	int index = 0;
-	MODULE_TYPE forceType = MODULE_TYPE::Manager;
-	int forceTempID = 0;
 	if (req_str.length() > 0)
 	{
 		auto req = ConvertStrToObj<RegisteWorkerRequest>(req_str);
-		forceTempID = req->forcetargettemplateid();
-		forceType = req->forcetargettype();
+		switch (req->runmode())
+		{
+		case RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_AssignTemplate:
+			index = SearchNeedCreateWithIDs(vector<int>(req->assigntargettemplateid().begin(), req->assigntargettemplateid().end()));
+			break;
+		case RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_IncludeType:
+			index = SearchNeedCreateWithType(false, vector<int>(req->includetargettype().begin(), req->includetargettype().end()));
+			break;
+		case RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_ExcludeType:
+			index = SearchNeedCreateWithType(true, vector<int>(req->includetargettype().begin(), req->includetargettype().end()));
+			break;
+		default:
+			index = SearchNeedCreateTemplate();
+			break;
+		}
 	}
-
-	if (forceTempID != 0)
-		index = forceTempID;
-	else if (forceType != 0)
-		index = SearchNeedCreateWithType(forceType);
-	else
-		index = SearchNeedCreateTemplate();
 
 	if (index == 0)
 	{

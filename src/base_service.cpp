@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-12-31 15:57:50
+ * @LastEditTime: 2021-01-05 15:27:09
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -99,9 +99,52 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
     Instance->Stop();
 }
 
-CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int forceTempID, MODULE_TYPE forceType, EasyConnect *con)
+CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, RunInfo *info, EasyConnect *con)
 {
     cout << "Connect to control succeed. Start registe and get configuation." << endl;
+
+    RegisteWorkerRequest sub_req;
+    if (!info->AssignedTargetTemplateID.empty())
+    {
+        sub_req.set_runmode(RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_AssignTemplate);
+        for (auto &item : Helper::split(info->AssignedTargetTemplateID, ','))
+        {
+            if (item.empty())
+                continue;
+            int id = 0;
+            if (!ConvertStrToInt(item, &id))
+                return CResult::Make_Error(Helper::Format("Convert template id [%s] to int failed.", item.c_str()));
+            sub_req.add_assigntargettemplateid(id);
+        }
+    }
+    else if (!info->ExcludeTargetType.empty())
+    {
+        sub_req.set_runmode(RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_ExcludeType);
+        for (auto &item : Helper::split(info->ExcludeTargetType, ','))
+        {
+            if (item.empty())
+                continue;
+            MODULE_TYPE forceType = MODULE_TYPE::Manager;
+            if (!MODULE_TYPE_Parse(item, &forceType))
+                return CResult::Make_Error(Helper::Format("Parse [%s] to module type error", item.c_str()));
+
+            sub_req.add_excludetargettype(forceType);
+        }
+    }
+    else if (!info->IncludeTargetType.empty())
+    {
+        sub_req.set_runmode(RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_IncludeType);
+        for (auto &item : Helper::split(info->IncludeTargetType, ','))
+        {
+            if (item.empty())
+                continue;
+            MODULE_TYPE forceType = MODULE_TYPE::Manager;
+            if (!MODULE_TYPE_Parse(item, &forceType))
+                return CResult::Make_Error(Helper::Format("Parse [%s] to module type error", item.c_str()));
+
+            sub_req.add_includetargettype(forceType);
+        }
+    }
 
     uint64_t uuid = 0;
     auto result = CResult::Make_Error("Cancelled by User.");
@@ -110,16 +153,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, int f
         auto req = Package::GetRequestPackage();
         req->set_function(Manager::Functions::RegisteWorker);
         req->set_sender(uuid);
-        RegisteWorkerRequest sub_req;
-        if (forceTempID > 0)
-        {
 
-            sub_req.set_forcetargettemplateid(forceTempID);
-        }
-        if (forceType != MODULE_TYPE::Manager)
-        {
-            sub_req.set_forcetargettype(forceType);
-        }
         Package::SetContent(req.get(), ConvertObjToStr(&sub_req));
         if (con->SendPackage(move(req)).IsFialed())
             return CResult::Make_Error("Send get config request error.");
@@ -217,15 +251,8 @@ CResult CSloongBaseService::Initialize(RunInfo info)
         {
             return CResult::Make_Error("Connect to control fialed." + res.GetMessage());
         }
-        MODULE_TYPE forceType = MODULE_TYPE::Manager;
-        if (!info.ForceTargetType.empty())
-        {
-            if (!MODULE_TYPE_Parse(info.ForceTargetType, &forceType))
-            {
-                return CResult::Make_Error(Helper::Format("Parse [%s] to module type error", info.ForceTargetType.c_str()));
-            }
-        }
-        res = InitlializeForWorker(&m_oServerConfig, info.ForceTargetTemplateID, forceType, pManagerConnect.get());
+
+        res = InitlializeForWorker(&m_oServerConfig, &info, pManagerConnect.get());
     }
     if (res.IsFialed())
         return res;

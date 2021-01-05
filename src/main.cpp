@@ -1,7 +1,7 @@
 ﻿/*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-12-31 15:58:52
+ * @LastEditTime: 2021-01-05 15:24:32
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/main.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -15,12 +15,13 @@
 
 void PrientHelp()
 {
-	cout << "sloongnet <type> <address:port> [--F=<ForceTargetTemplateID>] [--T=<TypeName>]" << endl;
+	cout << "sloongnet <type> <address:port> [--<assign|include|exclude>=<TypeName>]" << endl;
 	cout << "sloongnet version" << endl;
 	cout << "type: Manager|Worker" << endl;
 	cout << "address:port: Listen port / Manager port" << endl;
-	cout << "--F=<ForceTargetTemplateID>: If this node just for one templateid, set it." << endl;
-	cout << "--T=<TypeName>: Set it for target module type." << endl;
+	cout << "--assign=<TargetTemplateID>: If this node just for one templateid, set it." << endl;
+	cout << "--include=<TypeName>: Set it for target module type. If have multi type, use ',' to split. If assign is setted, this will be ignored." << endl;
+	cout << "--exclude=<TypeName>: Set it for target is not support type. If have multi type, use ',' to split. If assign/include is setted, this will be ignored." << endl;
 	cout << "-?/--help/-h: Print help info." << endl;
 	cout << "-v/--version: Print version info." << endl;
 }
@@ -36,12 +37,29 @@ int main(int argc, char **args)
 {
 	try
 	{
+		if (argc < 2 || strcasecmp(args[1], "-v") == 0 || strcasecmp(args[1], "--version") == 0)
+		{
+			PrintVersion();
+			return 0;
+		}
+		else if (strcasecmp(args[1], "-?") == 0 || strcasecmp(args[1], "--help") == 0 || strcasecmp(args[1], "-h") == 0)
+		{
+			PrientHelp();
+			return 0;
+		}
+
 		cout << "Command line:";
 		for (int i = 1; i < argc; i++)
 		{
 			cout << args[i] << " ";
 		}
 		cout << endl;
+
+		if (argc > 4)
+		{
+			cout << "Params error. See help with --help." << endl;
+			return -1;
+		}
 		RunInfo info;
 
 		if (strcasecmp(args[1], "Manager") == 0)
@@ -67,32 +85,29 @@ int main(int argc, char **args)
 				cout << "Convert [" << addr[1] << "] to int port fialed." << endl;
 				return -1;
 			}
-		}else{
+		}
+		else
+		{
 			cout << "Address port info error. See help with --help." << endl;
 			return -1;
 		}
 
-		for (int i = 3; i < argc; i++)
+		// Stop support for custom parameters
+		// for (int i = 3; i < argc; i++)
+		if (argc == 4)
 		{
-			auto item = string(args[i]);
-			if (item.find("--F=") != string::npos)
+			auto item = string(args[3]);
+			if (item.find("--assign=") != string::npos)
 			{
-				auto tempid = item.substr(3);
-				ConvertStrToInt(tempid, &info.ForceTargetTemplateID);
+				info.AssignedTargetTemplateID = item.substr(8);
 			}
-			else if (item.find("--T=") != string::npos)
+			else if (item.find("--include=") != string::npos)
 			{
-				info.ForceTargetType = item.substr(3);
+				info.IncludeTargetType = item.substr(9);
 			}
-			else if (strcasecmp(args[i], "-v") == 0 || strcasecmp(args[i], "--version") == 0)
+			else if (item.find("--exclude=") != string::npos)
 			{
-				PrintVersion();
-				return 0;
-			}
-			else if (strcasecmp(args[i], "-?") == 0 || strcasecmp(args[i], "--help") == 0 || strcasecmp(args[i], "-h") == 0)
-			{
-				PrientHelp();
-				return 0;
+				info.ExcludeTargetType = item.substr(9);
 			}
 		}
 
