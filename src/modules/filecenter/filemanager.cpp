@@ -35,7 +35,7 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(DataPackage *pack)
         return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("FileCenter no provide [%d] function.", function)));
     }
 
-    auto req_obj = pack->content().data();
+    auto req_obj = pack->content();
     auto func_name = Functions_Name(function);
     m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), req_obj.c_str()));
     if (!m_mapFuncToHandler.exist(function))

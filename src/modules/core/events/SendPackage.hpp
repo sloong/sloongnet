@@ -62,7 +62,7 @@ namespace Sloong
 				auto sync = make_shared<EasySync>();
 				SetCallbackFunc([result, sync, response_str](IEvent *event, DataPackage *pack) {
 					(*result) = pack->result();
-					(*response_str) = pack->content().data();
+					(*response_str) = pack->content();
 					sync->notify_one();
 				});
 				ic->CallMessage( shared_from_this() );

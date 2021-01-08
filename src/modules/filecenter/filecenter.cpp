@@ -138,9 +138,9 @@ CResult Sloong::CFileCenter::CreateProcessEnvironmentHandler(void **out_env)
 void Sloong::CFileCenter::EventPackageProcesser(DataPackage *pack)
 {
     auto event = Events_MIN;
-    if (!Manager::Events_Parse(pack->content().data(), &event))
+    if (!Manager::Events_Parse(pack->content(), &event))
     {
-        m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]", pack->content().data().c_str()));
+        m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]", pack->content().c_str()));
         return;
     }
 

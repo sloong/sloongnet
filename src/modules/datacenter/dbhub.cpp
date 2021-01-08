@@ -32,10 +32,10 @@ PackageResult Sloong::DBHub::RequestPackageProcesser(DataPackage *pack)
     auto function = (Functions)pack->function();
     if (!DataCenter::Functions_IsValid(function))
     {
-        return PackageResult::Make_Error(Helper::Format("Parser request package function[%s] error.", pack->content().data().c_str()));
+        return PackageResult::Make_Error(Helper::Format("Parser request package function[%s] error.", pack->content().c_str()));
     }
 
-    auto req_str = pack->content().data();
+    auto req_str = pack->content();
     auto func_name = Functions_Name(function);
     m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), CBase64::Encode(req_str).c_str()));
     if (!m_mapFuncToHandler.exist(function))

@@ -271,10 +271,10 @@ PackageResult Sloong::CServerManage::ProcessHandler(DataPackage *pack)
 	auto function = (Functions)pack->function();
 	if (!Manager::Functions_IsValid(function))
 	{
-		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Parser request package function[%s] error.", pack->content().data().c_str())));
+		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Parser request package function[%s] error.", pack->content().c_str())));
 	}
 
-	auto req_str = pack->content().data();
+	auto req_str = pack->content();
 	auto func_name = Functions_Name(function);
 	m_pLog->Debug(Helper::Format("Request [%d][%s]", function, func_name.c_str()));
 	if (!m_mapFuncToHandler.exist(function))

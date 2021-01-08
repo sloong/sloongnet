@@ -21,7 +21,7 @@ FROM ubuntu:20.04
 LABEL maintainer="admin@sloong.com"
 
 RUN apt update && apt install -y \
-    libsqlite3-0 libprotobuf17 libuuid1 libssl1.1  libjsoncpp1 libmariadb3 libluajit-5.1-2 Imagemagick
+    libsqlite3-0 libprotobuf17 libuuid1 libssl1.1  libjsoncpp1 libmariadb3 libluajit-5.1-2 imagemagick
 WORKDIR /usr/local/bin
 COPY --from=build-env /tmp/build/sloongnet-release /usr/local/bin
 RUN chmod +x /usr/local/bin/sloongnet

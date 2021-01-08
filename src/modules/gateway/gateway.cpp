@@ -202,7 +202,7 @@ list<int> SloongNetGateway::ProcessProviedFunction(const string &prov_func)
 
 void SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent* send_pack, DataPackage *res_pack)
 {
-	auto str_res = res_pack->content().data();
+	auto str_res = res_pack->content();
 	auto res = ConvertStrToObj<QueryReferenceInfoResponse>(str_res);
 	if (res == nullptr || res->templateinfos_size() == 0)
 		return;
@@ -291,12 +291,12 @@ void Sloong::SloongNetGateway::EventPackageProcesser(DataPackage *pack)
 	{
 	case Manager::Events::ReferenceModuleOnline:
 	{
-		OnReferenceModuleOnlineEvent(pack->content().data(), pack);
+		OnReferenceModuleOnlineEvent(pack->content(), pack);
 	}
 	break;
 	case Manager::Events::ReferenceModuleOffline:
 	{
-		OnReferenceModuleOfflineEvent(pack->content().data(), pack);
+		OnReferenceModuleOfflineEvent(pack->content(), pack);
 	}
 	break;
 	default:

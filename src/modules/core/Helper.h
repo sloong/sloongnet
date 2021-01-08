@@ -261,7 +261,7 @@ namespace Sloong
 	inline constexpr int g_max_package_print_log = 512;
 	inline bool IsPrintLog(DataPackage* pack)
 	{
-		if( !pack->extend().data().empty())
+		if( !pack->extend().empty())
 			return false;
 		if( pack->ByteSize() > g_max_package_print_log )
 			return false;
@@ -277,7 +277,7 @@ namespace Sloong
 		else
 		{
 			log->Log( title + Helper::Format("Function: %d Priority: %d ID: %lld Content[L]: %d Extend[L]: %d",
-			 package->function(), package->priority(), package->id(), package->content().data().length(), package->extend().data().length()), level );
+			 package->function(), package->priority(), package->id(), package->content().length(), package->extend().length()), level );
 		}
 	}
 

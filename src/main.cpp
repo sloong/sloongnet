@@ -1,7 +1,7 @@
 ﻿/*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-01-05 15:24:32
+ * @LastEditTime: 2021-01-06 20:07:13
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/main.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -19,6 +19,7 @@ void PrientHelp()
 	cout << "sloongnet version" << endl;
 	cout << "type: Manager|Worker" << endl;
 	cout << "address:port: Listen port / Manager port" << endl;
+	cout << "Note: the third parameter works only in Worker mode." << endl;
 	cout << "--assign=<TargetTemplateID>: If this node just for one templateid, set it." << endl;
 	cout << "--include=<TypeName>: Set it for target module type. If have multi type, use ',' to split. If assign is setted, this will be ignored." << endl;
 	cout << "--exclude=<TypeName>: Set it for target is not support type. If have multi type, use ',' to split. If assign/include is setted, this will be ignored." << endl;

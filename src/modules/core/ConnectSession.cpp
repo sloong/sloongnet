@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2020-10-09 15:40:36
+ * @LastEditTime: 2021-01-08 15:11:16
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -60,7 +60,6 @@
  */
 
 #include "ConnectSession.h"
-
 #include "IData.h"
 
 Sloong::ConnectSession::ConnectSession()
@@ -172,31 +171,26 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 				package->mutable_reserved()->set_sessionid(m_pConnection->GetHashCode());
 				bLoop = true;
 				m_ActiveTime = time(NULL);
-				
+
+				if( package->hash().length() != 32 )
+				{
+					AddToSendList(Package::MakeErrorResponse(package.get(), "Hash check error. Make sure the hash algorithm is SHA256"));
+					continue;
+				}
+				string hash(package->hash());
+				package->clear_hash();
+				unsigned char buffer[32] = {0};
+				CSHA256::Binary_Encoding(ConvertObjToStr(package.get()).c_str(),buffer);
+				if( string((char*)buffer,32) != hash )
+				{
+					AddToSendList(Package::MakeErrorResponse(package.get(), Helper::Format("Hash check error. Package[%s]<->[%s]Calculate", ConvertToHexString(hash.c_str(),0,31).c_str(),ConvertToHexString((char*)buffer,0,31).c_str() )));
+					continue;
+				}
+
 				if (package->priority() > s_PriorityLevel || package->priority() < 0)
 				{
-					m_pLog->Error(Helper::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", package->priority(), s_PriorityLevel));
+					m_pLog->Warn(Helper::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", package->priority(), s_PriorityLevel));
 					package->set_priority(s_PriorityLevel);
-				}
-				if (  package->content().data().length() > 0 )
-				{
-					auto crc = CRCEncode32( package->content().data());
-					if( crc != package->content().hash() )
-					{
-						m_pLog->Error("Content hash check error.");
-						AddToSendList(Package::MakeErrorResponse(package.get(), "Content hash check error."));
-						continue;
-					}
-				}
-				if (  package->extend().data().length() > 0 )
-				{
-					auto crc = CRCEncode32( package->extend().data() );
-					if( crc != package->extend().hash() )
-					{
-						m_pLog->Error("Extend hash check error.");
-						AddToSendList(Package::MakeErrorResponse(package.get(), "Extend hash check error."));
-						continue;
-					}
 				}
 
 				readList.push(std::move(package));

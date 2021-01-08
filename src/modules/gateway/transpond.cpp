@@ -50,8 +50,8 @@ PackageResult Sloong::GatewayTranspond::MessageToProcesser(DataPackage *pack)
 
 	auto trans_pack = Package::MakeResponse(pack);
 	trans_pack->set_status(DataPackage_StatusType::DataPackage_StatusType_Request);
-	Package::SetContent(trans_pack.get(), pack->content().data() );
-	Package::SetExtend( trans_pack.get(), pack->extend().data() );
+	Package::SetContent(trans_pack.get(), pack->content() );
+	Package::SetExtend( trans_pack.get(), pack->extend() );
 
 	auto id = snowflake::Instance->nextid();
 	trans_pack->set_id(id);
@@ -67,8 +67,8 @@ PackageResult Sloong::GatewayTranspond::MessageToClient(UniquePackage info, Data
 {
 	info->mutable_reserved()->add_clocks(GetClock());
 	info->set_result(pack->result());
-	Package::SetContent(info.get(), pack->content().data() );
-	Package::SetExtend( info.get(), pack->extend().data() );
+	Package::SetContent(info.get(), pack->content() );
+	Package::SetExtend( info.get(), pack->extend() );
 	
 	return PackageResult::Make_OKResult(move(info));
 }
