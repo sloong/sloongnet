@@ -64,7 +64,7 @@
 
 unique_ptr<CDataCenter> Sloong::CDataCenter::Instance = nullptr;
 
-extern "C" PackageResult RequestPackageProcesser(void *env, DataPackage *pack)
+extern "C" PackageResult RequestPackageProcesser(void *env, Package *pack)
 {
 	auto pDB = STATIC_TRANS<DBHub *>(env);
 	if (pDB)
@@ -73,7 +73,7 @@ extern "C" PackageResult RequestPackageProcesser(void *env, DataPackage *pack)
 		return PackageResult::Make_Error("RequestPackageProcesser error, Environment convert failed.");
 }
 
-extern "C" PackageResult ResponsePackageProcesser(void *env, DataPackage *pack)
+extern "C" PackageResult ResponsePackageProcesser(void *env, Package *pack)
 {
 	/*auto pDB = STATIC_TRANS<DBHub *>(env);
 	if (pDB)
@@ -83,7 +83,7 @@ extern "C" PackageResult ResponsePackageProcesser(void *env, DataPackage *pack)
 	return PackageResult::Make_Error("NO SUPPORT!");
 }
 
-extern "C" CResult EventPackageProcesser(DataPackage *pack)
+extern "C" CResult EventPackageProcesser(Package *pack)
 {
 	CDataCenter::Instance->EventPackageProcesser(pack);
 	return CResult::Succeed;
@@ -143,7 +143,7 @@ CResult CDataCenter::CreateProcessEnvironmentHandler(void **out_env)
 	return CResult::Succeed;
 }
 
-void Sloong::CDataCenter::EventPackageProcesser(DataPackage *data_pack)
+void Sloong::CDataCenter::EventPackageProcesser(Package *data_pack)
 {
 	auto event = (Manager::Events)data_pack->function();
 	if (!Manager::Events_IsValid(event))

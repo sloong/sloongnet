@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-01-05 19:26:47
+ * @LastEditTime: 2021-01-11 10:48:45
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -266,20 +266,20 @@ void Sloong::CServerManage::OnSocketClosed(uint64_t con)
 	m_mapIDToTemplateItem[id].Created.remove(target);
 }
 
-PackageResult Sloong::CServerManage::ProcessHandler(DataPackage *pack)
+PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
 {
 	auto function = (Functions)pack->function();
 	if (!Manager::Functions_IsValid(function))
 	{
-		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Parser request package function[%s] error.", pack->content().c_str())));
+		return PackageResult::Make_OKResult(PackageHelper::MakeErrorResponse(pack, Helper::Format("Parser request package function[%s] error.", pack->content().c_str())));
 	}
 
-	auto req_str = pack->content();
+	auto req_str = pack->content().data();
 	auto func_name = Functions_Name(function);
 	m_pLog->Debug(Helper::Format("Request [%d][%s]", function, func_name.c_str()));
 	if (!m_mapFuncToHandler.exist(function))
 	{
-		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
+		return PackageResult::Make_OKResult(PackageHelper::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
 	}
 
 	auto res = m_mapFuncToHandler[function](req_str, pack);
@@ -290,15 +290,15 @@ PackageResult Sloong::CServerManage::ProcessHandler(DataPackage *pack)
 	if (res.GetResult() == ResultType::Ignore)
 		return PackageResult::Ignore();
 
-	return PackageResult::Make_OKResult(Package::MakeResponse(pack, res));
+	return PackageResult::Make_OKResult(PackageHelper::MakeResponse(pack, res));
 }
 
-CResult Sloong::CServerManage::EventRecorderHandler(const string &req_str, DataPackage *pack)
+CResult Sloong::CServerManage::EventRecorderHandler(const string &req_str, Package *pack)
 {
 	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, DataPackage *pack)
+CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Package *pack)
 {
 	auto sender = pack->sender();
 	if (sender == 0)
@@ -311,7 +311,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, DataP
 		NodeItem item;
 		item.UUID = sender;
 		m_mapUUIDToNodeItem[sender] = item;
-		auto event = make_shared<GetConnectionInfoEvent>(pack->reserved().sessionid());
+		auto event = make_shared<GetConnectionInfoEvent>(pack->sessionid());
 		event->SetCallbackFunc([item = &m_mapUUIDToNodeItem[sender]](IEvent *e, ConnectionInfo info) {
 			item->Address = info.Address;
 		});
@@ -383,7 +383,7 @@ void Sloong::CServerManage::RefreshModuleReference(int id)
 	}
 }
 
-CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, DataPackage *pack)
+CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, Package *pack)
 {
 	auto sender = pack->sender();
 	auto req = ConvertStrToObj<RegisteNodeRequest>(req_str);
@@ -406,9 +406,9 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, DataPac
 	item.TemplateName = tpl.Name;
 	item.TemplateID = tpl.ID;
 	item.Port = tpl.ConfiguationObj->listenport();
-	item.ConnectionHashCode = pack->reserved().sessionid();
+	item.ConnectionHashCode = pack->sessionid();
 	tpl.Created.unique_insert(sender);
-	m_mapConnectionToUUID[pack->reserved().sessionid()] = sender;
+	m_mapConnectionToUUID[pack->sessionid()] = sender;
 
 	// Find reference node and notify them
 	list<uint64_t> notifyList;
@@ -431,7 +431,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, DataPac
 	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::AddTemplateHandler(const string &req_str, DataPackage *pack)
+CResult Sloong::CServerManage::AddTemplateHandler(const string &req_str, Package *pack)
 {
 	auto req = ConvertStrToObj<AddTemplateRequest>(req_str);
 	auto info = req->addinfo();
@@ -458,7 +458,7 @@ CResult Sloong::CServerManage::AddTemplateHandler(const string &req_str, DataPac
 	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::DeleteTemplateHandler(const string &req_str, DataPackage *pack)
+CResult Sloong::CServerManage::DeleteTemplateHandler(const string &req_str, Package *pack)
 {
 	auto req = ConvertStrToObj<DeleteTemplateRequest>(req_str);
 
@@ -481,7 +481,7 @@ CResult Sloong::CServerManage::DeleteTemplateHandler(const string &req_str, Data
 	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, DataPackage *pack)
+CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, Package *pack)
 {
 	auto req = ConvertStrToObj<SetTemplateRequest>(req_str);
 	auto info = req->setinfo();
@@ -515,7 +515,7 @@ CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, DataPac
 	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, DataPackage *pack)
+CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, Package *pack)
 {
 	auto req = ConvertStrToObj<QueryTemplateRequest>(req_str);
 
@@ -559,7 +559,7 @@ CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, DataP
 	return CResult::Make_OK(str_res);
 }
 
-CResult Sloong::CServerManage::QueryNodeHandler(const string &req_str, DataPackage *pack)
+CResult Sloong::CServerManage::QueryNodeHandler(const string &req_str, Package *pack)
 {
 	auto req = ConvertStrToObj<QueryNodeRequest>(req_str);
 	if (!req)
@@ -588,7 +588,7 @@ CResult Sloong::CServerManage::QueryNodeHandler(const string &req_str, DataPacka
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
-CResult Sloong::CServerManage::StopNodeHandler(const string &req_str, DataPackage *pack)
+CResult Sloong::CServerManage::StopNodeHandler(const string &req_str, Package *pack)
 {
 	auto req = ConvertStrToObj<StopNodeRequest>(req_str);
 	if (!req)
@@ -605,7 +605,7 @@ CResult Sloong::CServerManage::StopNodeHandler(const string &req_str, DataPackag
 	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, DataPackage *pack)
+CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, Package *pack)
 {
 	auto req = ConvertStrToObj<RestartNodeRequest>(req_str);
 	if (!req)
@@ -622,7 +622,7 @@ CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, DataPac
 	return CResult::Succeed;
 }
 
-CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, DataPackage *pack)
+CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, Package *pack)
 {
 	m_pLog->Verbos("QueryReferenceInfoHandler <<< ");
 	auto uuid = pack->sender();
@@ -654,7 +654,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
-CResult Sloong::CServerManage::ReportLoadStatusHandler(const string &req_str, DataPackage *pack)
+CResult Sloong::CServerManage::ReportLoadStatusHandler(const string &req_str, Package *pack)
 {
 	auto req = ConvertStrToObj<ReportLoadStatusRequest>(req_str);
 

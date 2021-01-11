@@ -173,20 +173,20 @@ namespace Sloong
 
         void OnSocketClosed(uint64_t);
 
-        PackageResult ProcessHandler(DataPackage *);
+        PackageResult ProcessHandler(Package *);
 
-        CResult EventRecorderHandler(const string &, DataPackage *);
-        CResult RegisteWorkerHandler(const string &, DataPackage *);
-        CResult RegisteNodeHandler(const string &, DataPackage *);
-        CResult AddTemplateHandler(const string &, DataPackage *);
-        CResult DeleteTemplateHandler(const string &, DataPackage *);
-        CResult SetTemplateHandler(const string &, DataPackage *);
-        CResult QueryTemplateHandler(const string &, DataPackage *);
-        CResult QueryNodeHandler(const string &, DataPackage *);
-        CResult StopNodeHandler(const string &, DataPackage *);
-        CResult RestartNodeHandler(const string &, DataPackage *);
-        CResult QueryReferenceInfoHandler(const string &, DataPackage *);
-        CResult ReportLoadStatusHandler(const string &, DataPackage *);
+        CResult EventRecorderHandler(const string &, Package *);
+        CResult RegisteWorkerHandler(const string &, Package *);
+        CResult RegisteNodeHandler(const string &, Package *);
+        CResult AddTemplateHandler(const string &, Package *);
+        CResult DeleteTemplateHandler(const string &, Package *);
+        CResult SetTemplateHandler(const string &, Package *);
+        CResult QueryTemplateHandler(const string &, Package *);
+        CResult QueryNodeHandler(const string &, Package *);
+        CResult StopNodeHandler(const string &, Package *);
+        CResult RestartNodeHandler(const string &, Package *);
+        CResult QueryReferenceInfoHandler(const string &, Package *);
+        CResult ReportLoadStatusHandler(const string &, Package *);
 
     public:
         static CResult LoadManagerConfig(const string &);

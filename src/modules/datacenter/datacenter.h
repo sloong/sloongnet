@@ -68,9 +68,9 @@
 #include "dbhub.h"
 
 extern "C" {
-	PackageResult RequestPackageProcesser(void *, DataPackage *);
-	PackageResult ResponsePackageProcesser(void *, DataPackage *);
-	CResult EventPackageProcesser(DataPackage *);
+	PackageResult RequestPackageProcesser(void *, Package *);
+	PackageResult ResponsePackageProcesser(void *, Package *);
+	CResult EventPackageProcesser(Package *);
 	CResult NewConnectAcceptProcesser(SOCKET);
 	CResult ModuleInitialization(IControl *);
 	CResult ModuleInitialized();
@@ -94,7 +94,7 @@ namespace Sloong
 		CResult Initialized();
 
 		inline CResult CreateProcessEnvironmentHandler(void **);
-		void EventPackageProcesser(DataPackage *);
+		void EventPackageProcesser(Package *);
 
 	protected:
 		list<unique_ptr<DBHub>> m_listDBHub;

@@ -35,17 +35,17 @@ namespace Sloong
         CResult Initialize(IControl *ic);
         CResult EnableDataReceive(int, int);
 
-        PackageResult RequestPackageProcesser(DataPackage *);
-        PackageResult ResponsePackageProcesser(DataPackage *);
+        PackageResult RequestPackageProcesser(Package *);
+        PackageResult ResponsePackageProcesser(Package *);
 
-        CResult PrepareUploadHandler(const string &str_req, DataPackage *trans_pack);
-        CResult UploadingHandler(const string &str_req, DataPackage *trans_pack);
-        CResult UploadedHandler(const string &str_req, DataPackage *trans_pack);
-        CResult SimpleUploadHandler(const string &str_req, DataPackage *trans_pack);
-        CResult DownloadVerifyHandler(const string &str_req, DataPackage *trans_pack);    
-        CResult DownloadFileHandler(const string &str_req, DataPackage *trans_pack); 
-        CResult ConvertImageFileHandler(const string &str_req, DataPackage *trans_pack);
-        CResult GetThumbnailHandler(const string &str_req, DataPackage *trans_pack);
+        CResult PrepareUploadHandler(const string &str_req, Package *trans_pack);
+        CResult UploadingHandler(const string &str_req, Package *trans_pack);
+        CResult UploadedHandler(const string &str_req, Package *trans_pack);
+        CResult SimpleUploadHandler(const string &str_req, Package *trans_pack);
+        CResult DownloadVerifyHandler(const string &str_req, Package *trans_pack);    
+        CResult DownloadFileHandler(const string &str_req, Package *trans_pack); 
+        CResult ConvertImageFileHandler(const string &str_req, Package *trans_pack);
+        CResult GetThumbnailHandler(const string &str_req, Package *trans_pack);
 
     protected:
         CResult ArchiveFile(const string& source);

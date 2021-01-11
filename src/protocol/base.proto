@@ -47,13 +47,4 @@ message DataPackage
     bytes Content = 9;
     // 扩展数据，只在FileCenter发送文件时使用。一旦设置了这个字段则认为该包是BigPackage，直接进入队列而不是直接发送
     bytes Extend = 10;
-    // 保留的结构，仅在程序内部使用，而不应该作为传输项目。发送之前首先清除这部分数据
-    message ReservedMessage
-    {
-        // SessionID. 内部使用。
-        fixed64 SessionID=1;
-        // Timespan. Used for internal.
-        repeated int64 Clocks=2;
-    }
-    ReservedMessage Reserved=11;
 }

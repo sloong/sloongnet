@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-10-09 10:41:50
+ * @LastEditTime: 2021-01-11 10:48:22
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -167,7 +167,7 @@ void Sloong::CNetworkHub::SendPackageEventHandler(SharedEvent event)
 
 void Sloong::CNetworkHub::AddMessageToSendList(UniquePackage pack)
 {
-	uint64_t sessionid = pack->reserved().sessionid();
+	uint64_t sessionid = pack->sessionid();
 	if (!m_mapConnectIDToSession.exist(sessionid))
 	{
 		m_pLog->Error(Helper::Format("AddMessageToSendList function called, but the session[%lld] is no regiestd in NetworkHub.", sessionid));
@@ -374,7 +374,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					// it just for is need add the pack obj to send list.
 					result.SetResult(ResultType::Ignore);
 
-					package->mutable_reserved()->add_clocks(GetClock());
+					package->add_clocks(GetClock());
 					switch (package->type())
 					{
 					case DataPackage_PackageType::DataPackage_PackageType_EventPackage:
@@ -412,9 +412,9 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 						}
 						else if (result.GetResult() != ResultType::Ignore)
 						{
-							auto response = Package::MakeResponse(package.get());
+							auto response = PackageHelper::MakeResponse(package.get());
 							response->set_result(result.GetResult());
-							Package::SetContent(response.get(),result.GetMessage());
+							PackageHelper::SetContent(response.get(),result.GetMessage());
 							PrintPackage( m_pLog, package.get(), "Response package <<< " );
 							AddMessageToSendList(move(response));
 						}
@@ -522,7 +522,7 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(uint64_t sessionid)
 				event = dynamic_pointer_cast<SendPackageEvent>(e);
 			if (event != nullptr)
 			{
-				auto shared_pack = shared_ptr<DataPackage>(move(pack));
+				auto shared_pack = shared_ptr<Package>(move(pack));
 				CThreadPool::EnqueTask([event, shared_pack](SMARTER p) {
 					event->CallCallbackFunc(shared_pack.get());
 					return (SMARTER) nullptr;

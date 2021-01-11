@@ -150,11 +150,11 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, RunIn
     auto result = CResult::Make_Error("Cancelled by User.");
     while (m_emStatus != RUN_STATUS::Exit)
     {
-        auto req = Package::GetRequestPackage();
+        auto req = PackageHelper::GetRequestPackage();
         req->set_function(Manager::Functions::RegisteWorker);
         req->set_sender(uuid);
 
-        Package::SetContent(req.get(), ConvertObjToStr(&sub_req));
+        PackageHelper::SetContent(req.get(), ConvertObjToStr(&sub_req));
         if (con->SendPackage(move(req)).IsFialed())
             return CResult::Make_Error("Send get config request error.");
         auto res = con->RecvPackage(true);
@@ -512,7 +512,7 @@ void CSloongBaseService::OnSendPackageToManagerEventHandler(SharedEvent e)
     auto event = dynamic_pointer_cast<SendPackageToManagerEvent>(e);
 
     auto req = make_shared<SendPackageEvent>(m_ManagerSession);
-    req->SetCallbackFunc([event](IEvent *e, DataPackage *p) {
+    req->SetCallbackFunc([event](IEvent *e, Package *p) {
         event->CallCallbackFunc(p);
     });
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event->GetFunctionID(), event->GetContent());

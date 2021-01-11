@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2020-08-17 12:14:44
+ * @LastEditTime: 2021-01-11 10:34:17
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -178,7 +178,7 @@ CResult Sloong::EasyConnect::SendPackage(UniquePackage pack)
 	{
 		if (!pack->SerializeToString(&m_strSending))
 		{
-			return CResult::Make_Error("DataPackage serialize fialed.");
+			return CResult::Make_Error("Package serialize fialed.");
 		}
 		m_SendPackageSize = m_strSending.size();
 		m_SentSize = 0;
@@ -316,7 +316,7 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 		m_strReceiving.append(buf, 0, len);
 		if (m_ReceivedSize == m_RecvPackageSize)
 		{
-			auto package = make_unique<DataPackage>();
+			auto package = PackageHelper::new_unique();
 			if (!package->ParseFromString(m_strReceiving))
 			{
 				Close();

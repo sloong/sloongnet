@@ -93,7 +93,7 @@ namespace Sloong
 		virtual CResult Run();
 		virtual void Stop();
 
-		TResult<shared_ptr<DataPackage>> RegisteToControl(EasyConnect *con, string uuid);
+		TResult<shared_ptr<Package>> RegisteToControl(EasyConnect *con, string uuid);
 
 	protected:
 		virtual CResult InitlializeForWorker(RuntimeDataPackage *, RunInfo*, EasyConnect *);

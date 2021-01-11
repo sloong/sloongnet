@@ -27,12 +27,12 @@ CResult Sloong::FileManager::Initialize(IControl *ic)
     return CResult::Succeed;
 }
 
-PackageResult Sloong::FileManager::RequestPackageProcesser(DataPackage *pack)
+PackageResult Sloong::FileManager::RequestPackageProcesser(Package *pack)
 {
     auto function = (Functions)pack->function();
     if (!Functions_IsValid(function))
     {
-        return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("FileCenter no provide [%d] function.", function)));
+        return PackageResult::Make_OKResult(PackageHelper::MakeErrorResponse(pack, Helper::Format("FileCenter no provide [%d] function.", function)));
     }
 
     auto req_obj = pack->content();
@@ -40,11 +40,11 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(DataPackage *pack)
     m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), req_obj.c_str()));
     if (!m_mapFuncToHandler.exist(function))
     {
-        return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
+        return PackageResult::Make_OKResult(PackageHelper::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
     }
 
     auto res = m_mapFuncToHandler[function](req_obj, pack);
-    auto response = Package::MakeResponse(pack, res);
+    auto response = PackageHelper::MakeResponse(pack, res);
     if (res.IsSucceed())
         m_pLog->Debug(Helper::Format("Response [%s]:[%s][%d].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().length()));
     else
@@ -52,7 +52,7 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(DataPackage *pack)
     return PackageResult::Make_OKResult(move(response));
 }
 
-PackageResult Sloong::FileManager::ResponsePackageProcesser(DataPackage *pack)
+PackageResult Sloong::FileManager::ResponsePackageProcesser(Package *pack)
 {
     return PackageResult::Ignore();
 }
@@ -188,7 +188,7 @@ U32Result Sloong::FileManager::CalculateFileRangeCRC(const string &filepath, int
     return U32Result::Make_OKResult(CRC::Calculate(str.c_str(), str.length(), CRC::CRC_32()));
 }
 
-CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, DataPackage *trans_pack)
+CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, Package *trans_pack)
 {
     auto req = ConvertStrToObj<PrepareUploadRequest>(str_req);
 
@@ -204,7 +204,7 @@ CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, DataPac
     return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
-CResult Sloong::FileManager::UploadingHandler(const string &str_req, DataPackage *pack)
+CResult Sloong::FileManager::UploadingHandler(const string &str_req, Package *pack)
 {
     auto req = ConvertStrToObj<UploadingRequest>(str_req);
 
@@ -233,7 +233,7 @@ CResult Sloong::FileManager::UploadingHandler(const string &str_req, DataPackage
     return CResult::Succeed;
 }
 
-CResult Sloong::FileManager::UploadedHandler(const string &str_req, DataPackage *pack)
+CResult Sloong::FileManager::UploadedHandler(const string &str_req, Package *pack)
 {
     auto req = ConvertStrToObj<UploadedRequest>(str_req);
     auto info = m_mapTokenToUploadInfo->try_get(req->token());
@@ -261,7 +261,7 @@ CResult Sloong::FileManager::UploadedHandler(const string &str_req, DataPackage 
     return CResult::Succeed;
 }
 
-CResult Sloong::FileManager::SimpleUploadHandler(const string &str_req, DataPackage *trans_pack)
+CResult Sloong::FileManager::SimpleUploadHandler(const string &str_req, Package *trans_pack)
 {
     auto req = ConvertStrToObj<SimpleUploadRequest>(str_req);
 
@@ -286,7 +286,7 @@ CResult Sloong::FileManager::SimpleUploadHandler(const string &str_req, DataPack
     return CResult::Succeed;
 }
 
-CResult Sloong::FileManager::DownloadVerifyHandler(const string &str_req, DataPackage *pack)
+CResult Sloong::FileManager::DownloadVerifyHandler(const string &str_req, Package *pack)
 {
     auto req = ConvertStrToObj<DownloadVerifyRequest>(str_req);
 
@@ -311,7 +311,7 @@ CResult Sloong::FileManager::DownloadVerifyHandler(const string &str_req, DataPa
     return CResult::Succeed;
 }
 
-CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, DataPackage *pack)
+CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, Package *pack)
 {
     auto req = ConvertStrToObj<DownloadFileRequest>(str_req);
 
@@ -355,12 +355,12 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, DataPack
     return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
-CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, DataPackage *trans_pack)
+CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Package *trans_pack)
 {
     return CResult::Make_Error("No support now.");
 }
 
-CResult Sloong::FileManager::GetThumbnailHandler(const string &str_req, DataPackage *trans_pack)
+CResult Sloong::FileManager::GetThumbnailHandler(const string &str_req, Package *trans_pack)
 {
     auto req = ConvertStrToObj<GetThumbnailRequest>(str_req);
     string thumb_file = Helper::Format("%s_%d_%d_%d", Helper::ntos(req->indexcode()).c_str(), req->width(), req->height(), req->quality());

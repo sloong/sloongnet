@@ -120,7 +120,7 @@ void Sloong::CGlobalFunction::OnStart(SharedEvent e)
 }
 
 
-void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent* send_pack, DataPackage *res_pack)
+void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent* send_pack, Package *res_pack)
 {
     auto str_res = res_pack->content();
     auto res = ConvertStrToObj<QueryReferenceInfoResponse>(str_res);

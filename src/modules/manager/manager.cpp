@@ -16,7 +16,7 @@ using namespace Sloong::Events;
 unique_ptr<SloongControlService> Sloong::SloongControlService::Instance = nullptr;
 string Sloong::SloongControlService::g_strDBFilePath = "./configuation.db";
 
-extern "C" PackageResult RequestPackageProcesser(void *pEnv, DataPackage *pack)
+extern "C" PackageResult RequestPackageProcesser(void *pEnv, Package *pack)
 {
 	auto pServer = STATIC_TRANS<CServerManage *>(pEnv);
 	if (pServer)
@@ -25,7 +25,7 @@ extern "C" PackageResult RequestPackageProcesser(void *pEnv, DataPackage *pack)
 		return PackageResult::Make_Error("Environment convert error. cannot process message.");
 }
 
-extern "C" PackageResult ResponsePackageProcesser(void *pEnv, DataPackage *pack)
+extern "C" PackageResult ResponsePackageProcesser(void *pEnv, Package *pack)
 {
 	auto pServer = STATIC_TRANS<CServerManage *>(pEnv);
 	if (pServer)
@@ -34,7 +34,7 @@ extern "C" PackageResult ResponsePackageProcesser(void *pEnv, DataPackage *pack)
 		return PackageResult::Make_Error("Environment convert error. cannot process message.");
 }
 
-extern "C" CResult EventPackageProcesser(DataPackage *pack)
+extern "C" CResult EventPackageProcesser(Package *pack)
 {
 	SloongControlService::Instance->EventPackageProcesser(pack);
 	return CResult::Succeed;
@@ -154,7 +154,7 @@ inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(voi
 	return CResult::Succeed;
 }
 
-void Sloong::SloongControlService::EventPackageProcesser(DataPackage *pack)
+void Sloong::SloongControlService::EventPackageProcesser(Package *pack)
 {
 	m_pLog->Info("EventPackageProcesser is called.");
 }
