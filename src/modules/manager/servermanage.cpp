@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-01-12 19:48:17
+ * @LastEditTime: 2021-01-12 20:07:37
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -223,7 +223,7 @@ int Sloong::CServerManage::SearchNeedCreateWithType(bool excludeMode, const vect
 		bool exist = std::find(type.begin(), type.end(), item_id) != type.end();
 		if ((exist && !excludeMode) || (!exist && excludeMode))
 		{
-			ids.push_back(item_id);
+			ids.push_back(item.first);
 		}
 	}
 
