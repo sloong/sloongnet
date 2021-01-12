@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-10-28 10:44:15
+ * @LastEditTime: 2020-12-30 16:18:26
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filemanager.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -25,7 +25,7 @@ namespace Sloong
     typedef struct UploadInfo
     {
         string Path;
-        uint64_t CRCHashCode;
+        uint64_t HashCode;
         int64_t FileSize;
         list<FileRange> DataList;
     } UploadInfo;
@@ -48,12 +48,10 @@ namespace Sloong
         CResult GetThumbnailHandler(const string &str_req, Package *trans_pack);
 
     protected:
-        CResult ArchiveFile(const string& source);
+        CResult ArchiveFile(const string& , const string& );
 
-        U32Result CalculateFileRangeCRC( const string&, int, int );
-        string QueryFilePath( const string& );
-        string GetPathByHashcode( const string& );
-        string GetFolderByHashcode( const string& );
+        string GetFileTruePath( const string&  );
+        string GetFileFolder( const string&  );
 
         CResult MergeFile(const list<FileRange> &fileList, const string &saveFile);
         CResult SplitFile(const string &saveFile, int splitSize, map_ex<int, string> &pReadList, int* out_all_size);

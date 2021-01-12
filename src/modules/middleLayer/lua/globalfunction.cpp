@@ -711,11 +711,11 @@ int CGlobalFunction::Lua_UploadEnd(lua_State *l)
 
 int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
 {
-    auto index = CLua::GetString(l,1,"");
+    auto file_index = CLua::GetString(l,1,"");
     auto height = CLua::GetInteger(l,2,0);
     auto width = CLua::GetInteger(l,3,0);
     auto quality = CLua::GetInteger(l,4,0);
-    if( index.empty() || height == 0 || width == 0 || quality == 0 )
+    if( file_index.empty() || height == 0 || width == 0 || quality == 0 )
     {
         CLua::PushBoolen(l, false);
         CLua::PushString(l, "Param error.");
@@ -733,7 +733,7 @@ int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
     auto session = conn.GetResultObject();
 
     FileCenter::GetThumbnailRequest request;
-    request.set_indexcode(index);
+    request.set_index(file_index);
     request.set_height(height);
     request.set_width(width);
     request.set_quality(quality);

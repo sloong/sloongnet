@@ -29,7 +29,7 @@ enum Functions{
     
     // 简单的上传，适用于上传小文件，不支持断点续传。
     // Request << SimpleUploadRequest(&Extend)
-    // Response >> Result
+    // Response >> Token in Content
     SimpleUpload=304;
 
     // 下载校验,可以对已下载的信息进行校验.
@@ -72,6 +72,7 @@ message PrepareUploadRequest{
 }
 
 message PrepareUploadResponse{
+    // If upload is succeed, this token will become to the index of the file
     string Token=1;
 }
 
@@ -85,17 +86,17 @@ message UploadedRequest{
 }
 
 message DownloadVerifyRequest{
-    bytes IndexCode=1;
+    string Index=1;
     // Strat pointer for data range
     int32 Start=2;
     // End pointer for data range
     int32 End=3;
     // Hashcode for This data range. Hash function is CRC32
-    fixed32 DataCRCCode=4;
+    fixed32 CRCCode=4;
 }
 
 message DownloadFileRequest{
-    bytes IndexCode=1;
+    string Index=1;
     repeated FileRange FileData=2;
 }
 
@@ -111,7 +112,7 @@ message SimpleUploadRequest{
 }
 
 message ConvertImageFileRequest{
-    bytes IndexCode=1;
+    string Index=1;
     
     SupportFormat TargetFormat=2;
     // 保留源文件
@@ -123,7 +124,7 @@ message ConvertImageFileResponse{
 }
 
 message GetThumbnailRequest{
-    bytes IndexCode=1;
+    string Index=1;
     int32 Height=2;
     int32 Width=3;
     int32 Quality=4;

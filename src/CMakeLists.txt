@@ -55,6 +55,8 @@ list(APPEND SRC_LIST ${PROTOSRCS})
 #生成可执行文件
 add_executable(${PROJECT_NAME} ${SRC_LIST}) 
 
+target_compile_options(${PROJECT_NAME} PRIVATE -fpie)
+
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,./")
 
 #添加链接库
