@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2021-01-11 10:31:00
+ * @LastEditTime: 2021-01-12 14:45:35
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -62,6 +62,9 @@
 #include "ConnectSession.h"
 #include "IData.h"
 
+#include "events/MonitorSendStatus.hpp"
+using namespace Sloong::Events;
+
 Sloong::ConnectSession::ConnectSession()
 {
 	m_pSendList = new queue_ex<UniquePackage>[s_PriorityLevel]();
@@ -104,7 +107,7 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 		pack->clear_extend();
 	}
 
-	m_pLog->Verbos(Helper::Format("SEND>>>[%d]>>No[%lld]>>[%d]byte", m_pConnection->GetSocketID() , pack->id(), pack->ByteSize()));
+	m_pLog->Verbos(Helper::Format("SEND>>>[%d]>>No[%lld]>>[%d]byte", m_pConnection->GetSocketID() , pack->id(), pack->ByteSizeLongEx()));
 
 	// if have exdata, directly add to epoll list.
 	if (IsBigPackage(pack.get()) || m_pConnection->IsSending() || (m_bIsSendListEmpty == false && !m_oPrepareSendList.empty()) || m_oSockSendMutex.try_lock() == false)
@@ -140,9 +143,11 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 
 void Sloong::ConnectSession::AddToSendList(UniquePackage pack)
 {
+	auto events = make_shared<MonitorSendStatusEvent>(pack->sessionid());
 	m_oPrepareSendList.push_move(std::move(pack));
 	m_pLog->Debug(Helper::Format("Add send package to prepare send list. list size:[%d]", m_oPrepareSendList.size()));
 	m_bIsSendListEmpty = false;
+	m_iC->SendMessage(events);
 }
 
 ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
@@ -165,7 +170,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 			}
 			else
 			{
-				m_pLog->Verbos(Helper::Format("RECV<<<[%d]<<No[%lld]<<[%d]byte", m_pConnection->GetSocketID(), package->id(), package->ByteSize()));
+				m_pLog->Verbos(Helper::Format("RECV<<<[%d]<<No[%lld]<<[%d]byte", m_pConnection->GetSocketID(), package->id(), package->ByteSizeLongEx()));
 				package->add_clocks(GetClock());
 				package->set_sessionid(m_pConnection->GetHashCode());
 				bLoop = true;
@@ -173,16 +178,20 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 
 				if( package->hash().length() != 32 )
 				{
-					AddToSendList(PackageHelper::MakeErrorResponse(package.get(), "Hash check error. Make sure the hash algorithm is SHA256"));
+					auto msg = "Hash check error. Make sure the hash algorithm is SHA256";
+					m_pLog->Verbos(msg);
+					AddToSendList(PackageHelper::MakeErrorResponse(package.get(),msg ));
 					continue;
 				}
 				string hash(package->hash());
 				package->clear_hash();
 				unsigned char buffer[32] = {0};
-				CSHA256::Binary_Encoding(ConvertObjToStr(package.get()).c_str(),buffer);
+				CSHA256::Binary_Encoding(ConvertObjToStr(package.get()),buffer);
 				if( string((char*)buffer,32) != hash )
 				{
-					AddToSendList(PackageHelper::MakeErrorResponse(package.get(), Helper::Format("Hash check error. Package[%s]<->[%s]Calculate", ConvertToHexString(hash.c_str(),0,31).c_str(),ConvertToHexString((char*)buffer,0,31).c_str() )));
+					auto msg =  Helper::Format("Hash check error. Package[%s]<->[%s]Calculate", ConvertToHexString(hash.c_str(),0,31).c_str(),ConvertToHexString((char*)buffer,0,31).c_str() );
+					m_pLog->Verbos(msg);
+					AddToSendList(PackageHelper::MakeErrorResponse(package.get(),msg));
 					continue;
 				}
 
@@ -286,7 +295,7 @@ ResultType Sloong::ConnectSession::ProcessSendList()
 		if (pack == nullptr)
 			return ResultType::Retry;
 
-		m_pLog->Debug(Helper::Format("Send new package, the list size[%d],Size[%d],", list->size(), pack->ByteSize()));
+		m_pLog->Debug(Helper::Format("Send new package, the list size[%d],Size[%d],", list->size(), pack->ByteSizeLongEx()));
 		auto res = m_pConnection->SendPackage(move(pack));
 
 		if (res.GetResult() == ResultType::Error)

@@ -1,11 +1,11 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-01-11 10:44:18
+ * @LastEditTime: 2021-01-12 14:47:41
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/PackageHelper.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description: The helper for Package object.
  */
 #pragma once
 
@@ -63,12 +63,12 @@ namespace Sloong
         static UniquePackage MakeResponse(Package *request_pack)
         {
             auto response_pack = PackageHelper::new_unique();
+            response_pack->set_sessionid(request_pack->sessionid());
             response_pack->set_type(request_pack->type());
             response_pack->set_priority(request_pack->priority());
             response_pack->set_function(request_pack->function());
             response_pack->set_id(request_pack->id());
             response_pack->set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
-
             return response_pack;
         }
 

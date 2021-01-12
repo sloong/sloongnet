@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2021-01-11 10:34:17
+ * @LastEditTime: 2021-01-12 12:41:59
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -176,6 +176,14 @@ CResult Sloong::EasyConnect::SendPackage(UniquePackage pack)
 	}
 	if (m_strSending.empty())
 	{
+		string tmp;
+		if (!pack->SerializeToString(&tmp))
+		{
+			return CResult::Make_Error("Package serialize fialed.");
+		}
+		unsigned char buffer[32] = {0};
+		CSHA256::Binary_Encoding(tmp,buffer);
+		pack->set_hash(buffer,32);
 		if (!pack->SerializeToString(&m_strSending))
 		{
 			return CResult::Make_Error("Package serialize fialed.");

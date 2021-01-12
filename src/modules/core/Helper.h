@@ -243,7 +243,7 @@ namespace Sloong
 	inline constexpr int g_max_package_size = 5 * 1024 * 1024;
 	inline bool IsOverflowPackage(Package *pack)
 	{
-		if (pack->ByteSize() > g_max_package_size)
+		if (pack->ByteSizeLong() > g_max_package_size)
 			return true;
 		else
 			return false;
@@ -252,7 +252,7 @@ namespace Sloong
 	inline constexpr int g_big_package_size = 1 * 1024;
 	inline bool IsBigPackage(Package *pack)
 	{
-		if (pack->ByteSize() > g_big_package_size)
+		if (pack->ByteSizeLong() > g_big_package_size)
 			return true;
 		else
 			return false;
@@ -263,7 +263,7 @@ namespace Sloong
 	{
 		if( !pack->extend().empty())
 			return false;
-		if( pack->ByteSize() > g_max_package_print_log )
+		if( pack->ByteSizeLong() > g_max_package_print_log )
 			return false;
 		return true;
 	}
