@@ -1,7 +1,7 @@
 ﻿/*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-01-06 20:07:13
+ * @LastEditTime: 2021-01-12 16:30:02
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/main.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -100,15 +100,15 @@ int main(int argc, char **args)
 			auto item = string(args[3]);
 			if (item.find("--assign=") != string::npos)
 			{
-				info.AssignedTargetTemplateID = item.substr(8);
+				info.AssignedTargetTemplateID = item.substr(9);
 			}
 			else if (item.find("--include=") != string::npos)
 			{
-				info.IncludeTargetType = item.substr(9);
+				info.IncludeTargetType = item.substr(10);
 			}
 			else if (item.find("--exclude=") != string::npos)
 			{
-				info.ExcludeTargetType = item.substr(9);
+				info.ExcludeTargetType = item.substr(10);
 			}
 		}
 
