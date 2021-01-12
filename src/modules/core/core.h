@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-08-07 12:43:05
- * @LastEditTime: 2020-08-11 18:53:27
+ * @LastEditTime: 2021-01-11 10:45:56
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/core.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -95,11 +95,13 @@ using namespace Core;
 
 #include <jsoncpp/json/json.h>
 
+#include "package.hpp"
+
 #include "Helper.h"
 #include "result.h"
 #include "queue_ex.hpp"
 #include "map_ex.hpp"
 #include "list_ex.hpp"
-#include "package.hpp"
+#include "PackageHelper.hpp"
 
 using namespace Sloong;

@@ -153,7 +153,7 @@ namespace Sloong
 		 * @return: 
 		 * 		New listen socket handle in TResult<int>
 		 */
-		NResult CreateListenSocket(const string &, int);
+		U64Result CreateListenSocket(const string &, int);
 
 		/*** 
 		 * @description: Control socket in epoll operation.

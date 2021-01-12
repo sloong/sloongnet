@@ -16,9 +16,9 @@
 
 extern "C"
 {
-	PackageResult RequestPackageProcesser(void *, DataPackage *);
-	PackageResult ResponsePackageProcesser(void *, DataPackage *);
-	CResult EventPackageProcesser(DataPackage *);
+	PackageResult RequestPackageProcesser(void *, Package *);
+	PackageResult ResponsePackageProcesser(void *, Package *);
+	CResult EventPackageProcesser(Package *);
 	CResult NewConnectAcceptProcesser(SOCKET);
 	CResult PrepareInitialize(GLOBAL_CONFIG*);
 	CResult ModuleInitialization(IControl*);
@@ -43,7 +43,7 @@ namespace Sloong
 		CResult Initialized();
 
 		inline CResult CreateProcessEnvironmentHandler(void **);
-		void EventPackageProcesser(DataPackage *);
+		void EventPackageProcesser(Package *);
 
 	protected:
 		void OnConnectionBreaked(SharedEvent);

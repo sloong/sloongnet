@@ -27,7 +27,7 @@ CResult Sloong::DBHub::Initialize(IControl *ic)
     return CResult::Succeed;
 }
 
-PackageResult Sloong::DBHub::RequestPackageProcesser(DataPackage *pack)
+PackageResult Sloong::DBHub::RequestPackageProcesser(Package *pack)
 {
     auto function = (Functions)pack->function();
     if (!DataCenter::Functions_IsValid(function))
@@ -48,10 +48,10 @@ PackageResult Sloong::DBHub::RequestPackageProcesser(DataPackage *pack)
 		m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
 	else
 		m_pLog->Verbos(Helper::Format("Response [%s]:[%s]", func_name.c_str(), ResultType_Name(res.GetResult()).c_str()));
-    return PackageResult::Make_OKResult(Package::MakeResponse(pack,res));
+    return PackageResult::Make_OKResult(PackageHelper::MakeResponse(pack,res));
 }
 
-CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, DataPackage *pack)
+CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, Package *pack)
 {
     auto req = ConvertStrToObj<ConnectDatabaseRequest>(req_obj);
 
@@ -95,7 +95,7 @@ inline MySqlEx* GetCurrentThreadConnextion(  map<thread::id,UniqueMySQLEx>* sess
     return (*sessions)[id].get();
 }
 
-CResult Sloong::DBHub::QuerySQLCmdHandler(const string &req_obj, DataPackage *pack)
+CResult Sloong::DBHub::QuerySQLCmdHandler(const string &req_obj, Package *pack)
 {
     auto req = ConvertStrToObj<QuerySQLCmdRequest>(req_obj);
 
@@ -120,7 +120,7 @@ CResult Sloong::DBHub::QuerySQLCmdHandler(const string &req_obj, DataPackage *pa
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
-CResult Sloong::DBHub::InsertSQLCmdHandler(const string &req_obj, DataPackage *pack)
+CResult Sloong::DBHub::InsertSQLCmdHandler(const string &req_obj, Package *pack)
 {
     auto req = ConvertStrToObj<InsertSQLCmdRequest>(req_obj);
 
@@ -155,7 +155,7 @@ CResult Sloong::DBHub::InsertSQLCmdHandler(const string &req_obj, DataPackage *p
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
-CResult Sloong::DBHub::DeleteSQLCmdHandler(const string &req_obj, DataPackage *pack)
+CResult Sloong::DBHub::DeleteSQLCmdHandler(const string &req_obj, Package *pack)
 {
     auto req = ConvertStrToObj<DeleteSQLCmdRequest>(req_obj);
 
@@ -173,7 +173,7 @@ CResult Sloong::DBHub::DeleteSQLCmdHandler(const string &req_obj, DataPackage *p
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
-CResult Sloong::DBHub::UpdateSQLCmdHandler(const string &req_obj, DataPackage *pack)
+CResult Sloong::DBHub::UpdateSQLCmdHandler(const string &req_obj, Package *pack)
 {
     auto req = ConvertStrToObj<UpdateSQLCmdRequest>(req_obj);
 

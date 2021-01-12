@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-08-21 13:24:04
+ * @LastEditTime: 2020-10-09 10:28:37
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filecenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -67,7 +67,7 @@ using namespace Sloong;
 
 unique_ptr<CFileCenter> Sloong::CFileCenter::Instance = nullptr;
 
-extern "C" PackageResult RequestPackageProcesser(void *pEnv, DataPackage *pack)
+extern "C" PackageResult RequestPackageProcesser(void *pEnv, Package *pack)
 {
     auto pManager = STATIC_TRANS<FileManager *>(pEnv);
     if (pManager)
@@ -76,7 +76,7 @@ extern "C" PackageResult RequestPackageProcesser(void *pEnv, DataPackage *pack)
         return PackageResult::Make_Error("Environment convert error. cannot process message.");
 }
 
-extern "C" PackageResult ResponsePackageProcesser(void *pEnv, DataPackage *pack)
+extern "C" PackageResult ResponsePackageProcesser(void *pEnv, Package *pack)
 {
     auto pManager = STATIC_TRANS<FileManager *>(pEnv);
     if (pManager)
@@ -85,7 +85,7 @@ extern "C" PackageResult ResponsePackageProcesser(void *pEnv, DataPackage *pack)
         return PackageResult::Make_Error("Environment convert error. cannot process message.");
 }
 
-extern "C" CResult EventPackageProcesser(DataPackage *pack)
+extern "C" CResult EventPackageProcesser(Package *pack)
 {
     CFileCenter::Instance->EventPackageProcesser(pack);
     return CResult::Succeed;
@@ -135,7 +135,7 @@ CResult Sloong::CFileCenter::CreateProcessEnvironmentHandler(void **out_env)
 	return CResult::Succeed;
 }
 
-void Sloong::CFileCenter::EventPackageProcesser(DataPackage *pack)
+void Sloong::CFileCenter::EventPackageProcesser(Package *pack)
 {
     auto event = Events_MIN;
     if (!Manager::Events_Parse(pack->content(), &event))

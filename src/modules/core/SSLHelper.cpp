@@ -34,11 +34,11 @@ CResult Sloong::SSLHelper::Initialize(SOCKET sock)
     return CResult::Succeed;
 }
 
-NResult Sloong::SSLHelper::Read(char *data, int len, bool block, bool bagain)
+U64Result Sloong::SSLHelper::Read(char *data, int len, bool block, bool bagain)
 {
     if (!CheckStatus(true))
     {
-        return NResult::Retry();
+        return U64Result::Retry();
     }
 
     // SSL发送数据
@@ -49,7 +49,7 @@ NResult Sloong::SSLHelper::Read(char *data, int len, bool block, bool bagain)
     int ret = SSL_Read_Ex(data, len, 0, true);
     if (ret == len)
     {
-        return NResult::Make_OKResult(ret);
+        return U64Result::Make_OKResult(ret);
     }
     else
     {
@@ -57,18 +57,18 @@ NResult Sloong::SSLHelper::Read(char *data, int len, bool block, bool bagain)
     }
 }
 
-NResult Sloong::SSLHelper::Write(const char *data, int len, int index)
+U64Result Sloong::SSLHelper::Write(const char *data, int len, int index)
 {
     if (!CheckStatus(false))
     {
-        return NResult::Retry();
+        return U64Result::Retry();
     }
 
     // SSL发送数据
     int ret = SSL_Write_Ex(data + index, len);
     if (ret == len - index)
     {
-        return NResult::Make_OKResult(ret);
+        return U64Result::Make_OKResult(ret);
     }
     else
     {
@@ -76,12 +76,12 @@ NResult Sloong::SSLHelper::Write(const char *data, int len, int index)
     }
 }
 
-NResult Sloong::SSLHelper::ResultCheck(int ret)
+U64Result Sloong::SSLHelper::ResultCheck(int ret)
 {
     if (ret > 0)
     {
         m_stStatus = ConnectStatus::WaitWrite;
-        return NResult::Retry();
+        return U64Result::Retry();
     }
     else if (ret < 0)
     {
@@ -92,30 +92,30 @@ NResult Sloong::SSLHelper::ResultCheck(int ret)
         {
         case SSL_ERROR_WANT_WRITE:
             m_stStatus = ConnectStatus::WaitWrite;
-            return NResult::Retry();
+            return U64Result::Retry();
             break;
         case SSL_ERROR_WANT_READ:
             if (support_ssl_reconnect)
             {
                 m_stStatus = ConnectStatus::WaitRead;
-                return NResult::Retry();
+                return U64Result::Retry();
             }
             else
             {
                 m_stStatus = ConnectStatus::ConnectError;
-                return NResult::Make_Error("SSL_ERROR_WANT_READ error, and support_ssl_reconnect is false.");
+                return U64Result::Make_Error("SSL_ERROR_WANT_READ error, and support_ssl_reconnect is false.");
             }
             break;
         default:
             m_stStatus = ConnectStatus::ConnectError;
-            return NResult::Make_Error("SSL_ERROR_WANT_READ error");
+            return U64Result::Make_Error("SSL_ERROR_WANT_READ error");
             break;
         }
     }
     else
     {
         m_stStatus = ConnectStatus::ConnectError;
-        return NResult::Make_Error("SSL_ERROR_WANT_READ error");
+        return U64Result::Make_Error("SSL_ERROR_WANT_READ error");
     }
 }
 

@@ -61,7 +61,7 @@
 #pragma once
 
 #include "result.h"
-typedef TResult<unique_ptr<DataPackage>> PackageResult;
+typedef TResult<unique_ptr<Package>> PackageResult;
 
 #include "protocol/base.pb.h"
 using namespace Base;
@@ -69,9 +69,9 @@ using namespace Base;
 using namespace Core;
 #include "IControl.h"
 typedef CResult (*CreateProcessEnvironmentFunction)(void**);
-typedef PackageResult (*RequestPackageProcessFunction)(void*,DataPackage*);
-typedef PackageResult (*ResponsePackageProcessFunction)(void*,DataPackage*);
-typedef CResult (*EventPackageProcessFunction)(DataPackage*);
+typedef PackageResult (*RequestPackageProcessFunction)(void*,Package*);
+typedef PackageResult (*ResponsePackageProcessFunction)(void*,Package*);
+typedef CResult (*EventPackageProcessFunction)(Package*);
 typedef CResult (*NewConnectAcceptProcessFunction)(SOCKET);
 typedef CResult (*PrepareInitializeFunction)(GLOBAL_CONFIG*);
 typedef CResult (*ModuleInitializationFunction)(IControl*);

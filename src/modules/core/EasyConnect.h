@@ -96,7 +96,7 @@ namespace Sloong
 		/**
          * @Description: send this package
          * @Params: 
-		 * 		1 > The DataPackage object.
+		 * 		1 > The Package object.
          * @Return: if send fialed, return Error.
          */
 		CResult SendPackage(UniquePackage);

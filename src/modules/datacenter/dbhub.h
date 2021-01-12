@@ -27,13 +27,13 @@ namespace Sloong
     public:
         CResult Initialize(IControl *ic);
 
-        PackageResult RequestPackageProcesser(DataPackage *);
+        PackageResult RequestPackageProcesser(Package *);
 
-        CResult ConnectDatabaseHandler(const string &req_obj, DataPackage *pack);
-        CResult QuerySQLCmdHandler(const string &req_obj, DataPackage *pack);
-        CResult InsertSQLCmdHandler(const string &req_obj, DataPackage *pack);
-        CResult UpdateSQLCmdHandler(const string &req_obj, DataPackage *pack);
-        CResult DeleteSQLCmdHandler(const string &req_obj, DataPackage *pack);
+        CResult ConnectDatabaseHandler(const string &req_obj, Package *pack);
+        CResult QuerySQLCmdHandler(const string &req_obj, Package *pack);
+        CResult InsertSQLCmdHandler(const string &req_obj, Package *pack);
+        CResult UpdateSQLCmdHandler(const string &req_obj, Package *pack);
+        CResult DeleteSQLCmdHandler(const string &req_obj, Package *pack);
 
     protected:
         map_ex<DataCenter::Functions, FunctionHandler> m_mapFuncToHandler;

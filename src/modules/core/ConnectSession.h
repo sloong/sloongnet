@@ -65,7 +65,7 @@
 #include "EasyConnect.h"
 namespace Sloong
 {
-    typedef queue<unique_ptr<DataPackage>> ReceivePackageList;
+    typedef queue<unique_ptr<Package>> ReceivePackageList;
     typedef TResult<ReceivePackageList> ReceivePackageListResult;
 	class ConnectSession : IObject
 	{

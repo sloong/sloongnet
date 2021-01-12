@@ -14,17 +14,17 @@ using namespace Manager;
 
 unique_ptr<SloongNetFirewall> Sloong::SloongNetFirewall::Instance = nullptr;
 
-extern "C" PackageResult RequestPackageProcesser(void* pEnv,DataPackage* pack)
+extern "C" PackageResult RequestPackageProcesser(void* pEnv,Package* pack)
 {
 	return SloongNetFirewall::Instance->RequestPackageProcesser(pack);
 }
 
-extern "C" PackageResult ResponsePackageProcesser(void* pEnv,DataPackage* pack)
+extern "C" PackageResult ResponsePackageProcesser(void* pEnv,Package* pack)
 {
 	return SloongNetFirewall::Instance->ResponsePackageProcesser(pack);
 }
 
-extern "C" CResult EventPackageProcesser(DataPackage* pack)
+extern "C" CResult EventPackageProcesser(Package* pack)
 {
 	SloongNetFirewall::Instance->EventPackageProcesser(pack);
 	return CResult::Succeed;
@@ -64,7 +64,7 @@ CResult SloongNetFirewall::Initialized()
 }
 
 
-PackageResult Sloong::SloongNetFirewall::RequestPackageProcesser(DataPackage* pack)
+PackageResult Sloong::SloongNetFirewall::RequestPackageProcesser(Package* pack)
 {
     auto sender = pack->sender();
     auto func = (Functions)pack->function();
@@ -73,7 +73,7 @@ PackageResult Sloong::SloongNetFirewall::RequestPackageProcesser(DataPackage* pa
 	return PackageResult::Succeed();
 }
 
-PackageResult Sloong::SloongNetFirewall::ResponsePackageProcesser(DataPackage* pack)
+PackageResult Sloong::SloongNetFirewall::ResponsePackageProcesser(Package* pack)
 {
     auto sender = pack->sender();
     auto func = (Functions)pack->function();
@@ -89,7 +89,7 @@ inline CResult Sloong::SloongNetFirewall::CreateProcessEnvironmentHandler(void**
 
 
 
-void Sloong::SloongNetFirewall::EventPackageProcesser(DataPackage* pack)
+void Sloong::SloongNetFirewall::EventPackageProcesser(Package* pack)
 {
 	auto event = Events_MIN;
 	if(!Manager::Events_Parse(pack->content(),&event))

@@ -98,7 +98,17 @@ message RegisteWorkerRequest
 {
    // In defualt no should set, just send request with empty content.
    // Just ues this when a worker node is for specified template.
-   int32 ForceTargetTemplateID=1;
+   enum RunType
+   {
+      Default=0;
+      AssignTemplate=1;
+      IncludeType=2;
+      ExcludeType=3;
+   };
+   RunType RunMode = 1;
+   repeated int32 AssignTargetTemplateID=2;
+   repeated Core.MODULE_TYPE IncludeTargetType=3;
+   repeated Core.MODULE_TYPE ExcludeTargetType=4;
 }
 
 message RegisteWorkerResponse

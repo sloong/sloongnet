@@ -21,11 +21,11 @@ namespace Sloong
 
 		CResult Initialize(IControl*);
 
-        PackageResult RequestPackageProcesser( DataPackage *);
-        PackageResult ResponsePackageProcesser( UniquePackage, DataPackage *);
+        PackageResult RequestPackageProcesser( Package *);
+        PackageResult ResponsePackageProcesser( UniquePackage, Package *);
 	private:
-        PackageResult MessageToProcesser(DataPackage *);
-		PackageResult MessageToClient(UniquePackage, DataPackage *);
+        PackageResult MessageToProcesser(Package *);
+		PackageResult MessageToClient(UniquePackage, Package *);
 
     protected:
 		IControl* 	m_iC = nullptr;

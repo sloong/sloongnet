@@ -42,15 +42,15 @@ namespace Sloong
 
         CResult Initialize(SOCKET sock);
 
-        NResult Read(char *, int, bool, bool);
-        NResult Write(const char *, int, int);
+        U64Result Read(char *, int, bool, bool);
+        U64Result Write(const char *, int, int);
 
         int SSL_Read_Ex(char *, int, int, bool);
         int SSL_Write_Ex(const char *, int);
         bool do_handshake();
 
         bool CheckStatus(bool);
-        NResult ResultCheck(int);
+        U64Result ResultCheck(int);
 
     public:
         static unsigned long G_InitializeSSL(void **, const string &, const string &, const string &);

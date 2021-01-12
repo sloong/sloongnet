@@ -58,7 +58,6 @@ build(){
 		exit 1
 	fi
 
-	
 	mkdir -p $OUTPATH/modules/
 
 	cp $CMAKE_FILE_PATH/referenced/libuniv/libuniv.so $OUTPATH/

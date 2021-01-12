@@ -71,9 +71,9 @@ using namespace Manager;
 
 extern "C"
 {
-	PackageResult RequestPackageProcesser(void *, DataPackage *);
-	PackageResult ResponsePackageProcesser(void *, DataPackage *);
-	CResult EventPackageProcesser(DataPackage *);
+	PackageResult RequestPackageProcesser(void *, Package *);
+	PackageResult ResponsePackageProcesser(void *, Package *);
+	CResult EventPackageProcesser(Package *);
 	CResult NewConnectAcceptProcesser(SOCKET);
 	CResult ModuleInitialization(IControl*);
 	CResult ModuleInitialized();
@@ -97,14 +97,14 @@ namespace Sloong
 		CResult Initialization(IControl*);
 		CResult Initialized();
 
-		PackageResult RequestPackageProcesser(CLuaProcessCenter *, DataPackage *);
-		PackageResult ResponsePackageProcesser(CLuaProcessCenter *, DataPackage *);
+		PackageResult RequestPackageProcesser(CLuaProcessCenter *, Package *);
+		PackageResult ResponsePackageProcesser(CLuaProcessCenter *, Package *);
 		inline CResult CreateProcessEnvironmentHandler(void **);
 
-		void EventPackageProcesser(DataPackage *);
+		void EventPackageProcesser(Package *);
 
-		void OnReferenceModuleOnlineEvent(const string &, DataPackage *);
-		void OnReferenceModuleOfflineEvent(const string &, DataPackage *);
+		void OnReferenceModuleOnlineEvent(const string &, Package *);
+		void OnReferenceModuleOfflineEvent(const string &, Package *);
 
 		void OnConnectionBreaked(SharedEvent);
 

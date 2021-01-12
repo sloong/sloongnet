@@ -60,14 +60,14 @@ message FileRange{
     int32 Start=1;
     // End pointer for data range
     int32 End=2;
-    // Hashcode for This data range. Hash function is City with 8bit
-    fixed64 HashCode=3;
+    // Hashcode for This data range. Hash function is CRC32
+    fixed32 CRCCode=3;
     // In download request no need set.
     bytes Data=4;
 }
 
 message PrepareUploadRequest{
-    fixed64 HashCode=1;
+    fixed32 CRCCode=1;
     int32 FileSize=2;
 }
 
@@ -91,8 +91,8 @@ message DownloadVerifyRequest{
     int32 Start=2;
     // End pointer for data range
     int32 End=3;
-    // Hashcode for This data range. Hash function is City with 8bit
-    fixed64 DataHashCode=4;
+    // Hashcode for This data range. Hash function is CRC32
+    fixed32 CRCCode=4;
 }
 
 message DownloadFileRequest{
@@ -101,13 +101,12 @@ message DownloadFileRequest{
 }
 
 message DownloadFileResponse{
-    fixed64 HashCode=1;
-    int32 FileSize=2;
-    repeated FileRange FileData=3;
+    int32 FileSize=1;
+    repeated FileRange FileData=2;
 }
 
 message SimpleUploadRequest{
-    fixed64 HashCode=1;
+    fixed32 CRCCode=1;
     int32 FileSize=2;
     bytes Data=3;
 }
@@ -121,18 +120,17 @@ message ConvertImageFileRequest{
 }
 
 message ConvertImageFileResponse{
-    fixed64 NewFileHashCode=1;
+    bytes NewFileIndexCode=1;
 }
 
 message GetThumbnailRequest{
-    string index=1;
+    string Index=1;
     int32 Height=2;
     int32 Width=3;
     int32 Quality=4;
 }
 
 message GetThumbnailResponse{
-    fixed64 HashCode=1;
-    int32 FileSize=2;
-    bytes Data=3;
+    int32 FileSize=1;
+    bytes Data=2;
 }

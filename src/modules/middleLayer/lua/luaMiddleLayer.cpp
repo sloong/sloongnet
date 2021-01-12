@@ -17,7 +17,7 @@ using namespace Sloong::Events;
 
 unique_ptr<LuaMiddleLayer> Sloong::LuaMiddleLayer::Instance = nullptr;
 
-extern "C" PackageResult RequestPackageProcesser(void *pEnv, DataPackage *pack)
+extern "C" PackageResult RequestPackageProcesser(void *pEnv, Package *pack)
 {
 	auto pProcess = STATIC_TRANS<CLuaProcessCenter *>(pEnv);
 	if (!pProcess)
@@ -28,7 +28,7 @@ extern "C" PackageResult RequestPackageProcesser(void *pEnv, DataPackage *pack)
 	return LuaMiddleLayer::Instance->RequestPackageProcesser(pProcess, pack);
 }
 
-extern "C" PackageResult ResponsePackageProcesser(void *pEnv, DataPackage *pack)
+extern "C" PackageResult ResponsePackageProcesser(void *pEnv, Package *pack)
 {
 	auto pProcess = STATIC_TRANS<CLuaProcessCenter *>(pEnv);
 	if (!pProcess)
@@ -39,7 +39,7 @@ extern "C" PackageResult ResponsePackageProcesser(void *pEnv, DataPackage *pack)
 	return LuaMiddleLayer::Instance->ResponsePackageProcesser(pProcess, pack);
 }
 
-extern "C" CResult EventPackageProcesser(DataPackage *pack)
+extern "C" CResult EventPackageProcesser(Package *pack)
 {
 	LuaMiddleLayer::Instance->EventPackageProcesser(pack);
 	return CResult::Succeed;
@@ -86,7 +86,7 @@ CResult LuaMiddleLayer::Initialized()
 	return CGlobalFunction::Instance->Initialize(m_iC);
 }
 
-PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter *pProcess, DataPackage *pack)
+PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter *pProcess, Package *pack)
 {
 	CLuaPacket *info = nullptr;
 	if (!m_mapUserInfoList.exist(pack->sender()))
@@ -101,7 +101,7 @@ PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter 
 	if( res.IsFialed() )
 	{
 		m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%s].", function, ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
-		return PackageResult::Make_OKResult(Package::MakeResponse(pack,res));
+		return PackageResult::Make_OKResult(PackageHelper::MakeResponse(pack,res));
 	}
 	else
 	{
@@ -114,29 +114,29 @@ PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter 
 				int size = 0;
 				auto ptr = m_iC->GetTempBytes(extendUUID, &size);
 				m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length(), size));
-				return PackageResult::Make_OKResult(Package::MakeResponse(pack,res.GetResult(), content, ptr.get(), size));
+				return PackageResult::Make_OKResult(PackageHelper::MakeResponse(pack,res.GetResult(), content, ptr.get(), size));
 			}
 			else if (m_iC->ExistTempString(extendUUID))
 			{
 				auto extend = m_iC->GetTempString(extendUUID);
 				m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length(), extend.length()));
-				return PackageResult::Make_OKResult(Package::MakeResponse(pack,res.GetResult(), content, extend));
+				return PackageResult::Make_OKResult(PackageHelper::MakeResponse(pack,res.GetResult(), content, extend));
 			}
 			else
 			{
 				m_pLog->Error(Helper::Format("Response [%d]:[%s][%d][Message is required an extend UUID[%s]. but not find in IControl. Ignore.]", function, ResultType_Name(res.GetResult()).c_str(), content.length(), extendUUID.c_str()));
-				return PackageResult::Make_OKResult(Package::MakeResponse(pack,res));
+				return PackageResult::Make_OKResult(PackageHelper::MakeResponse(pack,res));
 			}
 		}
 		else
 		{
 			m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length()));
-			return PackageResult::Make_OKResult(Package::MakeResponse(pack,res));
+			return PackageResult::Make_OKResult(PackageHelper::MakeResponse(pack,res));
 		}
 	}
 }
 
-PackageResult Sloong::LuaMiddleLayer::ResponsePackageProcesser(CLuaProcessCenter *pProcess, DataPackage *pack)
+PackageResult Sloong::LuaMiddleLayer::ResponsePackageProcesser(CLuaProcessCenter *pProcess, Package *pack)
 {
 	m_pLog->Info("ResponsePackageProcesser event");
 
@@ -160,7 +160,7 @@ inline CResult Sloong::LuaMiddleLayer::CreateProcessEnvironmentHandler(void **ou
 }
 
 
-void Sloong::LuaMiddleLayer::OnReferenceModuleOnlineEvent(const string &str_req, DataPackage *trans_pack)
+void Sloong::LuaMiddleLayer::OnReferenceModuleOnlineEvent(const string &str_req, Package *trans_pack)
 {
 	m_pLog->Info("Receive ReferenceModuleOnline event");
 	auto event = make_shared<ModuleOnlineEvent>(LUA_EVENT_TYPE::OnReferenceModuleOnline);
@@ -169,7 +169,7 @@ void Sloong::LuaMiddleLayer::OnReferenceModuleOnlineEvent(const string &str_req,
 	m_iC->SendMessage(event);
 }
 
-void Sloong::LuaMiddleLayer::OnReferenceModuleOfflineEvent(const string &str_req, DataPackage *trans_pack)
+void Sloong::LuaMiddleLayer::OnReferenceModuleOfflineEvent(const string &str_req, Package *trans_pack)
 {
 	m_pLog->Info("Receive ReferenceModuleOffline event");
 	auto event = make_shared<ModuleOfflineEvent>(LUA_EVENT_TYPE::OnReferenceModuleOffline);
@@ -178,7 +178,7 @@ void Sloong::LuaMiddleLayer::OnReferenceModuleOfflineEvent(const string &str_req
 	m_iC->SendMessage(event);
 }
 
-void Sloong::LuaMiddleLayer::EventPackageProcesser(DataPackage *pack)
+void Sloong::LuaMiddleLayer::EventPackageProcesser(Package *pack)
 {
 	auto event = (Manager::Events)pack->function();
 	if (!Manager::Events_IsValid(event))
