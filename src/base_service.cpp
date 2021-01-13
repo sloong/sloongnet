@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-01-12 14:41:24
+ * @LastEditTime: 2021-01-12 20:35:33
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -293,8 +293,11 @@ CResult CSloongBaseService::Initialize(RunInfo info)
     m_iC->Add(DATA_ITEM::RuntimeData, &m_oServerConfig);
     if (pConfig->moduleconfig().length() > 0)
     {
-        Json::Reader reader;
-        reader.parse(pConfig->moduleconfig(), m_oModuleConfig);
+        if(!m_oJsonReader.parse(pConfig->moduleconfig(), m_oModuleConfig))
+        {
+            m_pLog->Fatal("Error parsing module configuration");
+            return CResult::Make_Error("Error parsing module configuration");
+        }
         m_iC->Add(DATA_ITEM::ModuleConfiguation, &m_oModuleConfig);
     }
     else

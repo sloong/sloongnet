@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-01-11 10:48:45
+ * @LastEditTime: 2021-01-12 20:07:37
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -171,6 +171,9 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 
 int Sloong::CServerManage::SearchNeedCreateWithIDs(const vector<int> &ids)
 {
+	if (ids.size() == 0)
+		return 0;
+
 	// First time find the no created
 	for (auto item : m_mapIDToTemplateItem)
 	{
@@ -210,6 +213,9 @@ int Sloong::CServerManage::SearchNeedCreateWithIDs(const vector<int> &ids)
  */
 int Sloong::CServerManage::SearchNeedCreateWithType(bool excludeMode, const vector<int> &type)
 {
+	if (type.size() == 0)
+		return 0;
+
 	auto ids = vector<int>();
 	for (auto item : m_mapIDToTemplateItem)
 	{
@@ -217,7 +223,7 @@ int Sloong::CServerManage::SearchNeedCreateWithType(bool excludeMode, const vect
 		bool exist = std::find(type.begin(), type.end(), item_id) != type.end();
 		if ((exist && !excludeMode) || (!exist && excludeMode))
 		{
-			ids.push_back(item_id);
+			ids.push_back(item.first);
 		}
 	}
 
@@ -333,11 +339,25 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 			index = SearchNeedCreateWithIDs(vector<int>(req->assigntargettemplateid().begin(), req->assigntargettemplateid().end()));
 			break;
 		case RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_IncludeType:
-			index = SearchNeedCreateWithType(false, vector<int>(req->includetargettype().begin(), req->includetargettype().end()));
-			break;
+		{
+			vector<int> l;
+			for (auto i : req->includetargettype())
+			{
+				l.push_back(i);
+			}
+			index = SearchNeedCreateWithType(false, l);
+		}
+		break;
 		case RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_ExcludeType:
-			index = SearchNeedCreateWithType(true, vector<int>(req->includetargettype().begin(), req->includetargettype().end()));
-			break;
+		{
+			vector<int> l;
+			for (auto i : req->includetargettype())
+			{
+				l.push_back(i);
+			}
+			index = SearchNeedCreateWithType(true, l);
+		}
+		break;
 		default:
 			index = SearchNeedCreateTemplate();
 			break;

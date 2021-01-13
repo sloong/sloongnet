@@ -6,51 +6,39 @@
     "configurations": [        
         {
             "name": "RemoteWorker",
-            "type": "cppdbg",
+            "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
                     "Worker",
                     "10.0.0.18:19000"
             ],
-            "stopAtEntry": false,
+           
             "cwd": "${workspaceFolder}/build/debug/",
-            "environment": [],
-            "externalConsole": false,
-            //"preLaunchTask": "build",
-            "MIMode": "gdb",
         },
         {
             "name": "LocalManager",
-            "type": "cppdbg",
+            "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
                     "Manager",
                     "0.0.0.0:19000"
             ],
-            "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/debug/",
-            "environment": [],
-            "externalConsole": false,
-            //"preLaunchTask": "build",
-            "MIMode": "gdb",
+            // "preLaunchTask": "build",
         },
         {
             "name": "LocalWorker",
-            "type": "cppdbg",
+            "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
                     "Worker",
-                    "127.0.0.1:19000"
+                    "127.0.0.1:19000",
+                    "--include=Gateway"
             ],
-            "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/debug/",
-            "environment": [],
-            "externalConsole": false,
-            //"preLaunchTask": "build",
-            "MIMode": "gdb",
         }
     ]
 }
