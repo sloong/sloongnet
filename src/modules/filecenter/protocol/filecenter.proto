@@ -1,63 +1,136 @@
 syntax = "proto3";
 package FileCenter;
 
+enum SupportFormat
+{
+    JPG=0;
+    PNG=1;
+    WEBP=2;
+}
+
 enum Functions{
     Invalid=0;
     reserved 1 to 300;// FileCenter function is start by 301-400
-    TestSpeed=301;
-    PrepareUpload=302;
-    Uploading=303;
-	Uploaded=304;
-    PrepareDownload=305;
-    Downloading=306;
-    Downloaded=307;
+
+    // 准备上传文件，获取上传token
+    // Request << PrepareUploadRequest
+    // Response >> PrepareUploadResponse
+    PrepareUpload=301;
+
+    // 上传文件分包
+    // Request << UploadingRequest
+    // Response >> Result
+    Uploading=302;
+
+    // 上传完成
+    // Request << UploadedRequest
+    // Response >> Result
+	Uploaded=303;
+    
+    // 简单的上传，适用于上传小文件，不支持断点续传。
+    // Request << SimpleUploadRequest(&Extend)
+    // Response >> Token in Content
+    SimpleUpload=304;
+
+    // 下载校验,可以对已下载的信息进行校验.
+    // Request << DownloadVerifyRequest
+    // Response >> DownloadVerifyResponse
+    DownloadVerify=305;
+
+    // 下载文件分包
+    // Request << DownloadFileRequest
+    // Response >> DownloadFileResponse(&Extend)
+    DownloadFile=306;
+
+    // 尝试以图片的形式处理文件，对文件进行格式转换操作
+    // Request << ConvertImageFileRequest
+    // Response >> ConvertImageFileResponse
+    ConvertImageFile=311;
+
+    // 尝试获取文件的缩略图，仅支持图片文件
+    // Request << GetThumbnailRequest
+    // Response >> GetThumbnailResponse(&Extend)
+    GetThumbnail=312;
+
     reserved 400 to max;
 }
 
-message FileInfoItem {
-    string Name=1;
-    string Hash_MD5=2;
-    int32 FileSize=3;
+message FileRange{
+    // Strat pointer for data range
+    int32 Start=1;
+    // End pointer for data range
+    int32 End=2;
+    // Hashcode for This data range. Hash function is CRC32
+    fixed32 CRCCode=3;
+    // In download request no need set.
+    bytes Data=4;
 }
 
 message PrepareUploadRequest{
-    FileInfoItem info=1;
+    fixed32 CRCCode=1;
+    int32 FileSize=2;
 }
 
 message PrepareUploadResponse{
+    // If upload is succeed, this token will become to the index of the file
     string Token=1;
 }
 
 message UploadingRequest{
     string Token=1;
-    int32 SplitPackageID=2;
-    string Hash_MD5 = 3;
+    FileRange UploadData=2;
 }
 
 message UploadedRequest{
     string Token=1;
 }
 
-message PrepareDownloadRequest{
-    string Hash_MD5=1;
+message DownloadVerifyRequest{
+    string Index=1;
+    // Strat pointer for data range
+    int32 Start=2;
+    // End pointer for data range
+    int32 End=3;
+    // Hashcode for This data range. Hash function is CRC32
+    fixed32 CRCCode=4;
 }
 
-message PrepareDownloadResponse{
-    string Token=1;
+message DownloadFileRequest{
+    string Index=1;
+    repeated FileRange FileData=2;
+}
+
+message DownloadFileResponse{
+    int32 FileSize=1;
+    repeated FileRange FileData=2;
+}
+
+message SimpleUploadRequest{
+    fixed32 CRCCode=1;
     int32 FileSize=2;
-    map<int32,string> SplitPackageInfos=3;
+    bytes Data=3;
 }
 
-message DownloadingRequest{
-    string Token=1;
-    int32 SplitPackageID=2;
+message ConvertImageFileRequest{
+    string Index=1;
+    
+    SupportFormat TargetFormat=2;
+    // 保留源文件
+    bool RetainSourceFiles=3;
 }
 
-message DownloadingResponse{
-    string Hash_MD5=1;
+message ConvertImageFileResponse{
+    bytes NewFileIndexCode=1;
 }
 
-message DownloadedRequest{
-    string Token=1;
+message GetThumbnailRequest{
+    string Index=1;
+    int32 Height=2;
+    int32 Width=3;
+    int32 Quality=4;
 }
 
+message GetThumbnailResponse{
+    int32 FileSize=1;
+    bytes Data=2;
+}

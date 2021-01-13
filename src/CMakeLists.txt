@@ -20,13 +20,16 @@ link_directories(
 SET(LIBRARY_OUTPUT_PATH "../")
 
 #允许gdb调试
-set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -g -ggdb -DDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -DNODEBUG -DRELASE")
+set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -g -ggdb -DDEBUG -D_GLIBCXX_DEBUG")
+# the clang with O2/O3 will happend protobuf error. so in here the release set to O1
+set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O1 -DNODEBUG -DRELASE")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_definitions(-DLUA_USE_READLINE)
 
 # 警告信息选项
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-switch")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-switch -Wno-return-type-c-linkage")
 
 # C++ 版本
 set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
@@ -53,6 +56,9 @@ list(APPEND SRC_LIST ${PROTOSRCS})
 
 #生成可执行文件
 add_executable(${PROJECT_NAME} ${SRC_LIST}) 
+
+target_compile_options(${PROJECT_NAME} PRIVATE -fpie)
+
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,./")
 
 #添加链接库

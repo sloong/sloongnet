@@ -1,10 +1,63 @@
-/*
- * @Author: WCB
- * @Date: 1970-01-01 08:00:00
- * @LastEditors: WCB
- * @LastEditTime: 2020-04-16 16:26:29
- * @Description: file content
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 2018-02-28 10:55:37
+ * @LastEditTime: 2020-08-12 10:56:27
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/core/ControlHub.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
+/*** 
+ * @......................................&&.........................
+ * @....................................&&&..........................
+ * @.................................&&&&............................
+ * @...............................&&&&..............................
+ * @.............................&&&&&&..............................
+ * @...........................&&&&&&....&&&..&&&&&&&&&&&&&&&........
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............
+ * @................&...&&&&&&&&&&&&&&&&&&&&&&&&&&&&.................
+ * @.......................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @...................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...............
+ * @..................&&&   &&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @...............&&&&&@  &&&&&&&&&&..&&&&&&&&&&&&&&&&&&&...........
+ * @..............&&&&&&&&&&&&&&&.&&....&&&&&&&&&&&&&..&&&&&.........
+ * @..........&&&&&&&&&&&&&&&&&&...&.....&&&&&&&&&&&&&...&&&&........
+ * @........&&&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&....&&&.......
+ * @.......&&&&&&&&.....................&&&&&&&&&&&&&&&&.....&&......
+ * @........&&&&&.....................&&&&&&&&&&&&&&&&&&.............
+ * @..........&...................&&&&&&&&&&&&&&&&&&&&&&&............
+ * @................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&..&&&&&............
+ * @..............&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&....&&&&&............
+ * @...........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&......&&&&............
+ * @.........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........&&&&............
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&............
+ * @......&&&&&&&&&&&&&&&&&&&...&&&&&&...............&&&.............
+ * @.....&&&&&&&&&&&&&&&&............................&&..............
+ * @....&&&&&&&&&&&&&&&.................&&...........................
+ * @...&&&&&&&&&&&&&&&.....................&&&&......................
+ * @...&&&&&&&&&&.&&&........................&&&&&...................
+ * @..&&&&&&&&&&&..&&..........................&&&&&&&...............
+ * @..&&&&&&&&&&&&...&............&&&.....&&&&...&&&&&&&.............
+ * @..&&&&&&&&&&&&&.................&&&.....&&&&&&&&&&&&&&...........
+ * @..&&&&&&&&&&&&&&&&..............&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @..&&.&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&&&&&&&&&&&&.......
+ * @...&&..&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&...&&&&&&&&&&&&......
+ * @....&..&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&&&&&.....
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............&&&&&&&....
+ * @.......&&&&&.&&&&&&&&&&&&&&&&&&..&&&&&&&&...&..........&&&&&&....
+ * @........&&&.....&&&&&&&&&&&&&.....&&&&&&&&&&...........&..&&&&...
+ * @.......&&&........&&&.&&&&&&&&&.....&&&&&.................&&&&...
+ * @.......&&&...............&&&&&&&.......&&&&&&&&............&&&...
+ * @........&&...................&&&&&&.........................&&&..
+ * @.........&.....................&&&&........................&&....
+ * @...............................&&&.......................&&......
+ * @................................&&......................&&.......
+ * @.................................&&..............................
+ * @..................................&..............................
+ */
+
+
 #ifndef CONTROL_HUB_H
 #define CONTROL_HUB_H
 
@@ -13,21 +66,73 @@
 #include "core.h"
 namespace Sloong
 {
-	typedef struct ObjectData
+	enum TempDataItemType
 	{
-		void *ptr = nullptr;
-		int size = 0;
-	} ObjectData;
-	typedef struct BytesData
+		String,
+		Object,
+		Bytes,
+		SharedPtr,
+	};
+	class TempDataItem
 	{
-		unique_ptr<char[]> ptr = nullptr;
-		int size = 0;
-	} BytesData;
+	public:
+		virtual ~TempDataItem(){}
+		TempDataItemType Type;
+	};
+	class StringData : public TempDataItem
+	{
+	public:
+		StringData( const string &data)
+		{
+			Type = TempDataItemType::String;
+			Data = data;
+		}
+		string Data;
+	};
+	class ObjectData : public TempDataItem
+	{
+	public:
+		ObjectData( void *p, int s)
+		{
+			Type = TempDataItemType::Object;
+			Ptr = p;
+			Size = s;
+		}
+		void *Ptr = nullptr;
+		int Size = 0;
+	};
+	class BytesData : public TempDataItem
+	{
+	public:
+		BytesData( unique_ptr<char[]> &p, int s)
+		{
+			Type = TempDataItemType::Bytes;
+			Ptr = std::move(p);
+			Size = s;
+		}
+		unique_ptr<char[]> Ptr = nullptr;
+		int Size = 0;
+	};
+	class SharedPtrData : public TempDataItem
+	{
+	public:
+		SharedPtrData( shared_ptr<void> p)
+		{
+			Type = TempDataItemType::SharedPtr;
+			Ptr = p;
+		}
+		shared_ptr<void> Ptr = nullptr;
+	};
 	class CControlHub : public IControl
 	{
 	public:
+		virtual ~CControlHub()
+		{
+			m_oMsgHandlerList.clear();
+			CThreadPool::Exit();
+		}
 		// Always return true
-		CResult Initialize(int);
+		CResult Initialize(int, CLog*);
 
 		void Run()
 		{
@@ -36,80 +141,104 @@ namespace Sloong
 		void Exit();
 
 		// Message
-		void SendMessage(EVENT_TYPE);
-		void SendMessage(UniqueEvent);
+		void SendMessage(int32_t);
+		void SendMessage(SharedEvent);
 
-		void CallMessage(UniqueEvent);
+		void CallMessage(SharedEvent);
 
-		inline void RegisterEvent(EVENT_TYPE t)
-		{
-			m_oMsgHandlerList[t] = vector<MsgHandlerFunc>();
-		}
-		void RegisterEventHandler(EVENT_TYPE, MsgHandlerFunc);
-		inline void RegisterEventHook(EVENT_TYPE t, MsgHookFunc func)
-		{
-			m_listMsgHook[t] = func;
-		}
+		void RegisterEventHandler(int32_t, MsgHandlerFunc);
 
 		void MessageWorkLoop();
 
 		// Data
-		void Add(DATA_ITEM item, void *object)
+		void Add(uint64_t item, void *object)
 		{
 			m_oDataList[item] = object;
 		}
-		void *Get(DATA_ITEM);
+		void *Get(uint64_t);
 
 		template <typename T>
-		T GetAs(DATA_ITEM item)
+		T GetAs(uint64_t item)
 		{
 			T tmp = static_cast<T>(Get(item));
 			assert(tmp);
 			return tmp;
 		}
 
-		void Remove(DATA_ITEM item)
+		void Remove(uint64_t item)
 		{
 			m_oDataList.erase(item);
 		}
 
 		void AddTempString(const string &key, const string &value)
 		{
-			m_oTempStringList[key] = value;
+			m_oTempDataList[key] = make_shared<StringData>(value);
 		}
-		string GetTempString(const string &);
-		inline bool ExistTempString(const string &key) { return m_oTempStringList.exist(key); }
+		string GetTempString(const string &,bool = true);
+		inline bool ExistTempString(const string &key)
+		{
+			auto i = m_oTempDataList.try_get(key);
+			if (i == nullptr || (*i)->Type != TempDataItemType::String)
+				return false;
+			else
+				return true;
+		}
 
-		void AddTempObject(const string &key, const void *object, int size) { m_oTempObjectList[key] = ObjectData{ptr : const_cast<void *>(object), size : size}; }
-		void *GetTempObject(const string &, int *);
-		inline bool ExistTempObject(const string &key) { return m_oTempObjectList.exist(key); }
+		void AddTempObject(const string &key, const void *object, int size)
+		{
+			m_oTempDataList[key] = make_shared<ObjectData>(const_cast<void *>(object), size);
+		}
+		void *GetTempObject(const string &, int *,bool = true);
+		inline bool ExistTempObject(const string &key) 
+		{
+			auto i = m_oTempDataList.try_get(key);
+			if (i == nullptr || (*i)->Type != TempDataItemType::Object)
+				return false;
+			else
+				return true;
+		}
 
 		void AddTempBytes(const string &key, unique_ptr<char[]> &bytes, int size)
 		{
-			m_oTempBytesList[key] = BytesData();
-			m_oTempBytesList[key].ptr = std::move(bytes);
-			m_oTempBytesList[key].size = size;
+			m_oTempDataList[key] = make_shared<BytesData>( bytes, size);
 		}
+
 		unique_ptr<char[]> GetTempBytes(const string &, int *);
 		inline bool ExistTempBytes(const string &key)
 		{
-			if (m_oTempBytesList.find(key) == m_oTempBytesList.end())
+			auto i = m_oTempDataList.try_get(key);
+			if (i == nullptr || (*i)->Type != TempDataItemType::Bytes)
 				return false;
-			return true;
+			else
+				return true;
+		}
+
+		void AddTempSharedPtr(const string &key, shared_ptr<void> ptr)
+		{
+			m_oTempDataList[key] = make_shared<SharedPtrData>( ptr);
+		}
+		shared_ptr<void> GetTempSharedPtr(const string &,bool = true);
+		inline bool ExistTempSharedPtr(const string &key)
+		{
+			auto i = m_oTempDataList.try_get(key);
+			if (i == nullptr || (*i)->Type != TempDataItemType::SharedPtr)
+				return false;
+			else
+				return true;
 		}
 
 	protected:
 		// Data
-		map<DATA_ITEM, void *> m_oDataList;
-		map_ex<string, string> m_oTempStringList;
-		map_ex<string, ObjectData> m_oTempObjectList;
-		map<string, BytesData> m_oTempBytesList;
+		map<uint64_t, void *> m_oDataList;
+		map_ex<string, shared_ptr<TempDataItem>> m_oTempDataList;
+
 		// Message
-		map_ex<EVENT_TYPE, vector<MsgHandlerFunc>> m_oMsgHandlerList;
-		map_ex<EVENT_TYPE, MsgHookFunc> m_listMsgHook;
-		queue_ex<UniqueEvent> m_oMsgList;
+		map_ex<int32_t, vector<MsgHandlerFunc>> m_oMsgHandlerList;
+		queue_ex<SharedEvent> m_oMsgList;
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;
-		CEasySync m_oSync;
+		EasySync m_oSync;
+
+		CLog* m_pLog = nullptr;
 	};
 } // namespace Sloong
 

@@ -1,5 +1,13 @@
-#ifndef LUAPACKET_H
-#define LUAPACKET_H
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditTime: 2020-07-30 11:27:49
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/middleLayer/lua/luapacket.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
+ */
+#pragma once
 
 #include "core.h"
 
@@ -24,21 +32,21 @@ namespace Sloong
         string GetData(const string &key, const string &def);
 
         /**
-             * @Remarks: Check the map object is changed after the Initialize with ParseFromString function.
+             * @Description: Check the map object is changed after the Initialize with ParseFromString function.
              * @Params: No
              * @Return: if no changed, return 0. else return the changed count.
              */
         int IsChanged();
 
         /**
-             * @Remarks: Confirm the modify. user need call the SerializeToString function to get the data and save it.
+             * @Description: Confirm the modify. user need call the SerializeToString function to get the data and save it.
              * @Params: No
              * @Return: No
              */
         void ConfirmChange();
 
         /**
-             * @Remarks: Get changed items array. 
+             * @Description: Get changed items array. 
              * @Params: No
              * @Return: the array for changed items key.
              */
@@ -54,5 +62,3 @@ namespace Sloong
     };
 
 } // namespace Sloong
-
-#endif // LUAPACKET_H

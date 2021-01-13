@@ -9105,7 +9105,7 @@ namespace sqlite_orm {
              * instead of a unique_ptr. New code should prefer get_pointer()
              * unless the data needs to be shared.
              *
-             * @note
+             * @Remarks
              * Most scenarios don't need shared ownership of data, so we should prefer
              * unique_ptr when possible. It's more efficient, doesn't require atomic
              * ops for a reference count (which can cause major slowdowns on

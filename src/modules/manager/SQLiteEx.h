@@ -18,7 +18,7 @@ namespace Sloong
     public:
         ~CSQLiteEx();
 
-        bool Initialize( string dbPath );
+        CResult Initialize( const string& , const string& createSQL );
         string GetErrorMessage();
 
         bool Query(const string& strSQL, EasyResult strResult, string& strError);

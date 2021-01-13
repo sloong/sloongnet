@@ -3,8 +3,8 @@
 ### 
 # @Author: WCB
  # @Date: 2019-11-05 08:59:19
- # @LastEditors: WCB
- # @LastEditTime: 2019-11-06 17:06:01
+ # @LastEditors: Chuanbin Wang
+ # @LastEditTime: 2020-08-07 17:55:58
  # @Description: file content
  ###
 SCRIPTFOLDER=$(dirname $(readlink -f $0))
@@ -15,3 +15,4 @@ protoc -o base.pb base.proto
 protoc -o core.pb core.proto
 protoc -o manager.pb manager.proto
 protoc -o processer.pb processer.proto
+protoc -o filecenter.pb filecenter.proto

@@ -1,70 +1,73 @@
-#ifndef SLOONGNET_MODULE_FILECENTER_FILEMANAGER_H
-#define SLOONGNET_MODULE_FILECENTER_FILEMANAGER_H
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditTime: 2020-12-30 16:18:26
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/filecenter/filemanager.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
+ */
+#pragma once
 
 #include "IObject.h"
-#include "DataTransPackage.h"
 
 #include "protocol/filecenter.pb.h"
 using namespace FileCenter;
 
 namespace Sloong
 {
+    typedef struct FileRange
+    {
+        int Start;
+        int End;
+        string Data;
+    } FileRange;
     typedef struct UploadInfo
     {
         string Path;
-        string Name;
-        string Hash_MD5;
-        map_ex<int, string> SplitPackageFile;
+        uint64_t HashCode;
+        int64_t FileSize;
+        list<FileRange> DataList;
     } UploadInfo;
-    typedef struct DownloadInfo
-    {
-        string RealPath;
-        string CacheFolder;
-        string Hash_MD5;
-        int Size;
-        map_ex<int, string> SplitPackageFile;
-    } DownloadInfo;
-    
     class FileManager : IObject
     {
     public:
         CResult Initialize(IControl *ic);
         CResult EnableDataReceive(int, int);
 
-        CResult RequestPackageProcesser(CDataTransPackage *);
-        CResult ResponsePackageProcesser(CDataTransPackage *);
+        PackageResult RequestPackageProcesser(Package *);
+        PackageResult ResponsePackageProcesser(Package *);
 
-        CResult PrepareUploadHandler(const string &str_req, CDataTransPackage *trans_pack);
-        CResult UploadingHandler(const string &str_req, CDataTransPackage *trans_pack);
-        CResult UploadedHandler(const string &str_req, CDataTransPackage *trans_pack);
-        CResult PrepareDownloadHandler(const string &str_req, CDataTransPackage *trans_pack);
-        CResult DownloadingHandler(const string &str_req, CDataTransPackage *trans_pack);
-        CResult DownloadedHandler(const string &str_req, CDataTransPackage *trans_pack);
-        CResult TestSpeedHandler(const string &str_req, CDataTransPackage *trans_pack);
+        CResult PrepareUploadHandler(const string &str_req, Package *trans_pack);
+        CResult UploadingHandler(const string &str_req, Package *trans_pack);
+        CResult UploadedHandler(const string &str_req, Package *trans_pack);
+        CResult SimpleUploadHandler(const string &str_req, Package *trans_pack);
+        CResult DownloadVerifyHandler(const string &str_req, Package *trans_pack);    
+        CResult DownloadFileHandler(const string &str_req, Package *trans_pack); 
+        CResult ConvertImageFileHandler(const string &str_req, Package *trans_pack);
+        CResult GetThumbnailHandler(const string &str_req, Package *trans_pack);
 
     protected:
-        CResult MoveFile(const string &source, const string &target);
+        CResult ArchiveFile(const string& , const string& );
 
-        CResult QueryFilePath(const string &);
+        string GetFileTruePath( const string&  );
+        string GetFileFolder( const string&  );
 
-        CResult MergeFile(const map_ex<int, string> &fileList, const string &saveFile);
-        CResult SplitFile(const string &saveFile, map_ex<int, string> &fileList);
+        CResult MergeFile(const list<FileRange> &fileList, const string &saveFile);
+        CResult SplitFile(const string &saveFile, int splitSize, map_ex<int, string> &pReadList, int* out_all_size);
         CResult GetFileSize(const string &path, int *out_size);
         void ClearCache(const string &folder);
 
     protected:
-        RUN_STATUS m_emStatus = RUN_STATUS::Created;
         map_ex<FileCenter::Functions, FunctionHandler> m_mapFuncToHandler;
-        map_ex<string, UploadInfo> m_mapTokenToUploadInfo;
-        map_ex<string, DownloadInfo> m_mapTokenToDownloadInfo;
+        map_ex<string, UploadInfo>* m_mapTokenToUploadInfo;
 
-        string m_strUploadTempSaveFolder;
+        string m_strUploadTempSaveFolder = "./tmp/";
 
         // TODO: set the archive path.
-        string m_strArchiveFolder = "/tmp";
-        string m_strCacheFolder = "/tmp";
+        string m_strArchiveFolder = "./archive/";
+
+        string m_strCacheFolder = "./Cache/";
     };
 
 } // namespace Sloong
-
-#endif

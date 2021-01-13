@@ -21,20 +21,20 @@ namespace Sloong
         CConfiguation();
 
         /**
-         * @Remarks: Init db and load all configuation template.
+         * @Description: Init db and load all configuation template.
          * @Params: dbPath : the path of sqlite file.
          *          uuid : uuid string of the owner.
          * @Return: 
          */
-		CResult Initialize( const string& dbPath );
+		CResult Initialize( const string&);
         bool IsInituialized(){return m_bInitialized;}
 
-        TResult<TemplateInfo> GetTemplate(int id);
-        bool CheckTemplateExist(int id);
+        TResult<TemplateInfo> GetTemplate(int );
+        bool CheckTemplateExist(int );
         vector<TemplateInfo> GetTemplateList();
-        CResult AddTemplate( const TemplateInfo& config, int* out_id);
-		CResult SetTemplate( int id, const TemplateInfo& config);
-        CResult DeleteTemplate( int id );
+        CResult AddTemplate( const TemplateInfo& , int* );
+		CResult SetTemplate( int , const TemplateInfo& );
+        CResult DeleteTemplate( int  );
 
     protected:
         mutex m_oMutex;

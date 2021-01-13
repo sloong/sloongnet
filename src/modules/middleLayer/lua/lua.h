@@ -9,7 +9,6 @@ struct lua_State;
 namespace Sloong
 {
 	typedef int (*LuaFunctionType)(lua_State *pLuaState);
-	typedef std::function<void(const string &)> ErrorHandleType;
 
 	struct LuaFunctionRegistr
 	{
@@ -41,44 +40,29 @@ namespace Sloong
 		virtual ~CLua();
 
 		bool LoadScript(const string &strFileName);
-		bool RunScript(const string &strFileName);
-		bool RunBuffer(LPCSTR pBuffer, size_t sz);
-		bool RunString(const string &strCommand);
-		void PushPacket(CLuaPacket *pData);
-		CResult RunFunction(const string &, CLuaPacket *, int = 0, const string & = "", const string & = "", string* extendDataUUID = nullptr);
-		string GetErrorString();
 		bool AddFunction(const string &strFunctionName, LuaFunctionType pFunction);
-		bool PushFunction(int nFuncRef);
 		bool GetLuaFuncRef(int &nFunc, const string &strFuncName);
 		LuaType CheckType(int index);
-
-		// Inline functions.
-	public:
-		inline bool RunFunction(const string &strFunctionName, const string &args) { return RunString(Helper::Format("%s(%s)", strFunctionName.c_str(), args.c_str())); }
-		inline void HandlerError(const string &strErrorType, const string &strCmd) { HandlerError(strErrorType, strCmd.c_str()); }
-		inline string GetString(int nNum, const string &strDefault = "") { return GetString(m_pScriptContext, nNum, strDefault); }
-		double GetDouble(int nNum, double dDefault = -1.0f) { return GetDouble(m_pScriptContext, nNum, dDefault); }
-		inline int GetInteger(int nNum, int nDef = -1) { return GetInteger(m_pScriptContext, nNum, nDef); }
-		inline bool GetBoolen(int nNum) { return GetBoolen(m_pScriptContext, nNum); }
-		inline void *GetPointer(int nNum) { return GetPointer(m_pScriptContext, nNum); }
-		inline void PushString(const string &strString) { PushString(m_pScriptContext, strString); }
-		inline void PushDouble(double dValue) { CLua::PushDouble(m_pScriptContext, dValue); }
-		inline void PushInteger(int nValue) { PushInteger(m_pScriptContext, nValue); }
-		inline void SetErrorHandle(ErrorHandleType pErr) { m_pErrorHandler = pErr; }
 		inline lua_State *GetScriptContext() { return m_pScriptContext; }
-		inline unique_ptr<map<string, string>> GetTableParam(int index) { return GetTableParam(m_pScriptContext, index); }
-		inline void PushPointer(void *pPointer) { return CLua::PushPointer(m_pScriptContext, pPointer); }
-		inline void HandlerError(const string &strErrorType, const char *strCmd)
-		{
-			if (m_pErrorHandler)
-				m_pErrorHandler(Helper::Format("\n Error - %s:\n %s\n Error Message:%s", strErrorType.c_str(), strCmd, GetErrorString().c_str()));
-		}
 		inline void AddFunctions(vector<LuaFunctionRegistr> *pFuncList)
 		{
 			for (auto item : *pFuncList)
 				AddFunction(item.strFunctionName, item.pFunction);
 		}
-
+		inline void SetScriptFolder(const string &folder)
+		{
+			m_strScriptFolder = folder;
+			FormatFolderString(m_strScriptFolder);
+		}
+		inline vector<string> *GetSearchRouteList() { return &m_listSearchRoute; }
+		
+		// Push value 
+		void PushPacket(CLuaPacket *pData);
+		bool PushFunction(int nFuncRef);
+		inline void PushString(const string &strString) { PushString(m_pScriptContext, strString); }
+		inline void PushDouble(double dValue) { CLua::PushDouble(m_pScriptContext, dValue); }
+		inline void PushInteger(int nValue) { PushInteger(m_pScriptContext, nValue); }
+		inline void PushPointer(void *pPointer) { return CLua::PushPointer(m_pScriptContext, pPointer); }
 		inline bool PushFunction(const string &strFuncName)
 		{
 			int nFunc = 0;
@@ -87,38 +71,58 @@ namespace Sloong
 
 			return PushFunction(nFunc);
 		}
-		inline void SetScriptFolder(const string &folder)
-		{
-			m_strScriptFolder = folder;
-			char tag = m_strScriptFolder[m_strScriptFolder.length() - 1];
-			if (tag != '/' && tag != '\\')
-			{
-				m_strScriptFolder += '/';
-			}
-		}
-		inline vector<string> *GetSearchRouteList() { return &m_listSearchRoute; }
 
+		// Run lua
+		CResult RunScript(const string &strFileName);
+		CResult RunBuffer(LPCSTR pBuffer, size_t sz);
+		CResult RunString(const string &strCommand);
+		CResult RunFunction(const string &, CLuaPacket *, int = 0, const string & = "", const string & = "", string *extendDataUUID = nullptr);
+		inline CResult RunFunction(const string &strFunctionName, const string &args) { return RunString(Helper::Format("%s(%s)", strFunctionName.c_str(), args.c_str())); }
+
+		// Get Valkue
+		inline string GetString(int nNum, const string &strDefault = "") { return GetString(m_pScriptContext, nNum, strDefault); }
+		double GetDouble(int nNum, double dDefault = -1.0f) { return GetDouble(m_pScriptContext, nNum, dDefault); }
+		inline int GetInteger(int nNum, int nDef = -1) { return GetInteger(m_pScriptContext, nNum, nDef); }
+		inline bool GetBoolen(int nNum) { return GetBoolen(m_pScriptContext, nNum); }
+		inline void *GetPointer(int nNum) { return GetPointer(m_pScriptContext, nNum); }
+		inline unique_ptr<map<string, string>> GetTableParam(int index) { return GetTableParam(m_pScriptContext, index); }
+		
 		// Static functions.
 	public:
-		static string GetString(lua_State *l, int nNum, const string &strDefault = "");
-		static double GetDouble(lua_State *l, int nNum, double dDefault = -1.0f);
-		static int GetInteger(lua_State *l, int nNum, int nDef = -1);
-		static bool GetBoolen(lua_State *l, int nNum);
-		static void *GetPointer(lua_State *l, int nNum);
-		static void PushString(lua_State *l, const string &strString);
-		static void PushDouble(lua_State *l, double dValue);
-		static void PushNil(lua_State *l);
-		static void PushInteger(lua_State *l, int nValue);
-		static void PushBoolen(lua_State *l, bool b);
-		static void PushPointer(lua_State *l, void *pPointer);
-		static unique_ptr<map<string, string>> GetTableParam(lua_State *l, int index);
+		static string GetString(lua_State *, int, const string & = "");
+		static double GetDouble(lua_State *, int, double = -1.0f);
+		static int GetInteger(lua_State *, int, int = -1);
+		static bool GetBoolen(lua_State *, int);
+		static void *GetPointer(lua_State *, int);
+		static void PushString(lua_State *, const string &);
+		static void PushDouble(lua_State *, double);
+		static void PushNil(lua_State *);
+		static void PushInteger(lua_State *, int);
+		static void PushBoolen(lua_State *, bool);
+		static void PushPointer(lua_State *, void *);
+		static string GetCallStack(lua_State *);
+		static void PushTable(lua_State *, const map<string, string> &);
+		static void PushTable(lua_State*, const list<string>&);
+		static void Push2DTable(lua_State*, const list<list<string>>&);
+		static unique_ptr<map<string, string>> GetTableParam(lua_State *, int);
 
 	protected:
 		string findScript(const string &strFullName);
+		inline CResult HandlerError( const string &strErrorTitle, const string &strErrorOperation, int res = -1)
+		{
+			auto str = Helper::Format("\n [%d]Error - %s:\n %s\n Error Message:%s", res, strErrorTitle.c_str(), strErrorOperation.c_str(), GetString(m_pScriptContext,1).c_str());
+			//Helper::Format("\n Error - %s:\n %s\n Error Message:%s", strErrorType.c_str(), strCmd, GetCallStack(m_pScriptContext).c_str())
+			#ifdef DEBUG
+				cout << str << endl;
+				return CResult::Make_Error(str);
+			#else
+				return CResult::Make_Error("Service internal error.");
+			#endif
+			
+		}
 
 	private:
 		lua_State *m_pScriptContext = nullptr;
-		ErrorHandleType m_pErrorHandler = nullptr;
 		string m_strScriptFolder = "./";
 		vector<string> m_listSearchRoute = {
 			"%pathdir%%filename%.lua",

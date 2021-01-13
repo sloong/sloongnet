@@ -1,59 +1,108 @@
-/*
- * @Author: WCB
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditors: WCB
- * @LastEditTime: 2020-04-17 18:25:58
- * @Description: file content
+ * @LastEditTime: 2020-08-06 17:31:54
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/datacenter/datacenter.cpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
+/*** 
+ * @......................................&&.........................
+ * @....................................&&&..........................
+ * @.................................&&&&............................
+ * @...............................&&&&..............................
+ * @.............................&&&&&&..............................
+ * @...........................&&&&&&....&&&..&&&&&&&&&&&&&&&........
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............
+ * @................&...&&&&&&&&&&&&&&&&&&&&&&&&&&&&.................
+ * @.......................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @...................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...............
+ * @..................&&&   &&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @...............&&&&&@  &&&&&&&&&&..&&&&&&&&&&&&&&&&&&&...........
+ * @..............&&&&&&&&&&&&&&&.&&....&&&&&&&&&&&&&..&&&&&.........
+ * @..........&&&&&&&&&&&&&&&&&&...&.....&&&&&&&&&&&&&...&&&&........
+ * @........&&&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&....&&&.......
+ * @.......&&&&&&&&.....................&&&&&&&&&&&&&&&&.....&&......
+ * @........&&&&&.....................&&&&&&&&&&&&&&&&&&.............
+ * @..........&...................&&&&&&&&&&&&&&&&&&&&&&&............
+ * @................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&..&&&&&............
+ * @..............&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&....&&&&&............
+ * @...........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&......&&&&............
+ * @.........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........&&&&............
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&............
+ * @......&&&&&&&&&&&&&&&&&&&...&&&&&&...............&&&.............
+ * @.....&&&&&&&&&&&&&&&&............................&&..............
+ * @....&&&&&&&&&&&&&&&.................&&...........................
+ * @...&&&&&&&&&&&&&&&.....................&&&&......................
+ * @...&&&&&&&&&&.&&&........................&&&&&...................
+ * @..&&&&&&&&&&&..&&..........................&&&&&&&...............
+ * @..&&&&&&&&&&&&...&............&&&.....&&&&...&&&&&&&.............
+ * @..&&&&&&&&&&&&&.................&&&.....&&&&&&&&&&&&&&...........
+ * @..&&&&&&&&&&&&&&&&..............&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @..&&.&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&&&&&&&&&&&&.......
+ * @...&&..&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&...&&&&&&&&&&&&......
+ * @....&..&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&&&&&.....
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............&&&&&&&....
+ * @.......&&&&&.&&&&&&&&&&&&&&&&&&..&&&&&&&&...&..........&&&&&&....
+ * @........&&&.....&&&&&&&&&&&&&.....&&&&&&&&&&...........&..&&&&...
+ * @.......&&&........&&&.&&&&&&&&&.....&&&&&.................&&&&...
+ * @.......&&&...............&&&&&&&.......&&&&&&&&............&&&...
+ * @........&&...................&&&&&&.........................&&&..
+ * @.........&.....................&&&&........................&&....
+ * @...............................&&&.......................&&......
+ * @................................&&......................&&.......
+ * @.................................&&..............................
+ * @..................................&..............................
+ */
+
 #include "datacenter.h"
 #include "IData.h"
-#include "NetworkEvent.hpp"
-using namespace Sloong;
-using namespace Sloong::Events;
 
 #include "protocol/manager.pb.h"
 
 unique_ptr<CDataCenter> Sloong::CDataCenter::Instance = nullptr;
 
-extern "C" CResult RequestPackageProcesser(void *env, CDataTransPackage *pack)
+extern "C" PackageResult RequestPackageProcesser(void *env, Package *pack)
 {
-	auto pDB = TYPE_TRANS<DBHub *>(env);
+	auto pDB = STATIC_TRANS<DBHub *>(env);
 	if (pDB)
 		return pDB->RequestPackageProcesser(pack);
 	else
-		return CResult::Make_Error("RequestPackageProcesser error, Environment convert failed.");
+		return PackageResult::Make_Error("RequestPackageProcesser error, Environment convert failed.");
 }
 
-extern "C" CResult ResponsePackageProcesser(void *env, CDataTransPackage *pack)
+extern "C" PackageResult ResponsePackageProcesser(void *env, Package *pack)
 {
-	/*auto pDB = TYPE_TRANS<DBHub *>(env);
+	/*auto pDB = STATIC_TRANS<DBHub *>(env);
 	if (pDB)
 		return pDB->ResponsePackageProcesser(pack);
 	else
 		return CResult::Make_Error("ResponsePackageProcesser error, Environment convert failed.");*/
-	return CResult::Make_Error("NO SUPPORT!");
+	return PackageResult::Make_Error("NO SUPPORT!");
 }
 
-extern "C" CResult EventPackageProcesser(CDataTransPackage *pack)
+extern "C" CResult EventPackageProcesser(Package *pack)
 {
 	CDataCenter::Instance->EventPackageProcesser(pack);
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
-extern "C" CResult NewConnectAcceptProcesser(CSockInfo *info)
+extern "C" CResult NewConnectAcceptProcesser(SOCKET sock)
 {
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
-extern "C" CResult ModuleInitialization(GLOBAL_CONFIG *confiog)
+extern "C" CResult ModuleInitialization(IControl *ic)
 {
 	CDataCenter::Instance = make_unique<CDataCenter>();
-	return CResult::Succeed();
+	return CDataCenter::Instance->Initialization(ic);
 }
 
-extern "C" CResult ModuleInitialized(SOCKET sock, IControl *iC)
+extern "C" CResult ModuleInitialized()
 {
-	return CDataCenter::Instance->Initialized(sock, iC);
+	return CDataCenter::Instance->Initialized();
 }
 
 extern "C" CResult CreateProcessEnvironment(void **out_env)
@@ -61,10 +110,17 @@ extern "C" CResult CreateProcessEnvironment(void **out_env)
 	return CDataCenter::Instance->CreateProcessEnvironmentHandler(out_env);
 }
 
-CResult CDataCenter::Initialized(SOCKET sock, IControl *ic)
+CResult CDataCenter::Initialization(IControl *ic)
 {
 	IObject::Initialize(ic);
 	IData::Initialize(ic);
+	ic->Add( DATACENTER_DATAITEM::MapSessionIDToConnection , &m_mapSessionIDToDBConnections );
+	ic->Add( DATACENTER_DATAITEM::MapDBNameToSessionID , &m_mapDBNameToSessioinID );
+	return CResult::Succeed;
+}
+
+CResult CDataCenter::Initialized()
+{
 	m_pConfig = IData::GetGlobalConfig();
 	m_pModuleConfig = IData::GetModuleConfig();
 	m_pRuntimeData = IData::GetRuntimeData();
@@ -72,9 +128,8 @@ CResult CDataCenter::Initialized(SOCKET sock, IControl *ic)
 	{
 		return CResult::Make_Error("Initialize error. no config data.");
 	}
-	m_nManagerConnection = sock;
 
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 CResult CDataCenter::CreateProcessEnvironmentHandler(void **out_env)
@@ -85,12 +140,11 @@ CResult CDataCenter::CreateProcessEnvironmentHandler(void **out_env)
 		return res;
 	(*out_env) = item.get();
 	m_listDBHub.push_back(std::move(item));
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
-void Sloong::CDataCenter::EventPackageProcesser(CDataTransPackage *trans_pack)
+void Sloong::CDataCenter::EventPackageProcesser(Package *data_pack)
 {
-	auto data_pack = trans_pack->GetDataPackage();
 	auto event = (Manager::Events)data_pack->function();
 	if (!Manager::Events_IsValid(event))
 	{

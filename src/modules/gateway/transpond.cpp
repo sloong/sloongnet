@@ -1,77 +1,75 @@
-/*
- * @Author: WCB
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-28 14:43:16
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-14 20:39:20
- * @Description: file content
+ * @LastEditTime: 2021-01-11 10:48:00
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/gateway/transpond.cpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
-#include "NetworkEvent.hpp"
 #include "transpond.h"
+#include "package.hpp"
 #include "IData.h"
 #include "gateway.h"
-
 #include "snowflake.h"
-
-using namespace Sloong::Events;
 
 CResult Sloong::GatewayTranspond::Initialize(IControl* ic)
 {
     m_pLog = IData::GetLog();
-    m_pControl = ic;
-    return CResult::Succeed();
+    m_iC = ic;
+    return CResult::Succeed;
 }
 
-CResult GatewayTranspond::RequestPackageProcesser(CDataTransPackage *trans_pack)
+PackageResult GatewayTranspond::RequestPackageProcesser(Package *trans_pack)
+{
+	return MessageToProcesser(trans_pack);
+}
+
+PackageResult GatewayTranspond::ResponsePackageProcesser( UniquePackage info, Package *trans_pack)
+{
+	return MessageToClient(move(info),trans_pack);
+}
+
+
+PackageResult Sloong::GatewayTranspond::MessageToProcesser(Package *pack)
 {
 	m_pLog->Debug("Receive new request package.");
-	auto res = MessageToProcesser(trans_pack);
-	m_pLog->Debug(Helper::Format("Response [%s][%s].", ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
-	return res;
-}
-
-CResult GatewayTranspond::ResponsePackageProcesser( RequestInfo* info, CDataTransPackage *trans_pack)
-{
-	return MessageToClient(info,trans_pack);
-}
-
-
-CResult Sloong::GatewayTranspond::MessageToProcesser(CDataTransPackage *pack)
-{
-	auto data_pack = pack->GetDataPackage();
-	auto target = SloongNetGateway::Instance->GetPorcessConnect(data_pack->function());
-	if( target == INVALID_SOCKET )
+	auto target = SloongNetGateway::Instance->GetPorcessConnection(pack->function());
+	if( target == 0 )
 	{
-		return CResult::Make_Error("No process service online .");
+		auto msg = Helper::Format("No find process service for function[%d]. package [%d][%lld]", pack->function(), pack->sessionid(), pack->id() );
+		m_pLog->Debug(msg);
+		return PackageResult::Make_Error(msg);
 	}
 
-	RequestInfo info;
-	info.RequestConnect = pack->GetConnection();
-	info.SerialNumber = data_pack->id();
-	info.tStart = pack->GetRecord()->front();	
-	info.tProcess = pack->GetTimeval();
-		
-	auto serialNumber = snowflake::Instance->nextid();
-	data_pack->set_id(serialNumber);
-	pack->ClearConnection();
-	pack->SetSocket(target);
-	pack->RequestPackage();
+	auto response = PackageHelper::MakeResponse(pack);
+	for( auto i : pack->clocks() )
+	{
+		response->add_clocks(i);
+	}
+	response->add_clocks(GetClock());
 
-	m_pLog->Debug(Helper::Format("Trans package [%d][%llu] -> [%d][%llu]", info.RequestConnect->GetSocketID(), info.SerialNumber, target, serialNumber));
+	auto trans_pack = PackageHelper::MakeResponse(pack);
+	trans_pack->set_status(DataPackage_StatusType::DataPackage_StatusType_Request);
+	PackageHelper::SetContent(trans_pack.get(), pack->content() );
+	PackageHelper::SetExtend( trans_pack.get(), pack->extend() );
 
-	SloongNetGateway::Instance->m_mapSerialToRequest[serialNumber] = info;
-	return CResult::Succeed();
+	auto id = snowflake::Instance->nextid();
+	trans_pack->set_id(id);
+	trans_pack->set_sessionid(target);
+	
+	m_pLog->Debug(Helper::Format("Trans package [%lld][%lld] -> [%d][%lld]", pack->sessionid(), pack->id(), trans_pack->sessionid(), trans_pack->id()));
+
+	SloongNetGateway::Instance->m_mapSerialToRequest[trans_pack->id()] = move(response);
+	return PackageResult::Make_OKResult(move(trans_pack));
 }
 
-CResult Sloong::GatewayTranspond::MessageToClient(RequestInfo *req_info, CDataTransPackage *res_pack)
+PackageResult Sloong::GatewayTranspond::MessageToClient(UniquePackage info, Package *pack)
 {
-	auto res_data = res_pack->GetDataPackage();
-	res_data->set_id(req_info->SerialNumber);
-	res_pack->SetConnection(req_info->RequestConnect);
-	res_pack->ResponsePackage(res_data->result());
-
-	auto t = res_pack->GetRecord();
-	t->push_front(req_info->tProcess);
-	t->push_front(req_info->tStart);
-
-	return CResult::Succeed();
+	info->add_clocks(GetClock());
+	info->set_result(pack->result());
+	PackageHelper::SetContent(info.get(), pack->content() );
+	PackageHelper::SetExtend( info.get(), pack->extend() );
+	
+	return PackageResult::Make_OKResult(move(info));
 }

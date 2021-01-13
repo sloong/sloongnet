@@ -1,27 +1,85 @@
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 2018-02-28 10:55:37
+ * @LastEditTime: 2020-08-26 16:57:56
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/core/ControlHub.cpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
+ */
+/*** 
+ * @......................................&&.........................
+ * @....................................&&&..........................
+ * @.................................&&&&............................
+ * @...............................&&&&..............................
+ * @.............................&&&&&&..............................
+ * @...........................&&&&&&....&&&..&&&&&&&&&&&&&&&........
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............
+ * @................&...&&&&&&&&&&&&&&&&&&&&&&&&&&&&.................
+ * @.......................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @...................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...............
+ * @..................&&&   &&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @...............&&&&&@  &&&&&&&&&&..&&&&&&&&&&&&&&&&&&&...........
+ * @..............&&&&&&&&&&&&&&&.&&....&&&&&&&&&&&&&..&&&&&.........
+ * @..........&&&&&&&&&&&&&&&&&&...&.....&&&&&&&&&&&&&...&&&&........
+ * @........&&&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&....&&&.......
+ * @.......&&&&&&&&.....................&&&&&&&&&&&&&&&&.....&&......
+ * @........&&&&&.....................&&&&&&&&&&&&&&&&&&.............
+ * @..........&...................&&&&&&&&&&&&&&&&&&&&&&&............
+ * @................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&..&&&&&............
+ * @..............&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&....&&&&&............
+ * @...........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&......&&&&............
+ * @.........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........&&&&............
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&............
+ * @......&&&&&&&&&&&&&&&&&&&...&&&&&&...............&&&.............
+ * @.....&&&&&&&&&&&&&&&&............................&&..............
+ * @....&&&&&&&&&&&&&&&.................&&...........................
+ * @...&&&&&&&&&&&&&&&.....................&&&&......................
+ * @...&&&&&&&&&&.&&&........................&&&&&...................
+ * @..&&&&&&&&&&&..&&..........................&&&&&&&...............
+ * @..&&&&&&&&&&&&...&............&&&.....&&&&...&&&&&&&.............
+ * @..&&&&&&&&&&&&&.................&&&.....&&&&&&&&&&&&&&...........
+ * @..&&&&&&&&&&&&&&&&..............&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @..&&.&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&&&&&&&&&&&&.......
+ * @...&&..&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&...&&&&&&&&&&&&......
+ * @....&..&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&&&&&.....
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............&&&&&&&....
+ * @.......&&&&&.&&&&&&&&&&&&&&&&&&..&&&&&&&&...&..........&&&&&&....
+ * @........&&&.....&&&&&&&&&&&&&.....&&&&&&&&&&...........&..&&&&...
+ * @.......&&&........&&&.&&&&&&&&&.....&&&&&.................&&&&...
+ * @.......&&&...............&&&&&&&.......&&&&&&&&............&&&...
+ * @........&&...................&&&&&&.........................&&&..
+ * @.........&.....................&&&&........................&&....
+ * @...............................&&&.......................&&......
+ * @................................&&......................&&.......
+ * @.................................&&..............................
+ * @..................................&..............................
+ */
+
 
 #include "ControlHub.h"
-#include "univ/exception.h"
-#include "NormalEvent.hpp"
+#include "events/NormalEvent.hpp"
 using namespace Sloong::Events;
 
-CResult Sloong::CControlHub::Initialize(int quantity)
+CResult Sloong::CControlHub::Initialize(int quantity, CLog* log)
 {
 	if (quantity < 1)
 		return CResult::Make_Error("CControlHub work quantity must big than 0.");
+	m_pLog = log;
 	CThreadPool::AddWorkThread(std::bind(&CControlHub::MessageWorkLoop, this), quantity);
+	CThreadPool::Initialize(3);
 	CThreadPool::Run();
 	Run();
-	return CResult::Succeed();
+	return CResult::Succeed;
 }
 
 void Sloong::CControlHub::Exit()
 {
 	m_emStatus = RUN_STATUS::Exit;
-	m_listMsgHook.clear();
-	m_oMsgHandlerList.clear();
 }
 
-void *Sloong::CControlHub::Get(DATA_ITEM item)
+void *Sloong::CControlHub::Get(uint64_t item)
 {
 	auto data = m_oDataList.find(item);
 	if (data == m_oDataList.end())
@@ -30,80 +88,94 @@ void *Sloong::CControlHub::Get(DATA_ITEM item)
 	return (*data).second;
 }
 
-string Sloong::CControlHub::GetTempString(const string &key)
+string Sloong::CControlHub::GetTempString(const string &key, bool erase)
 {
-	auto item = m_oTempStringList.find(key);
-	if (item == m_oTempStringList.end())
-		return nullptr;
+	auto baseitem = m_oTempDataList.try_get(key);
+	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::String)
+		return string();
 
-	auto res = (*item).second;
-	m_oTempStringList.erase(key);
+	auto item = dynamic_pointer_cast<StringData>(*baseitem);
+	auto res = item->Data;
+	if (erase)
+		m_oTempDataList.erase(key);
+
 	return res;
 }
 
-void *Sloong::CControlHub::GetTempObject(const string &name, int *out_size)
+void *Sloong::CControlHub::GetTempObject(const string &key, int *out_size, bool erase)
 {
-	auto it = m_oTempObjectList.find(name);
-	if (it == m_oTempObjectList.end())
+	auto baseitem = m_oTempDataList.try_get(key);
+	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::Object)
 		return nullptr;
 
-	auto item = (*it).second;
+	auto item = dynamic_pointer_cast<ObjectData>(*baseitem);
 	if (out_size)
-		*out_size = item.size;
-	auto ptr = item.ptr;
-	m_oTempObjectList.erase(name);
+		*out_size = item->Size;
+	auto ptr = item->Ptr;
+	if (erase)
+		m_oTempDataList.erase(key);
+
 	return ptr;
 }
 
-unique_ptr<char[]> Sloong::CControlHub::GetTempBytes(const string &name, int *out_in_size)
+unique_ptr<char[]> Sloong::CControlHub::GetTempBytes(const string &key, int *out_in_size)
 {
-	auto it = m_oTempBytesList.find(name);
-	if (it == m_oTempBytesList.end())
+	auto baseitem = m_oTempDataList.try_get(key);
+	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::Bytes)
 		return nullptr;
 
-	auto &item = (*it).second;
-
+	auto item = dynamic_pointer_cast<BytesData>(*baseitem);
 	if (out_in_size)
-		*out_in_size = item.size;
+		*out_in_size = item->Size;
 
-	auto ptr = std::move(item.ptr);
-	m_oTempBytesList.erase(name);
+	auto ptr = std::move(item->Ptr);
+	m_oTempDataList.erase(key);
 	return ptr;
 }
 
-void Sloong::CControlHub::SendMessage(EVENT_TYPE msgType)
+shared_ptr<void> Sloong::CControlHub::GetTempSharedPtr(const string &key, bool erase)
 {
-	auto event = make_unique<CNormalEvent>();
+	auto baseitem = m_oTempDataList.try_get(key);
+	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::SharedPtr)
+		return nullptr;
+
+	auto item = dynamic_pointer_cast<SharedPtrData>(*baseitem);
+	auto ptr = item->Ptr;
+	if (erase)
+		m_oTempDataList.erase(key);
+
+	return ptr;
+}
+
+void Sloong::CControlHub::SendMessage(int msgType)
+{
+	auto event = make_unique<NormalEvent>();
 	event->SetEvent(msgType);
 	m_oMsgList.push_move(std::move(event));
 
 	m_oSync.notify_one();
 }
 
-void Sloong::CControlHub::SendMessage(UniqueEvent evt)
+void Sloong::CControlHub::SendMessage(SharedEvent evt)
 {
 	m_oMsgList.push_move(std::move(evt));
 	m_oSync.notify_one();
 }
 
 /**
- * @Remarks: One message only have one handler. so cannot register handled message again.
+ * @Description: One message only have one handler. so cannot register handled message again.
  * @Params: 
  * @Return: 
  */
-void Sloong::CControlHub::RegisterEventHandler(EVENT_TYPE t, MsgHandlerFunc func)
+void Sloong::CControlHub::RegisterEventHandler(int t, MsgHandlerFunc func)
 {
-	if (m_oMsgHandlerList.find(t) == m_oMsgHandlerList.end())
-	{
-		throw normal_except("Target event is not regist.");
-	}
-	else
-	{
-		m_oMsgHandlerList[t].push_back(func);
-	}
+	if (!m_oMsgHandlerList.exist(t))
+		m_oMsgHandlerList[t] = vector<MsgHandlerFunc>();
+
+	m_oMsgHandlerList[t].push_back(func);
 }
 
-void Sloong::CControlHub::CallMessage(UniqueEvent event)
+void Sloong::CControlHub::CallMessage(SharedEvent event)
 {
 	try
 	{
@@ -114,12 +186,7 @@ void Sloong::CControlHub::CallMessage(UniqueEvent event)
 			return;
 
 		for (auto func : handler_list)
-			func(event.get());
-
-		if (m_listMsgHook.exist(event->GetEvent()))
-			m_listMsgHook[event->GetEvent()](std::move(event));
-
-		event = nullptr;
+			func(event);
 	}
 	catch (const exception &ex)
 	{
@@ -133,26 +200,32 @@ void Sloong::CControlHub::CallMessage(UniqueEvent event)
 
 void Sloong::CControlHub::MessageWorkLoop()
 {
-	UniqueEvent event = nullptr;
+	auto pid = this_thread::get_id();
+	string spid = Helper::ntos(pid);
+	
+	m_pLog->Info("Control hub work thread is started. PID:" + spid);
+
+	while (m_emStatus == RUN_STATUS::Created)
+	{
+		this_thread::sleep_for(std::chrono::microseconds(100));
+	}
+
+	m_pLog->Info("Control hub work thread is running. PID:" + spid);
 	while (m_emStatus != RUN_STATUS::Exit)
 	{
 		try
 		{
-			if (m_emStatus == RUN_STATUS::Created)
-			{
-				this_thread::sleep_for(std::chrono::microseconds(100));
-				continue;
-			}
 			if (m_oMsgList.empty())
 			{
 				m_oSync.wait_for(1000);
 				continue;
 			}
 
-			if (m_oMsgList.TryMovePop(event) && event != nullptr)
+			auto event = m_oMsgList.TryMovePop();
+			if (event != nullptr)
 			{
 				// Get the message handler list.
-				CallMessage(std::move(event));
+				CallMessage(event);
 			}
 		}
 		catch (...)
@@ -160,4 +233,5 @@ void Sloong::CControlHub::MessageWorkLoop()
 			cerr << "Unhandle exception in CControlHub work loop." << endl;
 		}
 	}
+	m_pLog->Info("Control hub work thread is exit " + spid);
 }

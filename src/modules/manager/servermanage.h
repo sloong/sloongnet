@@ -1,15 +1,66 @@
-/*
- * @Author: WCB
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-21 11:17:32
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-18 10:27:12
- * @Description: file content
+ * @LastEditTime: 2021-01-05 16:29:35
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/manager/servermanage.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
-#ifndef SLOONGNET_MANAGER_SERVERMANAGE_h
-#define SLOONGNET_MANAGER_SERVERMANAGE_h
+/*** 
+ * @......................................&&.........................
+ * @....................................&&&..........................
+ * @.................................&&&&............................
+ * @...............................&&&&..............................
+ * @.............................&&&&&&..............................
+ * @...........................&&&&&&....&&&..&&&&&&&&&&&&&&&........
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............
+ * @................&...&&&&&&&&&&&&&&&&&&&&&&&&&&&&.................
+ * @.......................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @...................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...............
+ * @..................&&&   &&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @...............&&&&&@  &&&&&&&&&&..&&&&&&&&&&&&&&&&&&&...........
+ * @..............&&&&&&&&&&&&&&&.&&....&&&&&&&&&&&&&..&&&&&.........
+ * @..........&&&&&&&&&&&&&&&&&&...&.....&&&&&&&&&&&&&...&&&&........
+ * @........&&&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&....&&&.......
+ * @.......&&&&&&&&.....................&&&&&&&&&&&&&&&&.....&&......
+ * @........&&&&&.....................&&&&&&&&&&&&&&&&&&.............
+ * @..........&...................&&&&&&&&&&&&&&&&&&&&&&&............
+ * @................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&..&&&&&............
+ * @..............&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&....&&&&&............
+ * @...........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&......&&&&............
+ * @.........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........&&&&............
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&............
+ * @......&&&&&&&&&&&&&&&&&&&...&&&&&&...............&&&.............
+ * @.....&&&&&&&&&&&&&&&&............................&&..............
+ * @....&&&&&&&&&&&&&&&.................&&...........................
+ * @...&&&&&&&&&&&&&&&.....................&&&&......................
+ * @...&&&&&&&&&&.&&&........................&&&&&...................
+ * @..&&&&&&&&&&&..&&..........................&&&&&&&...............
+ * @..&&&&&&&&&&&&...&............&&&.....&&&&...&&&&&&&.............
+ * @..&&&&&&&&&&&&&.................&&&.....&&&&&&&&&&&&&&...........
+ * @..&&&&&&&&&&&&&&&&..............&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @..&&.&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&&&&&&&&&&&&.......
+ * @...&&..&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&...&&&&&&&&&&&&......
+ * @....&..&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&&&&&.....
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............&&&&&&&....
+ * @.......&&&&&.&&&&&&&&&&&&&&&&&&..&&&&&&&&...&..........&&&&&&....
+ * @........&&&.....&&&&&&&&&&&&&.....&&&&&&&&&&...........&..&&&&...
+ * @.......&&&........&&&.&&&&&&&&&.....&&&&&.................&&&&...
+ * @.......&&&...............&&&&&&&.......&&&&&&&&............&&&...
+ * @........&&...................&&&&&&.........................&&&..
+ * @.........&.....................&&&&........................&&....
+ * @...............................&&&.......................&&......
+ * @................................&&......................&&.......
+ * @.................................&&..............................
+ * @..................................&..............................
+ */
+
+#pragma once
 
 #include "configuation.h"
-#include "DataTransPackage.h"
+
 #include "protocol/manager.pb.h"
 using namespace Manager;
 
@@ -26,7 +77,7 @@ namespace Sloong
         uint64_t UUID;
         string TemplateName;
         int TemplateID;
-        SOCKET ConnectionID;
+        uint64_t ConnectionHashCode;
         Json::Value ToJson()
         {
             Json::Value item;
@@ -118,98 +169,40 @@ namespace Sloong
     class CServerManage : public IObject
     {
     public:
-        CResult Initialize(IControl *ic);
-        
-        void OnSocketClosed(SOCKET);
+        CResult Initialize(IControl *ic, const string &);
 
-        CResult ProcessHandler(CDataTransPackage *);
+        void OnSocketClosed(uint64_t);
 
-        /*
-        Request:PostLogMessageRequest
-        Response:Result
-        */
-        CResult EventRecorderHandler(const string &, CDataTransPackage *);
+        PackageResult ProcessHandler(Package *);
 
-        /* When worker start, send this request to registe a worker, and wait manage assigning template.
-        Request: Function
-        Response: Result    -> Succeed      RegisteWorkerMessageResponse
-                            -> Retry        Wait assign, wait some time and retry again.
-        */
-        CResult RegisteWorkerHandler(const string &, CDataTransPackage *);
-
-        /* When assigning tamplate, and node is ready to work, send this requst.
-        Request : RegisteNodeRequest
-        Response: Result
-        */
-        CResult RegisteNodeHandler(const string &, CDataTransPackage *);
-
-        /* 
-        Request:AddTemplateRequest
-        Response: Result
-        */
-        CResult AddTemplateHandler(const string &, CDataTransPackage *);
-        /* 
-        Request:DeleteTemplateRequest
-        Response: Result
-        */
-        CResult DeleteTemplateHandler(const string &, CDataTransPackage *);
-        /* 
-        Request :SetTemplateRequest
-        Response: Result
-        */
-        CResult SetTemplateHandler(const string &, CDataTransPackage *);
-        /* 
-        Request:QueryTemplateRequest
-        Response:QueryTemplateResponse
-        */
-        CResult QueryTemplateHandler(const string &, CDataTransPackage *);
-
-        /* 
-        Request:QueryNodeRequest
-        Response:QueryNodeResponse
-        */
-        CResult QueryNodeHandler(const string &, CDataTransPackage *);
-
-        /* 
-        Request:StopNodeRequest
-        Response:Result
-        */
-        CResult StopNodeHandler(const string &, CDataTransPackage *);
-
-        /* 
-        Request:RestartNodeRequest
-        Response:Result
-        */
-        CResult RestartNodeHandler(const string &, CDataTransPackage *);
-
-        /*
-        Request: None
-        Response: QueryReferenceInfoResponse
-        */
-        CResult QueryReferenceInfoHandler(const string &, CDataTransPackage *);
-
-        /*
-        Request: ReportLoadStatusRequest
-        Response: None
-        */
-        CResult ReportLoadStatusHandler(const string &, CDataTransPackage *);
-
+        CResult EventRecorderHandler(const string &, Package *);
+        CResult RegisteWorkerHandler(const string &, Package *);
+        CResult RegisteNodeHandler(const string &, Package *);
+        CResult AddTemplateHandler(const string &, Package *);
+        CResult DeleteTemplateHandler(const string &, Package *);
+        CResult SetTemplateHandler(const string &, Package *);
+        CResult QueryTemplateHandler(const string &, Package *);
+        CResult QueryNodeHandler(const string &, Package *);
+        CResult StopNodeHandler(const string &, Package *);
+        CResult RestartNodeHandler(const string &, Package *);
+        CResult QueryReferenceInfoHandler(const string &, Package *);
+        CResult ReportLoadStatusHandler(const string &, Package *);
 
     public:
-        static CResult LoadManagerConfig();
+        static CResult LoadManagerConfig(const string &);
         static CResult ResetManagerTemplate(GLOBAL_CONFIG *config);
 
-
     private:
-        int SearchNeedCreateTemplate();
+        int SearchNeedCreateTemplate(  );
+        int SearchNeedCreateWithIDs( const vector<int>& );
+        int SearchNeedCreateWithType( bool, const vector<int>&  );
         void RefreshModuleReference(int id);
         void SendEvent(const list<uint64_t> &, int, ::google::protobuf::Message *);
 
     protected:
         map_ex<Manager::Functions, FunctionHandler> m_mapFuncToHandler;
-        map_ex<int64_t, NodeItem> m_mapUUIDToNodeItem;
+        map_ex<uint64_t, NodeItem> m_mapUUIDToNodeItem;
         map_ex<int, TemplateItem> m_mapIDToTemplateItem;
-        map_ex<SOCKET, int64_t> m_mapSocketToUUID;
+        map_ex<uint64_t, uint64_t> m_mapConnectionToUUID;
     };
 } // namespace Sloong
-#endif

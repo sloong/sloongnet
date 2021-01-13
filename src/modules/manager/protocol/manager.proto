@@ -1,5 +1,6 @@
 syntax = "proto3";
 import "base.proto";
+import "core.proto";
 package Manager;
 
 enum Events{
@@ -19,28 +20,60 @@ message EventReferenceModuleOffline{
 
 enum Functions{
     ManagerInvalidFunction=0;
-    /* Flow: All -> Control
-       Response: post log message to control
-    */
+    
+    //
+    // Request:PostLogMessageRequest
+    // Response:Result
     PostLog=1;
-    /* Flow: All -> All
-       Response: Content - result with JSON string. 
-    */
+
+    // When worker start, send this request to registe a worker, and wait manage assigning template.
+    // Request: RegisteWorkerRequest * In defualt no should set, just send request with empty content.
+    // Response: Result    -> Succeed      RegisteWorkerMessageResponse
+    //                     -> Retry        Wait assign, wait some time and retry again.
     RegisteWorker=2;
-    /* Flow:  All -> Control
-       Response: Content(string) - the uuid for sender.
-                 Extend: config data
-    */
+    
+    // When assigning tamplate, and node is ready to work, send this requst.
+    // Request : RegisteNodeRequest
+    // Response: Result
     RegisteNode=3;
+
+    //
+    // Request:AddTemplateRequest
+    // Response: Result
     AddTemplate=4;
+
+    // Request:DeleteTemplateRequest
+    // Response: Result
     DeleteTemplate=5;
+
+    // Request :SetTemplateRequest
+    // Response: Result
     SetTemplate =6;
+
+    // Request:QueryTemplateRequest
+    // Response:QueryTemplateResponse
     QueryTemplate=7;
+    
+    // Request: None
+    // Response: QueryReferenceInfoResponse
     QueryReferenceInfo=8;
+
+    // Request:QueryNodeRequest
+    // Response:QueryNodeResponse
     QueryNode=9;
+
+    // Request:RestartNodeRequest
+    // Response:Result
     RestartNode=10;
+    
+    // Request:StopNodeRequest
+    // Response:Result
     StopNode=11;
+
+    // Request: ReportLoadStatusRequest
+    // Response: None
     ReportLoadStatus=12;
+
     // reserved for other service.
     reserved 101 to max;
 }
@@ -61,6 +94,23 @@ message PostLogMessageRequest
    bytes Content =7;// For succeed is message content; For other is message
 }
 
+message RegisteWorkerRequest
+{
+   // In defualt no should set, just send request with empty content.
+   // Just ues this when a worker node is for specified template.
+   enum RunType
+   {
+      Default=0;
+      AssignTemplate=1;
+      IncludeType=2;
+      ExcludeType=3;
+   };
+   RunType RunMode = 1;
+   repeated int32 AssignTargetTemplateID=2;
+   repeated Core.MODULE_TYPE IncludeTargetType=3;
+   repeated Core.MODULE_TYPE ExcludeTargetType=4;
+}
+
 message RegisteWorkerResponse
 {
    int32 TemplateID=1;
@@ -74,8 +124,9 @@ message RegisteNodeRequest{
 message ReferenceTemplateInfo
 {
    int32 TemplateID=1;
-   string ProvideFunctions=2;
-   repeated NodeItem NodeInfos=3;
+   Core.MODULE_TYPE Type=2;
+   string ProvideFunctions=3;
+   repeated NodeItem NodeInfos=4;
 }
 
 message QueryReferenceInfoResponse{
@@ -91,9 +142,12 @@ message DeleteTemplateRequest{
 message SetTemplateRequest{
    TemplateItem SetInfo=1;
 }
+
+// Query template info by ID or type.
 message QueryTemplateRequest{
-   // No set for query all
    repeated int32 TemplateID=1;
+   repeated int32 TemplateType=2;
+   bool QueryAll=3;
 }
 
 message StopNodeRequest{

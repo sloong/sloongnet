@@ -16,7 +16,12 @@
         {
             "label": "update processer protocol",
             "type": "shell",
-            "command": "./sloongnet/modules/middleLayer/lua/protocol/update.sh",
+            "command": "./src/modules/middleLayer/lua/protocol/update.sh",
+        },
+        {
+            "label": "Docker build",
+            "type": "shell",
+            "command": "./build/docker_build.sh",
         }
     ]
 }

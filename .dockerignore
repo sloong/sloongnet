@@ -1,0 +1,11 @@
+.git
+Dockerfile
+.dockerignore
+*.md
+.vscode
+*.pb.cc
+*.pb.h
+build/docker_build.sh
+build/debug
+build/release
+build/sloongnet-*

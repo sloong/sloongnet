@@ -1,11 +1,21 @@
-﻿﻿# Sloongnet - power by sloong.com
+﻿﻿<!--
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 1970-01-01 08:00:00
+ * @LastEditTime: 2020-10-06 18:15:28
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/README_CN.md
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
+-->
+# Sloongnet - power by sloong.com
 高性能开源网络引擎 - sloong.com 团队.
 
 ***
 
 ## 概览
-* 基于`linux`系统. 所有的测试在CentOS7 64bit系统中进行.
-* 在编译本引擎之前,需要先安装依赖模块 [library for sloong.com](https://git.sloong.com/public/library).
+* 只需要关心消息的处理，而无需关心底层部分网络的收发处理。快速简单实现一个高性能的网络服务。
+* 支持Docker部署。
+* 根据负载情况自动动态扩容。
 
 ## 特性
 * 使用 `epoll` 技术来完成网络I/O部分。
@@ -21,46 +31,36 @@
 ## 直接安装
 1. 安装依赖包：
 ```
-yum install -y libuuid mariadb openssl ImageMagick GraphicsMagick readline libjpeg
+
 ```
 2. 下载最新发布包
 3. 解压并执行.
 
-## 如何编译
-* 安装gcc7以上版本
-* 安装所需要的依赖包
 
+## 编译安装
+1. 下载源代码
 ```
-yum install -y libuuid libuuid-devel mariadb mariadb-devel openssl-devel ImageMagick GraphicsMagick readline-devel libjpeg-devel    
-git clone https://git.sloong.com/public/library.git    
-cd library/
-./install.sh
+git clone https://git.sloong.com:8000/sloongnet/engine.git    
+cd engine
 ```
-
+2. 安装依赖
 ```
-for ubuntu
-
-yum insatll -y uuid libmariadbclient18 ssl imagemagick graphicsmagick 
+./build/environment.sh
 ```
-
-* 开始编译
-
+3. 开始编译
 ```
-git clone https://git.sloong.com/public/sloongnet.git    
-cd sloongnet    
-./install.sh    
+./build/build.sh -r
 ```
 
 
 ## 联系我们
 如果你有任何问题,请联系我们.
 
-* [Email](wcb@sloong.com)
+* [Email](admin@sloong.com)
 
 ## 所引用的库
 use library in this project.
 
-* [CImg](https://git.sloong.com/wcb/CImg) 
 * [SloongLibrary](https://git.sloong.com/public/library)
 * Openssl
 

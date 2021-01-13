@@ -60,7 +60,7 @@ CResult Sloong::FileManager::EnableDataReceive(int port, int timtout)
 
     m_nRecvDataTimeoutTime = timtout;
     CThreadPool::AddWorkThread(std::bind(&FileManager::RecvDataConnFunc, this), 1);
-    return CResult::Succeed();
+    return CResult::Succeed;
 }
 
 void FileManager::ClearReceiveInfoByUUID(string uuid)
@@ -80,7 +80,7 @@ void FileManager::ClearReceiveInfoByUUID(string uuid)
     }
 }
 
-CResult Sloong::FileManager::PrepareSendFile(const string &str_req, CDataTransPackage *trans_pack)
+CResult Sloong::FileManager::PrepareSendFile(const string &str_req, Package *trans_pack)
 {
     auto req = ConvertStrToObj<PrepareSendFileRequest>(str_req);
     auto &filename = req->filename();
@@ -301,7 +301,7 @@ void Sloong::FileManager::RecvFileFunc(int conn_sock)
 // Receive File funcs
 // Client requeset with file list info
 // and here add the info to list and Build one uuid and return this uuid.
-CResult FileManager::ReceiveFile(const string &str_req, CDataTransPackage *trans_pack)
+CResult FileManager::ReceiveFile(const string &str_req, Package *trans_pack)
 {
     auto req = ConvertStrToObj<ReceiveFileRequest>(str_req);
 
@@ -329,7 +329,7 @@ CResult FileManager::ReceiveFile(const string &str_req, CDataTransPackage *trans
     return CResult::Make_OK(ConvertObjToStr(&res));
 }
 /*
-int FileManager::CheckRecvStatus(const string &str_req, CDataTransPackage *trans_pack)
+int FileManager::CheckRecvStatus(const string &str_req, Package *trans_pack)
 {
     string uuid = CLua::GetString(l, 1);
     string md5 = CLua::GetString(l, 2);

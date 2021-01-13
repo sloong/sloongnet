@@ -1,5 +1,8 @@
+// Protobuf for Core Module
+// If other module is develop by C/C++, and want base on Core module, use this protocol
 syntax = "proto3";
 package Core;
+
 
 // LogLevel
 enum LogLevel{
@@ -15,69 +18,81 @@ enum LogLevel{
 
 enum DATA_ITEM
 {
-    ServerConfiguation=0;
-	ModuleConfiguation=1;
-	Logger=2;
-	RuntimeData=3;
-    ReferenceTemplateInfo=4;
+    Invalid=0;
+    ServerConfiguation=1;
+	ModuleConfiguation=2;
+	Logger=3;
+	RuntimeData=4;
+    ReferenceTemplateInfo=5;
+
+    CustomMix=100;
+}
+
+enum MODULE_TYPE
+{
+    Manager=0;
+    AuthCenter=1;
+    DataCenter=2;
+    FileCenter=3;
+    Firewall=4;
+    Gateway=5;
+    Processer=6;
 }
 
 enum EVENT_TYPE
 {
-	/*
-	由 base_service 发送。程序准备完毕可以运行时发送
-	*/
-	ProgramStart=0;
-    ProgramStop=1;
-	// 重新启用
-	// 程序将会从加载开始，重新执行获取配置，加载模块等操作
-	ProgramRestart=2;
+    InvalidEventType=0;
+    //////////////////////////////////////////////////////////////////////////
+	// 由 * Application * 主程序提供的消息 (1-10)
+	//////////////////////////////////////////////////////////////////////////
+	// 程序准备完毕可以运行时发送
+	ProgramStart=1;
+
+    // 程序需要退出时发送
+    ProgramStop=2;
+
+	// 重新启动。程序将会从加载开始，重新执行获取配置，加载模块等操作
+	ProgramRestart=3;
+
+    // 发送请求到Manager服务
+    SendPackageToManager=4;
 
 
 	//////////////////////////////////////////////////////////////////////////
-	// 由 * NetworkHub * 模块提供的消息
+	// 由 * NetworkHub * 模块提供的消息 (11-20)
 	//////////////////////////////////////////////////////////////////////////
+    // 需要发送数据给客户端时，使用该消息
+    // 参数类型为SendPackageEvent
+	SendPackage=11;
+
 	// 当连接关闭时会发送该消息
-	// 需要在处理完成后调用回调函数以清除连接信息。
-	// 参数类型为CNetworkEvent
-	SocketClose=3;
-
-	// 需要发送数据给客户端时，使用该消息
-	SendPackage=4;
-
+	// 参数类型为ConnectionBreakedEvent
+	ConnectionBreaked=12;
     
+    // 主动关闭连接
+    // 参数类型为BreadConnectionEvent
+    BreadConnection=13;
 
 	// 需要监听socket的可写状态时，使用该消息
-	// 类型为CNetworkEvent.
-	MonitorSendStatus=5;
+	// 类型类型为MonitorSendStatusEvent.
+	MonitorSendStatus=14;
 
-	// 启用超时检查
-	// 参数类型为NormalEvent, 
-	//   实参为JSON，格式
-	// {"TimeoutTime":"", "CheckInterval":""}
-	EnableTimeoutCheck=6;
-
-	// 启用连接检查
-	// 参数类型为NormalEvent
-	//   实参为JSON，格式
-	// {"ClientCheckKey":"","ClientCheckTime":""}
-	EnableClientCheck=7;
-	
-	// 请求重新载入Lua环境
-	// 当需要重新载入Lua Context的时候发送该请求。
-	// 请求类型为CNormalEvent
-	ReloadLuaContext=8;
+	// 配置网络中心的功能
+    // 参数类型为NetworkHubFunctionConfigEvent
+	NetworkHubFunctionConfig=15;
 
     // 注册一个已经存在的连接到EPOLL
-    // 参数类型为类型为CNetworkEvent
-    RegisteConnection=9;
-	
-}
+    // 参数类型为RegisteConnectionEvent
+    RegisteConnection=16;
 
-enum PRIORITY_LEVEL{
-    HEIGHT_LEVEL=0;
-    NORMAL_LEVEL=1;
-    LOW_LEVEL=2;
+    // 获取一个连接的信息
+    // 参数类型为GetConnectionInfoEvent
+    GetConnectionInfo=18;
+
+    //////////////////////////////////////////////////////////////////////////
+	// 由 * 其他模块 * 模块提供的自定义消息 (>100)
+	//////////////////////////////////////////////////////////////////////////
+    CustomEventMix=100;
 }
 
 enum ControlEvent{
@@ -109,16 +124,6 @@ message GLOBAL_CONFIG
 
     // Module
     string  ModuleName = 12;
-    enum MODULE_TYPE
-    {
-        Manager=0;
-        AuthCenter=1;
-        DataCenter=2;
-        FileCenter=3;
-        Firewall=4;
-        Gateway=5;
-        Processer=6;
-    }
     MODULE_TYPE ModuleType = 13;
     string  ModulePath = 14;
     bytes   ModuleConfig = 15;

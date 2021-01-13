@@ -5,6 +5,9 @@
 #include <string.h> // for stricmp
 #include <uuid/uuid.h>
 #include <execinfo.h>
+// For hostname
+#include <netdb.h>
+#include <sys/socket.h>
 using namespace std;
 using namespace Sloong;
 #ifdef _WINDOWS
@@ -12,7 +15,6 @@ using namespace Sloong;
 #else
 
 #endif
-
 
 int CUtility::GetMemory(int &total, int &free)
 {
@@ -45,7 +47,7 @@ int CUtility::GetMemory(int &total, int &free)
 	return 0;
 }
 
-void CUtility::RecordCPUStatus(CPU_OCCUPY* cpust)
+void CUtility::RecordCPUStatus(CPU_OCCUPY *cpust)
 {
 	FILE *fd;
 	char buff[256];
@@ -68,9 +70,9 @@ double CUtility::CalculateCPULoad(CPU_OCCUPY *prev)
 	double cpu_use = 0.0;
 
 	od = (unsigned long)(prev->user + prev->nice + prev->system + prev->idle); //第一次(用户+优先级+系统+空闲)的时间再赋给od
-	nd = (unsigned long)(cur.user + cur.nice + cur.system + cur.idle);	   //第二次(用户+优先级+系统+空闲)的时间再赋给od
+	nd = (unsigned long)(cur.user + cur.nice + cur.system + cur.idle);		   //第二次(用户+优先级+系统+空闲)的时间再赋给od
 
-	id = (unsigned long)(cur.user - prev->user);	  //用户第一次和第二次的时间之差再赋给id
+	id = (unsigned long)(cur.user - prev->user);	 //用户第一次和第二次的时间之差再赋给id
 	sd = (unsigned long)(cur.system - prev->system); //系统第一次和第二次的时间之差再赋给sd
 	if ((nd - od) != 0)
 		cpu_use = ((sd + id) * 10000) / (nd - od); //((用户+系统)乖100)除(第一次和第二次的时间差)再赋给g_cpu_used
@@ -106,14 +108,14 @@ string Sloong::CUtility::GetSocketAddress(int socket)
 	return Helper::Format("%s:%d", inet_ntoa(add.sin_addr), add.sin_port);
 }
 
-unique_ptr<char[]> Sloong::CUtility::ReadFile(const string &filepath, int* out_size )
+unique_ptr<char[]> Sloong::CUtility::ReadFile(const string &filepath, int *out_size)
 {
 	if (-1 == access(filepath.c_str(), R_OK))
 	{
 		*out_size = -1;
 		return nullptr;
 	}
-		
+
 	ifstream in(filepath.c_str(), ios::in | ios::binary);
 	streampos pos = in.tellg();
 	in.seekg(0, ios::end);
@@ -124,6 +126,47 @@ unique_ptr<char[]> Sloong::CUtility::ReadFile(const string &filepath, int* out_s
 	in.close();
 	*out_size = nSize;
 	return pBuf;
+}
+
+uint64_t Sloong::CUtility::CityEncodeFile(const string& path)
+{
+	if (-1 == access(path.c_str(), R_OK))
+		return 0;
+	ifstream in(path.c_str(), ios::in | ios::binary);
+	streampos pos = in.tellg();
+	in.seekg(0, ios::end);
+	int nSize = in.tellg();
+	in.seekg(pos);
+	string out;
+	out.resize(nSize);
+	in.read(out.data(), nSize);
+	in.close();
+
+	return CCity::Encode64(out);
+}
+
+uint32_t Sloong::CUtility::CRC32EncodeFile(const string& path)
+{
+	if (-1 == access(path.c_str(), R_OK))
+		return 0;
+	ifstream in(path.c_str(), ios::in | ios::binary);
+	streampos pos = in.tellg();
+	in.seekg(0, ios::end);
+	int nSize = in.tellg();
+	in.seekg(pos);
+	string out;
+	out.resize(nSize);
+	in.read(out.data(), nSize);
+	in.close();
+
+	return CRC::Calculate(out.c_str(), out.length(), CRC::CRC_32());
+}
+
+string Sloong::CUtility::SHA1EncodeFile(const string& path)
+{
+	unsigned char t[Sloong::Universal::SHA1_LENGTH] = {0};
+	CSHA1::Binary_Encoding(path, t, true );
+	return string((char*)t,Sloong::Universal::SHA1_LENGTH);
 }
 
 CResult Sloong::CUtility::WriteFile(const string &filepath, const char *pBuffer, int size)
@@ -140,7 +183,7 @@ string Sloong::CUtility::GenUUID()
 	return uuid;
 }
 
-#define MAX_STACK_LAYERS 256
+#define MAX_STACK_LAYERS 20
 
 string Sloong::CUtility::GetCallStack()
 {
@@ -156,4 +199,90 @@ string Sloong::CUtility::GetCallStack()
 	}
 	free(strings);
 	return strRet;
+}
+
+VStrResult CUtility::IPToHostName(const string &ip)
+{
+	if (ip.length() == 0)
+	{
+		return VStrResult::Make_Error("invalid params");
+	}
+
+	struct addrinfo hints;
+	struct addrinfo *addr_res;
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_CANONNAME | AI_NUMERICHOST;
+	hints.ai_protocol = 0;
+
+	if (auto res = getaddrinfo(ip.c_str(), nullptr, &hints, &addr_res) != 0)
+	{
+		return VStrResult::Make_Error(Helper::Format("getaddrinfo: %s", gai_strerror(res)));
+	}
+
+	vector<string> list;
+	string errmsg;
+	for (auto res_p = addr_res; res_p != nullptr; res_p = res_p->ai_next)
+	{
+		char host[1024] = {0};
+		auto ret = getnameinfo(res_p->ai_addr, res_p->ai_addrlen, host, sizeof(host), NULL, 0, NI_NAMEREQD);
+		if (ret != 0)
+		{
+			errmsg += Helper::Format("getaddrinfo: %s", gai_strerror(ret));
+		}
+		else
+		{
+			list.push_back(host);
+		}
+	}
+
+	freeaddrinfo(addr_res);
+	if( list.size() > 0 )
+		return VStrResult::Make_OKResult(list,errmsg);
+	else
+		return VStrResult::Make_Error(errmsg);
+}
+
+VStrResult CUtility::HostnameToIP(const string &hostname)
+{
+	if (hostname.length() == 0)
+	{
+		return VStrResult::Make_Error("invalid params");
+	}
+
+	struct addrinfo hints;
+	struct addrinfo *hostname_res;
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_CANONNAME;
+	hints.ai_protocol = 0;
+
+	if (auto res = getaddrinfo(hostname.c_str(), NULL, &hints, &hostname_res) != 0)
+	{
+		return VStrResult::Make_Error(Helper::Format("getaddrinfo: %s", gai_strerror(res)));
+	}
+
+	vector<string> list;
+	string errmsg;
+	for (auto res_p = hostname_res; res_p != NULL; res_p = res_p->ai_next)
+	{
+		char host[1024] = {0};
+		auto ret = getnameinfo(res_p->ai_addr, res_p->ai_addrlen, host, sizeof(host), NULL, 0, NI_NUMERICHOST);
+		if (ret != 0)
+		{
+			errmsg += Helper::Format("getaddrinfo: %s", gai_strerror(ret));
+		}
+		else
+		{
+			list.push_back(host);
+		}
+	}
+
+	freeaddrinfo(hostname_res);
+	if( list.size() > 0 )
+		return VStrResult::Make_OKResult(list,errmsg);
+	else
+		return VStrResult::Make_Error(errmsg);
 }

@@ -1,12 +1,63 @@
-/*
- * @Author: WCB
- * @Date: 1970-01-01 08:00:00
- * @LastEditors: WCB
- * @LastEditTime: 2020-05-18 20:34:21
- * @Description: file content
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 2019-01-15 15:57:36
+ * @LastEditTime: 2020-07-29 19:42:10
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/gateway/gateway.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
-#ifndef SLOONGNET_MODULE_GATEWAY_H
-#define SLOONGNET_MODULE_GATEWAY_H
+/*** 
+ * @......................................&&.........................
+ * @....................................&&&..........................
+ * @.................................&&&&............................
+ * @...............................&&&&..............................
+ * @.............................&&&&&&..............................
+ * @...........................&&&&&&....&&&..&&&&&&&&&&&&&&&........
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............
+ * @................&...&&&&&&&&&&&&&&&&&&&&&&&&&&&&.................
+ * @.......................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @...................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...............
+ * @..................&&&   &&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @...............&&&&&@  &&&&&&&&&&..&&&&&&&&&&&&&&&&&&&...........
+ * @..............&&&&&&&&&&&&&&&.&&....&&&&&&&&&&&&&..&&&&&.........
+ * @..........&&&&&&&&&&&&&&&&&&...&.....&&&&&&&&&&&&&...&&&&........
+ * @........&&&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&....&&&.......
+ * @.......&&&&&&&&.....................&&&&&&&&&&&&&&&&.....&&......
+ * @........&&&&&.....................&&&&&&&&&&&&&&&&&&.............
+ * @..........&...................&&&&&&&&&&&&&&&&&&&&&&&............
+ * @................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&..&&&&&............
+ * @..............&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&....&&&&&............
+ * @...........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&......&&&&............
+ * @.........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........&&&&............
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&............
+ * @......&&&&&&&&&&&&&&&&&&&...&&&&&&...............&&&.............
+ * @.....&&&&&&&&&&&&&&&&............................&&..............
+ * @....&&&&&&&&&&&&&&&.................&&...........................
+ * @...&&&&&&&&&&&&&&&.....................&&&&......................
+ * @...&&&&&&&&&&.&&&........................&&&&&...................
+ * @..&&&&&&&&&&&..&&..........................&&&&&&&...............
+ * @..&&&&&&&&&&&&...&............&&&.....&&&&...&&&&&&&.............
+ * @..&&&&&&&&&&&&&.................&&&.....&&&&&&&&&&&&&&...........
+ * @..&&&&&&&&&&&&&&&&..............&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @..&&.&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&&&&&&&&&&&&.......
+ * @...&&..&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&...&&&&&&&&&&&&......
+ * @....&..&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&&&&&.....
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............&&&&&&&....
+ * @.......&&&&&.&&&&&&&&&&&&&&&&&&..&&&&&&&&...&..........&&&&&&....
+ * @........&&&.....&&&&&&&&&&&&&.....&&&&&&&&&&...........&..&&&&...
+ * @.......&&&........&&&.&&&&&&&&&.....&&&&&.................&&&&...
+ * @.......&&&...............&&&&&&&.......&&&&&&&&............&&&...
+ * @........&&...................&&&&&&.........................&&&..
+ * @.........&.....................&&&&........................&&....
+ * @...............................&&&.......................&&......
+ * @................................&&......................&&.......
+ * @.................................&&..............................
+ * @..................................&..............................
+ */
+
+#pragma once
 
 #include "EasyConnect.h"
 #include "core.h"
@@ -19,12 +70,12 @@ using namespace Manager;
 
 extern "C"
 {
-	CResult RequestPackageProcesser(void *, CDataTransPackage *);
-	CResult ResponsePackageProcesser(void *, CDataTransPackage *);
-	CResult EventPackageProcesser(CDataTransPackage *);
-	CResult NewConnectAcceptProcesser(CSockInfo *);
-	CResult ModuleInitialization(GLOBAL_CONFIG *);
-	CResult ModuleInitialized(SOCKET, IControl *);
+	PackageResult RequestPackageProcesser(void *, Package *);
+	PackageResult ResponsePackageProcesser(void *, Package *);
+	CResult EventPackageProcesser(Package *);
+	CResult NewConnectAcceptProcesser(SOCKET);
+	CResult ModuleInitialization(IControl *);
+	CResult ModuleInitialized();
 	CResult CreateProcessEnvironment(void **);
 }
 
@@ -35,24 +86,22 @@ namespace Sloong
 	public:
 		SloongNetGateway() {}
 
-		CResult Initialization(GLOBAL_CONFIG *);
-		CResult Initialized(SOCKET, IControl *);
+		CResult Initialization(IControl *);
+		CResult Initialized();
 
-		CResult ResponsePackageProcesser(CDataTransPackage *);
+		PackageResult ResponsePackageProcesser(Package *);
 
 		void QueryReferenceInfo();
-		CResult QueryReferenceInfoResponseHandler(IEvent *, CDataTransPackage *);
+		void QueryReferenceInfoResponseHandler(IEvent*, Package *);
 
 		inline CResult CreateProcessEnvironmentHandler(void **);
-		void EventPackageProcesser(CDataTransPackage *);
+		void EventPackageProcesser(Package *);
 
 		// Event handler
-		void OnStart(IEvent *);
-		void OnSocketClose(IEvent *);
-		void SendPackageHook(UniqueEvent);
+		void OnStart(SharedEvent);
 
-		void OnReferenceModuleOnlineEvent(const string &, CDataTransPackage *);
-		void OnReferenceModuleOfflineEvent(const string &, CDataTransPackage *);
+		void OnReferenceModuleOnlineEvent(const string &, Package *);
+		void OnReferenceModuleOfflineEvent(const string &, Package *);
 
 	private:
 		inline int ParseFunctionValue(const string &);
@@ -61,13 +110,12 @@ namespace Sloong
 		void AddConnection(uint64_t, const string &, int);
 
 	public:
-		SOCKET GetPorcessConnect(int function);
-		map_ex<uint64_t, UniqueEvent> m_listSendEvent;
+		uint64_t GetPorcessConnection(int function);
 		map_ex<int, list_ex<int>> m_mapFuncToTemplateIDs;
 		map_ex<int, list_ex<uint64_t>> m_mapTempteIDToUUIDs;
 		map_ex<uint64_t, NodeItem> m_mapUUIDToNode;
-		map_ex<uint64_t, SOCKET> m_mapUUIDToConnect;
-		map_ex<uint64_t, RequestInfo> m_mapSerialToRequest;
+		map_ex<uint64_t, uint64_t> m_mapUUIDToConnectionID;
+		map_ex<uint64_t, UniquePackage> m_mapSerialToRequest;
 
 	protected:
 		list<unique_ptr<GatewayTranspond>> m_listTranspond;
@@ -75,12 +123,9 @@ namespace Sloong
 		GLOBAL_CONFIG *m_pConfig;
 		Json::Value *m_pModuleConfig;
 		RuntimeDataPackage *m_pRuntimeData = nullptr;
-		SOCKET m_nManagerConnection = -1;
 
 	public:
 		static unique_ptr<SloongNetGateway> Instance;
 	};
 
 } // namespace Sloong
-
-#endif
