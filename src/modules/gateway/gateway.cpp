@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-01-15 15:57:36
- * @LastEditTime: 2020-08-12 14:23:08
+ * @LastEditTime: 2020-10-09 10:42:38
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/gateway.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -73,7 +73,7 @@ using namespace Manager;
 
 unique_ptr<SloongNetGateway> Sloong::SloongNetGateway::Instance = nullptr;
 
-extern "C" PackageResult RequestPackageProcesser(void *env, DataPackage *pack)
+extern "C" PackageResult RequestPackageProcesser(void *env, Package *pack)
 {
 	auto pTranspond = STATIC_TRANS<GatewayTranspond*>(env);
 	if( pTranspond)
@@ -82,7 +82,7 @@ extern "C" PackageResult RequestPackageProcesser(void *env, DataPackage *pack)
 		return PackageResult::Make_Error("RequestPackageProcesser error, Environment convert failed.");
 }
 
-extern "C" PackageResult ResponsePackageProcesser(void *env, DataPackage *pack)
+extern "C" PackageResult ResponsePackageProcesser(void *env, Package *pack)
 {
 	auto num = pack->id();
 	if( SloongNetGateway::Instance->m_mapSerialToRequest.exist(num) )
@@ -101,7 +101,7 @@ extern "C" PackageResult ResponsePackageProcesser(void *env, DataPackage *pack)
 	return SloongNetGateway::Instance->ResponsePackageProcesser(pack);
 }
 
-extern "C" CResult EventPackageProcesser(DataPackage *pack)
+extern "C" CResult EventPackageProcesser(Package *pack)
 {
 	SloongNetGateway::Instance->EventPackageProcesser(pack);
 	return CResult::Succeed;
@@ -157,7 +157,7 @@ CResult SloongNetGateway::Initialized()
 }
 
 
-PackageResult SloongNetGateway::ResponsePackageProcesser( DataPackage *trans_pack)
+PackageResult SloongNetGateway::ResponsePackageProcesser( Package *trans_pack)
 {
 	m_pLog->Error("ResponsePackageProcesser no find the package. Ignore package.");
 	return PackageResult::Ignore();
@@ -200,7 +200,7 @@ list<int> SloongNetGateway::ProcessProviedFunction(const string &prov_func)
 	return res_list;
 }
 
-void SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent* send_pack, DataPackage *res_pack)
+void SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent* send_pack, Package *res_pack)
 {
 	auto str_res = res_pack->content();
 	auto res = ConvertStrToObj<QueryReferenceInfoResponse>(str_res);
@@ -255,7 +255,7 @@ void SloongNetGateway::OnStart(SharedEvent evt)
 	QueryReferenceInfo();
 }
 
-void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_req, DataPackage *trans_pack)
+void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_req, Package *trans_pack)
 {
 	auto req = ConvertStrToObj<Manager::EventReferenceModuleOnline>(str_req);
 	auto item = req->item();
@@ -266,7 +266,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_re
 	AddConnection(item.uuid(), item.address(), item.port());
 }
 
-void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_req, DataPackage *trans_pack)
+void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_req, Package *trans_pack)
 {	
 	auto req = ConvertStrToObj<Manager::EventReferenceModuleOffline>(str_req);
 	auto uuid = req->uuid();
@@ -278,7 +278,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_r
 	m_pLog->Info(Helper::Format("Node is offline [%lld], template id[%d],list size[%d]", item.uuid(), item.templateid(), m_mapTempteIDToUUIDs[item.templateid()].size()));
 }
 
-void Sloong::SloongNetGateway::EventPackageProcesser(DataPackage *pack)
+void Sloong::SloongNetGateway::EventPackageProcesser(Package *pack)
 {
 	auto event = (Manager::Events)pack->function();
 	if (!Manager::Events_IsValid(event))

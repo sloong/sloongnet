@@ -86,7 +86,7 @@ using namespace Sloong::Universal;
 
 namespace Sloong
 {
-	typedef std::function<CResult(const string &, DataPackage *)> FunctionHandler;
+	typedef std::function<CResult(const string &, Package *)> FunctionHandler;
 
 	inline timeval GetTimeval()
 	{
@@ -101,12 +101,12 @@ namespace Sloong
 		return cur.tv_sec * 1000 + cur.tv_usec / 1000.0;
 	}
 
-	inline string FormatRecord(DataPackage *pack)
+	inline string FormatRecord(Package *pack)
 	{
 		string str;
-		auto clocks = pack->reserved().clocks();
+		auto clocks = pack->clocks();
 		auto start = clocks.begin();
-		for (auto item = start + 1; item != clocks.end(); item++)
+		for (auto item = start ++; item != clocks.end(); item++)
 		{
 			str = Helper::Format("%s[%.2f]", str.c_str(), *item - *start);
 		}
@@ -241,34 +241,34 @@ namespace Sloong
 	}
 
 	inline constexpr int g_max_package_size = 5 * 1024 * 1024;
-	inline bool IsOverflowPackage(DataPackage *pack)
+	inline bool IsOverflowPackage(Package *pack)
 	{
-		if (pack->ByteSize() > g_max_package_size)
+		if (pack->ByteSizeLong() > g_max_package_size)
 			return true;
 		else
 			return false;
 	}
 
 	inline constexpr int g_big_package_size = 1 * 1024;
-	inline bool IsBigPackage(DataPackage *pack)
+	inline bool IsBigPackage(Package *pack)
 	{
-		if (pack->ByteSize() > g_big_package_size)
+		if (pack->ByteSizeLong() > g_big_package_size)
 			return true;
 		else
 			return false;
 	}
 
 	inline constexpr int g_max_package_print_log = 512;
-	inline bool IsPrintLog(DataPackage* pack)
+	inline bool IsPrintLog(Package* pack)
 	{
 		if( !pack->extend().empty())
 			return false;
-		if( pack->ByteSize() > g_max_package_print_log )
+		if( pack->ByteSizeLong() > g_max_package_print_log )
 			return false;
 		return true;
 	}
 
-	inline void PrintPackage( CLog* log, DataPackage* package, const string& title, LOGLEVEL level = LOGLEVEL::Verbos )
+	inline void PrintPackage( CLog* log, Package* package, const string& title, LOGLEVEL level = LOGLEVEL::Verbos )
 	{
 		if(IsPrintLog( package))
 		{

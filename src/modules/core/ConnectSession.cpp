@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2020-08-26 17:39:02
+ * @LastEditTime: 2021-01-12 14:45:35
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -60,8 +60,10 @@
  */
 
 #include "ConnectSession.h"
-
 #include "IData.h"
+
+#include "events/MonitorSendStatus.hpp"
+using namespace Sloong::Events;
 
 Sloong::ConnectSession::ConnectSession()
 {
@@ -101,13 +103,11 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 	{
 		m_pLog->Assert("The package size is to bigger, this's returned and replaced with an error message package.");
 		pack->set_result(ResultType::Error);
-		pack->set_content("The package size is to bigger.");
+		PackageHelper::SetContent(pack.get(), "The package size is to bigger." );
 		pack->clear_extend();
 	}
 
-
-	pack->clear_reserved();
-	m_pLog->Verbos(Helper::Format("SEND>>>[%d]>>No[%lld]>>[%d]byte", m_pConnection->GetSocketID() , pack->id(), pack->ByteSize()));
+	m_pLog->Verbos(Helper::Format("SEND>>>[%d]>>No[%lld]>>[%d]byte", m_pConnection->GetSocketID() , pack->id(), pack->ByteSizeLongEx()));
 
 	// if have exdata, directly add to epoll list.
 	if (IsBigPackage(pack.get()) || m_pConnection->IsSending() || (m_bIsSendListEmpty == false && !m_oPrepareSendList.empty()) || m_oSockSendMutex.try_lock() == false)
@@ -143,9 +143,11 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 
 void Sloong::ConnectSession::AddToSendList(UniquePackage pack)
 {
+	auto events = make_shared<MonitorSendStatusEvent>(pack->sessionid());
 	m_oPrepareSendList.push_move(std::move(pack));
 	m_pLog->Debug(Helper::Format("Add send package to prepare send list. list size:[%d]", m_oPrepareSendList.size()));
 	m_bIsSendListEmpty = false;
+	m_iC->SendMessage(events);
 }
 
 ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
@@ -164,26 +166,41 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 			if (IsOverflowPackage(package.get()))
 			{
 				m_pLog->Warn("The package size is to bigger.");
-				AddToSendList(Package::MakeErrorResponse(package.get(),"The package size is to bigger."));
+				AddToSendList(PackageHelper::MakeErrorResponse(package.get(),"The package size is to bigger."));
 			}
 			else
 			{
-				m_pLog->Verbos(Helper::Format("RECV<<<[%d]<<No[%lld]<<[%d]byte", m_pConnection->GetSocketID(), package->id(), package->ByteSize()));
-				package->mutable_reserved()->add_clocks(GetClock());
-				package->mutable_reserved()->set_sessionid(m_pConnection->GetHashCode());
+				m_pLog->Verbos(Helper::Format("RECV<<<[%d]<<No[%lld]<<[%d]byte", m_pConnection->GetSocketID(), package->id(), package->ByteSizeLongEx()));
+				package->add_clocks(GetClock());
+				package->set_sessionid(m_pConnection->GetHashCode());
+				bLoop = true;
+				m_ActiveTime = time(NULL);
+
+				if( package->hash().length() != 32 )
+				{
+					auto msg = "Hash check error. Make sure the hash algorithm is SHA256";
+					m_pLog->Verbos(msg);
+					AddToSendList(PackageHelper::MakeErrorResponse(package.get(),msg ));
+					continue;
+				}
+				string hash(package->hash());
+				package->clear_hash();
+				unsigned char buffer[32] = {0};
+				CSHA256::Binary_Encoding(ConvertObjToStr(package.get()),buffer);
+				if( string((char*)buffer,32) != hash )
+				{
+					auto msg =  Helper::Format("Hash check error. Package[%s]<->[%s]Calculate", ConvertToHexString(hash.c_str(),0,31).c_str(),ConvertToHexString((char*)buffer,0,31).c_str() );
+					m_pLog->Verbos(msg);
+					AddToSendList(PackageHelper::MakeErrorResponse(package.get(),msg));
+					continue;
+				}
 
 				if (package->priority() > s_PriorityLevel || package->priority() < 0)
 				{
-					m_pLog->Error(Helper::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", package->priority(), s_PriorityLevel));
+					m_pLog->Warn(Helper::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", package->priority(), s_PriorityLevel));
 					package->set_priority(s_PriorityLevel);
 				}
-				if (package->hash().length() > 0)
-				{
-					m_pLog->Warn("Now don't support hash check, So the hash string will ignored.");
-				}
 
-				bLoop = true;
-				m_ActiveTime = time(NULL);
 				readList.push(std::move(package));
 			}
 		}
@@ -278,7 +295,7 @@ ResultType Sloong::ConnectSession::ProcessSendList()
 		if (pack == nullptr)
 			return ResultType::Retry;
 
-		m_pLog->Debug(Helper::Format("Send new package, the list size[%d],Size[%d],", list->size(), pack->ByteSize()));
+		m_pLog->Debug(Helper::Format("Send new package, the list size[%d],Size[%d],", list->size(), pack->ByteSizeLongEx()));
 		auto res = m_pConnection->SendPackage(move(pack));
 
 		if (res.GetResult() == ResultType::Error)

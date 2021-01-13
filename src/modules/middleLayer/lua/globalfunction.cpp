@@ -120,7 +120,7 @@ void Sloong::CGlobalFunction::OnStart(SharedEvent e)
 }
 
 
-void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent* send_pack, DataPackage *res_pack)
+void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent* send_pack, Package *res_pack)
 {
     auto str_res = res_pack->content();
     auto res = ConvertStrToObj<QueryReferenceInfoResponse>(str_res);
@@ -369,11 +369,11 @@ int CGlobalFunction::Lua_SetExtendDataByFile(lua_State *l)
     return 2;
 }
 
-NResult CGlobalFunction::GetConnectionID(int templateid)
+U64Result CGlobalFunction::GetConnectionID(int templateid)
 {
     if (CGlobalFunction::Instance->m_mapTemplateIDToUUIDs[templateid].size() == 0)
     {
-        return NResult::Make_Error(Helper::Format("Template[%d] no node online.", templateid));
+        return U64Result::Make_Error(Helper::Format("Template[%d] no node online.", templateid));
     }
 
     auto uuid = CGlobalFunction::Instance->m_mapTemplateIDToUUIDs[templateid].front();
@@ -382,10 +382,10 @@ NResult CGlobalFunction::GetConnectionID(int templateid)
         auto item = CGlobalFunction::Instance->m_mapUUIDToNode[uuid];
         CGlobalFunction::Instance->AddConnection(uuid, item.address(), item.port());
 
-        return NResult::Make_Error(Helper::Format("Try connect to [%d][%lld][%s:%d], please wait and retry.", templateid, uuid, item.address().c_str(), item.port()));
+        return U64Result::Make_Error(Helper::Format("Try connect to [%d][%lld][%s:%d], please wait and retry.", templateid, uuid, item.address().c_str(), item.port()));
     }
 
-    return NResult::Make_OKResult(CGlobalFunction::Instance->m_mapUUIDToConnectionID[uuid]);
+    return U64Result::Make_OKResult(CGlobalFunction::Instance->m_mapUUIDToConnectionID[uuid]);
 
 }
 
@@ -633,19 +633,12 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
 
 int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
 {
-    auto file_hash = CLua::GetString(l, 1, "");
+    auto file_crc = CLua::GetInteger(l, 1, 0);
     auto file_size = CLua::GetInteger(l, 2, 0);
-    if (file_hash.empty() || file_size == 0)
+    if (file_crc == 0 || file_size == 0)
     {
         CLua::PushBoolen(l, false);
         CLua::PushString(l, "request data is empty");
-        return 2;
-    }
-    int64_t hash;
-    if(!ConvertStrToInt64(file_hash,&hash))
-    {
-        CLua::PushBoolen(l, false);
-        CLua::PushString(l, "Convert file hash to int64 fialed.");
         return 2;
     }
 
@@ -659,7 +652,7 @@ int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
     auto session = conn.GetResultObject();
 
     FileCenter::PrepareUploadRequest request;
-    request.set_hashcode(  hash  );
+    request.set_crccode(file_crc);
     request.set_filesize(file_size);
 
     auto req = make_shared<SendPackageEvent>(session);

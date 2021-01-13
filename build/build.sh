@@ -46,7 +46,7 @@ build(){
 		mkdir $MAKEFLAG
 	fi
 	cd $MAKEFLAG
-	cmake -DCMAKE_TOOLCHAIN_FILE=$SCRIPTFOLDER/toolchain.cmake -DCMAKE_BUILD_TYPE=$CMAKEFLAG $CMAKE_FILE_PATH
+	cmake -DCMAKE_TOOLCHAIN_FILE=$SCRIPTFOLDER/clang.cmake -DCMAKE_BUILD_TYPE=$CMAKEFLAG $CMAKE_FILE_PATH
 	if [ $? -ne 0 ];then
 		echo "Run cmake cmd return error. build stop."
 		exit 1
@@ -58,7 +58,6 @@ build(){
 		exit 1
 	fi
 
-	
 	mkdir -p $OUTPATH/modules/
 
 	cp $CMAKE_FILE_PATH/referenced/libuniv/libuniv.so $OUTPATH/

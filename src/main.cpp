@@ -1,7 +1,7 @@
 ﻿/*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-08-10 14:09:44
+ * @LastEditTime: 2021-01-12 16:30:02
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/main.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -15,14 +15,16 @@
 
 void PrientHelp()
 {
-	cout << "sloongnet [<type>] [<address:port>] [--F=<ForceTargetTemplateID>]" << endl;
+	cout << "sloongnet <type> <address:port> [--<assign|include|exclude>=<TypeName>]" << endl;
 	cout << "sloongnet version" << endl;
-	cout << "<type>: Manager|Worker" << endl;
-	cout << "<address:port>: Listen port / Manager port" << endl;
-	cout << "--F=<ForceTargetTemplateID>: If this node just for one templateid, set it." << endl;
-	cout << "--T=<TypeName>: Set it for target module type." << endl;
-	cout << "--?/--help/--h: Print help info." << endl;
-	cout << "--v/--version: Print version info." << endl;
+	cout << "type: Manager|Worker" << endl;
+	cout << "address:port: Listen port / Manager port" << endl;
+	cout << "Note: the third parameter works only in Worker mode." << endl;
+	cout << "--assign=<TargetTemplateID>: If this node just for one templateid, set it." << endl;
+	cout << "--include=<TypeName>: Set it for target module type. If have multi type, use ',' to split. If assign is setted, this will be ignored." << endl;
+	cout << "--exclude=<TypeName>: Set it for target is not support type. If have multi type, use ',' to split. If assign/include is setted, this will be ignored." << endl;
+	cout << "-?/--help/-h: Print help info." << endl;
+	cout << "-v/--version: Print version info." << endl;
 }
 
 void PrintVersion()
@@ -32,70 +34,81 @@ void PrintVersion()
 	cout << COPYRIGHT_TEXT << endl;
 }
 
-typedef struct CmdInfo
-{
-	CmdInfo()
-	{
-		ManagerMode = false;
-		Address = "";
-		Port = 0;
-		ForceTargetTemplateID = 0;
-		ForceTargetType = "";
-	}
-	bool ManagerMode;
-	string Address;
-	int Port;
-	int ForceTargetTemplateID;
-	string ForceTargetType;
-} CmdInfo;
-
 int main(int argc, char **args)
 {
 	try
 	{
+		if (argc < 2 || strcasecmp(args[1], "-v") == 0 || strcasecmp(args[1], "--version") == 0)
+		{
+			PrintVersion();
+			return 0;
+		}
+		else if (strcasecmp(args[1], "-?") == 0 || strcasecmp(args[1], "--help") == 0 || strcasecmp(args[1], "-h") == 0)
+		{
+			PrientHelp();
+			return 0;
+		}
+
 		cout << "Command line:";
 		for (int i = 1; i < argc; i++)
 		{
 			cout << args[i] << " ";
 		}
 		cout << endl;
-		CmdInfo info;
-		for (int i = 1; i < argc; i++)
+
+		if (argc > 4)
 		{
-			auto item = string(args[i]);
-			if (strcasecmp(args[i], "Manager") == 0)
+			cout << "Params error. See help with --help." << endl;
+			return -1;
+		}
+		RunInfo info;
+
+		if (strcasecmp(args[1], "Manager") == 0)
+		{
+			info.ManagerMode = true;
+		}
+		else if (strcasecmp(args[1], "Worker") == 0)
+		{
+			info.ManagerMode = false;
+		}
+		else
+		{
+			cout << "Unknown type. See help with --help." << endl;
+			return -1;
+		}
+
+		if (string(args[2]).find(":") != string::npos)
+		{
+			vector<string> addr = Helper::split(args[2], ':');
+			info.Address = addr[0];
+			if (!ConvertStrToInt(addr[1], &info.Port))
 			{
-				info.ManagerMode = true;
-				continue;
+				cout << "Convert [" << addr[1] << "] to int port fialed." << endl;
+				return -1;
 			}
-			else if (item.find(":") != string::npos)
+		}
+		else
+		{
+			cout << "Address port info error. See help with --help." << endl;
+			return -1;
+		}
+
+		// Stop support for custom parameters
+		// for (int i = 3; i < argc; i++)
+		if (argc == 4)
+		{
+			auto item = string(args[3]);
+			if (item.find("--assign=") != string::npos)
 			{
-				vector<string> addr = Helper::split(args[2], ':');
-				info.Address = addr[0];
-				if (!ConvertStrToInt(addr[1], &info.Port))
-				{
-					cout << "Convert [" << addr[1] << "] to int port fialed." << endl;
-					return -1;
-				}
+				info.AssignedTargetTemplateID = item.substr(9);
 			}
-			else if (item.find("-F=") != string::npos)
+			else if (item.find("--include=") != string::npos)
 			{
-				auto tempid = item.substr(3);
-				ConvertStrToInt(tempid, &info.ForceTargetTemplateID);
+				info.IncludeTargetType = item.substr(10);
 			}
-			else if (item.find("-T=") != string::npos)
+			else if (item.find("--exclude=") != string::npos)
 			{
-				info.ForceTargetType = item.substr(3);
-			}
-			else if (strcasecmp(args[i], "--v") == 0 || strcasecmp(args[i], "--version") == 0)
-			{
-				PrintVersion();
-				return 0;
-			}
-			else if (strcasecmp(args[i], "--?") == 0 || strcasecmp(args[i], "--help") == 0 || strcasecmp(args[i], "--h") == 0)
-			{
-				PrientHelp();
-				return 0;
+				info.ExcludeTargetType = item.substr(10);
 			}
 		}
 
@@ -110,17 +123,16 @@ int main(int argc, char **args)
 		do
 		{
 			cout << "Initialize base service instance." << endl;
-			res = Sloong::CSloongBaseService::Instance->Initialize(info.ManagerMode, info.Address, info.Port, info.ForceTargetTemplateID);
+			res = Sloong::CSloongBaseService::Instance->Initialize(move(info));
 			if (!res.IsSucceed())
 			{
 				cout << "Initialize server error. Message: " << res.GetMessage() << endl;
 				return -5;
 			}
 
-			
 			cout << "Run base service instance." << endl;
 			res = Sloong::CSloongBaseService::Instance->Run();
-			
+
 			cout << "Base service instance is end with result " << ResultType_Name(res.GetResult()) << ". Message: " << res.GetMessage() << endl;
 		} while (res.GetResult() == ResultType::Retry);
 

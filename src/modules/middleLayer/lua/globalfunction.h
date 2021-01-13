@@ -111,11 +111,11 @@ namespace Sloong
         void OnStart(SharedEvent);
         void OnReferenceModuleOnline(SharedEvent);
         void OnReferenceModuleOffline(SharedEvent);
-        void QueryReferenceInfoResponseHandler(IEvent*, DataPackage*);
+        void QueryReferenceInfoResponseHandler(IEvent*, Package*);
         static CResult RunSQLFunction(uint64_t,const string&, int);
         static uint64_t SQLFunctionPrepareCheck(lua_State*, int, const string&);
         void AddConnection(uint64_t, const string &, int);
-        NResult GetConnectionID(int );
+        U64Result GetConnectionID(int );
 
     protected:
         map_ex<string, string> m_mapCommData;

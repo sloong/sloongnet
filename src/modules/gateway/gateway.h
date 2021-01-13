@@ -70,9 +70,9 @@ using namespace Manager;
 
 extern "C"
 {
-	PackageResult RequestPackageProcesser(void *, DataPackage *);
-	PackageResult ResponsePackageProcesser(void *, DataPackage *);
-	CResult EventPackageProcesser(DataPackage *);
+	PackageResult RequestPackageProcesser(void *, Package *);
+	PackageResult ResponsePackageProcesser(void *, Package *);
+	CResult EventPackageProcesser(Package *);
 	CResult NewConnectAcceptProcesser(SOCKET);
 	CResult ModuleInitialization(IControl *);
 	CResult ModuleInitialized();
@@ -89,19 +89,19 @@ namespace Sloong
 		CResult Initialization(IControl *);
 		CResult Initialized();
 
-		PackageResult ResponsePackageProcesser(DataPackage *);
+		PackageResult ResponsePackageProcesser(Package *);
 
 		void QueryReferenceInfo();
-		void QueryReferenceInfoResponseHandler(IEvent*, DataPackage *);
+		void QueryReferenceInfoResponseHandler(IEvent*, Package *);
 
 		inline CResult CreateProcessEnvironmentHandler(void **);
-		void EventPackageProcesser(DataPackage *);
+		void EventPackageProcesser(Package *);
 
 		// Event handler
 		void OnStart(SharedEvent);
 
-		void OnReferenceModuleOnlineEvent(const string &, DataPackage *);
-		void OnReferenceModuleOfflineEvent(const string &, DataPackage *);
+		void OnReferenceModuleOnlineEvent(const string &, Package *);
+		void OnReferenceModuleOfflineEvent(const string &, Package *);
 
 	private:
 		inline int ParseFunctionValue(const string &);

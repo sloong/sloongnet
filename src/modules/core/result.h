@@ -14,11 +14,10 @@
 #include <map>
 using namespace std;
 
-#include "protocol/base.pb.h"
-using namespace Base;
-
 #include "protocol/core.pb.h"
 using namespace Core;
+
+#include "package.hpp"
 
 namespace Sloong
 {
@@ -126,9 +125,12 @@ namespace Sloong
         T m_tResultObject;
     };
 
-    typedef TResult<uint64_t> NResult;
+    typedef TResult<uint64_t> U64Result;
+    typedef TResult<uint32_t> U32Result;
+    typedef TResult<int64_t> I64Result;
+    typedef TResult<int32_t> I32Result;
 	typedef TResult<std::pair<char*,int>> PResult;
     typedef TResult<string> SResult;
     typedef TResult<vector<string>> VStrResult;
-    typedef TResult<unique_ptr<DataPackage>> PackageResult;
+    typedef TResult<unique_ptr<Package>> PackageResult;
 } // namespace  Sloong

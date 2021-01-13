@@ -2,6 +2,6 @@
 
 #define VERSION_TEXT		"0.12.0.GIT_VERSION"
 #define PRODUCT_TEXT		"Sloong Network Engine"
-#define COPYRIGHT_TEXT		"Copyright 2015-2020 Sloong.com. All Rights Reserved "
+#define COPYRIGHT_TEXT		"Copyright 2015-2021 Sloong.com. All Rights Reserved "
 
 #endif // !VERSION_H
