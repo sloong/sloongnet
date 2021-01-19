@@ -2,10 +2,11 @@ version: '3.2'
 services:
   controller:
     image: sloong/sloongnet:latest
-    container_name: controller
     command:
       - Manager
       - 0.0.0.0:8000
+    environment:
+      - DB_FILE_PATH=/data/configuation.db
     ports:
       - "18000:8000"
     volumes:
@@ -18,7 +19,6 @@ services:
 
   moduler:
     image: sloong/sloongnet:latest
-    container_name: moduler
     ports:
       - "18002:8000"
     volumes:
@@ -33,9 +33,10 @@ services:
 
   control-ui:
     image: sloong/sloongnet-webui
-    container_name: control-ui
     ports:
       - "8000:8000"
+    environment:
+      - DB_FILE_PATH=/data/configuation.db
     volumes:
       - type: volume
         source: webui_local

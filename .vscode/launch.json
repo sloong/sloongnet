@@ -36,7 +36,7 @@
             "args": [
                     "Worker",
                     "127.0.0.1:19000",
-                    "--include=Gateway"
+                    "--exclude=Gateway"
             ],
             "cwd": "${workspaceFolder}/build/debug/",
         }

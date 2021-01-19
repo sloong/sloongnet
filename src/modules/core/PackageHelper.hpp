@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-01-12 14:47:41
+ * @LastEditTime: 2021-01-19 14:11:05
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/PackageHelper.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -122,7 +122,7 @@ namespace Sloong
             auto response_pack = MakeResponse(request_pack);
             response_pack->set_result(result);
             SetContent(response_pack.get(), message);
-            SetContent(response_pack.get(), extend);
+            SetExtend(response_pack.get(), extend);
             return response_pack;
         }
 

@@ -63,7 +63,7 @@ extern "C" CResult CreateProcessEnvironment(void **out_env)
 
 CResult SloongControlService::PrepareInitialize(GLOBAL_CONFIG *config)
 {
-	auto path = std::getenv("ManagerConfiguationDBFilePath");
+	auto path = std::getenv("DB_FILE_PATH");
 	if (path != nullptr)
 	{
 		g_strDBFilePath = path;
