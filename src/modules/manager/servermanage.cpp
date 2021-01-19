@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-01-12 20:07:37
+ * @LastEditTime: 2021-01-14 19:34:56
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -351,7 +351,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 		case RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_ExcludeType:
 		{
 			vector<int> l;
-			for (auto i : req->includetargettype())
+			for (auto i : req->excludetargettype())
 			{
 				l.push_back(i);
 			}

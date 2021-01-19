@@ -2,6 +2,7 @@
 #include "filecenter.h"
 #include "utility.h"
 #include "ImageProcesser.h"
+#include "IData.h"
 using namespace Sloong;
 
 CResult Sloong::FileManager::Initialize(IControl *ic)
@@ -10,6 +11,10 @@ CResult Sloong::FileManager::Initialize(IControl *ic)
 
     auto m = ic->Get(FILECENTER_DATAITEM::UploadInfos);
     m_mapTokenToUploadInfo = STATIC_TRANS<map_ex<string, UploadInfo> *>(m);
+
+    auto config = IData::GetModuleConfig();
+    m_strArchiveFolder = (*config)["ArchiveFolder"].asString();
+    m_strUploadTempSaveFolder = (*config)["UploadTempSaveFolder"].asString();
 
     FormatFolderString(m_strArchiveFolder);
     FormatFolderString(m_strUploadTempSaveFolder);
