@@ -55,7 +55,7 @@ namespace Sloong
 
         CResult MergeFile(const list<FileRange> &fileList, const string &saveFile);
         CResult SplitFile(const string &saveFile, int splitSize, map_ex<int, string> &pReadList, int* out_all_size);
-        CResult GetFileSize(const string &path, int *out_size);
+        int GetFileSize(const string &path);
         void ClearCache(const string &folder);
 
     protected:

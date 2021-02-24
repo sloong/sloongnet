@@ -142,10 +142,12 @@ void Sloong::FileManager::ClearCache(const string &folder)
 {
     // TODO:
 }
-CResult Sloong::FileManager::GetFileSize(const string &source, int *out_size)
+int Sloong::FileManager::GetFileSize(const string &source)
 {
-    // TODO:
-    return CResult::Make_Error("No readlize");
+    ifstream in(source, ios::in | ios::binary);
+    in.seekg(0, ios::end);
+    int nSize = in.tellg();
+    return nSize;
 }
 
 // The filecenter no't care the file format. so in here, we saved by the hashcode, the saver should be save the format.
@@ -174,9 +176,9 @@ CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, Package
     savedInfo.Path = m_strUploadTempSaveFolder + token + "/";
     CUniversal::RunSystemCmd(Helper::Format("mkdir -p %s", savedInfo.Path.c_str()));
 
-    PrepareUploadResponse res;
-    res.set_token(token);
-    return CResult::Make_OK(ConvertObjToStr(&res));
+    PrepareUploadResponse response;
+    response.set_token(token);
+    return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
 CResult Sloong::FileManager::UploadingHandler(const string &str_req, Package *pack)
@@ -323,13 +325,12 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, Package 
 
     auto data = req->filedata();
 
-    ifstream in(real_path.c_str(), ios::in | ios::binary);
-    in.seekg(0, ios::end);
-    int nSize = in.tellg();
     
+    auto nSize = GetFileSize(real_path);
+    ifstream in(real_path, ios::in | ios::binary);
 
-    DownloadFileResponse res;
-    res.set_filesize(nSize);
+    DownloadFileResponse response;
+    response.set_filesize(nSize);
 
     for (auto item : data)
     {
@@ -345,7 +346,7 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, Package 
             return CResult::Make_Error(Helper::Format("Error when read file:error: only %d could be read", canRead));
         }
 
-        auto d = res.add_filedata();
+        auto d = response.add_filedata();
         d->set_start(item.start());
         d->set_end(item.end());
         d->set_crccode(CRCEncode32(str));
@@ -353,12 +354,47 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, Package 
     }
     in.close();
 
-    return CResult::Make_OK(ConvertObjToStr(&res));
+    return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
 CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Package *trans_pack)
 {
-    return CResult::Make_Error("No support now.");
+    auto req = ConvertStrToObj<ConvertImageFileRequest>(str_req);
+    if( req->targetformat() != SupportFormat::WEBP) {
+        return CResult::Make_Error(Helper::Format("Unsupport format[%s].", SupportFormat_Name(req->targetformat()).c_str()));
+    } 
+    
+    string real_path = GetFileTruePath(req->index());
+    auto temp_path = m_strUploadTempSaveFolder + "FormatConvertTemp/" + req->index();
+    auto res = ImageProcesser::ConvertFormat(real_path, temp_path, req->targetformat(), req->quality());
+    if (res.IsFialed())
+        return res;
+
+    auto sha256 = CSHA256::Encode(temp_path, true );
+    auto md5 = CMD5::Encode(temp_path, true);
+    auto size = GetFileSize(temp_path);
+
+    auto uuid = CUtility::GenUUID();
+    res = ArchiveFile(uuid, temp_path);
+    if (res.IsFialed())
+        return res;
+
+    if( !req->retainsourcefile() )
+    {
+        m_pLog->Info(Helper::Format("%s is convert to %s with %s format.delete old file.",req->index().c_str(),uuid.c_str(),SupportFormat_Name(req->targetformat())));
+        int r = remove(real_path.c_str());
+        if (r != 0 ){
+            m_pLog->Warn( Helper::Format("old file delete fialed. return code %d", r));
+        }
+    }
+    
+    ConvertImageFileResponse response;
+    response.set_newfileindexcode(uuid);
+    response.set_newfilemd5(md5);
+    response.set_newfilesha256(sha256);
+    response.set_newfilesize(size);
+
+    return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
 CResult Sloong::FileManager::GetThumbnailHandler(const string &str_req, Package *trans_pack)
@@ -375,9 +411,9 @@ CResult Sloong::FileManager::GetThumbnailHandler(const string &str_req, Package 
 
     string data;
     auto size = ReadFile(thumb_file, data);
-    GetThumbnailResponse res;
-    res.set_filesize(size);
-    res.set_data(move(data));
+    GetThumbnailResponse response;
+    response.set_filesize(size);
+    response.set_data(move(data));
 
-    return CResult::Make_OK(ConvertObjToStr(&res));
+    return CResult::Make_OK(ConvertObjToStr(&response));
 }

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-08-17 11:16:27
- * @LastEditTime: 2020-08-17 12:10:07
+ * @LastEditTime: 2021-02-24 11:27:54
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/ImageProcesser.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -11,9 +11,9 @@
 
 using namespace Sloong;
 
-CResult ImageProcesser::GetThumbnail(const string &sourceFile, const string &targetFile,  int width, int height, int quality)
-{
-	if (sourceFile.empty() || targetFile.empty() || height == 0 || width == 0 || quality == 0)
+
+CResult RunCMD( const string &sourceFile, const string &targetFile, const string &str_cmd){
+	if (sourceFile.empty() || targetFile.empty())
 	{
 		return CResult::Make_Error("Param error.");
 	}
@@ -29,45 +29,43 @@ CResult ImageProcesser::GetThumbnail(const string &sourceFile, const string &tar
 	}
 	CUniversal::CheckFileDirectory(targetFile);
 
-	//string str_cmd = std::format("convert -sample {}x{} {} {}", width, height, src_path.c_str(), save_path.c_str());
-	string str_cmd = Helper::Format("convert -sample %dx%d %s %s", width, height, sourceFile.c_str(), targetFile.c_str());
-
 	if (CUniversal::RunSystemCmd(str_cmd))
 	{
 		return CResult::Succeed;
 	}
 	else
 	{
-		return CResult::Make_Error("run convert cmd fialed.");
+		return CResult::Make_Error("run cmd fialed.");
 	}
 }
 
-CResult ImageProcesser::ConvertFormat(const string &sourceFile, const string &targetFile, FileCenter::SupportFormat fmt)
+
+CResult ImageProcesser::GetThumbnail(const string &sourceFile, const string &targetFile,  int width, int height, int quality)
 {
-	return CResult::Make_Error("No support now.");
-	/*if (sourceFile.empty() || targetFile.empty())
+	if (height == 0 || width == 0 || quality == 0)
 	{
 		return CResult::Make_Error("Param error.");
 	}
 
-	if (access(sourceFile.c_str(), ACC_E) == -1)
-	{
-		return CResult::Make_Error("Cannot read the file.");
-	}
+	string str_cmd = Helper::Format("convert -sample %dx%d %s %s", width, height, sourceFile.c_str(), targetFile.c_str());
+	return RunCMD(sourceFile, targetFile, str_cmd);
+}
 
-	if (access(targetFile.c_str(), ACC_W) == 0)
-	{
-		return CResult::Make_Error("no access.");
+CResult ImageProcesser::ConvertFormat(const string &sourceFile, const string &targetFile, FileCenter::SupportFormat fmt, int quality)
+{
+	string str_cmd = "";
+	switch ( fmt ){
+		case FileCenter::SupportFormat::WEBP:{
+			str_cmd = Helper::Format("convert %s -quality %d -define webp:method=6 %s.webp", sourceFile.c_str(), quality, targetFile.c_str());
+		}
+		default:
+		{
+			return CResult::Make_Error("Unsupport format.");
+		}
 	}
-	CUniversal::CheckFileDirectory(targetFile);
+	auto res = RunCMD(sourceFile, targetFile, str_cmd);
+	if (res.IsFialed())
+		return res;
 
-	string str_cmd = Helper::Format("convert -resize %dx%d %s %s -quality %d", width, height, src_path.c_str(), save_path.c_str(), quality);
-	if (CUniversal::RunSystemCmd(str_cmd))
-	{
-		return CResult::Succeed;
-	}
-	else
-	{
-		return CResult::Make_Error("run convert cmd fialed.");
-	}*/
+	return CResult::Succeed;
 }
