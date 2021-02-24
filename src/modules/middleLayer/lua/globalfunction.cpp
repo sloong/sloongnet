@@ -99,6 +99,8 @@ LuaFunctionRegistr g_LuaFunc[] =
     { "PrepareUpload", CGlobalFunction::Lua_PrepareUpload },
     { "UploadEnd", CGlobalFunction::Lua_UploadEnd },
     { "GetThumbnail", CGlobalFunction::Lua_GetThumbnail },
+    { "ConvertImageFormat", CGlobalFunction::Lua_ConvertImageFormat },
+    { "SetTimeout", CGlobalFunction::Lua_SetTimeout },
 };
 
 CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
@@ -213,6 +215,15 @@ int Sloong::CGlobalFunction::Lua_Base64_Decode(lua_State *l)
     string res = CBase64::Decode(req);
     CLua::PushString(l, res);
     return 1;
+}
+
+int Sloong::CGlobalFunction::Lua_SetTimeout(lua_State *l)
+{
+    auto time = CLua::GetInteger(l, 1, -1);
+    if( time != -1 )
+    {
+        CGlobalFunction::Instance->SetTimeout(time);
+    }
 }
 
 /**
@@ -428,7 +439,7 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
 
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
         CLua::PushInteger(l, Base::ResultType::Error);
@@ -481,7 +492,7 @@ CResult CGlobalFunction::RunSQLFunction(uint64_t session, const string &request_
 {
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, func, request_str);
-    return req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    return req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
 }
 
 // Request sql query cmd to dbcenter.
@@ -556,19 +567,19 @@ int CGlobalFunction::Lua_SQLInsertToDBCenter(lua_State *l)
         auto response = ConvertStrToObj<DataCenter::InsertSQLCmdResponse>(res.GetMessage());
         if (response->affectedrows() > 0)
         {
-            CLua::PushBoolen(l, true);
+            CLua::PushInteger(l, Base::ResultType::Succeed);
             CLua::PushInteger(l, response->identity());
         }
         else
         {
-            CLua::PushBoolen(l, false);
+            CLua::PushInteger(l, Base::ResultType::Error);
             CLua::PushString(l, "SQL Run succeed, but affectedrows is 0");
         }
         return 2;
     }
     else
     {
-        CLua::PushBoolen(l, false);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, res.GetMessage());
         return 2;
     }
@@ -637,7 +648,7 @@ int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
     auto file_size = CLua::GetInteger(l, 2, 0);
     if (file_crc == 0 || file_size == 0)
     {
-        CLua::PushBoolen(l, false);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, "request data is empty");
         return 2;
     }
@@ -657,16 +668,16 @@ int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
 
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::PrepareUpload, ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
-        CLua::PushBoolen(l, false);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, res.GetMessage());
         return 2;
     }
 
     auto response = ConvertStrToObj<FileCenter::PrepareUploadResponse>(res.GetMessage());
-    CLua::PushBoolen(l, true);
+    CLua::PushInteger(l, Base::ResultType::Succeed);
     CLua::PushString(l, response->token());
     return 2;
 }
@@ -677,7 +688,7 @@ int CGlobalFunction::Lua_UploadEnd(lua_State *l)
     auto token = CLua::GetString(l, 1, "");
     if (token.empty())
     {
-        CLua::PushBoolen(l, false);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, "request data is empty");
         return 2;
     }
@@ -696,14 +707,14 @@ int CGlobalFunction::Lua_UploadEnd(lua_State *l)
 
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::Uploaded, ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
-        CLua::PushBoolen(l, false);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, res.GetMessage());
         return 2;
     }
-    CLua::PushBoolen(l, true);
+    CLua::PushInteger(l, Base::ResultType::Succeed);
     CLua::PushString(l, "succeed");
     return 2;
 }
@@ -717,7 +728,7 @@ int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
     auto quality = CLua::GetInteger(l,4,0);
     if( file_index.empty() || height == 0 || width == 0 || quality == 0 )
     {
-        CLua::PushBoolen(l, false);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, "Param error.");
         return 2;
     }
@@ -740,10 +751,10 @@ int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
 
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::GetThumbnail, ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
-        CLua::PushBoolen(l, false);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, res.GetMessage());
         return 2;
     }
@@ -752,7 +763,78 @@ int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
     
     auto uuid = CUtility::GenUUID();
     CGlobalFunction::Instance->m_iC->AddTempString( uuid, response->data() );
-    CLua::PushBoolen(l, true);
+    CLua::PushInteger(l, Base::ResultType::Succeed);
     CLua::PushString(l, uuid);
     return 2;
+}
+
+/// Send the convert image format request to FileCenter.
+/// Request params:
+///  1(str) > the file index.
+///  2(int) > the target image format (FileCenter.SupportFormat) in filecenter proto file.
+///  3(int) > convert quality.
+///  4(bool) > retain old file.
+/// Return:
+///  1(Base::ResultType) > the resule.
+/// (Succeed):
+///  2(str) > new file index.
+///  3(str) > new file sha256.
+///  4(str) > new file md5.
+///  5(int) > new file size.
+/// (Error):
+///  2(str) > the error message.
+int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
+{
+    auto file_index = CLua::GetString(l,1,"");
+    auto target = CLua::GetInteger(l,2,0);
+    auto quality = CLua::GetInteger(l,3,0);
+    auto retain = CLua::GetBoolen(l,4,0);
+    if( file_index.empty() || target == 0 || quality == 0 || retain == 0 )
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, "Param error.");
+        return 2;
+    }
+
+    FileCenter::SupportFormat fmt;
+    if (! FileCenter::SupportFormat_Parse(target,&fmt))
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, Helper::Format("Convert [%d] to FileCenter::SupportFormat enum fialed.", target));
+        return 2;
+    }
+
+    auto conn = CGlobalFunction::Instance->GetConnectionID(CGlobalFunction::Instance->m_FileCenterTemplateID.load());
+    if (conn.IsFialed())
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, conn.GetMessage());
+        return 2;
+    }
+
+    auto session = conn.GetResultObject();
+
+    FileCenter::ConvertImageFileRequest request;
+    request.set_index(file_index);
+    request.set_targetformat(fmt);
+    request.set_quality(quality);
+    request.set_retainsourcefile(retain);
+
+    auto req = make_shared<SendPackageEvent>(session);
+    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::ConvertImageFile, ConvertObjToStr(&request));
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
+    if (res.IsFialed())
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, res.GetMessage());
+        return 2;
+    }
+
+    auto response = ConvertStrToObj<FileCenter::ConvertImageFileResponse>(res.GetMessage());
+    CLua::PushInteger(l, Base::ResultType::Succeed);
+    CLua::PushString(l, response->newfileindexcode());
+    CLua::PushString(l, response->newfilesha256());
+    CLua::PushString(l, response->newfilemd5());
+    CLua::PushInteger(l, response->newfilesize()); 
+    return 5;
 }
