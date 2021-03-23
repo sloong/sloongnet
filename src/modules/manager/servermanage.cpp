@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-01-14 19:34:56
+ * @LastEditTime: 2021-03-09 14:08:30
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -362,6 +362,10 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 			index = SearchNeedCreateTemplate();
 			break;
 		}
+	}
+	else
+	{
+		index = SearchNeedCreateTemplate();
 	}
 
 	if (index == 0)
