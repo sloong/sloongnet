@@ -6,7 +6,6 @@
  * @Description: file content
  */
 #pragma once
-#pragma once
 
 #include "NormalEvent.hpp"
 namespace Sloong

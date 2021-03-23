@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-05-14 17:43:08
- * @LastEditTime: 2020-08-12 11:01:42
+ * @LastEditTime: 2021-02-25 18:52:54
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/events/NormalEvent.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -73,10 +73,12 @@ namespace Sloong
 			virtual ~NormalEvent(){}
 
 			inline void SetEvent(int32_t t){ m_emType = t; }
-			inline int32_t GetEvent(){ return m_emType; }
+			inline int32_t GetEvent() const { return m_emType; }
 
 			inline void SetMessage(string str){ m_strMessage = str; }
 			inline string GetMessage(){ return m_strMessage; }
+
+			inline bool IsOneTimeEvent() const { return false; }
 		protected:
 			int32_t m_emType;
 			string m_strMessage;
