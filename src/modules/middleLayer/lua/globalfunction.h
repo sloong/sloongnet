@@ -62,7 +62,7 @@
 
 #include "core.h"
 #include "IObject.h"
-#include "lua.h"
+#include "lua_ex.h"
 #include "EasyConnect.h"
 
 #include "protocol/manager.pb.h"
@@ -108,6 +108,7 @@ namespace Sloong
         static int Lua_GetThumbnail(lua_State *l);
         static int Lua_ConvertImageFormat(lua_State *l);
         static int Lua_SetTimeout(lua_State *l);
+        static int Lua_PushEvent(lua_State *l);
 
     protected:
         void OnStart(SharedEvent);

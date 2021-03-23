@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-09-18 12:26:03
+ * @LastEditTime: 2021-02-26 11:28:47
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -59,8 +59,11 @@
 
 #include "LuaProcessCenter.h"
 #include "globalfunction.h"
+#include "luaMiddleLayer.h"
 #include "IData.h"
+#include "events/LuaEvent.hpp"
 using namespace Sloong;
+using namespace Sloong::Events;
 
 CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 {
@@ -83,9 +86,20 @@ CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 		if (res.IsFialed())
 			return res;
 	}
+
+	m_iC->RegisterEventHandler(LUA_EVENT_TYPE::ProcessLuaEvent, std::bind(&CLuaProcessCenter::OnProcessLuaEvent, this, std::placeholders::_1));
+	
 	return CResult::Succeed;
 }
 
+void Sloong::CLuaProcessCenter::OnProcessLuaEvent(SharedEvent e)
+{
+	auto event = EVENT_TRANS<LuaEvent>(e);
+	int id = GetFreeLuaContext();
+	auto pLua = m_listLuaContent[id]->Content.get();
+	pLua->RunEventFunction(m_pConfig->operator[]("LuaEventFunction").asString(), event->GetLuaEvent(), event->GetLuaEventParams() );
+	FreeLuaContext(id);
+}
 
 void Sloong::CLuaProcessCenter::ReloadContext()
 {
@@ -177,10 +191,10 @@ SResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 		return SResult::Make_Error("Server process error. Unexpected exceptions happened.");
 	}
 }
-#define LUA_CONTEXT_WAIT_SECONDE 10
-int Sloong::CLuaProcessCenter::GetFreeLuaContext()
+
+int Sloong::CLuaProcessCenter::GetFreeLuaContext(int try_num)
 {
-	for (int i = 0; i < LUA_CONTEXT_WAIT_SECONDE && m_oFreeLuaContext.empty(); i++)
+	for (int i = 0; i < try_num && m_oFreeLuaContext.empty(); i++)
 	{
 		m_pLog->Debug("Wait lua context 1 sencond :" + Helper::ntos(i));
 		m_oSSync.wait_for(500);
@@ -188,7 +202,7 @@ int Sloong::CLuaProcessCenter::GetFreeLuaContext()
 
 	if (m_oFreeLuaContext.empty())
 	{
-		m_pLog->Debug("no free context");
+		m_pLog->Error("no free context");
 		return -1;
 	}
 	int nID = m_oFreeLuaContext.front();

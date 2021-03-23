@@ -1,4 +1,4 @@
-#include "lua.h"
+#include "lua_ex.h"
 #ifdef _WINDOWS
 #include <io.h>
 #endif // _WINDOWS
@@ -292,6 +292,28 @@ CResult Sloong::CLua::RunFunction(const string & strFunctionName, CLuaPacket *pU
 		return CResult::Make_Error("ResultType_IsValid " + Helper::ntos(nRes));
 	}
 	return CResult((ResultType)nRes,strResponse);
+}
+
+CResult Sloong::CLua::RunEventFunction(const string & strFunctionName, int eventid, const string &strRequest)
+{
+	int nTop = lua_gettop(m_pScriptContext);
+
+	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
+	auto nErr = lua_gettop(m_pScriptContext);
+	
+	PushFunction(strFunctionName);
+	// Push params
+	PushInteger(eventid);
+	PushString(strRequest);
+	auto res = lua_pcall(m_pScriptContext, 2, LUA_MULTRET, nErr);
+	lua_remove( m_pScriptContext, nErr );
+	if( res != LUA_OK )
+	{
+		return HandlerError("Run String", strFunctionName, res);
+	}
+	
+	lua_settop(m_pScriptContext, nTop);
+	return CResult::Succeed;
 }
 
 int Sloong::CLua::GetInteger(lua_State *l, int nNum, int nDef /*= -1*/)

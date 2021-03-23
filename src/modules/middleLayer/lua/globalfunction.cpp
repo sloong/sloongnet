@@ -7,7 +7,7 @@
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
  * @Description:
  */
- /***
+/***
   * @......................................&&.........................
   * @....................................&&&..........................
   * @.................................&&&&............................
@@ -73,34 +73,40 @@
 #include "events/RegisteConnection.hpp"
 #include "events/SendPackage.hpp"
 #include "events/ModuleOnOff.hpp"
+#include "events/LuaEvent.hpp"
+#include "lmarshal.c"
 using namespace Sloong::Events;
 
 unique_ptr<CGlobalFunction> Sloong::CGlobalFunction::Instance = make_unique<CGlobalFunction>();
 
 LuaFunctionRegistr g_LuaFunc[] =
-{
-    { "ShowLog", CGlobalFunction::Lua_ShowLog },
-    { "GetEngineVer", CGlobalFunction::Lua_GetEngineVer },
-    { "Base64Encode", CGlobalFunction::Lua_Base64_Encode },
-    { "Base64Decode", CGlobalFunction::Lua_Base64_Decode },
-    { "HashEncode", CGlobalFunction::Lua_Hash_Encode },
-    { "ReloadScript", CGlobalFunction::Lua_ReloadScript },
-    { "GetConfig", CGlobalFunction::Lua_GetConfig },
-    { "GenUUID", CGlobalFunction::Lua_GenUUID },
-    { "SetCommData", CGlobalFunction::Lua_SetCommData },
-    { "GetCommData", CGlobalFunction::Lua_GetCommData },
-    { "SetExtendData", CGlobalFunction::Lua_SetExtendData },
-    { "SetExtendDataByFile", CGlobalFunction::Lua_SetExtendDataByFile },
-    { "ConnectToDBCenter", CGlobalFunction::Lua_ConnectToDBCenter },
-    { "SQLQueryToDBCenter", CGlobalFunction::Lua_SQLQueryToDBCenter },
-    { "SQLInsertToDBCenter", CGlobalFunction::Lua_SQLInsertToDBCenter },
-    { "SQLDeleteToDBCenter", CGlobalFunction::Lua_SQLDeleteToDBCenter },
-    { "SQLUpdateToDBCenter", CGlobalFunction::Lua_SQLUpdateToDBCenter },
-    { "PrepareUpload", CGlobalFunction::Lua_PrepareUpload },
-    { "UploadEnd", CGlobalFunction::Lua_UploadEnd },
-    { "GetThumbnail", CGlobalFunction::Lua_GetThumbnail },
-    { "ConvertImageFormat", CGlobalFunction::Lua_ConvertImageFormat },
-    { "SetTimeout", CGlobalFunction::Lua_SetTimeout },
+    {
+        {"ShowLog", CGlobalFunction::Lua_ShowLog},
+        {"GetEngineVer", CGlobalFunction::Lua_GetEngineVer},
+        {"Base64Encode", CGlobalFunction::Lua_Base64_Encode},
+        {"Base64Decode", CGlobalFunction::Lua_Base64_Decode},
+        {"HashEncode", CGlobalFunction::Lua_Hash_Encode},
+        {"ReloadScript", CGlobalFunction::Lua_ReloadScript},
+        {"GetConfig", CGlobalFunction::Lua_GetConfig},
+        {"GenUUID", CGlobalFunction::Lua_GenUUID},
+        {"SetCommData", CGlobalFunction::Lua_SetCommData},
+        {"GetCommData", CGlobalFunction::Lua_GetCommData},
+        {"SetExtendData", CGlobalFunction::Lua_SetExtendData},
+        {"SetExtendDataByFile", CGlobalFunction::Lua_SetExtendDataByFile},
+        {"ConnectToDBCenter", CGlobalFunction::Lua_ConnectToDBCenter},
+        {"SQLQueryToDBCenter", CGlobalFunction::Lua_SQLQueryToDBCenter},
+        {"SQLInsertToDBCenter", CGlobalFunction::Lua_SQLInsertToDBCenter},
+        {"SQLDeleteToDBCenter", CGlobalFunction::Lua_SQLDeleteToDBCenter},
+        {"SQLUpdateToDBCenter", CGlobalFunction::Lua_SQLUpdateToDBCenter},
+        {"PrepareUpload", CGlobalFunction::Lua_PrepareUpload},
+        {"UploadEnd", CGlobalFunction::Lua_UploadEnd},
+        {"GetThumbnail", CGlobalFunction::Lua_GetThumbnail},
+        {"ConvertImageFormat", CGlobalFunction::Lua_ConvertImageFormat},
+        {"SetTimeout", CGlobalFunction::Lua_SetTimeout},
+        // 这个功能的实现仅是为了达到可用的程度，其实现存在一些性能问题。
+        {"PushEvent", CGlobalFunction::Lua_PushEvent},
+        {"EncodeToString", mar_encode},
+        {"DecodeFromString", mar_decode},
 };
 
 CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
@@ -121,8 +127,7 @@ void Sloong::CGlobalFunction::OnStart(SharedEvent e)
     m_iC->SendMessage(event);
 }
 
-
-void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent* send_pack, Package *res_pack)
+void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent *send_pack, Package *res_pack)
 {
     auto str_res = res_pack->content();
     auto res = ConvertStrToObj<QueryReferenceInfoResponse>(str_res);
@@ -157,9 +162,9 @@ void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent* send_pac
 void Sloong::CGlobalFunction::AddConnection(uint64_t uuid, const string &addr, int port)
 {
     auto event = make_shared<RegisteConnectionEvent>(addr, port);
-    event->SetCallbackFunc([this, uuid](IEvent* e, uint64_t hashcode) {
+    event->SetCallbackFunc([this, uuid](IEvent *e, uint64_t hashcode) {
         m_mapUUIDToConnectionID[uuid] = hashcode;
-        });
+    });
     m_iC->SendMessage(event);
 }
 
@@ -174,7 +179,6 @@ void Sloong::CGlobalFunction::OnReferenceModuleOnline(SharedEvent e)
 
     AddConnection(item.uuid(), item.address(), item.port());
 }
-
 
 void Sloong::CGlobalFunction::OnReferenceModuleOffline(SharedEvent e)
 {
@@ -220,10 +224,24 @@ int Sloong::CGlobalFunction::Lua_Base64_Decode(lua_State *l)
 int Sloong::CGlobalFunction::Lua_SetTimeout(lua_State *l)
 {
     auto time = CLua::GetInteger(l, 1, -1);
-    if( time != -1 )
+    if (time != -1)
     {
         CGlobalFunction::Instance->SetTimeout(time);
     }
+    return 0;
+}
+
+int CGlobalFunction::Lua_PushEvent(lua_State *l)
+{
+    auto e = CLua::GetInteger(l, 1, -1);
+    auto p = CLua::GetString(l, 2);
+
+    auto event = make_shared<LuaEvent>();
+    event->SetLuaEvent(e);
+    event->SetLuaEventParam(move(p));
+
+    CGlobalFunction::Instance->m_iC->SendMessage(event);
+    return 0;
 }
 
 /**
@@ -324,9 +342,9 @@ int CGlobalFunction::Lua_SetCommData(lua_State *l)
 {
     auto key = CLua::GetString(l, 1, "");
     auto value = CLua::GetString(l, 2, "");
-    if( !key.empty() )
+    if (!key.empty())
     {
-        if( value.empty() )
+        if (value.empty())
             Instance->m_mapCommData.erase(key);
         else
             Instance->m_mapCommData[key] = value;
@@ -397,7 +415,6 @@ U64Result CGlobalFunction::GetConnectionID(int templateid)
     }
 
     return U64Result::Make_OKResult(CGlobalFunction::Instance->m_mapUUIDToConnectionID[uuid]);
-
 }
 
 int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
@@ -485,7 +502,6 @@ uint64_t CGlobalFunction::SQLFunctionPrepareCheck(lua_State *l, int sessionid, c
     }
 
     return res.GetResultObject();
-
 }
 
 CResult CGlobalFunction::RunSQLFunction(uint64_t session, const string &request_str, int func)
@@ -625,7 +641,6 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
     request.set_session(SessionID);
     request.set_sqlcmd(sql_cmd);
 
-
     auto res = RunSQLFunction(session, ConvertObjToStr(&request), (int)DataCenter::Functions::UpdateSQLCmd);
     if (res.IsSucceed())
     {
@@ -682,7 +697,6 @@ int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
     return 2;
 }
 
-
 int CGlobalFunction::Lua_UploadEnd(lua_State *l)
 {
     auto token = CLua::GetString(l, 1, "");
@@ -719,14 +733,13 @@ int CGlobalFunction::Lua_UploadEnd(lua_State *l)
     return 2;
 }
 
-
 int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
 {
-    auto file_index = CLua::GetString(l,1,"");
-    auto height = CLua::GetInteger(l,2,0);
-    auto width = CLua::GetInteger(l,3,0);
-    auto quality = CLua::GetInteger(l,4,0);
-    if( file_index.empty() || height == 0 || width == 0 || quality == 0 )
+    auto file_index = CLua::GetString(l, 1, "");
+    auto height = CLua::GetInteger(l, 2, 0);
+    auto width = CLua::GetInteger(l, 3, 0);
+    auto quality = CLua::GetInteger(l, 4, 0);
+    if (file_index.empty() || height == 0 || width == 0 || quality == 0)
     {
         CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, "Param error.");
@@ -760,9 +773,9 @@ int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
     }
 
     auto response = ConvertStrToObj<FileCenter::GetThumbnailResponse>(res.GetMessage());
-    
+
     auto uuid = CUtility::GenUUID();
-    CGlobalFunction::Instance->m_iC->AddTempString( uuid, response->data() );
+    CGlobalFunction::Instance->m_iC->AddTempString(uuid, response->data());
     CLua::PushInteger(l, Base::ResultType::Succeed);
     CLua::PushString(l, uuid);
     return 2;
@@ -785,19 +798,18 @@ int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
 ///  2(str) > the error message.
 int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
 {
-    auto file_index = CLua::GetString(l,1,"");
-    auto target = CLua::GetInteger(l,2,0);
-    auto quality = CLua::GetInteger(l,3,0);
-    auto retain = CLua::GetBoolen(l,4,0);
-    if( file_index.empty() || target == 0 || quality == 0 || retain == 0 )
+    auto file_index = CLua::GetString(l, 1, "");
+    auto target = CLua::GetInteger(l, 2, 0);
+    auto quality = CLua::GetInteger(l, 3, 0);
+    auto retain = CLua::GetBoolen(l, 4);
+    if (file_index.empty() || target == 0 || quality == 0 || retain == 0)
     {
         CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, "Param error.");
         return 2;
     }
 
-    FileCenter::SupportFormat fmt;
-    if (! FileCenter::SupportFormat_Parse(target,&fmt))
+    if (!FileCenter::SupportFormat_IsValid(target))
     {
         CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, Helper::Format("Convert [%d] to FileCenter::SupportFormat enum fialed.", target));
@@ -816,7 +828,7 @@ int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
 
     FileCenter::ConvertImageFileRequest request;
     request.set_index(file_index);
-    request.set_targetformat(fmt);
+    request.set_targetformat((FileCenter::SupportFormat)target);
     request.set_quality(quality);
     request.set_retainsourcefile(retain);
 
@@ -835,6 +847,6 @@ int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
     CLua::PushString(l, response->newfileindexcode());
     CLua::PushString(l, response->newfilesha256());
     CLua::PushString(l, response->newfilemd5());
-    CLua::PushInteger(l, response->newfilesize()); 
+    CLua::PushInteger(l, response->newfilesize());
     return 5;
 }
