@@ -13,8 +13,14 @@ CResult Sloong::FileManager::Initialize(IControl *ic)
     m_mapTokenToUploadInfo = STATIC_TRANS<map_ex<string, UploadInfo> *>(m);
 
     auto config = IData::GetModuleConfig();
-    m_strArchiveFolder = (*config)["ArchiveFolder"].asString();
-    m_strUploadTempSaveFolder = (*config)["UploadTempSaveFolder"].asString();
+    if(!(*config)["ArchiveFolder"].empty())
+    {
+        m_strArchiveFolder = (*config)["ArchiveFolder"].asString();
+    }
+    if(!(*config)["UploadTempSaveFolder"].empty())
+    {
+        m_strUploadTempSaveFolder = (*config)["UploadTempSaveFolder"].asString();
+    }
 
     FormatFolderString(m_strArchiveFolder);
     FormatFolderString(m_strUploadTempSaveFolder);
@@ -360,7 +366,7 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, Package 
 CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Package *trans_pack)
 {
     auto req = ConvertStrToObj<ConvertImageFileRequest>(str_req);
-    if( req->targetformat() != SupportFormat::WEBP) {
+    if( req->targetformat() == SupportFormat::FLIF || !SupportFormat_IsValid(req->targetformat()) ) {
         return CResult::Make_Error(Helper::Format("Unsupport format[%s].", SupportFormat_Name(req->targetformat()).c_str()));
     } 
     
@@ -369,6 +375,8 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
     auto res = ImageProcesser::ConvertFormat(real_path, temp_path, req->targetformat(), req->quality());
     if (res.IsFialed())
         return res;
+
+    temp_path = res.GetMessage();
 
     auto sha256 = CSHA256::Encode(temp_path, true );
     auto md5 = CMD5::Encode(temp_path, true);
@@ -381,7 +389,7 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
 
     if( !req->retainsourcefile() )
     {
-        m_pLog->Info(Helper::Format("%s is convert to %s with %s format.delete old file.",req->index().c_str(),uuid.c_str(),SupportFormat_Name(req->targetformat())));
+        m_pLog->Info(Helper::Format("%s is convert to %s with %s format.delete old file.",req->index().c_str(),uuid.c_str(),SupportFormat_Name(req->targetformat()).c_str()));
         int r = remove(real_path.c_str());
         if (r != 0 ){
             m_pLog->Warn( Helper::Format("old file delete fialed. return code %d", r));
