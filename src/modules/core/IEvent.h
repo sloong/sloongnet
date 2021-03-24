@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-12 16:13:36
+ * @LastEditTime: 2021-02-25 18:51:10
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/IEvent.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -76,9 +76,8 @@ namespace Sloong
 	public:
 		IEvent() {}
 		virtual ~IEvent() {}
-		virtual int32_t GetEvent() = 0;
-	protected:
-		int m_nRefCount = 0;
+		virtual int32_t GetEvent() const = 0;
+		virtual bool IsOneTimeEvent() const = 0;
 	};
 
 	typedef shared_ptr<IEvent> SharedEvent;

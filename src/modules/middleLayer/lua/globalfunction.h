@@ -62,7 +62,7 @@
 
 #include "core.h"
 #include "IObject.h"
-#include "lua.h"
+#include "lua_ex.h"
 #include "EasyConnect.h"
 
 #include "protocol/manager.pb.h"
@@ -106,6 +106,9 @@ namespace Sloong
         static int Lua_PrepareUpload(lua_State *l);
         static int Lua_UploadEnd(lua_State *l);
         static int Lua_GetThumbnail(lua_State *l);
+        static int Lua_ConvertImageFormat(lua_State *l);
+        static int Lua_SetTimeout(lua_State *l);
+        static int Lua_PushEvent(lua_State *l);
 
     protected:
         void OnStart(SharedEvent);
@@ -113,9 +116,12 @@ namespace Sloong
         void OnReferenceModuleOffline(SharedEvent);
         void QueryReferenceInfoResponseHandler(IEvent*, Package*);
         static CResult RunSQLFunction(uint64_t,const string&, int);
-        static uint64_t SQLFunctionPrepareCheck(lua_State*, int, const string&);
+        static U64Result SQLFunctionPrepareCheck(lua_State*, int, const string&);
         void AddConnection(uint64_t, const string &, int);
         U64Result GetConnectionID(int );
+        void SetTimeout(int n){
+            m_nTimeout = n;
+        }
 
     protected:
         map_ex<string, string> m_mapCommData;
@@ -128,6 +134,8 @@ namespace Sloong
 
         atomic_int32_t m_DataCenterTemplateID = 0;
         atomic_int32_t m_FileCenterTemplateID = 0;
+
+        int m_nTimeout = 5000;
 
     public:
         static unique_ptr<CGlobalFunction> Instance;

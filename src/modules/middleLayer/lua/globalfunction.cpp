@@ -7,7 +7,7 @@
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
  * @Description:
  */
- /***
+/***
   * @......................................&&.........................
   * @....................................&&&..........................
   * @.................................&&&&............................
@@ -73,32 +73,37 @@
 #include "events/RegisteConnection.hpp"
 #include "events/SendPackage.hpp"
 #include "events/ModuleOnOff.hpp"
+#include "events/LuaEvent.hpp"
 using namespace Sloong::Events;
 
 unique_ptr<CGlobalFunction> Sloong::CGlobalFunction::Instance = make_unique<CGlobalFunction>();
 
 LuaFunctionRegistr g_LuaFunc[] =
-{
-    { "ShowLog", CGlobalFunction::Lua_ShowLog },
-    { "GetEngineVer", CGlobalFunction::Lua_GetEngineVer },
-    { "Base64Encode", CGlobalFunction::Lua_Base64_Encode },
-    { "Base64Decode", CGlobalFunction::Lua_Base64_Decode },
-    { "HashEncode", CGlobalFunction::Lua_Hash_Encode },
-    { "ReloadScript", CGlobalFunction::Lua_ReloadScript },
-    { "GetConfig", CGlobalFunction::Lua_GetConfig },
-    { "GenUUID", CGlobalFunction::Lua_GenUUID },
-    { "SetCommData", CGlobalFunction::Lua_SetCommData },
-    { "GetCommData", CGlobalFunction::Lua_GetCommData },
-    { "SetExtendData", CGlobalFunction::Lua_SetExtendData },
-    { "SetExtendDataByFile", CGlobalFunction::Lua_SetExtendDataByFile },
-    { "ConnectToDBCenter", CGlobalFunction::Lua_ConnectToDBCenter },
-    { "SQLQueryToDBCenter", CGlobalFunction::Lua_SQLQueryToDBCenter },
-    { "SQLInsertToDBCenter", CGlobalFunction::Lua_SQLInsertToDBCenter },
-    { "SQLDeleteToDBCenter", CGlobalFunction::Lua_SQLDeleteToDBCenter },
-    { "SQLUpdateToDBCenter", CGlobalFunction::Lua_SQLUpdateToDBCenter },
-    { "PrepareUpload", CGlobalFunction::Lua_PrepareUpload },
-    { "UploadEnd", CGlobalFunction::Lua_UploadEnd },
-    { "GetThumbnail", CGlobalFunction::Lua_GetThumbnail },
+    {
+        {"ShowLog", CGlobalFunction::Lua_ShowLog},
+        {"GetEngineVer", CGlobalFunction::Lua_GetEngineVer},
+        {"Base64Encode", CGlobalFunction::Lua_Base64_Encode},
+        {"Base64Decode", CGlobalFunction::Lua_Base64_Decode},
+        {"HashEncode", CGlobalFunction::Lua_Hash_Encode},
+        {"ReloadScript", CGlobalFunction::Lua_ReloadScript},
+        {"GetConfig", CGlobalFunction::Lua_GetConfig},
+        {"GenUUID", CGlobalFunction::Lua_GenUUID},
+        {"SetCommData", CGlobalFunction::Lua_SetCommData},
+        {"GetCommData", CGlobalFunction::Lua_GetCommData},
+        {"SetExtendData", CGlobalFunction::Lua_SetExtendData},
+        {"SetExtendDataByFile", CGlobalFunction::Lua_SetExtendDataByFile},
+        {"ConnectToDBCenter", CGlobalFunction::Lua_ConnectToDBCenter},
+        {"SQLQueryToDBCenter", CGlobalFunction::Lua_SQLQueryToDBCenter},
+        {"SQLInsertToDBCenter", CGlobalFunction::Lua_SQLInsertToDBCenter},
+        {"SQLDeleteToDBCenter", CGlobalFunction::Lua_SQLDeleteToDBCenter},
+        {"SQLUpdateToDBCenter", CGlobalFunction::Lua_SQLUpdateToDBCenter},
+        {"PrepareUpload", CGlobalFunction::Lua_PrepareUpload},
+        {"UploadEnd", CGlobalFunction::Lua_UploadEnd},
+        {"GetThumbnail", CGlobalFunction::Lua_GetThumbnail},
+        {"ConvertImageFormat", CGlobalFunction::Lua_ConvertImageFormat},
+        {"SetTimeout", CGlobalFunction::Lua_SetTimeout},
+        // 这个功能的实现仅是为了达到可用的程度，其实现存在一些性能问题。
+        {"PushEvent", CGlobalFunction::Lua_PushEvent},
 };
 
 CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
@@ -119,8 +124,7 @@ void Sloong::CGlobalFunction::OnStart(SharedEvent e)
     m_iC->SendMessage(event);
 }
 
-
-void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent* send_pack, Package *res_pack)
+void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent *send_pack, Package *res_pack)
 {
     auto str_res = res_pack->content();
     auto res = ConvertStrToObj<QueryReferenceInfoResponse>(str_res);
@@ -155,9 +159,9 @@ void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent* send_pac
 void Sloong::CGlobalFunction::AddConnection(uint64_t uuid, const string &addr, int port)
 {
     auto event = make_shared<RegisteConnectionEvent>(addr, port);
-    event->SetCallbackFunc([this, uuid](IEvent* e, uint64_t hashcode) {
+    event->SetCallbackFunc([this, uuid](IEvent *e, uint64_t hashcode) {
         m_mapUUIDToConnectionID[uuid] = hashcode;
-        });
+    });
     m_iC->SendMessage(event);
 }
 
@@ -172,7 +176,6 @@ void Sloong::CGlobalFunction::OnReferenceModuleOnline(SharedEvent e)
 
     AddConnection(item.uuid(), item.address(), item.port());
 }
-
 
 void Sloong::CGlobalFunction::OnReferenceModuleOffline(SharedEvent e)
 {
@@ -213,6 +216,29 @@ int Sloong::CGlobalFunction::Lua_Base64_Decode(lua_State *l)
     string res = CBase64::Decode(req);
     CLua::PushString(l, res);
     return 1;
+}
+
+int Sloong::CGlobalFunction::Lua_SetTimeout(lua_State *l)
+{
+    auto time = CLua::GetInteger(l, 1, -1);
+    if (time != -1)
+    {
+        CGlobalFunction::Instance->SetTimeout(time);
+    }
+    return 0;
+}
+
+int CGlobalFunction::Lua_PushEvent(lua_State *l)
+{
+    auto e = CLua::GetInteger(l, 1, -1);
+    auto p = CLua::GetString(l, 2);
+
+    auto event = make_shared<LuaEvent>();
+    event->SetLuaEvent(e);
+    event->SetLuaEventParam(move(p));
+
+    CGlobalFunction::Instance->m_iC->SendMessage(event);
+    return 0;
 }
 
 /**
@@ -313,9 +339,9 @@ int CGlobalFunction::Lua_SetCommData(lua_State *l)
 {
     auto key = CLua::GetString(l, 1, "");
     auto value = CLua::GetString(l, 2, "");
-    if( !key.empty() )
+    if (!key.empty())
     {
-        if( value.empty() )
+        if (value.empty())
             Instance->m_mapCommData.erase(key);
         else
             Instance->m_mapCommData[key] = value;
@@ -386,7 +412,6 @@ U64Result CGlobalFunction::GetConnectionID(int templateid)
     }
 
     return U64Result::Make_OKResult(CGlobalFunction::Instance->m_mapUUIDToConnectionID[uuid]);
-
 }
 
 int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
@@ -428,7 +453,7 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
 
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
         CLua::PushInteger(l, Base::ResultType::Error);
@@ -449,39 +474,32 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
     return 2;
 }
 
-uint64_t CGlobalFunction::SQLFunctionPrepareCheck(lua_State *l, int sessionid, const string &sql)
+U64Result CGlobalFunction::SQLFunctionPrepareCheck(lua_State *l, int sessionid, const string &sql)
 {
     if (sessionid == -1)
     {
-        CLua::PushInteger(l, -1);
-        CLua::PushString(l, "Database session id is invalid, call ConnectDBCenter first.");
-        return 0;
+        return U64Result::Make_Error("Database session id is invalid, call ConnectDBCenter first.");
     }
 
     if (sql.empty())
     {
-        CLua::PushInteger(l, -1);
-        CLua::PushString(l, "request data is empty");
-        return 0;
+        return U64Result::Make_Error(l, "request data is empty");
     }
 
     auto res = CGlobalFunction::Instance->GetConnectionID(CGlobalFunction::Instance->m_DataCenterTemplateID.load());
     if (res.IsFialed())
     {
-        CLua::PushInteger(l, Base::ResultType::Error);
-        CLua::PushString(l, res.GetMessage());
-        return 0;
+        return res;
     }
 
     return res.GetResultObject();
-
 }
 
 CResult CGlobalFunction::RunSQLFunction(uint64_t session, const string &request_str, int func)
 {
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, func, request_str);
-    return req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    return req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
 }
 
 // Request sql query cmd to dbcenter.
@@ -492,9 +510,14 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
 {
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto query_cmd = CLua::GetString(l, 2, "");
-    auto session = SQLFunctionPrepareCheck(l, SessionID, query_cmd);
-    if (session == 0)
+    auto session_res = SQLFunctionPrepareCheck(l, SessionID, query_cmd);
+    if (session_res.IsFialed())
+    {
+        CLua::PushInteger(l,Base::ResultType::Error );
+        CLua::PushString(l, res.GetMessage());
         return 2;
+    }
+    auto session = session_res.GetResultObject();
 
     DataCenter::QuerySQLCmdRequest request;
     request.set_session(SessionID);
@@ -506,12 +529,14 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
         auto response = ConvertStrToObj<DataCenter::QuerySQLCmdResponse>(res.GetMessage());
         if (response->lines_size() == 0)
         {
+            CLua::PushInteger(l, Base::ResultType::Succeed );
             CLua::PushInteger(l, 0);
             CLua::PushNil(l);
-            return 2;
+            return 3;
         }
         else
         {
+            CLua::PushInteger(l, Base::ResultType::Succeed );
             CLua::PushInteger(l, response->lines_size());
             list<list<string>> res;
             for (auto &item : response->lines())
@@ -522,12 +547,12 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
                 res.push_back(row);
             }
             CLua::Push2DTable(l, res);
-            return 2;
+            return 3;
         }
     }
     else
     {
-        CLua::PushInteger(l, -1);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, res.GetMessage());
         return 2;
     }
@@ -541,9 +566,14 @@ int CGlobalFunction::Lua_SQLInsertToDBCenter(lua_State *l)
 {
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto sql_cmd = CLua::GetString(l, 2, "");
-    auto session = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
-    if (session == 0)
+    auto session_res = SQLFunctionPrepareCheck(l, SessionID, query_cmd);
+    if (session_res.IsFialed())
+    {
+        CLua::PushInteger(l,Base::ResultType::Error );
+        CLua::PushString(l, res.GetMessage());
         return 2;
+    }
+    auto session = session_res.GetResultObject();
 
     DataCenter::InsertSQLCmdRequest request;
     request.set_session(SessionID);
@@ -556,19 +586,19 @@ int CGlobalFunction::Lua_SQLInsertToDBCenter(lua_State *l)
         auto response = ConvertStrToObj<DataCenter::InsertSQLCmdResponse>(res.GetMessage());
         if (response->affectedrows() > 0)
         {
-            CLua::PushBoolen(l, true);
+            CLua::PushInteger(l, Base::ResultType::Succeed);
             CLua::PushInteger(l, response->identity());
         }
         else
         {
-            CLua::PushBoolen(l, false);
+            CLua::PushInteger(l, Base::ResultType::Error);
             CLua::PushString(l, "SQL Run succeed, but affectedrows is 0");
         }
         return 2;
     }
     else
     {
-        CLua::PushBoolen(l, false);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, res.GetMessage());
         return 2;
     }
@@ -578,9 +608,14 @@ int CGlobalFunction::Lua_SQLDeleteToDBCenter(lua_State *l)
 {
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto sql_cmd = CLua::GetString(l, 2, "");
-    auto session = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
-    if (session == 0)
+    auto session_res = SQLFunctionPrepareCheck(l, SessionID, query_cmd);
+    if (session_res.IsFialed())
+    {
+        CLua::PushInteger(l,Base::ResultType::Error );
+        CLua::PushString(l, res.GetMessage());
         return 2;
+    }
+    auto session = session_res.GetResultObject();
 
     DataCenter::DeleteSQLCmdRequest request;
     request.set_session(SessionID);
@@ -590,8 +625,8 @@ int CGlobalFunction::Lua_SQLDeleteToDBCenter(lua_State *l)
     if (res.IsSucceed())
     {
         auto response = ConvertStrToObj<DataCenter::DeleteSQLCmdResponse>(res.GetMessage());
+        CLua::PushInteger(l,Base::ResultType::Succeed );
         CLua::PushInteger(l, response->affectedrows());
-        CLua::PushString(l, "");
         return 2;
     }
     else
@@ -606,26 +641,31 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
 {
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto sql_cmd = CLua::GetString(l, 2, "");
-    auto session = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
-    if (session == 0)
+    auto session_res = SQLFunctionPrepareCheck(l, SessionID, query_cmd);
+    if (session_res.IsFialed())
+    {
+        CLua::PushInteger(l,Base::ResultType::Error );
+        CLua::PushString(l, res.GetMessage());
         return 2;
+    }
+    auto session = session_res.GetResultObject();
+
 
     DataCenter::UpdateSQLCmdRequest request;
     request.set_session(SessionID);
     request.set_sqlcmd(sql_cmd);
 
-
     auto res = RunSQLFunction(session, ConvertObjToStr(&request), (int)DataCenter::Functions::UpdateSQLCmd);
     if (res.IsSucceed())
     {
         auto response = ConvertStrToObj<DataCenter::UpdateSQLCmdResponse>(res.GetMessage());
+        CLua::PushInteger(l,Base::ResultType::Succeed );
         CLua::PushInteger(l, response->affectedrows());
-        CLua::PushString(l, "");
         return 2;
     }
     else
     {
-        CLua::PushInteger(l, -1);
+        CLua::PushInteger(l, Base::ResultType::Error );
         CLua::PushString(l, res.GetMessage());
         return 2;
     }
@@ -633,11 +673,11 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
 
 int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
 {
-    auto file_crc = CLua::GetInteger(l, 1, 0);
+    auto file_sha256 = CLua::GetString(l, 1, "");
     auto file_size = CLua::GetInteger(l, 2, 0);
-    if (file_crc == 0 || file_size == 0)
+    if (file_sha256.empty() || file_size == 0)
     {
-        CLua::PushBoolen(l, false);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, "request data is empty");
         return 2;
     }
@@ -652,32 +692,31 @@ int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
     auto session = conn.GetResultObject();
 
     FileCenter::PrepareUploadRequest request;
-    request.set_crccode(file_crc);
+    request.set_sha256(file_sha256);
     request.set_filesize(file_size);
 
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::PrepareUpload, ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
-        CLua::PushBoolen(l, false);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, res.GetMessage());
         return 2;
     }
 
     auto response = ConvertStrToObj<FileCenter::PrepareUploadResponse>(res.GetMessage());
-    CLua::PushBoolen(l, true);
+    CLua::PushInteger(l, Base::ResultType::Succeed);
     CLua::PushString(l, response->token());
     return 2;
 }
-
 
 int CGlobalFunction::Lua_UploadEnd(lua_State *l)
 {
     auto token = CLua::GetString(l, 1, "");
     if (token.empty())
     {
-        CLua::PushBoolen(l, false);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, "request data is empty");
         return 2;
     }
@@ -696,28 +735,27 @@ int CGlobalFunction::Lua_UploadEnd(lua_State *l)
 
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::Uploaded, ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
-        CLua::PushBoolen(l, false);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, res.GetMessage());
         return 2;
     }
-    CLua::PushBoolen(l, true);
+    CLua::PushInteger(l, Base::ResultType::Succeed);
     CLua::PushString(l, "succeed");
     return 2;
 }
 
-
 int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
 {
-    auto file_index = CLua::GetString(l,1,"");
-    auto height = CLua::GetInteger(l,2,0);
-    auto width = CLua::GetInteger(l,3,0);
-    auto quality = CLua::GetInteger(l,4,0);
-    if( file_index.empty() || height == 0 || width == 0 || quality == 0 )
+    auto file_index = CLua::GetString(l, 1, "");
+    auto height = CLua::GetInteger(l, 2, 0);
+    auto width = CLua::GetInteger(l, 3, 0);
+    auto quality = CLua::GetInteger(l, 4, 0);
+    if (file_index.empty() || height == 0 || width == 0 || quality == 0)
     {
-        CLua::PushBoolen(l, false);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, "Param error.");
         return 2;
     }
@@ -740,19 +778,89 @@ int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
 
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::GetThumbnail, ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, 5000);
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
-        CLua::PushBoolen(l, false);
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, res.GetMessage());
         return 2;
     }
 
     auto response = ConvertStrToObj<FileCenter::GetThumbnailResponse>(res.GetMessage());
-    
+
     auto uuid = CUtility::GenUUID();
-    CGlobalFunction::Instance->m_iC->AddTempString( uuid, response->data() );
-    CLua::PushBoolen(l, true);
+    CGlobalFunction::Instance->m_iC->AddTempString(uuid, response->data());
+    CLua::PushInteger(l, Base::ResultType::Succeed);
     CLua::PushString(l, uuid);
     return 2;
+}
+
+/// Send the convert image format request to FileCenter.
+/// Request params:
+///  1(str) > the file index.
+///  2(int) > the target image format (FileCenter.SupportFormat) in filecenter proto file.
+///  3(int) > convert quality.
+///  4(bool) > retain old file.
+/// Return:
+///  1(Base::ResultType) > the resule.
+/// (Succeed):
+///  2(str) > new file index.
+///  3(str) > new file sha256.
+///  4(str) > new file md5.
+///  5(int) > new file size.
+/// (Error):
+///  2(str) > the error message.
+int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
+{
+    auto file_index = CLua::GetString(l, 1, "");
+    auto target = CLua::GetInteger(l, 2, 0);
+    auto quality = CLua::GetInteger(l, 3, 0);
+    auto retain = CLua::GetBoolen(l, 4);
+    if (file_index.empty() || quality <= 0 )
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, "Param error.");
+        return 2;
+    }
+
+    if (!FileCenter::SupportFormat_IsValid(target))
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, Helper::Format("Convert [%d] to FileCenter::SupportFormat enum fialed.", target));
+        return 2;
+    }
+
+    auto conn = CGlobalFunction::Instance->GetConnectionID(CGlobalFunction::Instance->m_FileCenterTemplateID.load());
+    if (conn.IsFialed())
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, conn.GetMessage());
+        return 2;
+    }
+
+    auto session = conn.GetResultObject();
+
+    FileCenter::ConvertImageFileRequest request;
+    request.set_index(file_index);
+    request.set_targetformat((FileCenter::SupportFormat)target);
+    request.set_quality(quality);
+    request.set_retainsourcefile(retain);
+
+    auto req = make_shared<SendPackageEvent>(session);
+    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::ConvertImageFile, ConvertObjToStr(&request));
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
+    if (res.IsFialed())
+    {
+        CLua::PushInteger(l, Base::ResultType::Error);
+        CLua::PushString(l, res.GetMessage());
+        return 2;
+    }
+
+    auto response = ConvertStrToObj<FileCenter::ConvertImageFileResponse>(res.GetMessage());
+    CLua::PushInteger(l, Base::ResultType::Succeed);
+    CLua::PushString(l, response->newfileindexcode());
+    CLua::PushString(l, response->newfilesha256());
+    CLua::PushString(l, response->newfilemd5());
+    CLua::PushInteger(l, response->newfilesize());
+    return 5;
 }

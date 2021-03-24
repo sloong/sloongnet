@@ -83,7 +83,8 @@ extern "C"
 enum LUA_EVENT_TYPE
 {
 	OnReferenceModuleOnline = EVENT_TYPE::CustomEventMix +1,
-	OnReferenceModuleOffline = EVENT_TYPE::CustomEventMix +2,
+	OnReferenceModuleOffline,
+	ProcessLuaEvent,
 };
 
 namespace Sloong

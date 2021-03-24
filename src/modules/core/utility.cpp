@@ -169,6 +169,13 @@ string Sloong::CUtility::SHA1EncodeFile(const string& path)
 	return string((char*)t,Sloong::Universal::SHA1_LENGTH);
 }
 
+string Sloong::CUtility::SHA256EncodeFile(const string& path)
+{
+	unsigned char t[Sloong::Universal::SHA256_LENGTH] = {0};
+	CSHA256::Binary_Encoding(path, t, true );
+	return Helper::BinaryToHex(t,Sloong::Universal::SHA256_LENGTH);
+}
+
 CResult Sloong::CUtility::WriteFile(const string &filepath, const char *pBuffer, int size)
 {
 	return CResult::Make_Error("No realize.");

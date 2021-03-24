@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-26 16:57:56
+ * @LastEditTime: 2021-02-25 18:52:12
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ControlHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -186,7 +186,11 @@ void Sloong::CControlHub::CallMessage(SharedEvent event)
 			return;
 
 		for (auto func : handler_list)
+		{
 			func(event);
+			if ( event->IsOneTimeEvent() )
+				break;
+		}
 	}
 	catch (const exception &ex)
 	{

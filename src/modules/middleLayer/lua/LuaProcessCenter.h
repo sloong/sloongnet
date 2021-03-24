@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-18 17:36:59
+ * @LastEditTime: 2021-02-26 16:07:11
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -65,7 +65,7 @@
 #include "core.h"
 #include "IObject.h"
 
-#include "lua.h"
+#include "lua_ex.h"
 
 namespace Sloong
 {
@@ -92,7 +92,8 @@ namespace Sloong
 		TResult<unique_ptr<CLua>> InitLua();
 		void CloseSocket(CLuaPacket* uinfo);
 		SResult MsgProcess( int function, CLuaPacket * pUInfo, const string& msg, const string& extend );
-		int GetFreeLuaContext();
+		void OnProcessLuaEvent(SharedEvent event);
+		int GetFreeLuaContext(int = 10);
 		inline void FreeLuaContext(int id){
 			m_oFreeLuaContext.push(id);
 			m_oSSync.notify_one();

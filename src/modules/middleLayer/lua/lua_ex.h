@@ -78,6 +78,7 @@ namespace Sloong
 		CResult RunString(const string &strCommand);
 		CResult RunFunction(const string &, CLuaPacket *, int = 0, const string & = "", const string & = "", string *extendDataUUID = nullptr);
 		inline CResult RunFunction(const string &strFunctionName, const string &args) { return RunString(Helper::Format("%s(%s)", strFunctionName.c_str(), args.c_str())); }
+		CResult RunEventFunction( const string&, int, const string&);
 
 		// Get Valkue
 		inline string GetString(int nNum, const string &strDefault = "") { return GetString(m_pScriptContext, nNum, strDefault); }
