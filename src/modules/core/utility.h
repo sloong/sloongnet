@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-12-30 15:11:44
+ * @LastEditTime: 2021-03-24 14:57:00
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/utility.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -43,6 +43,7 @@ namespace Sloong
 		static uint32_t CRC32EncodeFile(const string& path);
 
 		static string SHA1EncodeFile(const string& path);
+		static string SHA256EncodeFile(const string& path);
 
 		static string GenUUID();
 
