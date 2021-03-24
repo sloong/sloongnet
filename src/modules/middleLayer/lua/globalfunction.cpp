@@ -483,7 +483,7 @@ U64Result CGlobalFunction::SQLFunctionPrepareCheck(lua_State *l, int sessionid, 
 
     if (sql.empty())
     {
-        return U64Result::Make_Error(l, "request data is empty");
+        return U64Result::Make_Error("request data is empty");
     }
 
     auto res = CGlobalFunction::Instance->GetConnectionID(CGlobalFunction::Instance->m_DataCenterTemplateID.load());
@@ -492,7 +492,7 @@ U64Result CGlobalFunction::SQLFunctionPrepareCheck(lua_State *l, int sessionid, 
         return res;
     }
 
-    return res.GetResultObject();
+    return res;
 }
 
 CResult CGlobalFunction::RunSQLFunction(uint64_t session, const string &request_str, int func)
@@ -509,19 +509,19 @@ CResult CGlobalFunction::RunSQLFunction(uint64_t session, const string &request_
 int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
 {
     auto SessionID = CLua::GetInteger(l, 1, -1);
-    auto query_cmd = CLua::GetString(l, 2, "");
-    auto session_res = SQLFunctionPrepareCheck(l, SessionID, query_cmd);
+    auto sql_cmd = CLua::GetString(l, 2, "");
+    auto session_res = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
     if (session_res.IsFialed())
     {
         CLua::PushInteger(l,Base::ResultType::Error );
-        CLua::PushString(l, res.GetMessage());
+        CLua::PushString(l, session_res.GetMessage());
         return 2;
     }
     auto session = session_res.GetResultObject();
 
     DataCenter::QuerySQLCmdRequest request;
     request.set_session(SessionID);
-    request.set_sqlcmd(query_cmd);
+    request.set_sqlcmd(sql_cmd);
 
     auto res = RunSQLFunction(session, ConvertObjToStr(&request), (int)DataCenter::Functions::QuerySQLCmd);
     if (res.IsSucceed())
@@ -566,11 +566,11 @@ int CGlobalFunction::Lua_SQLInsertToDBCenter(lua_State *l)
 {
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto sql_cmd = CLua::GetString(l, 2, "");
-    auto session_res = SQLFunctionPrepareCheck(l, SessionID, query_cmd);
+    auto session_res = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
     if (session_res.IsFialed())
     {
         CLua::PushInteger(l,Base::ResultType::Error );
-        CLua::PushString(l, res.GetMessage());
+        CLua::PushString(l, session_res.GetMessage());
         return 2;
     }
     auto session = session_res.GetResultObject();
@@ -608,11 +608,11 @@ int CGlobalFunction::Lua_SQLDeleteToDBCenter(lua_State *l)
 {
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto sql_cmd = CLua::GetString(l, 2, "");
-    auto session_res = SQLFunctionPrepareCheck(l, SessionID, query_cmd);
+    auto session_res = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
     if (session_res.IsFialed())
     {
         CLua::PushInteger(l,Base::ResultType::Error );
-        CLua::PushString(l, res.GetMessage());
+        CLua::PushString(l, session_res.GetMessage());
         return 2;
     }
     auto session = session_res.GetResultObject();
@@ -641,11 +641,11 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
 {
     auto SessionID = CLua::GetInteger(l, 1, -1);
     auto sql_cmd = CLua::GetString(l, 2, "");
-    auto session_res = SQLFunctionPrepareCheck(l, SessionID, query_cmd);
+    auto session_res = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
     if (session_res.IsFialed())
     {
         CLua::PushInteger(l,Base::ResultType::Error );
-        CLua::PushString(l, res.GetMessage());
+        CLua::PushString(l, session_res.GetMessage());
         return 2;
     }
     auto session = session_res.GetResultObject();
