@@ -65,14 +65,15 @@ message FileRange{
     int32 Start=1;
     // End pointer for data range
     int32 End=2;
-    // Hashcode for This data range. Hash function is CRC32
-    fixed32 CRCCode=3;
+    // Hashcode for This data range.
+    string SHA256=3;
     // In download request no need set.
     bytes Data=4;
 }
 
 message PrepareUploadRequest{
-    fixed32 CRCCode=1;
+    // Hashcode for file.
+    string SHA256=1;
     int32 FileSize=2;
 }
 
@@ -96,8 +97,8 @@ message DownloadVerifyRequest{
     int32 Start=2;
     // End pointer for data range
     int32 End=3;
-    // Hashcode for This data range. Hash function is CRC32
-    fixed32 CRCCode=4;
+    // Hashcode for This data range.
+    string SHA256=4;
 }
 
 message DownloadFileRequest{
@@ -111,7 +112,8 @@ message DownloadFileResponse{
 }
 
 message SimpleUploadRequest{
-    fixed32 CRCCode=1;
+    // Hashcode for file. 
+    string SHA256=1;
     int32 FileSize=2;
     bytes Data=3;
 }
@@ -130,6 +132,7 @@ message ConvertImageFileRequest{
 message ConvertImageFileResponse{
     string NewFileIndexCode=1;
     string NewFileMD5=2;
+    // Hashcode for file. SHA256 with HEX text.
     string NewFIleSHA256=3;
     int32 NewFileSize=4;
 }

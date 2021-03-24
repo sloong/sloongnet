@@ -13,11 +13,11 @@ CResult Sloong::FileManager::Initialize(IControl *ic)
     m_mapTokenToUploadInfo = STATIC_TRANS<map_ex<string, UploadInfo> *>(m);
 
     auto config = IData::GetModuleConfig();
-    if(!(*config)["ArchiveFolder"].empty())
+    if (!(*config)["ArchiveFolder"].empty())
     {
         m_strArchiveFolder = (*config)["ArchiveFolder"].asString();
     }
-    if(!(*config)["UploadTempSaveFolder"].empty())
+    if (!(*config)["UploadTempSaveFolder"].empty())
     {
         m_strUploadTempSaveFolder = (*config)["UploadTempSaveFolder"].asString();
     }
@@ -103,7 +103,7 @@ CResult Sloong::FileManager::SplitFile(const string &filepath, int splitSize, ma
     return CResult::Succeed;
 }
 
-CResult Sloong::FileManager::ArchiveFile(const string& index, const string &source)
+CResult Sloong::FileManager::ArchiveFile(const string &index, const string &source)
 {
     try
     {
@@ -157,19 +157,18 @@ int Sloong::FileManager::GetFileSize(const string &source)
 }
 
 // The filecenter no't care the file format. so in here, we saved by the hashcode, the saver should be save the format.
-string Sloong::FileManager::GetFileTruePath(const string& index)
+string Sloong::FileManager::GetFileTruePath(const string &index)
 {
     return GetFileFolder(index) + index;
 }
 
 // The filecenter no't care the file format. so in here, we saved by the hashcode, the saver should be save the format.
-string Sloong::FileManager::GetFileFolder(const string& index)
+string Sloong::FileManager::GetFileFolder(const string &index)
 {
     auto path = Helper::Format("%s%s/", m_strArchiveFolder.c_str(), index.substr(0, 3).c_str());
     CUniversal::CheckFileDirectory(path);
     return path;
 }
-
 
 CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, Package *trans_pack)
 {
@@ -177,7 +176,7 @@ CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, Package
 
     auto token = CUtility::GenUUID();
     auto &savedInfo = (*m_mapTokenToUploadInfo)[token];
-    savedInfo.HashCode = req->crccode();
+    savedInfo.SHA256 = req->sha256();
     savedInfo.FileSize = req->filesize();
     savedInfo.Path = m_strUploadTempSaveFolder + token + "/";
     CUniversal::RunSystemCmd(Helper::Format("mkdir -p %s", savedInfo.Path.c_str()));
@@ -197,16 +196,15 @@ CResult Sloong::FileManager::UploadingHandler(const string &str_req, Package *pa
 
     auto &data = req->uploaddata();
 
-    
     if (data.end() - data.start() != data.data().length())
     {
-        return CResult::Make_Error( Helper::Format("Length check error.[%d]<->[%d]", data.end() - data.start() , data.data().length() ));
+        return CResult::Make_Error(Helper::Format("Length check error.[%d]<->[%d]", data.end() - data.start(), data.data().length()));
     }
 
-    auto hash32 = CRCEncode32(data.data());
-    if (data.crccode() != hash32 )
+    auto sha256 =  CSHA256::Encode(data.data());
+    if (data.sha256() != sha256)
     {
-        return CResult::Make_Error(Helper::Format("Hasd check error.[%lld]<->[%lld]", hash32, data.crccode() ));
+        return CResult::Make_Error(Helper::Format("Hasd check error.[%s]<->[%s]", sha256.c_str(), data.sha256().c_str()));
     }
 
     FileRange range;
@@ -226,19 +224,19 @@ CResult Sloong::FileManager::UploadedHandler(const string &str_req, Package *pac
     if (info == nullptr)
         return CResult::Make_Error("Need request PrepareUpload firest.");
 
-    auto temp_path = info->Path + Helper::ntos(info->HashCode);
+    auto temp_path = info->Path + info->SHA256;
     CUniversal::CheckFileDirectory(temp_path);
 
     auto res = MergeFile(info->DataList, temp_path);
     if (res.IsFialed())
         return CResult::Make_Error(res.GetMessage());
 
-    m_pLog->Verbos(Helper::Format("Save file to [%s]. Hash [%lld]", temp_path.c_str(), info->HashCode));
+    m_pLog->Verbos(Helper::Format("Save file to [%s]. Hash [%s]", temp_path.c_str(), info->SHA256.c_str()));
+    auto sha256 = CUtility::SHA256EncodeFile(temp_path);
+    if (info->SHA256 != sha256)
+        return CResult::Make_Error(Helper::Format("Hasd check error.[%s]<->[%s]", sha256.c_str(),info->SHA256.c_str()));
 
-    if (info->HashCode != CUtility::CRC32EncodeFile(temp_path))
-        return CResult::Make_Error("Hasd check error.");
-
-    res = ArchiveFile( req->token(), temp_path);
+    res = ArchiveFile(req->token(), temp_path);
     if (res.IsFialed())
         return res;
 
@@ -251,7 +249,7 @@ CResult Sloong::FileManager::SimpleUploadHandler(const string &str_req, Package 
 {
     auto req = ConvertStrToObj<SimpleUploadRequest>(str_req);
 
-    if (req->crccode() != CRCEncode32(req->data()))
+    if (req->sha256() != CSHA256::Encode(req->data()))
     {
         return CResult::Make_Error("Hasd check error.");
     }
@@ -260,7 +258,7 @@ CResult Sloong::FileManager::SimpleUploadHandler(const string &str_req, Package 
         return CResult::Make_Error("Length check error.");
     }
 
-    auto temp_path = m_strUploadTempSaveFolder + "SimpleUpload/" + Helper::ntos(req->crccode());
+    auto temp_path = m_strUploadTempSaveFolder + "SimpleUpload/" + req->sha256();
     CUniversal::CheckFileDirectory(temp_path);
 
     auto res = CUtility::WriteFile(temp_path, req->data().c_str(), req->filesize());
@@ -268,7 +266,7 @@ CResult Sloong::FileManager::SimpleUploadHandler(const string &str_req, Package 
         return res;
 
     auto token = CUtility::GenUUID();
-    res = ArchiveFile( token, temp_path);
+    res = ArchiveFile(token, temp_path);
     if (res.IsFialed())
         return res;
 
@@ -331,7 +329,6 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, Package 
 
     auto data = req->filedata();
 
-    
     auto nSize = GetFileSize(real_path);
     ifstream in(real_path, ios::in | ios::binary);
 
@@ -355,7 +352,7 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, Package 
         auto d = response.add_filedata();
         d->set_start(item.start());
         d->set_end(item.end());
-        d->set_crccode(CRCEncode32(str));
+        d->set_sha256(CSHA256::Encode(str));
         d->set_data(move(str));
     }
     in.close();
@@ -366,10 +363,11 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, Package 
 CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Package *trans_pack)
 {
     auto req = ConvertStrToObj<ConvertImageFileRequest>(str_req);
-    if( req->targetformat() == SupportFormat::FLIF || !SupportFormat_IsValid(req->targetformat()) ) {
+    if (req->targetformat() == SupportFormat::FLIF || !SupportFormat_IsValid(req->targetformat()))
+    {
         return CResult::Make_Error(Helper::Format("Unsupport format[%s].", SupportFormat_Name(req->targetformat()).c_str()));
-    } 
-    
+    }
+
     string real_path = GetFileTruePath(req->index());
     auto temp_path = m_strUploadTempSaveFolder + "FormatConvertTemp/" + req->index();
     auto res = ImageProcesser::ConvertFormat(real_path, temp_path, req->targetformat(), req->quality());
@@ -378,7 +376,7 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
 
     temp_path = res.GetMessage();
 
-    auto sha256 = CSHA256::Encode(temp_path, true );
+    auto sha256 = CSHA256::Encode(temp_path, true);
     auto md5 = CMD5::Encode(temp_path, true);
     auto size = GetFileSize(temp_path);
 
@@ -387,15 +385,16 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
     if (res.IsFialed())
         return res;
 
-    if( !req->retainsourcefile() )
+    if (!req->retainsourcefile())
     {
-        m_pLog->Info(Helper::Format("%s is convert to %s with %s format.delete old file.",req->index().c_str(),uuid.c_str(),SupportFormat_Name(req->targetformat()).c_str()));
+        m_pLog->Info(Helper::Format("%s is convert to %s with %s format.delete old file.", req->index().c_str(), uuid.c_str(), SupportFormat_Name(req->targetformat()).c_str()));
         int r = remove(real_path.c_str());
-        if (r != 0 ){
-            m_pLog->Warn( Helper::Format("old file delete fialed. return code %d", r));
+        if (r != 0)
+        {
+            m_pLog->Warn(Helper::Format("old file delete fialed. return code %d", r));
         }
     }
-    
+
     ConvertImageFileResponse response;
     response.set_newfileindexcode(uuid);
     response.set_newfilemd5(md5);
@@ -408,7 +407,7 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
 CResult Sloong::FileManager::GetThumbnailHandler(const string &str_req, Package *trans_pack)
 {
     auto req = ConvertStrToObj<GetThumbnailRequest>(str_req);
-    string thumb_file = Helper::Format("%s_%d_%d_%d",Helper::ntos(req->index()).c_str(), req->width(), req->height(), req->quality());
+    string thumb_file = Helper::Format("%s_%d_%d_%d", Helper::ntos(req->index()).c_str(), req->width(), req->height(), req->quality());
     if (!FileExist(thumb_file))
     {
         auto real_path = GetFileTruePath(req->index());

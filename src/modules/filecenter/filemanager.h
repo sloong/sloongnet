@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-01-14 19:02:57
+ * @LastEditTime: 2021-03-24 14:55:44
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filemanager.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -25,7 +25,7 @@ namespace Sloong
     typedef struct UploadInfo
     {
         string Path;
-        uint64_t HashCode;
+        string SHA256;
         int64_t FileSize;
         list<FileRange> DataList;
     } UploadInfo;
