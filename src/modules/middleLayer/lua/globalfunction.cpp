@@ -74,7 +74,6 @@
 #include "events/SendPackage.hpp"
 #include "events/ModuleOnOff.hpp"
 #include "events/LuaEvent.hpp"
-#include "lmarshal.c"
 using namespace Sloong::Events;
 
 unique_ptr<CGlobalFunction> Sloong::CGlobalFunction::Instance = make_unique<CGlobalFunction>();
@@ -105,8 +104,6 @@ LuaFunctionRegistr g_LuaFunc[] =
         {"SetTimeout", CGlobalFunction::Lua_SetTimeout},
         // 这个功能的实现仅是为了达到可用的程度，其实现存在一些性能问题。
         {"PushEvent", CGlobalFunction::Lua_PushEvent},
-        {"EncodeToString", mar_encode},
-        {"DecodeFromString", mar_decode},
 };
 
 CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
@@ -659,9 +656,9 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
 
 int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
 {
-    auto file_crc = CLua::GetInteger(l, 1, 0);
+    auto file_sha256 = CLua::GetString(l, 1, "");
     auto file_size = CLua::GetInteger(l, 2, 0);
-    if (file_crc == 0 || file_size == 0)
+    if (file_sha256.empty() || file_size == 0)
     {
         CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, "request data is empty");
@@ -678,7 +675,7 @@ int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
     auto session = conn.GetResultObject();
 
     FileCenter::PrepareUploadRequest request;
-    request.set_crccode(file_crc);
+    request.set_sha256(file_sha256);
     request.set_filesize(file_size);
 
     auto req = make_shared<SendPackageEvent>(session);
@@ -802,7 +799,7 @@ int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
     auto target = CLua::GetInteger(l, 2, 0);
     auto quality = CLua::GetInteger(l, 3, 0);
     auto retain = CLua::GetBoolen(l, 4);
-    if (file_index.empty() || target == 0 || quality == 0 || retain == 0)
+    if (file_index.empty() || quality <= 0 )
     {
         CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, "Param error.");
