@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-08-17 11:16:27
- * @LastEditTime: 2021-03-23 20:08:39
+ * @LastEditTime: 2021-03-24 16:51:35
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/ImageProcesser.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -60,18 +60,18 @@ CResult ImageProcesser::ConvertFormat(const string &sourceFile, const string &ta
 		case FileCenter::SupportFormat::WEBP:{
 			out_file += ".webp";
 			str_cmd = Helper::Format("convert %s -quality %d -define webp:method=6 %s", sourceFile.c_str(), quality, out_file.c_str());
-		}
+		}break;
 		case FileCenter::SupportFormat::AVIF:{
 			out_file += ".avif";
 			str_cmd = Helper::Format("convert %s -quality %d %s", sourceFile.c_str(), quality, out_file.c_str());
-		}
+		}break;
 		case FileCenter::SupportFormat::HEIF:{
 			out_file += ".heif";
 			str_cmd = Helper::Format("convert %s -quality %d %s", sourceFile.c_str(), quality, out_file.c_str());
-		}
+		}break;
 		case FileCenter::SupportFormat::Best:{
 			return ConvertBestFormat(sourceFile,targetFile,quality);
-		}
+		}break;
 		default:
 		{
 			return CResult::Make_Error("Unsupport format.");
@@ -114,19 +114,27 @@ CResult ImageProcesser::ConvertBestFormat(const string &sourceFile, const string
 	{
 		if( s_avif > s_heif ){
 			// heif is best
+			remove(res_avif.GetMessage().c_str());
+			remove(res_webp.GetMessage().c_str());
 			return res_heif;
 		}
 		else{
 			// avif is best
+			remove(res_webp.GetMessage().c_str());
+			remove(res_heif.GetMessage().c_str());
 			return res_avif;
 		}
 	}else{
 		if( s_webp > s_heif ){
 			// heif is best
+			remove(res_webp.GetMessage().c_str());
+			remove(res_avif.GetMessage().c_str());
 			return res_heif;
 		}
 		else{
 			// webp is best
+			remove(res_heif.GetMessage().c_str());
+			remove(res_avif.GetMessage().c_str());
 			return res_webp;
 		}
 	}
