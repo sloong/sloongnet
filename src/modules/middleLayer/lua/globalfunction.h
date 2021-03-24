@@ -116,7 +116,7 @@ namespace Sloong
         void OnReferenceModuleOffline(SharedEvent);
         void QueryReferenceInfoResponseHandler(IEvent*, Package*);
         static CResult RunSQLFunction(uint64_t,const string&, int);
-        static uint64_t SQLFunctionPrepareCheck(lua_State*, int, const string&);
+        static U64Result SQLFunctionPrepareCheck(lua_State*, int, const string&);
         void AddConnection(uint64_t, const string &, int);
         U64Result GetConnectionID(int );
         void SetTimeout(int n){
