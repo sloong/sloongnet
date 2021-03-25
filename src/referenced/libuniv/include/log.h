@@ -4,8 +4,6 @@
 #include "univ.h"
 #include "EasySync.hpp"
 
-using namespace Sloong::Universal;
-
 namespace Sloong
 {
 	namespace Universal
