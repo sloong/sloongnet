@@ -62,7 +62,6 @@
 
 #include "core.h"
 #include "export.h"
-#include <jsoncpp/json/json.h>
 #include "LuaProcessCenter.h"
 #include "IObject.h"
 

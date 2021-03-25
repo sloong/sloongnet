@@ -456,7 +456,7 @@ ResultType Sloong::CNetworkHub::OnNewAccept(uint64_t sock)
 		memset(pCheckBuf, 0, m_nClientCheckKeyLength + 1);
 		// In Check function, client need send the check key in 3 second.
 		// 这里仍然使用Universal提供的ReceEx。这里不需要进行SSL接收
-		int nLen = CUniversal::RecvEx(conn_sock, pCheckBuf, m_nClientCheckKeyLength, m_nClientCheckTime);
+		int nLen = Helper::RecvEx(conn_sock, pCheckBuf, m_nClientCheckKeyLength, m_nClientCheckTime);
 		if (nLen != m_nClientCheckKeyLength || 0 != strcmp(pCheckBuf, m_strClientCheckKey.c_str()))
 		{
 			m_pLog->Warn(Helper::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nClientCheckKeyLength, nLen, m_strClientCheckKey.c_str(), pCheckBuf));

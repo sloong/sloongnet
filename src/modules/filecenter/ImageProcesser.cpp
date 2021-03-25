@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-08-17 11:16:27
- * @LastEditTime: 2021-03-24 16:51:35
+ * @LastEditTime: 2021-03-25 16:01:42
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/ImageProcesser.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -28,9 +28,9 @@ CResult RunCMD( const string &sourceFile, const string &targetFile, const string
 	{
 		return CResult::Make_Error("no access.");
 	}
-	CUniversal::CheckFileDirectory(targetFile);
+	Helper::CheckFileDirectory(targetFile);
 
-	if (CUniversal::RunSystemCmd(str_cmd))
+	if (Helper::RunSystemCmd(str_cmd))
 	{
 		return CResult::Succeed;
 	}
