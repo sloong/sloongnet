@@ -816,6 +816,7 @@ int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
     auto target = CLua::GetInteger(l, 2, 0);
     auto quality = CLua::GetInteger(l, 3, 0);
     auto retain = CLua::GetBoolen(l, 4);
+    auto timeout = CLua::GetInteger(l, 5, CGlobalFunction::Instance->m_nTimeout);
     if (file_index.empty() || quality <= 0 )
     {
         CLua::PushInteger(l, Base::ResultType::Error);
@@ -848,7 +849,7 @@ int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
 
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::ConvertImageFile, ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, timeout);
     if (res.IsFialed())
     {
         CLua::PushInteger(l, Base::ResultType::Error);
