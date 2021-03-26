@@ -21,9 +21,14 @@ CResult Sloong::FileManager::Initialize(IControl *ic)
     {
         m_strUploadTempSaveFolder = (*config)["UploadTempSaveFolder"].asString();
     }
+    if (!(*config)["CacheFolder"].empty())
+    {
+        m_strCacheFolder = (*config)["CacheFolder"].asString();
+    }
 
     FormatFolderString(m_strArchiveFolder);
     FormatFolderString(m_strUploadTempSaveFolder);
+    FormatFolderString(m_strCacheFolder);
 
     m_mapFuncToHandler[Functions::PrepareUpload] = std::bind(&FileManager::PrepareUploadHandler, this, std::placeholders::_1, std::placeholders::_2);
     m_mapFuncToHandler[Functions::Uploading] = std::bind(&FileManager::UploadingHandler, this, std::placeholders::_1, std::placeholders::_2);
@@ -447,9 +452,10 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
 CResult Sloong::FileManager::GetThumbnailHandler(const string &str_req, Package *trans_pack)
 {
     auto req = ConvertStrToObj<GetThumbnailRequest>(str_req);
-    string thumb_file = Helper::Format("%s_%d_%d_%d.webp", Helper::ntos(req->index()).c_str(), req->width(), req->height(), req->quality());
+    string thumb_file = Helper::Format("%s%dx%dx%d/%s.webp", m_strCacheFolder.c_str(), req->width(), req->height(), req->quality(), req->index().c_str());
     if (!FileExist(thumb_file))
     {
+        Helper::CheckFileDirectory(thumb_file);
         auto real_path = GetFileTruePath(req->index());
         auto res = ImageProcesser::GetThumbnail(real_path, thumb_file, req->width(), req->height(), req->quality());
         if (res.IsFialed())
