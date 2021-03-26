@@ -7,7 +7,7 @@
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
  * @Description:
  */
- /***
+/***
   * @......................................&&.........................
   * @....................................&&&..........................
   * @.................................&&&&............................
@@ -59,7 +59,6 @@
 
 #pragma once
 
-
 #include "core.h"
 #include "IObject.h"
 #include "lua_ex.h"
@@ -78,11 +77,36 @@ namespace Sloong
         SHA_512 = 3,
     };
 
+    enum RecvStatus
+    {
+        Wait = 0,
+        Receiving = 1,
+        Saveing = 2,
+        Done = 3,
+        VerificationError = 4,
+        OtherError = 5,
+    };
+    struct RecvDataPackage
+    {
+        string strMD5 = "";
+        RecvStatus emStatus = RecvStatus::Wait;
+        string strName = "";
+        string strPath = "";
+    };
+
     class CGlobalFunction : public IObject
     {
     public:
         CResult Initialize(IControl *iMsg);
         void RegistFuncToLua(CLua *pLua);
+        CResult EnableDataReceive(int,int);
+
+    protected:
+        void ClearReceiveInfoByUUID(string uuid);
+
+    private:
+        void RecvDataConnFunc();
+        void RecvFileFunc(int);
 
     public:
         static int Lua_ShowLog(lua_State *l);
@@ -95,7 +119,10 @@ namespace Sloong
         static int Lua_GenUUID(lua_State *l);
         static int Lua_SetCommData(lua_State *l);
         static int Lua_GetCommData(lua_State *l);
-        static int Lua_GetLogObject(lua_State *l);
+        static int Lua_MoveFile(lua_State *l);
+        static int Lua_SendFile(lua_State *l);
+        static int Lua_ReceiveFile(lua_State *l);
+        static int Lua_CheckRecvStatus(lua_State *l);
         static int Lua_SetExtendData(lua_State *l);
         static int Lua_SetExtendDataByFile(lua_State *l);
         static int Lua_ConnectToDBCenter(lua_State *l);
@@ -112,21 +139,32 @@ namespace Sloong
 
     protected:
         void OnStart(SharedEvent);
+        void OnStop(SharedEvent);
         void OnReferenceModuleOnline(SharedEvent);
         void OnReferenceModuleOffline(SharedEvent);
-        void QueryReferenceInfoResponseHandler(IEvent*, Package*);
-        static CResult RunSQLFunction(uint64_t,const string&, int);
-        static U64Result SQLFunctionPrepareCheck(lua_State*, int, const string&);
+        void QueryReferenceInfoResponseHandler(IEvent *, Package *);
+        static CResult RunSQLFunction(uint64_t, const string &, int);
+        static U64Result SQLFunctionPrepareCheck(lua_State *, int, const string &);
         void AddConnection(uint64_t, const string &, int);
-        U64Result GetConnectionID(int );
-        void SetTimeout(int n){
+        U64Result GetConnectionID(int);
+        void SetTimeout(int n)
+        {
             m_nTimeout = n;
         }
 
     protected:
         map_ex<string, string> m_mapCommData;
         map_ex<string, int> m_mapDBNameToSessionID;
-        Json::Value* m_pModuleConfig = nullptr;
+        Json::Value *m_pModuleConfig = nullptr;
+
+        map<int, string> g_RecvDataConnList;
+        map<string, map<string, RecvDataPackage *>> g_RecvDataInfoList;
+
+        static constexpr int g_data_pack_len = 8;
+        static constexpr int g_uuid_len = 36;
+        static constexpr int g_md5_len = 32;
+        static constexpr int FILE_TRANS_MAX_SIZE = 20 * 1024 * 1024; //20mb
+
 
         map_ex<int32_t, list_ex<uint64_t>> m_mapTemplateIDToUUIDs;
         map_ex<uint64_t, NodeItem> m_mapUUIDToNode;
@@ -135,7 +173,12 @@ namespace Sloong
         atomic_int32_t m_DataCenterTemplateID = 0;
         atomic_int32_t m_FileCenterTemplateID = 0;
 
+        int m_ListenSock;
+        int m_nRecvDataTimeoutTime;
+
         int m_nTimeout = 5000;
+
+        RUN_STATUS m_emStatus = RUN_STATUS::Created;
 
     public:
         static unique_ptr<CGlobalFunction> Instance;
