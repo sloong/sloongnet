@@ -381,6 +381,31 @@ void Sloong::CLua::Push2DTable( lua_State* l, const list<list<string>>& listValu
 	}
 }
 
+void Sloong::CLua::Push2DTable( lua_State* l, const list<map<string, string>>& listValue)
+{
+	lua_newtable(l);
+	int index = 1;
+	for( auto& item : listValue )
+	{
+		PushTable(l, item);
+		lua_rawseti(l, -2, index);
+		index++;
+	}
+}
+
+void Sloong::CLua::Push2DTable( lua_State* l, const map<string,map<string,string>>& listValue)
+{
+	lua_newtable(l);
+	int index = 1;
+	for( auto& item : listValue )
+	{
+		lua_pushstring(l, item.first.c_str());
+		PushTable(l, item.second);
+		lua_rawseti(l, -3, index);
+		index++;
+	}
+}
+
 unique_ptr<map<std::string, std::string>> Sloong::CLua::GetTableParam(lua_State *l, int index)
 {
 	auto data = make_unique<map<string, string>>();
