@@ -201,7 +201,7 @@ CResult Sloong::FileManager::UploadingHandler(const string &str_req, Package *pa
         return CResult::Make_Error(Helper::Format("Length check error.[%d]<->[%d]", data.end() - data.start(), data.data().length()));
     }
 
-    auto sha256 =  CSHA256::Encode(data.data());
+    auto sha256 = CSHA256::Encode(data.data());
     if (data.sha256() != sha256)
     {
         return CResult::Make_Error(Helper::Format("Hasd check error.[%s]<->[%s]", sha256.c_str(), data.sha256().c_str()));
@@ -234,7 +234,7 @@ CResult Sloong::FileManager::UploadedHandler(const string &str_req, Package *pac
     m_pLog->Verbos(Helper::Format("Save file to [%s]. Hash [%s]", temp_path.c_str(), info->SHA256.c_str()));
     auto sha256 = CUtility::SHA256EncodeFile(temp_path);
     if (info->SHA256 != sha256)
-        return CResult::Make_Error(Helper::Format("Hasd check error.[%s]<->[%s]", sha256.c_str(),info->SHA256.c_str()));
+        return CResult::Make_Error(Helper::Format("Hasd check error.[%s]<->[%s]", sha256.c_str(), info->SHA256.c_str()));
 
     res = ArchiveFile(req->token(), temp_path);
     if (res.IsFialed())
@@ -370,18 +370,64 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
 
     string real_path = GetFileTruePath(req->index());
     auto temp_path = m_strUploadTempSaveFolder + "FormatConvertTemp/" + req->index();
-    auto res = ImageProcesser::ConvertFormat(real_path, temp_path, req->targetformat(), req->quality());
-    if (res.IsFialed())
-        return res;
 
-    temp_path = res.GetMessage();
+    ConvertImageFileResponse response;
 
-    auto sha256 = CSHA256::Encode(temp_path, true);
-    auto md5 = CMD5::Encode(temp_path, true);
-    auto size = GetFileSize(temp_path);
+    list<SupportFormat> fms;
+    if (req->targetformat() == SupportFormat::Best)
+    {
+        fms.push_back(SupportFormat::WEBP);
+        fms.push_back(SupportFormat::AVIF);
+        fms.push_back(SupportFormat::HEIF);
+    }
+    else
+    {
+        fms.push_back(req->targetformat());
+    }
+
+    map<SupportFormat, string> f_path;
+    string new_file_path;
+    for (auto f : fms)
+    {
+        auto res = ImageProcesser::ConvertFormat(real_path, temp_path, f, req->quality());
+        if (res.IsFialed())
+            return res;
+
+        auto info = response.add_extendinfos();
+        auto temp_path = res.GetMessage();
+        f_path[f] = temp_path;
+        info->set_size(GetFileSize(temp_path));
+        info->set_sha256(CSHA256::Encode(temp_path, true));
+        info->set_md5(CMD5::Encode(temp_path, true));
+    }
+
+    auto best_fmt = SupportFormat::Best;
+    auto best_size = ((unsigned int)-1) >> 1;
+    for (auto f : response.extendinfos())
+    {
+        if (f.size() < best_size)
+        {
+            best_size = f.size();
+            best_fmt = f.format();
+        }
+    }
+
+    auto infos = response.mutable_extendinfos();
+    for( auto i = infos->begin(); i != infos->end(); ++i)
+    {
+        auto f = *i;
+        if(f.format() == best_fmt )
+        {
+            new_file_path = f_path[f.format()];
+            response.set_allocated_newfileinfo(&f);
+            infos->erase(i);
+        }else {
+            remove(f_path[f.format()].c_str());
+        }
+    }
 
     auto uuid = CUtility::GenUUID();
-    res = ArchiveFile(uuid, temp_path);
+    auto res = ArchiveFile(uuid, new_file_path);
     if (res.IsFialed())
         return res;
 
@@ -394,12 +440,6 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
             m_pLog->Warn(Helper::Format("old file delete fialed. return code %d", r));
         }
     }
-
-    ConvertImageFileResponse response;
-    response.set_newfileindexcode(uuid);
-    response.set_newfilemd5(md5);
-    response.set_newfilesha256(sha256);
-    response.set_newfilesize(size);
 
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
