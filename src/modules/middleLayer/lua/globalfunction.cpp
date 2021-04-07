@@ -94,7 +94,7 @@ LuaFunctionRegistr g_LuaFunc[] =
         {"MoveFile", CGlobalFunction::Lua_MoveFile},
         {"SendFile", CGlobalFunction::Lua_SendFile},
         {"ReceiveFile", CGlobalFunction::Lua_ReceiveFile},
-        {"Sloongnet_CheckRecvStatus", CGlobalFunction::Lua_CheckRecvStatus},
+        {"CheckRecvStatus", CGlobalFunction::Lua_CheckRecvStatus},
         {"SetExtendData", CGlobalFunction::Lua_SetExtendData},
         {"SetExtendDataByFile", CGlobalFunction::Lua_SetExtendDataByFile},
         {"ConnectToDBCenter", CGlobalFunction::Lua_ConnectToDBCenter},
@@ -1226,9 +1226,6 @@ int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
     auto new_info = response->newfileinfo();
     map<string, string> t;
     t["index"] = new_info.index();
-    t["crc32"] = new_info.crc32();
-    t["md5"] = new_info.md5();
-    t["sha1"] = new_info.sha1();
     t["sha256"] = new_info.sha256();
     t["size"] = new_info.size();
     t["format"] = new_info.format();
@@ -1239,9 +1236,6 @@ int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
         for (auto i : response->extendinfos())
         {
             map<string, string> t;
-            t["crc32"] = i.crc32();
-            t["md5"] = i.md5();
-            t["sha1"] = i.sha1();
             t["sha256"] = i.sha256();
             t["size"] = i.size();
             t["format"] = i.format();

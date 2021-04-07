@@ -222,8 +222,8 @@ Succeed:
 Return|Type|Note
 ----|----|-----
 1|int|Result with Base.ResultType
-2|table| new file info. key list:index, crc32, md5, sha1, sha256, size, format.
-3|table| __Only target is Best__.extend file info. key list: crc32, md5, sha1, sha256, size, format.
+2|table| new file info. key list:index, sha256, size, format.
+3|table| __Only target is Best__.extend file info. key list: sha256, size, format.
 
 
 ## SetTimeout
