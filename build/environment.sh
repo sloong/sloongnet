@@ -3,12 +3,12 @@
  # @Author: WCB
  # @Date: 2020-04-20 12:26:04
  # @LastEditors: Chuanbin Wang
- # @LastEditTime: 2021-04-25 16:44:04
+ # @LastEditTime: 2021-04-25 16:54:17
  # @Description: file content
  ###
 
 # disable the Configuring tzdata
-DEBIAN_FRONTEND=noninteractive
+export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
 # install run time library
