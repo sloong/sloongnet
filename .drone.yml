@@ -1,0 +1,9 @@
+kind: pipeline
+name: default
+
+steps:
+- name: build
+  image: ubuntu:20.04
+  commands:
+  - build/environment.sh
+  - build/build.sh
