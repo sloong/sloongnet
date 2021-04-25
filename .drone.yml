@@ -6,4 +6,4 @@ steps:
   image: ubuntu:20.04
   commands:
   - build/environment.sh
-  - build/build.sh
+  - build/build.sh -r
