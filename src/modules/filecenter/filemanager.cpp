@@ -403,7 +403,6 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
         f_path[f] = temp_path;
         info->set_size(GetFileSize(temp_path));
         info->set_sha256(CSHA256::Encode(temp_path, true));
-        info->set_md5(CMD5::Encode(temp_path, true));
     }
 
     auto best_fmt = SupportFormat::Best;
