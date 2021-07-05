@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-03-09 14:08:30
+ * @LastEditTime: 2021-07-05 16:54:24
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -536,6 +536,9 @@ CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, Package
 
 	m_mapIDToTemplateItem[tplInfo.ID] = tplInfo;
 	RefreshModuleReference(tplInfo.ID);
+
+	SendEvent(m_mapIDToTemplateItem[tplInfo.ID].Created, Core::ControlEvent::Restart, nullptr );
+
 	return CResult::Succeed;
 }
 
