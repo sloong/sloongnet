@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2021-01-12 12:41:59
+ * @LastEditTime: 2021-03-25 17:43:26
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -182,8 +182,8 @@ CResult Sloong::EasyConnect::SendPackage(UniquePackage pack)
 			return CResult::Make_Error("Package serialize fialed.");
 		}
 		unsigned char buffer[32] = {0};
-		CSHA256::Binary_Encoding(tmp,buffer);
-		pack->set_hash(buffer,32);
+		CSHA256::Binary_Encoding(tmp, buffer);
+		pack->set_hash(buffer, 32);
 		if (!pack->SerializeToString(&m_strSending))
 		{
 			return CResult::Make_Error("Package serialize fialed.");
@@ -212,6 +212,10 @@ CResult Sloong::EasyConnect::SendPackage(UniquePackage pack)
 		if (nCurSent >= nLen)
 		{
 			m_SentSize = nCurSent - nLen;
+		}
+		else if (nCurSent == -11)
+		{
+			return CResult(ResultType::Retry);
 		}
 		else
 		{
@@ -363,9 +367,9 @@ int Sloong::EasyConnect::Read(char *data, int len, bool block, bool bagain)
 	{
 		int recvSize = 0;
 		if (block)
-			recvSize = CUniversal::RecvTimeout(m_nSocket, data, len, 0, bagain);
+			recvSize = Helper::RecvTimeout(m_nSocket, data, len, 0, bagain);
 		else
-			recvSize = CUniversal::RecvEx(m_nSocket, data, len, bagain);
+			recvSize = Helper::RecvEx(m_nSocket, data, len, bagain);
 
 		if (recvSize < 0)
 			m_nErrno = 0 - recvSize;
@@ -383,7 +387,7 @@ int Sloong::EasyConnect::Write(const char *data, int len, int index)
 	// 未启用SSL时直接发送数据
 	if (!m_pSSL)
 	{
-		auto sendSize = CUniversal::SendEx(m_nSocket, data, len, index);
+		auto sendSize = Helper::SendEx(m_nSocket, data, len, index, true);
 		if (sendSize < 0)
 			m_nErrno = 0 - sendSize;
 		return sendSize;

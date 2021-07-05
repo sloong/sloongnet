@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-03-09 14:08:30
+ * @LastEditTime: 2021-07-05 16:58:30
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -318,9 +318,8 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 		item.UUID = sender;
 		m_mapUUIDToNodeItem[sender] = item;
 		auto event = make_shared<GetConnectionInfoEvent>(pack->sessionid());
-		event->SetCallbackFunc([item = &m_mapUUIDToNodeItem[sender]](IEvent *e, ConnectionInfo info) {
-			item->Address = info.Address;
-		});
+		event->SetCallbackFunc([item = &m_mapUUIDToNodeItem[sender]](IEvent *e, ConnectionInfo info)
+							   { item->Address = info.Address; });
 		m_iC->SendMessage(event);
 		m_pLog->Debug(Helper::Format("Module[%s:%d] regist to system. Allocating uuid [%lld].", item.Address.c_str(), item.Port, item.UUID));
 		char m_pMsgBuffer[8] = {0};
@@ -530,12 +529,13 @@ CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, Package
 	tplInfo.BuildCache();
 	auto res = CConfiguation::Instance->SetTemplate(tplInfo.ID, tplInfo.ToTemplateInfo());
 	if (res.IsFialed())
-	{
 		return res;
-	}
 
 	m_mapIDToTemplateItem[tplInfo.ID] = tplInfo;
 	RefreshModuleReference(tplInfo.ID);
+
+	SendEvent(m_mapIDToTemplateItem[tplInfo.ID].Created, Core::ControlEvent::Restart, nullptr);
+
 	return CResult::Succeed;
 }
 

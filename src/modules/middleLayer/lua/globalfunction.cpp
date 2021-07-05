@@ -77,6 +77,7 @@
 using namespace Sloong::Events;
 
 unique_ptr<CGlobalFunction> Sloong::CGlobalFunction::Instance = make_unique<CGlobalFunction>();
+const string g_temp_file_path = "/tmp/sloongnet/receivefile/temp.tmp";
 
 LuaFunctionRegistr g_LuaFunc[] =
     {
@@ -90,6 +91,10 @@ LuaFunctionRegistr g_LuaFunc[] =
         {"GenUUID", CGlobalFunction::Lua_GenUUID},
         {"SetCommData", CGlobalFunction::Lua_SetCommData},
         {"GetCommData", CGlobalFunction::Lua_GetCommData},
+        {"MoveFile", CGlobalFunction::Lua_MoveFile},
+        {"SendFile", CGlobalFunction::Lua_SendFile},
+        {"ReceiveFile", CGlobalFunction::Lua_ReceiveFile},
+        {"CheckRecvStatus", CGlobalFunction::Lua_CheckRecvStatus},
         {"SetExtendData", CGlobalFunction::Lua_SetExtendData},
         {"SetExtendDataByFile", CGlobalFunction::Lua_SetExtendDataByFile},
         {"ConnectToDBCenter", CGlobalFunction::Lua_ConnectToDBCenter},
@@ -112,9 +117,251 @@ CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
     IData::Initialize(ic);
     m_pModuleConfig = IData::GetModuleConfig();
     m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&CGlobalFunction::OnStart, this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStop, std::bind(&CGlobalFunction::OnStop, this, std::placeholders::_1));
     m_iC->RegisterEventHandler(LUA_EVENT_TYPE::OnReferenceModuleOnline, std::bind(&CGlobalFunction::OnReferenceModuleOnline, this, std::placeholders::_1));
     m_iC->RegisterEventHandler(LUA_EVENT_TYPE::OnReferenceModuleOffline, std::bind(&CGlobalFunction::OnReferenceModuleOffline, this, std::placeholders::_1));
     return CResult::Succeed;
+}
+
+CResult CGlobalFunction::EnableDataReceive(int port, int timtout)
+{
+    if (port < 0)
+        return CResult::Make_Error("Listen port error.");
+
+    m_ListenSock = socket(AF_INET, SOCK_STREAM, 0);
+    int sock_op = 1;
+    // SOL_SOCKET:在socket层面设置
+    // SO_REUSEADDR:允许套接字和一个已在使用中的地址捆绑
+    setsockopt(m_ListenSock, SOL_SOCKET, SO_REUSEADDR, &sock_op, sizeof(sock_op));
+
+    struct sockaddr_in address;
+    memset(&address, 0, sizeof(address));
+    address.sin_addr.s_addr = htonl(INADDR_ANY);
+    address.sin_port = htons((uint16_t)port);
+
+    errno = bind(m_ListenSock, (struct sockaddr *)&address, sizeof(address));
+
+    if (errno == -1)
+        return CResult::Make_Error(Helper::Format("bind to %d field. errno = %d", port, errno));
+
+    errno = listen(m_ListenSock, 1024);
+
+    m_nRecvDataTimeoutTime = timtout;
+    CThreadPool::AddWorkThread(std::bind(&CGlobalFunction::RecvDataConnFunc, this), 1);
+    return CResult::Succeed;
+}
+
+void CGlobalFunction::ClearReceiveInfoByUUID(string uuid)
+{
+    m_pLog->Debug(Helper::Format("Clean receive info from g_RecvDataInfoList by :[%s]", uuid.c_str()));
+    auto p_item_list = g_RecvDataInfoList.find(uuid);
+    if (p_item_list == g_RecvDataInfoList.end())
+    {
+        return;
+    }
+    auto item_list = p_item_list->second;
+    for (auto item = item_list.begin(); item != item_list.end(); item++)
+    {
+        RecvDataPackage *pack = item->second;
+        SAFE_DELETE(pack);
+        item_list.erase(item);
+    }
+}
+
+//
+void Sloong::CGlobalFunction::RecvDataConnFunc()
+{
+    CLog *pLog = m_pLog;
+    while (m_emStatus != RUN_STATUS::Exit)
+    {
+        int conn_sock = -1;
+        if ((conn_sock = accept(m_ListenSock, NULL, NULL)) > 0)
+        {
+            pLog->Debug(Helper::Format("Accept data connect :[%s][%d]", CUtility::GetSocketIP(conn_sock).c_str(), CUtility::GetSocketPort(conn_sock)));
+            // When accept the connect , receive the uuid data. and
+            char *pCheckBuf = new char[g_uuid_len + 1];
+            memset(pCheckBuf, 0, g_uuid_len + 1);
+            // In Check function, client need send the check key in 3 second.
+            int nLen = Helper::RecvEx(conn_sock, pCheckBuf, CGlobalFunction::g_uuid_len, m_nRecvDataTimeoutTime);
+            // Check uuid length
+            if (nLen != CGlobalFunction::g_uuid_len)
+            {
+                pLog->Warn(Helper::Format("The uuid length error:[%d]. Close connect.", nLen));
+                close(conn_sock);
+                continue;
+            }
+            // Check uuid validity
+            if (g_RecvDataInfoList.find(pCheckBuf) == g_RecvDataInfoList.end())
+            {
+                pLog->Warn(Helper::Format("The uuid is not find in list:[%s]. Close connect.", pCheckBuf));
+                close(conn_sock);
+                continue;
+            }
+            // Add to connect list
+            g_RecvDataConnList[conn_sock] = pCheckBuf;
+            // Start new thread to recv data for this connect.
+            auto f = std::bind(&CGlobalFunction::RecvFileFunc, this, conn_sock);
+            // TODO: modify the libarary function.
+            CThreadPool::EnqueTask([f](SMARTER p) {
+                f();
+                return (SMARTER) nullptr;
+            });
+        }
+    }
+}
+
+void Sloong::CGlobalFunction::RecvFileFunc(int conn_sock)
+{
+    CLog *pLog = m_pLog;
+    // Find the recv uuid.
+    auto conn_item = g_RecvDataConnList.find(conn_sock);
+    if (conn_item == g_RecvDataConnList.end())
+    {
+        pLog->Error("The socket id is not find in conn list.");
+        return;
+    }
+    string uuid = conn_item->second;
+    pLog->Info(Helper::Format("Start thread to receive file data for :[%s]", uuid.c_str()));
+    // Find the recv info list.
+    auto info_item = g_RecvDataInfoList.find(uuid);
+    if (info_item == g_RecvDataInfoList.end())
+    {
+        pLog->Error("The uuid is not find in info list.");
+        return;
+    }
+    try
+    {
+        map<string, RecvDataPackage *> recv_file_list = info_item->second;
+        bool bLoop = false;
+        do
+        {
+            char *pLongBuffer = new char[g_data_pack_len + 1](); //dataLeng;
+            memset(pLongBuffer, 0, g_data_pack_len + 1);
+            int nRecvSize = Helper::RecvTimeout(conn_sock, pLongBuffer, g_data_pack_len, m_nRecvDataTimeoutTime);
+            if (nRecvSize <= 0)
+            {
+                SAFE_DELETE_ARR(pLongBuffer);
+                pLog->Warn("Recv data package length error.");
+                return;
+            }
+            else
+            {
+
+                auto dlen = Helper::BytesToInt64(pLongBuffer);
+                SAFE_DELETE_ARR(pLongBuffer);
+                // package length cannot big than 2147483648. this is max value for int.
+                if (dlen <= 0 || dlen > FILE_TRANS_MAX_SIZE || nRecvSize != g_data_pack_len)
+                {
+                    pLog->Error("Receive data length error.");
+                    return;
+                }
+                int dtlen = (int)dlen;
+
+                char *szMD5 = new char[g_md5_len + 1];
+                memset(szMD5, 0, g_md5_len + 1);
+                nRecvSize = Helper::RecvTimeout(conn_sock, szMD5, g_md5_len, m_nRecvDataTimeoutTime, true);
+                if (nRecvSize <= 0)
+                {
+                    pLog->Error("Receive data package md5 error.");
+                    SAFE_DELETE_ARR(szMD5);
+                    return;
+                }
+                string trans_md5 = string(szMD5);
+                Helper::tolower(trans_md5);
+
+                auto recv_file_item = recv_file_list.find(trans_md5);
+                if (recv_file_item == recv_file_list.end())
+                {
+                    pLog->Error("the file md5 is not find in recv list.");
+                    return;
+                }
+                RecvDataPackage *pack = recv_file_item->second;
+                pack->emStatus = RecvStatus::Receiving;
+
+                char *data = new char[dtlen];
+                memset(data, 0, dtlen);
+
+                // In here receive 10240 length data in one time.
+                // because the file length is different, if the file is too big, and user network speed not to fast,
+                // it will be fialed.
+                char *pData = data;
+                int nRecvdLen = 0;
+                while (nRecvdLen < dtlen)
+                {
+                    int nOnceRecvLen = 10240;
+                    if (dtlen - nRecvdLen < 10240)
+                        nOnceRecvLen = dtlen - nRecvdLen;
+                    nRecvSize = Helper::RecvTimeout(conn_sock, pData, nOnceRecvLen, m_nRecvDataTimeoutTime, true);
+                    if (nRecvSize < 0)
+                    {
+                        pLog->Error("Receive data error.");
+                        SAFE_DELETE_ARR(data);
+                        return;
+                    }
+                    else if (nRecvSize == 0)
+                    {
+                        pLog->Error("Receive data timeout.");
+                        SAFE_DELETE_ARR(data);
+                        return;
+                    }
+                    else
+                    {
+                        pData += nRecvSize;
+                        nRecvdLen += nRecvSize;
+                    }
+                }
+
+                pack->emStatus = RecvStatus::Saveing;
+
+                // check target file path is not exist
+                Helper::CheckFileDirectory(pack->strPath);
+
+                // save to file
+                ofstream of;
+                of.open(pack->strPath + pack->strName, ios::out | ios::trunc | ios::binary);
+                of.write(data, dtlen);
+                of.close();
+                SAFE_DELETE_ARR(data);
+
+                string file_md5 = CMD5::Encode(pack->strPath + pack->strName, true);
+                Helper::tolower(file_md5);
+
+                // check md5
+                if (trans_md5.compare(file_md5))
+                {
+                    pLog->Error("the file data is different with md5 code.");
+                    pack->emStatus = RecvStatus::VerificationError;
+                }
+                else
+                {
+                    pack->emStatus = RecvStatus::Done;
+                }
+
+                // check the receive file list status
+                for (auto item = recv_file_list.begin(); item != recv_file_list.end(); item++)
+                {
+                    auto pack = item->second;
+                    if (pack->emStatus == RecvStatus::Wait)
+                    {
+                        bLoop = true;
+                        break;
+                    }
+                    else
+                    {
+                        bLoop = false;
+                    }
+                }
+            }
+        } while (bLoop);
+
+        pLog->Debug(Helper::Format("Receive connect done. close:[%s:%d]", CUtility::GetSocketIP(conn_sock).c_str(), CUtility::GetSocketPort(conn_sock)));
+        close(conn_sock);
+    }
+    catch (const std::exception &)
+    {
+        close(conn_sock);
+        ClearReceiveInfoByUUID(uuid);
+    }
 }
 
 void Sloong::CGlobalFunction::OnStart(SharedEvent e)
@@ -122,7 +369,13 @@ void Sloong::CGlobalFunction::OnStart(SharedEvent e)
     auto event = make_shared<SendPackageToManagerEvent>(Functions::QueryReferenceInfo, "");
     event->SetCallbackFunc(std::bind(&CGlobalFunction::QueryReferenceInfoResponseHandler, this, std::placeholders::_1, std::placeholders::_2));
     m_iC->SendMessage(event);
+    m_emStatus = RUN_STATUS::Running;
 }
+void Sloong::CGlobalFunction::OnStop(SharedEvent e)
+{
+    m_emStatus = RUN_STATUS::Exit;
+}
+
 
 void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent *send_pack, Package *res_pack)
 {
@@ -359,10 +612,122 @@ int CGlobalFunction::Lua_GetCommData(lua_State *l)
     return 1;
 }
 
-int CGlobalFunction::Lua_GetLogObject(lua_State *l)
+int CGlobalFunction::Lua_MoveFile(lua_State *l)
 {
-    CLua::PushPointer(l, CGlobalFunction::Instance->m_pLog);
+    string orgName = CLua::GetString(l, 1, "");
+    string newName = CLua::GetString(l, 2, "");
+    int nRes(0);
+    try
+    {
+        if (orgName == "" || newName == "")
+        {
+            nRes = -2;
+            throw invalid_argument(Helper::Format("Move File error. File name cannot empty. orgName:%s;newName:%s", orgName.c_str(), newName.c_str()));
+        }
+
+        if (access(orgName.c_str(), ACC_R) != 0)
+        {
+            nRes = -1;
+            throw runtime_error(Helper::Format("Move File error. Origin file not exist or can not read:[%s]", orgName.c_str()));
+        }
+
+        int res = Helper::CheckFileDirectory(newName);
+        if (res < 0)
+        {
+            nRes = -1;
+            throw runtime_error(Helper::Format("Move File error.CheckFileDirectory error:[%s][%d]", newName.c_str(), res));
+        }
+
+        if (!Helper::MoveFile(orgName, newName))
+        {
+            // Move file need write access. so if move file error, try copy .
+            if (!Helper::RunSystemCmd(Helper::Format("cp \"%s\" \"%s\"", orgName.c_str(), newName.c_str())))
+            {
+                nRes = -3;
+                throw runtime_error("Move File and try copy file error.");
+            }
+            nRes = 1;
+        }
+    }
+    catch (exception &e)
+    {
+        CGlobalFunction::Instance->m_pLog->Error(e.what());
+        CLua::PushInteger(l, nRes);
+        CLua::PushString(l, e.what());
+        return 2;
+    }
+
+    // if succeed return 0, else return nozero
+    CLua::PushInteger(l, nRes);
+    CLua::PushString(l, "");
+    return 2;
+}
+
+int Sloong::CGlobalFunction::Lua_SendFile(lua_State *l)
+{
+    return Lua_SetExtendDataByFile(l);
+}
+
+// Receive File funcs
+// Client requeset with file list info
+// and here add the info to list and Build one uuid and return this uuid.
+int CGlobalFunction::Lua_ReceiveFile(lua_State *l)
+{
+    string save_folder = CLua::GetString(l, 2);
+
+    // The file list, key is md5 ,value is file name
+    auto fileList = CLua::GetTableParam(l, 1);
+    string uuid = CUtility::GenUUID();
+
+    map<string, RecvDataPackage *> recv_list;
+    for (auto item : *fileList)
+    {
+        RecvDataPackage *pack = new RecvDataPackage();
+        string md5 = item.first;
+        Helper::tolower(md5);
+        pack->strName = item.second;
+        pack->strPath = save_folder;
+        pack->strMD5 = md5;
+        pack->emStatus = RecvStatus::Wait;
+        recv_list[md5] = pack;
+    }
+
+    CGlobalFunction::Instance->g_RecvDataInfoList[uuid] = recv_list;
+
+    CLua::PushString(l, uuid);
     return 1;
+}
+
+int CGlobalFunction::Lua_CheckRecvStatus(lua_State *l)
+{
+    string uuid = CLua::GetString(l, 1);
+    string md5 = CLua::GetString(l, 2);
+    Helper::tolower(md5);
+    auto recv_list = CGlobalFunction::Instance->g_RecvDataInfoList[uuid];
+    auto recv_item = recv_list.find(md5);
+    if (recv_item == recv_list.end())
+    {
+        CLua::PushInteger(l, RecvStatus::OtherError);
+        CLua::PushString(l, "Cannot find the hash receive info.");
+        return 2;
+    }
+    else
+    {
+        RecvDataPackage *pack = recv_item->second;
+        if (pack->emStatus == RecvStatus::Done)
+        {
+            recv_list.erase(recv_item);
+            CLua::PushInteger(l, RecvStatus::Done);
+            CLua::PushString(l, pack->strPath + pack->strName);
+            return 2;
+        }
+        else
+        {
+            CLua::PushInteger(l, pack->emStatus);
+            CLua::PushString(l, "");
+            return 2;
+        }
+    }
 }
 
 int CGlobalFunction::Lua_SetExtendData(lua_State *l)
@@ -513,7 +878,7 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
     auto session_res = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
     if (session_res.IsFialed())
     {
-        CLua::PushInteger(l,Base::ResultType::Error );
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, session_res.GetMessage());
         return 2;
     }
@@ -529,14 +894,14 @@ int CGlobalFunction::Lua_SQLQueryToDBCenter(lua_State *l)
         auto response = ConvertStrToObj<DataCenter::QuerySQLCmdResponse>(res.GetMessage());
         if (response->lines_size() == 0)
         {
-            CLua::PushInteger(l, Base::ResultType::Succeed );
+            CLua::PushInteger(l, Base::ResultType::Succeed);
             CLua::PushInteger(l, 0);
             CLua::PushNil(l);
             return 3;
         }
         else
         {
-            CLua::PushInteger(l, Base::ResultType::Succeed );
+            CLua::PushInteger(l, Base::ResultType::Succeed);
             CLua::PushInteger(l, response->lines_size());
             list<list<string>> res;
             for (auto &item : response->lines())
@@ -569,7 +934,7 @@ int CGlobalFunction::Lua_SQLInsertToDBCenter(lua_State *l)
     auto session_res = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
     if (session_res.IsFialed())
     {
-        CLua::PushInteger(l,Base::ResultType::Error );
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, session_res.GetMessage());
         return 2;
     }
@@ -611,7 +976,7 @@ int CGlobalFunction::Lua_SQLDeleteToDBCenter(lua_State *l)
     auto session_res = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
     if (session_res.IsFialed())
     {
-        CLua::PushInteger(l,Base::ResultType::Error );
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, session_res.GetMessage());
         return 2;
     }
@@ -625,7 +990,7 @@ int CGlobalFunction::Lua_SQLDeleteToDBCenter(lua_State *l)
     if (res.IsSucceed())
     {
         auto response = ConvertStrToObj<DataCenter::DeleteSQLCmdResponse>(res.GetMessage());
-        CLua::PushInteger(l,Base::ResultType::Succeed );
+        CLua::PushInteger(l, Base::ResultType::Succeed);
         CLua::PushInteger(l, response->affectedrows());
         return 2;
     }
@@ -644,12 +1009,11 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
     auto session_res = SQLFunctionPrepareCheck(l, SessionID, sql_cmd);
     if (session_res.IsFialed())
     {
-        CLua::PushInteger(l,Base::ResultType::Error );
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, session_res.GetMessage());
         return 2;
     }
     auto session = session_res.GetResultObject();
-
 
     DataCenter::UpdateSQLCmdRequest request;
     request.set_session(SessionID);
@@ -659,13 +1023,13 @@ int CGlobalFunction::Lua_SQLUpdateToDBCenter(lua_State *l)
     if (res.IsSucceed())
     {
         auto response = ConvertStrToObj<DataCenter::UpdateSQLCmdResponse>(res.GetMessage());
-        CLua::PushInteger(l,Base::ResultType::Succeed );
+        CLua::PushInteger(l, Base::ResultType::Succeed);
         CLua::PushInteger(l, response->affectedrows());
         return 2;
     }
     else
     {
-        CLua::PushInteger(l, Base::ResultType::Error );
+        CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, res.GetMessage());
         return 2;
     }
@@ -816,7 +1180,8 @@ int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
     auto target = CLua::GetInteger(l, 2, 0);
     auto quality = CLua::GetInteger(l, 3, 0);
     auto retain = CLua::GetBoolen(l, 4);
-    if (file_index.empty() || quality <= 0 )
+    auto timeout = CLua::GetInteger(l, 5, CGlobalFunction::Instance->m_nTimeout);
+    if (file_index.empty() || quality <= 0)
     {
         CLua::PushInteger(l, Base::ResultType::Error);
         CLua::PushString(l, "Param error.");
@@ -848,7 +1213,7 @@ int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
 
     auto req = make_shared<SendPackageEvent>(session);
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::ConvertImageFile, ConvertObjToStr(&request));
-    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
+    auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, timeout);
     if (res.IsFialed())
     {
         CLua::PushInteger(l, Base::ResultType::Error);
@@ -858,9 +1223,29 @@ int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
 
     auto response = ConvertStrToObj<FileCenter::ConvertImageFileResponse>(res.GetMessage());
     CLua::PushInteger(l, Base::ResultType::Succeed);
-    CLua::PushString(l, response->newfileindexcode());
-    CLua::PushString(l, response->newfilesha256());
-    CLua::PushString(l, response->newfilemd5());
-    CLua::PushInteger(l, response->newfilesize());
-    return 5;
+    auto new_info = response->newfileinfo();
+    map<string, string> t;
+    t["index"] = new_info.index();
+    t["sha256"] = new_info.sha256();
+    t["size"] = new_info.size();
+    t["format"] = new_info.format();
+    CLua::PushTable(l, t);
+    if (response->extendinfos_size() > 0)
+    {
+        list<map<string, string>> ex_l;
+        for (auto i : response->extendinfos())
+        {
+            map<string, string> t;
+            t["sha256"] = i.sha256();
+            t["size"] = i.size();
+            t["format"] = i.format();
+            ex_l.push_back(t);
+        }
+        CLua::Push2DTable(l, ex_l);
+        return 3;
+    }
+    else
+    {
+        return 2;
+    }
 }

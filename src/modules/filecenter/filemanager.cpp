@@ -21,9 +21,14 @@ CResult Sloong::FileManager::Initialize(IControl *ic)
     {
         m_strUploadTempSaveFolder = (*config)["UploadTempSaveFolder"].asString();
     }
+    if (!(*config)["CacheFolder"].empty())
+    {
+        m_strCacheFolder = (*config)["CacheFolder"].asString();
+    }
 
     FormatFolderString(m_strArchiveFolder);
     FormatFolderString(m_strUploadTempSaveFolder);
+    FormatFolderString(m_strCacheFolder);
 
     m_mapFuncToHandler[Functions::PrepareUpload] = std::bind(&FileManager::PrepareUploadHandler, this, std::placeholders::_1, std::placeholders::_2);
     m_mapFuncToHandler[Functions::Uploading] = std::bind(&FileManager::UploadingHandler, this, std::placeholders::_1, std::placeholders::_2);
@@ -42,17 +47,13 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(Package *pack)
 {
     auto function = (Functions)pack->function();
     if (!Functions_IsValid(function))
-    {
         return PackageResult::Make_OKResult(PackageHelper::MakeErrorResponse(pack, Helper::Format("FileCenter no provide [%d] function.", function)));
-    }
 
     auto req_obj = pack->content();
     auto func_name = Functions_Name(function);
     m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), req_obj.c_str()));
     if (!m_mapFuncToHandler.exist(function))
-    {
         return PackageResult::Make_OKResult(PackageHelper::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
-    }
 
     auto res = m_mapFuncToHandler[function](req_obj, pack);
     auto response = PackageHelper::MakeResponse(pack, res);
@@ -111,25 +112,19 @@ CResult Sloong::FileManager::ArchiveFile(const string &index, const string &sour
 
         m_pLog->Verbos(Helper::Format("Archive file: source[%s] target[%s]", source.c_str(), target.c_str()));
         if (source.length() < 3 || target.length() < 3)
-        {
             return CResult::Make_Error(Helper::Format("Move File error. File name cannot empty. source:%s;target:%s", source.c_str(), target.c_str()));
-        }
 
         if (access(source.c_str(), ACC_R) != 0)
-        {
             return CResult::Make_Error(Helper::Format("Move File error. Origin file not exist or can not read:[%s]", source.c_str()));
-        }
 
-        auto res = CUniversal::CheckFileDirectory(target);
+        auto res = Helper::CheckFileDirectory(target);
         if (res < 0)
-        {
             return CResult::Make_Error(Helper::Format("Move File error.CheckFileDirectory error:[%s][%d]", target.c_str(), res));
-        }
 
         if (!Helper::MoveFile(source, target))
         {
             // Move file need write access. so if move file error, try copy .
-            if (!CUniversal::RunSystemCmd(Helper::Format("mv \"%s\" \"%s\"", source.c_str(), target.c_str())))
+            if (!Helper::RunSystemCmd(Helper::Format("mv \"%s\" \"%s\"", source.c_str(), target.c_str())))
             {
                 return CResult::Make_Error("Move File and try copy file error.");
             }
@@ -144,10 +139,12 @@ CResult Sloong::FileManager::ArchiveFile(const string &index, const string &sour
 
     return CResult::Succeed;
 }
+
 void Sloong::FileManager::ClearCache(const string &folder)
 {
     // TODO:
 }
+
 int Sloong::FileManager::GetFileSize(const string &source)
 {
     ifstream in(source, ios::in | ios::binary);
@@ -166,7 +163,7 @@ string Sloong::FileManager::GetFileTruePath(const string &index)
 string Sloong::FileManager::GetFileFolder(const string &index)
 {
     auto path = Helper::Format("%s%s/", m_strArchiveFolder.c_str(), index.substr(0, 3).c_str());
-    CUniversal::CheckFileDirectory(path);
+    Helper::CheckFileDirectory(path);
     return path;
 }
 
@@ -179,7 +176,7 @@ CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, Package
     savedInfo.SHA256 = req->sha256();
     savedInfo.FileSize = req->filesize();
     savedInfo.Path = m_strUploadTempSaveFolder + token + "/";
-    CUniversal::RunSystemCmd(Helper::Format("mkdir -p %s", savedInfo.Path.c_str()));
+    Helper::RunSystemCmd(Helper::Format("mkdir -p %s", savedInfo.Path.c_str()));
 
     PrepareUploadResponse response;
     response.set_token(token);
@@ -197,15 +194,11 @@ CResult Sloong::FileManager::UploadingHandler(const string &str_req, Package *pa
     auto &data = req->uploaddata();
 
     if (data.end() - data.start() != data.data().length())
-    {
         return CResult::Make_Error(Helper::Format("Length check error.[%d]<->[%d]", data.end() - data.start(), data.data().length()));
-    }
 
-    auto sha256 =  CSHA256::Encode(data.data());
+    auto sha256 = CSHA256::Encode(data.data());
     if (data.sha256() != sha256)
-    {
         return CResult::Make_Error(Helper::Format("Hasd check error.[%s]<->[%s]", sha256.c_str(), data.sha256().c_str()));
-    }
 
     FileRange range;
     range.Start = data.start();
@@ -225,7 +218,7 @@ CResult Sloong::FileManager::UploadedHandler(const string &str_req, Package *pac
         return CResult::Make_Error("Need request PrepareUpload firest.");
 
     auto temp_path = info->Path + info->SHA256;
-    CUniversal::CheckFileDirectory(temp_path);
+    Helper::CheckFileDirectory(temp_path);
 
     auto res = MergeFile(info->DataList, temp_path);
     if (res.IsFialed())
@@ -234,13 +227,13 @@ CResult Sloong::FileManager::UploadedHandler(const string &str_req, Package *pac
     m_pLog->Verbos(Helper::Format("Save file to [%s]. Hash [%s]", temp_path.c_str(), info->SHA256.c_str()));
     auto sha256 = CUtility::SHA256EncodeFile(temp_path);
     if (info->SHA256 != sha256)
-        return CResult::Make_Error(Helper::Format("Hasd check error.[%s]<->[%s]", sha256.c_str(),info->SHA256.c_str()));
+        return CResult::Make_Error(Helper::Format("Hasd check error.[%s]<->[%s]", sha256.c_str(), info->SHA256.c_str()));
 
     res = ArchiveFile(req->token(), temp_path);
     if (res.IsFialed())
         return res;
 
-    CUniversal::RunSystemCmd(Helper::Format("rm -d %s", info->Path.c_str()));
+    Helper::RunSystemCmd(Helper::Format("rm -d %s", info->Path.c_str()));
 
     return CResult::Succeed;
 }
@@ -259,7 +252,7 @@ CResult Sloong::FileManager::SimpleUploadHandler(const string &str_req, Package 
     }
 
     auto temp_path = m_strUploadTempSaveFolder + "SimpleUpload/" + req->sha256();
-    CUniversal::CheckFileDirectory(temp_path);
+    Helper::CheckFileDirectory(temp_path);
 
     auto res = CUtility::WriteFile(temp_path, req->data().c_str(), req->filesize());
     if (res.IsFialed())
@@ -270,7 +263,7 @@ CResult Sloong::FileManager::SimpleUploadHandler(const string &str_req, Package 
     if (res.IsFialed())
         return res;
 
-    CUniversal::RunSystemCmd(Helper::Format("rm %s", temp_path.c_str()));
+    Helper::RunSystemCmd(Helper::Format("rm %s", temp_path.c_str()));
 
     return CResult::Make_OK(token);
 }
@@ -323,9 +316,7 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, Package 
 
     string real_path = GetFileTruePath(req->index());
     if (access(real_path.c_str(), ACC_R) != 0)
-    {
         return CResult::Make_Error("Cann't access to target file:" + real_path);
-    }
 
     auto data = req->filedata();
 
@@ -370,18 +361,65 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
 
     string real_path = GetFileTruePath(req->index());
     auto temp_path = m_strUploadTempSaveFolder + "FormatConvertTemp/" + req->index();
-    auto res = ImageProcesser::ConvertFormat(real_path, temp_path, req->targetformat(), req->quality());
-    if (res.IsFialed())
-        return res;
 
-    temp_path = res.GetMessage();
+    ConvertImageFileResponse response;
 
-    auto sha256 = CSHA256::Encode(temp_path, true);
-    auto md5 = CMD5::Encode(temp_path, true);
-    auto size = GetFileSize(temp_path);
+    list<SupportFormat> fms;
+    if (req->targetformat() == SupportFormat::Best)
+    {
+        fms.push_back(SupportFormat::WEBP);
+        fms.push_back(SupportFormat::AVIF);
+        fms.push_back(SupportFormat::HEIF);
+    }
+    else
+    {
+        fms.push_back(req->targetformat());
+    }
+
+    map<SupportFormat, string> f_path;
+    string new_file_path;
+    for (auto f : fms)
+    {
+        auto res = ImageProcesser::ConvertFormat(real_path, temp_path, f, req->quality());
+        if (res.IsFialed())
+            return res;
+
+        auto info = response.add_extendinfos();
+        auto temp_path = res.GetMessage();
+        f_path[f] = temp_path;
+        info->set_size(GetFileSize(temp_path));
+        info->set_sha256(CSHA256::Encode(temp_path, true));
+    }
+
+    auto best_fmt = SupportFormat::Best;
+    auto best_size = ((unsigned int)-1) >> 1;
+    for (auto f : response.extendinfos())
+    {
+        if (f.size() < best_size)
+        {
+            best_size = f.size();
+            best_fmt = f.format();
+        }
+    }
+
+    auto infos = response.mutable_extendinfos();
+    for (auto i = infos->begin(); i != infos->end(); ++i)
+    {
+        auto f = *i;
+        if (f.format() == best_fmt)
+        {
+            new_file_path = f_path[f.format()];
+            response.set_allocated_newfileinfo(&f);
+            infos->erase(i);
+        }
+        else
+        {
+            remove(f_path[f.format()].c_str());
+        }
+    }
 
     auto uuid = CUtility::GenUUID();
-    res = ArchiveFile(uuid, temp_path);
+    auto res = ArchiveFile(uuid, new_file_path);
     if (res.IsFialed())
         return res;
 
@@ -395,21 +433,16 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
         }
     }
 
-    ConvertImageFileResponse response;
-    response.set_newfileindexcode(uuid);
-    response.set_newfilemd5(md5);
-    response.set_newfilesha256(sha256);
-    response.set_newfilesize(size);
-
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
 CResult Sloong::FileManager::GetThumbnailHandler(const string &str_req, Package *trans_pack)
 {
     auto req = ConvertStrToObj<GetThumbnailRequest>(str_req);
-    string thumb_file = Helper::Format("%s_%d_%d_%d", Helper::ntos(req->index()).c_str(), req->width(), req->height(), req->quality());
+    string thumb_file = Helper::Format("%s%dx%dx%d/%s.webp", m_strCacheFolder.c_str(), req->width(), req->height(), req->quality(), req->index().c_str());
     if (!FileExist(thumb_file))
     {
+        Helper::CheckFileDirectory(thumb_file);
         auto real_path = GetFileTruePath(req->index());
         auto res = ImageProcesser::GetThumbnail(real_path, thumb_file, req->width(), req->height(), req->quality());
         if (res.IsFialed())

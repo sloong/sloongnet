@@ -4,7 +4,6 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0", 
     "configurations": [        
-        
         {
             "name": "LocalWorker",
             "type": "lldb",
@@ -13,7 +12,7 @@
             "args": [
                     "Worker",
                     "127.0.0.1:19000",
-                    "--exclude=Gateway"
+                    // "--exclude=Gateway"
             ],
             "cwd": "${workspaceFolder}/build/debug/",
         },

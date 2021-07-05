@@ -69,14 +69,7 @@
 #include <sys/time.h>
 
 // univ head file
-#include "defines.h"
 #include "univ.h"
-#include "univ.hpp"
-#include "log.h"
-#include "threadpool.h"
-#include "hash.h"
-#include "base64.h"
-#include "CRC.hpp"
 using namespace Sloong;
 using namespace Sloong::Universal;
 

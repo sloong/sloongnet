@@ -105,6 +105,8 @@ namespace Sloong
 		static void PushTable(lua_State *, const map<string, string> &);
 		static void PushTable(lua_State*, const list<string>&);
 		static void Push2DTable(lua_State*, const list<list<string>>&);
+		static void Push2DTable(lua_State*, const list<map<string, string>>&);
+		static void Push2DTable(lua_State*, const map<string,map<string, string>>&);
 		static unique_ptr<map<string, string>> GetTableParam(lua_State *, int);
 
 	protected:

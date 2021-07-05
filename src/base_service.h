@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-01-12 20:35:22
+ * @LastEditTime: 2021-03-25 16:24:15
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -121,7 +121,6 @@ namespace Sloong
 		unique_ptr<CLog> m_pLog = make_unique<CLog>();
 		RuntimeDataPackage m_oServerConfig;
 		uint64_t m_ManagerSession;
-		Json::Reader m_oJsonReader;
 		Json::Value m_oModuleConfig;
 		EasySync m_oExitSync;
 		CResult m_oExitResult = CResult::Succeed;

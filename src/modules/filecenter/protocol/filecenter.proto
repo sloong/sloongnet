@@ -128,13 +128,16 @@ message ConvertImageFileRequest{
     int32 Quality=4;
 }
 
+message FileInfo{
+    string Index=1;
+    string SHA256=2;
+    int32 Size=3;
+    SupportFormat Format=4;
+}
 
 message ConvertImageFileResponse{
-    string NewFileIndexCode=1;
-    string NewFileMD5=2;
-    // Hashcode for file. SHA256 with HEX text.
-    string NewFIleSHA256=3;
-    int32 NewFileSize=4;
+    FileInfo NewFileInfo=1;
+    repeated FileInfo ExtendInfos=2;
 }
 
 message GetThumbnailRequest{
