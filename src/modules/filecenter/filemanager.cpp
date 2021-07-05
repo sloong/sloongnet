@@ -47,17 +47,13 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(Package *pack)
 {
     auto function = (Functions)pack->function();
     if (!Functions_IsValid(function))
-    {
         return PackageResult::Make_OKResult(PackageHelper::MakeErrorResponse(pack, Helper::Format("FileCenter no provide [%d] function.", function)));
-    }
 
     auto req_obj = pack->content();
     auto func_name = Functions_Name(function);
     m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), req_obj.c_str()));
     if (!m_mapFuncToHandler.exist(function))
-    {
         return PackageResult::Make_OKResult(PackageHelper::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
-    }
 
     auto res = m_mapFuncToHandler[function](req_obj, pack);
     auto response = PackageHelper::MakeResponse(pack, res);
@@ -116,20 +112,14 @@ CResult Sloong::FileManager::ArchiveFile(const string &index, const string &sour
 
         m_pLog->Verbos(Helper::Format("Archive file: source[%s] target[%s]", source.c_str(), target.c_str()));
         if (source.length() < 3 || target.length() < 3)
-        {
             return CResult::Make_Error(Helper::Format("Move File error. File name cannot empty. source:%s;target:%s", source.c_str(), target.c_str()));
-        }
 
         if (access(source.c_str(), ACC_R) != 0)
-        {
             return CResult::Make_Error(Helper::Format("Move File error. Origin file not exist or can not read:[%s]", source.c_str()));
-        }
 
         auto res = Helper::CheckFileDirectory(target);
         if (res < 0)
-        {
             return CResult::Make_Error(Helper::Format("Move File error.CheckFileDirectory error:[%s][%d]", target.c_str(), res));
-        }
 
         if (!Helper::MoveFile(source, target))
         {
@@ -149,10 +139,12 @@ CResult Sloong::FileManager::ArchiveFile(const string &index, const string &sour
 
     return CResult::Succeed;
 }
+
 void Sloong::FileManager::ClearCache(const string &folder)
 {
     // TODO:
 }
+
 int Sloong::FileManager::GetFileSize(const string &source)
 {
     ifstream in(source, ios::in | ios::binary);
@@ -202,15 +194,11 @@ CResult Sloong::FileManager::UploadingHandler(const string &str_req, Package *pa
     auto &data = req->uploaddata();
 
     if (data.end() - data.start() != data.data().length())
-    {
         return CResult::Make_Error(Helper::Format("Length check error.[%d]<->[%d]", data.end() - data.start(), data.data().length()));
-    }
 
     auto sha256 = CSHA256::Encode(data.data());
     if (data.sha256() != sha256)
-    {
         return CResult::Make_Error(Helper::Format("Hasd check error.[%s]<->[%s]", sha256.c_str(), data.sha256().c_str()));
-    }
 
     FileRange range;
     range.Start = data.start();
@@ -328,9 +316,7 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, Package 
 
     string real_path = GetFileTruePath(req->index());
     if (access(real_path.c_str(), ACC_R) != 0)
-    {
         return CResult::Make_Error("Cann't access to target file:" + real_path);
-    }
 
     auto data = req->filedata();
 
@@ -417,15 +403,17 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
     }
 
     auto infos = response.mutable_extendinfos();
-    for( auto i = infos->begin(); i != infos->end(); ++i)
+    for (auto i = infos->begin(); i != infos->end(); ++i)
     {
         auto f = *i;
-        if(f.format() == best_fmt )
+        if (f.format() == best_fmt)
         {
             new_file_path = f_path[f.format()];
             response.set_allocated_newfileinfo(&f);
             infos->erase(i);
-        }else {
+        }
+        else
+        {
             remove(f_path[f.format()].c_str());
         }
     }
