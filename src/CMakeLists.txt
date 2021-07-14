@@ -61,7 +61,11 @@ add_executable(${PROJECT_NAME} ${SRC_LIST})
 
 target_compile_options(${PROJECT_NAME} PRIVATE -fpie)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,./")
+# http://sourceware.org/binutils/docs/ld/Options.html
+# -E/--export-dynamic:  add all symbols to the dynamic symbol table.
+# -rpath: Add a directory to the runtime library search path.
+set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath=.")
+add_link_options("-Wl,-E")
 
 #添加链接库
 target_link_libraries(${PROJECT_NAME} m)

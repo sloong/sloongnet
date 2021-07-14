@@ -8,7 +8,7 @@ RUN cat /etc/apt/sources.list
 RUN rm -Rf /var/lib/apt/lists/*
 
 RUN apt update && apt install -y \
-    cmake clang llvm libsqlite3-dev libprotobuf-dev protobuf-compiler uuid-dev libssl-dev libjsoncpp-dev libmariadbclient-dev libluajit-5.1-dev
+    cmake clang llvm libsqlite3-dev libprotobuf-dev protobuf-compiler uuid-dev libssl-dev libjsoncpp-dev libmariadbclient-dev liblua5.3-dev
 
 COPY . /tmp/
 WORKDIR /tmp
@@ -21,7 +21,7 @@ FROM ubuntu:20.04
 LABEL maintainer="admin@sloong.com"
 
 RUN apt update && apt install -y \
-    libsqlite3-0 libprotobuf17 libuuid1 libssl1.1  libjsoncpp1 libmariadb3 libluajit-5.1-2 imagemagick
+    libsqlite3-0 libprotobuf17 libuuid1 libssl1.1  libjsoncpp1 libmariadb3 liblua5.3 imagemagick
 WORKDIR /usr/local/bin
 COPY --from=build-env /tmp/build/sloongnet-release /usr/local/bin
 RUN chmod +x /usr/local/bin/sloongnet

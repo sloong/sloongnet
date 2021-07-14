@@ -4,6 +4,8 @@
 #endif // _WINDOWS
 using namespace Sloong;
 
+#include "utility.h"
+
 typedef int (*LuaFunc)(lua_State *pLuaState);
 
 #define LOCK_GUARD(m)             \
@@ -45,7 +47,7 @@ std::string CLua::findScript(const string &strFullName)
 	for (auto item : m_listSearchRoute)
 	{
 		testFile = Helper::Replace(Helper::Replace(item, "%pathdir%", m_strScriptFolder), "%filename%", strFullName);
-		if (0 == ACCESS(testFile.c_str(), ACC_R))
+		if (CUtility::FileExist(testFile))
 		{
 			res = testFile;
 			break;
@@ -92,7 +94,7 @@ std::string CLua::GetCallStack(lua_State *l)
 			continue;
 		}
 
-		lua_pushfstring(l, "%4d-   ", level - 1);
+		// lua_pushfstring(l, "%4d-   ", level - 1);
 		// 'n': 填充 name 及 namewhat 域；
 		// 'S': 填充 source， short_src，linedefined，lastlinedefined，以及 what 域；
 		// 'l': 填充 currentline 域；
@@ -198,6 +200,10 @@ static int GlobalErrorHandler( lua_State *L)
 	CLua::PushString(L,CLua::GetCallStack(L));
 	return 1;
 }
+
+#ifndef LUA_OK
+#define LUA_OK 0
+#endif
 
 CResult CLua::RunScript(const string &strFileName)
 {

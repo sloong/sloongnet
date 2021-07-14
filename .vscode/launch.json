@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
                     "Worker",
-                    "127.0.0.1:19000",
+                    "127.0.0.1:9001",
                     // "--exclude=Gateway"
             ],
             "cwd": "${workspaceFolder}/build/debug/",

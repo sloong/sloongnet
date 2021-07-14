@@ -296,10 +296,10 @@ CResult CSloongBaseService::Initialize(RunInfo info)
         Json::CharReaderBuilder builder;
         const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
         JSONCPP_STRING err;
-        if(!reader->parse(pConfig->moduleconfig().c_str(),pConfig->moduleconfig().c_str()+pConfig->moduleconfig().length(), &m_oModuleConfig, &err))
+        if (!reader->parse(pConfig->moduleconfig().c_str(), pConfig->moduleconfig().c_str() + pConfig->moduleconfig().length(), &m_oModuleConfig, &err))
         {
-            m_pLog->Fatal("Error parsing module configuration" );
-            cerr << err <<endl;
+            m_pLog->Fatal("Error parsing module configuration");
+            cerr << err << endl;
             return CResult::Make_Error("Error parsing module configuration");
         }
         m_iC->Add(DATA_ITEM::ModuleConfiguation, &m_oModuleConfig);
@@ -337,15 +337,17 @@ CResult CSloongBaseService::Initialize(RunInfo info)
     if (pManagerConnect)
     {
         auto event = make_shared<Events::RegisteConnectionEvent>(pManagerConnect->m_strAddress, pManagerConnect->m_nPort);
-        event->SetCallbackFunc([s = &m_ManagerSession](IEvent *e, uint64_t sessionid) {
-            *s = sessionid;
-        });
+        event->SetCallbackFunc([s = &m_ManagerSession](IEvent *e, uint64_t sessionid)
+                               { *s = sessionid; });
         m_iC->CallMessage(event);
     }
 
     res = m_pModuleInitializedFunc();
     if (res.IsFialed())
+    {
         m_pLog->Fatal(res.GetMessage());
+        return res;
+    }
     m_pLog->Debug("Module initialized succeed.");
 
     if (!info.ManagerMode)
@@ -519,9 +521,8 @@ void CSloongBaseService::OnSendPackageToManagerEventHandler(SharedEvent e)
     auto event = dynamic_pointer_cast<SendPackageToManagerEvent>(e);
 
     auto req = make_shared<SendPackageEvent>(m_ManagerSession);
-    req->SetCallbackFunc([event](IEvent *e, Package *p) {
-        event->CallCallbackFunc(p);
-    });
+    req->SetCallbackFunc([event](IEvent *e, Package *p)
+                         { event->CallCallbackFunc(p); });
     req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event->GetFunctionID(), event->GetContent());
     m_iC->SendMessage(req);
 }

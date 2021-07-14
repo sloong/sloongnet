@@ -28,8 +28,8 @@ namespace Sloong
 	{
 	public:
 		// Initialize the global variable. and register the function to lua.
-		static void RecordCPUStatus(CPU_OCCUPY*);
-		static double CalculateCPULoad(CPU_OCCUPY* prev);
+		static void RecordCPUStatus(CPU_OCCUPY *);
+		static double CalculateCPULoad(CPU_OCCUPY *prev);
 		static int GetCpuUsed(double nWaitTime = 0.1);
 		static int GetMemory(int &total, int &free);
 
@@ -37,20 +37,33 @@ namespace Sloong
 		static int GetSocketPort(int socket);
 		static string GetSocketAddress(int socket);
 
-		static unique_ptr<char[]> ReadFile(const string &filepath, int* out_size );
+		static unique_ptr<char[]> ReadFile(const string &filepath, int *out_size);
 		static CResult WriteFile(const string &filepath, const char *buf, int size);
-		static uint64_t CityEncodeFile(const string& path);
-		static uint32_t CRC32EncodeFile(const string& path);
+		static uint64_t CityEncodeFile(const string &path);
+		static uint32_t CRC32EncodeFile(const string &path);
 
-		static string SHA1EncodeFile(const string& path);
-		static string SHA256EncodeFile(const string& path);
+		static string SHA1EncodeFile(const string &path);
+		static string SHA256EncodeFile(const string &path);
 
 		static string GenUUID();
 
-		static VStrResult HostnameToIP(const string&);
-		static VStrResult IPToHostName(const string&);
+		static VStrResult HostnameToIP(const string &);
+		static VStrResult IPToHostName(const string &);
 
 		static string GetCallStack();
+
+		static bool FileExist(const string &file)
+		{
+			// 		On success (all requested permissions granted, or mode is F_OK
+			//    and the file exists), zero is returned.  On error (at least one
+			//    bit in mode asked for a permission that is denied, or mode is
+			//    F_OK and the file does not exist, or some other error occurred),
+			//    -1 is returned, and errno is set to indicate the error.
+			if (0 == access(file.c_str(), F_OK))
+				return true;
+			else
+				return false;
+		}
 	};
 
 } // namespace Sloong

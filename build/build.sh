@@ -35,7 +35,13 @@ VERSION_STR=$(cat $SCRIPTFOLDER/../version)
 
 
 clean(){
+	cd $SCRIPTFOLDER/$MAKEFLAG
 	rm -rdf $MAKEFLAG/$PROJECT
+	rm -rdf CMakeFiles
+	rm -f CMakeCache.txt
+	rm -f Makefile
+	rm -rdf modules
+	rm cmake_install.cmake
 	if [ -d $OUTPATH  ];then
 		rm -rdf $OUTPATH
 	fi
@@ -57,13 +63,6 @@ build(){
 		echo "Run make cmd return error. build stop."
 		exit 1
 	fi
-
-	mkdir -p $OUTPATH/modules/
-
-	cp $CMAKE_FILE_PATH/referenced/libuniv/libuniv.so $OUTPATH/
-	cp $SCRIPTFOLDER/$MAKEFLAG/$PROJECT $OUTPATH/
-	cp $SCRIPTFOLDER/$MAKEFLAG/libcore.so $OUTPATH/
-	cp $SCRIPTFOLDER/$MAKEFLAG/modules/*.so $OUTPATH/modules/
 }
 
 build_debug(){
@@ -72,6 +71,15 @@ build_debug(){
 	CMAKEFLAG=Debug
 	# clean
 	build
+}
+
+clean_all(){
+	OUTPATH=$SCRIPTFOLDER/$PROJECT-debug
+	MAKEFLAG=debug
+	clean
+	# OUTPATH=$SCRIPTFOLDER/$PROJECT-release
+	# MAKEFLAG=release
+	# clean
 }
 
 build_release(){
@@ -83,6 +91,13 @@ build_release(){
 }
 
 zipfile(){
+	mkdir -p $OUTPATH/modules/
+
+	cp $CMAKE_FILE_PATH/referenced/libuniv/libuniv.so $OUTPATH/
+	cp $SCRIPTFOLDER/$MAKEFLAG/$PROJECT $OUTPATH/
+	cp $SCRIPTFOLDER/$MAKEFLAG/libcore.so $OUTPATH/
+	cp $SCRIPTFOLDER/$MAKEFLAG/modules/*.so $OUTPATH/modules/
+
 	OUTFILE=$OUTPATH-v$VERSION_STR
 	cd $OUTPATH
 	tar -rv -f $OUTFILE.tar *.so
@@ -117,6 +132,9 @@ if [ $# -eq 1 ]; then
 		-dz) 
 			build_debug
 			zipfile
+			;;
+		-c)
+			clean_all
 			;;
 		* ) 
 			show_help

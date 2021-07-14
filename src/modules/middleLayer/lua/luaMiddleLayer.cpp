@@ -83,7 +83,14 @@ CResult LuaMiddleLayer::Initialized()
 		return CResult::Make_Error("No set module config. cannot go on.");
 	}
 	m_iC->RegisterEventHandler(EVENT_TYPE::ConnectionBreaked, std::bind(&LuaMiddleLayer::OnConnectionBreaked, this, std::placeholders::_1));
-	return CGlobalFunction::Instance->Initialize(m_iC);
+	auto res = CGlobalFunction::Instance->Initialize(m_iC);
+	if( res.IsFialed() )
+		return res;
+	auto item = make_shared<CLuaProcessCenter>();
+	res = item->Initialize(m_iC);
+	if (res.IsFialed())
+		return res;
+	return res;
 }
 
 PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter *pProcess, Package *pack)
