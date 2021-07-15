@@ -115,7 +115,7 @@ namespace Sloong
 		{
 			auto str = Helper::Format("\n [%d]Error - %s:\n %s\n Error Message:%s", res, strErrorTitle.c_str(), strErrorOperation.c_str(), GetString(m_pScriptContext,1).c_str());
 			//Helper::Format("\n Error - %s:\n %s\n Error Message:%s", strErrorType.c_str(), strCmd, GetCallStack(m_pScriptContext).c_str())
-			#ifdef DEBUG
+			#ifndef HIDE_LUA_ERROR
 				cout << str << endl;
 				return CResult::Make_Error(str);
 			#else
@@ -128,8 +128,8 @@ namespace Sloong
 		lua_State *m_pScriptContext = nullptr;
 		string m_strScriptFolder = "./";
 		vector<string> m_listSearchRoute = {
-			"%pathdir%%filename%.lua",
 			"%pathdir%%filename%",
+			"%pathdir%%filename%.lua",
 		};
 	};
 
