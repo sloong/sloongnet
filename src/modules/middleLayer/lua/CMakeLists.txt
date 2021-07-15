@@ -6,7 +6,7 @@ message(WorkDir:${CMAKE_CURRENT_LIST_DIR})
 
 include_directories(
 	"${CMAKE_CURRENT_LIST_DIR}"
-	"/usr/include/lua5.1"
+	"/usr/include/lua5.3"
 )
 
 SET(LIBRARY_OUTPUT_PATH "../../")
@@ -28,5 +28,4 @@ ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRC_LIST})
 add_link_options("-Wl,-E")
 
 # 添加链接库
-target_link_libraries(${PROJECT_NAME} lua5.1)
-#target_link_libraries(${PROJECT_NAME} lua)
+target_link_libraries(${PROJECT_NAME} lua5.3)
