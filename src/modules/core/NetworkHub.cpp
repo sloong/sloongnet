@@ -67,6 +67,7 @@
 #include "events/MonitorSendStatus.hpp"
 #include "events/RegisteConnection.hpp"
 #include "events/GetConnectionInfo.hpp"
+#include "events/EnableTimeoutCheck.hpp"
 using namespace Sloong::Events;
 
 Sloong::CNetworkHub::CNetworkHub()
@@ -116,6 +117,7 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	m_iC->RegisterEventHandler(EVENT_TYPE::MonitorSendStatus, std::bind(&CNetworkHub::MonitorSendStatusEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::RegisteConnection, std::bind(&CNetworkHub::RegisteConnectionEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::GetConnectionInfo, std::bind(&CNetworkHub::OnGetConnectionInfoEventHandler, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::EnableTimeoutCheck, std::bind(&CNetworkHub::OnEnableTimeoutCheckEventHandler, this, std::placeholders::_1));
 
 	if (m_pRequestFunc == nullptr)
 	{
@@ -130,9 +132,7 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 
 	m_emStatus = RUN_STATUS::Running;
 	m_pEpoll->Run();
-	if (m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0)
-		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this));
-		
+	
 	return CResult::Succeed;
 }
 
@@ -188,7 +188,7 @@ void Sloong::CNetworkHub::AddMessageToSendList(UniquePackage pack)
 
 void Sloong::CNetworkHub::OnConnectionBreakedEventHandler(SharedEvent e)
 {
-	auto event = DYNAMIC_TRANS<ConnectionBreakedEventn *>(e.get());
+	auto event = DYNAMIC_TRANS<ConnectionBreakedEvent *>(e.get());
 	auto id = event->GetSessionID();
 	if (!m_mapConnectIDToSession.exist(id))
 		return;
@@ -258,12 +258,22 @@ void Sloong::CNetworkHub::OnGetConnectionInfoEventHandler(SharedEvent e)
 	event->CallCallbackFunc(ConnectionInfo{ .Address = pConn->m_strAddress, .Port = pConn->m_nPort});
 }
 
+void Sloong::CNetworkHub::OnEnableTimeoutCheckEventHandler(SharedEvent e)
+{
+	auto event = DYNAMIC_TRANS<EnableTimeoutCheckEvent *>(e.get());
+	if (event == nullptr)
+		return;
+
+	EnableTimeoutCheck(event->GetTimeoutTime(),event->GetCheckInterval());
+}
+
+
 inline void Sloong::CNetworkHub::SendConnectionBreak(uint64_t sessionid)
 {
 	if (!m_mapConnectIDToSession.exist(sessionid))
 		return;
 
-	m_iC->SendMessage(make_shared<ConnectionBreakedEventn>(sessionid));
+	m_iC->SendMessage(make_shared<ConnectionBreakedEvent>(sessionid));
 }
 
 void Sloong::CNetworkHub::EnableClientCheck(const string &clientCheckKey, int clientCheckTime)
@@ -277,6 +287,9 @@ void Sloong::CNetworkHub::EnableTimeoutCheck(int timeoutTime, int checkInterval)
 {
 	m_nConnectTimeoutTime = timeoutTime;
 	m_nCheckTimeoutInterval = checkInterval;
+	if (m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0)
+		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this));
+		
 }
 
 void Sloong::CNetworkHub::EnableSSL(const string &certFile, const string &keyFile, const string &passwd)

@@ -16,17 +16,20 @@ namespace Sloong
 {
 	namespace Events
 	{
-		class ConnectionBreakedEvent : public NormalEvent
+		class EnableTimeoutCheckEvent : public NormalEvent
 		{
 		public:
-			ConnectionBreakedEvent(uint64_t session):NormalEvent( EVENT_TYPE::ConnectionBreaked ){
-				m_SessionID = session;
+			EnableTimeoutCheckEvent(uint64_t time, uint64_t interval):NormalEvent( EVENT_TYPE::EnableTimeoutCheck ){
+				m_TimeoutTime = time;
+				m_CheckInterval = interval;
 			}
-			virtual	~ConnectionBreakedEvent(){}
+			virtual	~EnableTimeoutCheckEvent(){}
 
-			inline uint64_t GetSessionID() { return m_SessionID; }
+			inline uint64_t GetTimeoutTime() { return m_TimeoutTime; }
+			inline uint64_t GetCheckInterval() { return m_CheckInterval; }
 		protected:
-			uint64_t m_SessionID;
+			uint64_t m_TimeoutTime;
+			uint64_t m_CheckInterval;
 		};
 	}	
 }

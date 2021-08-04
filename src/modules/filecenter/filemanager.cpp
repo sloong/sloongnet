@@ -186,6 +186,7 @@ CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, Package
 CResult Sloong::FileManager::UploadingHandler(const string &str_req, Package *pack)
 {
     auto req = ConvertStrToObj<UploadingRequest>(str_req);
+    assert(req);
 
     auto info = m_mapTokenToUploadInfo->try_get(req->token());
     if (info == nullptr)

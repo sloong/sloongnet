@@ -91,6 +91,7 @@ CResult SloongControlService::PrepareInitialize(GLOBAL_CONFIG *config)
 	}
 	// When config parse done, revert the port setting. Because we always use the command line port.
 	config->set_listenport(port);
+	
 
 	return CResult::Succeed;
 }
@@ -137,7 +138,7 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG *config)
 
 void Sloong::SloongControlService::OnConnectionBreaked(SharedEvent e)
 {
-	auto event = DYNAMIC_TRANS<ConnectionBreakedEventn *>(e.get());
+	auto event = DYNAMIC_TRANS<ConnectionBreakedEvent *>(e.get());
 	auto id = event->GetSessionID();
 	for (auto &item : m_listServerManage)
 		item->OnSocketClosed(id);

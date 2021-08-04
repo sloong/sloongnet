@@ -86,6 +86,7 @@ namespace Sloong
         void MonitorSendStatusEventHandler(SharedEvent);
         void RegisteConnectionEventHandler(SharedEvent);
         void OnGetConnectionInfoEventHandler(SharedEvent);
+        void OnEnableTimeoutCheckEventHandler(SharedEvent);
 
         inline void RegisterProcesser(RequestPackageProcessFunction req, ResponsePackageProcessFunction res, EventPackageProcessFunction event)
         {
