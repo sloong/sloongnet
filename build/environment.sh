@@ -12,6 +12,6 @@ export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
 # install run time library
-apt-get install -y libsqlite3-0 libprotobuf17 libuuid1 libssl1.1  libjsoncpp1 mariadb-client liblua5.3 graphicsmagick
+apt-get install -y libsqlite3-0 libprotobuf17 libuuid1 libssl1.1  libjsoncpp1 mariadb-client liblua5.3 imagemagick
 # install develop library
 apt-get install -y cmake clang llvm libsqlite3-dev libprotobuf-dev protobuf-compiler uuid-dev libssl-dev libjsoncpp-dev libmariadbclient-dev liblua5.3
