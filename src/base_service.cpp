@@ -453,8 +453,7 @@ CResult CSloongBaseService::Run()
     m_iC->SendMessage(EVENT_TYPE::ProgramStart);
     m_emStatus = RUN_STATUS::Running;
 
-    bool enableReport = false;
-    if (enableReport)
+    if (m_ManagerSession != INVALID_SESSION)
     {
         auto prev_status = make_shared<CPU_OCCUPY>();
         CUtility::RecordCPUStatus(prev_status.get());

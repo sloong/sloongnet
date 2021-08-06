@@ -120,7 +120,10 @@ namespace Sloong
 		unique_ptr<CControlHub> m_iC = make_unique<CControlHub>();
 		unique_ptr<CLog> m_pLog = make_unique<CLog>();
 		RuntimeDataPackage m_oServerConfig;
-		uint64_t m_ManagerSession;
+		
+		static const uint64_t INVALID_SESSION = 0;
+
+		uint64_t m_ManagerSession=INVALID_SESSION;
 		Json::Value m_oModuleConfig;
 		EasySync m_oExitSync;
 		CResult m_oExitResult = CResult::Succeed;
@@ -136,7 +139,7 @@ namespace Sloong
 		ModuleInitializedFunction m_pModuleInitializedFunc = nullptr;
 		PrepareInitializeFunction m_pPrepareInitializeFunc = nullptr;
 
-		static constexpr int REPORT_LOAD_STATUS_INTERVAL = 1000 * 60; // one mintue
+		static constexpr int REPORT_LOAD_STATUS_INTERVAL = 1000 * 10; // one mintue
 	public:
 		static unique_ptr<CSloongBaseService> Instance;
 	};
