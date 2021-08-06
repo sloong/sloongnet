@@ -126,7 +126,7 @@ namespace Sloong
 
     protected:
         map_ex<uint64_t, unique_ptr<ConnectSession>> m_mapConnectIDToSession;
-        mutex m_oSockListMutex;
+        shared_mutex  m_oSockListMutex;
         RUN_STATUS m_emStatus = RUN_STATUS::Created;
         unique_ptr<CEpollEx> m_pEpoll;
         EasySync m_oCheckTimeoutThreadSync;

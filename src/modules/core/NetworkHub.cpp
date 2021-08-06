@@ -132,13 +132,12 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 
 	m_emStatus = RUN_STATUS::Running;
 	m_pEpoll->Run();
-	
+
 	return CResult::Succeed;
 }
 
 void Sloong::CNetworkHub::Run(SharedEvent event)
 {
-	
 }
 
 void Sloong::CNetworkHub::Exit(SharedEvent event)
@@ -196,7 +195,7 @@ void Sloong::CNetworkHub::OnConnectionBreakedEventHandler(SharedEvent e)
 	auto info = m_mapConnectIDToSession[id].get();
 	m_pLog->Info(Helper::Format("close connect:[%d]%s:%d.", info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
 
-	unique_lock<mutex> sockLck(m_oSockListMutex);
+	unique_lock<shared_mutex> sockLck(m_oSockListMutex);
 	m_mapConnectIDToSession.erase(id);
 	sockLck.unlock();
 
@@ -212,7 +211,7 @@ void Sloong::CNetworkHub::MonitorSendStatusEventHandler(SharedEvent e)
 
 	auto info = m_mapConnectIDToSession[id].get();
 	m_pLog->Info(Helper::Format("MonitorSendStatus:%s:%d.", info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
-	m_pEpoll->ModifySendMonitorStatus(info->m_pConnection->GetHashCode(),true);
+	m_pEpoll->ModifySendMonitorStatus(info->m_pConnection->GetHashCode(), true);
 }
 
 void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
@@ -225,8 +224,8 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
 	}
 
 	auto connect = make_unique<EasyConnect>();
-	auto res = connect->InitializeAsClient( m_pLog, event->GetAddress(), event->GetPort(), m_pCTX);
-	if( res.IsFialed() )
+	auto res = connect->InitializeAsClient(m_pLog, event->GetAddress(), event->GetPort(), m_pCTX);
+	if (res.IsFialed())
 	{
 		m_pLog->Warn(res.GetMessage());
 	}
@@ -236,11 +235,11 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
 	auto sessionid = info->m_pConnection->GetHashCode();
 	m_pLog->Info(Helper::Format("Registe connection:[%d][%lld][%s:%d].", info->m_pConnection->GetSocketID(), sessionid, info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
 
-	unique_lock<mutex> sockLck(m_oSockListMutex);
+	unique_lock<shared_mutex> sockLck(m_oSockListMutex);
 	m_mapConnectIDToSession[sessionid] = std::move(info);
 	sockLck.unlock();
 	m_pEpoll->RegisteConnection(m_mapConnectIDToSession[sessionid]->m_pConnection.get());
-	
+
 	event->CallCallbackFunc(sessionid);
 }
 
@@ -255,7 +254,7 @@ void Sloong::CNetworkHub::OnGetConnectionInfoEventHandler(SharedEvent e)
 		return;
 
 	auto pConn = (*info)->m_pConnection.get();
-	event->CallCallbackFunc(ConnectionInfo{ .Address = pConn->m_strAddress, .Port = pConn->m_nPort});
+	event->CallCallbackFunc(ConnectionInfo{.Address = pConn->m_strAddress, .Port = pConn->m_nPort});
 }
 
 void Sloong::CNetworkHub::OnEnableTimeoutCheckEventHandler(SharedEvent e)
@@ -264,9 +263,8 @@ void Sloong::CNetworkHub::OnEnableTimeoutCheckEventHandler(SharedEvent e)
 	if (event == nullptr)
 		return;
 
-	EnableTimeoutCheck(event->GetTimeoutTime(),event->GetCheckInterval());
+	EnableTimeoutCheck(event->GetTimeoutTime(), event->GetCheckInterval());
 }
-
 
 inline void Sloong::CNetworkHub::SendConnectionBreak(uint64_t sessionid)
 {
@@ -289,7 +287,6 @@ void Sloong::CNetworkHub::EnableTimeoutCheck(int timeoutTime, int checkInterval)
 	m_nCheckTimeoutInterval = checkInterval;
 	if (m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0)
 		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this));
-		
 }
 
 void Sloong::CNetworkHub::EnableSSL(const string &certFile, const string &keyFile, const string &passwd)
@@ -311,23 +308,31 @@ void Sloong::CNetworkHub::EnableSSL(const string &certFile, const string &keyFil
 *************************************************/
 void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
 {
-	int tout = m_nConnectTimeoutTime * 60;
-	int tinterval = m_nCheckTimeoutInterval * 60 * 1000;
+	int tout = m_nConnectTimeoutTime;
+	int tinterval = m_nCheckTimeoutInterval * 1000;
+
+	map_ex<uint64_t, bool> closedList;
 
 	m_pLog->Debug("Check connect timeout thread is running.");
 	while (m_emStatus != RUN_STATUS::Exit)
 	{
 		m_pLog->Debug("Check connect timeout start.");
+		closedList.clear();
 	RecheckTimeout:
+		shared_lock<shared_mutex> rlock(m_oSockListMutex);
 		for (auto it = m_mapConnectIDToSession.begin(); it != m_mapConnectIDToSession.end(); ++it)
 		{
+			if (closedList.exist(it->first))
+				continue;
 			if (it->second != NULL && time(NULL) - it->second->m_ActiveTime > tout)
 			{
 				m_pLog->Info(Helper::Format("[Timeout]:[Close connect:%s]", it->second->m_pConnection->m_strAddress.c_str()));
+				closedList[it->first] = true;
 				SendConnectionBreak(it->first);
 				goto RecheckTimeout;
 			}
 		}
+		rlock.unlock();
 		m_pLog->Debug(Helper::Format("Check connect timeout done. wait [%d] ms.", tinterval));
 		m_oCheckTimeoutThreadSync.wait_for(tinterval);
 	}
@@ -392,7 +397,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					{
 					case DataPackage_PackageType::DataPackage_PackageType_EventPackage:
 					{
-						PrintPackage( m_pLog, package.get(), "Event package <<< " );
+						PrintPackage(m_pLog, package.get(), "Event package <<< ");
 						switch (package->function())
 						{
 						case ControlEvent::Restart:
@@ -411,7 +416,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					break;
 					case DataPackage_PackageType::DataPackage_PackageType_NormalPackage:
 					{
-						PrintPackage( m_pLog, package.get(), "Process package <<< " );
+						PrintPackage(m_pLog, package.get(), "Process package <<< ");
 						if (package->status() == DataPackage_StatusType::DataPackage_StatusType_Request)
 							result = m_pRequestFunc(pEnv, package.get());
 						else
@@ -420,20 +425,20 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 						if (result.HaveResultObject())
 						{
 							auto response = result.MoveResultObject();
-							PrintPackage( m_pLog, package.get(), "Response package <<< " );
+							PrintPackage(m_pLog, package.get(), "Response package <<< ");
 							AddMessageToSendList(move(response));
 						}
 						else if (result.GetResult() != ResultType::Ignore)
 						{
 							auto response = PackageHelper::MakeResponse(package.get());
 							response->set_result(result.GetResult());
-							PackageHelper::SetContent(response.get(),result.GetMessage());
-							PrintPackage( m_pLog, package.get(), "Response package <<< " );
+							PackageHelper::SetContent(response.get(), result.GetMessage());
+							PrintPackage(m_pLog, package.get(), "Response package <<< ");
 							AddMessageToSendList(move(response));
 						}
 						else
 						{
-							m_pLog->Error(Helper::Format("Result[%s]", ResultType_Name(result.GetResult()).c_str()));
+							// Ignore the package response
 						}
 					}
 					break;
@@ -460,7 +465,6 @@ ResultType Sloong::CNetworkHub::OnNewAccept(uint64_t sock)
 {
 	SOCKET conn_sock = (SOCKET)sock;
 	m_pLog->Debug("Accept function is called.");
-	
 
 	// start client check when acdept
 	if (m_nClientCheckKeyLength > 0)
@@ -487,13 +491,13 @@ ResultType Sloong::CNetworkHub::OnNewAccept(uint64_t sock)
 	}
 
 	auto conn = make_unique<EasyConnect>();
-	conn->InitializeAsServer( m_pLog, conn_sock, m_pCTX);
+	conn->InitializeAsServer(m_pLog, conn_sock, m_pCTX);
 
 	auto info = make_unique<ConnectSession>();
 	info->Initialize(m_iC, std::move(conn));
 	auto id = info->m_pConnection->GetHashCode();
 	m_pLog->Info(Helper::Format("Accept client:[%lld][%d][%s:%d].", id, info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
-	unique_lock<mutex> sockLck(m_oSockListMutex);
+	unique_lock<shared_mutex> sockLck(m_oSockListMutex);
 	m_mapConnectIDToSession[id] = std::move(info);
 	sockLck.unlock();
 	m_pEpoll->RegisteConnection(m_mapConnectIDToSession[id]->m_pConnection.get());
@@ -536,10 +540,11 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(uint64_t sessionid)
 			if (event != nullptr)
 			{
 				auto shared_pack = shared_ptr<Package>(move(pack));
-				CThreadPool::EnqueTask([event, shared_pack](SMARTER p) {
-					event->CallCallbackFunc(shared_pack.get());
-					return (SMARTER) nullptr;
-				});
+				CThreadPool::EnqueTask([event, shared_pack](SMARTER p)
+									   {
+										   event->CallCallbackFunc(shared_pack.get());
+										   return (SMARTER) nullptr;
+									   });
 				continue;
 			}
 		}
