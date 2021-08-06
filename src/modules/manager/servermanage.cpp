@@ -280,7 +280,7 @@ PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
 		return PackageResult::Make_OKResult(PackageHelper::MakeErrorResponse(pack, Helper::Format("Parser request package function[%s] error.", pack->content().c_str())));
 	}
 
-	auto req_str = pack->content().data();
+	auto req_str = pack->content();
 	auto func_name = Functions_Name(function);
 	m_pLog->Debug(Helper::Format("Request [%d][%s]", function, func_name.c_str()));
 	if (!m_mapFuncToHandler.exist(function))
@@ -681,7 +681,9 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 CResult Sloong::CServerManage::ReportLoadStatusHandler(const string &req_str, Package *pack)
 {
 	auto req = ConvertStrToObj<ReportLoadStatusRequest>(req_str);
-
+	if (!req)
+		return CResult::Make_Error("Parser message object fialed.");
+		
 	m_pLog->Info(Helper::Format("Node[%lld] load status :CPU[%lf]Mem[%lf]", pack->sender(), req->cpuload(), req->memroyused()));
 
 	return CResult(ResultType::Ignore);
