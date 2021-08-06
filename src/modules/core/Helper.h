@@ -269,7 +269,7 @@ namespace Sloong
 		}
 		else
 		{
-			log->Log( title + Helper::Format("Function: %d Priority: %d ID: %lld Content[L]: %d Extend[L]: %d",
+			log->Log( title + Helper::Format("Function: %d Priority: %d ID: %llu Content[L]: %d Extend[L]: %d",
 			 package->function(), package->priority(), package->id(), package->content().length(), package->extend().length()), level );
 		}
 	}

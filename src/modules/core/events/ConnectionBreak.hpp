@@ -25,8 +25,14 @@ namespace Sloong
 			virtual	~ConnectionBreakedEvent(){}
 
 			inline uint64_t GetSessionID() { return m_SessionID; }
+
+			inline void SetJustClose(bool b){ m_JustClose = b;}
+
+			inline bool GetJustClose(){ return m_JustClose; }
 		protected:
 			uint64_t m_SessionID;
+
+			bool m_JustClose;
 		};
 	}	
 }

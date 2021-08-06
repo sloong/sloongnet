@@ -118,6 +118,8 @@ namespace Sloong
 			m_pOnReconnect = func;
 		}
 
+		inline bool SupportReconnect() { return m_bSupportReconnect; }
+
 	protected:	
 		CResult Connect();
 		
