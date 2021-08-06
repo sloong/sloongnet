@@ -370,7 +370,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 	}
 
 	void *pEnv;
-	m_pLog->Verbos("Call module create process environment function.");
+	m_pLog->Debug("Call module create process environment function.");
 	auto res = m_pCreateEnvFunc(&pEnv);
 	if (res.IsFialed())
 	{
@@ -384,7 +384,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 	}
 	else
 	{
-		m_pLog->Verbos("Create called succeed.");
+		m_pLog->Debug("Create called succeed.");
 	}
 
 	m_pLog->Info("Network hub work thread is running. PID:" + spid);

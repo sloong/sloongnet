@@ -118,6 +118,9 @@ CResult Sloong::EasyConnect::Connect()
 	}
 	auto list = dns_res.GetResultObject();
 
+	if (m_pLog)
+		m_pLog->Debug(Helper::Format("Connect to %s:%d.", list[0].c_str(), m_nPort));
+
 	struct sockaddr_in remote_addr;
 	memset(&remote_addr, 0, sizeof(remote_addr));
 	remote_addr.sin_family = AF_INET;
@@ -313,7 +316,7 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 		else
 		{
 			if (m_pLog)
-				m_pLog->Verbos("Receive data package happened other error. close connection.");
+				m_pLog->Debug("Receive data package happened other error. close connection.");
 			Close();
 			return PackageResult::Make_Error("Error when receive length data.");
 		}
@@ -401,6 +404,8 @@ int Sloong::EasyConnect::Write(const char *data, int len, int index)
 
 void Sloong::EasyConnect::Close()
 {
+	if (m_pLog)
+		m_pLog->Debug(Helper::Format("Socket[%d] is close.",m_nSocket));
 	shutdown(m_nSocket, SHUT_RDWR);
 	close(m_nSocket);
 	m_nInvalidSocket = m_nSocket;

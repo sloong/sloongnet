@@ -23,7 +23,7 @@
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
                     "Manager",
-                    "0.0.0.0:19000"
+                    "0.0.0.0:9001"
             ],
             "cwd": "${workspaceFolder}/build/debug/",
             // "preLaunchTask": "build",
@@ -35,7 +35,7 @@
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
                     "Worker",
-                    "10.0.0.18:19000"
+                    "192.168.10.10:9001"
             ],
            
             "cwd": "${workspaceFolder}/build/debug/",

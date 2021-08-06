@@ -103,11 +103,11 @@ PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter 
 	auto function = pack->function();
 	auto& content =pack->content();
 	auto& extend = pack->extend();
-	m_pLog->Verbos(Helper::Format("Request [%d]:[%d][%d]", function, content.length(), extend.length()));
+	m_pLog->Info(Helper::Format("Request [%d]:[%d][%d]", function, content.length(), extend.length()));
 	auto res = pProcess->MsgProcess(function, info, content, extend);
 	if( res.IsFialed() )
 	{
-		m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%s].", function, ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
+		m_pLog->Warn(Helper::Format("Response [%d]:[%s][%s].", function, ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
 		return PackageResult::Make_OKResult(PackageHelper::MakeResponse(pack,res));
 	}
 	else
@@ -120,13 +120,13 @@ PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter 
 			{
 				int size = 0;
 				auto ptr = m_iC->GetTempBytes(extendUUID, &size);
-				m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length(), size));
+				m_pLog->Info(Helper::Format("Response [%d]:[%s][%d][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length(), size));
 				return PackageResult::Make_OKResult(PackageHelper::MakeResponse(pack,res.GetResult(), content, ptr.get(), size));
 			}
 			else if (m_iC->ExistTempString(extendUUID))
 			{
 				auto extend = m_iC->GetTempString(extendUUID);
-				m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length(), extend.length()));
+				m_pLog->Info(Helper::Format("Response [%d]:[%s][%d][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length(), extend.length()));
 				return PackageResult::Make_OKResult(PackageHelper::MakeResponse(pack,res.GetResult(), content, extend));
 			}
 			else
@@ -137,7 +137,7 @@ PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter 
 		}
 		else
 		{
-			m_pLog->Verbos(Helper::Format("Response [%d]:[%s][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length()));
+			m_pLog->Info(Helper::Format("Response [%d]:[%s][%d].", function, ResultType_Name(res.GetResult()).c_str(), content.length()));
 			return PackageResult::Make_OKResult(PackageHelper::MakeResponse(pack,res));
 		}
 	}

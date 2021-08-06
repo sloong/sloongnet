@@ -110,7 +110,7 @@ CResult Sloong::FileManager::ArchiveFile(const string &index, const string &sour
     {
         string target = GetFileTruePath(index);
 
-        m_pLog->Verbos(Helper::Format("Archive file: source[%s] target[%s]", source.c_str(), target.c_str()));
+        m_pLog->Debug(Helper::Format("Archive file: source[%s] target[%s]", source.c_str(), target.c_str()));
         if (source.length() < 3 || target.length() < 3)
             return CResult::Make_Error(Helper::Format("Move File error. File name cannot empty. source:%s;target:%s", source.c_str(), target.c_str()));
 
@@ -225,7 +225,7 @@ CResult Sloong::FileManager::UploadedHandler(const string &str_req, Package *pac
     if (res.IsFialed())
         return CResult::Make_Error(res.GetMessage());
 
-    m_pLog->Verbos(Helper::Format("Save file to [%s]. Hash [%s]", temp_path.c_str(), info->SHA256.c_str()));
+    m_pLog->Debug(Helper::Format("Save file to [%s]. Hash [%s]", temp_path.c_str(), info->SHA256.c_str()));
     auto sha256 = CUtility::SHA256EncodeFile(temp_path);
     if (info->SHA256 != sha256)
         return CResult::Make_Error(Helper::Format("Hasd check error.[%s]<->[%s]", sha256.c_str(), info->SHA256.c_str()));

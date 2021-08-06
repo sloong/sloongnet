@@ -92,7 +92,7 @@ DResult Sloong::MySqlEx::Query(const string &sqlCmd)
 		return DResult::Make_Error("No connect to server. please call Connect function first.");
 	}
 	if (m_pLog)
-		m_pLog->Verbos(Helper::Format("[SQL]:[%s]", sqlCmd.c_str()));
+		m_pLog->Debug(Helper::Format("[SQL]:[%s]", sqlCmd.c_str()));
 
 	mysql_ping(&m_MySql);
 	if (0 != mysql_query(&m_MySql, sqlCmd.c_str()))
@@ -130,7 +130,7 @@ DResult Sloong::MySqlEx::Query(const string &sqlCmd)
 
 	mysql_free_result(res);
 	if (m_pLog)
-		m_pLog->Verbos(Helper::Format("[SQL]:[Rows:[%d]", dbresult->GetLinesNum()));
+		m_pLog->Debug(Helper::Format("[SQL]:[Rows:[%d]", dbresult->GetLinesNum()));
 	return DResult::Make_OKResult(dbresult);
 }
 
@@ -141,7 +141,7 @@ U64Result Sloong::MySqlEx::RunModifySQLCmd(const string &sqlCmd)
 		return U64Result::Make_Error("No connect to server. please call Connect function first.");
 	}
 	if (m_pLog)
-		m_pLog->Verbos(Helper::Format("[SQL]:[%s]", sqlCmd.c_str()));
+		m_pLog->Debug(Helper::Format("[SQL]:[%s]", sqlCmd.c_str()));
 
 	mysql_ping(&m_MySql);
 	if (0 != mysql_query(&m_MySql, sqlCmd.c_str()))
@@ -152,6 +152,6 @@ U64Result Sloong::MySqlEx::RunModifySQLCmd(const string &sqlCmd)
 	int nRes = mysql_affected_rows(&m_MySql);
 
 	if (m_pLog)
-		m_pLog->Verbos(Helper::Format("[SQL]:[Insert Line:[%d]", nRes));
+		m_pLog->Debug(Helper::Format("[SQL]:[Insert Line:[%d]", nRes));
 	return U64Result::Make_OKResult(nRes);
 }

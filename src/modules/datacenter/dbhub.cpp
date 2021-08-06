@@ -45,9 +45,9 @@ PackageResult Sloong::DBHub::RequestPackageProcesser(Package *pack)
 
     auto res = m_mapFuncToHandler[function](req_str, pack);
    if (res.IsError())
-		m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
+		m_pLog->Warn(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
 	else
-		m_pLog->Verbos(Helper::Format("Response [%s]:[%s]", func_name.c_str(), ResultType_Name(res.GetResult()).c_str()));
+		m_pLog->Debug(Helper::Format("Response [%s]:[%s]", func_name.c_str(), ResultType_Name(res.GetResult()).c_str()));
     return PackageResult::Make_OKResult(PackageHelper::MakeResponse(pack,res));
 }
 
@@ -80,7 +80,7 @@ CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, Package *pa
 
     ConnectDatabaseResponse response;
     response.set_session(*id);
-    m_pLog->Verbos( Helper::Format("Connect to database [%s] succeed. session id [%d]", req->database().c_str(), response.session() ));
+    m_pLog->Debug( Helper::Format("Connect to database [%s] succeed. session id [%d]", req->database().c_str(), response.session() ));
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 

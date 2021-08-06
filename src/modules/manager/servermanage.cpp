@@ -293,7 +293,7 @@ PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
 	}
 
 	auto func_name = Functions_Name(function);
-	m_pLog->Debug(Helper::Format("Request [%d][%s]", function, func_name.c_str()));
+	m_pLog->Info(Helper::Format("Request [%d][%s]", function, func_name.c_str()));
 	if (!m_mapFuncToHandler.exist(function))
 	{
 		return PackageResult::Make_OKResult(PackageHelper::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
@@ -301,9 +301,9 @@ PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
 
 	auto res = m_mapFuncToHandler[function](req_str, pack);
 	if (res.IsError())
-		m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
+		m_pLog->Warn(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
 	else
-		m_pLog->Verbos(Helper::Format("Response [%s]:[%s]", func_name.c_str(), ResultType_Name(res.GetResult()).c_str()));
+		m_pLog->Info(Helper::Format("Response [%s]:[%s]", func_name.c_str(), ResultType_Name(res.GetResult()).c_str()));
 	if (res.GetResult() == ResultType::Ignore)
 		return PackageResult::Ignore();
 
@@ -659,7 +659,7 @@ CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, Package
 
 CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, Package *pack)
 {
-	m_pLog->Verbos("QueryReferenceInfoHandler <<< ");
+	m_pLog->Debug("QueryReferenceInfoHandler <<< ");
 	auto uuid = pack->sender();
 	if (!m_mapUUIDToNodeItem.exist(uuid))
 		return CResult::Make_Error(Helper::Format("The node is no registed. [%llu]", uuid));
@@ -685,7 +685,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 			m_mapUUIDToNodeItem[node].ToProtobuf(item->add_nodeinfos());
 		}
 	}
-	m_pLog->Verbos("QueryReferenceInfoHandler response >>> " + res.ShortDebugString());
+	m_pLog->Debug("QueryReferenceInfoHandler response >>> " + res.ShortDebugString());
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 

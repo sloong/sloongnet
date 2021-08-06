@@ -179,7 +179,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 				if( package->hash().length() != 32 )
 				{
 					auto msg = "Hash check error. Make sure the hash algorithm is SHA256";
-					m_pLog->Verbos(msg);
+					m_pLog->Warn(msg);
 					AddToSendList(PackageHelper::MakeErrorResponse(package.get(),msg ));
 					continue;
 				}
@@ -190,7 +190,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 				if( string((char*)buffer,32) != hash )
 				{
 					auto msg =  Helper::Format("Hash check error. Package[%s]<->[%s]Calculate", ConvertToHexString(hash.c_str(),0,31).c_str(),ConvertToHexString((char*)buffer,0,31).c_str() );
-					m_pLog->Verbos(msg);
+					m_pLog->Warn(msg);
 					AddToSendList(PackageHelper::MakeErrorResponse(package.get(),msg));
 					continue;
 				}
@@ -218,7 +218,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 		else if (res.GetResult() == ResultType::Retry )
 		{
 			// Package is no receive done. need receive in next time.
-			m_pLog->Verbos(Helper::Format("Receive package happened retry event. curent list[%d] ",readList.size()));
+			m_pLog->Debug(Helper::Format("Receive package happened retry event. curent list[%d] ",readList.size()));
 			break;
 		}
 		else if (res.GetResult() == ResultType::Error)

@@ -212,7 +212,7 @@ void SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent* send_pack, Pack
 	{
 		if (info.providefunctions() == "*")
 		{
-			m_pLog->Verbos(Helper::Format("Universal processer find: template id[%d]", info.templateid()));
+			m_pLog->Debug(Helper::Format("Universal processer find: template id[%d]", info.templateid()));
 			m_mapFuncToTemplateIDs[-1].unique_insert(info.templateid());
 		}
 		else

@@ -129,7 +129,7 @@ TResult<unique_ptr<CLua>> Sloong::CLuaProcessCenter::InitLua()
 {
 	auto lua = make_unique<CLua>();
 	auto folder = m_pConfig->operator[]("LuaScriptFolder").asString();
-	m_pLog->Verbos("Init lua base on folder : " + folder);
+	m_pLog->Info("Init lua base on folder : " + folder);
 	lua->SetScriptFolder(folder);
 	
 	CGlobalFunction::Instance->RegistFuncToLua(lua.get());
