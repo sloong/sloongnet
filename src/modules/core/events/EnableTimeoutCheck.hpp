@@ -16,6 +16,7 @@ namespace Sloong
 {
 	namespace Events
 	{
+		// the unit as second
 		class EnableTimeoutCheckEvent : public NormalEvent
 		{
 		public:

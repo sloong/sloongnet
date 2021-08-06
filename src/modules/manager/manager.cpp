@@ -9,6 +9,7 @@
 #include "manager.h"
 #include "utility.h"
 #include "events/ConnectionBreak.hpp"
+#include "events/EnableTimeoutCheck.hpp"
 #include "fstream_ex.hpp"
 
 using namespace Sloong::Events;
@@ -122,6 +123,11 @@ CResult SloongControlService::Initialization(IControl *iC)
 CResult SloongControlService::Initialized()
 {
 	m_iC->RegisterEventHandler(EVENT_TYPE::ConnectionBreaked, std::bind(&SloongControlService::OnConnectionBreaked, this, std::placeholders::_1));
+
+	// Check every two minutes, timeout time as 30 seconds.
+	auto event = make_shared<EnableTimeoutCheckEvent>(30,2*60);
+	m_iC->SendMessage(event);
+
 	return CResult::Succeed;
 }
 
