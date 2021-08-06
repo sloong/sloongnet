@@ -281,6 +281,17 @@ PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
 	}
 
 	auto req_str = pack->content();
+
+	auto uuid = m_mapConnectionToUUID.try_get(pack->sessionid());
+	if (uuid != nullptr)
+	{
+		auto node = m_mapUUIDToNodeItem.try_get(*uuid);
+		if (node != nullptr)
+		{
+			node->Active();
+		}
+	}
+
 	auto func_name = Functions_Name(function);
 	m_pLog->Debug(Helper::Format("Request [%d][%s]", function, func_name.c_str()));
 	if (!m_mapFuncToHandler.exist(function))
@@ -683,7 +694,7 @@ CResult Sloong::CServerManage::ReportLoadStatusHandler(const string &req_str, Pa
 	auto req = ConvertStrToObj<ReportLoadStatusRequest>(req_str);
 	if (!req)
 		return CResult::Make_Error("Parser message object fialed.");
-		
+
 	m_pLog->Info(Helper::Format("Node[%lld] load status :CPU[%lf]Mem[%lf]", pack->sender(), req->cpuload(), req->memroyused()));
 
 	return CResult(ResultType::Ignore);
