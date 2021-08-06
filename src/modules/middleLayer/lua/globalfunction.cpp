@@ -425,7 +425,7 @@ void Sloong::CGlobalFunction::OnReferenceModuleOnline(SharedEvent e)
     auto item = info->item();
     m_mapUUIDToNode[item.uuid()] = item;
     m_mapTemplateIDToUUIDs[item.templateid()].push_back(item.uuid());
-    m_pLog->Info(Helper::Format("New node[%lld][%s:%d] is online:templateid[%d],list size[%d]", item.uuid(), item.address().c_str(), item.port(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
+    m_pLog->Info(Helper::Format("New node[%llu][%s:%d] is online:templateid[%d],list size[%d]", item.uuid(), item.address().c_str(), item.port(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
 
     AddConnection(item.uuid(), item.address(), item.port());
 }
@@ -440,7 +440,7 @@ void Sloong::CGlobalFunction::OnReferenceModuleOffline(SharedEvent e)
     m_mapTemplateIDToUUIDs[item.templateid()].erase(item.uuid());
     m_mapUUIDToConnectionID.erase(uuid);
     m_mapUUIDToNode.erase(uuid);
-    m_pLog->Info(Helper::Format("Node is offline [%lld], template id[%d],list size[%d]", item.uuid(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
+    m_pLog->Info(Helper::Format("Node is offline [%llu], template id[%d],list size[%d]", item.uuid(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
 }
 
 void Sloong::CGlobalFunction::RegistFuncToLua(CLua *pLua)
@@ -773,7 +773,7 @@ U64Result CGlobalFunction::GetConnectionID(int templateid)
         auto item = CGlobalFunction::Instance->m_mapUUIDToNode[uuid];
         CGlobalFunction::Instance->AddConnection(uuid, item.address(), item.port());
 
-        return U64Result::Make_Error(Helper::Format("Try connect to [%d][%lld][%s:%d], please wait and retry.", templateid, uuid, item.address().c_str(), item.port()));
+        return U64Result::Make_Error(Helper::Format("Try connect to [%d][%llu][%s:%d], please wait and retry.", templateid, uuid, item.address().c_str(), item.port()));
     }
 
     return U64Result::Make_OKResult(CGlobalFunction::Instance->m_mapUUIDToConnectionID[uuid]);

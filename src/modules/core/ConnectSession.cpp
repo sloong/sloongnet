@@ -107,7 +107,7 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 		pack->clear_extend();
 	}
 
-	m_pLog->Verbos(Helper::Format("SEND>>>[%d]>>No[%lld]>>[%d]byte", m_pConnection->GetSocketID() , pack->id(), pack->ByteSizeLongEx()));
+	m_pLog->Verbos(Helper::Format("SEND>>>[%d]>>No[%llu]>>[%d]byte", m_pConnection->GetSocketID() , pack->id(), pack->ByteSizeLongEx()));
 
 	// if have exdata, directly add to epoll list.
 	if (IsBigPackage(pack.get()) || m_pConnection->IsSending() || (m_bIsSendListEmpty == false && !m_oPrepareSendList.empty()) || m_oSockSendMutex.try_lock() == false)
@@ -170,7 +170,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 			}
 			else
 			{
-				m_pLog->Verbos(Helper::Format("RECV<<<[%d]<<No[%lld]<<[%d]byte", m_pConnection->GetSocketID(), package->id(), package->ByteSizeLongEx()));
+				m_pLog->Verbos(Helper::Format("RECV<<<[%d]<<No[%llu]<<[%d]byte", m_pConnection->GetSocketID(), package->id(), package->ByteSizeLongEx()));
 				package->add_clocks(GetClock());
 				package->set_sessionid(m_pConnection->GetHashCode());
 				bLoop = true;

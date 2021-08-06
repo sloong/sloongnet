@@ -261,7 +261,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_re
 	auto item = req->item();
 	m_mapUUIDToNode[item.uuid()] = item;
 	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
-	m_pLog->Info(Helper::Format("New node[%lld][%s:%d] is online:templateid[%d],list size[%d]", item.uuid(), item.address().c_str(), item.port(), item.templateid(), m_mapTempteIDToUUIDs[item.templateid()].size()));
+	m_pLog->Info(Helper::Format("New node[%llu][%s:%d] is online:templateid[%d],list size[%d]", item.uuid(), item.address().c_str(), item.port(), item.templateid(), m_mapTempteIDToUUIDs[item.templateid()].size()));
 
 	AddConnection(item.uuid(), item.address(), item.port());
 }
@@ -275,7 +275,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_r
 	m_mapTempteIDToUUIDs[item.templateid()].erase(item.uuid());
 	m_mapUUIDToConnectionID.erase(uuid);
 	m_mapUUIDToNode.erase(uuid);
-	m_pLog->Info(Helper::Format("Node is offline [%lld], template id[%d],list size[%d]", item.uuid(), item.templateid(), m_mapTempteIDToUUIDs[item.templateid()].size()));
+	m_pLog->Info(Helper::Format("Node is offline [%llu], template id[%d],list size[%d]", item.uuid(), item.templateid(), m_mapTempteIDToUUIDs[item.templateid()].size()));
 }
 
 void Sloong::SloongNetGateway::EventPackageProcesser(Package *pack)
