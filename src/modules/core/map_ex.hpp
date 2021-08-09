@@ -119,5 +119,13 @@ namespace Sloong
 			unique_lock<shared_mutex> lock(m_mut);
 			map<K, V>::erase(key);
 		}
+
+		V remove(const K &key)
+		{
+			unique_lock<shared_mutex> lock(m_mut);
+			V value= move(map<K, V>::operator[](key));
+			map<K, V>::erase(key);
+			return move(value);
+		}
 	};
 } // namespace Sloong
