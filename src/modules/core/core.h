@@ -101,6 +101,7 @@ using namespace Core;
 #include "result.h"
 #include "queue_ex.hpp"
 #include "map_ex.hpp"
+#include "strict_map.hpp"
 #include "list_ex.hpp"
 #include "PackageHelper.hpp"
 
