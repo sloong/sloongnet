@@ -90,8 +90,7 @@ extern "C" PackageResult ResponsePackageProcesser(void *env, Package *pack)
 		auto pTranspond = STATIC_TRANS<GatewayTranspond*>(env);
 		if( pTranspond)
 		{
-			auto info = move(SloongNetGateway::Instance->m_mapSerialToRequest[num]);
-			SloongNetGateway::Instance->m_mapSerialToRequest.erase(num);
+			auto info = SloongNetGateway::Instance->m_mapSerialToRequest.remove(num);
 			return pTranspond->ResponsePackageProcesser(move(info),pack);
 		}
 		else
