@@ -118,6 +118,8 @@ CResult Sloong::CLuaProcessCenter::NewThreadInit()
 	auto lua = make_unique<LuaContent>();
 	lua->Content = c.MoveResultObject();
 	lua->Reload.store(false);
+
+	lua->Content->EnableLog(m_pLog);
 	
 	m_listLuaContent.push_back(move(lua));
 	int id = (int)m_listLuaContent.size() - 1;
