@@ -47,11 +47,14 @@ clean(){
 	fi
 }
 
-build(){
+swtich_folder(){
 	if [ ! -d $MAKEFLAG  ];then
 		mkdir $MAKEFLAG
 	fi
 	cd $MAKEFLAG
+}
+
+build(){
 	cmake -DCMAKE_TOOLCHAIN_FILE=$SCRIPTFOLDER/clang.cmake -DCMAKE_BUILD_TYPE=$CMAKEFLAG $CMAKE_FILE_PATH
 	if [ $? -ne 0 ];then
 		echo "Run cmake cmd return error. build stop."
@@ -69,6 +72,7 @@ build_debug(){
 	OUTPATH=$SCRIPTFOLDER/$PROJECT-debug
 	MAKEFLAG=debug
 	CMAKEFLAG=Debug
+	swtich_folder
 	# clean
 	build
 }
