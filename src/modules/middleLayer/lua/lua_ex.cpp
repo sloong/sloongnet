@@ -195,9 +195,9 @@ bool CLua::PushFunction(int nFuncRef)
 	return true;
 }
 
-static int GlobalErrorHandler( lua_State *L)
+static int GlobalErrorHandler(lua_State *L)
 {
-	CLua::PushString(L,CLua::GetCallStack(L));
+	CLua::PushString(L, CLua::GetCallStack(L));
 	return 1;
 }
 
@@ -208,12 +208,12 @@ static int GlobalErrorHandler( lua_State *L)
 CResult CLua::RunScript(const string &strFileName)
 {
 	std::string strFullName = findScript(strFileName);
-	if( strFullName.length() == 0)
+	if (strFullName.length() == 0)
 	{
 		return HandlerError("Load Script", "No find scritp file:" + strFullName);
 	}
 
-	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
+	lua_pushcfunction(m_pScriptContext, GlobalErrorHandler);
 	auto nErr = lua_gettop(m_pScriptContext);
 
 	if (0 != luaL_loadfile(m_pScriptContext, strFullName.c_str()))
@@ -222,8 +222,8 @@ CResult CLua::RunScript(const string &strFileName)
 	}
 
 	auto res = lua_pcall(m_pScriptContext, 0, LUA_MULTRET, nErr);
-	lua_remove( m_pScriptContext, nErr );
-	if( res != LUA_OK )
+	lua_remove(m_pScriptContext, nErr);
+	if (res != LUA_OK)
 	{
 		return HandlerError("Run Script", strFullName, res);
 	}
@@ -232,7 +232,7 @@ CResult CLua::RunScript(const string &strFileName)
 
 CResult CLua::RunBuffer(LPCSTR pBuffer, size_t sz)
 {
-	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
+	lua_pushcfunction(m_pScriptContext, GlobalErrorHandler);
 	auto nErr = lua_gettop(m_pScriptContext);
 
 	if (0 != luaL_loadbuffer(m_pScriptContext, (LPCSTR)pBuffer, sz, NULL))
@@ -241,8 +241,8 @@ CResult CLua::RunBuffer(LPCSTR pBuffer, size_t sz)
 	}
 
 	auto res = lua_pcall(m_pScriptContext, 0, LUA_MULTRET, nErr);
-	lua_remove( m_pScriptContext, nErr );
-	if( res != LUA_OK )
+	lua_remove(m_pScriptContext, nErr);
+	if (res != LUA_OK)
 	{
 		return HandlerError("Run Buffer", pBuffer, res);
 	}
@@ -251,7 +251,7 @@ CResult CLua::RunBuffer(LPCSTR pBuffer, size_t sz)
 
 CResult CLua::RunString(const string &strCommand)
 {
-	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
+	lua_pushcfunction(m_pScriptContext, GlobalErrorHandler);
 	auto nErr = lua_gettop(m_pScriptContext);
 	if (0 != luaL_loadstring(m_pScriptContext, strCommand.c_str()))
 	{
@@ -259,21 +259,21 @@ CResult CLua::RunString(const string &strCommand)
 	}
 
 	auto res = lua_pcall(m_pScriptContext, 0, LUA_MULTRET, nErr);
-	lua_remove( m_pScriptContext, nErr );
-	if( res != LUA_OK )
+	lua_remove(m_pScriptContext, nErr);
+	if (res != LUA_OK)
 	{
 		return HandlerError("Run String", strCommand, res);
 	}
 
 	return CResult::Succeed;
 }
-CResult Sloong::CLua::RunFunction(const string & strFunctionName, CLuaPacket *pUserInfo, int funcid, const string &strRequest, const string &strExtend, string* extendDataUUID)
+CResult Sloong::CLua::RunFunction(const string &strFunctionName, CLuaPacket *pUserInfo, int funcid, const string &strRequest, const string &strExtend, string *extendDataUUID)
 {
 	int nTop = lua_gettop(m_pScriptContext);
 
-	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
+	lua_pushcfunction(m_pScriptContext, GlobalErrorHandler);
 	auto nErr = lua_gettop(m_pScriptContext);
-	
+
 	PushFunction(strFunctionName);
 	// Push params
 	PushInteger(funcid);
@@ -281,43 +281,73 @@ CResult Sloong::CLua::RunFunction(const string & strFunctionName, CLuaPacket *pU
 	PushString(strRequest);
 	PushString(strExtend);
 	auto res = lua_pcall(m_pScriptContext, 4, LUA_MULTRET, nErr);
-	lua_remove( m_pScriptContext, nErr );
-	if( res != LUA_OK )
+	lua_remove(m_pScriptContext, nErr);
+	if (res != LUA_OK)
 	{
 		return HandlerError("Run String", strFunctionName, res);
 	}
-	int nRes = (int)GetInteger(1,0);
-	auto strResponse = GetString(2,"");
-	if( extendDataUUID)
-		*extendDataUUID = GetString(3,"");
-	
+
+	int retNum = lua_gettop(m_pScriptContext);
+	if (m_pLog)
+	{
+		for (int i = 1; i <= retNum; i++)
+		{
+			m_pLog->Debug(Helper::Format("Function returned no.[%d] params. type:[%s]", i, lua_typename(m_pScriptContext, lua_type(m_pScriptContext, i))));
+		}
+	}
+		
+	if (retNum < 2 || retNum > 3)
+	{
+		return CResult::Make_Error("Incorrect number of returned parameters");
+	}
+
+	if (!lua_isinteger(m_pScriptContext, 1))
+	{
+		return CResult::Make_Error(Helper::Format("first returned type[%s] error. it's must be interger.", lua_typename(m_pScriptContext, lua_type(m_pScriptContext, 1))));
+	}
+
+	if (!lua_isstring(m_pScriptContext, 2))
+	{
+		return CResult::Make_Error(Helper::Format("second returned type[%s] error. it's must be string.", lua_typename(m_pScriptContext, lua_type(m_pScriptContext, 2))));
+	}
+
+	if (retNum == 3 && !lua_isstring(m_pScriptContext, 3))
+	{
+		return CResult::Make_Error(Helper::Format("third returned type[%s] error. it's must be string.", lua_typename(m_pScriptContext, lua_type(m_pScriptContext, 3))));
+	}
+
+	int nRes = (int)GetInteger(1, 0);
+	auto strResponse = GetString(2, "");
+	if (extendDataUUID)
+		*extendDataUUID = GetString(3, "");
+
 	lua_settop(m_pScriptContext, nTop);
 
-	if (!ResultType_IsValid(nRes) || nRes == ResultType::Invalid )
+	if (!ResultType_IsValid(nRes) || nRes == ResultType::Invalid)
 	{
 		return CResult::Make_Error("ResultType_IsValid " + Helper::ntos(nRes));
 	}
-	return CResult((ResultType)nRes,strResponse);
+	return CResult((ResultType)nRes, strResponse);
 }
 
-CResult Sloong::CLua::RunEventFunction(const string & strFunctionName, int eventid, const string &strRequest)
+CResult Sloong::CLua::RunEventFunction(const string &strFunctionName, int eventid, const string &strRequest)
 {
 	int nTop = lua_gettop(m_pScriptContext);
 
-	lua_pushcfunction(m_pScriptContext,GlobalErrorHandler);
+	lua_pushcfunction(m_pScriptContext, GlobalErrorHandler);
 	auto nErr = lua_gettop(m_pScriptContext);
-	
+
 	PushFunction(strFunctionName);
 	// Push params
 	PushInteger(eventid);
 	PushString(strRequest);
 	auto res = lua_pcall(m_pScriptContext, 2, LUA_MULTRET, nErr);
-	lua_remove( m_pScriptContext, nErr );
-	if( res != LUA_OK )
+	lua_remove(m_pScriptContext, nErr);
+	if (res != LUA_OK)
 	{
 		return HandlerError("Run String", strFunctionName, res);
 	}
-	
+
 	lua_settop(m_pScriptContext, nTop);
 	return CResult::Succeed;
 }
@@ -352,22 +382,22 @@ void Sloong::CLua::PushPointer(lua_State *l, void *pPointer)
 	lua_pushlightuserdata(l, pPointer);
 }
 
-void Sloong::CLua::PushTable( lua_State* l, const map<string,string>& mapValue)
+void Sloong::CLua::PushTable(lua_State *l, const map<string, string> &mapValue)
 {
 	lua_newtable(l);
-	for( auto& item : mapValue )
+	for (auto &item : mapValue)
 	{
 		lua_pushstring(l, item.first.c_str());
 		lua_pushstring(l, item.second.c_str());
-		lua_rawset(l,-3);
+		lua_rawset(l, -3);
 	}
 }
 
-void Sloong::CLua::PushTable( lua_State* l, const list<string>& listValue)
+void Sloong::CLua::PushTable(lua_State *l, const list<string> &listValue)
 {
 	lua_newtable(l);
 	int index = 1;
-	for( auto& item : listValue)
+	for (auto &item : listValue)
 	{
 		lua_pushstring(l, item.c_str());
 		lua_rawseti(l, -2, index);
@@ -375,11 +405,11 @@ void Sloong::CLua::PushTable( lua_State* l, const list<string>& listValue)
 	}
 }
 
-void Sloong::CLua::Push2DTable( lua_State* l, const list<list<string>>& listValue)
+void Sloong::CLua::Push2DTable(lua_State *l, const list<list<string>> &listValue)
 {
 	lua_newtable(l);
 	int index = 1;
-	for( auto& item : listValue )
+	for (auto &item : listValue)
 	{
 		PushTable(l, item);
 		lua_rawseti(l, -2, index);
@@ -387,11 +417,11 @@ void Sloong::CLua::Push2DTable( lua_State* l, const list<list<string>>& listValu
 	}
 }
 
-void Sloong::CLua::Push2DTable( lua_State* l, const list<map<string, string>>& listValue)
+void Sloong::CLua::Push2DTable(lua_State *l, const list<map<string, string>> &listValue)
 {
 	lua_newtable(l);
 	int index = 1;
-	for( auto& item : listValue )
+	for (auto &item : listValue)
 	{
 		PushTable(l, item);
 		lua_rawseti(l, -2, index);
@@ -399,11 +429,11 @@ void Sloong::CLua::Push2DTable( lua_State* l, const list<map<string, string>>& l
 	}
 }
 
-void Sloong::CLua::Push2DTable( lua_State* l, const map<string,map<string,string>>& listValue)
+void Sloong::CLua::Push2DTable(lua_State *l, const map<string, map<string, string>> &listValue)
 {
 	lua_newtable(l);
 	int index = 1;
-	for( auto& item : listValue )
+	for (auto &item : listValue)
 	{
 		lua_pushstring(l, item.first.c_str());
 		PushTable(l, item.second);
