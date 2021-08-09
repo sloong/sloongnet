@@ -95,10 +95,10 @@ CResult Sloong::CServerManage::Initialize(IControl *ic, const string &db_path)
 	for (auto &item : list)
 	{
 		TemplateItem addItem(item);
-		m_mapIDToTemplateItem[addItem.ID] = addItem;
+		m_mapIDToTemplateItem.insert(addItem.ID, addItem);
 		RefreshModuleReference(addItem.ID);
 	}
-	m_mapIDToTemplateItem[1].Created.push_back(0);
+	m_mapIDToTemplateItem.get(1).Created.push_back(0);
 	return CResult::Succeed;
 }
 
@@ -269,7 +269,7 @@ void Sloong::CServerManage::OnSocketClosed(uint64_t con)
 		SendEvent(notifyList, Manager::Events::ReferenceModuleOffline, &offline_event);
 	}
 	m_mapUUIDToNodeItem.erase(target);
-	m_mapIDToTemplateItem[id].Created.remove(target);
+	m_mapIDToTemplateItem.get(id).Created.remove(target);
 }
 
 PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
@@ -388,17 +388,17 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 		return CResult::Make_Error("Add server info to ServerList fialed.");
 	}
 
-	if (!m_mapIDToTemplateItem.exist(index))
+	auto tpl = m_mapIDToTemplateItem.try_get(index);
+	if (tpl == nullptr)
 	{
 		return CResult(ResultType::Retry, "Allocating type no exist.");
 	}
 
-	auto tpl = m_mapIDToTemplateItem[index];
 	RegisteWorkerResponse res;
-	res.set_templateid(tpl.ID);
-	res.set_configuation(m_mapIDToTemplateItem[tpl.ID].Configuation);
+	res.set_templateid(tpl->ID);
+	res.set_configuation(tpl->Configuation);
 
-	m_pLog->Debug(Helper::Format("Allocating module[%llu] Type to [%s]", sender_info->UUID, tpl.Name.c_str()));
+	m_pLog->Debug(Helper::Format("Allocating module[%llu] Type to [%s]", sender_info->UUID, tpl->Name.c_str()));
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
@@ -425,8 +425,6 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, Package
 		return CResult::Make_Error("The required parameter check error.");
 
 	int id = req->templateid();
-	if (!m_mapIDToTemplateItem.exist(id))
-		return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
 
 	if (!m_mapUUIDToNodeItem.exist(sender))
 		return CResult::Make_Error(Helper::Format("The sender [%llu] is no regitser.", sender));
@@ -434,14 +432,17 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, Package
 	if (id == 1)
 		return CResult::Make_Error("Template id error.");
 
+	auto tpl = m_mapIDToTemplateItem.try_get(id);
+	if (tpl==nullptr)
+		return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
+
 	// Save node info.
 	auto &item = m_mapUUIDToNodeItem[sender];
-	auto &tpl = m_mapIDToTemplateItem[id];
-	item.TemplateName = tpl.Name;
-	item.TemplateID = tpl.ID;
-	item.Port = tpl.ConfiguationObj->listenport();
+	item.TemplateName = tpl->Name;
+	item.TemplateID = tpl->ID;
+	item.Port = tpl->ConfiguationObj->listenport();
 	item.ConnectionHashCode = pack->sessionid();
-	tpl.Created.unique_insert(sender);
+	tpl->Created.unique_insert(sender);
 	m_mapConnectionToUUID[pack->sessionid()] = sender;
 
 	// Find reference node and notify them
@@ -487,7 +488,8 @@ CResult Sloong::CServerManage::AddTemplateHandler(const string &req_str, Package
 		return res;
 	}
 	item.ID = id;
-	m_mapIDToTemplateItem[id] = item;
+
+	m_mapIDToTemplateItem.insert(id, item);
 	RefreshModuleReference(id);
 	return CResult::Succeed;
 }
@@ -519,33 +521,32 @@ CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, Package
 {
 	auto req = ConvertStrToObj<SetTemplateRequest>(req_str);
 	auto info = req->setinfo();
-	if (!m_mapIDToTemplateItem.exist(info.id()))
+
+	auto tplInfo = m_mapIDToTemplateItem.try_get(info.id());
+	if (tplInfo == nullptr)
 	{
 		return CResult::Make_Error("Check the templeate ID error, please check.");
 	}
 
-	auto tplInfo = m_mapIDToTemplateItem[info.id()];
 	if (info.name().size() > 0)
-		tplInfo.Name = info.name();
+		tplInfo->Name = info.name();
 
 	if (info.note().size() > 0)
-		tplInfo.Note = info.note();
+		tplInfo->Note = info.note();
 
 	if (info.replicas() > 0)
-		tplInfo.Replicas = info.replicas();
+		tplInfo->Replicas = info.replicas();
 
 	if (info.configuation().size() > 0)
-		tplInfo.Configuation = info.configuation();
+		tplInfo->Configuation = info.configuation();
 
-	tplInfo.BuildCache();
-	auto res = CConfiguation::Instance->SetTemplate(tplInfo.ID, tplInfo.ToTemplateInfo());
+	tplInfo->BuildCache();
+	auto res = CConfiguation::Instance->SetTemplate(tplInfo->ID, tplInfo->ToTemplateInfo());
 	if (res.IsFialed())
 		return res;
 
-	m_mapIDToTemplateItem[tplInfo.ID] = tplInfo;
-	RefreshModuleReference(tplInfo.ID);
-
-	SendEvent(m_mapIDToTemplateItem[tplInfo.ID].Created, Core::ControlEvent::Restart, nullptr);
+	RefreshModuleReference(info.id());
+	SendEvent(m_mapIDToTemplateItem.get(info.id()).Created, Core::ControlEvent::Restart, nullptr);
 
 	return CResult::Succeed;
 }
@@ -570,7 +571,7 @@ CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, Packa
 			for (auto id : ids)
 			{
 				if (m_mapIDToTemplateItem.exist(id))
-					m_mapIDToTemplateItem[id].ToProtobuf(res.add_templateinfos());
+					m_mapIDToTemplateItem.get(id).ToProtobuf(res.add_templateinfos());
 				else
 					return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
 			}
@@ -613,7 +614,7 @@ CResult Sloong::CServerManage::QueryNodeHandler(const string &req_str, Package *
 		auto id_list = req->templateid();
 		for (auto id : id_list)
 		{
-			for (auto servID : m_mapIDToTemplateItem[id].Created)
+			for (auto servID : m_mapIDToTemplateItem.get(id).Created)
 			{
 				m_mapUUIDToNodeItem[servID].ToProtobuf(res.add_nodeinfos());
 			}
@@ -669,14 +670,14 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 		return CResult::Make_Error(Helper::Format("The template id error. UUID[%llu];ID[%d]", uuid, id));
 
 	QueryReferenceInfoResponse res;
-	auto references = Helper::split(m_mapIDToTemplateItem[id].ConfiguationObj->modulereference(), ',');
+	auto references = Helper::split(m_mapIDToTemplateItem.get(id).ConfiguationObj->modulereference(), ',');
 	for (auto ref : references)
 	{
 		auto ref_id = 0;
 		if (!ConvertStrToInt(ref, &ref_id))
 			continue;
 		auto item = res.add_templateinfos();
-		auto tpl = m_mapIDToTemplateItem[ref_id];
+		auto tpl = m_mapIDToTemplateItem.get(ref_id);
 		item->set_templateid(tpl.ID);
 		item->set_type(tpl.ConfiguationObj->moduletype());
 		item->set_providefunctions(tpl.ConfiguationObj->modulefunctoins());

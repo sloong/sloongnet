@@ -202,7 +202,7 @@ namespace Sloong
     protected:
         map_ex<Manager::Functions, FunctionHandler> m_mapFuncToHandler;
         map_ex<uint64_t, NodeItem> m_mapUUIDToNodeItem;
-        map_ex<int, TemplateItem> m_mapIDToTemplateItem;
+        strict_map<int, TemplateItem> m_mapIDToTemplateItem;
         map_ex<uint64_t, uint64_t> m_mapConnectionToUUID;
     };
 } // namespace Sloong
