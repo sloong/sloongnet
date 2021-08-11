@@ -115,7 +115,7 @@ namespace Sloong
 
 		inline void SetOnReconnectCallback(std::function<void(uint64_t, int, int)> func)
 		{
-			m_pOnReconnect = func;
+			m_pOnReconnect.push_back(func);
 		}
 
 		inline bool SupportReconnect() { return m_bSupportReconnect; }
@@ -156,7 +156,7 @@ namespace Sloong
 		SOCKET m_nSocket = INVALID_SOCKET;
 		CLog* m_pLog = nullptr;
 		bool m_bSupportReconnect = false;
-		std::function<void(uint64_t, int, int)> m_pOnReconnect = nullptr;
+		vector<std::function<void(uint64_t, int, int)>> m_pOnReconnect;
 	};
 
 	typedef unique_ptr<EasyConnect> UniqueConnection;

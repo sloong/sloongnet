@@ -339,6 +339,15 @@ CResult CSloongBaseService::Initialize(RunInfo info)
         auto event = make_shared<Events::RegisteConnectionEvent>(pManagerConnect->m_strAddress, pManagerConnect->m_nPort);
         event->SetCallbackFunc([s = &m_ManagerSession](IEvent *e, uint64_t sessionid)
                                { *s = sessionid; });
+        event->EnableReconnectCallback([&](uint64_t , int , int ){
+            auto res = RegisteNode();
+            if (res.IsFialed())
+            {
+                m_pLog->Fatal(res.GetMessage());
+                m_pLog->Fatal("Manager is reconnected. but register node fialed. exit. ");
+                Stop();
+            }
+        });
         m_iC->CallMessage(event);
     }
 
@@ -369,7 +378,7 @@ CResult CSloongBaseService::InitModule()
     string libFullPath = m_oServerConfig.templateconfig().modulepath() + m_oServerConfig.templateconfig().modulename();
 
     m_pLog->Debug(Helper::Format("Start init module[%s] and load module functions", libFullPath.c_str()));
-    m_pModule = dlopen(libFullPath.c_str(), RTLD_LAZY);
+    m_pModule = dlopen(libFullPath.c_str(), RTLD_LAZY | RTLD_GLOBAL);
     if (m_pModule == nullptr)
     {
         string errMsg = Helper::Format("Load library [%s] error[%s].", libFullPath.c_str(), dlerror());

@@ -240,6 +240,11 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
 		m_pLog->Warn(res.GetMessage());
 	}
 
+	if( event->HaveReconnectCallback())
+	{
+		connect->SetOnReconnectCallback(event->MoveReconnectCallbackFunc());
+	}
+
 	auto info = make_unique<ConnectSession>();
 	info->Initialize(m_iC, std::move(connect));
 	auto sessionid = info->m_pConnection->GetHashCode();

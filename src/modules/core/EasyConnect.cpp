@@ -141,8 +141,9 @@ CResult Sloong::EasyConnect::Connect()
 			return res;
 	}
 
-	if (m_pOnReconnect)
-		m_pOnReconnect(m_nHashCode, m_nInvalidSocket, m_nSocket);
+	if (m_pOnReconnect.size() > 0)
+		for_each(m_pOnReconnect.begin(), m_pOnReconnect.end(), [&](auto func)
+				 { func(m_nHashCode, m_nInvalidSocket, m_nSocket); });
 	return CResult::Succeed;
 }
 
@@ -405,7 +406,7 @@ int Sloong::EasyConnect::Write(const char *data, int len, int index)
 void Sloong::EasyConnect::Close()
 {
 	if (m_pLog)
-		m_pLog->Debug(Helper::Format("Socket[%d] is close.",m_nSocket));
+		m_pLog->Debug(Helper::Format("Socket[%d] is close.", m_nSocket));
 	shutdown(m_nSocket, SHUT_RDWR);
 	close(m_nSocket);
 	m_nInvalidSocket = m_nSocket;
