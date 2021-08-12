@@ -66,7 +66,7 @@
 #include "events/RegisteConnection.hpp"
 using namespace Sloong::Events;
 
-#include "protocol/manager.pb.h"
+#include "modules/manager/protocol/manager.pb.h"
 using namespace Manager;
 
 IControl *Sloong::IData::m_iC = nullptr;

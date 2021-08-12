@@ -90,6 +90,7 @@ build_release(){
 	OUTPATH=$SCRIPTFOLDER/$PROJECT-release
 	MAKEFLAG=release
 	CMAKEFLAG=Release
+	switch_folder
 	clean
 	build
 }
