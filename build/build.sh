@@ -35,26 +35,29 @@ VERSION_STR=$(cat $SCRIPTFOLDER/../version)
 
 
 clean(){
-	cd $SCRIPTFOLDER/$MAKEFLAG
-	rm -rdf $MAKEFLAG/$PROJECT
-	rm -rdf CMakeFiles
-	rm -f CMakeCache.txt
-	rm -f Makefile
-	rm -rdf modules
-	rm cmake_install.cmake
-	if [ -d $OUTPATH  ];then
-		rm -rdf $OUTPATH
+	if [ -d $BUILD_FOLDER  ];then
+		rm -rdf $BUILD_FOLDER
 	fi
 }
 
-swtich_folder(){
-	if [ ! -d $MAKEFLAG  ];then
-		mkdir $MAKEFLAG
+build_path(){
+	BUILD_FOLDER=$SCRIPTFOLDER/cache/$MAKEFLAG
+	OUTPUT_FOLDER=$SCRIPTFOLDER/$MAKEFLAG
+	
+}
+
+check_folder(){
+	if [ ! -d $BUILD_FOLDER  ];then
+		mkdir -p $BUILD_FOLDER
 	fi
-	cd $MAKEFLAG
+	if [ ! -d $OUTPUT_FOLDER/modules ];then
+		mkdir -p $OUTPUT_FOLDER/modules
+	fi
 }
 
 build(){
+	check_folder
+	cd $BUILD_FOLDER
 	cmake -DCMAKE_TOOLCHAIN_FILE=$SCRIPTFOLDER/clang.cmake -DCMAKE_BUILD_TYPE=$CMAKEFLAG $CMAKE_FILE_PATH
 	if [ $? -ne 0 ];then
 		echo "Run cmake cmd return error. build stop."
@@ -66,44 +69,49 @@ build(){
 		echo "Run make cmd return error. build stop."
 		exit 1
 	fi
+	cp $PROJECT $OUTPUT_FOLDER/
+	cp libcore.so $OUTPUT_FOLDER/
+	cp modules/*.so $OUTPUT_FOLDER/modules/
 }
 
 build_debug(){
 	OUTPATH=$SCRIPTFOLDER/$PROJECT-debug
 	MAKEFLAG=debug
 	CMAKEFLAG=Debug
-	swtich_folder
+	build_path
 	# clean
 	build
 }
 
 clean_all(){
-	OUTPATH=$SCRIPTFOLDER/$PROJECT-debug
-	MAKEFLAG=debug
-	clean
-	# OUTPATH=$SCRIPTFOLDER/$PROJECT-release
-	# MAKEFLAG=release
-	# clean
+	if [ -d $SCRIPTFOLDER/cache  ];then
+		rm -rdf $SCRIPTFOLDER/cache
+	fi
 }
 
 build_release(){
 	OUTPATH=$SCRIPTFOLDER/$PROJECT-release
 	MAKEFLAG=release
 	CMAKEFLAG=Release
-	switch_folder
+	build_path
 	clean
 	build
 }
 
-zipfile(){
+copyfile(){
 	mkdir -p $OUTPATH/modules/
 
 	cp $CMAKE_FILE_PATH/referenced/libuniv/libuniv.so $OUTPATH/
 	cp $SCRIPTFOLDER/$MAKEFLAG/$PROJECT $OUTPATH/
 	cp $SCRIPTFOLDER/$MAKEFLAG/libcore.so $OUTPATH/
 	cp $SCRIPTFOLDER/$MAKEFLAG/modules/*.so $OUTPATH/modules/
+}
+
+zipfile(){
+	copyfile
 
 	OUTFILE=$OUTPATH-v$VERSION_STR
+
 	cd $OUTPATH
 	tar -rv -f $OUTFILE.tar *.so
 	tar -rv -f $OUTFILE.tar $PROJECT
