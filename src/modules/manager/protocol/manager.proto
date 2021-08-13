@@ -74,6 +74,12 @@ enum Functions{
     // Response: None
     ReportLoadStatus=12;
 
+    /// For worker lost the connect to the manager. when the connect is reconnected, send this request
+    /// If the template node no full, return succeed. else return error. worker should exit or waiting as other node.
+    /// Request: ReconnectRegisteRequest
+    /// Response: Result
+    ReconnectRegiste=13;
+
     // reserved for other service.
     reserved 101 to max;
 }
@@ -195,4 +201,9 @@ message ReportLoadStatusRequest{
    double MemroyUsed=3;
    double NetworkIn=5;
    double NetworkOut=6;
+}
+
+message ReconnectRegisteRequest{
+   int32 TemplateID=1;
+   fixed64 NodeUUID=2;
 }

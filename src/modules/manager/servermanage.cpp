@@ -82,6 +82,7 @@ CResult Sloong::CServerManage::Initialize(IControl *ic, const string &db_path)
 	m_mapFuncToHandler[Functions::StopNode] = std::bind(&CServerManage::StopNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::RestartNode] = std::bind(&CServerManage::RestartNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::ReportLoadStatus] = std::bind(&CServerManage::ReportLoadStatusHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_mapFuncToHandler[Functions::ReconnectRegiste] = std::bind(&CServerManage::ReportLoadStatusHandler, this, std::placeholders::_1, std::placeholders::_2);
 
 	if (!CConfiguation::Instance->IsInituialized())
 	{
@@ -433,7 +434,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, Package
 		return CResult::Make_Error("Template id error.");
 
 	auto tpl = m_mapIDToTemplateItem.try_get(id);
-	if (tpl==nullptr)
+	if (tpl == nullptr)
 		return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
 
 	// Save node info.
@@ -699,4 +700,62 @@ CResult Sloong::CServerManage::ReportLoadStatusHandler(const string &req_str, Pa
 	m_pLog->Info(Helper::Format("Node[%llu] load status :CPU[%lf]Mem[%lf]", pack->sender(), req->cpuload(), req->memroyused()));
 
 	return CResult(ResultType::Ignore);
+}
+
+CResult Sloong::CServerManage::ReconnectRegisteHandler(const string &req_str, Package *pack)
+{
+	auto req = ConvertStrToObj<ReconnectRegisteRequest>(req_str);
+	if (!req)
+		return CResult::Make_Error("Parser message object fialed.");
+
+	if (m_mapUUIDToNodeItem.exist(req->nodeuuid()))
+	{
+		return CResult::Make_Error("Node is regitstered");
+	}
+
+	auto tpl = m_mapIDToTemplateItem.try_get(req->templateid());
+	if (tpl == nullptr)
+	{
+		return CResult::Make_Error("Template not exist.");
+	}
+
+	if (tpl->Created.size() >= tpl->Replicas)
+	{
+		return CResult::Make_Error("Target template worker node is full.");
+	}
+
+	NodeItem item;
+	item.UUID = req->nodeuuid();
+	m_mapUUIDToNodeItem[item.UUID] = item;
+	auto event = make_shared<GetConnectionInfoEvent>(pack->sessionid());
+	event->SetCallbackFunc([item = &m_mapUUIDToNodeItem[item.UUID]](IEvent *e, ConnectionInfo info)
+						   { item->Address = info.Address; });
+	m_iC->CallMessage(event);
+
+	item.TemplateName = tpl->Name;
+	item.TemplateID = tpl->ID;
+	item.Port = tpl->ConfiguationObj->listenport();
+	item.ConnectionHashCode = pack->sessionid();
+	tpl->Created.unique_insert(item.UUID);
+	m_mapConnectionToUUID[pack->sessionid()] = item.UUID;
+
+	// Find reference node and notify them
+	list<uint64_t> notifyList;
+	for (auto &item : m_mapIDToTemplateItem)
+	{
+		if (item.second.Reference.exist(req->templateid()))
+		{
+			for (auto i : item.second.Created)
+				notifyList.push_back(i);
+		}
+	}
+
+	if (notifyList.size() > 0)
+	{
+		EventReferenceModuleOnline online_event;
+		m_mapUUIDToNodeItem[item.UUID].ToProtobuf(online_event.mutable_item());
+		SendEvent(notifyList, Manager::Events::ReferenceModuleOnline, &online_event);
+	}
+
+	return CResult::Succeed;
 }

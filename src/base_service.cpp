@@ -230,6 +230,8 @@ void CSloongBaseService::InitSystem()
 
 CResult CSloongBaseService::Initialize(RunInfo info)
 {
+    m_emStatus = RUN_STATUS::Created;
+
     m_oServerConfig.set_manageraddress(info.Address);
     m_oServerConfig.set_managerport(info.Port);
     m_oExitResult = CResult::Succeed;
@@ -339,15 +341,15 @@ CResult CSloongBaseService::Initialize(RunInfo info)
         auto event = make_shared<Events::RegisteConnectionEvent>(pManagerConnect->m_strAddress, pManagerConnect->m_nPort);
         event->SetCallbackFunc([s = &m_ManagerSession](IEvent *e, uint64_t sessionid)
                                { *s = sessionid; });
-        event->EnableReconnectCallback([&](uint64_t , int , int ){
-            auto res = RegisteNode();
-            if (res.IsFialed())
-            {
-                m_pLog->Fatal(res.GetMessage());
-                m_pLog->Fatal("Manager is reconnected. but register node fialed. exit. ");
-                Stop();
-            }
-        });
+        event->EnableReconnectCallback([&](uint64_t, int, int)
+                                       {
+                                           ReconnectRegisteRequest req_pack;
+                                           req_pack.set_templateid(m_oServerConfig.templateid());
+                                           req_pack.set_nodeuuid(m_oServerConfig.nodeuuid());
+
+                                           auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::ReconnectRegiste, ConvertObjToStr(&req_pack));
+                                           return event->SyncCall(m_iC.get(), 5000);
+                                       });
         m_iC->CallMessage(event);
     }
 
@@ -462,34 +464,28 @@ CResult CSloongBaseService::Run()
     m_iC->SendMessage(EVENT_TYPE::ProgramStart);
     m_emStatus = RUN_STATUS::Running;
 
-    if (m_ManagerSession != INVALID_SESSION)
+    auto prev_status = make_shared<CPU_OCCUPY>();
+    CUtility::RecordCPUStatus(prev_status.get());
+    int mem_total, mem_free;
+    // Report server load status each one minutes.
+    while (!m_oExitSync.wait_for(REPORT_LOAD_STATUS_INTERVAL) && m_emStatus != RUN_STATUS::Exit)
     {
-        auto prev_status = make_shared<CPU_OCCUPY>();
-        CUtility::RecordCPUStatus(prev_status.get());
-        int mem_total, mem_free;
-        // Report server load status each one minutes.
-        while (!m_oExitSync.wait_for(REPORT_LOAD_STATUS_INTERVAL))
+        Manager::ReportLoadStatusRequest req;
+        auto load = CUtility::CalculateCPULoad(prev_status.get());
+        CUtility::GetMemory(mem_total, mem_free);
+        req.set_cpuload(load);
+        req.set_memroyused(mem_total / mem_free);
+
+        if (m_oServerConfig.templateid() != 1) // Manager module
         {
-            Manager::ReportLoadStatusRequest req;
-            auto load = CUtility::CalculateCPULoad(prev_status.get());
-            CUtility::GetMemory(mem_total, mem_free);
-            req.set_cpuload(load);
-            req.set_memroyused(mem_total / mem_free);
-
-            if (m_oServerConfig.templateid() != 1) // Manager module
-            {
-                auto event = make_shared<Events::SendPackageEvent>(m_ManagerSession);
-                event->SetRequest(m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(), Base::PRIORITY_LEVEL::LOW_LEVEL, (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
-                m_iC->SendMessage(event);
-            }
-
-            CUtility::RecordCPUStatus(prev_status.get());
+            auto event = make_shared<Events::SendPackageEvent>(m_ManagerSession);
+            event->SetRequest(m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(), Base::PRIORITY_LEVEL::LOW_LEVEL, (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
+            m_iC->SendMessage(event);
         }
+
+        CUtility::RecordCPUStatus(prev_status.get());
     }
-    while (m_emStatus != RUN_STATUS::Exit)
-    {
-        m_oExitSync.wait_for(1000);
-    }
+
     m_pLog->Info("Application main work loop end with result " + ResultType_Name(m_oExitResult.GetResult()));
 
     return m_oExitResult;
@@ -508,6 +504,7 @@ void CSloongBaseService::OnProgramRestartEventHandler(SharedEvent event)
     // Restart service. use the Exit Sync object, notify the wait thread and return the ExitResult.
     // in main function, check the result, if is Retry, do the init loop.
     m_oExitResult = CResult(ResultType::Retry);
+    m_emStatus = RUN_STATUS::Exit;
     m_oExitSync.notify_all();
 }
 

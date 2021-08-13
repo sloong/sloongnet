@@ -123,7 +123,7 @@ int main(int argc, char **args)
 		do
 		{
 			cout << "Initialize base service instance." << endl;
-			res = Sloong::CSloongBaseService::Instance->Initialize(move(info));
+			res = Sloong::CSloongBaseService::Instance->Initialize(info);
 			if (!res.IsSucceed())
 			{
 				cout << "Initialize server error. Message: " << res.GetMessage() << endl;

@@ -187,6 +187,7 @@ namespace Sloong
         CResult RestartNodeHandler(const string &, Package *);
         CResult QueryReferenceInfoHandler(const string &, Package *);
         CResult ReportLoadStatusHandler(const string &, Package *);
+        CResult ReconnectRegisteHandler(const string &, Package *);
 
     public:
         static CResult LoadManagerConfig(const string &);
