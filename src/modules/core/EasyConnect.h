@@ -120,9 +120,9 @@ namespace Sloong
 
 		inline bool SupportReconnect() { return m_bSupportReconnect; }
 
-	protected:	
 		CResult Connect();
-		
+
+	protected:			
 		int Read(char *, int, bool, bool);
 
 		decltype(auto) RecvLengthData(bool);

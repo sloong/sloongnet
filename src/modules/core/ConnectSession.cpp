@@ -107,6 +107,11 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 		pack->clear_extend();
 	}
 
+	if( m_pConnection->GetSocketID() ==  INVALID_SOCKET && m_pConnection->SupportReconnect() )
+	{
+		m_pConnection->Connect();
+	}
+
 	m_pLog->Verbos(Helper::Format("SEND>>>[%d]>>No[%llu]>>[%d]byte", m_pConnection->GetSocketID() , pack->id(), pack->ByteSizeLongEx()));
 
 	// if have exdata, directly add to epoll list.
