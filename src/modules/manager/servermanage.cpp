@@ -82,7 +82,7 @@ CResult Sloong::CServerManage::Initialize(IControl *ic, const string &db_path)
 	m_mapFuncToHandler[Functions::StopNode] = std::bind(&CServerManage::StopNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::RestartNode] = std::bind(&CServerManage::RestartNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::ReportLoadStatus] = std::bind(&CServerManage::ReportLoadStatusHandler, this, std::placeholders::_1, std::placeholders::_2);
-	m_mapFuncToHandler[Functions::ReconnectRegiste] = std::bind(&CServerManage::ReportLoadStatusHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_mapFuncToHandler[Functions::ReconnectRegiste] = std::bind(&CServerManage::ReconnectRegisteHandler, this, std::placeholders::_1, std::placeholders::_2);
 
 	if (!CConfiguation::Instance->IsInituialized())
 	{
@@ -475,7 +475,6 @@ CResult Sloong::CServerManage::AddTemplateHandler(const string &req_str, Package
 	item.ID = 0;
 	item.Name = info.name();
 	item.Note = info.note();
-	;
 	item.Replicas = info.replicas();
 	item.Configuation = info.configuation();
 	item.BuildCache();
