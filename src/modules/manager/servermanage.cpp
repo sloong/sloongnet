@@ -666,22 +666,29 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 		return CResult::Make_Error(Helper::Format("The node is no registed. [%llu]", uuid));
 
 	auto id = m_mapUUIDToNodeItem[uuid].TemplateID;
-	if (!m_mapIDToTemplateItem.exist(id))
+	auto item = m_mapIDToTemplateItem.try_get(id);
+	if (item == nullptr )
 		return CResult::Make_Error(Helper::Format("The template id error. UUID[%llu];ID[%d]", uuid, id));
 
 	QueryReferenceInfoResponse res;
-	auto references = Helper::split(m_mapIDToTemplateItem.get(id).ConfiguationObj->modulereference(), ',');
+
+	auto references = Helper::split(item->ConfiguationObj->modulereference(), ',');
 	for (auto ref : references)
 	{
 		auto ref_id = 0;
 		if (!ConvertStrToInt(ref, &ref_id))
 			continue;
 		auto item = res.add_templateinfos();
-		auto tpl = m_mapIDToTemplateItem.get(ref_id);
-		item->set_templateid(tpl.ID);
-		item->set_type(tpl.ConfiguationObj->moduletype());
-		item->set_providefunctions(tpl.ConfiguationObj->modulefunctoins());
-		for (auto node : tpl.Created)
+		auto tpl = m_mapIDToTemplateItem.try_get(ref_id);
+		if( tpl == nullptr )
+		{
+			m_pLog->Warn(Helper::Format("Reference template item [id:%d] no exist. please check. ", ref_id));
+			continue;
+		}
+		item->set_templateid(tpl->ID);
+		item->set_type(tpl->ConfiguationObj->moduletype());
+		item->set_providefunctions(tpl->ConfiguationObj->modulefunctoins());
+		for (auto node : tpl->Created)
 		{
 			m_mapUUIDToNodeItem[node].ToProtobuf(item->add_nodeinfos());
 		}
