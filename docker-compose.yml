@@ -22,7 +22,7 @@ services:
     ports:
       - "18002:8000"
     volumes:
-      - "control_local:/data"
+      - "module_local:/data"
     networks:
       - sloongnet
     depends_on:
@@ -31,12 +31,10 @@ services:
       mode: replicated
       replicas: 1
 
-  control-ui:
+  ui:
     image: sloong/sloongnet-webui
     ports:
       - "8000:8000"
-    environment:
-      - DB_FILE_PATH=/data/configuation.db
     volumes:
       - type: volume
         source: webui_local

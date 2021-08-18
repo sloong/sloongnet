@@ -208,7 +208,7 @@ CResult CSloongBaseService::InitlializeForManager(RuntimeDataPackage *data)
     data->set_templateid(1);
     auto config = data->mutable_templateconfig();
     config->set_listenport(data->managerport());
-    config->set_modulepath("./modules/");
+    config->set_modulepath("./");
     config->set_modulename("libmanager.so");
     return CResult::Succeed;
 }

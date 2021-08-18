@@ -71,6 +71,8 @@ build(){
 	fi
 	cp $PROJECT $OUTPUT_FOLDER/
 	cp libcore.so $OUTPUT_FOLDER/
+	cp libmanager.so $OUTPUT_FOLDER/
+	cp $CMAKE_FILE_PATH/referenced/libuniv/libuniv.so $OUTPUT_FOLDER/
 	cp modules/*.so $OUTPUT_FOLDER/modules/
 }
 
