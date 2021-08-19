@@ -1,7 +1,7 @@
 version: '3.2'
 services:
   controller:
-    image: sloong/sloongnet:latest
+    image: sloongnet:latest
     command:
       - Manager
       - 0.0.0.0:8000
@@ -17,8 +17,12 @@ services:
       mode: replicated
       replicas: 1
 
-  moduler:
-    image: sloong/sloongnet:latest
+  gateway:
+    image: sloongnet:latest
+    command:
+      - Worker
+      - controller:8000
+      - --include=Gateway
     ports:
       - "18002:8000"
     volumes:
@@ -30,9 +34,25 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+  
+  moduler:
+    image: sloongnet:latest
+    command:
+      - Worker
+      - controller:8000
+      - --exclude=Gateway
+    volumes:
+      - "module_local:/data"
+    networks:
+      - sloongnet
+    depends_on:
+      - controller
+    deploy:
+      mode: replicated
+      replicas: 3
 
   ui:
-    image: sloong/sloongnet-webui
+    image: sloongnet-webui
     ports:
       - "8000:8000"
     volumes:
