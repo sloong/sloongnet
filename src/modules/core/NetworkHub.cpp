@@ -73,7 +73,7 @@ using namespace Sloong::Events;
 Sloong::CNetworkHub::CNetworkHub()
 {
 	m_pEpoll = make_unique<CEpollEx>();
-	m_pWaitProcessList = new queue_ex<UniquePackage>[s_PriorityLevel]();
+	m_pWaitProcessList = new queue_safety<UniquePackage>[s_PriorityLevel]();
 }
 
 Sloong::CNetworkHub::~CNetworkHub()
@@ -82,11 +82,7 @@ Sloong::CNetworkHub::~CNetworkHub()
 		SSLHelper::G_FreeSSL(m_pCTX);
 	for (int i = 0; i < s_PriorityLevel; i++)
 	{
-		while (!m_pWaitProcessList[i].empty())
-		{
-			m_pWaitProcessList[i].front().reset();
-			m_pWaitProcessList[i].pop_move();
-		}
+		m_pWaitProcessList[i].clear();
 	}
 	SAFE_DELETE_ARR(m_pWaitProcessList);
 }
@@ -203,7 +199,7 @@ void Sloong::CNetworkHub::OnConnectionBreakedEventHandler(SharedEvent e)
 	}
 	else
 	{
-		m_pLog->Info(Helper::Format("close connect:[%d]%s:%d. Unregister this session." , info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
+		m_pLog->Info(Helper::Format("close connect:[%d]%s:%d. Unregister this session.", info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
 		unique_lock<shared_mutex> sockLck(m_oSockListMutex);
 		m_mapConnectIDToSession.erase(id);
 		sockLck.unlock();
@@ -240,7 +236,7 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
 		m_pLog->Warn(res.GetMessage());
 	}
 
-	if( event->HaveReconnectCallback())
+	if (event->HaveReconnectCallback())
 	{
 		connect->SetOnReconnectCallback(event->MoveReconnectCallbackFunc());
 	}
@@ -404,7 +400,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					continue;
 
 				PackageResult result(ResultType::Ignore);
-				UniquePackage package = m_pWaitProcessList[i].TryMovePop();
+				UniquePackage package = m_pWaitProcessList[i].pop(nullptr);
 
 				while (package != nullptr)
 				{
@@ -568,7 +564,7 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(uint64_t sessionid)
 				continue;
 			}
 		}
-		m_pWaitProcessList[pack->priority()].push_move(std::move(pack));
+		m_pWaitProcessList[pack->priority()].push(std::move(pack));
 	}
 	m_oProcessThreadSync.notify_all();
 	return res.GetResult();

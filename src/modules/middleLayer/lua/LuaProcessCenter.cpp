@@ -65,6 +65,8 @@
 using namespace Sloong;
 using namespace Sloong::Events;
 
+static const int MAX_TRY_NUM = 99;
+
 CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 {
 	IObject::Initialize(iMsg);
@@ -95,7 +97,7 @@ CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 void Sloong::CLuaProcessCenter::OnProcessLuaEvent(SharedEvent e)
 {
 	auto event = EVENT_TRANS<LuaEvent>(e);
-	int id = GetFreeLuaContext();
+	int id = GetFreeLuaContext(MAX_TRY_NUM);
 	auto pLua = m_listLuaContent[id]->Content.get();
 	pLua->RunEventFunction(m_pConfig->operator[]("LuaEventFunction").asString(), event->GetLuaEvent(), event->GetLuaEventParams() );
 	FreeLuaContext(id);
@@ -152,7 +154,7 @@ TResult<unique_ptr<CLua>> Sloong::CLuaProcessCenter::InitLua()
 void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket *uinfo)
 {
 	// call close function.
-	int id = GetFreeLuaContext();
+	int id = GetFreeLuaContext(MAX_TRY_NUM);
 	auto pLua = m_listLuaContent[id]->Content.get();
 	pLua->RunFunction(m_pConfig->operator[]("LuaSocketCloseFunction").asString(), uinfo, 0, "", "");
 	FreeLuaContext(id);
@@ -207,7 +209,6 @@ int Sloong::CLuaProcessCenter::GetFreeLuaContext(int try_num)
 		m_pLog->Error("no free context");
 		return -1;
 	}
-	int nID = m_oFreeLuaContext.front();
-	m_oFreeLuaContext.pop();
+	int nID = m_oFreeLuaContext.pop(-1);
 	return nID;
 }

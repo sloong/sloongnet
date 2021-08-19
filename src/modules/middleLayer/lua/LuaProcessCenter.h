@@ -101,7 +101,7 @@ namespace Sloong
 		void ReloadContext();
 	protected:
 		vector<unique_ptr<LuaContent>>	m_listLuaContent;
-		queue_ex<int>		m_oFreeLuaContext;
+		queue_safety<int>		m_oFreeLuaContext;
 		EasySync		m_oSSync;
 		Json::Value*	m_pConfig;
 	};

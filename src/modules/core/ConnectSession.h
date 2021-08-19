@@ -116,12 +116,12 @@ namespace Sloong
 	protected:
 		void ProcessPrepareSendList();
 		ResultType ProcessSendList();
-		queue_ex<UniquePackage> *GetSendPackage();
+		queue_safety<UniquePackage> *GetSendPackage();
 		void AddToSendList(UniquePackage);
 
 	public:
-		queue_ex<UniquePackage> *m_pSendList; // the send list of the bytes.
-		queue_ex<UniquePackage> m_oPrepareSendList;
+		queue_safety<UniquePackage> *m_pSendList; // the send list of the bytes.
+		queue_safety<UniquePackage> m_oPrepareSendList;
 
 		time_t m_ActiveTime;
 		UniqueConnection m_pConnection = nullptr;

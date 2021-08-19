@@ -148,6 +148,6 @@ namespace Sloong
         ResponsePackageProcessFunction m_pResponseFunc = nullptr;
         EventPackageProcessFunction m_pEventFunc = nullptr;
         NewConnectAcceptProcessFunction m_pAcceptFunc = nullptr;
-        queue_ex<UniquePackage> *m_pWaitProcessList;
+        queue_safety<UniquePackage> *m_pWaitProcessList;
     };
 } // namespace Sloong

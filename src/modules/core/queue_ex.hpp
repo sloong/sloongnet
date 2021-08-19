@@ -11,74 +11,65 @@ using std::shared_ptr;
 namespace Sloong
 {
     template<typename T>
-    class queue_ex : public queue<T>
+    class queue_safety : public queue<T>
     {
     private:
         shared_mutex m_mut;
+        T pop();
+
     public:
-        queue_ex() {}
-        queue_ex(const queue_ex&) = delete;
+        queue_safety() {}
+        queue_safety(const queue_safety&) = delete;
         void push(const T& data)
         {
             unique_lock<shared_mutex> lock(m_mut);
             queue<T>::push(data);
         }
-        void push_move(T data)
+        void push(T&& data)
         {
             unique_lock<shared_mutex> lock(m_mut);
             queue<T>::push(std::move(data));
         }
-        T pop()
+        
+        T pop(T&& def)
         {
+            if (empty())
+                return move(def);
+                
             unique_lock<shared_mutex> lock(m_mut);
-            auto item = this->front();
+            auto t = move(queue<T>::front());
             queue<T>::pop();
-            return item;
+            return move(t);
         }
-        T pop_move()
-        {
-            unique_lock<shared_mutex> lock(m_mut);
-            auto item = std::move(this->front());
-            queue<T>::pop();
-            return item;
-        }
-        shared_ptr<T> pops()
-        {
-            unique_lock<shared_mutex> lock(m_mut);
-            shared_ptr<T> res(make_shared<T>(this->front()));
-            queue<T>::pop();
-            return res;
-        }
-        bool TryPop(T& t)
-        {
-            unique_lock<shared_mutex> lock(m_mut);
-            if (queue<T>::empty())
-                return false;
 
-            t = queue<T>::front();
+        bool take(T& t)
+        {
+            if (empty() || t == nullptr)
+                return false;
+                
+            unique_lock<shared_mutex> lock(m_mut);
+            *t = queue<T>::front();
             queue<T>::pop();
             return true;
         }
 
-        T TryMovePop()
+        unique_ptr<T> pop_ptr()
         {
-            unique_lock<shared_mutex> lock(m_mut);
-            if (queue<T>::empty())
+            if (empty())
                 return nullptr;
-
-            auto t = std::move(queue<T>::front());
-            queue<T>::pop();
-            return t;
-        }
-
-        shared_ptr<T> TryPop()
-        {
+            
             unique_lock<shared_mutex> lock(m_mut);
-            if (queue<T>::empty())
-                return nullptr;
-            shared_ptr<T> res(make_shared<T>(queue<T>::front()));
+            unique_ptr<T> res(make_unique<T>(std::move(queue<T>::front())));
             queue<T>::pop();
             return res;
+        }
+
+        inline void clear(){
+            unique_lock<shared_mutex> lock(m_mut);
+            while(!queue<T>::empty())
+            {
+                queue<T>::pop();
+            }
         }
 
         inline bool empty()

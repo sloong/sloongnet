@@ -67,7 +67,7 @@ using namespace Sloong::Events;
 
 Sloong::ConnectSession::ConnectSession()
 {
-	m_pSendList = new queue_ex<UniquePackage>[s_PriorityLevel]();
+	m_pSendList = new queue_safety<UniquePackage>[s_PriorityLevel]();
 }
 
 ConnectSession::~ConnectSession()
@@ -76,17 +76,12 @@ ConnectSession::~ConnectSession()
 		m_pConnection->Close();
 	for (int i = 0; i < s_PriorityLevel; i++)
 	{
-		while (!m_pSendList[i].empty())
-		{
-			m_pSendList[i].pop_move();
-		}
+		m_pSendList[i].clear();
 	}
 	SAFE_DELETE_ARR(m_pSendList);
 
-	while (!m_oPrepareSendList.empty())
-	{
-		m_oPrepareSendList.pop_move();
-	}
+	m_oPrepareSendList.clear();
+	
 }
 
 void Sloong::ConnectSession::Initialize(IControl *iMsg, UniqueConnection conn)
@@ -149,7 +144,7 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 void Sloong::ConnectSession::AddToSendList(UniquePackage pack)
 {
 	auto events = make_shared<MonitorSendStatusEvent>(pack->sessionid());
-	m_oPrepareSendList.push_move(std::move(pack));
+	m_oPrepareSendList.push(std::move(pack));
 	m_pLog->Debug(Helper::Format("Add send package to prepare send list. list size:[%d]", m_oPrepareSendList.size()));
 	m_bIsSendListEmpty = false;
 	m_iC->SendMessage(events);
@@ -251,15 +246,15 @@ ResultType Sloong::ConnectSession::OnDataCanSend()
 void Sloong::ConnectSession::ProcessPrepareSendList()
 {
 	// progress the prepare send list first
-	auto pack = m_oPrepareSendList.TryMovePop();
+	auto pack = m_oPrepareSendList.pop(nullptr);
 	while (pack != nullptr)
 	{
 		auto priority = pack->priority();
-		m_pSendList[priority].push_move(std::move(pack));
+		m_pSendList[priority].push(std::move(pack));
 		m_pLog->Debug(Helper::Format("Add package to send list[%d]. send list size[%d], prepare send list size[%d]",
 									 priority, m_pSendList[priority].size(), m_oPrepareSendList.size()));
 
-		pack = m_oPrepareSendList.TryMovePop();
+		pack = m_oPrepareSendList.pop(nullptr);
 	}
 }
 
@@ -296,7 +291,7 @@ ResultType Sloong::ConnectSession::ProcessSendList()
 			return ResultType::Succeed;
 		}
 
-		auto pack = list->TryMovePop();
+		auto pack = list->pop(nullptr);
 		if (pack == nullptr)
 			return ResultType::Retry;
 
@@ -325,7 +320,7 @@ ResultType Sloong::ConnectSession::ProcessSendList()
 /// 获取发送信息列表
 // 首先判断上次发送标志，如果不为-1，表示上次的发送列表没有发送完成。直接返回指定的列表
 // 如果为-1，表示需要发送新的列表。按照优先级逐级的进行寻找。
-queue_ex<UniquePackage> *Sloong::ConnectSession::GetSendPackage()
+queue_safety<UniquePackage> *Sloong::ConnectSession::GetSendPackage()
 {
 	for (int i = 0; i < s_PriorityLevel; i++)
 	{

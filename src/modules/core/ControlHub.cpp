@@ -151,14 +151,14 @@ void Sloong::CControlHub::SendMessage(int msgType)
 {
 	auto event = make_unique<NormalEvent>();
 	event->SetEvent(msgType);
-	m_oMsgList.push_move(std::move(event));
+	m_oMsgList.push(std::move(event));
 
 	m_oSync.notify_one();
 }
 
 void Sloong::CControlHub::SendMessage(SharedEvent evt)
 {
-	m_oMsgList.push_move(std::move(evt));
+	m_oMsgList.push(std::move(evt));
 	m_oSync.notify_one();
 }
 
@@ -225,7 +225,7 @@ void Sloong::CControlHub::MessageWorkLoop()
 				continue;
 			}
 
-			auto event = m_oMsgList.TryMovePop();
+			auto event = m_oMsgList.pop(nullptr);
 			if (event != nullptr)
 			{
 				// Get the message handler list.
