@@ -278,7 +278,7 @@ PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
 	auto function = (Functions)pack->function();
 	if (!Manager::Functions_IsValid(function))
 	{
-		return PackageResult::Make_OKResult(PackageHelper::MakeErrorResponse(pack, Helper::Format("Parser request package function[%s] error.", pack->content().c_str())));
+		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Parser request package function[%s] error.", pack->content().c_str())));
 	}
 
 	auto req_str = pack->content();
@@ -297,7 +297,7 @@ PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
 	m_pLog->Info(Helper::Format("Request [%d][%s]", function, func_name.c_str()));
 	if (!m_mapFuncToHandler.exist(function))
 	{
-		return PackageResult::Make_OKResult(PackageHelper::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
+		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
 	}
 
 	auto res = m_mapFuncToHandler[function](req_str, pack);
@@ -308,7 +308,7 @@ PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
 	if (res.GetResult() == ResultType::Ignore)
 		return PackageResult::Ignore();
 
-	return PackageResult::Make_OKResult(PackageHelper::MakeResponse(pack, res));
+	return PackageResult::Make_OKResult(Package::MakeResponse(pack, res));
 }
 
 CResult Sloong::CServerManage::EventRecorderHandler(const string &req_str, Package *pack)

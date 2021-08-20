@@ -150,11 +150,11 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, RunIn
     auto result = CResult::Make_Error("Cancelled by User.");
     while (m_emStatus != RUN_STATUS::Exit)
     {
-        auto req = PackageHelper::GetRequestPackage();
+        auto req = Package::GetRequestPackage();
         req->set_function(Manager::Functions::RegisteWorker);
         req->set_sender(uuid);
 
-        PackageHelper::SetContent(req.get(), ConvertObjToStr(&sub_req));
+        Package::SetContent(req.get(), ConvertObjToStr(&sub_req));
         if (con->SendPackage(move(req)).IsFialed())
             return CResult::Make_Error("Send get config request error.");
         auto res = con->RecvPackage(true);

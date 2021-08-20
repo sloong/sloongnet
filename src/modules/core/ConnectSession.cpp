@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2021-01-12 14:45:35
+ * @LastEditTime: 2021-08-20 14:15:53
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -98,7 +98,7 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 	{
 		m_pLog->Assert("The package size is to bigger, this's returned and replaced with an error message package.");
 		pack->set_result(ResultType::Error);
-		PackageHelper::SetContent(pack.get(), "The package size is to bigger." );
+		pack->set_content("The package size is to bigger." );
 		pack->clear_extend();
 	}
 
@@ -166,7 +166,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 			if (IsOverflowPackage(package.get()))
 			{
 				m_pLog->Warn("The package size is to bigger.");
-				AddToSendList(PackageHelper::MakeErrorResponse(package.get(),"The package size is to bigger."));
+				AddToSendList(Package::MakeErrorResponse(package.get(),"The package size is to bigger."));
 			}
 			else
 			{
@@ -180,7 +180,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 				{
 					auto msg = "Hash check error. Make sure the hash algorithm is SHA256";
 					m_pLog->Warn(msg);
-					AddToSendList(PackageHelper::MakeErrorResponse(package.get(),msg ));
+					AddToSendList(Package::MakeErrorResponse(package.get(),msg ));
 					continue;
 				}
 				string hash(package->hash());
@@ -191,7 +191,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 				{
 					auto msg =  Helper::Format("Hash check error. Package[%s]<->[%s]Calculate", ConvertToHexString(hash.c_str(),0,31).c_str(),ConvertToHexString((char*)buffer,0,31).c_str() );
 					m_pLog->Warn(msg);
-					AddToSendList(PackageHelper::MakeErrorResponse(package.get(),msg));
+					AddToSendList(Package::MakeErrorResponse(package.get(),msg));
 					continue;
 				}
 

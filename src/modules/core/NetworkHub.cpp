@@ -446,9 +446,9 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 						}
 						else if (result.GetResult() != ResultType::Ignore)
 						{
-							auto response = PackageHelper::MakeResponse(package.get());
+							auto response = Package::MakeResponse(package.get());
 							response->set_result(result.GetResult());
-							PackageHelper::SetContent(response.get(), result.GetMessage());
+							Package::SetContent(response.get(), result.GetMessage());
 							PrintPackage(m_pLog, package.get(), "Response package <<< ");
 							AddMessageToSendList(move(response));
 						}

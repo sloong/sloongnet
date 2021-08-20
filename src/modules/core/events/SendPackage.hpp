@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-01-11 10:28:42
+ * @LastEditTime: 2021-08-20 14:14:17
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/events/SendPackage.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -37,7 +37,7 @@ namespace Sloong
 				m_pData->set_sender(sender);
 				m_pData->set_type(type);
 				m_pData->set_function(func);
-				PackageHelper::SetContent(m_pData.get(), content);
+				m_pData->set_content(content);
 				m_pData->set_priority(priority);
 				m_pData->set_id(serialnumber);
 				m_pData->set_sessionid(m_ConnectionHashCode);

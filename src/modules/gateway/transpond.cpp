@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-28 14:43:16
- * @LastEditTime: 2021-01-11 10:48:00
+ * @LastEditTime: 2021-08-20 14:14:33
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/transpond.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -42,17 +42,17 @@ PackageResult Sloong::GatewayTranspond::MessageToProcesser(Package *pack)
 		return PackageResult::Make_Error(msg);
 	}
 
-	auto response = PackageHelper::MakeResponse(pack);
+	auto response = Package::MakeResponse(pack);
 	for( auto i : pack->clocks() )
 	{
 		response->add_clocks(i);
 	}
 	response->add_clocks(GetClock());
 
-	auto trans_pack = PackageHelper::MakeResponse(pack);
+	auto trans_pack = Package::MakeResponse(pack);
 	trans_pack->set_status(DataPackage_StatusType::DataPackage_StatusType_Request);
-	PackageHelper::SetContent(trans_pack.get(), pack->content() );
-	PackageHelper::SetExtend( trans_pack.get(), pack->extend() );
+	trans_pack->set_content( pack->content() );
+	trans_pack->set_extend( pack->extend() );
 
 	auto id = snowflake::Instance->nextid();
 	trans_pack->set_id(id);
@@ -68,8 +68,8 @@ PackageResult Sloong::GatewayTranspond::MessageToClient(UniquePackage info, Pack
 {
 	info->add_clocks(GetClock());
 	info->set_result(pack->result());
-	PackageHelper::SetContent(info.get(), pack->content() );
-	PackageHelper::SetExtend( info.get(), pack->extend() );
-	
+	info->set_content( pack->content() );
+	info->set_extend( pack->extend() );
+	 
 	return PackageResult::Make_OKResult(move(info));
 }

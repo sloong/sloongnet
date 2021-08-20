@@ -332,7 +332,7 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 		m_strReceiving.append(buf, 0, len);
 		if (m_ReceivedSize == m_RecvPackageSize)
 		{
-			auto package = PackageHelper::new_unique();
+			auto package = Package::new_unique();
 			if (!package->ParseFromString(m_strReceiving))
 			{
 				Close();
