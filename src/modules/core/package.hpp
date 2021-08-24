@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-08-20 14:19:54
+ * @LastEditTime: 2021-08-23 19:27:02
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/package.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -42,6 +42,8 @@ namespace Sloong
             return len;
         }
 
+        inline bool SerializeToString(string *str) { return data.SerializeToString(str); }
+
         inline bool ParseFromString(const string &str) { return data.ParseFromString(str); }
 
         inline size_t ByteSizeLong() { return data.ByteSizeLong(); }
@@ -53,9 +55,10 @@ namespace Sloong
 
         inline string hash() { return data.hash(); }
         inline void set_hash(const string &str) { data.set_hash(str); }
-        inline void clear_hash(){data.clear_hash();}
+        inline void set_hash(const void *str, int len) { data.set_hash(str, len); }
+        inline void clear_hash() { data.clear_hash(); }
 
-        inline string extend() { return data.extend(); }
+        inline const string &extend() { return data.extend(); }
         inline void set_extend(const string &str)
         {
             data.set_extend(str);
@@ -68,15 +71,15 @@ namespace Sloong
             // pack->mutable_extend()->set_hash( CRCEncode32(message));
             // pack->mutable_extend()->set_data( message );
         }
-        inline void set_extend(const char *str, int len)
+        inline void set_extend(const void *str, int len)
         {
             data.set_extend(str, len);
             // pack->mutable_extend()->set_hash( CRCEncode32(message));
             // pack->mutable_extend()->set_data( message );
         }
-        inline void clear_extend(){ data.clear_extend(); }
+        inline void clear_extend() { data.clear_extend(); }
 
-        inline string content() { return data.content(); }
+        inline const string &content() { return data.content(); }
         inline void set_content(const string &str)
         {
             data.set_content(str);
@@ -89,7 +92,7 @@ namespace Sloong
             // mutable_content()->set_hash( CRCEncode32(message));
             //pack->mutable_content()->set_data( message );
         }
-        inline void clear_content(){ data.clear_content(); }
+        inline void clear_content() { data.clear_content(); }
 
         inline int32_t function() { return data.function(); }
         inline void set_function(int32_t f) { data.set_function(f); }
@@ -104,10 +107,10 @@ namespace Sloong
         inline void set_type(DataPackage_PackageType value) { data.set_type(value); }
 
         inline DataPackage_StatusType status() { return data.status(); }
-        inline void set_status(DataPackage_StatusType s){ data.set_status(s);}
+        inline void set_status(DataPackage_StatusType s) { data.set_status(s); }
 
-        inline ResultType result(){ return data.result(); }
-        inline void set_result(ResultType r){ data.set_result(r); }
+        inline ResultType result() { return data.result(); }
+        inline void set_result(ResultType r) { data.set_result(r); }
 
         static inline unique_ptr<Package> new_unique() { return make_unique<Package>(); }
 
@@ -246,7 +249,6 @@ namespace Sloong
     typedef shared_ptr<Package> SmartPackage;
     typedef unique_ptr<Package> UniquePackage;
 
-    
     typedef TResult<unique_ptr<Package>> PackageResult;
 
 } // namespace Sloong

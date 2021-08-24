@@ -74,6 +74,7 @@ using namespace Sloong;
 using namespace Sloong::Universal;
 
 #include "result.h"
+#include "package.hpp" 
 
 #define ARRAYSIZE(a) (sizeof(a) / sizeof(a[0]))
 
@@ -134,6 +135,14 @@ namespace Sloong
 	}
 
 	inline string ConvertObjToStr(::google::protobuf::Message *obj)
+	{
+		string str_res;
+		if (!obj->SerializeToString(&str_res))
+			return "";
+		return str_res;
+	}
+
+	inline string ConvertObjToStr(Package *obj)
 	{
 		string str_res;
 		if (!obj->SerializeToString(&str_res))

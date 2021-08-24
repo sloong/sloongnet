@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-03-25 16:49:37
+ * @LastEditTime: 2021-08-23 19:28:45
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -154,7 +154,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, RunIn
         req->set_function(Manager::Functions::RegisteWorker);
         req->set_sender(uuid);
 
-        Package::SetContent(req.get(), ConvertObjToStr(&sub_req));
+        req->set_content(ConvertObjToStr(&sub_req));
         if (con->SendPackage(move(req)).IsFialed())
             return CResult::Make_Error("Send get config request error.");
         auto res = con->RecvPackage(true);

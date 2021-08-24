@@ -28,6 +28,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O1 -DNODEBUG -DRELASE")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+
 add_definitions(-DLUA_USE_READLINE)
 
 # 警告信息选项
@@ -69,6 +71,7 @@ add_link_options("-Wl,-E")
 
 #添加链接库
 target_link_libraries(${PROJECT_NAME} m)
+#target_link_libraries(${PROJECT_NAME} glib-2.0)
 target_link_libraries(${PROJECT_NAME} dl)
 target_link_libraries(${PROJECT_NAME} univ)
 target_link_libraries(${PROJECT_NAME} protobuf)
