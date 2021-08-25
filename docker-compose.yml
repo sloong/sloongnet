@@ -7,8 +7,6 @@ services:
       - 0.0.0.0:8000
     environment:
       - DB_FILE_PATH=/data/configuation.db
-    ports:
-      - "18000:8000"
     volumes:
       - "control_local:/data"
     networks:

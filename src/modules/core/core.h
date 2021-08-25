@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-08-07 12:43:05
- * @LastEditTime: 2021-08-20 13:55:58
+ * @LastEditTime: 2021-08-25 11:35:01
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/core.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -93,7 +93,7 @@ using namespace Base;
 #include "protocol/core.pb.h"
 using namespace Core;
 
-#include <jsoncpp/include/json/json.h>
+#include <jsoncpp/json/json.h>
 
 #include "package.hpp"
 

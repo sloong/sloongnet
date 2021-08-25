@@ -14,7 +14,6 @@ include_directories(
 
 link_directories(
     "${CMAKE_CURRENT_LIST_DIR}/referenced/libuniv"
-    "${CMAKE_CURRENT_LIST_DIR}/referenced/jsoncpp/lib"
     "${CMAKE_CURRENT_LIST_DIR}/modules"
 )
 
