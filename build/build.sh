@@ -85,9 +85,20 @@ build_debug(){
 	build
 }
 
-clean_all(){
+
+clean_cache(){
 	if [ -d $SCRIPTFOLDER/cache  ];then
 		rm -rdf $SCRIPTFOLDER/cache
+	fi
+}
+
+clean_all(){
+	clean_cache
+	if [ -d $SCRIPTFOLDER/debug  ];then
+		rm -rdf $SCRIPTFOLDER/debug
+	fi
+	if [ -d $SCRIPTFOLDER/release  ];then
+		rm -rdf $SCRIPTFOLDER/release
 	fi
 }
 
@@ -148,8 +159,11 @@ if [ $# -eq 1 ]; then
 			build_debug
 			zipfile
 			;;
-		-c)
+		-ca)
 			clean_all
+			;;
+		-c)
+			clean_cache
 			;;
 		* ) 
 			show_help
