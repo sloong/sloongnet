@@ -9,6 +9,7 @@ services:
       - DB_FILE_PATH=/data/configuation.db
     volumes:
       - "control_local:/data"
+    restart: always
     networks:
       - sloongnet
     deploy:
@@ -25,6 +26,7 @@ services:
       - "18002:8000"
     volumes:
       - "module_local:/data"
+    restart: always
     networks:
       - sloongnet
     depends_on:
@@ -38,27 +40,25 @@ services:
     command:
       - Worker
       - controller:8000
-      - --exclude=Gateway
+      - --exclude=Gateway,Processer
     volumes:
       - "module_local:/data"
+    restart: always
     networks:
       - sloongnet
     depends_on:
       - controller
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 2
 
   ui:
     image: sloongnet-webui
     ports:
       - "8000:8000"
     volumes:
-      - type: volume
-        source: webui_local
-        target: /data
-        volume:
-          nocopy: true
+      - "webui_local:/data"
+    restart: always
     networks:
       - sloongnet
     deploy:
