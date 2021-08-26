@@ -80,7 +80,7 @@ CResult Sloong::EasyConnect::InitializeAsServer(CLog *log, SOCKET sock, LPVOID c
 	m_nSocket = sock;
 	m_strAddress = CUtility::GetSocketIP(m_nSocket);
 	m_nPort = CUtility::GetSocketPort(m_nSocket);
-	m_nHashCode = std::hash<string>{}(Helper::Format("%s:%d", m_strAddress.c_str(), m_nPort));
+	m_nHashCode = std::hash<string>{}(format("{}:{}", m_strAddress, m_nPort));
 
 	if (ctx)
 	{
@@ -96,7 +96,7 @@ CResult Sloong::EasyConnect::InitializeAsClient(CLog *log, const string &address
 	m_bSupportReconnect = true;
 	m_strAddress = address;
 	m_nPort = port;
-	m_nHashCode = std::hash<string>{}(Helper::Format("%s:%d", m_strAddress.c_str(), m_nPort));
+	m_nHashCode = std::hash<string>{}(format("{}:{}", m_strAddress, m_nPort));
 
 	if (ctx)
 	{
@@ -119,7 +119,7 @@ CResult Sloong::EasyConnect::Connect()
 	auto list = dns_res.GetResultObject();
 
 	if (m_pLog)
-		m_pLog->Debug(Helper::Format("Connect to %s:%d.", list[0].c_str(), m_nPort));
+		m_pLog->Debug(format("Connect to {}:{}.", list[0], m_nPort));
 
 	struct sockaddr_in remote_addr;
 	memset(&remote_addr, 0, sizeof(remote_addr));
@@ -223,7 +223,7 @@ CResult Sloong::EasyConnect::SendPackage(UniquePackage pack)
 		}
 		else
 		{
-			auto msg = Helper::Format("Error when send length data. Socket[%d][%s:%d].Errno[%d].", m_nSocket, m_strAddress.c_str(), m_nPort, GetErrno());
+			auto msg = format("Error when send length data. Socket[{}][{}:{}].Errno[{}].", m_nSocket, m_strAddress, m_nPort, GetErrno());
 			Close();
 			return CResult::Make_Error(msg);
 		}
@@ -252,7 +252,7 @@ CResult Sloong::EasyConnect::SendPackage(UniquePackage pack)
 	}
 	else
 	{
-		auto msg = Helper::Format("Error when send data. Socket[%d][%s:%d].Errno[%d].", m_nSocket, m_strAddress.c_str(), m_nPort, GetErrno());
+		auto msg = format("Error when send data. Socket[{}][{}:{}].Errno[{}].", m_nSocket, m_strAddress, m_nPort, GetErrno());
 		Close();
 		return CResult::Make_Error(msg);
 	}
@@ -347,20 +347,20 @@ PackageResult Sloong::EasyConnect::RecvPackage(bool block)
 		else
 		{
 			if (m_pLog)
-				m_pLog->Debug(Helper::Format("Receive package returned [Retry]. Package size[%d], Received[%d][%d]", m_RecvPackageSize, m_ReceivedSize, m_strReceiving.length()));
+				m_pLog->Debug(format("Receive package returned [Retry]. Package size[{}], Received[{}][{}]", m_RecvPackageSize, m_ReceivedSize, m_strReceiving.length()));
 			return PackageResult(ResultType::Retry);
 		}
 	}
 	else if (len == -11)
 	{
 		if (m_pLog)
-			m_pLog->Debug(Helper::Format("Receive package returned [Retry]. Package size[%d], Received[%d]", m_RecvPackageSize, m_ReceivedSize));
+			m_pLog->Debug(format("Receive package returned [Retry]. Package size[{}], Received[{}]", m_RecvPackageSize, m_ReceivedSize));
 		return PackageResult(ResultType::Retry);
 	}
 	else
 	{
 		Close();
-		return PackageResult::Make_Error(Helper::Format("Error when receive data. Socket[%d][%s:%d].Errno[%d].", m_nSocket, m_strAddress.c_str(), m_nPort, GetErrno()));
+		return PackageResult::Make_Error(format("Error when receive data. Socket[{}][{}:{}].Errno[{}].", m_nSocket, m_strAddress, m_nPort, GetErrno()));
 	}
 }
 
@@ -406,7 +406,7 @@ int Sloong::EasyConnect::Write(const char *data, int len, int index)
 void Sloong::EasyConnect::Close()
 {
 	if (m_pLog)
-		m_pLog->Debug(Helper::Format("Socket[%d] is close.", m_nSocket));
+		m_pLog->Debug(format("Socket[{}] is close.", m_nSocket));
 	shutdown(m_nSocket, SHUT_RDWR);
 	close(m_nSocket);
 	m_nInvalidSocket = m_nSocket;

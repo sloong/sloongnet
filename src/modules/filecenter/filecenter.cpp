@@ -140,7 +140,7 @@ void Sloong::CFileCenter::EventPackageProcesser(Package *pack)
     auto event = Events_MIN;
     if (!Manager::Events_Parse(pack->content(), &event))
     {
-        m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]", pack->content().c_str()));
+        m_pLog->Error(format("Receive event but parse error. content:[{}]", pack->content()));
         return;
     }
 

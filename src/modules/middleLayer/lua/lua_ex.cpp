@@ -102,9 +102,9 @@ std::string CLua::GetCallStack(lua_State *l)
 		// 'f': 把正在运行中指定级别处函数压入堆栈； （译注：一般用于获取函数调用中的信息， 级别是由 ar 中的私有部分来提供。 如果用于获取静态函数，那么就直接把指定函数重新压回堆栈， 但这样做通常无甚意义。）
 		// 'L': 压一个 table 入栈，这个 table 中的整数索引用于描述函数中哪些行是有效行。 （有效行指有实际代码的行， 即你可以置入断点的行。 无效行包括空行和只有注释的行。）
 		lua_getinfo(l, "Snl", &ar);
-		lua_pushfstring(l, "%s:", ar.short_src);
+		lua_pushfstring(l, "{}:", ar.short_src);
 		if (ar.currentline > 0)
-			lua_pushfstring(l, "%d:", ar.currentline);
+			lua_pushfstring(l, "{}:", ar.currentline);
 
 		switch (*ar.namewhat)
 		{
@@ -112,16 +112,16 @@ std::string CLua::GetCallStack(lua_State *l)
 		case 'l': // local
 		case 'f': // field
 		case 'm': // method
-			lua_pushfstring(l, " In function '%s'", ar.name);
+			lua_pushfstring(l, " In function '{}'", ar.name);
 			break;
 		default:
 		{
 			if (*ar.what == 'm')
 				lua_pushfstring(l, "in main chunk");
 			else if (*ar.what == 'C') // c function
-				lua_pushfstring(l, "%s", ar.short_src);
+				lua_pushfstring(l, "{}", ar.short_src);
 			else
-				lua_pushfstring(l, " in function <%s:%d>", ar.short_src, ar.linedefined);
+				lua_pushfstring(l, " in function <{}:{}>", ar.short_src, ar.linedefined);
 		}
 		}
 		lua_pushliteral(l, "\r\n");
@@ -292,7 +292,7 @@ CResult Sloong::CLua::RunFunction(const string &strFunctionName, CLuaPacket *pUs
 	{
 		for (int i = 1; i <= retNum; i++)
 		{
-			m_pLog->Debug(Helper::Format("Function returned no.[%d] params. type:[%s]", i, lua_typename(m_pScriptContext, lua_type(m_pScriptContext, i))));
+			m_pLog->Debug(format("Function returned no.[{}] params. type:[{}]", i, lua_typename(m_pScriptContext, lua_type(m_pScriptContext, i))));
 		}
 	}
 		
@@ -303,17 +303,17 @@ CResult Sloong::CLua::RunFunction(const string &strFunctionName, CLuaPacket *pUs
 
 	if (!lua_isinteger(m_pScriptContext, 1))
 	{
-		return CResult::Make_Error(Helper::Format("first returned type[%s] error. it's must be interger.", lua_typename(m_pScriptContext, lua_type(m_pScriptContext, 1))));
+		return CResult::Make_Error(format("first returned type[{}] error. it's must be interger.", lua_typename(m_pScriptContext, lua_type(m_pScriptContext, 1))));
 	}
 
 	if (!lua_isstring(m_pScriptContext, 2))
 	{
-		return CResult::Make_Error(Helper::Format("second returned type[%s] error. it's must be string.", lua_typename(m_pScriptContext, lua_type(m_pScriptContext, 2))));
+		return CResult::Make_Error(format("second returned type[{}] error. it's must be string.", lua_typename(m_pScriptContext, lua_type(m_pScriptContext, 2))));
 	}
 
 	if (retNum == 3 && !lua_isstring(m_pScriptContext, 3))
 	{
-		return CResult::Make_Error(Helper::Format("third returned type[%s] error. it's must be string.", lua_typename(m_pScriptContext, lua_type(m_pScriptContext, 3))));
+		return CResult::Make_Error(format("third returned type[{}] error. it's must be string.", lua_typename(m_pScriptContext, lua_type(m_pScriptContext, 3))));
 	}
 
 	int nRes = (int)GetInteger(1, 0);

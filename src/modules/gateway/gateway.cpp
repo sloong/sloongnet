@@ -143,12 +143,12 @@ CResult SloongNetGateway::Initialized()
 	{
 		/*auto event = make_shared<NormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableTimeoutCheck);
-		event->SetMessage(Helper::Format("{\"TimeoutTime\":\"%d\", \"CheckInterval\":%d}", (*m_pModuleConfig)["TimeoutTime"].asInt(), (*m_pModuleConfig)["TimeoutCheckInterval"].asInt()));
+		event->SetMessage(format("{\"TimeoutTime\":\"{}\", \"CheckInterval\":{}}", (*m_pModuleConfig)["TimeoutTime"].asInt(), (*m_pModuleConfig)["TimeoutCheckInterval"].asInt()));
 		m_iC->SendMessage(event);
 
 		event = make_shared<NormalEvent>();
 		event->SetEvent(EVENT_TYPE::EnableClientCheck);
-		event->SetMessage(Helper::Format("{\"ClientCheckKey\":\"%s\", \"ClientCheckTime\":%d}", (*m_pModuleConfig)["ClientCheckKey"].asString().c_str(), (*m_pModuleConfig)["ClientCheckKey"].asInt()));
+		event->SetMessage(format("{\"ClientCheckKey\":\"{}\", \"ClientCheckTime\":{}}", (*m_pModuleConfig)["ClientCheckKey"].asString(), (*m_pModuleConfig)["ClientCheckKey"].asInt()));
 		m_iC->SendMessage(event);*/
 	}
 	m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&SloongNetGateway::OnStart, this, std::placeholders::_1));
@@ -211,7 +211,7 @@ void SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent* send_pack, Pack
 	{
 		if (info.providefunctions() == "*")
 		{
-			m_pLog->Debug(Helper::Format("Universal processer find: template id[%d]", info.templateid()));
+			m_pLog->Debug(format("Universal processer find: template id[{}]", info.templateid()));
 			m_mapFuncToTemplateIDs[-1].unique_insert(info.templateid());
 		}
 		else
@@ -260,7 +260,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_re
 	auto item = req->item();
 	m_mapUUIDToNode[item.uuid()] = item;
 	m_mapTempteIDToUUIDs[item.templateid()].push_back(item.uuid());
-	m_pLog->Info(Helper::Format("New node[%llu][%s:%d] is online:templateid[%d],list size[%d]", item.uuid(), item.address().c_str(), item.port(), item.templateid(), m_mapTempteIDToUUIDs[item.templateid()].size()));
+	m_pLog->Info(format("New node[{}][{}:{}] is online:templateid[{}],list size[{}]", item.uuid(), item.address(), item.port(), item.templateid(), m_mapTempteIDToUUIDs[item.templateid()].size()));
 
 	AddConnection(item.uuid(), item.address(), item.port());
 }
@@ -274,7 +274,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_r
 	m_mapTempteIDToUUIDs[item.templateid()].erase(item.uuid());
 	m_mapUUIDToConnectionID.erase(uuid);
 	m_mapUUIDToNode.erase(uuid);
-	m_pLog->Info(Helper::Format("Node is offline [%llu], template id[%d],list size[%d]", item.uuid(), item.templateid(), m_mapTempteIDToUUIDs[item.templateid()].size()));
+	m_pLog->Info(format("Node is offline [{}], template id[{}],list size[{}]", item.uuid(), item.templateid(), m_mapTempteIDToUUIDs[item.templateid()].size()));
 }
 
 void Sloong::SloongNetGateway::EventPackageProcesser(Package *pack)
@@ -282,7 +282,7 @@ void Sloong::SloongNetGateway::EventPackageProcesser(Package *pack)
 	auto event = (Manager::Events)pack->function();
 	if (!Manager::Events_IsValid(event))
 	{
-		m_pLog->Error(Helper::Format("EventPackageProcesser is called.but the fucntion[%d] check error.", event));
+		m_pLog->Error(format("EventPackageProcesser is called.but the fucntion[{}] check error.", event));
 		return;
 	}
 
@@ -300,7 +300,7 @@ void Sloong::SloongNetGateway::EventPackageProcesser(Package *pack)
 	break;
 	default:
 	{
-		m_pLog->Error(Helper::Format("Event is no processed. [%s][%d].", Manager::Events_Name(event).c_str(), event));
+		m_pLog->Error(format("Event is no processed. [{}][{}].", Manager::Events_Name(event), event));
 	}
 	break;
 	}
@@ -311,7 +311,7 @@ uint64_t Sloong::SloongNetGateway::GetPorcessConnection(int function)
 {
 	if (!m_mapFuncToTemplateIDs.exist(function) && !m_mapFuncToTemplateIDs.exist(-1))
 	{
-		m_pLog->Warn(Helper::Format("Function to template map list no have function [%d] and universal processer. the map list size [%d]", function, m_mapFuncToTemplateIDs.size()));
+		m_pLog->Warn(format("Function to template map list no have function [{}] and universal processer. the map list size [{}]", function, m_mapFuncToTemplateIDs.size()));
 		return 0;
 	}
 

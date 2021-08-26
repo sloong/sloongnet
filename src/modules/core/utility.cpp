@@ -55,7 +55,7 @@ void CUtility::RecordCPUStatus(CPU_OCCUPY *cpust)
 	fd = fopen("/proc/stat", "r");
 	fgets(buff, sizeof(buff), fd);
 
-	sscanf(buff, "%s %u %u %u %u", cpust->name, &cpust->user, &cpust->nice, &cpust->system, &cpust->idle);
+	sscanf(buff, "{} %u %u %u %u", cpust->name, &cpust->user, &cpust->nice, &cpust->system, &cpust->idle);
 
 	fclose(fd);
 }
@@ -105,7 +105,7 @@ string Sloong::CUtility::GetSocketAddress(int socket)
 	int nSize = sizeof(add);
 	memset(&add, 0, sizeof(add));
 	getpeername(socket, (sockaddr *)&add, (socklen_t *)&nSize);
-	return Helper::Format("%s:%d", inet_ntoa(add.sin_addr), add.sin_port);
+	return format("{}:{}", inet_ntoa(add.sin_addr), add.sin_port);
 }
 
 unique_ptr<char[]> Sloong::CUtility::ReadFile(const string &filepath, int *out_size)
@@ -225,7 +225,7 @@ VStrResult CUtility::IPToHostName(const string &ip)
 
 	if (auto res = getaddrinfo(ip.c_str(), nullptr, &hints, &addr_res) != 0)
 	{
-		return VStrResult::Make_Error(Helper::Format("getaddrinfo: %s", gai_strerror(res)));
+		return VStrResult::Make_Error(format("getaddrinfo: {}", gai_strerror(res)));
 	}
 
 	vector<string> list;
@@ -236,7 +236,7 @@ VStrResult CUtility::IPToHostName(const string &ip)
 		auto ret = getnameinfo(res_p->ai_addr, res_p->ai_addrlen, host, sizeof(host), NULL, 0, NI_NAMEREQD);
 		if (ret != 0)
 		{
-			errmsg += Helper::Format("getaddrinfo: %s", gai_strerror(ret));
+			errmsg += format("getaddrinfo: {}", gai_strerror(ret));
 		}
 		else
 		{
@@ -268,7 +268,7 @@ VStrResult CUtility::HostnameToIP(const string &hostname)
 
 	if (auto res = getaddrinfo(hostname.c_str(), NULL, &hints, &hostname_res) != 0)
 	{
-		return VStrResult::Make_Error(Helper::Format("getaddrinfo: %s", gai_strerror(res)));
+		return VStrResult::Make_Error(format("getaddrinfo: {}", gai_strerror(res)));
 	}
 
 	vector<string> list;
@@ -279,7 +279,7 @@ VStrResult CUtility::HostnameToIP(const string &hostname)
 		auto ret = getnameinfo(res_p->ai_addr, res_p->ai_addrlen, host, sizeof(host), NULL, 0, NI_NUMERICHOST);
 		if (ret != 0)
 		{
-			errmsg += Helper::Format("getaddrinfo: %s", gai_strerror(ret));
+			errmsg += format("getaddrinfo: {}", gai_strerror(ret));
 		}
 		else
 		{

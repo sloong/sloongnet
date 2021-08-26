@@ -7,8 +7,8 @@ CResult Sloong::DBHub::Initialize(IControl *ic)
     IObject::Initialize(ic);
     auto config = IData::GetModuleConfig();
     MySqlEx mysql;
-    auto res = mysql.Connect((*config)["Address"].asString().c_str(), (*config)["Port"].asInt(), (*config)["User"].asString().c_str(),
-                             (*config)["Password"].asString().c_str(), "");
+    auto res = mysql.Connect((*config)["Address"].asString(), (*config)["Port"].asInt(), (*config)["User"].asString(),
+                             (*config)["Password"].asString(), "");
 
     if (res.IsFialed())
         return res;
@@ -32,22 +32,22 @@ PackageResult Sloong::DBHub::RequestPackageProcesser(Package *pack)
     auto function = (Functions)pack->function();
     if (!DataCenter::Functions_IsValid(function))
     {
-        return PackageResult::Make_Error(Helper::Format("Parser request package function[%s] error.", pack->content().c_str()));
+        return PackageResult::Make_Error(format("Parser request package function[{}] error.", pack->content()));
     }
 
     auto req_str = pack->content();
     auto func_name = Functions_Name(function);
-    m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), CBase64::Encode(req_str).c_str()));
+    m_pLog->Debug(format("Request [{}][{}]:[{}]", function, func_name, CBase64::Encode(req_str)));
     if (!m_mapFuncToHandler.exist(function))
     {
-        return PackageResult::Make_Error(Helper::Format("Function [%s] no handler.", func_name.c_str()));
+        return PackageResult::Make_Error(format("Function [{}] no handler.", func_name));
     }
 
     auto res = m_mapFuncToHandler[function](req_str, pack);
    if (res.IsError())
-		m_pLog->Warn(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
+		m_pLog->Warn(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage()));
 	else
-		m_pLog->Debug(Helper::Format("Response [%s]:[%s]", func_name.c_str(), ResultType_Name(res.GetResult()).c_str()));
+		m_pLog->Debug(format("Response [{}]:[{}]", func_name, ResultType_Name(res.GetResult())));
     return PackageResult::Make_OKResult(Package::MakeResponse(pack,res));
 }
 
@@ -62,8 +62,8 @@ CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, Package *pa
         sessions[this_thread::get_id()] = make_unique<MySqlEx>();
 
         auto connection = sessions[this_thread::get_id()].get();
-        auto res = connection->Connect((*config)["Address"].asString().c_str(), (*config)["Port"].asInt(), (*config)["User"].asString().c_str(),
-                                       (*config)["Password"].asString().c_str(), req->database());
+        auto res = connection->Connect((*config)["Address"].asString(), (*config)["Port"].asInt(), (*config)["User"].asString(),
+                                       (*config)["Password"].asString(), req->database());
         if (res.IsFialed())
             return res;
 
@@ -80,7 +80,7 @@ CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, Package *pa
 
     ConnectDatabaseResponse response;
     response.set_session(*id);
-    m_pLog->Debug( Helper::Format("Connect to database [%s] succeed. session id [%d]", req->database().c_str(), response.session() ));
+    m_pLog->Debug( format("Connect to database [{}] succeed. session id [{}]", req->database(), response.session() ));
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 

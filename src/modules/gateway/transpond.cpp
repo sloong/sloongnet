@@ -37,7 +37,7 @@ PackageResult Sloong::GatewayTranspond::MessageToProcesser(Package *pack)
 	auto target = SloongNetGateway::Instance->GetPorcessConnection(pack->function());
 	if( target == 0 )
 	{
-		auto msg = Helper::Format("No find process service for function[%d]. package [%d][%llu]", pack->function(), pack->sessionid(), pack->id() );
+		auto msg = format("No find process service for function[{}]. package [{}][{}]", pack->function(), pack->sessionid(), pack->id() );
 		m_pLog->Debug(msg);
 		return PackageResult::Make_Error(msg);
 	}
@@ -58,7 +58,7 @@ PackageResult Sloong::GatewayTranspond::MessageToProcesser(Package *pack)
 	trans_pack->set_id(id);
 	trans_pack->set_sessionid(target);
 	
-	m_pLog->Debug(Helper::Format("Trans package [%llu][%llu] -> [%d][%llu]", pack->sessionid(), pack->id(), trans_pack->sessionid(), trans_pack->id()));
+	m_pLog->Debug(format("Trans package [{}][{}] -> [{}][{}]", pack->sessionid(), pack->id(), trans_pack->sessionid(), trans_pack->id()));
 
 	SloongNetGateway::Instance->m_mapSerialToRequest[trans_pack->id()] = move(response);
 	return PackageResult::Make_OKResult(move(trans_pack));

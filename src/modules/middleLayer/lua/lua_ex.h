@@ -77,7 +77,7 @@ namespace Sloong
 		CResult RunBuffer(LPCSTR pBuffer, size_t sz);
 		CResult RunString(const string &strCommand);
 		CResult RunFunction(const string &, CLuaPacket *, int = 0, const string & = "", const string & = "", string *extendDataUUID = nullptr);
-		inline CResult RunFunction(const string &strFunctionName, const string &args) { return RunString(Helper::Format("%s(%s)", strFunctionName.c_str(), args.c_str())); }
+		inline CResult RunFunction(const string &strFunctionName, const string &args) { return RunString(format("%s(%s)", strFunctionName.c_str(), args.c_str())); }
 		CResult RunEventFunction( const string&, int, const string&);
 
 		// Get Valkue
@@ -115,8 +115,8 @@ namespace Sloong
 		string findScript(const string &strFullName);
 		inline CResult HandlerError( const string &strErrorTitle, const string &strErrorOperation, int res = -1)
 		{
-			auto str = Helper::Format("\n [%d]Error - %s:\n %s\n Error Message:%s", res, strErrorTitle.c_str(), strErrorOperation.c_str(), GetString(m_pScriptContext,1).c_str());
-			//Helper::Format("\n Error - %s:\n %s\n Error Message:%s", strErrorType.c_str(), strCmd, GetCallStack(m_pScriptContext).c_str())
+			auto str = format("\n [%d]Error - %s:\n %s\n Error Message:%s", res, strErrorTitle.c_str(), strErrorOperation.c_str(), GetString(m_pScriptContext,1).c_str());
+			//format("\n Error - %s:\n %s\n Error Message:%s", strErrorType.c_str(), strCmd, GetCallStack(m_pScriptContext).c_str())
 			#ifndef HIDE_LUA_ERROR
 				cout << str << endl;
 				return CResult::Make_Error(str);

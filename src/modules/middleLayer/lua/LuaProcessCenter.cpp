@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2021-02-26 11:28:47
+ * @LastEditTime: 2021-08-26 14:56:30
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -143,7 +143,7 @@ TResult<unique_ptr<CLua>> Sloong::CLuaProcessCenter::InitLua()
 	{
 		return TResult<unique_ptr<CLua>>::Make_Error("Run Script Fialed." + res.GetMessage());
 	}
-	res = lua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), Helper::Format("'%s'", m_pConfig->operator[]("LuaScriptFolder").asString().c_str()));
+	res = lua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), format("'{}'", m_pConfig->operator[]("LuaScriptFolder").asString()));
 	if (res.IsFialed())
 	{
 		return TResult<unique_ptr<CLua>>::Make_Error("Run Function Fialed." + res.GetMessage());

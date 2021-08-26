@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-08-07 12:43:05
- * @LastEditTime: 2021-08-25 11:45:34
+ * @LastEditTime: 2021-08-26 14:16:15
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/core.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -86,6 +86,10 @@
 #include <mutex>
 #include <atomic>
 using namespace std;
+
+#include <fmt/format.h>
+using fmt::format;
+
 
 #include "protocol/base.pb.h"
 using namespace Base;

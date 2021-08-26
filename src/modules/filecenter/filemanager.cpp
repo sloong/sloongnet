@@ -47,20 +47,20 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(Package *pack)
 {
     auto function = (Functions)pack->function();
     if (!Functions_IsValid(function))
-        return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("FileCenter no provide [%d] function.", function)));
+        return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, format("FileCenter no provide [{}] function.", function)));
 
     auto req_obj = pack->content();
     auto func_name = Functions_Name(function);
-    m_pLog->Debug(Helper::Format("Request [%d][%s]:[%s]", function, func_name.c_str(), req_obj.c_str()));
+    m_pLog->Debug(format("Request [{}][{}]:[{}]", function, func_name, req_obj));
     if (!m_mapFuncToHandler.exist(function))
-        return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
+        return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, format("Function [{}] no handler.", func_name)));
 
     auto res = m_mapFuncToHandler[function](req_obj, pack);
     auto response = Package::MakeResponse(pack, res);
     if (res.IsSucceed())
-        m_pLog->Debug(Helper::Format("Response [%s]:[%s][%d].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().length()));
+        m_pLog->Debug(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage().length()));
     else
-        m_pLog->Debug(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
+        m_pLog->Debug(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage()));
     return PackageResult::Make_OKResult(move(response));
 }
 
@@ -71,7 +71,7 @@ PackageResult Sloong::FileManager::ResponsePackageProcesser(Package *pack)
 
 CResult Sloong::FileManager::MergeFile(const list<FileRange> &fileList, const string &saveFile)
 {
-    ofstream out(saveFile.c_str(), ios::binary);
+    ofstream out(saveFile, ios::binary);
     for (auto &item : fileList)
     {
         out.seekp(ios_base::beg + item.Start);
@@ -88,7 +88,7 @@ CResult Sloong::FileManager::SplitFile(const string &filepath, int splitSize, ma
         return CResult::Make_Error("File no exist.");
     }
 
-    ifstream in(filepath.c_str(), ios::in | ios::binary);
+    ifstream in(filepath, ios::in | ios::binary);
     in.seekg(ios_base::end);
     int nSize = in.tellg();
     in.seekg(ios_base::beg);
@@ -110,21 +110,21 @@ CResult Sloong::FileManager::ArchiveFile(const string &index, const string &sour
     {
         string target = GetFileTruePath(index);
 
-        m_pLog->Debug(Helper::Format("Archive file: source[%s] target[%s]", source.c_str(), target.c_str()));
+        m_pLog->Debug(format("Archive file: source[{}] target[{}]", source, target));
         if (source.length() < 3 || target.length() < 3)
-            return CResult::Make_Error(Helper::Format("Move File error. File name cannot empty. source:%s;target:%s", source.c_str(), target.c_str()));
+            return CResult::Make_Error(format("Move File error. File name cannot empty. source:{};target:{}", source, target));
 
         if (access(source.c_str(), ACC_R) != 0)
-            return CResult::Make_Error(Helper::Format("Move File error. Origin file not exist or can not read:[%s]", source.c_str()));
+            return CResult::Make_Error(format("Move File error. Origin file not exist or can not read:[{}]", source));
 
         auto res = Helper::CheckFileDirectory(target);
         if (res < 0)
-            return CResult::Make_Error(Helper::Format("Move File error.CheckFileDirectory error:[%s][%d]", target.c_str(), res));
+            return CResult::Make_Error(format("Move File error.CheckFileDirectory error:[{}][{}]", target, res));
 
         if (!Helper::MoveFile(source, target))
         {
             // Move file need write access. so if move file error, try copy .
-            if (!Helper::RunSystemCmd(Helper::Format("mv \"%s\" \"%s\"", source.c_str(), target.c_str())))
+            if (!Helper::RunSystemCmd(format("mv \"{}\" \"{}\"", source, target)))
             {
                 return CResult::Make_Error("Move File and try copy file error.");
             }
@@ -162,7 +162,7 @@ string Sloong::FileManager::GetFileTruePath(const string &index)
 // The filecenter no't care the file format. so in here, we saved by the hashcode, the saver should be save the format.
 string Sloong::FileManager::GetFileFolder(const string &index)
 {
-    auto path = Helper::Format("%s%s/", m_strArchiveFolder.c_str(), index.substr(0, 3).c_str());
+    auto path = format("{}{}/", m_strArchiveFolder, index.substr(0, 3));
     Helper::CheckFileDirectory(path);
     return path;
 }
@@ -176,7 +176,7 @@ CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, Package
     savedInfo.SHA256 = req->sha256();
     savedInfo.FileSize = req->filesize();
     savedInfo.Path = m_strUploadTempSaveFolder + token + "/";
-    Helper::RunSystemCmd(Helper::Format("mkdir -p %s", savedInfo.Path.c_str()));
+    Helper::RunSystemCmd(format("mkdir -p {}", savedInfo.Path));
 
     PrepareUploadResponse response;
     response.set_token(token);
@@ -195,11 +195,11 @@ CResult Sloong::FileManager::UploadingHandler(const string &str_req, Package *pa
     auto &data = req->uploaddata();
 
     if (data.end() - data.start() != data.data().length())
-        return CResult::Make_Error(Helper::Format("Length check error.[%d]<->[%d]", data.end() - data.start(), data.data().length()));
+        return CResult::Make_Error(format("Length check error.[{}]<->[{}]", data.end() - data.start(), data.data().length()));
 
     auto sha256 = CSHA256::Encode(data.data());
     if (data.sha256() != sha256)
-        return CResult::Make_Error(Helper::Format("Hasd check error.[%s]<->[%s]", sha256.c_str(), data.sha256().c_str()));
+        return CResult::Make_Error(format("Hasd check error.[{}]<->[{}]", sha256, data.sha256()));
 
     FileRange range;
     range.Start = data.start();
@@ -225,16 +225,16 @@ CResult Sloong::FileManager::UploadedHandler(const string &str_req, Package *pac
     if (res.IsFialed())
         return CResult::Make_Error(res.GetMessage());
 
-    m_pLog->Debug(Helper::Format("Save file to [%s]. Hash [%s]", temp_path.c_str(), info->SHA256.c_str()));
+    m_pLog->Debug(format("Save file to [{}]. Hash [{}]", temp_path, info->SHA256));
     auto sha256 = CUtility::SHA256EncodeFile(temp_path);
     if (info->SHA256 != sha256)
-        return CResult::Make_Error(Helper::Format("Hasd check error.[%s]<->[%s]", sha256.c_str(), info->SHA256.c_str()));
+        return CResult::Make_Error(format("Hasd check error.[{}]<->[{}]", sha256, info->SHA256));
 
     res = ArchiveFile(req->token(), temp_path);
     if (res.IsFialed())
         return res;
 
-    Helper::RunSystemCmd(Helper::Format("rm -d %s", info->Path.c_str()));
+    Helper::RunSystemCmd(format("rm -d {}", info->Path));
 
     return CResult::Succeed;
 }
@@ -264,7 +264,7 @@ CResult Sloong::FileManager::SimpleUploadHandler(const string &str_req, Package 
     if (res.IsFialed())
         return res;
 
-    Helper::RunSystemCmd(Helper::Format("rm %s", temp_path.c_str()));
+    Helper::RunSystemCmd(format("rm {}", temp_path));
 
     return CResult::Make_OK(token);
 }
@@ -338,7 +338,7 @@ CResult Sloong::FileManager::DownloadFileHandler(const string &str_req, Package 
         {
             int canRead = in.gcount();
             in.close();
-            return CResult::Make_Error(Helper::Format("Error when read file:error: only %d could be read", canRead));
+            return CResult::Make_Error(format("Error when read file:error: only {} could be read", canRead));
         }
 
         auto d = response.add_filedata();
@@ -357,7 +357,7 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
     auto req = ConvertStrToObj<ConvertImageFileRequest>(str_req);
     if (req->targetformat() == SupportFormat::FLIF || !SupportFormat_IsValid(req->targetformat()))
     {
-        return CResult::Make_Error(Helper::Format("Unsupport format[%s].", SupportFormat_Name(req->targetformat()).c_str()));
+        return CResult::Make_Error(format("Unsupport format[{}].", SupportFormat_Name(req->targetformat())));
     }
 
     string real_path = GetFileTruePath(req->index());
@@ -426,11 +426,11 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
 
     if (!req->retainsourcefile())
     {
-        m_pLog->Info(Helper::Format("%s is convert to %s with %s format.delete old file.", req->index().c_str(), uuid.c_str(), SupportFormat_Name(req->targetformat()).c_str()));
+        m_pLog->Info(format("{} is convert to {} with {} format.delete old file.", req->index(), uuid, SupportFormat_Name(req->targetformat())));
         int r = remove(real_path.c_str());
         if (r != 0)
         {
-            m_pLog->Warn(Helper::Format("old file delete fialed. return code %d", r));
+            m_pLog->Warn(format("old file delete fialed. return code {}", r));
         }
     }
 
@@ -440,7 +440,7 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
 CResult Sloong::FileManager::GetThumbnailHandler(const string &str_req, Package *trans_pack)
 {
     auto req = ConvertStrToObj<GetThumbnailRequest>(str_req);
-    string thumb_file = Helper::Format("%s%dx%dx%d/%s.webp", m_strCacheFolder.c_str(), req->width(), req->height(), req->quality(), req->index().c_str());
+    string thumb_file = format("{}{}x{}x{}/{}.webp", m_strCacheFolder, req->width(), req->height(), req->quality(), req->index());
     if (!FileExist(thumb_file))
     {
         Helper::CheckFileDirectory(thumb_file);

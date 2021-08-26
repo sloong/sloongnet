@@ -37,11 +37,11 @@ U64Result Sloong::CEpollEx::CreateListenSocket(const string &addr, int port)
 	// SOL_SOCKET:在socket层面设置
 	// SO_REUSEADDR:允许套接字和一个已在使用中的地址捆绑
 	if (0 != setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &sock_op, sizeof(sock_op)))
-		return U64Result::Make_Error(Helper::Format("Set socket property to [SO_REUSEADDR] field. Error info: [%d]%s", errno, strerror(errno)));
+		return U64Result::Make_Error(format("Set socket property to [SO_REUSEADDR] field. Error info: [{}]{}", errno, strerror(errno)));
 
 #ifdef SO_REUSEPORT
 	if (0 != setsockopt(listen_sock, SOL_SOCKET, SO_REUSEPORT, &sock_op, sizeof(sock_op)))
-		return U64Result::Make_Error(Helper::Format("Set socket property to [SO_REUSEPORT] field. Error info: [%d]%s", errno, strerror(errno)));
+		return U64Result::Make_Error(format("Set socket property to [SO_REUSEPORT] field. Error info: [{}]{}", errno, strerror(errno)));
 #endif
 
 	// 初始化地址结构
@@ -56,11 +56,11 @@ U64Result Sloong::CEpollEx::CreateListenSocket(const string &addr, int port)
 
 	// 绑定端口
 	if (-1 == bind(listen_sock, (struct sockaddr *)&address, sizeof(address)))
-		return U64Result::Make_Error(Helper::Format("Bind to %d field. Error info: [%d]%s", port, errno, strerror(errno)));
+		return U64Result::Make_Error(format("Bind to {} field. Error info: [{}]{}", port, errno, strerror(errno)));
 
 	// 监听端口,定义的SOMAXCONN大小为128,太小了,这里修改为1024
 	if (-1 == listen(listen_sock, 1024))
-		return U64Result::Make_Error(Helper::Format("Listen to %d field. Error info: [%d]%s", port, errno, strerror(errno)));
+		return U64Result::Make_Error(format("Listen to {} field. Error info: [{}]{}", port, errno, strerror(errno)));
 
 	return U64Result::Make_OKResult(listen_sock);
 }
@@ -70,7 +70,7 @@ CResult Sloong::CEpollEx::Initialize(IControl *iMsg)
 {
 	IObject::Initialize(iMsg);
 	int nPort = IData::GetGlobalConfig()->listenport();
-	m_pLog->Info(Helper::Format("epollex is initialize.license port is %d", nPort));
+	m_pLog->Info(format("epollex is initialize.license port is {}", nPort));
 
 	// For Test the port cannot used. when test done, close it.
 	auto nRes = CreateListenSocket("0.0.0.0", nPort);
@@ -86,7 +86,7 @@ CResult Sloong::CEpollEx::Initialize(IControl *iMsg)
 	if (workThread < 1)
 		return CResult::Make_Error("Epoll work thread must be big than 0");
 
-	m_pLog->Info(Helper::Format("epollex is running with %d threads", workThread));
+	m_pLog->Info(format("epollex is running with {} threads", workThread));
 
 #ifdef SO_REUSEPORT
 	m_pLog->Debug("System support SO_REUSEPORT. epoll will run with SO_REUSEPORT mode.");
@@ -280,12 +280,12 @@ void Sloong::CEpollEx::MainWorkLoop()
 				{
 					if( !m_mapSocketToID.exist(fd))
 					{
-						m_pLog->Error(Helper::Format("EPoll EPOLLIN event happened. Socket[%d][%s] Data Can Receive.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						m_pLog->Error(format("EPoll EPOLLIN event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
 					}
 					else
 					{
 						auto id = m_mapSocketToID[fd];
-						m_pLog->Debug(Helper::Format("EPoll EPOLLIN event happened. Socket[%d][%s] Data Can Receive.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						m_pLog->Debug(format("EPoll EPOLLIN event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
 						auto res = OnDataCanReceive(id);
 						if (res == ResultType::Error)
 							UnregisteConnection(id);
@@ -297,12 +297,12 @@ void Sloong::CEpollEx::MainWorkLoop()
 					
 					if( !m_mapSocketToID.exist(fd))
 					{
-						m_pLog->Error(Helper::Format("EPoll EPOLLOUT event happened. Socket[%d][%s] Data Can Receive.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						m_pLog->Error(format("EPoll EPOLLOUT event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
 					}
 					else
 					{
 						auto id = m_mapSocketToID[fd];
-						m_pLog->Debug(Helper::Format("EPoll EPOLLOUT event happened.Socket[%d][%s] Can Write Data.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						m_pLog->Debug(format("EPoll EPOLLOUT event happened.Socket[{}][{}] Can Write Data.", fd, CUtility::GetSocketAddress(fd)));
 						auto res = OnCanWriteData(id);
 						// 所有消息全部发送完毕后只需要监听可读消息就可以了。
 						if (res == ResultType::Succeed)
@@ -314,12 +314,12 @@ void Sloong::CEpollEx::MainWorkLoop()
 					
 					if( !m_mapSocketToID.exist(fd))
 					{
-						m_pLog->Error(Helper::Format("EPoll EPOLLIN event happened. Socket[%d][%s] Data Can Receive.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						m_pLog->Error(format("EPoll EPOLLIN event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
 					}
 					else
 					{
 						auto id = m_mapSocketToID[fd];
-						m_pLog->Debug(Helper::Format("EPoll unkuown event happened. Socket[%d][%s] close this connnect.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						m_pLog->Debug(format("EPoll unkuown event happened. Socket[{}][{}] close this connnect.", fd, CUtility::GetSocketAddress(fd)));
 						OnOtherEventHappened(id);
 					}
 				}
@@ -327,7 +327,7 @@ void Sloong::CEpollEx::MainWorkLoop()
 		}
 		catch (exception &ex)
 		{
-			m_pLog->Error(Helper::Format("Error happened in Epoll work thead. message:", ex.what()));
+			m_pLog->Error(format("Error happened in Epoll work thead. message:", ex.what()));
 		}
 		catch (...)
 		{

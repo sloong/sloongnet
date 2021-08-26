@@ -142,7 +142,7 @@ CResult CGlobalFunction::EnableDataReceive(int port, int timtout)
     errno = bind(m_ListenSock, (struct sockaddr *)&address, sizeof(address));
 
     if (errno == -1)
-        return CResult::Make_Error(Helper::Format("bind to %d field. errno = %d", port, errno));
+        return CResult::Make_Error(format("bind to {} field. errno = {}", port, errno));
 
     errno = listen(m_ListenSock, 1024);
 
@@ -153,7 +153,7 @@ CResult CGlobalFunction::EnableDataReceive(int port, int timtout)
 
 void CGlobalFunction::ClearReceiveInfoByUUID(string uuid)
 {
-    m_pLog->Debug(Helper::Format("Clean receive info from g_RecvDataInfoList by :[%s]", uuid.c_str()));
+    m_pLog->Debug(format("Clean receive info from g_RecvDataInfoList by :[{}]", uuid));
     auto p_item_list = g_RecvDataInfoList.find(uuid);
     if (p_item_list == g_RecvDataInfoList.end())
     {
@@ -177,7 +177,7 @@ void Sloong::CGlobalFunction::RecvDataConnFunc()
         int conn_sock = -1;
         if ((conn_sock = accept(m_ListenSock, NULL, NULL)) > 0)
         {
-            pLog->Debug(Helper::Format("Accept data connect :[%s][%d]", CUtility::GetSocketIP(conn_sock).c_str(), CUtility::GetSocketPort(conn_sock)));
+            pLog->Debug(format("Accept data connect :[{}][{}]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
             // When accept the connect , receive the uuid data. and
             char *pCheckBuf = new char[g_uuid_len + 1];
             memset(pCheckBuf, 0, g_uuid_len + 1);
@@ -186,14 +186,14 @@ void Sloong::CGlobalFunction::RecvDataConnFunc()
             // Check uuid length
             if (nLen != CGlobalFunction::g_uuid_len)
             {
-                pLog->Warn(Helper::Format("The uuid length error:[%d]. Close connect.", nLen));
+                pLog->Warn(format("The uuid length error:[{}]. Close connect.", nLen));
                 close(conn_sock);
                 continue;
             }
             // Check uuid validity
             if (g_RecvDataInfoList.find(pCheckBuf) == g_RecvDataInfoList.end())
             {
-                pLog->Warn(Helper::Format("The uuid is not find in list:[%s]. Close connect.", pCheckBuf));
+                pLog->Warn(format("The uuid is not find in list:[{}]. Close connect.", pCheckBuf));
                 close(conn_sock);
                 continue;
             }
@@ -221,7 +221,7 @@ void Sloong::CGlobalFunction::RecvFileFunc(int conn_sock)
         return;
     }
     string uuid = conn_item->second;
-    pLog->Info(Helper::Format("Start thread to receive file data for :[%s]", uuid.c_str()));
+    pLog->Info(format("Start thread to receive file data for :[{}]", uuid));
     // Find the recv info list.
     auto info_item = g_RecvDataInfoList.find(uuid);
     if (info_item == g_RecvDataInfoList.end())
@@ -354,7 +354,7 @@ void Sloong::CGlobalFunction::RecvFileFunc(int conn_sock)
             }
         } while (bLoop);
 
-        pLog->Debug(Helper::Format("Receive connect done. close:[%s:%d]", CUtility::GetSocketIP(conn_sock).c_str(), CUtility::GetSocketPort(conn_sock)));
+        pLog->Debug(format("Receive connect done. close:[{}:{}]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
         close(conn_sock);
     }
     catch (const std::exception &)
@@ -425,7 +425,7 @@ void Sloong::CGlobalFunction::OnReferenceModuleOnline(SharedEvent e)
     auto item = info->item();
     m_mapUUIDToNode[item.uuid()] = item;
     m_mapTemplateIDToUUIDs[item.templateid()].push_back(item.uuid());
-    m_pLog->Info(Helper::Format("New node[%llu][%s:%d] is online:templateid[%d],list size[%d]", item.uuid(), item.address().c_str(), item.port(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
+    m_pLog->Info(format("New node[{}][{}:{}] is online:templateid[{}],list size[{}]", item.uuid(), item.address(), item.port(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
 
     AddConnection(item.uuid(), item.address(), item.port());
 }
@@ -440,7 +440,7 @@ void Sloong::CGlobalFunction::OnReferenceModuleOffline(SharedEvent e)
     m_mapTemplateIDToUUIDs[item.templateid()].erase(item.uuid());
     m_mapUUIDToConnectionID.erase(uuid);
     m_mapUUIDToNode.erase(uuid);
-    m_pLog->Info(Helper::Format("Node is offline [%llu], template id[%d],list size[%d]", item.uuid(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
+    m_pLog->Info(format("Node is offline [{}], template id[{}],list size[{}]", item.uuid(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
 }
 
 void Sloong::CGlobalFunction::RegistFuncToLua(CLua *pLua)
@@ -566,7 +566,7 @@ int CGlobalFunction::Lua_ShowLog(lua_State *l)
     if (msg == "")
         return 0;
     else
-        msg = Helper::Format("[Script]:[%s]", msg.c_str());
+        msg = format("[Script]:[{}]", msg);
 
     auto log = CGlobalFunction::Instance->m_pLog;
     if (luaTitle == "Info")
@@ -622,26 +622,26 @@ int CGlobalFunction::Lua_MoveFile(lua_State *l)
         if (orgName == "" || newName == "")
         {
             nRes = -2;
-            throw invalid_argument(Helper::Format("Move File error. File name cannot empty. orgName:%s;newName:%s", orgName.c_str(), newName.c_str()));
+            throw invalid_argument(format("Move File error. File name cannot empty. orgName:{};newName:{}", orgName, newName));
         }
 
         if (access(orgName.c_str(), ACC_R) != 0)
         {
             nRes = -1;
-            throw runtime_error(Helper::Format("Move File error. Origin file not exist or can not read:[%s]", orgName.c_str()));
+            throw runtime_error(format("Move File error. Origin file not exist or can not read:[{}]", orgName));
         }
 
         int res = Helper::CheckFileDirectory(newName);
         if (res < 0)
         {
             nRes = -1;
-            throw runtime_error(Helper::Format("Move File error.CheckFileDirectory error:[%s][%d]", newName.c_str(), res));
+            throw runtime_error(format("Move File error.CheckFileDirectory error:[{}][{}]", newName, res));
         }
 
         if (!Helper::MoveFile(orgName, newName))
         {
             // Move file need write access. so if move file error, try copy .
-            if (!Helper::RunSystemCmd(Helper::Format("cp \"%s\" \"%s\"", orgName.c_str(), newName.c_str())))
+            if (!Helper::RunSystemCmd(format("cp \"{}\" \"{}\"", orgName, newName)))
             {
                 nRes = -3;
                 throw runtime_error("Move File and try copy file error.");
@@ -764,7 +764,7 @@ U64Result CGlobalFunction::GetConnectionID(int templateid)
 {
     if (CGlobalFunction::Instance->m_mapTemplateIDToUUIDs[templateid].size() == 0)
     {
-        return U64Result::Make_Error(Helper::Format("Template[%d] no node online.", templateid));
+        return U64Result::Make_Error(format("Template[{}] no node online.", templateid));
     }
 
     auto uuid = CGlobalFunction::Instance->m_mapTemplateIDToUUIDs[templateid].front();
@@ -773,7 +773,7 @@ U64Result CGlobalFunction::GetConnectionID(int templateid)
         auto item = CGlobalFunction::Instance->m_mapUUIDToNode[uuid];
         CGlobalFunction::Instance->AddConnection(uuid, item.address(), item.port());
 
-        return U64Result::Make_Error(Helper::Format("Try connect to [%d][%llu][%s:%d], please wait and retry.", templateid, uuid, item.address().c_str(), item.port()));
+        return U64Result::Make_Error(format("Try connect to [{}][{}][{}:{}], please wait and retry.", templateid, uuid, item.address(), item.port()));
     }
 
     return U64Result::Make_OKResult(CGlobalFunction::Instance->m_mapUUIDToConnectionID[uuid]);
@@ -1191,7 +1191,7 @@ int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
     if (!FileCenter::SupportFormat_IsValid(target))
     {
         CLua::PushInteger(l, Base::ResultType::Error);
-        CLua::PushString(l, Helper::Format("Convert [%d] to FileCenter::SupportFormat enum fialed.", target));
+        CLua::PushString(l, format("Convert [{}] to FileCenter::SupportFormat enum fialed.", target));
         return 2;
     }
 

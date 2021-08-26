@@ -68,7 +68,7 @@ PackageResult Sloong::SloongNetFirewall::RequestPackageProcesser(Package* pack)
 {
     auto sender = pack->sender();
     auto func = (Functions)pack->function();
-    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%llu]", Functions_Name(func).c_str(), sender));
+    m_pLog->Debug(format("Porcess [{}] request: sender[{}]", Functions_Name(func), sender));
 
 	return PackageResult::Succeed();
 }
@@ -77,7 +77,7 @@ PackageResult Sloong::SloongNetFirewall::ResponsePackageProcesser(Package* pack)
 {
     auto sender = pack->sender();
     auto func = (Functions)pack->function();
-    m_pLog->Debug(Helper::Format("Porcess [%s] request: sender[%llu]", Functions_Name(func).c_str(), sender));
+    m_pLog->Debug(format("Porcess [{}] request: sender[{}]", Functions_Name(func), sender));
 
 	return PackageResult::Succeed();
 }
@@ -94,7 +94,7 @@ void Sloong::SloongNetFirewall::EventPackageProcesser(Package* pack)
 	auto event = Events_MIN;
 	if(!Manager::Events_Parse(pack->content(),&event))
 	{
-		m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]",pack->content().c_str()));
+		m_pLog->Error(format("Receive event but parse error. content:[{}]",pack->content()));
 		return;
 	}
 

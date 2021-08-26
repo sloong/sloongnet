@@ -67,6 +67,8 @@
 #pragma once
 
 #include <sys/time.h>
+#include <fmt/format.h>
+using fmt::format;
 
 // univ head file
 #include "univ.h"
@@ -102,7 +104,7 @@ namespace Sloong
 		auto start = clocks.begin();
 		for (auto item = start ++; item != clocks.end(); item++)
 		{
-			str = Helper::Format("%s[%.2f]", str.c_str(), *item - *start);
+			str = format("%s[%.2f]", str.c_str(), *item - *start);
 		}
 		return str;
 	}
@@ -278,7 +280,7 @@ namespace Sloong
 		}
 		else
 		{
-			log->Log( title + Helper::Format("Function: %d Priority: %d ID: %llu Content[L]: %d Extend[L]: %d",
+			log->Log( title + format("Function: %d Priority: %d ID: %llu Content[L]: %d Extend[L]: %d",
 			 package->function(), package->priority(), package->id(), package->content().length(), package->extend().length()), level );
 		}
 	}

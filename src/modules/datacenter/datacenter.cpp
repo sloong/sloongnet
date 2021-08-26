@@ -148,7 +148,7 @@ void Sloong::CDataCenter::EventPackageProcesser(Package *data_pack)
 	auto event = (Manager::Events)data_pack->function();
 	if (!Manager::Events_IsValid(event))
 	{
-		m_pLog->Error(Helper::Format("EventPackageProcesser is called.but the fucntion[%d] check error.", event));
+		m_pLog->Error(format("EventPackageProcesser is called.but the fucntion[{}] check error.", event));
 		return;
 	}
 
@@ -156,7 +156,7 @@ void Sloong::CDataCenter::EventPackageProcesser(Package *data_pack)
 	{
 	default:
 	{
-		m_pLog->Error(Helper::Format("Event is no processed. [%s][%d].", Manager::Events_Name(event).c_str(), event));
+		m_pLog->Error(format("Event is no processed. [{}][{}].", Manager::Events_Name(event), event));
 	}
 	break;
 	}

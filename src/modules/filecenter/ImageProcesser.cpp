@@ -48,7 +48,7 @@ CResult ImageProcesser::GetThumbnail(const string &sourceFile, const string &tar
 		return CResult::Make_Error("Param error.");
 	}
 
-	string str_cmd = Helper::Format("convert -sample %dx%d %s %s", width, height, sourceFile.c_str(), targetFile.c_str());
+	string str_cmd = format("convert -sample {}x{} {} {}", width, height, sourceFile, targetFile);
 	return RunCMD(sourceFile, targetFile, str_cmd);
 }
 
@@ -59,15 +59,15 @@ CResult ImageProcesser::ConvertFormat(const string &sourceFile, const string &ta
 	switch ( fmt ){
 		case FileCenter::SupportFormat::WEBP:{
 			out_file += ".webp";
-			str_cmd = Helper::Format("convert %s -quality %d -define webp:method=6 %s", sourceFile.c_str(), quality, out_file.c_str());
+			str_cmd = format("convert {} -quality {} -define webp:method=6 {}", sourceFile, quality, out_file);
 		}break;
 		case FileCenter::SupportFormat::AVIF:{
 			out_file += ".avif";
-			str_cmd = Helper::Format("convert %s -quality %d %s", sourceFile.c_str(), quality, out_file.c_str());
+			str_cmd = format("convert {} -quality {} {}", sourceFile, quality, out_file);
 		}break;
 		case FileCenter::SupportFormat::HEIF:{
 			out_file += ".heif";
-			str_cmd = Helper::Format("convert %s -quality %d %s", sourceFile.c_str(), quality, out_file.c_str());
+			str_cmd = format("convert {} -quality {} {}", sourceFile, quality, out_file);
 		}break;
 		case FileCenter::SupportFormat::Best:{
 			return ConvertBestFormat(sourceFile,targetFile,quality);

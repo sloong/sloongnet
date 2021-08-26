@@ -278,7 +278,7 @@ PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
 	auto function = (Functions)pack->function();
 	if (!Manager::Functions_IsValid(function))
 	{
-		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Parser request package function[%s] error.", pack->content().c_str())));
+		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, format("Parser request package function[{}] error.", pack->content())));
 	}
 
 	auto req_str = pack->content();
@@ -294,17 +294,17 @@ PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
 	}
 
 	auto func_name = Functions_Name(function);
-	m_pLog->Info(Helper::Format("Request [%d][%s]", function, func_name.c_str()));
+	m_pLog->Info(format("Request [{}][{}]", function, func_name));
 	if (!m_mapFuncToHandler.exist(function))
 	{
-		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, Helper::Format("Function [%s] no handler.", func_name.c_str())));
+		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, format("Function [{}] no handler.", func_name)));
 	}
 
 	auto res = m_mapFuncToHandler[function](req_str, pack);
 	if (res.IsError())
-		m_pLog->Warn(Helper::Format("Response [%s]:[%s][%s].", func_name.c_str(), ResultType_Name(res.GetResult()).c_str(), res.GetMessage().c_str()));
+		m_pLog->Warn(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage()));
 	else
-		m_pLog->Info(Helper::Format("Response [%s]:[%s]", func_name.c_str(), ResultType_Name(res.GetResult()).c_str()));
+		m_pLog->Info(format("Response [{}]:[{}]", func_name, ResultType_Name(res.GetResult())));
 	if (res.GetResult() == ResultType::Ignore)
 		return PackageResult::Ignore();
 
@@ -333,7 +333,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 		event->SetCallbackFunc([item = &m_mapUUIDToNodeItem[sender]](IEvent *e, ConnectionInfo info)
 							   { item->Address = info.Address; });
 		m_iC->SendMessage(event);
-		m_pLog->Debug(Helper::Format("Module[%s:%d] regist to system. Allocating uuid [%llu].", item.Address.c_str(), item.Port, item.UUID));
+		m_pLog->Debug(format("Module[{}:{}] regist to system. Allocating uuid [{}].", item.Address, item.Port, item.UUID));
 		char m_pMsgBuffer[8] = {0};
 		char *pCpyPoint = m_pMsgBuffer;
 		Helper::Int64ToBytes(sender, pCpyPoint);
@@ -399,7 +399,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 	res.set_templateid(tpl->ID);
 	res.set_configuation(tpl->Configuation);
 
-	m_pLog->Debug(Helper::Format("Allocating module[%llu] Type to [%s]", sender_info->UUID, tpl->Name.c_str()));
+	m_pLog->Debug(format("Allocating module[{}] Type to [{}]", sender_info->UUID, tpl->Name));
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
@@ -428,14 +428,14 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, Package
 	int id = req->templateid();
 
 	if (!m_mapUUIDToNodeItem.exist(sender))
-		return CResult::Make_Error(Helper::Format("The sender [%llu] is no regitser.", sender));
+		return CResult::Make_Error(format("The sender [{}] is no regitser.", sender));
 
 	if (id == 1)
 		return CResult::Make_Error("Template id error.");
 
 	auto tpl = m_mapIDToTemplateItem.try_get(id);
 	if (tpl == nullptr)
-		return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
+		return CResult::Make_Error(format("The template id [{}] is no exist.", id));
 
 	// Save node info.
 	auto &item = m_mapUUIDToNodeItem[sender];
@@ -501,7 +501,7 @@ CResult Sloong::CServerManage::DeleteTemplateHandler(const string &req_str, Pack
 	int id = req->templateid();
 	if (!m_mapIDToTemplateItem.exist(id))
 	{
-		return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
+		return CResult::Make_Error(format("The template id [{}] is no exist.", id));
 	}
 	if (id == 1)
 	{
@@ -573,7 +573,7 @@ CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, Packa
 				if (m_mapIDToTemplateItem.exist(id))
 					m_mapIDToTemplateItem.get(id).ToProtobuf(res.add_templateinfos());
 				else
-					return CResult::Make_Error(Helper::Format("The template id [%d] is no exist.", id));
+					return CResult::Make_Error(format("The template id [{}] is no exist.", id));
 			}
 		}
 		else if (req->templatetype_size() > 0)
@@ -591,7 +591,7 @@ CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, Packa
 	}
 
 	auto str_res = ConvertObjToStr(&res);
-	m_pLog->Debug(Helper::Format("Query Template Succeed: Count[%d];[%s]", res.templateinfos_size(), CBase64::Encode(str_res).c_str()));
+	m_pLog->Debug(format("Query Template Succeed: Count[{}];[{}]", res.templateinfos_size(), CBase64::Encode(str_res)));
 	return CResult::Make_OK(str_res);
 }
 
@@ -663,12 +663,12 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 	m_pLog->Debug("QueryReferenceInfoHandler <<< ");
 	auto uuid = pack->sender();
 	if (!m_mapUUIDToNodeItem.exist(uuid))
-		return CResult::Make_Error(Helper::Format("The node is no registed. [%llu]", uuid));
+		return CResult::Make_Error(format("The node is no registed. [{}]", uuid));
 
 	auto id = m_mapUUIDToNodeItem[uuid].TemplateID;
 	auto item = m_mapIDToTemplateItem.try_get(id);
 	if (item == nullptr )
-		return CResult::Make_Error(Helper::Format("The template id error. UUID[%llu];ID[%d]", uuid, id));
+		return CResult::Make_Error(format("The template id error. UUID[{}];ID[{}]", uuid, id));
 
 	QueryReferenceInfoResponse res;
 
@@ -682,7 +682,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 		auto tpl = m_mapIDToTemplateItem.try_get(ref_id);
 		if( tpl == nullptr )
 		{
-			m_pLog->Warn(Helper::Format("Reference template item [id:%d] no exist. please check. ", ref_id));
+			m_pLog->Warn(format("Reference template item [id:{}] no exist. please check. ", ref_id));
 			continue;
 		}
 		item->set_templateid(tpl->ID);
@@ -703,7 +703,7 @@ CResult Sloong::CServerManage::ReportLoadStatusHandler(const string &req_str, Pa
 	if (!req)
 		return CResult::Make_Error("Parser message object fialed.");
 
-	m_pLog->Info(Helper::Format("Node[%llu] load status :CPU[%lf]Mem[%lf]", pack->sender(), req->cpuload(), req->memroyused()));
+	m_pLog->Info(format("Node[{}] load status :CPU[{}]Mem[{}]", pack->sender(), req->cpuload(), req->memroyused()));
 
 	return CResult(ResultType::Ignore);
 }

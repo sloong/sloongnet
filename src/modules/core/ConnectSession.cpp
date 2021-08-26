@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2021-08-20 14:15:53
+ * @LastEditTime: 2021-08-26 14:59:12
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -107,7 +107,7 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 		m_pConnection->Connect();
 	}
 
-	m_pLog->Verbos(Helper::Format("SEND>>>[%d]>>No[%llu]>>[%d]byte", m_pConnection->GetSocketID() , pack->id(), pack->ByteSizeLongEx()));
+	m_pLog->Verbos(format("SEND>>>[{}]>>No[{}]>>[{}]byte", m_pConnection->GetSocketID() , pack->id(), pack->ByteSizeLongEx()));
 
 	// if have exdata, directly add to epoll list.
 	if (IsBigPackage(pack.get()) || m_pConnection->IsSending() || (m_bIsSendListEmpty == false && !m_oPrepareSendList.empty()) || m_oSockSendMutex.try_lock() == false)
@@ -126,17 +126,17 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 	}
 	else if (res.GetResult() == ResultType::Error)
 	{
-		m_pLog->Warn(Helper::Format("Send data failed.[%s]", m_pConnection->m_strAddress.c_str()));
+		m_pLog->Warn(format("Send data failed.[{}]", m_pConnection->m_strAddress));
 		return ResultType::Error;
 	}
 	else if (res.GetResult() == ResultType::Retry)
 	{
-		m_pLog->Verbos(Helper::Format("Send data done. wait next send time.[%d/%d]", m_pConnection->m_SendPackageSize, m_pConnection->m_SentSize));
+		m_pLog->Verbos(format("Send data done. wait next send time.[{}/{}]", m_pConnection->m_SendPackageSize, m_pConnection->m_SentSize));
 		return ResultType::Retry;
 	}
 	else
 	{
-		m_pLog->Error(Helper::Format("Unintended result[%s] in SendDataPackage in SockInfo.", ResultType_Name(res.GetResult()).c_str()));
+		m_pLog->Error(format("Unintended result[{}] in SendDataPackage in SockInfo.", ResultType_Name(res.GetResult())));
 		return ResultType::Error;
 	}
 }
@@ -145,7 +145,7 @@ void Sloong::ConnectSession::AddToSendList(UniquePackage pack)
 {
 	auto events = make_shared<MonitorSendStatusEvent>(pack->sessionid());
 	m_oPrepareSendList.push(std::move(pack));
-	m_pLog->Debug(Helper::Format("Add send package to prepare send list. list size:[%d]", m_oPrepareSendList.size()));
+	m_pLog->Debug(format("Add send package to prepare send list. list size:[{}]", m_oPrepareSendList.size()));
 	m_bIsSendListEmpty = false;
 	m_iC->SendMessage(events);
 }
@@ -170,7 +170,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 			}
 			else
 			{
-				m_pLog->Verbos(Helper::Format("RECV<<<[%d]<<No[%llu]<<[%d]byte", m_pConnection->GetSocketID(), package->id(), package->ByteSizeLongEx()));
+				m_pLog->Verbos(format("RECV<<<[{}]<<No[{}]<<[{}]byte", m_pConnection->GetSocketID(), package->id(), package->ByteSizeLongEx()));
 				package->add_clocks(GetClock());
 				package->set_sessionid(m_pConnection->GetHashCode());
 				bLoop = true;
@@ -189,7 +189,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 				CSHA256::Binary_Encoding(ConvertObjToStr(package.get()),buffer);
 				if( string((char*)buffer,32) != hash )
 				{
-					auto msg =  Helper::Format("Hash check error. Package[%s]<->[%s]Calculate", ConvertToHexString(hash.c_str(),0,31).c_str(),ConvertToHexString((char*)buffer,0,31).c_str() );
+					auto msg =  format("Hash check error. Package[{}]<->[{}]Calculate", ConvertToHexString(hash.c_str(),0,31),ConvertToHexString((char*)buffer,0,31) );
 					m_pLog->Warn(msg);
 					AddToSendList(Package::MakeErrorResponse(package.get(),msg));
 					continue;
@@ -197,7 +197,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 
 				if (package->priority() > s_PriorityLevel || package->priority() < 0)
 				{
-					m_pLog->Warn(Helper::Format("Receive priority level error. the data is %d, the config level is %d. add this message to last list", package->priority(), s_PriorityLevel));
+					m_pLog->Warn(format("Receive priority level error. the data is {}, the config level is {}. add this message to last list", package->priority(), s_PriorityLevel));
 					package->set_priority(s_PriorityLevel);
 				}
 
@@ -218,7 +218,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 		else if (res.GetResult() == ResultType::Retry )
 		{
 			// Package is no receive done. need receive in next time.
-			m_pLog->Debug(Helper::Format("Receive package happened retry event. curent list[%d] ",readList.size()));
+			m_pLog->Debug(format("Receive package happened retry event. curent list[{}] ",readList.size()));
 			break;
 		}
 		else if (res.GetResult() == ResultType::Error)
@@ -228,7 +228,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 		}
 		else
 		{
-			m_pLog->Error(Helper::Format("Unintended result[%s].Loop[%s].", ResultType_Name(res.GetResult()).c_str(), bLoop ? "true" : "false"));
+			m_pLog->Error(format("Unintended result[{}].Loop[{}].", ResultType_Name(res.GetResult()), bLoop ? "true" : "false"));
 			break;
 		}
 	} while (bLoop);
@@ -251,7 +251,7 @@ void Sloong::ConnectSession::ProcessPrepareSendList()
 	{
 		auto priority = pack->priority();
 		m_pSendList[priority].push(std::move(pack));
-		m_pLog->Debug(Helper::Format("Add package to send list[%d]. send list size[%d], prepare send list size[%d]",
+		m_pLog->Debug(format("Add package to send list[{}]. send list size[{}], prepare send list size[{}]",
 									 priority, m_pSendList[priority].size(), m_oPrepareSendList.size()));
 
 		pack = m_oPrepareSendList.pop(nullptr);
@@ -263,16 +263,16 @@ ResultType Sloong::ConnectSession::ProcessSendList()
 	unique_lock<mutex> srlck(m_oSockSendMutex, std::adopt_lock);
 	if (m_pConnection->IsSending())
 	{
-		m_pLog->Debug(Helper::Format("Start send package : AllSize[%d],Sent[%d]", m_pConnection->m_SendPackageSize, m_pConnection->m_SentSize));
+		m_pLog->Debug(format("Start send package : AllSize[{}],Sent[{}]", m_pConnection->m_SendPackageSize, m_pConnection->m_SentSize));
 		auto res = m_pConnection->SendPackage(nullptr);
 		if (res.GetResult() == ResultType::Error)
 		{
-			m_pLog->Error(Helper::Format("Send data package error. close connect:[%s:%d]", m_pConnection->m_strAddress.c_str(), m_pConnection->m_nPort));
+			m_pLog->Error(format("Send data package error. close connect:[{}:{}]", m_pConnection->m_strAddress, m_pConnection->m_nPort));
 			return ResultType::Error;
 		}
 		else if (res.GetResult() == ResultType::Retry)
 		{
-			m_pLog->Debug(Helper::Format("Send data package done but not all data is send All[%d]:Sent[%d]. wait next write sign.", m_pConnection->m_SendPackageSize, m_pConnection->m_SentSize));
+			m_pLog->Debug(format("Send data package done but not all data is send All[{}]:Sent[{}]. wait next write sign.", m_pConnection->m_SendPackageSize, m_pConnection->m_SentSize));
 			return ResultType::Retry;
 		}
 		else
@@ -295,17 +295,17 @@ ResultType Sloong::ConnectSession::ProcessSendList()
 		if (pack == nullptr)
 			return ResultType::Retry;
 
-		m_pLog->Debug(Helper::Format("Send new package, the list size[%d],Size[%d],", list->size(), pack->ByteSizeLongEx()));
+		m_pLog->Debug(format("Send new package, the list size[{}],Size[{}],", list->size(), pack->ByteSizeLongEx()));
 		auto res = m_pConnection->SendPackage(move(pack));
 
 		if (res.GetResult() == ResultType::Error)
 		{
-			m_pLog->Error(Helper::Format("Send data package error. close connect:[%s:%d]", m_pConnection->m_strAddress.c_str(), m_pConnection->m_nPort));
+			m_pLog->Error(format("Send data package error. close connect:[{}:{}]", m_pConnection->m_strAddress, m_pConnection->m_nPort));
 			return ResultType::Error;
 		}
 		else if (res.GetResult() == ResultType::Retry)
 		{
-			m_pLog->Debug(Helper::Format("Send data package done but not all data is send All[%d]:Sent[%d]. wait next write sign.", m_pConnection->m_SendPackageSize, m_pConnection->m_SentSize));
+			m_pLog->Debug(format("Send data package done but not all data is send All[{}]:Sent[{}]. wait next write sign.", m_pConnection->m_SendPackageSize, m_pConnection->m_SentSize));
 			bTrySend = false;
 			return ResultType::Retry;
 		}
@@ -328,7 +328,7 @@ queue_safety<UniquePackage> *Sloong::ConnectSession::GetSendPackage()
 			continue;
 		else
 		{
-			m_pLog->Debug(Helper::Format("Send list, Priority level:%d", i));
+			m_pLog->Debug(format("Send list, Priority level:{}", i));
 			return &m_pSendList[i];
 		}
 	}

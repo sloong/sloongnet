@@ -150,7 +150,7 @@ void Sloong::CNetworkHub::SendPackageEventHandler(SharedEvent event)
 	auto id = send_evt->GetConnectionHashCode();
 	if (!m_mapConnectIDToSession.exist(id))
 	{
-		m_pLog->Error(Helper::Format("SendPackageEventHandler function called, but the session[%llu] is no regiestd in NetworkHub.", id));
+		m_pLog->Error(format("SendPackageEventHandler function called, but the session[{}] is no regiestd in NetworkHub.", id));
 		return;
 	}
 
@@ -165,7 +165,7 @@ void Sloong::CNetworkHub::AddMessageToSendList(UniquePackage pack)
 	uint64_t sessionid = pack->sessionid();
 	if (!m_mapConnectIDToSession.exist(sessionid))
 	{
-		m_pLog->Error(Helper::Format("AddMessageToSendList function called, but the session[%llu] is no regiestd in NetworkHub.", sessionid));
+		m_pLog->Error(format("AddMessageToSendList function called, but the session[{}] is no regiestd in NetworkHub.", sessionid));
 		return;
 	}
 
@@ -190,16 +190,16 @@ void Sloong::CNetworkHub::OnConnectionBreakedEventHandler(SharedEvent e)
 
 	auto info = m_mapConnectIDToSession[id].get();
 
-	m_pLog->Info(Helper::Format("Connect is braked:[%d]%s:%d.", info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
+	m_pLog->Info(format("Connect is braked:[{}]{}:{}.", info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress, info->m_pConnection->m_nPort));
 
 	if (event->GetJustClose())
 	{
-		m_pLog->Info(Helper::Format("close connect:[%d]%s:%d. will try reconnect when send data in next time.", info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
+		m_pLog->Info(format("close connect:[{}]{}:{}. will try reconnect when send data in next time.", info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress, info->m_pConnection->m_nPort));
 		m_mapConnectIDToSession[id]->m_pConnection->Close();
 	}
 	else
 	{
-		m_pLog->Info(Helper::Format("close connect:[%d]%s:%d. Unregister this session.", info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
+		m_pLog->Info(format("close connect:[{}]{}:{}. Unregister this session.", info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress, info->m_pConnection->m_nPort));
 		unique_lock<shared_mutex> sockLck(m_oSockListMutex);
 		m_mapConnectIDToSession.erase(id);
 		sockLck.unlock();
@@ -216,7 +216,7 @@ void Sloong::CNetworkHub::MonitorSendStatusEventHandler(SharedEvent e)
 		return;
 
 	auto info = m_mapConnectIDToSession[id].get();
-	m_pLog->Info(Helper::Format("MonitorSendStatus:%s:%d.", info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
+	m_pLog->Info(format("MonitorSendStatus:{}:{}.", info->m_pConnection->m_strAddress, info->m_pConnection->m_nPort));
 	m_pEpoll->ModifySendMonitorStatus(info->m_pConnection->GetHashCode(), true);
 }
 
@@ -244,7 +244,7 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
 	auto info = make_unique<ConnectSession>();
 	info->Initialize(m_iC, std::move(connect));
 	auto sessionid = info->m_pConnection->GetHashCode();
-	m_pLog->Info(Helper::Format("Registe connection:[%d][%llu][%s:%d].", info->m_pConnection->GetSocketID(), sessionid, info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
+	m_pLog->Info(format("Registe connection:[{}][{}][{}:{}].", info->m_pConnection->GetSocketID(), sessionid, info->m_pConnection->m_strAddress, info->m_pConnection->m_nPort));
 
 	unique_lock<shared_mutex> sockLck(m_oSockListMutex);
 	m_mapConnectIDToSession[sessionid] = std::move(info);
@@ -342,14 +342,14 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
 				continue;
 			if (it->second != NULL && time(NULL) - it->second->m_ActiveTime > tout)
 			{
-				m_pLog->Info(Helper::Format("[Timeout]:[Close connect:%s]", it->second->m_pConnection->m_strAddress.c_str()));
+				m_pLog->Info(format("[Timeout]:[Close connect:{}]", it->second->m_pConnection->m_strAddress));
 				closedList[it->first] = true;
 				SendConnectionBreak(it->first);
 				goto RecheckTimeout;
 			}
 		}
 		rlock.unlock();
-		m_pLog->Debug(Helper::Format("Check connect timeout done. wait [%d] ms.", tinterval));
+		m_pLog->Debug(format("Check connect timeout done. wait [{}] ms.", tinterval));
 		m_oCheckTimeoutThreadSync.wait_for(tinterval);
 	}
 	m_pLog->Info("check timeout connect thread is exit ");
@@ -492,7 +492,7 @@ ResultType Sloong::CNetworkHub::OnNewAccept(uint64_t sock)
 		int nLen = Helper::RecvEx(conn_sock, pCheckBuf, m_nClientCheckKeyLength, m_nClientCheckTime);
 		if (nLen != m_nClientCheckKeyLength || 0 != strcmp(pCheckBuf, m_strClientCheckKey.c_str()))
 		{
-			m_pLog->Warn(Helper::Format("Check Key Error.Length[%d]:[%d].Server[%s]:[%s]Client", m_nClientCheckKeyLength, nLen, m_strClientCheckKey.c_str(), pCheckBuf));
+			m_pLog->Warn(format("Check Key Error.Length[{}]:[{}].Server[{}]:[{}]Client", m_nClientCheckKeyLength, nLen, m_strClientCheckKey, pCheckBuf));
 			return ResultType::Error;
 		}
 	}
@@ -512,7 +512,7 @@ ResultType Sloong::CNetworkHub::OnNewAccept(uint64_t sock)
 	auto info = make_unique<ConnectSession>();
 	info->Initialize(m_iC, std::move(conn));
 	auto id = info->m_pConnection->GetHashCode();
-	m_pLog->Info(Helper::Format("Accept client:[%llu][%d][%s:%d].", id, info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress.c_str(), info->m_pConnection->m_nPort));
+	m_pLog->Info(format("Accept client:[{}][{}][{}:{}].", id, info->m_pConnection->GetSocketID(), info->m_pConnection->m_strAddress, info->m_pConnection->m_nPort));
 	unique_lock<shared_mutex> sockLck(m_oSockListMutex);
 	m_mapConnectIDToSession[id] = std::move(info);
 	sockLck.unlock();
@@ -540,7 +540,7 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(uint64_t sessionid)
 	}
 
 	auto pReadList = res.MoveResultObject();
-	m_pLog->Verbos(Helper::Format("OnDataCanReceive done. received [%d] packages.", pReadList.size()));
+	m_pLog->Verbos(format("OnDataCanReceive done. received [{}] packages.", pReadList.size()));
 	while (!pReadList.empty())
 	{
 		auto pack = std::move(pReadList.front());
