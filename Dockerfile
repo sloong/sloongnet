@@ -28,7 +28,7 @@ RUN cat /etc/apt/sources.list
 RUN rm -Rf /var/lib/apt/lists/*
 
 RUN apt update && apt install -y \
-    libsqlite3-0 libprotobuf17 libuuid1 libssl1.1  libjsoncpp1 libmariadb3 liblua5.3-0 imagemagick
+    libsqlite3-0 libprotobuf17 libuuid1 libssl1.1 libjsoncpp1 libmariadb3 liblua5.3-0 imagemagick
     
 WORKDIR /usr/local/bin
 COPY --from=build-env /tmp/build/release/ /usr/local/bin/

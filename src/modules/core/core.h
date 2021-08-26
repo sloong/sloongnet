@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-08-07 12:43:05
- * @LastEditTime: 2021-08-25 11:35:01
+ * @LastEditTime: 2021-08-25 11:45:34
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/core.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -99,7 +99,7 @@ using namespace Core;
 
 #include "Helper.h"
 #include "result.h"
-#include "queue_ex.hpp"
+#include "queue_safety.hpp"
 #include "map_ex.hpp"
 #include "strict_map.hpp"
 #include "list_ex.hpp"
