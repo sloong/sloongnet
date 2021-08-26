@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2021-08-26 13:47:32
- * @LastEditTime: 2021-08-26 13:47:33
+ * @LastEditTime: 2021-08-26 15:16:44
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/queue_safety.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -51,13 +51,13 @@ namespace Sloong
             return move(t);
         }
 
-        bool take(T &t)
+        bool take(T *t)
         {
             if (empty() || t == nullptr)
                 return false;
 
             unique_lock<shared_mutex> lock(m_mut);
-            *t = queue<T>::front();
+            *t = move(queue<T>::front());
             queue<T>::pop();
             return true;
         }

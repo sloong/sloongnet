@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2021-08-26 14:59:12
+ * @LastEditTime: 2021-08-26 16:07:52
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -246,15 +246,13 @@ ResultType Sloong::ConnectSession::OnDataCanSend()
 void Sloong::ConnectSession::ProcessPrepareSendList()
 {
 	// progress the prepare send list first
-	auto pack = m_oPrepareSendList.pop(nullptr);
-	while (pack != nullptr)
+	UniquePackage pack = nullptr;
+	while (m_oPrepareSendList.take(&pack))
 	{
 		auto priority = pack->priority();
 		m_pSendList[priority].push(std::move(pack));
 		m_pLog->Debug(format("Add package to send list[{}]. send list size[{}], prepare send list size[{}]",
 									 priority, m_pSendList[priority].size(), m_oPrepareSendList.size()));
-
-		pack = m_oPrepareSendList.pop(nullptr);
 	}
 }
 
@@ -265,7 +263,11 @@ ResultType Sloong::ConnectSession::ProcessSendList()
 	{
 		m_pLog->Debug(format("Start send package : AllSize[{}],Sent[{}]", m_pConnection->m_SendPackageSize, m_pConnection->m_SentSize));
 		auto res = m_pConnection->SendPackage(nullptr);
-		if (res.GetResult() == ResultType::Error)
+		if( res.GetResult() == ResultType::Succeed )
+		{
+			// Do nothing. 
+		}
+		else if (res.GetResult() == ResultType::Error)
 		{
 			m_pLog->Error(format("Send data package error. close connect:[{}:{}]", m_pConnection->m_strAddress, m_pConnection->m_nPort));
 			return ResultType::Error;
@@ -277,6 +279,8 @@ ResultType Sloong::ConnectSession::ProcessSendList()
 		}
 		else
 		{
+			m_pLog->Error(format("Send data package returned Unexpected results {}.", ResultType_Name(res.GetResult())));
+			return ResultType::Retry;
 		}
 	}
 
