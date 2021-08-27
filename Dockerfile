@@ -1,4 +1,4 @@
-FROM ubuntu:20.04 AS build-env
+FROM debian:11-slim AS build-env
 
 RUN apt update && apt install -y ca-certificates
 
@@ -10,7 +10,7 @@ RUN rm -Rf /var/lib/apt/lists/*
 RUN apt update && DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" apt install -y tzdata
 
 RUN apt install -y \
-    cmake clang llvm libsqlite3-dev libprotobuf-dev protobuf-compiler uuid-dev libssl-dev libjsoncpp-dev libmariadbclient-dev liblua5.3-dev
+    cmake clang llvm libsqlite3-dev libprotobuf-dev protobuf-compiler uuid-dev libssl-dev libjsoncpp-dev libmariadb-dev liblua5.3-dev libfmt-dev
 
 COPY . /tmp/
 WORKDIR /tmp
@@ -18,7 +18,7 @@ WORKDIR /tmp
 RUN /tmp/build/build.sh -r
 
 #FROM debian:10-slim
-FROM ubuntu:20.04
+FROM debian:11-slim
 LABEL maintainer="admin@sloong.com"
 
 RUN apt update && apt install -y ca-certificates
@@ -28,7 +28,7 @@ RUN cat /etc/apt/sources.list
 RUN rm -Rf /var/lib/apt/lists/*
 
 RUN apt update && apt install -y \
-    libsqlite3-0 libprotobuf17 libuuid1 libssl1.1 libjsoncpp1 libmariadb3 liblua5.3-0 imagemagick
+    libsqlite3-0 libprotobuf23 libuuid1 libssl1.1 libjsoncpp24 libmariadb3 liblua5.3-0 libfmt7 imagemagick
     
 WORKDIR /usr/local/bin
 COPY --from=build-env /tmp/build/release/ /usr/local/bin/
