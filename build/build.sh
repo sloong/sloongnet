@@ -72,7 +72,6 @@ build(){
 	cp $PROJECT $OUTPUT_FOLDER/
 	cp libcore.so $OUTPUT_FOLDER/
 	cp libmanager.so $OUTPUT_FOLDER/
-	cp $CMAKE_FILE_PATH/referenced/libuniv/libuniv.so $OUTPUT_FOLDER/
 	cp modules/*.so $OUTPUT_FOLDER/modules/
 }
 
@@ -114,7 +113,6 @@ build_release(){
 copyfile(){
 	mkdir -p $OUTPATH/modules/
 
-	cp $CMAKE_FILE_PATH/referenced/libuniv/libuniv.so $OUTPATH/
 	cp $SCRIPTFOLDER/$MAKEFLAG/$PROJECT $OUTPATH/
 	cp $SCRIPTFOLDER/$MAKEFLAG/libcore.so $OUTPATH/
 	cp $SCRIPTFOLDER/$MAKEFLAG/modules/*.so $OUTPATH/modules/

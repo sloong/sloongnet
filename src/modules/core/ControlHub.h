@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-08-12 10:56:27
+ * @LastEditTime: 2021-08-27 11:19:20
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ControlHub.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -129,7 +129,8 @@ namespace Sloong
 		virtual ~CControlHub()
 		{
 			m_oMsgHandlerList.clear();
-			CThreadPool::Exit();
+			ThreadPool::Exit();
+			TaskPool::Exit();
 		}
 		// Always return true
 		CResult Initialize(int, CLog*);

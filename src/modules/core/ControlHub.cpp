@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2021-02-25 18:52:12
+ * @LastEditTime: 2021-08-27 11:19:34
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ControlHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -67,9 +67,8 @@ CResult Sloong::CControlHub::Initialize(int quantity, CLog* log)
 	if (quantity < 1)
 		return CResult::Make_Error("CControlHub work quantity must big than 0.");
 	m_pLog = log;
-	CThreadPool::AddWorkThread(std::bind(&CControlHub::MessageWorkLoop, this), quantity);
-	CThreadPool::Initialize(3);
-	CThreadPool::Run();
+	ThreadPool::AddWorkThread(std::bind(&CControlHub::MessageWorkLoop, this), quantity);
+	TaskPool::Initialize(3);
 	Run();
 	return CResult::Succeed;
 }

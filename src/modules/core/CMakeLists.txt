@@ -20,7 +20,9 @@ list(APPEND SRC_LIST ${PROTOSRCS})
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRC_LIST})
 
 #添加链接库
-target_link_libraries(${PROJECT_NAME} ssl)
-target_link_libraries(${PROJECT_NAME} crypto)
-target_link_libraries(${PROJECT_NAME} uuid)
-target_link_libraries(${PROJECT_NAME} fmt)
+target_link_libraries(${PROJECT_NAME} 
+        ssl
+        crypto
+        uuid
+        fmt
+        univ)

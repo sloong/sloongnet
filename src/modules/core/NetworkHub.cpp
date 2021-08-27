@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2021-08-23 19:28:07
+ * @LastEditTime: 2021-08-27 11:27:30
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -124,7 +124,7 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	if (m_pConfig->processthreadquantity() < 1)
 		m_pLog->Fatal("the config value for process work quantity is invalid, please check.");
 
-	CThreadPool::AddWorkThread(std::bind(&CNetworkHub::MessageProcessWorkLoop, this), m_pConfig->processthreadquantity());
+	ThreadPool::AddWorkThread(std::bind(&CNetworkHub::MessageProcessWorkLoop, this), m_pConfig->processthreadquantity());
 
 	m_emStatus = RUN_STATUS::Running;
 	m_pEpoll->Run();
@@ -302,7 +302,7 @@ void Sloong::CNetworkHub::EnableTimeoutCheck(int timeoutTime, int checkInterval)
 	m_nConnectTimeoutTime = timeoutTime;
 	m_nCheckTimeoutInterval = checkInterval;
 	if (m_nConnectTimeoutTime > 0 && m_nCheckTimeoutInterval > 0)
-		CThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this));
+		ThreadPool::AddWorkThread(std::bind(&CNetworkHub::CheckTimeoutWorkLoop, this));
 }
 
 void Sloong::CNetworkHub::EnableSSL(const string &certFile, const string &keyFile, const string &passwd)
@@ -556,10 +556,10 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(uint64_t sessionid)
 			if (event != nullptr)
 			{
 				auto shared_pack = shared_ptr<Package>(move(pack));
-				CThreadPool::EnqueTask([event, shared_pack](SMARTER p)
+				TaskPool::Run([event, shared_pack]()
 									   {
 										   event->CallCallbackFunc(shared_pack.get());
-										   return (SMARTER) nullptr;
+										   return nullptr;
 									   });
 				continue;
 			}

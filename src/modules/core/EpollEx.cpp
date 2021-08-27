@@ -95,7 +95,7 @@ CResult Sloong::CEpollEx::Initialize(IControl *iMsg)
 	m_EpollHandle = epoll_create(65535);
 
 	// Init the thread pool
-	CThreadPool::AddWorkThread(std::bind(&CEpollEx::MainWorkLoop, this), workThread);
+	ThreadPool::AddWorkThread(std::bind(&CEpollEx::MainWorkLoop, this), workThread);
 	m_emStatus = RUN_STATUS::Running;
 	
 	return CResult::Succeed;

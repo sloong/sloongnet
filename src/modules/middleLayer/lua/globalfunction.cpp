@@ -147,7 +147,7 @@ CResult CGlobalFunction::EnableDataReceive(int port, int timtout)
     errno = listen(m_ListenSock, 1024);
 
     m_nRecvDataTimeoutTime = timtout;
-    CThreadPool::AddWorkThread(std::bind(&CGlobalFunction::RecvDataConnFunc, this), 1);
+    ThreadPool::AddWorkThread(std::bind(&CGlobalFunction::RecvDataConnFunc, this), 1);
     return CResult::Succeed;
 }
 
@@ -202,9 +202,9 @@ void Sloong::CGlobalFunction::RecvDataConnFunc()
             // Start new thread to recv data for this connect.
             auto f = std::bind(&CGlobalFunction::RecvFileFunc, this, conn_sock);
             // TODO: modify the libarary function.
-            CThreadPool::EnqueTask([f](SMARTER p) {
+            TaskPool::Run([f]() {
                 f();
-                return (SMARTER) nullptr;
+                return nullptr;
             });
         }
     }

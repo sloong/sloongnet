@@ -46,7 +46,6 @@ add_subdirectory(modules/datacenter)
 add_subdirectory(modules/filecenter)
 add_subdirectory(modules/middleLayer/lua)
 
-
 #当前目录下所有源文件赋给SRC_LIST
 aux_source_directory(. SRC_LIST)
 list(APPEND SRC_LIST ${MODULE_SRC_LIST})
@@ -69,11 +68,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath=.")
 add_link_options("-Wl,-E")
 
 #添加链接库
-target_link_libraries(${PROJECT_NAME} m)
-#target_link_libraries(${PROJECT_NAME} glib-2.0)
-target_link_libraries(${PROJECT_NAME} dl)
-target_link_libraries(${PROJECT_NAME} univ)
-target_link_libraries(${PROJECT_NAME} protobuf)
-target_link_libraries(${PROJECT_NAME} jsoncpp)
-target_link_libraries(${PROJECT_NAME} core)
-target_link_libraries(${PROJECT_NAME} manager)
+target_link_libraries(${PROJECT_NAME} 
+        m
+        dl
+        protobuf
+        jsoncpp
+        core
+        manager)
