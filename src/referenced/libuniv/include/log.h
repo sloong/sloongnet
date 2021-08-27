@@ -64,7 +64,7 @@ namespace Sloong
 			inline void WriteLine(const string &szLog)
 			{
 				if (!szLog.empty())
-					Write(Helper::Format("[%s]:%s\n", Helper::FormatDatetime().c_str(), szLog.c_str()));
+					Write("[" + Helper::FormatDatetime() + "]:" + szLog + "\n");
 			}
 			void Log(const string &strErrorText, const string &strTitle, DWORD dwCode = 0, bool bFormatSysMsg = false);
 			void Log(const string &strErrorText, LOGLEVEL level);

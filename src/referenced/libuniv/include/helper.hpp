@@ -250,7 +250,7 @@ namespace Sloong
         {
             auto cur = CurrentDatetime();
             auto lt = localtime(&cur.tv_sec);
-            return Helper::Format("%d/%d/%d-%d:%d:%d.%.4d", (lt->tm_year + 1900), lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec, cur.tv_usec / 1000);
+            return Format("%d/%d/%d-%d:%d:%d.%.4d", (lt->tm_year + 1900), lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec, cur.tv_usec / 1000);
         }
 
         /// Move file
@@ -322,9 +322,9 @@ namespace Sloong
 
             string path = filepath.substr(0, find_index);
 #ifndef _WINDOWS
-            RunSystemCmd(Helper::Format("mkdir -p %s", path.c_str()));
+            RunSystemCmd("mkdir -p " + path);
 #else
-            RunSystemCmd(Helper::Format("mkdir %s", path.c_str()));
+            RunSystemCmd("mkdir " + path);
 #endif
 
             // no have write access.

@@ -1,9 +1,9 @@
 /*** 
  * @Author: Chuanbin Wang
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-03-26 17:18:22
+ * @LastEditTime: 2021-08-27 11:04:03
  * @LastEditors: Chuanbin Wang
- * @FilePath: /libuniv/src/threadpool.h
+ * @FilePath: /libuniv/src/taskpool.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
  * @Description: 
  */
@@ -57,36 +57,69 @@
  * @..................................&..............................
  */
 
-
 #pragma once
 
-#include <thread>
-#include <vector>
-using std::thread;
-using std::vector;
+#include <functional>
+#include <memory>
+using std::function;
+using std::shared_ptr;
 namespace Sloong
 {
 	namespace Universal
 	{
 		/// C style define
-		typedef LPVOID(*pTaskJobFunc)(LPVOID);
-		typedef pTaskJobFunc LPTASKFUNC;	
-		
-		class UNIVERSAL_API ThreadPool
+		typedef LPVOID (*pTaskJobFunc)(LPVOID);
+		typedef void (*pTaskCallBack)(LPVOID);
+		typedef pTaskJobFunc LPTASKFUNC;
+		typedef pTaskCallBack LPTASKCALLBACK;
+
+		typedef enum emTaskPriority{
+			Low = 1,
+			Normal = 3,
+			High = 5,
+		} TaskPriority;
+
+		typedef enum emTaskState {
+			Created=  1 << 0,
+			Running = 1 << 1,
+			RanToCompletion = 1 << 2,
+			Canceled = 1 << 3,
+			Faulted = 1 << 4,
+			Finished = 1 << 5,
+		}TaskState;
+
+		class Task
 		{
 		public:
+			virtual ~Task() {}
+
+			virtual void Wait() = 0;
+
+			virtual TaskState Status() const = 0;
+		};
+
+		class UNIVERSAL_API TaskPool
+		{
+		public:
+			virtual ~TaskPool() {}
+			
+		public:
+			static void Initialize(int nThreadNum);
+
+			static void ClearAll();
+
 			static void Exit();
+			
+			// Add a task to job list.
+			// the pJob is the job function pointer.
+			// the pParam is the job function param when call the function.
+			// the bStatic is the job is not doing once. if ture, the job will always run it in the threadpool.
+			// and the function return the job index in job list. for once job, it can not do anything, for static job
+			// it can used in RemoveTask function.
+			static shared_ptr<Task> Run(std::function<shared_ptr<void>()> pJob, std::function<void(shared_ptr<void>)> pCallback = nullptr, TaskPriority priority = TaskPriority::Normal );
 
-            // Add a work thread to the threadlist.
-            // return the thread index in threadlist. if the nNum param is not 1, the other
-            // thread index is base on return value.
-            static int AddWorkThread(LPTASKFUNC pJob, LPVOID pParam = nullptr, int nNum = 1);
-
-			static int AddWorkThread(std::function<void()> pJob, int nNum = 1);
-
-		protected:
-			static vector<thread*> 		m_pThreadList;
+			// Add new task with C style.
+			static shared_ptr<Task> Run(LPTASKFUNC pJob, LPVOID pParam = nullptr, LPTASKCALLBACK pCallback = nullptr , TaskPriority priority = TaskPriority::Normal );
 		};
 	}
 }
-
