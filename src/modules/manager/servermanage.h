@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-21 11:17:32
- * @LastEditTime: 2021-01-05 16:29:35
+ * @LastEditTime: 2021-08-28 14:41:46
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -205,5 +205,7 @@ namespace Sloong
         map_ex<uint64_t, NodeItem> m_mapUUIDToNodeItem;
         strict_map<int, TemplateItem> m_mapIDToTemplateItem;
         map_ex<uint64_t, uint64_t> m_mapConnectionToUUID;
+
+        mutex m_SyncMutex;
     };
 } // namespace Sloong

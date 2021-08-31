@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-07-05 16:58:30
+ * @LastEditTime: 2021-08-31 14:25:25
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -316,6 +316,8 @@ CResult Sloong::CServerManage::EventRecorderHandler(const string &req_str, Packa
 	return CResult::Succeed;
 }
 
+
+// TODO 在同时接收到多个请求时，会返回同一个templateid，即使其副本设置为1. 导致后面的RegisterNote请求必定只有一个可以成功。
 CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Package *pack)
 {
 	auto sender = pack->sender();
@@ -339,6 +341,8 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 		Helper::Int64ToBytes(sender, pCpyPoint);
 		return CResult(ResultType::Retry, string(m_pMsgBuffer, 8));
 	}
+
+	unique_lock<mutex> lock(m_SyncMutex);
 
 	int index = 0;
 	if (req_str.length() > 0)
@@ -378,6 +382,8 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 	{
 		index = SearchNeedCreateTemplate();
 	}
+
+	lock.unlock();
 
 	if (index == 0)
 	{
@@ -436,6 +442,11 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, Package
 	auto tpl = m_mapIDToTemplateItem.try_get(id);
 	if (tpl == nullptr)
 		return CResult::Make_Error(format("The template id [{}] is no exist.", id));
+
+	if( tpl->Created.size() >= tpl->Replicas )
+	{
+		return CResult(ResultType::Retry,format("Target template is no need a new node. Retry with [RegisteWorker] request."));
+	}
 
 	// Save node info.
 	auto &item = m_mapUUIDToNodeItem[sender];
