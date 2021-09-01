@@ -107,7 +107,7 @@ CResult Sloong::CEpollEx::Run()
 }
 
 
-void Sloong::CEpollEx::RegisteConnection( EasyConnect* conn )
+void Sloong::CEpollEx::RegisterConnection( EasyConnect* conn )
 {
 	conn->SetOnReconnectCallback([&](uint64_t id, int old_sock, int cur_sock){
 		if( m_mapSocketToID.exist(old_sock) ) 

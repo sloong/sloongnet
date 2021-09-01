@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-09-01 14:34:07
+ * @LastEditTime: 2021-09-01 14:50:59
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -71,8 +71,8 @@ CResult Sloong::CServerManage::Initialize(IControl *ic, const string &db_path)
 	IObject::Initialize(ic);
 
 	m_mapFuncToHandler[Functions::PostLog] = std::bind(&CServerManage::EventRecorderHandler, this, std::placeholders::_1, std::placeholders::_2);
-	m_mapFuncToHandler[Functions::RegisteWorker] = std::bind(&CServerManage::RegisteWorkerHandler, this, std::placeholders::_1, std::placeholders::_2);
-	m_mapFuncToHandler[Functions::RegisteNode] = std::bind(&CServerManage::RegisteNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_mapFuncToHandler[Functions::RegisterWorker] = std::bind(&CServerManage::RegisterWorkerHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_mapFuncToHandler[Functions::RegisterNode] = std::bind(&CServerManage::RegisterNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::AddTemplate] = std::bind(&CServerManage::AddTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::DeleteTemplate] = std::bind(&CServerManage::DeleteTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::SetTemplate] = std::bind(&CServerManage::SetTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
@@ -82,7 +82,7 @@ CResult Sloong::CServerManage::Initialize(IControl *ic, const string &db_path)
 	m_mapFuncToHandler[Functions::StopNode] = std::bind(&CServerManage::StopNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::RestartNode] = std::bind(&CServerManage::RestartNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::ReportLoadStatus] = std::bind(&CServerManage::ReportLoadStatusHandler, this, std::placeholders::_1, std::placeholders::_2);
-	m_mapFuncToHandler[Functions::ReconnectRegiste] = std::bind(&CServerManage::ReconnectRegisteHandler, this, std::placeholders::_1, std::placeholders::_2);
+	m_mapFuncToHandler[Functions::ReconnectRegister] = std::bind(&CServerManage::ReconnectRegisterHandler, this, std::placeholders::_1, std::placeholders::_2);
 
 	if (!CConfiguation::Instance->IsInituialized())
 	{
@@ -142,11 +142,11 @@ CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG *config)
 
 bool Sloong::CServerManage::CheckForRegistering(int id)
 {
-	for (auto i = m_mapRegisteredUUIDToInfo.begin(); i != m_mapRegisteredUUIDToInfo.end(); i++)
+	for (auto i = m_mapRegisterdUUIDToInfo.begin(); i != m_mapRegisterdUUIDToInfo.end(); i++)
 	{
 		if (difftime(time(NULL), (*i).second.registedTime) > 1)
 		{
-			m_mapRegisteredUUIDToInfo.erase(i);
+			m_mapRegisterdUUIDToInfo.erase(i);
 			continue;
 		}
 		if ((*i).second.templateID == id)
@@ -344,7 +344,7 @@ CResult Sloong::CServerManage::EventRecorderHandler(const string &req_str, Packa
 }
 
 // TODO 在同时接收到多个请求时，会返回同一个templateid，即使其副本设置为1. 导致后面的RegisterNote请求必定只有一个可以成功。
-CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Package *pack)
+CResult Sloong::CServerManage::RegisterWorkerHandler(const string &req_str, Package *pack)
 {
 	auto sender = pack->sender();
 	if (sender == 0)
@@ -371,13 +371,13 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 	int index = 0;
 	if (req_str.length() > 0)
 	{
-		auto req = ConvertStrToObj<RegisteWorkerRequest>(req_str);
+		auto req = ConvertStrToObj<RegisterWorkerRequest>(req_str);
 		switch (req->runmode())
 		{
-		case RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_AssignTemplate:
+		case RegisterWorkerRequest_RunType::RegisterWorkerRequest_RunType_AssignTemplate:
 			index = SearchNeedCreateWithIDs(vector<int>(req->assigntargettemplateid().begin(), req->assigntargettemplateid().end()));
 			break;
-		case RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_IncludeType:
+		case RegisterWorkerRequest_RunType::RegisterWorkerRequest_RunType_IncludeType:
 		{
 			vector<int> l;
 			for (auto i : req->includetargettype())
@@ -387,7 +387,7 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 			index = SearchNeedCreateWithType(false, l);
 		}
 		break;
-		case RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_ExcludeType:
+		case RegisterWorkerRequest_RunType::RegisterWorkerRequest_RunType_ExcludeType:
 		{
 			vector<int> l;
 			for (auto i : req->excludetargettype())
@@ -429,9 +429,9 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 	info.registedTime = time(NULL);
 	info.templateID = tpl->ID;
 
-	m_mapRegisteredUUIDToInfo.insert(id, info);
+	m_mapRegisterdUUIDToInfo.insert(id, info);
 
-	RegisteWorkerResponse res;
+	RegisterWorkerResponse res;
 	res.set_registerid(id);
 	res.set_configuation(tpl->Configuation);
 
@@ -454,10 +454,10 @@ void Sloong::CServerManage::RefreshModuleReference(int id)
 	}
 }
 
-CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, Package *pack)
+CResult Sloong::CServerManage::RegisterNodeHandler(const string &req_str, Package *pack)
 {
 	auto sender = pack->sender();
-	auto req = ConvertStrToObj<RegisteNodeRequest>(req_str);
+	auto req = ConvertStrToObj<RegisterNodeRequest>(req_str);
 	if (!req || sender == 0)
 		return CResult::Make_Error("The required parameter check error.");
 
@@ -466,10 +466,10 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, Package
 
 	int id = req->registerid();
 
-	if (!m_mapRegisteredUUIDToInfo.exist(id))
+	if (!m_mapRegisterdUUIDToInfo.exist(id))
 		return CResult::Make_Error(format("The register id [{}] is invalid.", id));
 
-	auto info = m_mapRegisteredUUIDToInfo.get(id);
+	auto info = m_mapRegisterdUUIDToInfo.get(id);
 
 	if (info.templateID == 1)
 		return CResult::Make_Error("Template id error.");
@@ -480,7 +480,7 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, Package
 
 	if (tpl->Created.size() >= tpl->Replicas)
 	{
-		return CResult(ResultType::Retry, format("Target template is no need a new node. Retry with [RegisteWorker] request."));
+		return CResult(ResultType::Retry, format("Target template is no need a new node. Retry with [RegisterWorker] request."));
 	}
 
 	// Save node info.
@@ -754,9 +754,9 @@ CResult Sloong::CServerManage::ReportLoadStatusHandler(const string &req_str, Pa
 	return CResult(ResultType::Ignore);
 }
 
-CResult Sloong::CServerManage::ReconnectRegisteHandler(const string &req_str, Package *pack)
+CResult Sloong::CServerManage::ReconnectRegisterHandler(const string &req_str, Package *pack)
 {
-	auto req = ConvertStrToObj<ReconnectRegisteRequest>(req_str);
+	auto req = ConvertStrToObj<ReconnectRegisterRequest>(req_str);
 	if (!req)
 		return CResult::Make_Error("Parser message object fialed.");
 

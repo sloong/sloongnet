@@ -13,17 +13,17 @@ namespace Sloong
 {
 	namespace Events
 	{
-		/// Registe a connected socket to network hub. 
+		/// Register a connected socket to network hub. 
 		/// when it's done, will call the callback function, with the connection id for network hub.
 		/// if you need do something when the socket is connected, set the ReconnectCallback function.
-		class RegisteConnectionEvent : public NormalEvent
+		class RegisterConnectionEvent : public NormalEvent
 		{
 		public:
-			RegisteConnectionEvent(const string& address, int port):NormalEvent( EVENT_TYPE::RegisteConnection ){
+			RegisterConnectionEvent(const string& address, int port):NormalEvent( EVENT_TYPE::RegisterConnection ){
                 Address = address;
                 Port = port;
             }
-			virtual	~RegisteConnectionEvent(){}
+			virtual	~RegisterConnectionEvent(){}
 
 			inline void SetCallbackFunc(std::function<void(IEvent*,uint64_t)> p){ m_pCallback = p; }
 			inline void CallCallbackFunc(uint64_t id){ 

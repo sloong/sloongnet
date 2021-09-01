@@ -181,8 +181,8 @@ namespace Sloong
         PackageResult ProcessHandler(Package *);
 
         CResult EventRecorderHandler(const string &, Package *);
-        CResult RegisteWorkerHandler(const string &, Package *);
-        CResult RegisteNodeHandler(const string &, Package *);
+        CResult RegisterWorkerHandler(const string &, Package *);
+        CResult RegisterNodeHandler(const string &, Package *);
         CResult AddTemplateHandler(const string &, Package *);
         CResult DeleteTemplateHandler(const string &, Package *);
         CResult SetTemplateHandler(const string &, Package *);
@@ -192,7 +192,7 @@ namespace Sloong
         CResult RestartNodeHandler(const string &, Package *);
         CResult QueryReferenceInfoHandler(const string &, Package *);
         CResult ReportLoadStatusHandler(const string &, Package *);
-        CResult ReconnectRegisteHandler(const string &, Package *);
+        CResult ReconnectRegisterHandler(const string &, Package *);
 
     public:
         static CResult LoadManagerConfig(const string &);
@@ -211,6 +211,6 @@ namespace Sloong
         map_ex<uint64_t, NodeItem> m_mapUUIDToNodeItem;
         strict_map<int, TemplateItem> m_mapIDToTemplateItem;
         map_ex<uint64_t, uint64_t> m_mapConnectionToUUID;
-        strict_map<uint64_t, RegisterNodeInfo> m_mapRegisteredUUIDToInfo;
+        strict_map<uint64_t, RegisterNodeInfo> m_mapRegisterdUUIDToInfo;
     };
 } // namespace Sloong

@@ -136,7 +136,7 @@ TResult<unique_ptr<CLua>> Sloong::CLuaProcessCenter::InitLua()
 	m_pLog->Info("Init lua base on folder : " + folder);
 	lua->SetScriptFolder(folder);
 	
-	CGlobalFunction::Instance->RegistFuncToLua(lua.get());
+	CGlobalFunction::Instance->RegisterFuncToLua(lua.get());
 	
 	auto res = lua->RunScript(m_pConfig->operator[]("LuaEntryFile").asString());
 	if (res.IsFialed())

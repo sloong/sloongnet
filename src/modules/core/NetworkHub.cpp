@@ -65,7 +65,7 @@
 #include "events/SendPackage.hpp"
 #include "events/ConnectionBreak.hpp"
 #include "events/MonitorSendStatus.hpp"
-#include "events/RegisteConnection.hpp"
+#include "events/RegisterConnection.hpp"
 #include "events/GetConnectionInfo.hpp"
 #include "events/EnableTimeoutCheck.hpp"
 using namespace Sloong::Events;
@@ -111,7 +111,7 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 	m_iC->RegisterEventHandler(EVENT_TYPE::SendPackage, std::bind(&CNetworkHub::SendPackageEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::ConnectionBreaked, std::bind(&CNetworkHub::OnConnectionBreakedEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::MonitorSendStatus, std::bind(&CNetworkHub::MonitorSendStatusEventHandler, this, std::placeholders::_1));
-	m_iC->RegisterEventHandler(EVENT_TYPE::RegisteConnection, std::bind(&CNetworkHub::RegisteConnectionEventHandler, this, std::placeholders::_1));
+	m_iC->RegisterEventHandler(EVENT_TYPE::RegisterConnection, std::bind(&CNetworkHub::RegisterConnectionEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::GetConnectionInfo, std::bind(&CNetworkHub::OnGetConnectionInfoEventHandler, this, std::placeholders::_1));
 	m_iC->RegisterEventHandler(EVENT_TYPE::EnableTimeoutCheck, std::bind(&CNetworkHub::OnEnableTimeoutCheckEventHandler, this, std::placeholders::_1));
 
@@ -220,12 +220,12 @@ void Sloong::CNetworkHub::MonitorSendStatusEventHandler(SharedEvent e)
 	m_pEpoll->ModifySendMonitorStatus(info->m_pConnection->GetHashCode(), true);
 }
 
-void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
+void Sloong::CNetworkHub::RegisterConnectionEventHandler(SharedEvent e)
 {
-	auto event = DYNAMIC_TRANS<RegisteConnectionEvent *>(e.get());
+	auto event = DYNAMIC_TRANS<RegisterConnectionEvent *>(e.get());
 	if (event == nullptr)
 	{
-		m_pLog->Error("RegisteConnectionEventHandler is called, but param type error.");
+		m_pLog->Error("RegisterConnectionEventHandler is called, but param type error.");
 		return;
 	}
 
@@ -244,12 +244,12 @@ void Sloong::CNetworkHub::RegisteConnectionEventHandler(SharedEvent e)
 	auto info = make_unique<ConnectSession>();
 	info->Initialize(m_iC, std::move(connect));
 	auto sessionid = info->m_pConnection->GetHashCode();
-	m_pLog->Info(format("Registe connection:[{}][{}][{}:{}].", info->m_pConnection->GetSocketID(), sessionid, info->m_pConnection->m_strAddress, info->m_pConnection->m_nPort));
+	m_pLog->Info(format("Register connection:[{}][{}][{}:{}].", info->m_pConnection->GetSocketID(), sessionid, info->m_pConnection->m_strAddress, info->m_pConnection->m_nPort));
 
 	unique_lock<shared_mutex> sockLck(m_oSockListMutex);
 	m_mapConnectIDToSession[sessionid] = std::move(info);
 	sockLck.unlock();
-	m_pEpoll->RegisteConnection(m_mapConnectIDToSession[sessionid]->m_pConnection.get());
+	m_pEpoll->RegisterConnection(m_mapConnectIDToSession[sessionid]->m_pConnection.get());
 
 	event->CallCallbackFunc(sessionid);
 }
@@ -516,7 +516,7 @@ ResultType Sloong::CNetworkHub::OnNewAccept(uint64_t sock)
 	unique_lock<shared_mutex> sockLck(m_oSockListMutex);
 	m_mapConnectIDToSession[id] = std::move(info);
 	sockLck.unlock();
-	m_pEpoll->RegisteConnection(m_mapConnectIDToSession[id]->m_pConnection.get());
+	m_pEpoll->RegisterConnection(m_mapConnectIDToSession[id]->m_pConnection.get());
 	return ResultType::Succeed;
 }
 

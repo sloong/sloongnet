@@ -93,13 +93,13 @@ namespace Sloong
 		virtual CResult Run();
 		virtual void Stop();
 
-		TResult<shared_ptr<Package>> RegisteToControl(EasyConnect *con, string uuid);
+		TResult<shared_ptr<Package>> RegisterToControl(EasyConnect *con, string uuid);
 
 	protected:
 		virtual CResult InitlializeForWorker(RuntimeDataPackage *, RunInfo*, EasyConnect *);
 		virtual CResult InitlializeForManager(RuntimeDataPackage *);
 
-		CResult RegisteNode();
+		CResult RegisterNode();
 		CResult InitModule();
 		void InitSystem();
 

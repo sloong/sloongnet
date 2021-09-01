@@ -82,8 +82,8 @@ enum EVENT_TYPE
 	NetworkHubFunctionConfig=15;
 
     // 注册一个已经存在的连接到EPOLL
-    // 参数类型为RegisteConnectionEvent
-    RegisteConnection=16;
+    // 参数类型为RegisterConnectionEvent
+    RegisterConnection=16;
 
     // 获取一个连接的信息
     // 参数类型为GetConnectionInfoEvent

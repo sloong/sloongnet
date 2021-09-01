@@ -63,7 +63,7 @@
 
 #include "events/SendPackage.hpp"
 #include "events/SendPackageToManager.hpp"
-#include "events/RegisteConnection.hpp"
+#include "events/RegisterConnection.hpp"
 using namespace Sloong::Events;
 
 #include "modules/manager/protocol/manager.pb.h"
@@ -103,10 +103,10 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, RunIn
 {
     cout << "Connect to control succeed. Start registe and get configuation." << endl;
 
-    RegisteWorkerRequest sub_req;
+    RegisterWorkerRequest sub_req;
     if (!info->AssignedTargetTemplateID.empty())
     {
-        sub_req.set_runmode(RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_AssignTemplate);
+        sub_req.set_runmode(RegisterWorkerRequest_RunType::RegisterWorkerRequest_RunType_AssignTemplate);
         for (auto &item : Helper::split(info->AssignedTargetTemplateID, ','))
         {
             if (item.empty())
@@ -119,7 +119,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, RunIn
     }
     else if (!info->ExcludeTargetType.empty())
     {
-        sub_req.set_runmode(RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_ExcludeType);
+        sub_req.set_runmode(RegisterWorkerRequest_RunType::RegisterWorkerRequest_RunType_ExcludeType);
         for (auto &item : Helper::split(info->ExcludeTargetType, ','))
         {
             if (item.empty())
@@ -133,7 +133,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, RunIn
     }
     else if (!info->IncludeTargetType.empty())
     {
-        sub_req.set_runmode(RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_IncludeType);
+        sub_req.set_runmode(RegisterWorkerRequest_RunType::RegisterWorkerRequest_RunType_IncludeType);
         for (auto &item : Helper::split(info->IncludeTargetType, ','))
         {
             if (item.empty())
@@ -151,7 +151,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, RunIn
     while (m_emStatus != RUN_STATUS::Exit)
     {
         auto req = Package::GetRequestPackage();
-        req->set_function(Manager::Functions::RegisteWorker);
+        req->set_function(Manager::Functions::RegisterWorker);
         req->set_sender(uuid);
 
         req->set_content(ConvertObjToStr(&sub_req));
@@ -181,7 +181,7 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, RunIn
         }
         else if (response->result() == ResultType::Succeed)
         {
-            auto res_pack = ConvertStrToObj<RegisteWorkerResponse>(response->content());
+            auto res_pack = ConvertStrToObj<RegisterWorkerResponse>(response->content());
             string serverConfig = res_pack->configuation();
             if (serverConfig.size() == 0)
                 return CResult::Make_Error("Control no return config infomation.");
@@ -338,16 +338,16 @@ CResult CSloongBaseService::Initialize(RunInfo info)
 
     if (pManagerConnect)
     {
-        auto event = make_shared<Events::RegisteConnectionEvent>(pManagerConnect->m_strAddress, pManagerConnect->m_nPort);
+        auto event = make_shared<Events::RegisterConnectionEvent>(pManagerConnect->m_strAddress, pManagerConnect->m_nPort);
         event->SetCallbackFunc([s = &m_ManagerSession](IEvent *e, uint64_t sessionid)
                                { *s = sessionid; });
         event->EnableReconnectCallback([&](uint64_t, int, int)
                                        {
-                                           ReconnectRegisteRequest req_pack;
+                                           ReconnectRegisterRequest req_pack;
                                            req_pack.set_templateid(m_oServerConfig.templateid());
                                            req_pack.set_nodeuuid(m_oServerConfig.nodeuuid());
 
-                                           auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::ReconnectRegiste, ConvertObjToStr(&req_pack));
+                                           auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::ReconnectRegister, ConvertObjToStr(&req_pack));
                                            return event->SyncCall(m_iC.get(), 5000);
                                        });
         m_iC->CallMessage(event);
@@ -363,7 +363,7 @@ CResult CSloongBaseService::Initialize(RunInfo info)
 
     if (!info.ManagerMode)
     {
-        auto res = RegisteNode();
+        auto res = RegisterNode();
         if (res.IsFialed())
         {
             m_pLog->Fatal(res.GetMessage());
@@ -444,12 +444,12 @@ CResult CSloongBaseService::InitModule()
     return CResult::Succeed;
 }
 
-CResult CSloongBaseService::RegisteNode()
+CResult CSloongBaseService::RegisterNode()
 {
-    RegisteNodeRequest req_pack;
+    RegisterNodeRequest req_pack;
     req_pack.set_templateid(m_oServerConfig.templateid());
 
-    auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::RegisteNode, ConvertObjToStr(&req_pack));
+    auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::RegisterNode, ConvertObjToStr(&req_pack));
     return event->SyncCall(m_iC.get(), 5000);
 }
 

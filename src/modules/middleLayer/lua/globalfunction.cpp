@@ -70,7 +70,7 @@
 #include "protocol/manager.pb.h"
 
 #include "events/SendPackageToManager.hpp"
-#include "events/RegisteConnection.hpp"
+#include "events/RegisterConnection.hpp"
 #include "events/SendPackage.hpp"
 #include "events/ModuleOnOff.hpp"
 #include "events/LuaEvent.hpp"
@@ -79,7 +79,7 @@ using namespace Sloong::Events;
 unique_ptr<CGlobalFunction> Sloong::CGlobalFunction::Instance = make_unique<CGlobalFunction>();
 const string g_temp_file_path = "/tmp/sloongnet/receivefile/temp.tmp";
 
-LuaFunctionRegistr g_LuaFunc[] =
+LuaFunctionRegisterr g_LuaFunc[] =
     {
         {"ShowLog", CGlobalFunction::Lua_ShowLog},
         {"GetEngineVer", CGlobalFunction::Lua_GetEngineVer},
@@ -411,7 +411,7 @@ void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent *send_pac
 
 void Sloong::CGlobalFunction::AddConnection(uint64_t uuid, const string &addr, int port)
 {
-    auto event = make_shared<RegisteConnectionEvent>(addr, port);
+    auto event = make_shared<RegisterConnectionEvent>(addr, port);
     event->SetCallbackFunc([this, uuid](IEvent *e, uint64_t hashcode) {
         m_mapUUIDToConnectionID[uuid] = hashcode;
     });
@@ -443,9 +443,9 @@ void Sloong::CGlobalFunction::OnReferenceModuleOffline(SharedEvent e)
     m_pLog->Info(format("Node is offline [{}], template id[{}],list size[{}]", item.uuid(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
 }
 
-void Sloong::CGlobalFunction::RegistFuncToLua(CLua *pLua)
+void Sloong::CGlobalFunction::RegisterFuncToLua(CLua *pLua)
 {
-    vector<LuaFunctionRegistr> funcList(g_LuaFunc, g_LuaFunc + ARRAYSIZE(g_LuaFunc));
+    vector<LuaFunctionRegisterr> funcList(g_LuaFunc, g_LuaFunc + ARRAYSIZE(g_LuaFunc));
     pLua->AddFunctions(&funcList);
 }
 

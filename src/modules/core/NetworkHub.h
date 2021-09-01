@@ -84,7 +84,7 @@ namespace Sloong
         void SendPackageEventHandler(SharedEvent);
         void OnConnectionBreakedEventHandler(SharedEvent);
         void MonitorSendStatusEventHandler(SharedEvent);
-        void RegisteConnectionEventHandler(SharedEvent);
+        void RegisterConnectionEventHandler(SharedEvent);
         void OnGetConnectionInfoEventHandler(SharedEvent);
         void OnEnableTimeoutCheckEventHandler(SharedEvent);
 

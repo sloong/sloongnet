@@ -98,7 +98,7 @@ namespace Sloong
     {
     public:
         CResult Initialize(IControl *iMsg);
-        void RegistFuncToLua(CLua *pLua);
+        void RegisterFuncToLua(CLua *pLua);
         CResult EnableDataReceive(int,int);
 
     protected:

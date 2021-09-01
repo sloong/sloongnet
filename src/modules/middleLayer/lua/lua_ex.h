@@ -10,7 +10,7 @@ namespace Sloong
 {
 	typedef int (*LuaFunctionType)(lua_State *pLuaState);
 
-	struct LuaFunctionRegistr
+	struct LuaFunctionRegisterr
 	{
 		string strFunctionName;
 		LuaFunctionType pFunction;
@@ -44,7 +44,7 @@ namespace Sloong
 		bool GetLuaFuncRef(int &nFunc, const string &strFuncName);
 		LuaType CheckType(int index);
 		inline lua_State *GetScriptContext() { return m_pScriptContext; }
-		inline void AddFunctions(vector<LuaFunctionRegistr> *pFuncList)
+		inline void AddFunctions(vector<LuaFunctionRegisterr> *pFuncList)
 		{
 			for (auto item : *pFuncList)
 				AddFunction(item.strFunctionName, item.pFunction);

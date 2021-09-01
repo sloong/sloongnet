@@ -62,7 +62,7 @@
 #include "utility.h"
 #include "IData.h"
 #include "events/SendPackageToManager.hpp"
-#include "events/RegisteConnection.hpp"
+#include "events/RegisterConnection.hpp"
 using namespace Sloong;
 using namespace Sloong::Events;
 
@@ -231,7 +231,7 @@ void SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent* send_pack, Pack
 
 void SloongNetGateway::AddConnection( uint64_t uuid, const string &addr, int port)
 {
-	auto event = make_shared<RegisteConnectionEvent>(addr, port);
+	auto event = make_shared<RegisterConnectionEvent>(addr, port);
 	event->SetCallbackFunc([this,uuid](IEvent* e, uint64_t hashcode){
 		m_mapUUIDToConnectionID[uuid] = hashcode;
 	});
