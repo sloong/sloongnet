@@ -87,7 +87,8 @@
         "shared_mutex": "cpp",
         "csetjmp": "cpp",
         "bit": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "ranges": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
     "terminal.integrated.shell.windows": "C:\\WINDOWS\\System32\\wsl.exe",

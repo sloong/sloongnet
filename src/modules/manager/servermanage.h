@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-21 11:17:32
- * @LastEditTime: 2021-08-28 14:41:46
+ * @LastEditTime: 2021-08-31 15:31:59
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -166,6 +166,11 @@ namespace Sloong
         list_ex<uint64_t> Created;
     };
 
+    struct RegisterNodeInfo{
+        time_t registedTime;
+        int templateID;
+    };
+
     class CServerManage : public IObject
     {
     public:
@@ -195,6 +200,7 @@ namespace Sloong
 
     private:
         int SearchNeedCreateTemplate(  );
+        bool CheckForRegistering( int);
         int SearchNeedCreateWithIDs( const vector<int>& );
         int SearchNeedCreateWithType( bool, const vector<int>&  );
         void RefreshModuleReference(int id);
@@ -205,7 +211,6 @@ namespace Sloong
         map_ex<uint64_t, NodeItem> m_mapUUIDToNodeItem;
         strict_map<int, TemplateItem> m_mapIDToTemplateItem;
         map_ex<uint64_t, uint64_t> m_mapConnectionToUUID;
-
-        mutex m_SyncMutex;
+        strict_map<uint64_t, RegisterNodeInfo> m_mapRegisteredUUIDToInfo;
     };
 } // namespace Sloong

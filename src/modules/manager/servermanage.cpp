@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-08-31 14:25:25
+ * @LastEditTime: 2021-09-01 14:34:07
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -140,6 +140,23 @@ CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG *config)
 	return res;
 }
 
+bool Sloong::CServerManage::CheckForRegistering(int id)
+{
+	for (auto i = m_mapRegisteredUUIDToInfo.begin(); i != m_mapRegisteredUUIDToInfo.end(); i++)
+	{
+		if (difftime(time(NULL), (*i).second.registedTime) > 1)
+		{
+			m_mapRegisteredUUIDToInfo.erase(i);
+			continue;
+		}
+		if ((*i).second.templateID == id)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 int Sloong::CServerManage::SearchNeedCreateTemplate()
 {
 	// First time find the no created
@@ -152,7 +169,11 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 			continue;
 
 		if (item.second.Created.size() == 0)
+		{
+			if (CheckForRegistering(item.first))
+				continue;
 			return item.first;
+		}
 	}
 
 	// Sencond time find the created < replicas
@@ -165,6 +186,8 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 			continue;
 
 		if ((int)item.second.Created.size() < item.second.Replicas)
+			if (CheckForRegistering(item.first))
+				continue;
 			return item.first;
 	}
 	return 0;
@@ -188,6 +211,8 @@ int Sloong::CServerManage::SearchNeedCreateWithIDs(const vector<int> &ids)
 			continue;
 
 		if (item.second.Created.size() == 0)
+			if (CheckForRegistering(item.first))
+				continue;
 			return item.first;
 	}
 
@@ -204,6 +229,8 @@ int Sloong::CServerManage::SearchNeedCreateWithIDs(const vector<int> &ids)
 			continue;
 
 		if ((int)item.second.Created.size() < item.second.Replicas)
+			if (CheckForRegistering(item.first))
+				continue;
 			return item.first;
 	}
 	return 0;
@@ -316,7 +343,6 @@ CResult Sloong::CServerManage::EventRecorderHandler(const string &req_str, Packa
 	return CResult::Succeed;
 }
 
-
 // TODO 在同时接收到多个请求时，会返回同一个templateid，即使其副本设置为1. 导致后面的RegisterNote请求必定只有一个可以成功。
 CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Package *pack)
 {
@@ -341,8 +367,6 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 		Helper::Int64ToBytes(sender, pCpyPoint);
 		return CResult(ResultType::Retry, string(m_pMsgBuffer, 8));
 	}
-
-	unique_lock<mutex> lock(m_SyncMutex);
 
 	int index = 0;
 	if (req_str.length() > 0)
@@ -383,8 +407,6 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 		index = SearchNeedCreateTemplate();
 	}
 
-	lock.unlock();
-
 	if (index == 0)
 	{
 		return CResult(ResultType::Retry, "Wait");
@@ -401,8 +423,16 @@ CResult Sloong::CServerManage::RegisteWorkerHandler(const string &req_str, Packa
 		return CResult(ResultType::Retry, "Allocating type no exist.");
 	}
 
+	auto id = snowflake::Instance->nextid();
+
+	RegisterNodeInfo info;
+	info.registedTime = time(NULL);
+	info.templateID = tpl->ID;
+
+	m_mapRegisteredUUIDToInfo.insert(id, info);
+
 	RegisteWorkerResponse res;
-	res.set_templateid(tpl->ID);
+	res.set_registerid(id);
 	res.set_configuation(tpl->Configuation);
 
 	m_pLog->Debug(format("Allocating module[{}] Type to [{}]", sender_info->UUID, tpl->Name));
@@ -431,21 +461,26 @@ CResult Sloong::CServerManage::RegisteNodeHandler(const string &req_str, Package
 	if (!req || sender == 0)
 		return CResult::Make_Error("The required parameter check error.");
 
-	int id = req->templateid();
-
 	if (!m_mapUUIDToNodeItem.exist(sender))
 		return CResult::Make_Error(format("The sender [{}] is no regitser.", sender));
 
-	if (id == 1)
+	int id = req->registerid();
+
+	if (!m_mapRegisteredUUIDToInfo.exist(id))
+		return CResult::Make_Error(format("The register id [{}] is invalid.", id));
+
+	auto info = m_mapRegisteredUUIDToInfo.get(id);
+
+	if (info.templateID == 1)
 		return CResult::Make_Error("Template id error.");
 
-	auto tpl = m_mapIDToTemplateItem.try_get(id);
+	auto tpl = m_mapIDToTemplateItem.try_get(info.templateID);
 	if (tpl == nullptr)
 		return CResult::Make_Error(format("The template id [{}] is no exist.", id));
 
-	if( tpl->Created.size() >= tpl->Replicas )
+	if (tpl->Created.size() >= tpl->Replicas)
 	{
-		return CResult(ResultType::Retry,format("Target template is no need a new node. Retry with [RegisteWorker] request."));
+		return CResult(ResultType::Retry, format("Target template is no need a new node. Retry with [RegisteWorker] request."));
 	}
 
 	// Save node info.
@@ -678,7 +713,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 
 	auto id = m_mapUUIDToNodeItem[uuid].TemplateID;
 	auto item = m_mapIDToTemplateItem.try_get(id);
-	if (item == nullptr )
+	if (item == nullptr)
 		return CResult::Make_Error(format("The template id error. UUID[{}];ID[{}]", uuid, id));
 
 	QueryReferenceInfoResponse res;
@@ -691,7 +726,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 			continue;
 		auto item = res.add_templateinfos();
 		auto tpl = m_mapIDToTemplateItem.try_get(ref_id);
-		if( tpl == nullptr )
+		if (tpl == nullptr)
 		{
 			m_pLog->Warn(format("Reference template item [id:{}] no exist. please check. ", ref_id));
 			continue;
