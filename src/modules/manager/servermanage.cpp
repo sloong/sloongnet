@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-09-01 14:50:59
+ * @LastEditTime: 2021-09-01 16:23:20
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -188,7 +188,7 @@ int Sloong::CServerManage::SearchNeedCreateTemplate()
 		if ((int)item.second.Created.size() < item.second.Replicas)
 			if (CheckForRegistering(item.first))
 				continue;
-			return item.first;
+		return item.first;
 	}
 	return 0;
 }
@@ -213,7 +213,7 @@ int Sloong::CServerManage::SearchNeedCreateWithIDs(const vector<int> &ids)
 		if (item.second.Created.size() == 0)
 			if (CheckForRegistering(item.first))
 				continue;
-			return item.first;
+		return item.first;
 	}
 
 	// Sencond time find the created < replicas
@@ -231,7 +231,7 @@ int Sloong::CServerManage::SearchNeedCreateWithIDs(const vector<int> &ids)
 		if ((int)item.second.Created.size() < item.second.Replicas)
 			if (CheckForRegistering(item.first))
 				continue;
-			return item.first;
+		return item.first;
 	}
 	return 0;
 }
@@ -266,7 +266,7 @@ void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int even
 		if (msg)
 			msg->SerializeToString(&msg_str);
 		auto req = make_unique<SendPackageEvent>(m_mapUUIDToNodeItem[item].ConnectionHashCode);
-		req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event, msg_str, DataPackage_PackageType::DataPackage_PackageType_EventPackage);
+		req->SetRequest(Base::HEIGHT_LEVEL, event, msg_str, DataPackage_PackageType::DataPackage_PackageType_EventPackage);
 		m_iC->SendMessage(std::move(req));
 	}
 }
@@ -433,6 +433,7 @@ CResult Sloong::CServerManage::RegisterWorkerHandler(const string &req_str, Pack
 
 	RegisterWorkerResponse res;
 	res.set_registerid(id);
+	res.set_templateid(tpl->ID);
 	res.set_configuation(tpl->Configuation);
 
 	m_pLog->Debug(format("Allocating module[{}] Type to [{}]", sender_info->UUID, tpl->Name));

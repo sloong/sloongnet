@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-01-15 15:57:36
- * @LastEditTime: 2020-07-29 19:42:10
+ * @LastEditTime: 2021-09-01 15:37:59
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/gateway.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -122,8 +122,6 @@ namespace Sloong
 		
 		GLOBAL_CONFIG *m_pConfig;
 		Json::Value *m_pModuleConfig;
-		RuntimeDataPackage *m_pRuntimeData = nullptr;
-
 	public:
 		static unique_ptr<SloongNetGateway> Instance;
 	};

@@ -62,7 +62,6 @@
 #include "version.h"
 #include "EpollEx.h"
 #include "IData.h"
-#include "snowflake.h"
 #include "luaMiddleLayer.h"
 
 #include "protocol/datacenter.pb.h"
@@ -817,7 +816,7 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
     request.set_database(DBName);
 
     auto req = make_shared<SendPackageEvent>(session);
-    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request));
+    req->SetRequest(Base::HEIGHT_LEVEL, DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request));
     auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
@@ -863,7 +862,7 @@ U64Result CGlobalFunction::SQLFunctionPrepareCheck(lua_State *l, int sessionid, 
 CResult CGlobalFunction::RunSQLFunction(uint64_t session, const string &request_str, int func)
 {
     auto req = make_shared<SendPackageEvent>(session);
-    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, func, request_str);
+    req->SetRequest(Base::HEIGHT_LEVEL, func, request_str);
     return req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
 }
 
@@ -1060,7 +1059,7 @@ int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
     request.set_filesize(file_size);
 
     auto req = make_shared<SendPackageEvent>(session);
-    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::PrepareUpload, ConvertObjToStr(&request));
+    req->SetRequest( Base::HEIGHT_LEVEL, FileCenter::Functions::PrepareUpload, ConvertObjToStr(&request));
     auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
@@ -1098,7 +1097,7 @@ int CGlobalFunction::Lua_UploadEnd(lua_State *l)
     request.set_token(token);
 
     auto req = make_shared<SendPackageEvent>(session);
-    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::Uploaded, ConvertObjToStr(&request));
+    req->SetRequest(Base::HEIGHT_LEVEL, FileCenter::Functions::Uploaded, ConvertObjToStr(&request));
     auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
@@ -1141,7 +1140,7 @@ int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
     request.set_quality(quality);
 
     auto req = make_shared<SendPackageEvent>(session);
-    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::GetThumbnail, ConvertObjToStr(&request));
+    req->SetRequest( Base::HEIGHT_LEVEL, FileCenter::Functions::GetThumbnail, ConvertObjToStr(&request));
     auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
@@ -1212,7 +1211,7 @@ int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
     request.set_retainsourcefile(retain);
 
     auto req = make_shared<SendPackageEvent>(session);
-    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, FileCenter::Functions::ConvertImageFile, ConvertObjToStr(&request));
+    req->SetRequest(Base::HEIGHT_LEVEL, FileCenter::Functions::ConvertImageFile, ConvertObjToStr(&request));
     auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, timeout);
     if (res.IsFialed())
     {

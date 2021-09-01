@@ -22,7 +22,7 @@ enum DATA_ITEM
     ServerConfiguation=1;
 	ModuleConfiguation=2;
 	Logger=3;
-	RuntimeData=4;
+	NodeUUID=4;
     ReferenceTemplateInfo=5;
 
     CustomMix=100;
@@ -142,13 +142,4 @@ message GLOBAL_CONFIG
     string  KeyFilePath=20;
     string  CertPasswd=21;
 
-};
-
-message RuntimeDataPackage
-{
-    string ManagerAddress=1;
-	int32 ManagerPort=2;
-	int32 TemplateID=3;
-    fixed64 NodeUUID=4;
-	GLOBAL_CONFIG TemplateConfig=5;
 }

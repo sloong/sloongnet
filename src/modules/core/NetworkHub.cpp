@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2021-08-27 11:27:30
+ * @LastEditTime: 2021-09-01 15:48:20
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -61,6 +61,7 @@
 #include "EpollEx.h"
 #include "ConnectSession.h"
 #include "IData.h"
+#include "snowflake.h"
 
 #include "events/SendPackage.hpp"
 #include "events/ConnectionBreak.hpp"
@@ -153,6 +154,10 @@ void Sloong::CNetworkHub::SendPackageEventHandler(SharedEvent event)
 		m_pLog->Error(format("SendPackageEventHandler function called, but the session[{}] is no regiestd in NetworkHub.", id));
 		return;
 	}
+
+	static uint64_t nodeUUID = IData::GetNodeUUID();
+
+	send_evt->SetBaseData(nodeUUID, snowflake::Instance->nextid());
 
 	if (send_evt->HaveCallbackFunc())
 		m_iC->AddTempSharedPtr(Helper::ntos(send_evt->GetDataPackage()->id()), event);
@@ -557,10 +562,10 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(uint64_t sessionid)
 			{
 				auto shared_pack = shared_ptr<Package>(move(pack));
 				TaskPool::Run([event, shared_pack]()
-									   {
-										   event->CallCallbackFunc(shared_pack.get());
-										   return nullptr;
-									   });
+							  {
+								  event->CallCallbackFunc(shared_pack.get());
+								  return nullptr;
+							  });
 				continue;
 			}
 		}

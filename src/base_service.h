@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-03-25 16:24:15
+ * @LastEditTime: 2021-09-01 16:20:00
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -70,7 +70,7 @@
 #include <dlfcn.h>
 namespace Sloong
 {
-	typedef struct RunInfo
+	typedef struct NodeInfo
 	{
 		bool ManagerMode = false;
 		string Address= "";
@@ -78,7 +78,10 @@ namespace Sloong
 		string AssignedTargetTemplateID= "";
 		string IncludeTargetType= "";
 		string ExcludeTargetType= "";
-	} RunInfo;
+		GLOBAL_CONFIG TemplateConfig;
+		int TemplateID;
+		uint64_t NodeUUID;
+	} NodeInfo;
 
 	class CSloongBaseService
 	{
@@ -88,7 +91,7 @@ namespace Sloong
 		virtual ~CSloongBaseService() {}
 
 		// Just call it without Control module.
-		virtual CResult Initialize(RunInfo);
+		virtual CResult Initialize(NodeInfo);
 
 		virtual CResult Run();
 		virtual void Stop();
@@ -96,10 +99,10 @@ namespace Sloong
 		TResult<shared_ptr<Package>> RegisterToControl(EasyConnect *con, string uuid);
 
 	protected:
-		virtual CResult InitlializeForWorker(RuntimeDataPackage *, RunInfo*, EasyConnect *);
-		virtual CResult InitlializeForManager(RuntimeDataPackage *);
+		virtual U64Result InitlializeForWorker(EasyConnect *);
+		virtual CResult InitlializeForManager();
 
-		CResult RegisterNode();
+		CResult RegisterNode(uint64_t);
 		CResult InitModule();
 		void InitSystem();
 
@@ -119,7 +122,7 @@ namespace Sloong
 		unique_ptr<CNetworkHub> m_pNetwork = make_unique<CNetworkHub>();
 		unique_ptr<CControlHub> m_iC = make_unique<CControlHub>();
 		unique_ptr<CLog> m_pLog = make_unique<CLog>();
-		RuntimeDataPackage m_oServerConfig;
+		NodeInfo m_oNodeRuntimeInfo;
 		
 		static const uint64_t INVALID_SESSION = 0;
 

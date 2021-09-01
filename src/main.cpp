@@ -61,7 +61,7 @@ int main(int argc, char **args)
 			cout << "Params error. See help with --help." << endl;
 			return -1;
 		}
-		RunInfo info;
+		NodeInfo info;
 
 		if (strcasecmp(args[1], "Manager") == 0)
 		{

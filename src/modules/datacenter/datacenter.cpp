@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-08-06 17:31:54
+ * @LastEditTime: 2021-09-01 15:38:09
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/datacenter/datacenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -123,7 +123,6 @@ CResult CDataCenter::Initialized()
 {
 	m_pConfig = IData::GetGlobalConfig();
 	m_pModuleConfig = IData::GetModuleConfig();
-	m_pRuntimeData = IData::GetRuntimeData();
 	if (m_pModuleConfig == nullptr)
 	{
 		return CResult::Make_Error("Initialize error. no config data.");

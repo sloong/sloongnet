@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-01-15 15:57:36
- * @LastEditTime: 2020-10-09 10:42:38
+ * @LastEditTime: 2021-09-01 15:38:14
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/gateway.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -68,7 +68,6 @@ using namespace Sloong::Events;
 
 #include "protocol/manager.pb.h"
 using namespace Manager;
-#include "snowflake.h"
 
 
 unique_ptr<SloongNetGateway> Sloong::SloongNetGateway::Instance = nullptr;
@@ -138,7 +137,6 @@ CResult SloongNetGateway::Initialized()
 {
 	m_pConfig = IData::GetGlobalConfig();
 	m_pModuleConfig = IData::GetModuleConfig();
-	m_pRuntimeData = IData::GetRuntimeData();
 	if (m_pModuleConfig)
 	{
 		/*auto event = make_shared<NormalEvent>();

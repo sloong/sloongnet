@@ -11,3 +11,4 @@ sloongnet/modules/middleLayer/rust/target/
 *.pb.cc
 *.pb.h
 configuation.db
+.vscode/settings.json

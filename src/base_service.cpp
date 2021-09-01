@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-08-26 14:42:19
+ * @LastEditTime: 2021-09-01 16:23:56
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -59,7 +59,6 @@
 
 #include "base_service.h"
 #include "utility.h"
-#include "snowflake.h"
 
 #include "events/SendPackage.hpp"
 #include "events/SendPackageToManager.hpp"
@@ -99,55 +98,55 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
     Instance->Stop();
 }
 
-CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, RunInfo *info, EasyConnect *con)
+U64Result CSloongBaseService::InitlializeForWorker(EasyConnect *con)
 {
     cout << "Connect to control succeed. Start registe and get configuation." << endl;
 
     RegisterWorkerRequest sub_req;
-    if (!info->AssignedTargetTemplateID.empty())
+    if (!m_oNodeRuntimeInfo.AssignedTargetTemplateID.empty())
     {
         sub_req.set_runmode(RegisterWorkerRequest_RunType::RegisterWorkerRequest_RunType_AssignTemplate);
-        for (auto &item : Helper::split(info->AssignedTargetTemplateID, ','))
+        for (auto &item : Helper::split(m_oNodeRuntimeInfo.AssignedTargetTemplateID, ','))
         {
             if (item.empty())
                 continue;
             int id = 0;
             if (!ConvertStrToInt(item, &id))
-                return CResult::Make_Error(format("Convert template id {} to int failed.", item));
+                return U64Result::Make_Error(format("Convert template id {} to int failed.", item));
             sub_req.add_assigntargettemplateid(id);
         }
     }
-    else if (!info->ExcludeTargetType.empty())
+    else if (!m_oNodeRuntimeInfo.ExcludeTargetType.empty())
     {
         sub_req.set_runmode(RegisterWorkerRequest_RunType::RegisterWorkerRequest_RunType_ExcludeType);
-        for (auto &item : Helper::split(info->ExcludeTargetType, ','))
+        for (auto &item : Helper::split(m_oNodeRuntimeInfo.ExcludeTargetType, ','))
         {
             if (item.empty())
                 continue;
             MODULE_TYPE forceType = MODULE_TYPE::Manager;
             if (!MODULE_TYPE_Parse(item, &forceType))
-                return CResult::Make_Error(format("Parse {} to module type error", item));
+                return U64Result::Make_Error(format("Parse {} to module type error", item));
 
             sub_req.add_excludetargettype(forceType);
         }
     }
-    else if (!info->IncludeTargetType.empty())
+    else if (!m_oNodeRuntimeInfo.IncludeTargetType.empty())
     {
         sub_req.set_runmode(RegisterWorkerRequest_RunType::RegisterWorkerRequest_RunType_IncludeType);
-        for (auto &item : Helper::split(info->IncludeTargetType, ','))
+        for (auto &item : Helper::split(m_oNodeRuntimeInfo.IncludeTargetType, ','))
         {
             if (item.empty())
                 continue;
             MODULE_TYPE forceType = MODULE_TYPE::Manager;
             if (!MODULE_TYPE_Parse(item, &forceType))
-                return CResult::Make_Error(format("Parse {} to module type error", item));
+                return U64Result::Make_Error(format("Parse {} to module type error", item));
 
             sub_req.add_includetargettype(forceType);
         }
     }
 
     uint64_t uuid = 0;
-    auto result = CResult::Make_Error("Cancelled by User.");
+    auto result = U64Result::Make_Error("Cancelled by User.");
     while (m_emStatus != RUN_STATUS::Exit)
     {
         auto req = Package::GetRequestPackage();
@@ -156,13 +155,13 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, RunIn
 
         req->set_content(ConvertObjToStr(&sub_req));
         if (con->SendPackage(move(req)).IsFialed())
-            return CResult::Make_Error("Send get config request error.");
+            return U64Result::Make_Error("Send get config request error.");
         auto res = con->RecvPackage(true);
         if (res.IsFialed())
-            return CResult::Make_Error("Receive get config result error.");
+            return U64Result::Make_Error("Receive get config result error.");
         auto response = res.MoveResultObject();
         if (!response)
-            return CResult::Make_Error("Parse the get config response data error.");
+            return U64Result::Make_Error("Parse the get config response data error.");
 
         if (response->result() == ResultType::Retry)
         {
@@ -184,30 +183,29 @@ CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, RunIn
             auto res_pack = ConvertStrToObj<RegisterWorkerResponse>(response->content());
             string serverConfig = res_pack->configuation();
             if (serverConfig.size() == 0)
-                return CResult::Make_Error("Control no return config infomation.");
-            if (!data->mutable_templateconfig()->ParseFromString(serverConfig))
-                return CResult::Make_Error("Parse the config struct error.");
+                return U64Result::Make_Error("Control no return config infomation.");
+            if (!m_oNodeRuntimeInfo.TemplateConfig.ParseFromString(serverConfig))
+                return U64Result::Make_Error("Parse the config struct error.");
 
-            data->set_templateid(res_pack->templateid());
-            data->set_nodeuuid(uuid);
-            result = CResult::Succeed;
+            m_oNodeRuntimeInfo.NodeUUID = uuid;
+            m_oNodeRuntimeInfo.TemplateID = res_pack->templateid();
+            result = U64Result::Make_OKResult(res_pack->registerid());
             break;
         }
         else
         {
-            return CResult::Make_Error(format("Control return an unexpected result {}. Message {}.", ResultType_Name(response->result()), response->content()));
+            return U64Result::Make_Error(format("Control return an unexpected result {}. Message {}.", ResultType_Name(response->result()), response->content()));
         }
     };
     cout << "Get configuation done." << endl;
     return result;
 }
 
-CResult CSloongBaseService::InitlializeForManager(RuntimeDataPackage *data)
+CResult CSloongBaseService::InitlializeForManager()
 {
-    data->set_nodeuuid(0);
-    data->set_templateid(1);
-    auto config = data->mutable_templateconfig();
-    config->set_listenport(data->managerport());
+    m_oNodeRuntimeInfo.NodeUUID = 0;
+    auto config = &m_oNodeRuntimeInfo.TemplateConfig;
+    config->set_listenport(m_oNodeRuntimeInfo.Port);
     config->set_modulepath("./");
     config->set_modulename("libmanager.so");
     return CResult::Succeed;
@@ -228,37 +226,40 @@ void CSloongBaseService::InitSystem()
     signal(SIGSEGV, &on_sigint);
 }
 
-CResult CSloongBaseService::Initialize(RunInfo info)
+CResult CSloongBaseService::Initialize(NodeInfo info)
 {
     m_emStatus = RUN_STATUS::Created;
 
-    m_oServerConfig.set_manageraddress(info.Address);
-    m_oServerConfig.set_managerport(info.Port);
+    m_oNodeRuntimeInfo = move(info);
     m_oExitResult = CResult::Succeed;
 
     InitSystem();
 
     CResult res = CResult::Succeed;
     UniqueConnection pManagerConnect = nullptr;
-
+    uint64_t registerid = 0;
     if (info.ManagerMode)
     {
-        res = InitlializeForManager(&m_oServerConfig);
+        res = InitlializeForManager();
     }
     else
     {
         pManagerConnect = make_unique<EasyConnect>();
-        res = pManagerConnect->InitializeAsClient(nullptr, m_oServerConfig.manageraddress(), m_oServerConfig.managerport(), nullptr);
+        res = pManagerConnect->InitializeAsClient(nullptr, m_oNodeRuntimeInfo.Address, m_oNodeRuntimeInfo.Port, nullptr);
         if (res.IsFialed())
         {
             return CResult::Make_Error("Connect to control fialed." + res.GetMessage());
         }
 
-        res = InitlializeForWorker(&m_oServerConfig, &info, pManagerConnect.get());
+        auto regres = InitlializeForWorker(pManagerConnect.get());
+        if (regres.IsFialed())
+            return CResult(regres.GetResult(), regres.GetMessage());
+        else
+            registerid = regres.GetResultObject();
     }
     if (res.IsFialed())
         return res;
-    auto pConfig = m_oServerConfig.mutable_templateconfig();
+    auto pConfig = &m_oNodeRuntimeInfo.TemplateConfig;
     if (pConfig->logoperation() == 0)
         pConfig->set_logoperation(LOGOPT::WriteToSTDOut);
 
@@ -290,9 +291,9 @@ CResult CSloongBaseService::Initialize(RunInfo info)
     }
     m_pLog->Debug("Control center initialization succeed.");
 
-    m_iC->Add(DATA_ITEM::ServerConfiguation, m_oServerConfig.mutable_templateconfig());
+    m_iC->Add(DATA_ITEM::ServerConfiguation, &m_oNodeRuntimeInfo.TemplateConfig);
     m_iC->Add(DATA_ITEM::Logger, m_pLog.get());
-    m_iC->Add(DATA_ITEM::RuntimeData, &m_oServerConfig);
+    m_iC->Add(DATA_ITEM::NodeUUID, &m_oNodeRuntimeInfo.NodeUUID);
     if (pConfig->moduleconfig().length() > 0)
     {
         Json::CharReaderBuilder builder;
@@ -344,8 +345,8 @@ CResult CSloongBaseService::Initialize(RunInfo info)
         event->EnableReconnectCallback([&](uint64_t, int, int)
                                        {
                                            ReconnectRegisterRequest req_pack;
-                                           req_pack.set_templateid(m_oServerConfig.templateid());
-                                           req_pack.set_nodeuuid(m_oServerConfig.nodeuuid());
+                                           req_pack.set_templateid(m_oNodeRuntimeInfo.TemplateID);
+                                           req_pack.set_nodeuuid(m_oNodeRuntimeInfo.NodeUUID);
 
                                            auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::ReconnectRegister, ConvertObjToStr(&req_pack));
                                            return event->SyncCall(m_iC.get(), 5000);
@@ -363,7 +364,7 @@ CResult CSloongBaseService::Initialize(RunInfo info)
 
     if (!info.ManagerMode)
     {
-        auto res = RegisterNode();
+        auto res = RegisterNode(registerid);
         if (res.IsFialed())
         {
             m_pLog->Fatal(res.GetMessage());
@@ -377,7 +378,7 @@ CResult CSloongBaseService::Initialize(RunInfo info)
 CResult CSloongBaseService::InitModule()
 {
     // Load the module library
-    string libFullPath = m_oServerConfig.templateconfig().modulepath() + m_oServerConfig.templateconfig().modulename();
+    string libFullPath = m_oNodeRuntimeInfo.TemplateConfig.modulepath() + m_oNodeRuntimeInfo.TemplateConfig.modulename();
 
     m_pLog->Debug(format("Start init module {} and load module functions", libFullPath));
     m_pModule = dlopen(libFullPath.c_str(), RTLD_LAZY | RTLD_GLOBAL);
@@ -444,10 +445,10 @@ CResult CSloongBaseService::InitModule()
     return CResult::Succeed;
 }
 
-CResult CSloongBaseService::RegisterNode()
+CResult CSloongBaseService::RegisterNode(uint64_t id)
 {
     RegisterNodeRequest req_pack;
-    req_pack.set_templateid(m_oServerConfig.templateid());
+    req_pack.set_registerid(id);
 
     auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::RegisterNode, ConvertObjToStr(&req_pack));
     return event->SyncCall(m_iC.get(), 5000);
@@ -476,10 +477,10 @@ CResult CSloongBaseService::Run()
         req.set_cpuload(load);
         req.set_memroyused(mem_total / mem_free);
 
-        if (m_oServerConfig.templateid() != 1) // Manager module
+        if (!m_oNodeRuntimeInfo.ManagerMode) // Manager module
         {
             auto event = make_shared<Events::SendPackageEvent>(m_ManagerSession);
-            event->SetRequest(m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(), Base::PRIORITY_LEVEL::LOW_LEVEL, (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
+            event->SetRequest(Base::PRIORITY_LEVEL::LOW_LEVEL, (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
             m_iC->SendMessage(event);
         }
 
@@ -528,7 +529,7 @@ void CSloongBaseService::OnSendPackageToManagerEventHandler(SharedEvent e)
     auto req = make_shared<SendPackageEvent>(m_ManagerSession);
     req->SetCallbackFunc([event](IEvent *e, Package *p)
                          { event->CallCallbackFunc(p); });
-    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event->GetFunctionID(), event->GetContent());
+    req->SetRequest(Base::HEIGHT_LEVEL, event->GetFunctionID(), event->GetContent());
     m_iC->SendMessage(req);
 }
 
