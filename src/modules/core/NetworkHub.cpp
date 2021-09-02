@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2021-09-01 15:48:20
+ * @LastEditTime: 2021-09-02 17:14:13
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -74,18 +74,18 @@ using namespace Sloong::Events;
 Sloong::CNetworkHub::CNetworkHub()
 {
 	m_pEpoll = make_unique<CEpollEx>();
-	m_pWaitProcessList = new queue_safety<UniquePackage>[s_PriorityLevel]();
+	m_oWaitProcessList =  vector<queue_safety<UniquePackage>>(s_PriorityLevel);
 }
 
 Sloong::CNetworkHub::~CNetworkHub()
 {
 	if (m_pCTX)
 		SSLHelper::G_FreeSSL(m_pCTX);
-	for (int i = 0; i < s_PriorityLevel; i++)
+	for (auto &i : m_oWaitProcessList)
 	{
-		m_pWaitProcessList[i].clear();
+		i.clear();
 	}
-	SAFE_DELETE_ARR(m_pWaitProcessList);
+	m_oWaitProcessList.clear();
 }
 
 CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
@@ -401,11 +401,11 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 		MessagePorcessListRetry:
 			for (int i = 0; i < s_PriorityLevel; i++)
 			{
-				if (m_pWaitProcessList[i].empty())
+				if (m_oWaitProcessList[i].empty())
 					continue;
 
 				PackageResult result(ResultType::Ignore);
-				UniquePackage package = m_pWaitProcessList[i].pop(nullptr);
+				UniquePackage package = m_oWaitProcessList[i].pop(nullptr);
 
 				while (package != nullptr)
 				{
@@ -569,7 +569,15 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(uint64_t sessionid)
 				continue;
 			}
 		}
-		m_pWaitProcessList[pack->priority()].push(std::move(pack));
+		if( m_oWaitProcessList.size() <= pack->priority() )
+		{
+			m_pLog->Warn(format("Package priority is invalid, ignoring the priority value."));
+			m_oWaitProcessList[0].push(std::move(pack));
+		}
+		else
+		{ 
+			m_oWaitProcessList[pack->priority()].push(std::move(pack));
+		}
 	}
 	m_oProcessThreadSync.notify_all();
 	return res.GetResult();
