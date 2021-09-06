@@ -6,7 +6,7 @@ services:
       - Manager
       - 0.0.0.0:8000
     environment:
-      - DB_FILE_PATH=/data/configuation.db
+      - ManagerConfiguationDBFilePath=/data/configuation.db
     volumes:
       - "control_local:/data"
     restart: always

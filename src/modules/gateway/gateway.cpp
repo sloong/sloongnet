@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-01-15 15:57:36
- * @LastEditTime: 2021-09-01 15:38:14
+ * @LastEditTime: 2021-09-02 17:27:45
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/gateway.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -243,7 +243,7 @@ CResult SloongNetGateway::CreateProcessEnvironmentHandler(void **out_env)
 	if (res.IsFialed())
 		return res;
 	(*out_env) = item.get();
-	m_listTranspond.push_back(std::move(item));
+	m_listTranspond.emplace_back(std::move(item));
 	return CResult::Succeed;
 }
 

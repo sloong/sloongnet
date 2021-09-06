@@ -1,3 +1,12 @@
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 2021-09-02 17:24:12
+ * @LastEditTime: 2021-09-02 17:25:16
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/core/list_ex.hpp
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
+ */
 /*
  * @Author: WCB
  * @Date: 1970-01-01 08:00:00
@@ -24,6 +33,15 @@ namespace Sloong
 			return false;
 		}
 
+		bool unique_insert(T&& v) {
+			if (!this->exist(v))
+			{
+				this->emplace_back(v);
+				return true;
+			}
+			return false;
+		}
+
 		void erase(const T& v){
 			auto it = std::find(this->begin(), this->end(), v);
 			if (it != this->end())
@@ -39,9 +57,14 @@ namespace Sloong
 				return true;
 		}
 
-		void copyfrom(const list_ex<T>& src){
+		void merge(const list_ex<T>& src){
 			for( auto i:src)
 				this->push_back(i);
+		}
+
+		void merge( list_ex<T>&& src){
+			for( auto i:src)
+				this->emplace_back(i);
 		}
 	};
 }

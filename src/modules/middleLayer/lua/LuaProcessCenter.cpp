@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2021-08-26 14:56:30
+ * @LastEditTime: 2021-09-02 17:28:26
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -123,7 +123,7 @@ CResult Sloong::CLuaProcessCenter::NewThreadInit()
 
 	lua->Content->EnableLog(m_pLog);
 	
-	m_listLuaContent.push_back(move(lua));
+	m_listLuaContent.emplace_back(move(lua));
 	int id = (int)m_listLuaContent.size() - 1;
 	FreeLuaContext(id);
 	return CResult::Succeed;

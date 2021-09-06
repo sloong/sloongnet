@@ -157,7 +157,7 @@ inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(voi
 	if (res.IsFialed())
 		return res;
 	(*out_env) = item.get();
-	m_listServerManage.push_back(std::move(item));
+	m_listServerManage.emplace_back(std::move(item));
 	return CResult::Succeed;
 }
 

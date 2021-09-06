@@ -62,11 +62,11 @@ namespace Sloong
                     buff += (n);
                 else if (n == sep)
                 {
-                    res.push_back(move(buff));
+                    res.emplace_back(move(buff));
                     buff = ("");
                 }
             }
-            res.push_back(move(buff));
+            res.emplace_back(move(buff));
 
             return res;
         }

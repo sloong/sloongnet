@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-09-01 15:38:09
+ * @LastEditTime: 2021-09-02 17:27:13
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/datacenter/datacenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -138,7 +138,7 @@ CResult CDataCenter::CreateProcessEnvironmentHandler(void **out_env)
 	if (res.IsFialed())
 		return res;
 	(*out_env) = item.get();
-	m_listDBHub.push_back(std::move(item));
+	m_listDBHub.emplace_back(std::move(item));
 	return CResult::Succeed;
 }
 

@@ -206,7 +206,7 @@ CResult Sloong::FileManager::UploadingHandler(const string &str_req, Package *pa
     range.End = data.end();
     range.Data = data.data();
 
-    info->DataList.push_back(move(range));
+    info->DataList.emplace_back(move(range));
 
     return CResult::Succeed;
 }
