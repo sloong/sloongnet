@@ -9,21 +9,6 @@ steps:
   - build/environment.sh --build
   - build/build.sh -ci
 
-- name: devlop-docker
-    image: plugins/docker
-    settings:
-      repo: sloong/sloongnet
-      use_cache: true
-      username:
-        from_secret: docker_username
-      password:
-        from_secret: docker_password
-    tags:
-      - develop
-    when:
-      event: push
-      branch: develop
-
 - name: docker
     image: plugins/docker
     settings:
