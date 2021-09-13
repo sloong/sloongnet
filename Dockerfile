@@ -1,35 +1,32 @@
 FROM debian:11-slim AS build-env
 
-RUN apt update && apt install -y ca-certificates
-
+# chagne to tsinghua source
 COPY ./build/sources.list /etc/apt/sources.list
-
 RUN cat /etc/apt/sources.list
 RUN rm -Rf /var/lib/apt/lists/*
 
-RUN apt update && DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" apt install -y tzdata
+# install build packages
+RUN ./build/environment.sh --build
 
-RUN apt install -y \
-    cmake clang llvm libsqlite3-dev libprotobuf-dev protobuf-compiler uuid-dev libssl-dev libjsoncpp-dev libmariadb-dev liblua5.3-dev libfmt-dev
-
+# copy file to docker
 COPY . /tmp/
 WORKDIR /tmp
-# RUN echo $(ls -1 /tmp)
+
+# start build
 RUN /tmp/build/build.sh -r
 
-#FROM debian:10-slim
+
 FROM debian:11-slim
 LABEL maintainer="admin@sloong.com"
 
-RUN apt update && apt install -y ca-certificates
+# chagne to tsinghua source
 COPY ./build/sources.list /etc/apt/sources.list
-
 RUN cat /etc/apt/sources.list
 RUN rm -Rf /var/lib/apt/lists/*
 
-RUN apt update && apt install -y \
-    libsqlite3-0 libprotobuf23 libuuid1 libssl1.1 libjsoncpp24 libmariadb3 liblua5.3-0 libfmt7 imagemagick
-    
+# install runtime packages
+RUN ./build/environment.sh --run
+
 WORKDIR /usr/local/bin
 COPY --from=build-env /tmp/build/release/ /usr/local/bin/
 RUN chmod +x /usr/local/bin/sloongnet
