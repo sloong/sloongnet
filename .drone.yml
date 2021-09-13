@@ -9,7 +9,7 @@ steps:
       - build/environment.sh --build
       - build/build.sh -ci
 
-  - name: build2
+  - name: docker-dev
     image: plugins/docker
     settings:
       repo: sloong/sloongnet
@@ -24,7 +24,7 @@ steps:
       event: push
       branch: develop
 
-  - name: build3
+  - name: docker
     image: plugins/docker
     settings:
       repo: sloong/sloongnet
