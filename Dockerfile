@@ -3,12 +3,12 @@ FROM debian:11-slim AS build-env
 # chagne to ustc source
 RUN sed -i "s/deb.debian.org/mirrors.ustc.edu.cn/g" /etc/apt/sources.list
 
-# install build packages
-RUN ./build/environment.sh --build
-
 # copy file to docker
 COPY . /tmp/
 WORKDIR /tmp
+
+# install build packages
+RUN /tmp/build/environment.sh --build
 
 # start build
 RUN /tmp/build/build.sh -r
@@ -21,7 +21,8 @@ LABEL maintainer="admin@sloong.com"
 RUN sed -i "s/deb.debian.org/mirrors.ustc.edu.cn/g" /etc/apt/sources.list
 
 # install runtime packages
-RUN ./build/environment.sh --run
+COPY ./build/environment.sh /tmp/environment.sh
+RUN /tmp/environment.sh --run
 
 WORKDIR /usr/local/bin
 COPY --from=build-env /tmp/build/release/ /usr/local/bin/
