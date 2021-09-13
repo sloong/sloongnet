@@ -9,7 +9,7 @@ steps:
       - build/environment.sh --build
       - build/build.sh -ci
 
-  - name: docker
+  - name: build_docker
     image: plugins/docker
     settings:
       repo: sloong/sloongnet
