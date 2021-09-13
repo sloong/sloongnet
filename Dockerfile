@@ -1,9 +1,7 @@
 FROM debian:11-slim AS build-env
 
-# chagne to tsinghua source
-COPY ./build/sources.list /etc/apt/sources.list
-RUN cat /etc/apt/sources.list
-RUN rm -Rf /var/lib/apt/lists/*
+# chagne to ustc source
+RUN sed -i "s/deb.debian.org/mirrors.ustc.edu.cn/g" /etc/apt/sources.list
 
 # install build packages
 RUN ./build/environment.sh --build
@@ -19,10 +17,8 @@ RUN /tmp/build/build.sh -r
 FROM debian:11-slim
 LABEL maintainer="admin@sloong.com"
 
-# chagne to tsinghua source
-COPY ./build/sources.list /etc/apt/sources.list
-RUN cat /etc/apt/sources.list
-RUN rm -Rf /var/lib/apt/lists/*
+# chagne to ustc source
+RUN sed -i "s/deb.debian.org/mirrors.ustc.edu.cn/g" /etc/apt/sources.list
 
 # install runtime packages
 RUN ./build/environment.sh --run

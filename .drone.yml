@@ -7,4 +7,4 @@ steps:
   commands:
   - sed -i "s/deb.debian.org/mirrors.ustc.edu.cn/g" /etc/apt/sources.list
   - build/environment.sh --build
-  - build/build.sh -r
+  - build/build.sh -ci

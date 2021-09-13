@@ -32,7 +32,7 @@ CPU_NUM=`grep -c "model name" /proc/cpuinfo`
 # default value is debug
 VERSION_STR=$(cat $SCRIPTFOLDER/../version)
 
-
+MAKE_CMD=make -j$CPU_NUM
 
 clean(){
 	if [ -d $BUILD_FOLDER  ];then
@@ -64,7 +64,7 @@ build(){
 		exit 1
 	fi
 
-	make -j$CPU_NUM
+	
 	if [ $? -ne 0 ];then
 		echo "Run make cmd return error. build stop."
 		exit 1
@@ -110,6 +110,17 @@ build_release(){
 	build
 }
 
+build_ci(){
+	MAKE_CMD=make
+	OUTPATH=$SCRIPTFOLDER/$PROJECT-release
+	MAKEFLAG=release
+	CMAKEFLAG=Release
+	build_path
+	clean
+	build
+}
+
+
 copyfile(){
 	mkdir -p $OUTPATH/modules/
 
@@ -144,6 +155,9 @@ fi
 if [ $# -eq 1 ]; then
 	case $1 in 
 		-r) 
+			build_release
+			;;
+		-ci) 
 			build_release
 			;;
 		-d) 
