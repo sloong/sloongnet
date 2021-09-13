@@ -3,7 +3,7 @@
  # @Author: WCB
  # @Date: 2020-04-20 12:26:04
  # @LastEditors: Chuanbin Wang
- # @LastEditTime: 2021-09-13 16:06:32
+ # @LastEditTime: 2021-09-13 20:16:16
  # @Description: file content
  ###
 
@@ -18,7 +18,7 @@ update(){
 install_run_env(){
     # install run time library
     # for debian 11/ubuntu 21.04
-    apt install -y libprotobuf23 libjsoncpp24 libfmt7
+    apt-get install -y libprotobuf23 libjsoncpp24 libfmt7
     # for debian 10/ubuntu 20.04
     # apt install -y libprotobuf17 libjsoncpp1 libfmt6
     apt-get install -y libsqlite3-0 libuuid1 libssl1.1 mariadb-client liblua5.3-0 imagemagick
