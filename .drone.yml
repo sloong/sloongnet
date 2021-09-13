@@ -5,36 +5,36 @@ steps:
   - name: build
     image: debian:11-slim
     commands:
-    - sed -i "s/deb.debian.org/mirrors.ustc.edu.cn/g" /etc/apt/sources.list
-    - build/environment.sh --build
-    - build/build.sh -ci
+      - sed -i "s/deb.debian.org/mirrors.ustc.edu.cn/g" /etc/apt/sources.list
+      - build/environment.sh --build
+      - build/build.sh -ci
 
   - name: build2
-      image: plugins/docker
-      settings:
-        repo: sloong/sloongnet
-        use_cache: true
-        username:
-          from_secret: docker_username
-        password:
-          from_secret: docker_password
-      tags:
-        - develop
-      when:
-        event: push
-        branch: develop
+    image: plugins/docker
+    settings:
+      repo: sloong/sloongnet
+      use_cache: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    tags:
+      - develop
+    when:
+      event: push
+      branch: develop
 
   - name: build3
-      image: plugins/docker
-      settings:
-        repo: sloong/sloongnet
-        use_cache: true
-        username:
-          from_secret: docker_username
-        password:
-          from_secret: docker_password
-      tags:
-        - latest
-      when:
-        event: push
-        branch: master
+    image: plugins/docker
+    settings:
+      repo: sloong/sloongnet
+      use_cache: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    tags:
+      - latest
+    when:
+      event: push
+      branch: master
