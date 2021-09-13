@@ -1,4 +1,4 @@
-FROM sloongnet_build AS build-env
+FROM sloong/sloongnet_build AS build-env
 
 # copy file to docker
 COPY . /tmp/
@@ -8,7 +8,7 @@ WORKDIR /tmp
 RUN /tmp/build/build.sh -r
 
 
-FROM sloongnet_run
+FROM sloong/sloongnet_run
 LABEL maintainer="admin@sloong.com"
 
 WORKDIR /usr/local/bin
