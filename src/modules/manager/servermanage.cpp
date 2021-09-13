@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-09-01 16:23:20
+ * @LastEditTime: 2021-09-08 20:47:36
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -467,15 +467,14 @@ CResult Sloong::CServerManage::RegisterNodeHandler(const string &req_str, Packag
 
 	int id = req->registerid();
 
-	if (!m_mapRegisterdUUIDToInfo.exist(id))
+	auto info = m_mapRegisterdUUIDToInfo.try_get(id);
+	if (info == nullptr)
 		return CResult::Make_Error(format("The register id [{}] is invalid.", id));
 
-	auto info = m_mapRegisterdUUIDToInfo.get(id);
-
-	if (info.templateID == 1)
+	if (info->templateID == 1)
 		return CResult::Make_Error("Template id error.");
 
-	auto tpl = m_mapIDToTemplateItem.try_get(info.templateID);
+	auto tpl = m_mapIDToTemplateItem.try_get(info->templateID);
 	if (tpl == nullptr)
 		return CResult::Make_Error(format("The template id [{}] is no exist.", id));
 

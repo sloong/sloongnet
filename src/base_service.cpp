@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-09-01 16:23:56
+ * @LastEditTime: 2021-09-08 20:52:40
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -515,11 +515,11 @@ void CSloongBaseService::OnProgramStopEventHandler(SharedEvent event)
         return;
     m_emStatus = RUN_STATUS::Exit;
     m_pLog->Info("Application receive ProgramStopEvent.");
-    m_oExitSync.notify_all();
-    m_iC->Exit();
-    m_pLog->End();
     if (m_pModule)
         dlclose(m_pModule);
+    m_oExitSync.notify_all();
+    m_pLog->End();
+    m_iC->Exit();
 }
 
 void CSloongBaseService::OnSendPackageToManagerEventHandler(SharedEvent e)
