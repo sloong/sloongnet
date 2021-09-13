@@ -32,7 +32,7 @@ CPU_NUM=`grep -c "model name" /proc/cpuinfo`
 # default value is debug
 VERSION_STR=$(cat $SCRIPTFOLDER/../version)
 
-MAKE_CMD=make -j$CPU_NUM
+MAKE_CMD="make -j$CPU_NUM"
 
 clean(){
 	if [ -d $BUILD_FOLDER  ];then
@@ -69,6 +69,7 @@ build(){
 		echo "Run make cmd return error. build stop."
 		exit 1
 	fi
+	$MAKE_CMD
 	cp $PROJECT $OUTPUT_FOLDER/
 	cp libcore.so $OUTPUT_FOLDER/
 	cp libmanager.so $OUTPUT_FOLDER/
@@ -111,7 +112,7 @@ build_release(){
 }
 
 build_ci(){
-	MAKE_CMD=make
+	MAKE_CMD="make ."
 	OUTPATH=$SCRIPTFOLDER/$PROJECT-release
 	MAKEFLAG=release
 	CMAKEFLAG=Release
