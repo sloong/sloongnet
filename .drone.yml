@@ -2,24 +2,39 @@ kind: pipeline
 name: default
 
 steps:
-- name: build
-  image: debian:11-slim
-  commands:
-  - sed -i "s/deb.debian.org/mirrors.ustc.edu.cn/g" /etc/apt/sources.list
-  - build/environment.sh --build
-  - build/build.sh -ci
+  - name: build
+    image: debian:11-slim
+    commands:
+    - sed -i "s/deb.debian.org/mirrors.ustc.edu.cn/g" /etc/apt/sources.list
+    - build/environment.sh --build
+    - build/build.sh -ci
 
-- name: docker
-    image: plugins/docker
-    settings:
-      repo: sloong/sloongnet
-      use_cache: true
-      username:
-        from_secret: docker_username
-      password:
-        from_secret: docker_password
-    tags:
-      - latest
-    when:
-      event: push
-      branch: master
+  - name: docker
+      image: plugins/docker
+      settings:
+        repo: sloong/sloongnet
+        use_cache: true
+        username:
+          from_secret: docker_username
+        password:
+          from_secret: docker_password
+      tags:
+        - develop
+      when:
+        event: push
+        branch: develop
+
+  - name: docker
+      image: plugins/docker
+      settings:
+        repo: sloong/sloongnet
+        use_cache: true
+        username:
+          from_secret: docker_username
+        password:
+          from_secret: docker_password
+      tags:
+        - latest
+      when:
+        event: push
+        branch: master
