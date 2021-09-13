@@ -8,5 +8,5 @@ COPY . /tmp/
 WORKDIR /tmp
 
 # install build packages
-RUN /tmp/environment.sh --run
+RUN /tmp/build/environment.sh --run
 
