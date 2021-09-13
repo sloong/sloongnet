@@ -45,7 +45,7 @@ function(PROTOBUF_GENERATE_CPP_EX PATH SRCS HDRS)
       COMMAND  ${PROTOBUF_PROTOC_EXECUTABLE}
       ARGS --cpp_out  ${PATH} ${_protobuf_include_path} ${ABS_FIL}
       DEPENDS ${ABS_FIL}
-      COMMENT "Running C++ protocol buffer compiler on ${FIL}"
+      COMMENT "Running C++ protocol buffer compiler on ${FIL}. File output to ${PATH}/${FIL_WE}"
       VERBATIM )
   endforeach()
 

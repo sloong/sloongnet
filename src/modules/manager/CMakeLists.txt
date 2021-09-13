@@ -24,4 +24,5 @@ list(APPEND SRC_LIST ${PROTOSRCS})
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRC_LIST})
 
 # 添加链接库
-target_link_libraries(${PROJECT_NAME} sqlite3)
+target_link_libraries(${PROJECT_NAME} sqlite3
+        core)

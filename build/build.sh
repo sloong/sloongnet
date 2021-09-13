@@ -112,7 +112,7 @@ build_release(){
 }
 
 build_ci(){
-	MAKE_CMD="make ."
+	MAKE_CMD=make
 	OUTPATH=$SCRIPTFOLDER/$PROJECT-release
 	MAKEFLAG=release
 	CMAKEFLAG=Release
@@ -159,7 +159,7 @@ if [ $# -eq 1 ]; then
 			build_release
 			;;
 		-ci) 
-			build_release
+			build_ci
 			;;
 		-d) 
 			build_debug
