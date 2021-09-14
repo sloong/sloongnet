@@ -121,13 +121,13 @@ message RegisterWorkerRequest
 
 message RegisterWorkerResponse
 {
-   int32 RegisterID=1;
+   fixed64 RegisterID=1;
    int32 TemplateID=2;
    bytes Configuation=3;
 }
 
 message RegisterNodeRequest{
-   int32 RegisterID=1;
+   fixed64 RegisterID=1;
 }
 
 message ReferenceTemplateInfo
