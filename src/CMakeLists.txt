@@ -24,9 +24,6 @@ SET(LIBRARY_OUTPUT_PATH "../")
 set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -g -ggdb -DDEBUG -D_GLIBCXX_DEBUG")
 # the clang with O2/O3 will happend protobuf error. so in here the release set to O1
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O1 -DNODEBUG -DRELASE")
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 add_definitions(-DLUA_USE_READLINE)
@@ -35,7 +32,8 @@ add_definitions(-DLUA_USE_READLINE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-switch -Wno-return-type-c-linkage")
 
 # C++ 版本
-set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 添加module
 add_subdirectory(modules/core)

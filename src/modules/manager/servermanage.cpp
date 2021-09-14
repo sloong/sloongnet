@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-09-14 14:20:07
+ * @LastEditTime: 2021-09-14 15:24:21
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -142,14 +142,11 @@ CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG *config)
 
 bool Sloong::CServerManage::CheckForRegistering(int id)
 {
+	std::erase_if(m_mapRegisterdUUIDToInfo, [](auto &it)
+				  { return difftime(time(NULL), it.second.registedTime) > 1; });
+
 	for (auto i = m_mapRegisterdUUIDToInfo.begin(); i != m_mapRegisterdUUIDToInfo.end(); i++)
 	{
-		if (difftime(time(NULL), (*i).second.registedTime) > 1)
-		{
-			m_mapRegisterdUUIDToInfo.erase(i);
-			i =  m_mapRegisterdUUIDToInfo.begin();
-			continue;
-		}
 		if ((*i).second.templateID == id)
 		{
 			return true;
