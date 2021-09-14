@@ -113,11 +113,11 @@ build_release(){
 
 build_ci(){
 	MAKE_CMD=make
-	OUTPATH=$SCRIPTFOLDER/$PROJECT-release
-	MAKEFLAG=release
-	CMAKEFLAG=Release
+	OUTPATH=$SCRIPTFOLDER/$PROJECT-debug
+	MAKEFLAG=debug
+	CMAKEFLAG=Debug
 	build_path
-	clean
+	# clean
 	build
 }
 
