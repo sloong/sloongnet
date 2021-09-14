@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-09-08 20:47:36
+ * @LastEditTime: 2021-09-14 14:20:07
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -147,6 +147,7 @@ bool Sloong::CServerManage::CheckForRegistering(int id)
 		if (difftime(time(NULL), (*i).second.registedTime) > 1)
 		{
 			m_mapRegisterdUUIDToInfo.erase(i);
+			i =  m_mapRegisterdUUIDToInfo.begin();
 			continue;
 		}
 		if ((*i).second.templateID == id)
@@ -436,7 +437,7 @@ CResult Sloong::CServerManage::RegisterWorkerHandler(const string &req_str, Pack
 	res.set_templateid(tpl->ID);
 	res.set_configuation(tpl->Configuation);
 
-	m_pLog->Debug(format("Allocating module[{}] Type to [{}]", sender_info->UUID, tpl->Name));
+	m_pLog->Debug(format("Allocating module[{}][{}] Type to [{}]", sender_info->UUID, id, tpl->Name));
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
