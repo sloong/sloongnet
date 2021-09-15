@@ -29,7 +29,7 @@ namespace Sloong
 
     protected:
 		IControl* 	m_iC = nullptr;
-		CLog*		m_pLog =nullptr;
+		spdlog::logger*		m_pLog =nullptr;
 	};
 
 }

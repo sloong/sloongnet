@@ -88,7 +88,7 @@ namespace Sloong
 		inline void *GetPointer(int nNum) { return GetPointer(m_pScriptContext, nNum); }
 		inline unique_ptr<map<string, string>> GetTableParam(int index) { return GetTableParam(m_pScriptContext, index); }
 
-		inline void EnableLog( CLog* p){m_pLog = p;}
+		inline void EnableLog( spdlog::logger* p){m_pLog = p;}
 		
 		// Static functions.
 	public:
@@ -127,7 +127,7 @@ namespace Sloong
 		}
 
 	private:
-		CLog* m_pLog = nullptr;
+		spdlog::logger* m_pLog = nullptr;
 		lua_State *m_pScriptContext = nullptr;
 		string m_strScriptFolder = "./";
 		vector<string> m_listSearchRoute = {

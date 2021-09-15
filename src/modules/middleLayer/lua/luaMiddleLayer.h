@@ -110,7 +110,7 @@ namespace Sloong
 
 		void SetReloadScriptFlag();
 
-		inline CLog* GetLog(){ return m_pLog; }
+		inline spdlog::logger* GetLog(){ return m_pLog; }
 
 	protected:
 		list_ex<shared_ptr<CLuaProcessCenter>> m_listProcess;

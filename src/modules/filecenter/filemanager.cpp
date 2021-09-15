@@ -51,16 +51,16 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(Package *pack)
 
     auto req_obj = pack->content();
     auto func_name = Functions_Name(function);
-    m_pLog->Debug(format("Request [{}][{}]:[{}]", function, func_name, req_obj));
+    m_pLog->debug(format("Request [{}][{}]:[{}]", function, func_name, req_obj));
     if (!m_mapFuncToHandler.exist(function))
         return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, format("Function [{}] no handler.", func_name)));
 
     auto res = m_mapFuncToHandler[function](req_obj, pack);
     auto response = Package::MakeResponse(pack, res);
     if (res.IsSucceed())
-        m_pLog->Debug(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage().length()));
+        m_pLog->debug(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage().length()));
     else
-        m_pLog->Debug(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage()));
+        m_pLog->debug(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage()));
     return PackageResult::Make_OKResult(move(response));
 }
 
@@ -110,7 +110,7 @@ CResult Sloong::FileManager::ArchiveFile(const string &index, const string &sour
     {
         string target = GetFileTruePath(index);
 
-        m_pLog->Debug(format("Archive file: source[{}] target[{}]", source, target));
+        m_pLog->debug(format("Archive file: source[{}] target[{}]", source, target));
         if (source.length() < 3 || target.length() < 3)
             return CResult::Make_Error(format("Move File error. File name cannot empty. source:{};target:{}", source, target));
 
@@ -133,7 +133,7 @@ CResult Sloong::FileManager::ArchiveFile(const string &index, const string &sour
     }
     catch (const exception &e)
     {
-        m_pLog->Error(e.what());
+        m_pLog->error(e.what());
         return CResult::Make_Error(e.what());
     }
 
@@ -225,7 +225,7 @@ CResult Sloong::FileManager::UploadedHandler(const string &str_req, Package *pac
     if (res.IsFialed())
         return CResult::Make_Error(res.GetMessage());
 
-    m_pLog->Debug(format("Save file to [{}]. Hash [{}]", temp_path, info->SHA256));
+    m_pLog->debug(format("Save file to [{}]. Hash [{}]", temp_path, info->SHA256));
     auto sha256 = CUtility::SHA256EncodeFile(temp_path);
     if (info->SHA256 != sha256)
         return CResult::Make_Error(format("Hasd check error.[{}]<->[{}]", sha256, info->SHA256));
@@ -426,11 +426,11 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
 
     if (!req->retainsourcefile())
     {
-        m_pLog->Info(format("{} is convert to {} with {} format.delete old file.", req->index(), uuid, SupportFormat_Name(req->targetformat())));
+        m_pLog->info(format("{} is convert to {} with {} format.delete old file.", req->index(), uuid, SupportFormat_Name(req->targetformat())));
         int r = remove(real_path.c_str());
         if (r != 0)
         {
-            m_pLog->Warn(format("old file delete fialed. return code {}", r));
+            m_pLog->warn(format("old file delete fialed. return code {}", r));
         }
     }
 

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-09-01 16:20:00
+ * @LastEditTime: 2021-09-15 10:14:33
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -68,6 +68,9 @@
 #include "NetworkHub.h"
 #include "EasyConnect.h"
 #include <dlfcn.h>
+
+#include <spdlog/spdlog.h>
+
 namespace Sloong
 {
 	typedef struct NodeInfo
@@ -88,10 +91,10 @@ namespace Sloong
 	public:
 		CSloongBaseService() {}
 
-		virtual ~CSloongBaseService() {}
+		virtual ~CSloongBaseService() {	}
 
 		// Just call it without Control module.
-		virtual CResult Initialize(NodeInfo);
+		virtual CResult Initialize(NodeInfo, spdlog::logger* );
 
 		virtual CResult Run();
 		virtual void Stop();
@@ -121,11 +124,11 @@ namespace Sloong
 	protected:
 		unique_ptr<CNetworkHub> m_pNetwork = make_unique<CNetworkHub>();
 		unique_ptr<CControlHub> m_iC = make_unique<CControlHub>();
-		unique_ptr<CLog> m_pLog = make_unique<CLog>();
 		NodeInfo m_oNodeRuntimeInfo;
 		
 		static const uint64_t INVALID_SESSION = 0;
 
+		spdlog::logger* m_pLog = nullptr;
 		uint64_t m_ManagerSession=INVALID_SESSION;
 		Json::Value m_oModuleConfig;
 		EasySync m_oExitSync;

@@ -68,7 +68,7 @@ PackageResult Sloong::SloongNetFirewall::RequestPackageProcesser(Package* pack)
 {
     auto sender = pack->sender();
     auto func = (Functions)pack->function();
-    m_pLog->Debug(format("Porcess [{}] request: sender[{}]", Functions_Name(func), sender));
+    m_pLog->debug(format("Porcess [{}] request: sender[{}]", Functions_Name(func), sender));
 
 	return PackageResult::Succeed();
 }
@@ -77,7 +77,7 @@ PackageResult Sloong::SloongNetFirewall::ResponsePackageProcesser(Package* pack)
 {
     auto sender = pack->sender();
     auto func = (Functions)pack->function();
-    m_pLog->Debug(format("Porcess [{}] request: sender[{}]", Functions_Name(func), sender));
+    m_pLog->debug(format("Porcess [{}] request: sender[{}]", Functions_Name(func), sender));
 
 	return PackageResult::Succeed();
 }
@@ -94,17 +94,17 @@ void Sloong::SloongNetFirewall::EventPackageProcesser(Package* pack)
 	auto event = Events_MIN;
 	if(!Manager::Events_Parse(pack->content(),&event))
 	{
-		m_pLog->Error(format("Receive event but parse error. content:[{}]",pack->content()));
+		m_pLog->error(format("Receive event but parse error. content:[{}]",pack->content()));
 		return;
 	}
 
 	switch (event)
 	{
 	case Manager::Events::ReferenceModuleOnline:{
-		m_pLog->Info("Receive ReferenceModuleOnline event");
+		m_pLog->info("Receive ReferenceModuleOnline event");
 		}break;
 	case Manager::Events::ReferenceModuleOffline:{
-		m_pLog->Info("Receive ReferenceModuleOffline event");
+		m_pLog->info("Receive ReferenceModuleOffline event");
 		}break;
 	default:{
 		}break;

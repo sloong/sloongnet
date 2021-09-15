@@ -133,7 +133,7 @@ TResult<unique_ptr<CLua>> Sloong::CLuaProcessCenter::InitLua()
 {
 	auto lua = make_unique<CLua>();
 	auto folder = m_pConfig->operator[]("LuaScriptFolder").asString();
-	m_pLog->Info("Init lua base on folder : " + folder);
+	m_pLog->info("Init lua base on folder : " + folder);
 	lua->SetScriptFolder(folder);
 	
 	CGlobalFunction::Instance->RegisterFuncToLua(lua.get());
@@ -200,13 +200,13 @@ int Sloong::CLuaProcessCenter::GetFreeLuaContext(int try_num)
 {
 	for (int i = 0; i < try_num && m_oFreeLuaContext.empty(); i++)
 	{
-		m_pLog->Debug("Wait lua context 1 sencond :" + Helper::ntos(i));
+		m_pLog->debug("Wait lua context 1 sencond :" + Helper::ntos(i));
 		m_oSSync.wait_for(500);
 	}
 
 	if (m_oFreeLuaContext.empty())
 	{
-		m_pLog->Error("no free context");
+		m_pLog->error("no free context");
 		return -1;
 	}
 	int nID = m_oFreeLuaContext.pop(-1);

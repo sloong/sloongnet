@@ -152,7 +152,7 @@ CResult CGlobalFunction::EnableDataReceive(int port, int timtout)
 
 void CGlobalFunction::ClearReceiveInfoByUUID(string uuid)
 {
-    m_pLog->Debug(format("Clean receive info from g_RecvDataInfoList by :[{}]", uuid));
+    m_pLog->debug(format("Clean receive info from g_RecvDataInfoList by :[{}]", uuid));
     auto p_item_list = g_RecvDataInfoList.find(uuid);
     if (p_item_list == g_RecvDataInfoList.end())
     {
@@ -170,13 +170,13 @@ void CGlobalFunction::ClearReceiveInfoByUUID(string uuid)
 //
 void Sloong::CGlobalFunction::RecvDataConnFunc()
 {
-    CLog *pLog = m_pLog;
+    spdlog::logger *pLog = m_pLog;
     while (m_emStatus != RUN_STATUS::Exit)
     {
         int conn_sock = -1;
         if ((conn_sock = accept(m_ListenSock, NULL, NULL)) > 0)
         {
-            pLog->Debug(format("Accept data connect :[{}][{}]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
+            pLog->debug(format("Accept data connect :[{}][{}]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
             // When accept the connect , receive the uuid data. and
             char *pCheckBuf = new char[g_uuid_len + 1];
             memset(pCheckBuf, 0, g_uuid_len + 1);
@@ -185,14 +185,14 @@ void Sloong::CGlobalFunction::RecvDataConnFunc()
             // Check uuid length
             if (nLen != CGlobalFunction::g_uuid_len)
             {
-                pLog->Warn(format("The uuid length error:[{}]. Close connect.", nLen));
+                pLog->warn(format("The uuid length error:[{}]. Close connect.", nLen));
                 close(conn_sock);
                 continue;
             }
             // Check uuid validity
             if (g_RecvDataInfoList.find(pCheckBuf) == g_RecvDataInfoList.end())
             {
-                pLog->Warn(format("The uuid is not find in list:[{}]. Close connect.", pCheckBuf));
+                pLog->warn(format("The uuid is not find in list:[{}]. Close connect.", pCheckBuf));
                 close(conn_sock);
                 continue;
             }
@@ -211,21 +211,21 @@ void Sloong::CGlobalFunction::RecvDataConnFunc()
 
 void Sloong::CGlobalFunction::RecvFileFunc(int conn_sock)
 {
-    CLog *pLog = m_pLog;
+    spdlog::logger *pLog = m_pLog;
     // Find the recv uuid.
     auto conn_item = g_RecvDataConnList.find(conn_sock);
     if (conn_item == g_RecvDataConnList.end())
     {
-        pLog->Error("The socket id is not find in conn list.");
+        pLog->error("The socket id is not find in conn list.");
         return;
     }
     string uuid = conn_item->second;
-    pLog->Info(format("Start thread to receive file data for :[{}]", uuid));
+    pLog->info(format("Start thread to receive file data for :[{}]", uuid));
     // Find the recv info list.
     auto info_item = g_RecvDataInfoList.find(uuid);
     if (info_item == g_RecvDataInfoList.end())
     {
-        pLog->Error("The uuid is not find in info list.");
+        pLog->error("The uuid is not find in info list.");
         return;
     }
     try
@@ -240,7 +240,7 @@ void Sloong::CGlobalFunction::RecvFileFunc(int conn_sock)
             if (nRecvSize <= 0)
             {
                 SAFE_DELETE_ARR(pLongBuffer);
-                pLog->Warn("Recv data package length error.");
+                pLog->warn("Recv data package length error.");
                 return;
             }
             else
@@ -251,7 +251,7 @@ void Sloong::CGlobalFunction::RecvFileFunc(int conn_sock)
                 // package length cannot big than 2147483648. this is max value for int.
                 if (dlen <= 0 || dlen > FILE_TRANS_MAX_SIZE || nRecvSize != g_data_pack_len)
                 {
-                    pLog->Error("Receive data length error.");
+                    pLog->error("Receive data length error.");
                     return;
                 }
                 int dtlen = (int)dlen;
@@ -261,7 +261,7 @@ void Sloong::CGlobalFunction::RecvFileFunc(int conn_sock)
                 nRecvSize = Helper::RecvTimeout(conn_sock, szMD5, g_md5_len, m_nRecvDataTimeoutTime, true);
                 if (nRecvSize <= 0)
                 {
-                    pLog->Error("Receive data package md5 error.");
+                    pLog->error("Receive data package md5 error.");
                     SAFE_DELETE_ARR(szMD5);
                     return;
                 }
@@ -271,7 +271,7 @@ void Sloong::CGlobalFunction::RecvFileFunc(int conn_sock)
                 auto recv_file_item = recv_file_list.find(trans_md5);
                 if (recv_file_item == recv_file_list.end())
                 {
-                    pLog->Error("the file md5 is not find in recv list.");
+                    pLog->error("the file md5 is not find in recv list.");
                     return;
                 }
                 RecvDataPackage *pack = recv_file_item->second;
@@ -293,13 +293,13 @@ void Sloong::CGlobalFunction::RecvFileFunc(int conn_sock)
                     nRecvSize = Helper::RecvTimeout(conn_sock, pData, nOnceRecvLen, m_nRecvDataTimeoutTime, true);
                     if (nRecvSize < 0)
                     {
-                        pLog->Error("Receive data error.");
+                        pLog->error("Receive data error.");
                         SAFE_DELETE_ARR(data);
                         return;
                     }
                     else if (nRecvSize == 0)
                     {
-                        pLog->Error("Receive data timeout.");
+                        pLog->error("Receive data timeout.");
                         SAFE_DELETE_ARR(data);
                         return;
                     }
@@ -328,7 +328,7 @@ void Sloong::CGlobalFunction::RecvFileFunc(int conn_sock)
                 // check md5
                 if (trans_md5.compare(file_md5))
                 {
-                    pLog->Error("the file data is different with md5 code.");
+                    pLog->error("the file data is different with md5 code.");
                     pack->emStatus = RecvStatus::VerificationError;
                 }
                 else
@@ -353,7 +353,7 @@ void Sloong::CGlobalFunction::RecvFileFunc(int conn_sock)
             }
         } while (bLoop);
 
-        pLog->Debug(format("Receive connect done. close:[{}:{}]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
+        pLog->debug(format("Receive connect done. close:[{}:{}]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
         close(conn_sock);
     }
     catch (const std::exception &)
@@ -424,7 +424,7 @@ void Sloong::CGlobalFunction::OnReferenceModuleOnline(SharedEvent e)
     auto item = info->item();
     m_mapUUIDToNode[item.uuid()] = item;
     m_mapTemplateIDToUUIDs[item.templateid()].push_back(item.uuid());
-    m_pLog->Info(format("New node[{}][{}:{}] is online:templateid[{}],list size[{}]", item.uuid(), item.address(), item.port(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
+    m_pLog->info(format("New node[{}][{}:{}] is online:templateid[{}],list size[{}]", item.uuid(), item.address(), item.port(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
 
     AddConnection(item.uuid(), item.address(), item.port());
 }
@@ -439,7 +439,7 @@ void Sloong::CGlobalFunction::OnReferenceModuleOffline(SharedEvent e)
     m_mapTemplateIDToUUIDs[item.templateid()].erase(item.uuid());
     m_mapUUIDToConnectionID.erase(uuid);
     m_mapUUIDToNode.erase(uuid);
-    m_pLog->Info(format("Node is offline [{}], template id[{}],list size[{}]", item.uuid(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
+    m_pLog->info(format("Node is offline [{}], template id[{}],list size[{}]", item.uuid(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
 }
 
 void Sloong::CGlobalFunction::RegisterFuncToLua(CLua *pLua)
@@ -569,21 +569,17 @@ int CGlobalFunction::Lua_ShowLog(lua_State *l)
 
     auto log = CGlobalFunction::Instance->m_pLog;
     if (luaTitle == "Info")
-        log->Info(msg);
+        log->info(msg);
     else if (luaTitle == "Warn")
-        log->Warn(msg);
+        log->warn(msg);
     else if (luaTitle == "Debug")
-        log->Debug(msg);
+        log->debug(msg);
     else if (luaTitle == "Error")
-        log->Error(msg);
+        log->error(msg);
     else if (luaTitle == "Verbos")
-        log->Verbos(msg);
-    else if (luaTitle == "Assert")
-        log->Assert(msg);
+        log->trace(msg);
     else if (luaTitle == "Fatal")
-        log->Fatal(msg);
-    else
-        log->Log(msg, luaTitle);
+        log->critical(msg);
     return 0;
 }
 
@@ -650,7 +646,7 @@ int CGlobalFunction::Lua_MoveFile(lua_State *l)
     }
     catch (exception &e)
     {
-        CGlobalFunction::Instance->m_pLog->Error(e.what());
+        CGlobalFunction::Instance->m_pLog->error(e.what());
         CLua::PushInteger(l, nRes);
         CLua::PushString(l, e.what());
         return 2;

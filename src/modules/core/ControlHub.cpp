@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2021-08-27 11:19:34
+ * @LastEditTime: 2021-09-14 20:51:28
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ControlHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -62,7 +62,7 @@
 #include "events/NormalEvent.hpp"
 using namespace Sloong::Events;
 
-CResult Sloong::CControlHub::Initialize(int quantity, CLog* log)
+CResult Sloong::CControlHub::Initialize(int quantity, spdlog::logger* log)
 {
 	if (quantity < 1)
 		return CResult::Make_Error("CControlHub work quantity must big than 0.");
@@ -76,6 +76,7 @@ CResult Sloong::CControlHub::Initialize(int quantity, CLog* log)
 void Sloong::CControlHub::Exit()
 {
 	m_emStatus = RUN_STATUS::Exit;
+	m_oSync.notify_all();
 }
 
 void *Sloong::CControlHub::Get(uint64_t item)
@@ -206,21 +207,20 @@ void Sloong::CControlHub::MessageWorkLoop()
 	auto pid = this_thread::get_id();
 	string spid = Helper::ntos(pid);
 	
-	m_pLog->Info("Control hub work thread is started. PID:" + spid);
+	m_pLog->info("Control hub work thread is running. PID:" + spid);
 
 	while (m_emStatus == RUN_STATUS::Created)
 	{
-		this_thread::sleep_for(std::chrono::microseconds(100));
+		this_thread::sleep_for(std::chrono::microseconds(10));
 	}
 
-	m_pLog->Info("Control hub work thread is running. PID:" + spid);
 	while (m_emStatus != RUN_STATUS::Exit)
 	{
 		try
 		{
 			if (m_oMsgList.empty())
 			{
-				m_oSync.wait_for(1000);
+				m_oSync.wait_for(100);
 				continue;
 			}
 
@@ -236,5 +236,5 @@ void Sloong::CControlHub::MessageWorkLoop()
 			cerr << "Unhandle exception in CControlHub work loop." << endl;
 		}
 	}
-	m_pLog->Info("Control hub work thread is exit " + spid);
+	cout << "Control hub work thread is exit " << spid << endl;
 }

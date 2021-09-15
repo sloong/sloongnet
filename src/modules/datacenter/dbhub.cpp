@@ -37,7 +37,7 @@ PackageResult Sloong::DBHub::RequestPackageProcesser(Package *pack)
 
     auto req_str = pack->content();
     auto func_name = Functions_Name(function);
-    m_pLog->Debug(format("Request [{}][{}]:[{}]", function, func_name, CBase64::Encode(req_str)));
+    m_pLog->debug(format("Request [{}][{}]:[{}]", function, func_name, CBase64::Encode(req_str)));
     if (!m_mapFuncToHandler.exist(function))
     {
         return PackageResult::Make_Error(format("Function [{}] no handler.", func_name));
@@ -45,9 +45,9 @@ PackageResult Sloong::DBHub::RequestPackageProcesser(Package *pack)
 
     auto res = m_mapFuncToHandler[function](req_str, pack);
    if (res.IsError())
-		m_pLog->Warn(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage()));
+		m_pLog->warn(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage()));
 	else
-		m_pLog->Debug(format("Response [{}]:[{}]", func_name, ResultType_Name(res.GetResult())));
+		m_pLog->debug(format("Response [{}]:[{}]", func_name, ResultType_Name(res.GetResult())));
     return PackageResult::Make_OKResult(Package::MakeResponse(pack,res));
 }
 
@@ -80,7 +80,7 @@ CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, Package *pa
 
     ConnectDatabaseResponse response;
     response.set_session(*id);
-    m_pLog->Debug( format("Connect to database [{}] succeed. session id [{}]", req->database(), response.session() ));
+    m_pLog->debug( format("Connect to database [{}] succeed. session id [{}]", req->database(), response.session() ));
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 

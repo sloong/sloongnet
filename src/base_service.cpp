@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-09-08 20:52:40
+ * @LastEditTime: 2021-09-15 10:43:01
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -226,8 +226,9 @@ void CSloongBaseService::InitSystem()
     signal(SIGSEGV, &on_sigint);
 }
 
-CResult CSloongBaseService::Initialize(NodeInfo info)
+CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger* log) 
 {
+    m_pLog = log;
     m_emStatus = RUN_STATUS::Created;
 
     m_oNodeRuntimeInfo = move(info);
@@ -264,10 +265,11 @@ CResult CSloongBaseService::Initialize(NodeInfo info)
         pConfig->set_logoperation(LOGOPT::WriteToSTDOut);
 
 #ifdef DEBUG
-    pConfig->set_loglevel(Core::LogLevel::All);
+    pConfig->set_loglevel(Core::LogLevel::Verbos);
     pConfig->set_logoperation(pConfig->logoperation() | LOGOPT::WriteToSTDOut);
 #endif
-    m_pLog->Initialize(pConfig->logpath(), "", LOGOPT(pConfig->logoperation()), LOGLEVEL(pConfig->loglevel()), LOGTYPE::DAY);
+    m_pLog->set_level( spdlog::level::level_enum(pConfig->loglevel()));
+    // m_pLog->Initialize(pConfig->logpath(), "", LOGOPT(pConfig->logoperation()), LOGLEVEL(pConfig->loglevel()), LOGTYPE::DAY);
 
     res = InitModule();
     if (res.IsFialed())
@@ -278,21 +280,21 @@ CResult CSloongBaseService::Initialize(NodeInfo info)
         res = m_pPrepareInitializeFunc(pConfig);
         if (res.IsFialed())
         {
-            m_pLog->Fatal(res.GetMessage());
+            m_pLog->critical(res.GetMessage());
             return res;
         }
     }
 
-    res = m_iC->Initialize(pConfig->mqthreadquantity(), m_pLog.get());
+    res = m_iC->Initialize(pConfig->mqthreadquantity(), m_pLog);
     if (res.IsFialed())
     {
-        m_pLog->Fatal(res.GetMessage());
+        m_pLog->critical(res.GetMessage());
         return res;
     }
-    m_pLog->Debug("Control center initialization succeed.");
+    m_pLog->debug("Control center initialization succeed.");
 
     m_iC->Add(DATA_ITEM::ServerConfiguation, &m_oNodeRuntimeInfo.TemplateConfig);
-    m_iC->Add(DATA_ITEM::Logger, m_pLog.get());
+    m_iC->Add(DATA_ITEM::Logger, m_pLog);
     m_iC->Add(DATA_ITEM::NodeUUID, &m_oNodeRuntimeInfo.NodeUUID);
     if (pConfig->moduleconfig().length() > 0)
     {
@@ -301,7 +303,7 @@ CResult CSloongBaseService::Initialize(NodeInfo info)
         JSONCPP_STRING err;
         if (!reader->parse(pConfig->moduleconfig().c_str(), pConfig->moduleconfig().c_str() + pConfig->moduleconfig().length(), &m_oModuleConfig, &err))
         {
-            m_pLog->Fatal("Error parsing module configuration");
+            m_pLog->critical("Error parsing module configuration");
             cerr << err << endl;
             return CResult::Make_Error("Error parsing module configuration");
         }
@@ -315,10 +317,10 @@ CResult CSloongBaseService::Initialize(NodeInfo info)
     res = m_pModuleInitializationFunc(m_iC.get());
     if (res.IsFialed())
     {
-        m_pLog->Fatal(res.GetMessage());
+        m_pLog->critical(res.GetMessage());
         return res;
     }
-    m_pLog->Debug("Module initialization succeed.");
+    m_pLog->debug("Module initialization succeed.");
 
     m_iC->RegisterEventHandler(EVENT_TYPE::ProgramRestart, std::bind(&CSloongBaseService::OnProgramRestartEventHandler, this, std::placeholders::_1));
     m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStop, std::bind(&CSloongBaseService::OnProgramStopEventHandler, this, std::placeholders::_1));
@@ -332,10 +334,10 @@ CResult CSloongBaseService::Initialize(NodeInfo info)
     res = m_pNetwork->Initialize(m_iC.get());
     if (res.IsFialed())
     {
-        m_pLog->Fatal(res.GetMessage());
+        m_pLog->critical(res.GetMessage());
         return res;
     }
-    m_pLog->Debug("Network initialization succeed.");
+    m_pLog->debug("Network initialization succeed.");
 
     if (pManagerConnect)
     {
@@ -357,17 +359,17 @@ CResult CSloongBaseService::Initialize(NodeInfo info)
     res = m_pModuleInitializedFunc();
     if (res.IsFialed())
     {
-        m_pLog->Fatal(res.GetMessage());
+        m_pLog->critical(res.GetMessage());
         return res;
     }
-    m_pLog->Debug("Module initialized succeed.");
+    m_pLog->debug("Module initialized succeed.");
 
     if (!info.ManagerMode)
     {
         auto res = RegisterNode(registerid);
         if (res.IsFialed())
         {
-            m_pLog->Fatal(res.GetMessage());
+            m_pLog->critical(res.GetMessage());
             return res;
         }
     }
@@ -380,12 +382,12 @@ CResult CSloongBaseService::InitModule()
     // Load the module library
     string libFullPath = m_oNodeRuntimeInfo.TemplateConfig.modulepath() + m_oNodeRuntimeInfo.TemplateConfig.modulename();
 
-    m_pLog->Debug(format("Start init module {} and load module functions", libFullPath));
+    m_pLog->debug(format("Start init module {} and load module functions", libFullPath));
     m_pModule = dlopen(libFullPath.c_str(), RTLD_LAZY | RTLD_GLOBAL);
     if (m_pModule == nullptr)
     {
         string errMsg = format("Load library {} error {}.", libFullPath, dlerror());
-        m_pLog->Error(errMsg);
+        m_pLog->error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     char *errmsg;
@@ -393,55 +395,55 @@ CResult CSloongBaseService::InitModule()
     if ((errmsg = dlerror()) != NULL)
     {
         string errMsg = format("Load function CreateProcessEnvironment error {}.", errmsg);
-        m_pLog->Error(errMsg);
+        m_pLog->error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     m_pModuleRequestHandler = (RequestPackageProcessFunction)dlsym(m_pModule, "RequestPackageProcesser");
     if ((errmsg = dlerror()) != NULL)
     {
         string errMsg = format("Load function RequestPackageProcesser error {}.", errmsg);
-        m_pLog->Error(errMsg);
+        m_pLog->error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     m_pModuleResponseHandler = (ResponsePackageProcessFunction)dlsym(m_pModule, "ResponsePackageProcesser");
     if ((errmsg = dlerror()) != NULL)
     {
         string errMsg = format("Load function ResponsePackageProcesser error {}.", errmsg);
-        m_pLog->Error(errMsg);
+        m_pLog->error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     m_pModuleEventHandler = (EventPackageProcessFunction)dlsym(m_pModule, "EventPackageProcesser");
     if ((errmsg = dlerror()) != NULL)
     {
         string errMsg = format("Load function EventPackageProcessFunction error {}.", errmsg);
-        m_pLog->Error(errMsg);
+        m_pLog->error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     m_pModuleAcceptHandler = (NewConnectAcceptProcessFunction)dlsym(m_pModule, "NewConnectAcceptProcesser");
     if ((errmsg = dlerror()) != NULL)
     {
         string errMsg = format("Load function NewConnectAcceptProcesser error {}. Use default function.", errmsg);
-        m_pLog->Warn(errMsg);
+        m_pLog->warn(errMsg);
     }
     m_pPrepareInitializeFunc = (PrepareInitializeFunction)dlsym(m_pModule, "PrepareInitialize");
     if ((errmsg = dlerror()) != NULL)
     {
         string errMsg = format("Load function PrepareInitialize error {}. maybe module no need.", errmsg);
-        m_pLog->Warn(errMsg);
+        m_pLog->warn(errMsg);
     }
     m_pModuleInitializationFunc = (ModuleInitializationFunction)dlsym(m_pModule, "ModuleInitialization");
     if ((errmsg = dlerror()) != NULL)
     {
         string errMsg = format("Load function ModuleInitialize error {}. maybe module no need initiliaze.", errmsg);
-        m_pLog->Warn(errMsg);
+        m_pLog->warn(errMsg);
     }
     m_pModuleInitializedFunc = (ModuleInitializedFunction)dlsym(m_pModule, "ModuleInitialized");
     if ((errmsg = dlerror()) != NULL)
     {
         string errMsg = format("Load function ModuleInitialize error {}. maybe module no need initiliaze.", errmsg);
-        m_pLog->Warn(errMsg);
+        m_pLog->warn(errMsg);
     }
-    m_pLog->Debug("load module functions done.");
+    m_pLog->debug("load module functions done.");
     return CResult::Succeed;
 }
 
@@ -461,7 +463,7 @@ CResult CSloongBaseService::Run()
         // May create evnironment error, and the application is received programstop event.
         return CResult::Make_Error("Application run function is called, but the status not created.");
     }
-    m_pLog->Info("Application begin running.");
+    m_pLog->info("Application begin running.");
     m_iC->SendMessage(EVENT_TYPE::ProgramStart);
     m_emStatus = RUN_STATUS::Running;
 
@@ -487,14 +489,14 @@ CResult CSloongBaseService::Run()
         CUtility::RecordCPUStatus(prev_status.get());
     }
 
-    m_pLog->Info("Application main work loop end with result " + ResultType_Name(m_oExitResult.GetResult()));
+    m_pLog->info("Application main work loop end with result " + ResultType_Name(m_oExitResult.GetResult()));
 
     return m_oExitResult;
 }
 
 void CSloongBaseService::Stop()
 {
-    m_pLog->Info("Application will exit.");
+    m_pLog->info("Application will exit.");
     m_iC->SendMessage(EVENT_TYPE::ProgramStop);
     if (m_emStatus == RUN_STATUS::Created)
         m_emStatus = RUN_STATUS::Exit;
@@ -514,11 +516,10 @@ void CSloongBaseService::OnProgramStopEventHandler(SharedEvent event)
     if (m_emStatus == RUN_STATUS::Exit)
         return;
     m_emStatus = RUN_STATUS::Exit;
-    m_pLog->Info("Application receive ProgramStopEvent.");
+    m_pLog->info("Application receive ProgramStopEvent.");
     if (m_pModule)
         dlclose(m_pModule);
     m_oExitSync.notify_all();
-    m_pLog->End();
     m_iC->Exit();
 }
 

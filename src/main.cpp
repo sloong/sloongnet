@@ -1,7 +1,7 @@
 ﻿/*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-01-12 16:30:02
+ * @LastEditTime: 2021-09-15 10:43:58
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/main.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -34,10 +34,15 @@ void PrintVersion()
 	cout << COPYRIGHT_TEXT << endl;
 }
 
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+
 int main(int argc, char **args)
 {
 	try
 	{
+		auto logger = spdlog::stdout_color_mt("console");
+		
 		if (argc < 2 || strcasecmp(args[1], "-v") == 0 || strcasecmp(args[1], "--version") == 0)
 		{
 			PrintVersion();
@@ -123,7 +128,7 @@ int main(int argc, char **args)
 		do
 		{
 			cout << "Initialize base service instance." << endl;
-			res = Sloong::CSloongBaseService::Instance->Initialize(info);
+			res = Sloong::CSloongBaseService::Instance->Initialize(info, logger.get());
 			if (!res.IsSucceed())
 			{
 				cout << "Initialize server error. Message: " << res.GetMessage() << endl;
@@ -138,6 +143,7 @@ int main(int argc, char **args)
 
 		cout << "Application exit." << endl;
 		Sloong::CSloongBaseService::Instance = nullptr;
+		spdlog::shutdown();
 		return 0;
 	}
 	catch (string &msg)

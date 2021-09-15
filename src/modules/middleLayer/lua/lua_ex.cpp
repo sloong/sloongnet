@@ -292,7 +292,7 @@ CResult Sloong::CLua::RunFunction(const string &strFunctionName, CLuaPacket *pUs
 	{
 		for (int i = 1; i <= retNum; i++)
 		{
-			m_pLog->Debug(format("Function returned no.[{}] params. type:[{}]", i, lua_typename(m_pScriptContext, lua_type(m_pScriptContext, i))));
+			m_pLog->debug(format("Function returned no.[{}] params. type:[{}]", i, lua_typename(m_pScriptContext, lua_type(m_pScriptContext, i))));
 		}
 	}
 		

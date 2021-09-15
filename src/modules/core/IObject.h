@@ -70,11 +70,11 @@ namespace Sloong
         inline void Initialize(IControl *iMsg)
         {
             m_iC = iMsg;
-            m_pLog = STATIC_TRANS<CLog *>(m_iC->Get(DATA_ITEM::Logger));
+            m_pLog = STATIC_TRANS<spdlog::logger *>(m_iC->Get(DATA_ITEM::Logger));
         }
 
     protected:
         IControl *m_iC;
-        CLog *m_pLog;
+        spdlog::logger *m_pLog;
     };
 } // namespace Sloong

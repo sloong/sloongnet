@@ -6,14 +6,13 @@ package Core;
 
 // LogLevel
 enum LogLevel{
-    All = 0;
-    Verbos = 1;
-    Debug = 2;
-    Info = 3;
-    Warn = 4;
-    Err = 5;
-    Assert = 6;
-    Fatal = 7;  
+    Verbos = 0;
+    Debug = 1;
+    Info = 2;
+    Warn = 3;
+    Err = 4;
+    Fatal = 5;  
+    Off=6;
 }
 
 enum DATA_ITEM

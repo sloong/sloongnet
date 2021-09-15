@@ -75,8 +75,8 @@ namespace Sloong
 		static Json::Value* GetModuleConfig(){
 			return STATIC_TRANS<Json::Value*>(m_iC->Get(DATA_ITEM::ModuleConfiguation ));
 		}
-		static CLog* GetLog(){
-			return STATIC_TRANS<CLog*>(m_iC->Get(DATA_ITEM::Logger));
+		static spdlog::logger* GetLog(){
+			return STATIC_TRANS<spdlog::logger*>(m_iC->Get(DATA_ITEM::Logger));
 		}
 		static uint64_t GetNodeUUID(){
 			return *(STATIC_TRANS<uint64_t*>(m_iC->Get(DATA_ITEM::NodeUUID )));

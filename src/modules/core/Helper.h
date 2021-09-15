@@ -75,6 +75,8 @@ using fmt::format;
 using namespace Sloong;
 using namespace Sloong::Universal;
 
+#include <spdlog/spdlog.h>
+
 #include "result.h"
 #include "package.hpp" 
 
@@ -272,16 +274,16 @@ namespace Sloong
 		return true;
 	}
 
-	inline void PrintPackage( CLog* log, Package* package, const string& title, LOGLEVEL level = LOGLEVEL::Verbos )
+	inline void PrintPackage( spdlog::logger* log, Package* package, const string& title, spdlog::level::level_enum level = spdlog::level::level_enum::trace )
 	{
 		if(IsPrintLog( package))
 		{
-			log->Log( title +  package->ShortDebugString(), level );
+			log->log( level, title +  package->ShortDebugString() );
 		}
 		else
 		{
-			log->Log( title + format("Function: %d Priority: %d ID: %llu Content[L]: %d Extend[L]: %d",
-			 package->function(), package->priority(), package->id(), package->content().length(), package->extend().length()), level );
+			log->log(  level, title + format("Function: %d Priority: %d ID: %llu Content[L]: %d Extend[L]: %d",
+			 package->function(), package->priority(), package->id(), package->content().length(), package->extend().length()) );
 		}
 	}
 

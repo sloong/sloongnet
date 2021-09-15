@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2021-08-27 11:19:20
+ * @LastEditTime: 2021-09-14 20:34:09
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ControlHub.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -128,12 +128,13 @@ namespace Sloong
 	public:
 		virtual ~CControlHub()
 		{
+			Exit();
 			m_oMsgHandlerList.clear();
 			ThreadPool::Exit();
 			TaskPool::Exit();
 		}
 		// Always return true
-		CResult Initialize(int, CLog*);
+		CResult Initialize(int, spdlog::logger*);
 
 		void Run()
 		{
@@ -239,7 +240,7 @@ namespace Sloong
 		RUN_STATUS m_emStatus = RUN_STATUS::Created;
 		EasySync m_oSync;
 
-		CLog* m_pLog = nullptr;
+		spdlog::logger* m_pLog = nullptr;
 	};
 } // namespace Sloong
 

@@ -163,5 +163,5 @@ inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(voi
 
 void Sloong::SloongControlService::EventPackageProcesser(Package *pack)
 {
-	m_pLog->Info("EventPackageProcesser is called.");
+	m_pLog->info("EventPackageProcesser is called.");
 }

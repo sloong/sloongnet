@@ -6,7 +6,9 @@
     "configurations": [        
         {
             "name": "LocalWorker",
-            "type": "lldb",
+            "type": "cppdbg",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
             "request": "launch",
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [
@@ -18,7 +20,9 @@
         },
         {
             "name": "LocalManager",
-            "type": "lldb",
+            "type": "cppdbg",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
             "request": "launch",
             "program": "${workspaceFolder}/build/debug/sloongnet",
             "args": [

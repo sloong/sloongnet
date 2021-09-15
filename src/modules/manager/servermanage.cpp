@@ -319,7 +319,7 @@ PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
 	}
 
 	auto func_name = Functions_Name(function);
-	m_pLog->Info(format("Request [{}][{}]", function, func_name));
+	m_pLog->info(format("Request [{}][{}]", function, func_name));
 	if (!m_mapFuncToHandler.exist(function))
 	{
 		return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, format("Function [{}] no handler.", func_name)));
@@ -327,9 +327,9 @@ PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
 
 	auto res = m_mapFuncToHandler[function](req_str, pack);
 	if (res.IsError())
-		m_pLog->Warn(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage()));
+		m_pLog->warn(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage()));
 	else
-		m_pLog->Info(format("Response [{}]:[{}]", func_name, ResultType_Name(res.GetResult())));
+		m_pLog->info(format("Response [{}]:[{}]", func_name, ResultType_Name(res.GetResult())));
 	if (res.GetResult() == ResultType::Ignore)
 		return PackageResult::Ignore();
 
@@ -359,7 +359,7 @@ CResult Sloong::CServerManage::RegisterWorkerHandler(const string &req_str, Pack
 		event->SetCallbackFunc([item = &m_mapUUIDToNodeItem[sender]](IEvent *e, ConnectionInfo info)
 							   { item->Address = info.Address; });
 		m_iC->SendMessage(event);
-		m_pLog->Debug(format("Module[{}:{}] regist to system. Allocating uuid [{}].", item.Address, item.Port, item.UUID));
+		m_pLog->debug(format("Module[{}:{}] regist to system. Allocating uuid [{}].", item.Address, item.Port, item.UUID));
 		char m_pMsgBuffer[8] = {0};
 		char *pCpyPoint = m_pMsgBuffer;
 		Helper::Int64ToBytes(sender, pCpyPoint);
@@ -434,7 +434,7 @@ CResult Sloong::CServerManage::RegisterWorkerHandler(const string &req_str, Pack
 	res.set_templateid(tpl->ID);
 	res.set_configuation(tpl->Configuation);
 
-	m_pLog->Debug(format("Allocating module[{}][{}] Type to [{}]", sender_info->UUID, id, tpl->Name));
+	m_pLog->debug(format("Allocating module[{}][{}] Type to [{}]", sender_info->UUID, id, tpl->Name));
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
@@ -635,7 +635,7 @@ CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, Packa
 	}
 
 	auto str_res = ConvertObjToStr(&res);
-	m_pLog->Debug(format("Query Template Succeed: Count[{}];[{}]", res.templateinfos_size(), CBase64::Encode(str_res)));
+	m_pLog->debug(format("Query Template Succeed: Count[{}];[{}]", res.templateinfos_size(), CBase64::Encode(str_res)));
 	return CResult::Make_OK(str_res);
 }
 
@@ -704,7 +704,7 @@ CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, Package
 
 CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, Package *pack)
 {
-	m_pLog->Debug("QueryReferenceInfoHandler <<< ");
+	m_pLog->debug("QueryReferenceInfoHandler <<< ");
 	auto uuid = pack->sender();
 	if (!m_mapUUIDToNodeItem.exist(uuid))
 		return CResult::Make_Error(format("The node is no registed. [{}]", uuid));
@@ -726,7 +726,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 		auto tpl = m_mapIDToTemplateItem.try_get(ref_id);
 		if (tpl == nullptr)
 		{
-			m_pLog->Warn(format("Reference template item [id:{}] no exist. please check. ", ref_id));
+			m_pLog->warn(format("Reference template item [id:{}] no exist. please check. ", ref_id));
 			continue;
 		}
 		item->set_templateid(tpl->ID);
@@ -737,7 +737,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 			m_mapUUIDToNodeItem[node].ToProtobuf(item->add_nodeinfos());
 		}
 	}
-	m_pLog->Debug("QueryReferenceInfoHandler response >>> " + res.ShortDebugString());
+	m_pLog->debug("QueryReferenceInfoHandler response >>> " + res.ShortDebugString());
 	return CResult::Make_OK(ConvertObjToStr(&res));
 }
 
@@ -747,7 +747,7 @@ CResult Sloong::CServerManage::ReportLoadStatusHandler(const string &req_str, Pa
 	if (!req)
 		return CResult::Make_Error("Parser message object fialed.");
 
-	m_pLog->Info(format("Node[{}] load status :CPU[{}]Mem[{}]", pack->sender(), req->cpuload(), req->memroyused()));
+	m_pLog->info(format("Node[{}] load status :CPU[{}]Mem[{}]", pack->sender(), req->cpuload(), req->memroyused()));
 
 	return CResult(ResultType::Ignore);
 }

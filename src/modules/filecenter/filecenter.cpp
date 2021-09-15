@@ -139,7 +139,7 @@ void Sloong::CFileCenter::EventPackageProcesser(Package *pack)
     auto event = Events_MIN;
     if (!Manager::Events_Parse(pack->content(), &event))
     {
-        m_pLog->Error(format("Receive event but parse error. content:[{}]", pack->content()));
+        m_pLog->error(format("Receive event but parse error. content:[{}]", pack->content()));
         return;
     }
 
@@ -147,12 +147,12 @@ void Sloong::CFileCenter::EventPackageProcesser(Package *pack)
     {
     case Manager::Events::ReferenceModuleOnline:
     {
-        m_pLog->Info("Receive ReferenceModuleOnline event");
+        m_pLog->info("Receive ReferenceModuleOnline event");
     }
     break;
     case Manager::Events::ReferenceModuleOffline:
     {
-        m_pLog->Info("Receive ReferenceModuleOffline event");
+        m_pLog->info("Receive ReferenceModuleOffline event");
     }
     break;
     default:

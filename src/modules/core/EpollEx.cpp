@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-08-11 19:08:24
+ * @LastEditTime: 2021-09-14 20:47:46
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EpollEx.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -70,7 +70,7 @@ CResult Sloong::CEpollEx::Initialize(IControl *iMsg)
 {
 	IObject::Initialize(iMsg);
 	int nPort = IData::GetGlobalConfig()->listenport();
-	m_pLog->Info(format("epollex is initialize.license port is {}", nPort));
+	m_pLog->info(format("epollex is initialize.license port is {}", nPort));
 
 	// For Test the port cannot used. when test done, close it.
 	auto nRes = CreateListenSocket("0.0.0.0", nPort);
@@ -86,10 +86,10 @@ CResult Sloong::CEpollEx::Initialize(IControl *iMsg)
 	if (workThread < 1)
 		return CResult::Make_Error("Epoll work thread must be big than 0");
 
-	m_pLog->Info(format("epollex is running with {} threads", workThread));
+	m_pLog->info(format("epollex is running with {} threads", workThread));
 
 #ifdef SO_REUSEPORT
-	m_pLog->Debug("System support SO_REUSEPORT. epoll will run with SO_REUSEPORT mode.");
+	m_pLog->debug("System support SO_REUSEPORT. epoll will run with SO_REUSEPORT mode.");
 #endif
 
 	m_EpollHandle = epoll_create(65535);
@@ -213,12 +213,12 @@ void Sloong::CEpollEx::MainWorkLoop()
 	auto pid = this_thread::get_id();
 	string spid = Helper::ntos(pid);
 	
-	m_pLog->Info("epoll work thread is started. PID:" + spid);
+	m_pLog->info("epoll work thread is started. PID:" + spid);
 	int port = IData::GetGlobalConfig()->listenport();
 	auto res = CreateListenSocket("0.0.0.0", port);
 	if (res.IsFialed())
 	{
-		m_pLog->Fatal(res.GetMessage());
+		m_pLog->critical(res.GetMessage());
 		m_iC->SendMessage(EVENT_TYPE::ProgramStop);
 		return;
 	}
@@ -232,10 +232,8 @@ void Sloong::CEpollEx::MainWorkLoop()
 
 	while (m_emStatus == RUN_STATUS::Created)
 	{
-		this_thread::sleep_for(std::chrono::microseconds(100));
+		this_thread::sleep_for(std::chrono::microseconds(10));
 	}
-
-	m_pLog->Info("epoll work thread is running. PID:" + spid);
 
 	int n, i;
 	while (m_emStatus == RUN_STATUS::Running)
@@ -253,7 +251,7 @@ void Sloong::CEpollEx::MainWorkLoop()
 				int fd = m_Events[i].data.fd;
 				if (m_mapAcceptSocketToPID.exist(fd))
 				{
-					m_pLog->Debug("EPoll Accept event happened.");
+					m_pLog->debug("EPoll Accept event happened.");
 					// accept the connect and add it to the list
 					int conn_sock = -1;
 					do
@@ -262,9 +260,9 @@ void Sloong::CEpollEx::MainWorkLoop()
 						if (conn_sock == -1)
 						{
 							if (errno == EAGAIN)
-								m_pLog->Debug("Accept end.");
+								m_pLog->debug("Accept end.");
 							else
-								m_pLog->Warn("Accept error.");
+								m_pLog->warn("Accept error.");
 							continue;
 						}
 						auto res = OnNewAccept(conn_sock);
@@ -280,12 +278,12 @@ void Sloong::CEpollEx::MainWorkLoop()
 				{
 					if( !m_mapSocketToID.exist(fd))
 					{
-						m_pLog->Error(format("EPoll EPOLLIN event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
+						m_pLog->error(format("EPoll EPOLLIN event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
 					}
 					else
 					{
 						auto id = m_mapSocketToID[fd];
-						m_pLog->Debug(format("EPoll EPOLLIN event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
+						m_pLog->debug(format("EPoll EPOLLIN event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
 						auto res = OnDataCanReceive(id);
 						if (res == ResultType::Error)
 							UnregisteConnection(id);
@@ -297,12 +295,12 @@ void Sloong::CEpollEx::MainWorkLoop()
 					
 					if( !m_mapSocketToID.exist(fd))
 					{
-						m_pLog->Error(format("EPoll EPOLLOUT event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
+						m_pLog->error(format("EPoll EPOLLOUT event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
 					}
 					else
 					{
 						auto id = m_mapSocketToID[fd];
-						m_pLog->Debug(format("EPoll EPOLLOUT event happened.Socket[{}][{}] Can Write Data.", fd, CUtility::GetSocketAddress(fd)));
+						m_pLog->debug(format("EPoll EPOLLOUT event happened.Socket[{}][{}] Can Write Data.", fd, CUtility::GetSocketAddress(fd)));
 						auto res = OnCanWriteData(id);
 						// 所有消息全部发送完毕后只需要监听可读消息就可以了。
 						if (res == ResultType::Succeed)
@@ -314,12 +312,12 @@ void Sloong::CEpollEx::MainWorkLoop()
 					
 					if( !m_mapSocketToID.exist(fd))
 					{
-						m_pLog->Error(format("EPoll EPOLLIN event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
+						m_pLog->error(format("EPoll EPOLLIN event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
 					}
 					else
 					{
 						auto id = m_mapSocketToID[fd];
-						m_pLog->Debug(format("EPoll unkuown event happened. Socket[{}][{}] close this connnect.", fd, CUtility::GetSocketAddress(fd)));
+						m_pLog->debug(format("EPoll unkuown event happened. Socket[{}][{}] close this connnect.", fd, CUtility::GetSocketAddress(fd)));
 						OnOtherEventHappened(id);
 					}
 				}
@@ -327,14 +325,14 @@ void Sloong::CEpollEx::MainWorkLoop()
 		}
 		catch (exception &ex)
 		{
-			m_pLog->Error(format("Error happened in Epoll work thead. message:", ex.what()));
+			m_pLog->error(format("Error happened in Epoll work thead. message:", ex.what()));
 		}
 		catch (...)
 		{
-			m_pLog->Error("Unkown error happened in Epoll work thead.");
+			m_pLog->error("Unkown error happened in Epoll work thead.");
 		}
 	}
-	m_pLog->Info("epoll work thread is exit " + spid);
+	cout << "epoll work thread is exit " << spid << endl;
 }
 
 void Sloong::CEpollEx::Exit()
