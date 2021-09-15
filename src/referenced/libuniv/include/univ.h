@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2021-03-25 15:52:09
- * @LastEditTime: 2021-09-15 10:49:33
+ * @LastEditTime: 2021-09-15 13:16:25
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/referenced/libuniv/include/univ.h
  * Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -27,3 +27,4 @@
 #include "hash.h"
 #include "base64.h"
 #include "CRC.hpp"
+#include "EasySync.hpp"
