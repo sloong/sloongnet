@@ -2,7 +2,7 @@ kind: pipeline
 name: default
 
 steps:
-   - name: build_image
+  - name: build_build_image
     image: plugins/docker
     settings:
       repo: sloong/sloongnet_build
@@ -16,7 +16,7 @@ steps:
       tags:
         - latest
 
-  - name: run_image
+  - name: build_run_image
     image: plugins/docker
     settings:
       repo: sloong/sloongnet_run
