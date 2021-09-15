@@ -3,7 +3,7 @@
 # @Author: WCB
  # @Date: 2019-12-11 14:28:05
  # @LastEditors: Chuanbin Wang
- # @LastEditTime: 2021-09-13 20:12:21
+ # @LastEditTime: 2021-09-15 11:36:55
  # @Description: file content
  ###
 pwd
@@ -41,10 +41,10 @@ fi
 if [ $# -eq 1 ]; then
 	case $1 in 
 		--build) 
-			build_release
+			build_image
 			;;
 		--run) 
-			build_ci
+			run_image
 			;;
 		* ) 
 			build

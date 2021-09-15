@@ -2,6 +2,34 @@ kind: pipeline
 name: default
 
 steps:
+   - name: build_image
+    image: plugins/docker
+    settings:
+      repo: sloong/sloongnet_build
+      cache_from: sloong/sloongnet_build
+      use_cache: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      dockerfile: build/Build.Dockerfile
+      tags:
+        - latest
+
+  - name: run_image
+    image: plugins/docker
+    settings:
+      repo: sloong/sloongnet_run
+      cache_from: sloong/sloongnet_run
+      use_cache: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      dockerfile: build/Run.Dockerfile
+      tags:
+        - latest
+
   - name: build
     image: sloong/sloongnet_build
     commands:

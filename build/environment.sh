@@ -3,7 +3,7 @@
  # @Author: WCB
  # @Date: 2020-04-20 12:26:04
  # @LastEditors: Chuanbin Wang
- # @LastEditTime: 2021-09-13 20:16:16
+ # @LastEditTime: 2021-09-15 11:37:28
  # @Description: file content
  ###
 
@@ -27,7 +27,7 @@ install_run_env(){
 
 install_build_env(){
     # install develop library
-    apt-get install -y cmake clang llvm libsqlite3-dev libprotobuf-dev protobuf-compiler uuid-dev libssl-dev libjsoncpp-dev libmariadb-dev liblua5.3-dev libfmt-dev
+    apt-get install -y cmake clang llvm libsqlite3-dev libprotobuf-dev protobuf-compiler uuid-dev libssl-dev libjsoncpp-dev libmariadb-dev liblua5.3-dev libfmt-dev libspdlog-dev
 }
 
 install_all(){
