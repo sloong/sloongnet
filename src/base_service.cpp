@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-09-15 10:43:01
+ * @LastEditTime: 2021-09-15 15:36:02
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -261,12 +261,12 @@ CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger* log)
     if (res.IsFialed())
         return res;
     auto pConfig = &m_oNodeRuntimeInfo.TemplateConfig;
-    if (pConfig->logoperation() == 0)
-        pConfig->set_logoperation(LOGOPT::WriteToSTDOut);
+    // if (pConfig->logoperation() == 0)
+        // pConfig->set_logoperation(LOGOPT::WriteToSTDOut);
 
 #ifdef DEBUG
     pConfig->set_loglevel(Core::LogLevel::Verbos);
-    pConfig->set_logoperation(pConfig->logoperation() | LOGOPT::WriteToSTDOut);
+    // pConfig->set_logoperation(pConfig->logoperation() | LOGOPT::WriteToSTDOut);
 #endif
     m_pLog->set_level( spdlog::level::level_enum(pConfig->loglevel()));
     // m_pLog->Initialize(pConfig->logpath(), "", LOGOPT(pConfig->logoperation()), LOGLEVEL(pConfig->loglevel()), LOGTYPE::DAY);

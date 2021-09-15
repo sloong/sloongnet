@@ -3,7 +3,7 @@
 # @Author: WCB
  # @Date: 2019-12-11 14:28:05
  # @LastEditors: Chuanbin Wang
- # @LastEditTime: 2021-09-15 11:36:55
+ # @LastEditTime: 2021-09-15 13:39:03
  # @Description: file content
  ###
 pwd
@@ -17,19 +17,19 @@ build(){
     VERSION_STR=$(cat version)
 
     ./build/build.sh -c
-    docker build -t sloongnet:$VERSION_STR -f $SCRIPTFOLDER/../Dockerfile $SCRIPTFOLDER/../
-    docker tag sloongnet:$VERSION_STR sloongnet:latest
+    docker build -t sloong/sloongnet:$VERSION_STR -f $SCRIPTFOLDER/../Dockerfile $SCRIPTFOLDER/../
+    docker tag sloong/sloongnet:$VERSION_STR sloong/sloongnet:latest
 }
 
 
 build_image() {
-    docker build -t sloongnet_build:latest -f $SCRIPTFOLDER/Build.Dockerfile .
+    docker build -t sloong/sloongnet_build:latest -f $SCRIPTFOLDER/Build.Dockerfile .
     docker push sloong/sloongnet_build
 }
 
 
 run_image() {
-    docker build -t sloongnet_run -f $SCRIPTFOLDER/Run.Dockerfile .
+    docker build -t sloong/sloongnet_run -f $SCRIPTFOLDER/Run.Dockerfile .
     docker push sloong/sloongnet_run
 }
 
