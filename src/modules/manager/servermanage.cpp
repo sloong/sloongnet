@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-09-14 15:24:21
+ * @LastEditTime: 2021-09-16 13:32:37
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -463,7 +463,7 @@ CResult Sloong::CServerManage::RegisterNodeHandler(const string &req_str, Packag
 	if (!m_mapUUIDToNodeItem.exist(sender))
 		return CResult::Make_Error(format("The sender [{}] is no regitser.", sender));
 
-	int id = req->registerid();
+	auto id = req->registerid();
 
 	auto info = m_mapRegisterdUUIDToInfo.try_get(id);
 	if (info == nullptr)
