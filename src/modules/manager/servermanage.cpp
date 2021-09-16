@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-09-16 13:32:37
+ * @LastEditTime: 2021-09-16 15:58:55
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -275,7 +275,20 @@ void Sloong::CServerManage::OnSocketClosed(uint64_t con)
 		return;
 
 	auto target = m_mapConnectionToUUID[con];
-	auto id = m_mapUUIDToNodeItem[target].TemplateID;
+	auto tpl = m_mapUUIDToNodeItem.try_get(target);
+	if(  tpl == nullptr)
+	{
+		m_pLog->error("Connection is already closed, but not found the node infomation");
+		return;
+	}
+	auto id = tpl->TemplateID;
+
+	auto tplItem = m_mapIDToTemplateItem.try_get(id);
+	if( tplItem == nullptr)
+	{ 
+		m_pLog->error(format("cannot find the template item with id {}", id));
+		return;
+	}
 
 	// Find reference node and notify them
 	list<uint64_t> notifyList;
@@ -295,7 +308,7 @@ void Sloong::CServerManage::OnSocketClosed(uint64_t con)
 		SendEvent(notifyList, Manager::Events::ReferenceModuleOffline, &offline_event);
 	}
 	m_mapUUIDToNodeItem.erase(target);
-	m_mapIDToTemplateItem.get(id).Created.remove(target);
+	tplItem->Created.remove(target);
 }
 
 PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
