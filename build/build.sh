@@ -34,6 +34,8 @@ VERSION_STR=$(cat $SCRIPTFOLDER/../version)
 
 MAKE_CMD="make -j$CPU_NUM"
 
+echo "System has $CPU_NUM cpus installed"
+
 clean(){
 	if [ -d $BUILD_FOLDER  ];then
 		rm -rdf $BUILD_FOLDER
@@ -69,6 +71,7 @@ build(){
 		echo "Run make cmd return error. build stop."
 		exit 1
 	fi
+	echo $MAKE_CMD
 	$MAKE_CMD
 	cp $PROJECT $OUTPUT_FOLDER/
 	cp libcore.so $OUTPUT_FOLDER/
