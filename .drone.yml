@@ -5,7 +5,7 @@ steps:
   - name: build
     image: sloong/sloongnet_build
     commands:
-      - build/build.sh -ci
+      - build/build.sh -d
 
   - name: build_docker
     image: plugins/docker
