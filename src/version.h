@@ -1,6 +1,6 @@
 #ifndef VERSION_H
 
-#define VERSION_TEXT		"0.12.0.960"
+#define VERSION_TEXT		"0.12.0.961"
 #define PRODUCT_TEXT		"Sloong Network Engine"
 #define COPYRIGHT_TEXT		"Copyright 2015-2021 Sloong.com. All Rights Reserved "
 

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-21 11:17:32
- * @LastEditTime: 2021-08-31 15:31:59
+ * @LastEditTime: 2021-09-17 11:11:08
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -59,7 +59,7 @@
 
 #pragma once
 
-#include "configuation.h"
+#include "configuration.h"
 
 #include "protocol/manager.pb.h"
 using namespace Manager;
@@ -112,14 +112,14 @@ namespace Sloong
             ID = info.id;
             Name = info.name;
             Note = info.note;
-            Configuation = string(info.configuation.begin(), info.configuation.end());
+            Configuration = string(info.configuration.begin(), info.configuration.end());
             Replicas = info.replicas;
             BuildCache();
         }
         TemplateInfo ToTemplateInfo()
         {
             TemplateInfo info;
-            info.configuation = vector<char>(this->Configuation.begin(), this->Configuation.end());
+            info.configuration = vector<char>(this->Configuration.begin(), this->Configuration.end());
             info.id = this->ID;
             info.name = this->Name;
             info.note = this->Note;
@@ -134,7 +134,7 @@ namespace Sloong
             item["Replicas"] = this->Replicas;
             item["Created"] = (int)this->Created.size();
             item["Note"] = this->Note;
-            item["Configuation"] = this->Configuation;
+            item["Configuration"] = this->Configuration;
             return item;
         }
         void ToProtobuf(Manager::TemplateItem *item)
@@ -144,24 +144,24 @@ namespace Sloong
             item->set_replicas(this->Replicas);
             item->set_created(this->Created.size());
             item->set_note(this->Note);
-            item->set_configuation(this->Configuation);
+            item->set_configuration(this->Configuration);
         }
         bool IsValid()
         {
-            if (ID < 0 || Name.length() == 0 || Replicas < 0 || Configuation.length() == 0)
+            if (ID < 0 || Name.length() == 0 || Replicas < 0 || Configuration.length() == 0)
                 return false;
             return true;
         }
         void BuildCache()
         {
-            ConfiguationObj = ConvertStrToObj<GLOBAL_CONFIG>(this->Configuation);
+            ConfigurationObj = ConvertStrToObj<GLOBAL_CONFIG>(this->Configuration);
         }
         int ID;
         string Name;
         string Note;
         int Replicas;
-        string Configuation;
-        shared_ptr<GLOBAL_CONFIG> ConfiguationObj;
+        string Configuration;
+        shared_ptr<GLOBAL_CONFIG> ConfigurationObj;
         list_ex<int> Reference;
         list_ex<uint64_t> Created;
     };

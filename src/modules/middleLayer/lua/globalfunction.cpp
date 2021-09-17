@@ -795,7 +795,7 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
     if (templateid == 0)
     {
         CLua::PushInteger(l, Base::ResultType::Error);
-        CLua::PushString(l, "No enable datacenter, please check the configuation.");
+        CLua::PushString(l, "No enable datacenter, please check the configuration.");
         return 2;
     }
 

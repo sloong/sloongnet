@@ -15,13 +15,13 @@
 namespace Sloong
 {
     
-    class CConfiguation
+    class CConfiguration
     {
     public:
-        CConfiguation();
+        CConfiguration();
 
         /**
-         * @Description: Init db and load all configuation template.
+         * @Description: Init db and load all configuration template.
          * @Params: dbPath : the path of sqlite file.
          *          uuid : uuid string of the owner.
          * @Return: 
@@ -42,7 +42,7 @@ namespace Sloong
         bool    m_bInitialized = false;
 
     public:
-        static unique_ptr<CConfiguation> Instance;
+        static unique_ptr<CConfiguration> Instance;
     };
 
 

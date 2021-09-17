@@ -1,12 +1,10 @@
 version: '3.2'
 services:
   controller:
-    image: sloongnet:latest
+    image: sloong/sloongnet:latest
     command:
       - Manager
       - 0.0.0.0:8000
-    environment:
-      - ManagerConfiguationDBFilePath=/data/configuation.db
     volumes:
       - "control_local:/data"
     restart: always
@@ -17,7 +15,7 @@ services:
       replicas: 1
 
   gateway:
-    image: sloongnet:latest
+    image: sloong/sloongnet:latest
     command:
       - Worker
       - controller:8000
@@ -36,7 +34,7 @@ services:
       replicas: 1
   
   moduler:
-    image: sloongnet:latest
+    image: sloong/sloongnet:latest
     command:
       - Worker
       - controller:8000

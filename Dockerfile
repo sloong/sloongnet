@@ -16,6 +16,8 @@ COPY --from=build-env /tmp/build/release/ /usr/local/bin/
 RUN chmod +x /usr/local/bin/sloongnet
 
 RUN mkdir -p /data/log
+ENV DB_FILE_PATH="/data/configuration.db"
+
 VOLUME /data
 EXPOSE 8000
 ENTRYPOINT ["/usr/local/bin/sloongnet"]

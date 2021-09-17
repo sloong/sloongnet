@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-09-15 15:36:02
+ * @LastEditTime: 2021-09-17 11:12:33
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -100,7 +100,7 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
 
 U64Result CSloongBaseService::InitlializeForWorker(EasyConnect *con)
 {
-    cout << "Connect to control succeed. Start registe and get configuation." << endl;
+    cout << "Connect to control succeed. Start registe and get configuration." << endl;
 
     RegisterWorkerRequest sub_req;
     if (!m_oNodeRuntimeInfo.AssignedTargetTemplateID.empty())
@@ -181,7 +181,7 @@ U64Result CSloongBaseService::InitlializeForWorker(EasyConnect *con)
         else if (response->result() == ResultType::Succeed)
         {
             auto res_pack = ConvertStrToObj<RegisterWorkerResponse>(response->content());
-            string serverConfig = res_pack->configuation();
+            string serverConfig = res_pack->configuration();
             if (serverConfig.size() == 0)
                 return U64Result::Make_Error("Control no return config infomation.");
             if (!m_oNodeRuntimeInfo.TemplateConfig.ParseFromString(serverConfig))
@@ -197,7 +197,7 @@ U64Result CSloongBaseService::InitlializeForWorker(EasyConnect *con)
             return U64Result::Make_Error(format("Control return an unexpected result {}. Message {}.", ResultType_Name(response->result()), response->content()));
         }
     };
-    cout << "Get configuation done." << endl;
+    cout << "Get configuration done." << endl;
     return result;
 }
 
@@ -293,7 +293,7 @@ CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger* log)
     }
     m_pLog->debug("Control center initialization succeed.");
 
-    m_iC->Add(DATA_ITEM::ServerConfiguation, &m_oNodeRuntimeInfo.TemplateConfig);
+    m_iC->Add(DATA_ITEM::ServerConfiguration, &m_oNodeRuntimeInfo.TemplateConfig);
     m_iC->Add(DATA_ITEM::Logger, m_pLog);
     m_iC->Add(DATA_ITEM::NodeUUID, &m_oNodeRuntimeInfo.NodeUUID);
     if (pConfig->moduleconfig().length() > 0)
@@ -307,11 +307,11 @@ CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger* log)
             cerr << err << endl;
             return CResult::Make_Error("Error parsing module configuration");
         }
-        m_iC->Add(DATA_ITEM::ModuleConfiguation, &m_oModuleConfig);
+        m_iC->Add(DATA_ITEM::ModuleConfiguration, &m_oModuleConfig);
     }
     else
     {
-        m_iC->Add(DATA_ITEM::ModuleConfiguation, nullptr);
+        m_iC->Add(DATA_ITEM::ModuleConfiguration, nullptr);
     }
 
     res = m_pModuleInitializationFunc(m_iC.get());

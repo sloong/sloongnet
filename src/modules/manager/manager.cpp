@@ -15,7 +15,7 @@
 using namespace Sloong::Events;
 
 unique_ptr<SloongControlService> Sloong::SloongControlService::Instance = nullptr;
-string Sloong::SloongControlService::g_strDBFilePath = "./configuation.db";
+string Sloong::SloongControlService::g_strDBFilePath = "./configuration.db";
 
 extern "C" PackageResult RequestPackageProcesser(void *pEnv, Package *pack)
 {

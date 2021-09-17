@@ -18,8 +18,8 @@ enum LogLevel{
 enum DATA_ITEM
 {
     Invalid=0;
-    ServerConfiguation=1;
-	ModuleConfiguation=2;
+    ServerConfiguration=1;
+	ModuleConfiguration=2;
 	Logger=3;
 	NodeUUID=4;
     ReferenceTemplateInfo=5;

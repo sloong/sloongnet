@@ -27,7 +27,7 @@ enum Functions{
     PostLog=1;
 
     // When worker start, send this request to registe a worker, and wait manage assigning template.
-    // Note: The template configuation can't ensure can works in the node. so must send another request to confirm the node is ready to work.
+    // Note: The template configuration can't ensure can works in the node. so must send another request to confirm the node is ready to work.
     // Request: RegisterWorkerRequest * In defualt no should set, just send request with empty content.
     // Response: Result    -> Succeed      RegisterWorkerResponse
     //                     -> Retry        Wait assign, wait some time and retry again.
@@ -123,7 +123,7 @@ message RegisterWorkerResponse
 {
    fixed64 RegisterID=1;
    int32 TemplateID=2;
-   bytes Configuation=3;
+   bytes Configuration=3;
 }
 
 message RegisterNodeRequest{
@@ -173,7 +173,7 @@ message TemplateItem{
    string Note=3;
    int32 Replicas=4;
    int32 Created=5;
-   bytes Configuation=6;
+   bytes Configuration=6;
 }
 message QueryTemplateResponse{
    repeated TemplateItem TemplateInfos=1;

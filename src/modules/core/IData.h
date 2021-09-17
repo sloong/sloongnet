@@ -62,7 +62,7 @@
 #include "core.h"
 namespace Sloong
 {
-	class CConfiguation;
+	class CConfiguration;
 	class IData
 	{
 	public:
@@ -70,10 +70,10 @@ namespace Sloong
 			if ( m_iC == nullptr) m_iC = ic;
 		}
 		static GLOBAL_CONFIG* GetGlobalConfig(){
-			return STATIC_TRANS<GLOBAL_CONFIG*>(m_iC->Get(DATA_ITEM::ServerConfiguation ));
+			return STATIC_TRANS<GLOBAL_CONFIG*>(m_iC->Get(DATA_ITEM::ServerConfiguration ));
 		}
 		static Json::Value* GetModuleConfig(){
-			return STATIC_TRANS<Json::Value*>(m_iC->Get(DATA_ITEM::ModuleConfiguation ));
+			return STATIC_TRANS<Json::Value*>(m_iC->Get(DATA_ITEM::ModuleConfiguration ));
 		}
 		static spdlog::logger* GetLog(){
 			return STATIC_TRANS<spdlog::logger*>(m_iC->Get(DATA_ITEM::Logger));

@@ -6,15 +6,15 @@
  * @Description: file content
  */
 
-#include "configuation.h"
+#include "configuration.h"
 
-unique_ptr<CConfiguation> Sloong::CConfiguation::Instance = make_unique<CConfiguation>();
+unique_ptr<CConfiguration> Sloong::CConfiguration::Instance = make_unique<CConfiguration>();
 
-Sloong::CConfiguation::CConfiguation()
+Sloong::CConfiguration::CConfiguration()
 {
 }
 
-CResult Sloong::CConfiguation::Initialize(const string &dbPath)
+CResult Sloong::CConfiguration::Initialize(const string &dbPath)
 {
     if (0 != access(dbPath.c_str(), R_OK))
     {
@@ -30,7 +30,7 @@ CResult Sloong::CConfiguation::Initialize(const string &dbPath)
     return CResult::Succeed;
 }
 
-TResult<TemplateInfo> Sloong::CConfiguation::GetTemplate(int id)
+TResult<TemplateInfo> Sloong::CConfiguration::GetTemplate(int id)
 {
     unique_lock<mutex> lck(m_oMutex);
     try
@@ -48,7 +48,7 @@ TResult<TemplateInfo> Sloong::CConfiguation::GetTemplate(int id)
     }
 }
 
-bool Sloong::CConfiguation::CheckTemplateExist(int id)
+bool Sloong::CConfiguration::CheckTemplateExist(int id)
 {
     unique_lock<mutex> lck(m_oMutex);
     try
@@ -64,7 +64,7 @@ bool Sloong::CConfiguation::CheckTemplateExist(int id)
     }
 }
 
-vector<TemplateInfo> Sloong::CConfiguation::GetTemplateList()
+vector<TemplateInfo> Sloong::CConfiguration::GetTemplateList()
 {
     unique_lock<mutex> lck(m_oMutex);
     try
@@ -77,7 +77,7 @@ vector<TemplateInfo> Sloong::CConfiguation::GetTemplateList()
     }
 }
 
-CResult Sloong::CConfiguation::AddTemplate(const TemplateInfo &config, int *out_id)
+CResult Sloong::CConfiguration::AddTemplate(const TemplateInfo &config, int *out_id)
 {
     unique_lock<mutex> lck(m_oMutex);
     try
@@ -93,7 +93,7 @@ CResult Sloong::CConfiguation::AddTemplate(const TemplateInfo &config, int *out_
     }
 }
 
-CResult Sloong::CConfiguation::DeleteTemplate(int id)
+CResult Sloong::CConfiguration::DeleteTemplate(int id)
 {
     unique_lock<mutex> lck(m_oMutex);
     try
@@ -107,7 +107,7 @@ CResult Sloong::CConfiguation::DeleteTemplate(int id)
     }
 }
 
-CResult Sloong::CConfiguation::SetTemplate(int id, const TemplateInfo &config)
+CResult Sloong::CConfiguration::SetTemplate(int id, const TemplateInfo &config)
 {
     unique_lock<mutex> lck(m_oMutex);
     try

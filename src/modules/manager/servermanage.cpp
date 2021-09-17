@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-09-16 15:58:55
+ * @LastEditTime: 2021-09-17 11:11:34
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -84,15 +84,15 @@ CResult Sloong::CServerManage::Initialize(IControl *ic, const string &db_path)
 	m_mapFuncToHandler[Functions::ReportLoadStatus] = std::bind(&CServerManage::ReportLoadStatusHandler, this, std::placeholders::_1, std::placeholders::_2);
 	m_mapFuncToHandler[Functions::ReconnectRegister] = std::bind(&CServerManage::ReconnectRegisterHandler, this, std::placeholders::_1, std::placeholders::_2);
 
-	if (!CConfiguation::Instance->IsInituialized())
+	if (!CConfiguration::Instance->IsInituialized())
 	{
-		auto res = CConfiguation::Instance->Initialize(db_path);
+		auto res = CConfiguration::Instance->Initialize(db_path);
 		if (res.IsFialed())
 			return res;
 	}
 
 	// Initialize template list
-	auto list = CConfiguation::Instance->GetTemplateList();
+	auto list = CConfiguration::Instance->GetTemplateList();
 	for (auto &item : list)
 	{
 		TemplateItem addItem(item);
@@ -105,16 +105,16 @@ CResult Sloong::CServerManage::Initialize(IControl *ic, const string &db_path)
 
 CResult Sloong::CServerManage::LoadManagerConfig(const string &db_path)
 {
-	if (!CConfiguation::Instance->IsInituialized())
+	if (!CConfiguration::Instance->IsInituialized())
 	{
-		auto res = CConfiguation::Instance->Initialize(db_path);
+		auto res = CConfiguration::Instance->Initialize(db_path);
 		if (res.IsFialed())
 			return res;
 	}
-	auto res = CConfiguation::Instance->GetTemplate(1);
+	auto res = CConfiguration::Instance->GetTemplate(1);
 	if (res.IsFialed())
 		return CResult(ResultType::Warning);
-	return CResult::Make_OK(string(res.GetResultObject().configuation.begin(), res.GetResultObject().configuation.end()));
+	return CResult::Make_OK(string(res.GetResultObject().configuration.begin(), res.GetResultObject().configuration.end()));
 }
 
 CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG *config)
@@ -129,14 +129,14 @@ CResult Sloong::CServerManage::ResetManagerTemplate(GLOBAL_CONFIG *config)
 	item.Name = "Manager";
 	item.Note = "This template just for the manager node.";
 	item.Replicas = 1;
-	item.Configuation = config_str;
+	item.Configuration = config_str;
 	item.BuildCache();
 	CResult res(ResultType::Succeed);
 	auto info = item.ToTemplateInfo();
-	if (CConfiguation::Instance->CheckTemplateExist(1))
-		res = CConfiguation::Instance->SetTemplate(1, info);
+	if (CConfiguration::Instance->CheckTemplateExist(1))
+		res = CConfiguration::Instance->SetTemplate(1, info);
 	else
-		res = CConfiguation::Instance->AddTemplate(info, nullptr);
+		res = CConfiguration::Instance->AddTemplate(info, nullptr);
 	return res;
 }
 
@@ -245,7 +245,7 @@ int Sloong::CServerManage::SearchNeedCreateWithType(bool excludeMode, const vect
 	auto ids = vector<int>();
 	for (auto item : m_mapIDToTemplateItem)
 	{
-		int item_id = item.second.ConfiguationObj->moduletype();
+		int item_id = item.second.ConfigurationObj->moduletype();
 		bool exist = std::find(type.begin(), type.end(), item_id) != type.end();
 		if ((exist && !excludeMode) || (!exist && excludeMode))
 		{
@@ -445,7 +445,7 @@ CResult Sloong::CServerManage::RegisterWorkerHandler(const string &req_str, Pack
 	RegisterWorkerResponse res;
 	res.set_registerid(id);
 	res.set_templateid(tpl->ID);
-	res.set_configuation(tpl->Configuation);
+	res.set_configuration(tpl->Configuration);
 
 	m_pLog->debug(format("Allocating module[{}][{}] Type to [{}]", sender_info->UUID, id, tpl->Name));
 	return CResult::Make_OK(ConvertObjToStr(&res));
@@ -457,7 +457,7 @@ void Sloong::CServerManage::RefreshModuleReference(int id)
 	if (info == nullptr)
 		return;
 	info->Reference.clear();
-	auto references = Helper::split(info->ConfiguationObj->modulereference(), ',');
+	auto references = Helper::split(info->ConfigurationObj->modulereference(), ',');
 	for (auto &item : references)
 	{
 		int id;
@@ -498,7 +498,7 @@ CResult Sloong::CServerManage::RegisterNodeHandler(const string &req_str, Packag
 	auto &item = m_mapUUIDToNodeItem[sender];
 	item.TemplateName = tpl->Name;
 	item.TemplateID = tpl->ID;
-	item.Port = tpl->ConfiguationObj->listenport();
+	item.Port = tpl->ConfigurationObj->listenport();
 	item.ConnectionHashCode = pack->sessionid();
 	tpl->Created.unique_insert(sender);
 	m_mapConnectionToUUID[pack->sessionid()] = sender;
@@ -533,13 +533,13 @@ CResult Sloong::CServerManage::AddTemplateHandler(const string &req_str, Package
 	item.Name = info.name();
 	item.Note = info.note();
 	item.Replicas = info.replicas();
-	item.Configuation = info.configuation();
+	item.Configuration = info.configuration();
 	item.BuildCache();
 	if (!item.IsValid())
 		return CResult::Make_Error("Param is valid.");
 
 	int id = 0;
-	auto res = CConfiguation::Instance->AddTemplate(item.ToTemplateInfo(), &id);
+	auto res = CConfiguration::Instance->AddTemplate(item.ToTemplateInfo(), &id);
 	if (res.IsFialed())
 	{
 		return res;
@@ -565,7 +565,7 @@ CResult Sloong::CServerManage::DeleteTemplateHandler(const string &req_str, Pack
 		return CResult::Make_Error("Cannot delete this template.");
 	}
 
-	auto res = CConfiguation::Instance->DeleteTemplate(id);
+	auto res = CConfiguration::Instance->DeleteTemplate(id);
 	if (res.IsFialed())
 	{
 		return res;
@@ -594,11 +594,11 @@ CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, Package
 	if (info.replicas() > 0)
 		tplInfo->Replicas = info.replicas();
 
-	if (info.configuation().size() > 0)
-		tplInfo->Configuation = info.configuation();
+	if (info.configuration().size() > 0)
+		tplInfo->Configuration = info.configuration();
 
 	tplInfo->BuildCache();
-	auto res = CConfiguation::Instance->SetTemplate(tplInfo->ID, tplInfo->ToTemplateInfo());
+	auto res = CConfiguration::Instance->SetTemplate(tplInfo->ID, tplInfo->ToTemplateInfo());
 	if (res.IsFialed())
 		return res;
 
@@ -640,7 +640,7 @@ CResult Sloong::CServerManage::QueryTemplateHandler(const string &req_str, Packa
 			{
 				for (auto &item : m_mapIDToTemplateItem)
 				{
-					if (item.second.ConfiguationObj->moduletype() == t)
+					if (item.second.ConfigurationObj->moduletype() == t)
 						item.second.ToProtobuf(res.add_templateinfos());
 				}
 			}
@@ -729,7 +729,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 
 	QueryReferenceInfoResponse res;
 
-	auto references = Helper::split(item->ConfiguationObj->modulereference(), ',');
+	auto references = Helper::split(item->ConfigurationObj->modulereference(), ',');
 	for (auto ref : references)
 	{
 		auto ref_id = 0;
@@ -743,8 +743,8 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
 			continue;
 		}
 		item->set_templateid(tpl->ID);
-		item->set_type(tpl->ConfiguationObj->moduletype());
-		item->set_providefunctions(tpl->ConfiguationObj->modulefunctoins());
+		item->set_type(tpl->ConfigurationObj->moduletype());
+		item->set_providefunctions(tpl->ConfigurationObj->modulefunctoins());
 		for (auto node : tpl->Created)
 		{
 			m_mapUUIDToNodeItem[node].ToProtobuf(item->add_nodeinfos());
@@ -797,7 +797,7 @@ CResult Sloong::CServerManage::ReconnectRegisterHandler(const string &req_str, P
 
 	item.TemplateName = tpl->Name;
 	item.TemplateID = tpl->ID;
-	item.Port = tpl->ConfiguationObj->listenport();
+	item.Port = tpl->ConfigurationObj->listenport();
 	item.ConnectionHashCode = pack->sessionid();
 	tpl->Created.unique_insert(item.UUID);
 	m_mapConnectionToUUID[pack->sessionid()] = item.UUID;
