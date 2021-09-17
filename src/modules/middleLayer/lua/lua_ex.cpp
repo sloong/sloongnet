@@ -253,12 +253,8 @@ CResult CLua::RunString(const string &strCommand)
 {
 	lua_pushcfunction(m_pScriptContext, GlobalErrorHandler);
 	auto nErr = lua_gettop(m_pScriptContext);
-	if (0 != luaL_loadstring(m_pScriptContext, strCommand.c_str()))
-	{
-		return HandlerError("String Load", strCommand);
-	}
-
-	auto res = lua_pcall(m_pScriptContext, 0, LUA_MULTRET, nErr);
+	PushString(strCommand);
+	auto res = lua_pcall(m_pScriptContext, 1, LUA_MULTRET, nErr);
 	lua_remove(m_pScriptContext, nErr);
 	if (res != LUA_OK)
 	{
