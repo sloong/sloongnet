@@ -1,7 +1,7 @@
 ﻿/*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-09-15 10:43:58
+ * @LastEditTime: 2021-09-17 17:40:45
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/main.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -39,6 +39,9 @@ void PrintVersion()
 
 int main(int argc, char **args)
 {
+	// vector<string> argv;
+	// for (int i = 1; i < argc; i++)
+	// 	argv.push_back(args[i]);
 	try
 	{
 		auto logger = spdlog::stdout_color_mt("console");
@@ -54,16 +57,16 @@ int main(int argc, char **args)
 			return 0;
 		}
 
-		cout << "Command line:";
+		string cmd = "Command line:";
 		for (int i = 1; i < argc; i++)
 		{
-			cout << args[i] << " ";
+			cmd += string(args[i]) + " ";
 		}
-		cout << endl;
+		logger->info(cmd);
 
 		if (argc > 4)
 		{
-			cout << "Params error. See help with --help." << endl;
+			logger->critical("Params error. See help with --help.");
 			return -1;
 		}
 		NodeInfo info;
@@ -78,7 +81,7 @@ int main(int argc, char **args)
 		}
 		else
 		{
-			cout << "Unknown type. See help with --help." << endl;
+			logger->critical("Unknown type. See help with --help.");
 			return -1;
 		}
 
@@ -88,13 +91,13 @@ int main(int argc, char **args)
 			info.Address = addr[0];
 			if (!ConvertStrToInt(addr[1], &info.Port))
 			{
-				cout << "Convert [" << addr[1] << "] to int port fialed." << endl;
+				logger->critical(format("Convert [{}] to int port fialed.",  addr[1]));
 				return -1;
 			}
 		}
 		else
 		{
-			cout << "Address port info error. See help with --help." << endl;
+			logger->critical( "Address port info error. See help with --help.");
 			return -1;
 		}
 
@@ -119,7 +122,7 @@ int main(int argc, char **args)
 
 		if (info.Port == 0)
 		{
-			cout << "Port error, please check." << endl;
+			logger->critical("Port error, please check.");
 			return -2;
 		}
 
@@ -127,21 +130,21 @@ int main(int argc, char **args)
 		Sloong::CSloongBaseService::Instance = make_unique<Sloong::CSloongBaseService>();
 		do
 		{
-			cout << "Initialize base service instance." << endl;
+			logger->info( "Initialize base service instance.");
 			res = Sloong::CSloongBaseService::Instance->Initialize(info, logger.get());
 			if (!res.IsSucceed())
 			{
-				cout << "Initialize server error. Message: " << res.GetMessage() << endl;
+				logger->critical( format("Initialize server error. Message: {}",  res.GetMessage()));
 				return -5;
 			}
 
-			cout << "Run base service instance." << endl;
+			logger->info("Run base service instance.");
 			res = Sloong::CSloongBaseService::Instance->Run();
 
-			cout << "Base service instance is end with result " << ResultType_Name(res.GetResult()) << ". Message: " << res.GetMessage() << endl;
+			logger->info(format("Base service instance is end with result {}. Message {}", ResultType_Name(res.GetResult()) , res.GetMessage()));
 		} while (res.GetResult() == ResultType::Retry);
 
-		cout << "Application exit." << endl;
+		logger->info( "Application exit.");
 		Sloong::CSloongBaseService::Instance = nullptr;
 		spdlog::shutdown();
 		return 0;
@@ -163,4 +166,5 @@ int main(int argc, char **args)
 		return -4;
 	}
 	cout << "Application exit with exception." << endl;
+	return -5;
 }

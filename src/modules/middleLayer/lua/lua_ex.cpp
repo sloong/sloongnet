@@ -210,7 +210,7 @@ CResult CLua::RunScript(const string &strFileName)
 	std::string strFullName = findScript(strFileName);
 	if (strFullName.length() == 0)
 	{
-		return HandlerError("Load Script", "No find scritp file:" + strFullName);
+		return CResult::Make_Error(format("RunScript error. No find scritp file [{}] in folder [{}]" ,strFileName, m_strScriptFolder));
 	}
 
 	lua_pushcfunction(m_pScriptContext, GlobalErrorHandler);

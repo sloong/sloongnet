@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2021-09-02 17:28:26
+ * @LastEditTime: 2021-09-17 17:43:13
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -80,7 +80,7 @@ CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 	// 这里使用处理线程池的数量进行初始化，保证在所有线程都在处理Lua请求时不会因luacontext发生堵塞
 	auto num = m_pConfig->operator[]("LuaContextQuantity").asInt();
 	if (num < 1)
-		return CResult::Make_Error("LuaContextQuantity must be bigger than 0,");
+		return CResult::Make_Error(format("LuaContextQuantity must be bigger than 0, current value is [{}]", num));
 
 	for (int i = 0; i < num; i++)
 	{
@@ -137,8 +137,12 @@ TResult<unique_ptr<CLua>> Sloong::CLuaProcessCenter::InitLua()
 	lua->SetScriptFolder(folder);
 	
 	CGlobalFunction::Instance->RegisterFuncToLua(lua.get());
-	
-	auto res = lua->RunScript(m_pConfig->operator[]("LuaEntryFile").asString());
+	auto f = m_pConfig->operator[]("LuaEntryFile").asString();
+	if( f.empty() )
+	{	
+		return TResult<unique_ptr<CLua>>::Make_Error("The config [LuaEntryFile] no exist or it's empty");
+	}
+	auto res = lua->RunScript(f);
 	if (res.IsFialed())
 	{
 		return TResult<unique_ptr<CLua>>::Make_Error("Run Script Fialed." + res.GetMessage());

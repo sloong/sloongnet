@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2021-09-14 20:51:41
+ * @LastEditTime: 2021-09-17 17:26:54
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -358,7 +358,7 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
 		m_pLog->debug(format("Check connect timeout done. wait [{}] ms.", tinterval));
 		m_oCheckTimeoutThreadSync.wait_for(tinterval);
 	}
-	cout << "check timeout connect thread is exit " << endl;
+	m_pLog->info("check timeout connect thread is exit ");
 }
 
 /// 消息处理工作线程函数
@@ -379,7 +379,8 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 	// Before run loop, it's need create the environment, so check the run status before that.
 	if( m_emStatus == RUN_STATUS::Exit )
 	{
-		cout << "Network hub work thread is exit " << spid << endl;
+		m_pLog->critical(format("Network hub work thread[{}] is exit before into work loop. " ,spid));
+		return;
 	}
 
 	void *pEnv;
@@ -483,7 +484,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 			m_pLog->error("Unknown exception happened in MessageProcessWorkLoop");
 		}
 	}
-	cout << "Network hub work thread is exit " << spid << endl;
+	m_pLog->info(format("Network hub work thread[{}] is exit ", spid));
 }
 
 /// 有新链接到达。

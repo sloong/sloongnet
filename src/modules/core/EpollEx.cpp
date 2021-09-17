@@ -332,7 +332,7 @@ void Sloong::CEpollEx::MainWorkLoop()
 			m_pLog->error("Unkown error happened in Epoll work thead.");
 		}
 	}
-	cout << "epoll work thread is exit " << spid << endl;
+	m_pLog->info(format("epoll work thread[{}] is exit " , spid));
 }
 
 void Sloong::CEpollEx::Exit()

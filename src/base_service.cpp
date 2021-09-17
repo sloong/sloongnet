@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-09-17 11:12:33
+ * @LastEditTime: 2021-09-17 16:16:31
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -100,7 +100,7 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
 
 U64Result CSloongBaseService::InitlializeForWorker(EasyConnect *con)
 {
-    cout << "Connect to control succeed. Start registe and get configuration." << endl;
+    m_pLog->info( "Connect to control succeed. Start registe and get configuration." );
 
     RegisterWorkerRequest sub_req;
     if (!m_oNodeRuntimeInfo.AssignedTargetTemplateID.empty())
@@ -168,13 +168,13 @@ U64Result CSloongBaseService::InitlializeForWorker(EasyConnect *con)
             if (uuid == 0)
             {
                 uuid = Helper::BytesToInt64(response->content().c_str());
-                cout << "Control assigen uuid ." << uuid << endl;
+                m_pLog->info(format("Control assigen uuid [{}].", uuid));
             }
             else
             {
                 this_thread::sleep_for(std::chrono::seconds(1));
                 //sleep(1);
-                cout << "Control return retry package. wait 1s and retry." << endl;
+                m_pLog->trace("Control return retry package. wait 1s and retry.");
             }
             continue;
         }
@@ -197,7 +197,7 @@ U64Result CSloongBaseService::InitlializeForWorker(EasyConnect *con)
             return U64Result::Make_Error(format("Control return an unexpected result {}. Message {}.", ResultType_Name(response->result()), response->content()));
         }
     };
-    cout << "Get configuration done." << endl;
+    m_pLog->info( "Get configuration done.");
     return result;
 }
 

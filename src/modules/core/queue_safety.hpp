@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2021-08-26 13:47:32
- * @LastEditTime: 2021-08-26 15:16:44
+ * @LastEditTime: 2021-09-17 17:49:45
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/queue_safety.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -46,6 +46,7 @@ namespace Sloong
                 return move(def);
 
             unique_lock<shared_mutex> lock(m_mut);
+            if(queue<T>::empty()) return move(def);
             auto t = move(queue<T>::front());
             queue<T>::pop();
             return move(t);

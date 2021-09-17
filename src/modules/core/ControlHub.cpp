@@ -233,8 +233,8 @@ void Sloong::CControlHub::MessageWorkLoop()
 		}
 		catch (...)
 		{
-			cerr << "Unhandle exception in CControlHub work loop." << endl;
+			m_pLog->critical( "Unhandle exception in CControlHub work loop.");
 		}
 	}
-	cout << "Control hub work thread is exit " << spid << endl;
+	m_pLog->info(format( "Control hub work thread[{}] is exit " ,spid));
 }
