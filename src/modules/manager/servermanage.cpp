@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-09-18 15:17:00
+ * @LastEditTime: 2021-09-18 15:52:27
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -256,7 +256,7 @@ int Sloong::CServerManage::SearchNeedCreateWithType(bool excludeMode, const vect
 	return SearchNeedCreateWithIDs(ids);
 }
 
-void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int event, ::google::protobuf::Message *msg)
+void Sloong::CServerManage::SendManagerEvent(const list<uint64_t> &notifyList, Manager::Events event, ::google::protobuf::Message *msg)
 {
 	for (auto item : notifyList)
 	{
@@ -264,18 +264,18 @@ void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int even
 		if (msg)
 			msg->SerializeToString(&msg_str);
 		auto req = make_unique<SendPackageEvent>(m_mapUUIDToNodeItem[item].ConnectionHashCode);
-		req->SetRequest(Base::HEIGHT_LEVEL, event, msg_str, DataPackage_PackageType::DataPackage_PackageType_EventPackage);
+		req->SetEvent(Base::HEIGHT_LEVEL, event, msg_str, DataPackage_PackageType::DataPackage_PackageType_ManagerEvent);
 		m_iC->SendMessage(std::move(req));
 	}
 }
 
 
-void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int event, const string& msg)
+void Sloong::CServerManage::SendControlEvent(const list<uint64_t> &notifyList, Core::ControlEvent event, const string& msg)
 {
 	for (auto item : notifyList)
 	{
 		auto req = make_unique<SendPackageEvent>(m_mapUUIDToNodeItem[item].ConnectionHashCode);
-		req->SetRequest(Base::HEIGHT_LEVEL, event, msg, DataPackage_PackageType::DataPackage_PackageType_EventPackage);
+		req->SetEvent(Base::HEIGHT_LEVEL, event, msg, DataPackage_PackageType::DataPackage_PackageType_ControlEvent);
 		m_iC->SendMessage(std::move(req));
 	}
 }
@@ -316,7 +316,7 @@ void Sloong::CServerManage::OnSocketClosed(uint64_t con)
 	{
 		EventReferenceModuleOffline offline_event;
 		offline_event.set_uuid(target);
-		SendEvent(notifyList, Manager::Events::ReferenceModuleOffline, &offline_event);
+		SendManagerEvent(notifyList, Manager::Events::ReferenceModuleOffline, &offline_event);
 	}
 	m_mapUUIDToNodeItem.erase(target);
 	tplItem->Created.remove(target);
@@ -529,7 +529,7 @@ CResult Sloong::CServerManage::RegisterNodeHandler(const string &req_str, Packag
 	{
 		EventReferenceModuleOnline online_event;
 		m_mapUUIDToNodeItem[sender].ToProtobuf(online_event.mutable_item());
-		SendEvent(notifyList, Manager::Events::ReferenceModuleOnline, &online_event);
+		SendManagerEvent(notifyList, Manager::Events::ReferenceModuleOnline, &online_event);
 	}
 
 	return CResult::Succeed;
@@ -614,7 +614,7 @@ CResult Sloong::CServerManage::SetTemplateHandler(const string &req_str, Package
 		return res;
 
 	RefreshModuleReference(info.id());
-	SendEvent(m_mapIDToTemplateItem.get(info.id()).Created, Core::ControlEvent::Restart, nullptr);
+	SendControlEvent(m_mapIDToTemplateItem.get(info.id()).Created, Core::ControlEvent::Restart, string());
 
 	return CResult::Succeed;
 }
@@ -704,7 +704,7 @@ CResult Sloong::CServerManage::StopNodeHandler(const string &req_str, Package *p
 
 	list<uint64_t> l;
 	l.push_back(id);
-	SendEvent(l, Core::ControlEvent::Stop, nullptr);
+	SendControlEvent(l, Core::ControlEvent::Stop, nullptr);
 
 	return CResult::Succeed;
 }
@@ -721,7 +721,7 @@ CResult Sloong::CServerManage::RestartNodeHandler(const string &req_str, Package
 
 	list<uint64_t> l;
 	l.push_back(id);
-	SendEvent(l, Core::ControlEvent::Restart, nullptr);
+	SendControlEvent(l, Core::ControlEvent::Restart, nullptr);
 
 	return CResult::Succeed;
 }
@@ -828,7 +828,7 @@ CResult Sloong::CServerManage::ReconnectRegisterHandler(const string &req_str, P
 	{
 		EventReferenceModuleOnline online_event;
 		m_mapUUIDToNodeItem[item.UUID].ToProtobuf(online_event.mutable_item());
-		SendEvent(notifyList, Manager::Events::ReferenceModuleOnline, &online_event);
+		SendManagerEvent(notifyList, Manager::Events::ReferenceModuleOnline, &online_event);
 	}
 
 	return CResult::Succeed;
@@ -858,7 +858,7 @@ CResult Sloong::CServerManage::SetNodeLogLevelHandler(const string &req_str, Pac
 	
 	if (notifyList.size() > 0)
 	{
-		SendEvent(notifyList, Core::ControlEvent::SetLogLevel, new_level);
+		SendControlEvent(notifyList, Core::ControlEvent::SetLogLevel, new_level);
 	}
 
 	return CResult::Succeed;

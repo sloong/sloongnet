@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2021-09-18 11:19:04
+ * @LastEditTime: 2021-09-18 15:53:46
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -423,7 +423,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					package->add_clocks(GetClock());
 					switch (package->type())
 					{
-					case DataPackage_PackageType::DataPackage_PackageType_EventPackage:
+					case DataPackage_PackageType::DataPackage_PackageType_ControlEvent:
 					{
 						PrintPackage(m_pLog, package.get(), "Event package <<< ");
 						switch (package->function())
@@ -459,10 +459,11 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 						}
 					}
 					break;
-					case DataPackage_PackageType::DataPackage_PackageType_NormalPackage:
+					case DataPackage_PackageType::DataPackage_PackageType_Request:
+					case DataPackage_PackageType::DataPackage_PackageType_Response:
 					{
 						PrintPackage(m_pLog, package.get(), "Process package <<< ");
-						if (package->status() == DataPackage_StatusType::DataPackage_StatusType_Request)
+						if (package->type() == DataPackage_PackageType::DataPackage_PackageType_Request)
 							result = m_pRequestFunc(pEnv, package.get());
 						else
 							result = m_pResponseFunc(pEnv, package.get());
@@ -576,7 +577,7 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(uint64_t sessionid)
 		pReadList.pop();
 		// Check the package is not a response package.
 		// If is normal package, and status is response, and it saved in control center. add a task to call the callback function.
-		if (pack->type() == DataPackage_PackageType::DataPackage_PackageType_NormalPackage && pack->status() == DataPackage_StatusType::DataPackage_StatusType_Response)
+		if (pack->type() == DataPackage_PackageType::DataPackage_PackageType_Response)
 		{
 			auto e = static_pointer_cast<IEvent>(m_iC->GetTempSharedPtr(Helper::ntos(pack->id())));
 			shared_ptr<SendPackageEvent> event = nullptr;

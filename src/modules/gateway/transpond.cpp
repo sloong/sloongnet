@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-28 14:43:16
- * @LastEditTime: 2021-08-20 14:14:33
+ * @LastEditTime: 2021-09-18 15:59:35
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/transpond.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -49,8 +49,9 @@ PackageResult Sloong::GatewayTranspond::MessageToProcesser(Package *pack)
 	}
 	response->add_clocks(GetClock());
 
+	// Use the make request to copy need send data. and reset type to request.
 	auto trans_pack = Package::MakeResponse(pack);
-	trans_pack->set_status(DataPackage_StatusType::DataPackage_StatusType_Request);
+	trans_pack->set_status(DataPackage_PackageType::DataPackage_PackageType_Request);
 	trans_pack->set_content( pack->content() );
 	trans_pack->set_extend( pack->extend() );
 

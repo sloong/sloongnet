@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-08-23 19:27:02
+ * @LastEditTime: 2021-09-18 16:10:01
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/package.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -52,7 +52,7 @@ namespace Sloong
 
         inline uint64_t sender() { return data.sender(); }
         inline void set_sender(uint64_t s) { data.set_sender(s); }
-
+        
         inline string hash() { return data.hash(); }
         inline void set_hash(const string &str) { data.set_hash(str); }
         inline void set_hash(const void *str, int len) { data.set_hash(str, len); }
@@ -106,23 +106,29 @@ namespace Sloong
         inline DataPackage_PackageType type() { return data.type(); }
         inline void set_type(DataPackage_PackageType value) { data.set_type(value); }
 
-        inline DataPackage_StatusType status() { return data.status(); }
-        inline void set_status(DataPackage_StatusType s) { data.set_status(s); }
-
         inline ResultType result() { return data.result(); }
         inline void set_result(ResultType r) { data.set_result(r); }
 
         static inline unique_ptr<Package> new_unique() { return make_unique<Package>(); }
 
-        static unique_ptr<Package> GetRequestPackage(bool EventPackage = false)
+        static unique_ptr<Package> GetRequestPackage()
         {
             auto package = Package::new_unique();
+            package->data.set_type(DataPackage_PackageType::DataPackage_PackageType_Request);
+            return package;
+        }
 
-            package->data.set_status(DataPackage_StatusType::DataPackage_StatusType_Request);
-            if (EventPackage)
-                package->data.set_type(DataPackage_PackageType::DataPackage_PackageType_EventPackage);
-            else
-                package->data.set_type(DataPackage_PackageType::DataPackage_PackageType_NormalPackage);
+        static unique_ptr<Package> GetControlEventPackage()
+        {
+            auto package = Package::new_unique();
+            package->data.set_type(DataPackage_PackageType::DataPackage_PackageType_ControlEvent);
+            return package;
+        }
+
+        static unique_ptr<Package> GetManagerEventPackage( )
+        {
+            auto package = Package::new_unique();
+            package->data.set_type(DataPackage_PackageType::DataPackage_PackageType_ManagerEvent);
             return package;
         }
 
@@ -133,17 +139,16 @@ namespace Sloong
          *      1 > The Package object.
          * @Remarks: 
          *      Only used it when you need control everything. 
-         *      This function just set the status to response.
+         *      This function just set the type to response.
          */
         static unique_ptr<Package> MakeResponse(Package *request_pack)
         {
             auto response_pack = Package::new_unique();
             response_pack->set_sessionid(request_pack->sessionid());
-            response_pack->set_type(request_pack->data.type());
+            response_pack->set_type(DataPackage_PackageType::DataPackage_PackageType_Response);
             response_pack->set_priority(request_pack->priority());
             response_pack->set_function(request_pack->function());
             response_pack->set_id(request_pack->id());
-            response_pack->set_status(DataPackage_StatusType::DataPackage_StatusType_Response);
             return response_pack;
         }
 

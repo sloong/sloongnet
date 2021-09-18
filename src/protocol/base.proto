@@ -18,33 +18,30 @@ enum PRIORITY_LEVEL{
 
 message DataPackage
 {
-    /// The hash code for this message. Hash function in default is used SHA-2,
-    /// Sender need set all field without this field. And then serialize to bytes and calculate the hash. and then set the hash value to this field.
-    /// Receiver need move this field to an other value and clean the hash value. and then calculate the hash value and compare to the saved hash value.
-    bytes Hash=1;
     enum PackageType{
-        NormalPackage=0;
-        EventPackage=1;
-    }
-    PackageType Type = 2;
-    enum StatusType{
         Request=0;
         Response=1;
+        ControlEvent=2;
+        ManagerEvent=3;
     }
-    StatusType Status=3;
+    PackageType Type = 1;
+    // 流水号
+    fixed64 ID = 2;
+    // 优先级
+    int32 Priority = 3;
     // In request pacakge, value is function id.
     // In event package, value is event id
     int32 Function = 4;
-    // 流水号
-    fixed64 ID = 5;
-    // 优先级
-    int32 Priority = 6;
     // 结果代码
-    ResultType Result = 7;
-    // 发送者的唯一标识符
-    fixed64 Sender = 8;
+    ResultType Result = 5;
     // 消息内容
-    bytes Content = 9;
+    bytes Content = 6;
     // 扩展数据，只在FileCenter发送文件时使用。一旦设置了这个字段则认为该包是BigPackage，直接进入队列而不是直接发送
-    bytes Extend = 10;
+    bytes Extend = 7;
+    /// The hash code for this message. Hash function in default is used SHA-2,
+    /// Sender need set all field without this field. And then serialize to bytes and calculate the hash. and then set the hash value to this field.
+    /// Receiver need move this field to an other value and clean the hash value. and then calculate the hash value and compare to the saved hash value.
+    bytes Hash=8;
+    // 发送者的唯一标识符
+    fixed64 Sender = 9;
 }
