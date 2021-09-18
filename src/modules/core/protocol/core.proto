@@ -102,6 +102,7 @@ enum ControlEvent{
     InvalidEvent=0;
     Restart=1;
     Stop=2;
+    SetLogLevel=3;
 }
 
 message GLOBAL_CONFIG

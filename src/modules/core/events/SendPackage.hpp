@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-09-01 15:31:13
+ * @LastEditTime: 2021-09-18 11:33:41
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/events/SendPackage.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -33,12 +33,22 @@ namespace Sloong
 			}
 			inline bool HaveCallbackFunc() { return m_pCallback != nullptr; }
 
-			void SetRequest(int32_t priority, int32_t func, string content, DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_NormalPackage)
+			void SetRequest(int32_t priority, int32_t func, const string& content, DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_NormalPackage)
 			{
 				m_pData = make_unique<Package>();
 				m_pData->set_type(type);
 				m_pData->set_function(func);
 				m_pData->set_content(content);
+				m_pData->set_priority(priority);
+				m_pData->set_sessionid(m_ConnectionHashCode);
+			}
+
+			void SetRequest(int32_t priority, int32_t func, string&& content, DataPackage_PackageType type = DataPackage_PackageType::DataPackage_PackageType_NormalPackage)
+			{
+				m_pData = make_unique<Package>();
+				m_pData->set_type(type);
+				m_pData->set_function(func);
+				m_pData->set_content(move(content));
 				m_pData->set_priority(priority);
 				m_pData->set_sessionid(m_ConnectionHashCode);
 			}

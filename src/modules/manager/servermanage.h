@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-21 11:17:32
- * @LastEditTime: 2021-09-17 11:11:08
+ * @LastEditTime: 2021-09-18 14:59:56
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -193,6 +193,7 @@ namespace Sloong
         CResult QueryReferenceInfoHandler(const string &, Package *);
         CResult ReportLoadStatusHandler(const string &, Package *);
         CResult ReconnectRegisterHandler(const string &, Package *);
+        CResult SetNodeLogLevelHandler(const string &, Package *);
 
     public:
         static CResult LoadManagerConfig(const string &);
@@ -205,6 +206,7 @@ namespace Sloong
         int SearchNeedCreateWithType( bool, const vector<int>&  );
         void RefreshModuleReference(int id);
         void SendEvent(const list<uint64_t> &, int, ::google::protobuf::Message *);
+        void SendEvent(const list<uint64_t> &, int, const string&);
 
     protected:
         map_ex<Manager::Functions, FunctionHandler> m_mapFuncToHandler;

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2021-09-17 17:26:54
+ * @LastEditTime: 2021-09-18 11:19:04
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -74,7 +74,7 @@ using namespace Sloong::Events;
 Sloong::CNetworkHub::CNetworkHub()
 {
 	m_pEpoll = make_unique<CEpollEx>();
-	m_oWaitProcessList =  vector<queue_safety<UniquePackage>>(s_PriorityLevel);
+	m_oWaitProcessList = vector<queue_safety<UniquePackage>>(s_PriorityLevel);
 }
 
 Sloong::CNetworkHub::~CNetworkHub()
@@ -134,7 +134,7 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 }
 
 void Sloong::CNetworkHub::Run(SharedEvent event)
-{	
+{
 	m_emStatus = RUN_STATUS::Running;
 }
 
@@ -377,9 +377,9 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 	}
 
 	// Before run loop, it's need create the environment, so check the run status before that.
-	if( m_emStatus == RUN_STATUS::Exit )
+	if (m_emStatus == RUN_STATUS::Exit)
 	{
-		m_pLog->critical(format("Network hub work thread[{}] is exit before into work loop. " ,spid));
+		m_pLog->critical(format("Network hub work thread[{}] is exit before into work loop. ", spid));
 		return;
 	}
 
@@ -429,13 +429,30 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 						switch (package->function())
 						{
 						case ControlEvent::Restart:
+						{
 							m_pLog->info("Received restart control event. application will restart.");
 							m_iC->SendMessage(EVENT_TYPE::ProgramRestart);
-							break;
+						}
+						break;
 						case ControlEvent::Stop:
+						{
 							m_pLog->info("Received stop control event. application will stop.");
 							m_iC->SendMessage(EVENT_TYPE::ProgramStop);
-							break;
+						}
+						break;
+						case ControlEvent::SetLogLevel:
+						{
+							m_pLog->info("Received set log level control event.");
+							auto l = stoi(package->content());
+							if (!LogLevel_IsValid(l))
+							{
+								m_pLog->error(format("The content[{}] is not valid for the specified log level.", l));
+							}
+							auto level = spdlog::level::level_enum(l);
+							m_pLog->set_level(level);
+							m_pLog->info(format("Set log level to [{}:{}]", l, LogLevel_Name(l)));
+						}
+						break;
 						default:
 							m_pEventFunc(package.get());
 							break;
@@ -576,13 +593,13 @@ ResultType Sloong::CNetworkHub::OnDataCanReceive(uint64_t sessionid)
 				continue;
 			}
 		}
-		if( m_oWaitProcessList.size() <= pack->priority() )
+		if (m_oWaitProcessList.size() <= pack->priority())
 		{
 			m_pLog->warn(format("Package priority is invalid, ignoring the priority value."));
 			m_oWaitProcessList[0].push(std::move(pack));
 		}
 		else
-		{ 
+		{
 			m_oWaitProcessList[pack->priority()].push(std::move(pack));
 		}
 	}

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-09-17 11:11:34
+ * @LastEditTime: 2021-09-18 15:17:00
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -265,6 +265,17 @@ void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int even
 			msg->SerializeToString(&msg_str);
 		auto req = make_unique<SendPackageEvent>(m_mapUUIDToNodeItem[item].ConnectionHashCode);
 		req->SetRequest(Base::HEIGHT_LEVEL, event, msg_str, DataPackage_PackageType::DataPackage_PackageType_EventPackage);
+		m_iC->SendMessage(std::move(req));
+	}
+}
+
+
+void Sloong::CServerManage::SendEvent(const list<uint64_t> &notifyList, int event, const string& msg)
+{
+	for (auto item : notifyList)
+	{
+		auto req = make_unique<SendPackageEvent>(m_mapUUIDToNodeItem[item].ConnectionHashCode);
+		req->SetRequest(Base::HEIGHT_LEVEL, event, msg, DataPackage_PackageType::DataPackage_PackageType_EventPackage);
 		m_iC->SendMessage(std::move(req));
 	}
 }
@@ -818,6 +829,36 @@ CResult Sloong::CServerManage::ReconnectRegisterHandler(const string &req_str, P
 		EventReferenceModuleOnline online_event;
 		m_mapUUIDToNodeItem[item.UUID].ToProtobuf(online_event.mutable_item());
 		SendEvent(notifyList, Manager::Events::ReferenceModuleOnline, &online_event);
+	}
+
+	return CResult::Succeed;
+}
+
+
+CResult Sloong::CServerManage::SetNodeLogLevelHandler(const string &req_str, Package *pack)
+{
+	auto req = ConvertStrToObj<SetNodeLogLevelRequest>(req_str);
+	if (!req)
+		return CResult::Make_Error("Parser message object fialed.");
+
+	auto new_level =  Helper::ntos( req->loglevel() );
+	list<uint64_t> notifyList;
+	for( auto& id: req->nodes() )
+	{	
+		auto node = m_mapUUIDToNodeItem.try_get(id);
+		if( node == nullptr )
+		{
+			m_pLog->warn(format("SetNodeLogLevelHandler: no found node with id [{}]. ignore.", id));
+			continue;
+		}
+		notifyList.push_back(id);
+		m_pLog->info(format("Send UpdateLogLevel event with new level [{}] for node [{}]", new_level, id));
+	}
+
+	
+	if (notifyList.size() > 0)
+	{
+		SendEvent(notifyList, Core::ControlEvent::SetLogLevel, new_level);
 	}
 
 	return CResult::Succeed;

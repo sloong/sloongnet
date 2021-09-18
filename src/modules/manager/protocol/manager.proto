@@ -82,6 +82,11 @@ enum Functions{
     /// Response: Result
     ReconnectRegister=13;
 
+    /// Set log level for node. 
+    /// Request: SetNodeLogLevelRequest
+    /// Response: None
+    SetNodeLogLevel=14;
+
     // reserved for other service.
     reserved 101 to max;
 }
@@ -209,4 +214,9 @@ message ReportLoadStatusRequest{
 message ReconnectRegisterRequest{
    int32 TemplateID=1;
    fixed64 NodeUUID=2;
+}
+
+message SetNodeLogLevelRequest{
+   repeated fixed64 Nodes=1;
+   Core.LogLevel LogLevel=2;
 }

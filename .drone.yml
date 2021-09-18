@@ -6,6 +6,12 @@ steps:
     image: sloong/sloongnet_build
     commands:
       - build/build.sh -d
+    when:
+      event: push
+      branch:
+        exclude:
+          - master
+          - develop
 
   - name: build_docker
     image: plugins/docker
@@ -36,5 +42,5 @@ steps:
       tags:
         - latest
     when:
-      event: push
       branch: master
+
