@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2021-09-18 15:53:46
+ * @LastEditTime: 2021-09-22 13:24:12
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -74,7 +74,7 @@ using namespace Sloong::Events;
 Sloong::CNetworkHub::CNetworkHub()
 {
 	m_pEpoll = make_unique<CEpollEx>();
-	m_oWaitProcessList = vector<queue_safety<UniquePackage>>(s_PriorityLevel);
+	m_oWaitProcessList = vector<queue_safety<UniquePackage>>(PRIORITY_LEVEL_ARRAYSIZE);
 }
 
 Sloong::CNetworkHub::~CNetworkHub()
@@ -406,7 +406,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 		try
 		{
 		MessagePorcessListRetry:
-			for (int i = 0; i < s_PriorityLevel; i++)
+			for (int i = 0; i < PRIORITY_LEVEL_ARRAYSIZE; i++)
 			{
 				if (m_oWaitProcessList[i].empty())
 					continue;
@@ -420,7 +420,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					// it just for is need add the pack obj to send list.
 					result.SetResult(ResultType::Ignore);
 
-					package->add_clocks(GetClock());
+					package->record_point_in_timeline("StartPorcess");
 					switch (package->type())
 					{
 					case DataPackage_PackageType::DataPackage_PackageType_ControlEvent:

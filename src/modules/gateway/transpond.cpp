@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-28 14:43:16
- * @LastEditTime: 2021-09-18 15:59:35
+ * @LastEditTime: 2021-09-22 11:12:36
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/transpond.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -43,15 +43,11 @@ PackageResult Sloong::GatewayTranspond::MessageToProcesser(Package *pack)
 	}
 
 	auto response = Package::MakeResponse(pack);
-	for( auto i : pack->clocks() )
-	{
-		response->add_clocks(i);
-	}
-	response->add_clocks(GetClock());
+	response->record_point_in_timeline("ForwardToProcesser");
 
 	// Use the make request to copy need send data. and reset type to request.
 	auto trans_pack = Package::MakeResponse(pack);
-	trans_pack->set_status(DataPackage_PackageType::DataPackage_PackageType_Request);
+	trans_pack->set_type(DataPackage_PackageType::DataPackage_PackageType_Request);
 	trans_pack->set_content( pack->content() );
 	trans_pack->set_extend( pack->extend() );
 
@@ -67,7 +63,7 @@ PackageResult Sloong::GatewayTranspond::MessageToProcesser(Package *pack)
 
 PackageResult Sloong::GatewayTranspond::MessageToClient(UniquePackage info, Package *pack)
 {
-	info->add_clocks(GetClock());
+	info->record_point_in_timeline("ResponseToClient");
 	info->set_result(pack->result());
 	info->set_content( pack->content() );
 	info->set_extend( pack->extend() );

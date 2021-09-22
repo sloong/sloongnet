@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-09-18 15:52:27
+ * @LastEditTime: 2021-09-22 10:06:08
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -264,7 +264,7 @@ void Sloong::CServerManage::SendManagerEvent(const list<uint64_t> &notifyList, M
 		if (msg)
 			msg->SerializeToString(&msg_str);
 		auto req = make_unique<SendPackageEvent>(m_mapUUIDToNodeItem[item].ConnectionHashCode);
-		req->SetEvent(Base::HEIGHT_LEVEL, event, msg_str, DataPackage_PackageType::DataPackage_PackageType_ManagerEvent);
+		req->SetEvent(event, msg_str, DataPackage_PackageType::DataPackage_PackageType_ManagerEvent);
 		m_iC->SendMessage(std::move(req));
 	}
 }
@@ -275,7 +275,7 @@ void Sloong::CServerManage::SendControlEvent(const list<uint64_t> &notifyList, C
 	for (auto item : notifyList)
 	{
 		auto req = make_unique<SendPackageEvent>(m_mapUUIDToNodeItem[item].ConnectionHashCode);
-		req->SetEvent(Base::HEIGHT_LEVEL, event, msg, DataPackage_PackageType::DataPackage_PackageType_ControlEvent);
+		req->SetEvent( event, msg, DataPackage_PackageType::DataPackage_PackageType_ControlEvent);
 		m_iC->SendMessage(std::move(req));
 	}
 }

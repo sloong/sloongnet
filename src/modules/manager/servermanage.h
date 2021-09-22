@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-21 11:17:32
- * @LastEditTime: 2021-09-18 14:59:56
+ * @LastEditTime: 2021-09-22 10:10:35
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -205,8 +205,8 @@ namespace Sloong
         int SearchNeedCreateWithIDs( const vector<int>& );
         int SearchNeedCreateWithType( bool, const vector<int>&  );
         void RefreshModuleReference(int id);
-        void SendEvent(const list<uint64_t> &, int, ::google::protobuf::Message *);
-        void SendEvent(const list<uint64_t> &, int, const string&);
+        void SendManagerEvent(const list<uint64_t> &, Manager::Events, ::google::protobuf::Message *);
+        void SendControlEvent(const list<uint64_t> &, Core::ControlEvent, const string&);
 
     protected:
         map_ex<Manager::Functions, FunctionHandler> m_mapFuncToHandler;

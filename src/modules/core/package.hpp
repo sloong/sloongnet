@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-09-18 16:10:01
+ * @LastEditTime: 2021-09-22 13:22:07
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/package.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -15,6 +15,8 @@ using namespace Base;
 #include <list>
 using namespace std;
 
+#include <sys/time.h>
+
 #include "result.h"
 
 namespace Sloong
@@ -22,15 +24,56 @@ namespace Sloong
     class Package
     {
     public:
+        inline uint64_t GetClock()
+        {
+            struct timespec spec;
+
+            clock_gettime(CLOCK_REALTIME, &spec);
+
+            auto ms = lround(spec.tv_nsec / 1.0e6); // Convert nanoseconds to milliseconds
+
+            return spec.tv_sec * 1000 + ms;
+        }
+
+        // inline string FormatRecord(Package *pack)
+        // {
+        //     string str;
+        //     auto clocks = pack->clocks();
+        //     auto start = clocks.begin();
+        //     for (auto item = start ++; item != clocks.end(); item++)
+        //     {
+        //         str = format("%s[%.2f]", str.c_str(), *item - *start);
+        //     }
+        //     return str;
+        // }
+
         uint64_t sessionid() { return SessionID; }
         void set_sessionid(uint64_t sessionid) { SessionID = sessionid; }
-        list<uint64_t> clocks() { return Clocks; }
-        void add_clocks(uint64_t clock) { Clocks.push_back(clock); }
+
+        
+        auto get_clocks(){            return Clocks;        }
+
+        void merge_timeline(Package *other)
+        {
+            for (auto &i : other->get_clocks())
+            {
+                Clocks.push_back(i);
+            }
+        }
+
+        void record_point_in_timeline(const string &note)
+        {
+            Clocks.push_back(std::make_pair(GetClock(), note));
+        }
+        void record_point_in_timeline(string &&note)
+        {
+            Clocks.push_back(std::make_pair(GetClock(), move(note)));
+        }
 
         /*** 
          * @description: 这个函数只针对需要提前计算正确的包大小的情况，因为hash字段是在发送之前由Connect对象设置的，所以会先检查Hash字段是否设置过，如果没有则会设置空进去，然后计算大小之后再清空hash。
          */
-        size_t ByteSizeLongEx()
+        inline size_t ByteSizeLongEx()
         {
             auto len = data.ByteSizeLong();
             if (data.hash().length() == 0)
@@ -52,7 +95,7 @@ namespace Sloong
 
         inline uint64_t sender() { return data.sender(); }
         inline void set_sender(uint64_t s) { data.set_sender(s); }
-        
+
         inline string hash() { return data.hash(); }
         inline void set_hash(const string &str) { data.set_hash(str); }
         inline void set_hash(const void *str, int len) { data.set_hash(str, len); }
@@ -97,8 +140,8 @@ namespace Sloong
         inline int32_t function() { return data.function(); }
         inline void set_function(int32_t f) { data.set_function(f); }
 
-        inline int32_t priority() { return data.priority(); }
-        inline void set_priority(int32_t p) { data.set_priority(p); }
+        inline PRIORITY_LEVEL priority() { return data.priority(); }
+        inline void set_priority(PRIORITY_LEVEL p) { data.set_priority(p); }
 
         inline uint64_t id() { return data.id(); }
         inline void set_id(uint64_t id) { data.set_id(id); }
@@ -125,7 +168,7 @@ namespace Sloong
             return package;
         }
 
-        static unique_ptr<Package> GetManagerEventPackage( )
+        static unique_ptr<Package> GetManagerEventPackage()
         {
             auto package = Package::new_unique();
             package->data.set_type(DataPackage_PackageType::DataPackage_PackageType_ManagerEvent);
@@ -149,6 +192,8 @@ namespace Sloong
             response_pack->set_priority(request_pack->priority());
             response_pack->set_function(request_pack->function());
             response_pack->set_id(request_pack->id());
+            response_pack->merge_timeline(request_pack);
+
             return response_pack;
         }
 
@@ -244,11 +289,12 @@ namespace Sloong
             return response_pack;
         }
 
+    public:
         DataPackage data;
 
     private:
         uint64_t SessionID = 0;
-        list<uint64_t> Clocks;
+        list<std::pair<uint64_t, string>> Clocks;
     };
 
     typedef shared_ptr<Package> SmartPackage;

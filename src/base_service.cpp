@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-09-17 16:16:31
+ * @LastEditTime: 2021-09-22 10:05:36
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -482,7 +482,7 @@ CResult CSloongBaseService::Run()
         if (!m_oNodeRuntimeInfo.ManagerMode) // Manager module
         {
             auto event = make_shared<Events::SendPackageEvent>(m_ManagerSession);
-            event->SetRequest(Base::PRIORITY_LEVEL::LOW_LEVEL, (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
+            event->SetRequest( (int)Functions::ReportLoadStatus, ConvertObjToStr(&req), PRIORITY_LEVEL::Low);
             m_iC->SendMessage(event);
         }
 
@@ -530,7 +530,7 @@ void CSloongBaseService::OnSendPackageToManagerEventHandler(SharedEvent e)
     auto req = make_shared<SendPackageEvent>(m_ManagerSession);
     req->SetCallbackFunc([event](IEvent *e, Package *p)
                          { event->CallCallbackFunc(p); });
-    req->SetRequest(Base::HEIGHT_LEVEL, event->GetFunctionID(), event->GetContent());
+    req->SetRequest( event->GetFunctionID(), event->GetContent(), PRIORITY_LEVEL::Real_time);
     m_iC->SendMessage(req);
 }
 

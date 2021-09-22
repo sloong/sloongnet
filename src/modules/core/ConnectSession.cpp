@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2021-09-15 10:40:41
+ * @LastEditTime: 2021-09-22 13:25:53
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -67,14 +67,14 @@ using namespace Sloong::Events;
 
 Sloong::ConnectSession::ConnectSession()
 {
-	m_pSendList = new queue_safety<UniquePackage>[s_PriorityLevel]();
+	m_pSendList = new queue_safety<UniquePackage>[ PRIORITY_LEVEL_ARRAYSIZE ]();
 }
 
 ConnectSession::~ConnectSession()
 {
 	if (m_pConnection)
 		m_pConnection->Close();
-	for (int i = 0; i < s_PriorityLevel; i++)
+	for (int i = 0; i < PRIORITY_LEVEL_ARRAYSIZE; i++)
 	{
 		m_pSendList[i].clear();
 	}
@@ -171,7 +171,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 			else
 			{
 				m_pLog->trace(format("RECV<<<[{}]<<No[{}]<<[{}]byte", m_pConnection->GetSocketID(), package->id(), package->ByteSizeLongEx()));
-				package->add_clocks(GetClock());
+				package->record_point_in_timeline("Received");
 				package->set_sessionid(m_pConnection->GetHashCode());
 				bLoop = true;
 				m_ActiveTime = time(NULL);
@@ -195,10 +195,10 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 					continue;
 				}
 
-				if (package->priority() > s_PriorityLevel || package->priority() < 0)
+				if (!PRIORITY_LEVEL_IsValid(package->priority()))
 				{
-					m_pLog->warn(format("Receive priority level error. the data is {}, the config level is {}. add this message to last list", package->priority(), s_PriorityLevel));
-					package->set_priority(s_PriorityLevel);
+					m_pLog->warn(format("Receive priority level error. the data is {}, the config level is {}. add this message to last list", package->priority(), PRIORITY_LEVEL_ARRAYSIZE));
+					package->set_priority(PRIORITY_LEVEL::Time_consuming);
 				}
 
 				readList.push(std::move(package));
@@ -326,7 +326,7 @@ ResultType Sloong::ConnectSession::ProcessSendList()
 // 如果为-1，表示需要发送新的列表。按照优先级逐级的进行寻找。
 queue_safety<UniquePackage> *Sloong::ConnectSession::GetSendPackage()
 {
-	for (int i = 0; i < s_PriorityLevel; i++)
+	for (int i = 0; i < PRIORITY_LEVEL_ARRAYSIZE; i++)
 	{
 		if (m_pSendList[i].empty())
 			continue;

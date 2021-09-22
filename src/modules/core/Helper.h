@@ -66,7 +66,7 @@
    */
 #pragma once
 
-#include <sys/time.h>
+
 #include <fmt/format.h>
 using fmt::format;
 
@@ -86,31 +86,6 @@ namespace Sloong
 {
 	typedef std::function<CResult(const string &, Package *)> FunctionHandler;
 
-	inline timeval GetTimeval()
-	{
-		struct timeval cur;
-		gettimeofday(&cur, NULL);
-		return cur;
-	}
-
-	inline double GetClock()
-	{
-		auto cur = GetTimeval();
-		return cur.tv_sec * 1000 + cur.tv_usec / 1000.0;
-	}
-
-	inline string FormatRecord(Package *pack)
-	{
-		string str;
-		auto clocks = pack->clocks();
-		auto start = clocks.begin();
-		for (auto item = start ++; item != clocks.end(); item++)
-		{
-			str = format("%s[%.2f]", str.c_str(), *item - *start);
-		}
-		return str;
-	}
-
 	template <typename T, typename K>
 	inline T STATIC_TRANS(K p)
 	{
@@ -126,8 +101,6 @@ namespace Sloong
 		assert(tmp);
 		return tmp;
 	}
-
-	const int s_PriorityLevel = 3;
 
 	template <class T>
 	inline shared_ptr<T> ConvertStrToObj(const string &obj)
