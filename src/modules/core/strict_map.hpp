@@ -1,9 +1,9 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-03-18 20:39:26
- * @LastEditTime: 2020-08-11 19:20:24
+ * @LastEditTime: 2021-09-22 14:40:44
  * @LastEditors: Chuanbin Wang
- * @FilePath: /engine/src/modules/core/map_ex.hpp
+ * @FilePath: /engine/src/modules/core/strict_map.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
  * @Description: 
  */
@@ -105,10 +105,17 @@ namespace Sloong
 				return it->second;
 		}
 
-		void insert(K key, V value )
+		void insert(K key, const V& value )
 		{
 			unique_lock<shared_mutex> lock(m_mut);
 			map<K, V>::operator[](key) = value;
+		}
+
+
+		void insert(K key, V&& value )
+		{
+			unique_lock<shared_mutex> lock(m_mut);
+			map<K, V>::operator[](key) = move(value);
 		}
 
 		V& get(const K &key)

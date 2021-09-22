@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2021-09-22 13:25:53
+ * @LastEditTime: 2021-09-22 14:43:27
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -171,7 +171,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 			else
 			{
 				m_pLog->trace(format("RECV<<<[{}]<<No[{}]<<[{}]byte", m_pConnection->GetSocketID(), package->id(), package->ByteSizeLongEx()));
-				package->record_point_in_timeline("Received");
+				package->record_point("Received");
 				package->set_sessionid(m_pConnection->GetHashCode());
 				bLoop = true;
 				m_ActiveTime = time(NULL);

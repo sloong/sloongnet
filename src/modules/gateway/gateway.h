@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-01-15 15:57:36
- * @LastEditTime: 2021-09-01 15:37:59
+ * @LastEditTime: 2021-09-22 16:15:08
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/gateway.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -81,6 +81,19 @@ extern "C"
 
 namespace Sloong
 {
+	typedef struct _FORWARD_RANE_INFO{
+		bool InRange(int f){
+			return f >= begin && f <= end;
+		}
+		int begin, end;
+		int forward_to;
+	}_FORWARD_RANE_INFO;
+
+	typedef struct _FORWARD_MAP_INFO{
+		int source_function,map_function;	
+		int forward_to;
+	}_FORWARD_MAP_INFO;
+
 	class SloongNetGateway : public IObject
 	{
 	public:
@@ -110,18 +123,22 @@ namespace Sloong
 		void AddConnection(uint64_t, const string &, int);
 
 	public:
-		uint64_t GetPorcessConnection(int function);
-		map_ex<int, list_ex<int>> m_mapFuncToTemplateIDs;
-		map_ex<int, list_ex<uint64_t>> m_mapTempteIDToUUIDs;
+		U64Result GetPorcessConnection(int function);
+		list_ex<_FORWARD_RANE_INFO> m_mapforwardRangeInfo;
+		strict_map<int, _FORWARD_MAP_INFO> m_mapForwardMapInfo;
+		strict_map<int, list_ex<uint64_t>> m_mapTempteIDToUUIDs;
 		map_ex<uint64_t, NodeItem> m_mapUUIDToNode;
-		map_ex<uint64_t, uint64_t> m_mapUUIDToConnectionID;
+		map_ex<uint64_t, SessionID> m_mapUUIDToConnectionID;
 		map_ex<uint64_t, UniquePackage> m_mapSerialToRequest;
+		
 
 	protected:
 		list<unique_ptr<GatewayTranspond>> m_listTranspond;
 		
 		GLOBAL_CONFIG *m_pConfig;
 		Json::Value *m_pModuleConfig;
+
+		int _DefaultTemplateId;
 	public:
 		static unique_ptr<SloongNetGateway> Instance;
 	};

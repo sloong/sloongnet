@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-08-07 12:43:05
- * @LastEditTime: 2021-08-26 14:16:15
+ * @LastEditTime: 2021-09-22 14:55:46
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/core.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -110,3 +110,5 @@ using namespace Core;
 #include "package.hpp"
 
 using namespace Sloong;
+
+typedef uint64_t SessionID;

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-09-22 13:22:07
+ * @LastEditTime: 2021-09-22 14:06:27
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/package.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -38,9 +38,9 @@ namespace Sloong
         // inline string FormatRecord(Package *pack)
         // {
         //     string str;
-        //     auto clocks = pack->clocks();
-        //     auto start = clocks.begin();
-        //     for (auto item = start ++; item != clocks.end(); item++)
+        //     auto _timeline = pack->_timeline();
+        //     auto start = _timeline.begin();
+        //     for (auto item = start ++; item != _timeline.end(); item++)
         //     {
         //         str = format("%s[%.2f]", str.c_str(), *item - *start);
         //     }
@@ -51,23 +51,23 @@ namespace Sloong
         void set_sessionid(uint64_t sessionid) { SessionID = sessionid; }
 
         
-        auto get_clocks(){            return Clocks;        }
+        auto get_timeline(){            return _timeline;        }
 
         void merge_timeline(Package *other)
         {
-            for (auto &i : other->get_clocks())
+            for (auto &i : other->get_timeline())
             {
-                Clocks.push_back(i);
+                _timeline.push_back(i);
             }
         }
 
-        void record_point_in_timeline(const string &note)
+        void record_point(const string &note)
         {
-            Clocks.push_back(std::make_pair(GetClock(), note));
+            _timeline.push_back(std::make_pair(GetClock(), note));
         }
-        void record_point_in_timeline(string &&note)
+        void record_point(string &&note)
         {
-            Clocks.push_back(std::make_pair(GetClock(), move(note)));
+            _timeline.push_back(std::make_pair(GetClock(), move(note)));
         }
 
         /*** 
@@ -294,7 +294,7 @@ namespace Sloong
 
     private:
         uint64_t SessionID = 0;
-        list<std::pair<uint64_t, string>> Clocks;
+        list<std::pair<uint64_t, string>> _timeline;
     };
 
     typedef shared_ptr<Package> SmartPackage;

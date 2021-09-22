@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2021-09-22 13:24:12
+ * @LastEditTime: 2021-09-22 14:43:34
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -420,7 +420,7 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 					// it just for is need add the pack obj to send list.
 					result.SetResult(ResultType::Ignore);
 
-					package->record_point_in_timeline("StartPorcess");
+					package->record_point("StartPorcess");
 					switch (package->type())
 					{
 					case DataPackage_PackageType::DataPackage_PackageType_ControlEvent:
