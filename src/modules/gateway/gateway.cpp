@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-01-15 15:57:36
- * @LastEditTime: 2021-09-22 16:28:18
+ * @LastEditTime: 2021-09-22 17:44:32
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/gateway.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -403,9 +403,15 @@ U64Result Sloong::SloongNetGateway::GetPorcessConnection(int function)
 		return U64Result::Make_Error("Forward error: not node infomation.");
 	}
 
+	
+
 	for (auto node : m_mapTempteIDToUUIDs.get(forward_to))
 	{
 		// TODO: should be check the node loading.
 		return U64Result::Make_OKResult(m_mapUUIDToConnectionID[node]);
 	}
+
+	auto node = m_mapTempteIDToUUIDs.get(forward_to).begin();
+	return U64Result::Make_OKResult(m_mapUUIDToConnectionID[*node]);
+
 }
