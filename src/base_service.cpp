@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-09-22 10:05:36
+ * @LastEditTime: 2021-09-24 11:23:16
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -67,6 +67,9 @@ using namespace Sloong::Events;
 
 #include "modules/manager/protocol/manager.pb.h"
 using namespace Manager;
+
+#include "linux_cpuload.hpp"
+#include "linux_memoryload.hpp"
 
 IControl *Sloong::IData::m_iC = nullptr;
 unique_ptr<CSloongBaseService> Sloong::CSloongBaseService::Instance = nullptr;
@@ -467,17 +470,17 @@ CResult CSloongBaseService::Run()
     m_iC->SendMessage(EVENT_TYPE::ProgramStart);
     m_emStatus = RUN_STATUS::Running;
 
-    auto prev_status = make_shared<CPU_OCCUPY>();
-    CUtility::RecordCPUStatus(prev_status.get());
-    int mem_total, mem_free;
+    auto CpuLoadInstance = cpuLoad::createInstance();
+    unique_ptr<memoryLoad> MemoryLoadInstance =make_unique<memoryLoad>();
+
     // Report server load status each one minutes.
     while (!m_oExitSync.wait_for(REPORT_LOAD_STATUS_INTERVAL) && m_emStatus != RUN_STATUS::Exit)
     {
         Manager::ReportLoadStatusRequest req;
-        auto load = CUtility::CalculateCPULoad(prev_status.get());
-        CUtility::GetMemory(mem_total, mem_free);
+        auto load = CpuLoadInstance->getCurrentCpuUsage();
+        auto mem_load = MemoryLoadInstance->getCurrentMemUsageInPercent();
         req.set_cpuload(load);
-        req.set_memroyused(mem_total / mem_free);
+        req.set_memroyused(mem_load);
 
         if (!m_oNodeRuntimeInfo.ManagerMode) // Manager module
         {
@@ -485,8 +488,6 @@ CResult CSloongBaseService::Run()
             event->SetRequest( (int)Functions::ReportLoadStatus, ConvertObjToStr(&req), PRIORITY_LEVEL::Low);
             m_iC->SendMessage(event);
         }
-
-        CUtility::RecordCPUStatus(prev_status.get());
     }
 
     m_pLog->info("Application main work loop end with result " + ResultType_Name(m_oExitResult.GetResult()));

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-01-15 15:57:36
- * @LastEditTime: 2021-09-23 17:07:42
+ * @LastEditTime: 2021-09-24 11:03:39
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/gateway.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -414,7 +414,7 @@ FWResult Sloong::SloongNetGateway::GetForwardInfo(int function)
 	{
 		auto item = m_mapForwardMapInfo.get(function);
 		forward_to = item.forward_to;
-		new_function = item.to
+		new_function = item.to;
 	}
 	else
 	{

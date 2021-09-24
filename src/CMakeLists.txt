@@ -8,6 +8,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/protobuf_ex.cmake)
 include_directories(
     "${CMAKE_CURRENT_LIST_DIR}"
 	"${CMAKE_CURRENT_LIST_DIR}/referenced/libuniv/include"
+    "${CMAKE_CURRENT_LIST_DIR}/referenced/libsysinfo/lib"
     "${CMAKE_CURRENT_LIST_DIR}/referenced"
     "${CMAKE_CURRENT_LIST_DIR}/modules/core"
 )
