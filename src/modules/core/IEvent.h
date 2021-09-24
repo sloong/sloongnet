@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2021-02-25 18:51:10
+ * @LastEditTime: 2021-09-24 11:02:38
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/IEvent.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -60,9 +60,9 @@
 #pragma once
 
 #include <memory>
+#include <functional>
 using namespace std;
 
-#include "Helper.h"
 // 事件的接口
 // 由于涉及到多处理函数，而且释放必须由最后一个使用者来释放
 // 所以将由框架在发送之前，根据处理函数的个数来自动调用AddRef函数来增加计数。

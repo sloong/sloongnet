@@ -1,7 +1,7 @@
 <!--
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2021-03-24 11:49:29
- * @LastEditTime: 2021-09-22 16:09:26
+ * @LastEditTime: 2021-09-23 16:34:13
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/README.md
  * Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -13,20 +13,25 @@
 example:
 ```
 {
-    "forwards": {
+    "forwarders": {
         "default": 5,
         "range": [
             {
+                "forward_to": 5
                 "begin": 100,
                 "end":200,
-                "forward_to": 5
+                "convert_rule": {
+                    "direction":"+/-",
+                    "offset":10,
+                }
             }
         ],
-        "map": [
+        "single": [
             {
-                "source_function": 105,
-                "map_function": 305,
                 "forward_to": 5,
+                "maps": [
+                    "105":"305",
+                ]
             }
         ]
     }

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-01-12 15:25:16
- * @LastEditTime: 2021-03-25 17:43:26
+ * @LastEditTime: 2021-09-24 11:02:24
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EasyConnect.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -63,7 +63,6 @@
 #include "EasyConnect.h"
 #include <sys/socket.h>
 #include "utility.h"
-#include "Helper.h"
 
 // If want use the int64 to send the length data, define this.
 //#define USE_INT64_LENGTH_SIZE	1

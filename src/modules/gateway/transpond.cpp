@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-28 14:43:16
- * @LastEditTime: 2021-09-22 16:18:25
+ * @LastEditTime: 2021-09-23 17:08:53
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/transpond.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -32,9 +32,10 @@ PackageResult GatewayTranspond::ResponsePackageProcesser(UniquePackage info, Pac
 PackageResult Sloong::GatewayTranspond::MessageToProcesser(Package *pack)
 {
 	m_pLog->debug("Receive new request package.");
-	auto target = SloongNetGateway::Instance->GetPorcessConnection(pack->function());
+	auto target = SloongNetGateway::Instance->GetForwardInfo(pack->function());
 	if (target.IsSucceed())
 	{
+		auto info = target.GetResultObject();
 		auto response = Package::MakeResponse(pack);
 		response->record_point("ForwardToProcesser");
 
@@ -43,10 +44,11 @@ PackageResult Sloong::GatewayTranspond::MessageToProcesser(Package *pack)
 		trans_pack->set_type(DataPackage_PackageType::DataPackage_PackageType_Request);
 		trans_pack->set_content(pack->content());
 		trans_pack->set_extend(pack->extend());
+		trans_pack->set_function(info.function_id);
 
 		auto id = snowflake::Instance->nextid();
 		trans_pack->set_id(id);
-		trans_pack->set_sessionid(target.GetResultObject());
+		trans_pack->set_sessionid(info.connection_id);
 
 		m_pLog->debug(format("Trans package [{}][{}] -> [{}][{}]", pack->sessionid(), pack->id(), trans_pack->sessionid(), trans_pack->id()));
 

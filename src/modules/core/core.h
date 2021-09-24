@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-08-07 12:43:05
- * @LastEditTime: 2021-09-22 14:55:46
+ * @LastEditTime: 2021-09-23 16:50:00
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/core.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -90,6 +90,10 @@ using namespace std;
 #include <fmt/format.h>
 using fmt::format;
 
+#include <spdlog/spdlog.h>
+
+#include <jsoncpp/json/json.h>
+
 
 #include "protocol/base.pb.h"
 using namespace Base;
@@ -97,7 +101,6 @@ using namespace Base;
 #include "protocol/core.pb.h"
 using namespace Core;
 
-#include <jsoncpp/json/json.h>
 
 #include "package.hpp"
 

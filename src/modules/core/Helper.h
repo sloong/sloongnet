@@ -66,16 +66,19 @@
    */
 #pragma once
 
-
 #include <fmt/format.h>
 using fmt::format;
+
+#include <spdlog/spdlog.h>
+
+#include <jsoncpp/json/json.h>
+
 
 // univ head file
 #include "univ.h"
 using namespace Sloong;
 using namespace Sloong::Universal;
 
-#include <spdlog/spdlog.h>
 
 #include "result.h"
 #include "package.hpp" 
@@ -131,8 +134,10 @@ namespace Sloong
 	{
 		try
 		{
+			// save to temp value. because the out_res maybe nullptr, the user just want check the string can't to int.
+			auto out = stoi(str);
 			if (out_res)
-				(*out_res) = stoi(str);
+				(*out_res) = out;
 			return true;
 		}
 		catch (const invalid_argument &e)
@@ -276,5 +281,39 @@ namespace Sloong
 	inline uint32_t CRCEncode32( const string& s )
 	{
 		return CRC::Calculate( s.c_str(), s.size(), CRC::CRC_32());
+	}
+
+	inline bool CheckJsonString( const Json::Value& j, const string& key ){ 
+		return j.isMember(key) && j[key].isString();
+	}
+	inline bool CheckJsonInt( const Json::Value& j, const string& key, bool allowString = true ){
+		if( j.isMember(key) )
+		{
+			auto& v = j[key];
+			if( v.isInt() )
+				return true;
+
+			if(!allowString) return false;
+			if(!v.isString() ) return false;
+
+			return ConvertStrToInt(v.asString(), nullptr);
+		}
+		return false;
+	}
+	inline int GetJsonInt(const Json::Value& j, const string& key, bool allowString = true){
+		if( j.isMember(key) )
+		{
+			auto& v = j[key];
+			if( v.isInt() )
+				return v.asInt();
+
+			if(!allowString) throw invalid_argument("Json: value not int type.");
+			if(!v.isString() ) throw invalid_argument("Json: value not int/string type.");
+			int res = 0;
+			if(!ConvertStrToInt(v.asString(), &res) )
+				throw invalid_argument(format("Json: convert [{}] to int type failed.",v.asString()));
+			return res;
+		}
+		throw invalid_argument("Json: not have the key.");
 	}
 } // namespace Sloong

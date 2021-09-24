@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-03-18 20:39:26
- * @LastEditTime: 2021-09-22 14:40:44
+ * @LastEditTime: 2021-09-23 17:02:16
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/strict_map.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -134,7 +134,7 @@ namespace Sloong
 			return true;
 		}
 
-		void rase(const K &key)
+		void erase(const K &key)
 		{
 			unique_lock<shared_mutex> lock(m_mut);
 			map<K, V>::erase(key);
