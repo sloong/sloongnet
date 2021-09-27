@@ -1,7 +1,7 @@
 ﻿/*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-09-17 17:40:45
+ * @LastEditTime: 2021-09-27 17:06:40
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/main.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -36,6 +36,18 @@ void PrintVersion()
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+
+// prints the explanatory string of an exception. If the exception is nested,
+// recurses to print the explanatory of the exception it holds
+void print_exception(const std::exception& e, int level =  0)
+{
+    std::cerr << std::string(level, ' ') << "exception: " << e.what() << '\n';
+    try {
+        std::rethrow_if_nested(e);
+    } catch(const std::exception& e) {
+        print_exception(e, level+1);
+    } catch(...) {}
+}
 
 int main(int argc, char **args)
 {
@@ -148,20 +160,10 @@ int main(int argc, char **args)
 		Sloong::CSloongBaseService::Instance = nullptr;
 		spdlog::shutdown();
 		return 0;
-	}
-	catch (string &msg)
-	{
-		cout << "exception happened, message:" << msg << endl;
-		return -4;
-	}
-	catch (exception &exc)
-	{
-		cout << "exception happened, message:" << exc.what() << endl;
-		return -4;
-	}
-	catch (...)
-	{
-		cout << "Unhandle exception happened, system will shutdown. " << endl;
+	}catch(const std::exception& e) {
+        print_exception(e);
+    }catch (...){
+		cout << "Unhandle exception happneed, system will shutdown. " << endl;
 		cout << CUtility::GetCallStack();
 		return -4;
 	}

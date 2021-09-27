@@ -307,13 +307,13 @@ namespace Sloong
 			if( v.isInt() )
 				return v.asInt();
 
-			if(!allowString) throw invalid_argument("Json: value not int type.");
-			if(!v.isString() ) throw invalid_argument("Json: value not int/string type.");
+			if(!allowString)  std::throw_with_nested(invalid_argument("Json: value not int type."));
+			if(!v.isString() ) std::throw_with_nested(invalid_argument("Json: value not int/string type."));
 			int res = 0;
 			if(!ConvertStrToInt(v.asString(), &res) )
-				throw invalid_argument(format("Json: convert [{}] to int type failed.",v.asString()));
+				std::throw_with_nested(invalid_argument(format("Json: convert [{}] to int type failed.",v.asString())));
 			return res;
 		}
-		throw invalid_argument("Json: not have the key.");
+		std::throw_with_nested(invalid_argument("Json: not have the key."));
 	}
 } // namespace Sloong

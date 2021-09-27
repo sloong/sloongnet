@@ -617,20 +617,20 @@ int CGlobalFunction::Lua_MoveFile(lua_State *l)
         if (orgName == "" || newName == "")
         {
             nRes = -2;
-            throw invalid_argument(format("Move File error. File name cannot empty. orgName:{};newName:{}", orgName, newName));
+            std::throw_with_nested(invalid_argument(format("Move File error. File name cannot empty. orgName:{};newName:{}", orgName, newName)));
         }
 
         if (access(orgName.c_str(), ACC_R) != 0)
         {
             nRes = -1;
-            throw runtime_error(format("Move File error. Origin file not exist or can not read:[{}]", orgName));
+            std::throw_with_nested(runtime_error(format("Move File error. Origin file not exist or can not read:[{}]", orgName)));
         }
 
         int res = Helper::CheckFileDirectory(newName);
         if (res < 0)
         {
             nRes = -1;
-            throw runtime_error(format("Move File error.CheckFileDirectory error:[{}][{}]", newName, res));
+            std::throw_with_nested(runtime_error(format("Move File error.CheckFileDirectory error:[{}][{}]", newName, res)));
         }
 
         if (!Helper::MoveFile(orgName, newName))
@@ -639,7 +639,7 @@ int CGlobalFunction::Lua_MoveFile(lua_State *l)
             if (!Helper::RunSystemCmd(format("cp \"{}\" \"{}\"", orgName, newName)))
             {
                 nRes = -3;
-                throw runtime_error("Move File and try copy file error.");
+                std::throw_with_nested(runtime_error("Move File and try copy file error."));
             }
             nRes = 1;
         }
