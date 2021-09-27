@@ -1,13 +1,13 @@
-/*** 
+/***
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-09-24 11:23:16
+ * @LastEditTime: 2021-09-27 17:30:03
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description:
  */
-/*** 
+/***
  * @......................................&&.........................
  * @....................................&&&..........................
  * @.................................&&&&............................
@@ -58,11 +58,12 @@
  */
 
 #include "base_service.h"
-#include "utility.h"
 
+#include "events/RegisterConnection.hpp"
 #include "events/SendPackage.hpp"
 #include "events/SendPackageToManager.hpp"
-#include "events/RegisterConnection.hpp"
+#include "utility.h"
+
 using namespace Sloong::Events;
 
 #include "modules/manager/protocol/manager.pb.h"
@@ -103,7 +104,7 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
 
 U64Result CSloongBaseService::InitlializeForWorker(EasyConnect *con)
 {
-    m_pLog->info( "Connect to control succeed. Start registe and get configuration." );
+    m_pLog->info("Connect to control succeed. Start registe and get configuration.");
 
     RegisterWorkerRequest sub_req;
     if (!m_oNodeRuntimeInfo.AssignedTargetTemplateID.empty())
@@ -176,7 +177,7 @@ U64Result CSloongBaseService::InitlializeForWorker(EasyConnect *con)
             else
             {
                 this_thread::sleep_for(std::chrono::seconds(1));
-                //sleep(1);
+                // sleep(1);
                 m_pLog->trace("Control return retry package. wait 1s and retry.");
             }
             continue;
@@ -197,10 +198,11 @@ U64Result CSloongBaseService::InitlializeForWorker(EasyConnect *con)
         }
         else
         {
-            return U64Result::Make_Error(format("Control return an unexpected result {}. Message {}.", ResultType_Name(response->result()), response->content()));
+            return U64Result::Make_Error(format("Control return an unexpected result {}. Message {}.",
+                                                ResultType_Name(response->result()), response->content()));
         }
     };
-    m_pLog->info( "Get configuration done.");
+    m_pLog->info("Get configuration done.");
     return result;
 }
 
@@ -218,18 +220,21 @@ void CSloongBaseService::InitSystem()
 {
     set_terminate(sloong_terminator);
     set_unexpected(sloong_unexpected);
-    //SIG_IGN:忽略信号的处理程序
-    //SIGPIPE:在reader终止之后写pipe的时候发生
-    signal(SIGPIPE, SIG_IGN); // this signal should call the socket check function. and remove the timeout socket.
-    //SIGCHLD: 进程Terminate或Stop的时候,SIGPIPE会发送给进程的父进程,缺省情况下该Signal会被忽略
+    // SIG_IGN:忽略信号的处理程序
+    // SIGPIPE:在reader终止之后写pipe的时候发生
+    signal(SIGPIPE, SIG_IGN); // this signal should call the socket check
+                              // function. and remove the timeout socket.
+    // SIGCHLD:
+    // 进程Terminate或Stop的时候,SIGPIPE会发送给进程的父进程,缺省情况下该Signal会被忽略
     signal(SIGCHLD, SIG_IGN);
-    //SIGINT:由Interrupt Key产生,通常是Ctrl+c或者Delete,发送给所有的ForeGroundGroup进程.
+    // SIGINT:由Interrupt
+    // Key产生,通常是Ctrl+c或者Delete,发送给所有的ForeGroundGroup进程.
     signal(SIGINT, &on_SIGINT_Event);
     // SIGSEGV:当一个进程执行了一个无效的内存引用，或发生段错误时发送给它的信号
     signal(SIGSEGV, &on_sigint);
 }
 
-CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger* log) 
+CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger *log)
 {
     m_pLog = log;
     m_emStatus = RUN_STATUS::Created;
@@ -249,7 +254,8 @@ CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger* log)
     else
     {
         pManagerConnect = make_unique<EasyConnect>();
-        res = pManagerConnect->InitializeAsClient(nullptr, m_oNodeRuntimeInfo.Address, m_oNodeRuntimeInfo.Port, nullptr);
+        res =
+            pManagerConnect->InitializeAsClient(nullptr, m_oNodeRuntimeInfo.Address, m_oNodeRuntimeInfo.Port, nullptr);
         if (res.IsFialed())
         {
             return CResult::Make_Error("Connect to control fialed." + res.GetMessage());
@@ -265,14 +271,15 @@ CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger* log)
         return res;
     auto pConfig = &m_oNodeRuntimeInfo.TemplateConfig;
     // if (pConfig->logoperation() == 0)
-        // pConfig->set_logoperation(LOGOPT::WriteToSTDOut);
+    // pConfig->set_logoperation(LOGOPT::WriteToSTDOut);
 
 #ifdef DEBUG
     pConfig->set_loglevel(Core::LogLevel::Verbos);
     // pConfig->set_logoperation(pConfig->logoperation() | LOGOPT::WriteToSTDOut);
 #endif
-    m_pLog->set_level( spdlog::level::level_enum(pConfig->loglevel()));
-    // m_pLog->Initialize(pConfig->logpath(), "", LOGOPT(pConfig->logoperation()), LOGLEVEL(pConfig->loglevel()), LOGTYPE::DAY);
+    m_pLog->set_level(spdlog::level::level_enum(pConfig->loglevel()));
+    // m_pLog->Initialize(pConfig->logpath(), "", LOGOPT(pConfig->logoperation()),
+    // LOGLEVEL(pConfig->loglevel()), LOGTYPE::DAY);
 
     res = InitModule();
     if (res.IsFialed())
@@ -304,7 +311,8 @@ CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger* log)
         Json::CharReaderBuilder builder;
         const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
         JSONCPP_STRING err;
-        if (!reader->parse(pConfig->moduleconfig().c_str(), pConfig->moduleconfig().c_str() + pConfig->moduleconfig().length(), &m_oModuleConfig, &err))
+        if (!reader->parse(pConfig->moduleconfig().c_str(),
+                           pConfig->moduleconfig().c_str() + pConfig->moduleconfig().length(), &m_oModuleConfig, &err))
         {
             m_pLog->critical("Error parsing module configuration");
             cerr << err << endl;
@@ -325,9 +333,13 @@ CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger* log)
     }
     m_pLog->debug("Module initialization succeed.");
 
-    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramRestart, std::bind(&CSloongBaseService::OnProgramRestartEventHandler, this, std::placeholders::_1));
-    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStop, std::bind(&CSloongBaseService::OnProgramStopEventHandler, this, std::placeholders::_1));
-    m_iC->RegisterEventHandler(EVENT_TYPE::SendPackageToManager, std::bind(&CSloongBaseService::OnSendPackageToManagerEventHandler, this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramRestart, std::bind(&CSloongBaseService::OnProgramRestartEventHandler,
+                                                                     this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStop,
+                               std::bind(&CSloongBaseService::OnProgramStopEventHandler, this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(
+        EVENT_TYPE::SendPackageToManager,
+        std::bind(&CSloongBaseService::OnSendPackageToManagerEventHandler, this, std::placeholders::_1));
 
     IData::Initialize(m_iC.get());
     m_pNetwork->RegisterEnvCreateProcesser(m_pModuleCreateProcessEvnFunc);
@@ -344,18 +356,18 @@ CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger* log)
 
     if (pManagerConnect)
     {
-        auto event = make_shared<Events::RegisterConnectionEvent>(pManagerConnect->m_strAddress, pManagerConnect->m_nPort);
-        event->SetCallbackFunc([s = &m_ManagerSession](IEvent *e, uint64_t sessionid)
-                               { *s = sessionid; });
-        event->EnableReconnectCallback([&](uint64_t, int, int)
-                                       {
-                                           ReconnectRegisterRequest req_pack;
-                                           req_pack.set_templateid(m_oNodeRuntimeInfo.TemplateID);
-                                           req_pack.set_nodeuuid(m_oNodeRuntimeInfo.NodeUUID);
+        auto event =
+            make_shared<Events::RegisterConnectionEvent>(pManagerConnect->m_strAddress, pManagerConnect->m_nPort);
+        event->SetCallbackFunc([s = &m_ManagerSession](IEvent *e, uint64_t sessionid) { *s = sessionid; });
+        event->EnableReconnectCallback([&](uint64_t, int, int) {
+            ReconnectRegisterRequest req_pack;
+            req_pack.set_templateid(m_oNodeRuntimeInfo.TemplateID);
+            req_pack.set_nodeuuid(m_oNodeRuntimeInfo.NodeUUID);
 
-                                           auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::ReconnectRegister, ConvertObjToStr(&req_pack));
-                                           return event->SyncCall(m_iC.get(), 5000);
-                                       });
+            auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::ReconnectRegister,
+                                                                ConvertObjToStr(&req_pack));
+            return event->SyncCall(m_iC.get(), 5000);
+        });
         m_iC->CallMessage(event);
     }
 
@@ -383,7 +395,8 @@ CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger* log)
 CResult CSloongBaseService::InitModule()
 {
     // Load the module library
-    string libFullPath = m_oNodeRuntimeInfo.TemplateConfig.modulepath() + m_oNodeRuntimeInfo.TemplateConfig.modulename();
+    string libFullPath =
+        m_oNodeRuntimeInfo.TemplateConfig.modulepath() + m_oNodeRuntimeInfo.TemplateConfig.modulename();
 
     m_pLog->debug(format("Start init module {} and load module functions", libFullPath));
     m_pModule = dlopen(libFullPath.c_str(), RTLD_LAZY | RTLD_GLOBAL);
@@ -425,7 +438,9 @@ CResult CSloongBaseService::InitModule()
     m_pModuleAcceptHandler = (NewConnectAcceptProcessFunction)dlsym(m_pModule, "NewConnectAcceptProcesser");
     if ((errmsg = dlerror()) != NULL)
     {
-        string errMsg = format("Load function NewConnectAcceptProcesser error {}. Use default function.", errmsg);
+        string errMsg = format("Load function NewConnectAcceptProcesser error {}. "
+                               "Use default function.",
+                               errmsg);
         m_pLog->warn(errMsg);
     }
     m_pPrepareInitializeFunc = (PrepareInitializeFunction)dlsym(m_pModule, "PrepareInitialize");
@@ -437,13 +452,17 @@ CResult CSloongBaseService::InitModule()
     m_pModuleInitializationFunc = (ModuleInitializationFunction)dlsym(m_pModule, "ModuleInitialization");
     if ((errmsg = dlerror()) != NULL)
     {
-        string errMsg = format("Load function ModuleInitialize error {}. maybe module no need initiliaze.", errmsg);
+        string errMsg = format("Load function ModuleInitialize error {}. maybe "
+                               "module no need initiliaze.",
+                               errmsg);
         m_pLog->warn(errMsg);
     }
     m_pModuleInitializedFunc = (ModuleInitializedFunction)dlsym(m_pModule, "ModuleInitialized");
     if ((errmsg = dlerror()) != NULL)
     {
-        string errMsg = format("Load function ModuleInitialize error {}. maybe module no need initiliaze.", errmsg);
+        string errMsg = format("Load function ModuleInitialize error {}. maybe "
+                               "module no need initiliaze.",
+                               errmsg);
         m_pLog->warn(errMsg);
     }
     m_pLog->debug("load module functions done.");
@@ -463,7 +482,8 @@ CResult CSloongBaseService::Run()
 {
     if (m_emStatus != RUN_STATUS::Created)
     {
-        // May create evnironment error, and the application is received programstop event.
+        // May create evnironment error, and the application is received programstop
+        // event.
         return CResult::Make_Error("Application run function is called, but the status not created.");
     }
     m_pLog->info("Application begin running.");
@@ -471,21 +491,21 @@ CResult CSloongBaseService::Run()
     m_emStatus = RUN_STATUS::Running;
 
     auto CpuLoadInstance = cpuLoad::createInstance();
-    unique_ptr<memoryLoad> MemoryLoadInstance =make_unique<memoryLoad>();
+    unique_ptr<memoryLoad> MemoryLoadInstance = make_unique<memoryLoad>();
 
     // Report server load status each one minutes.
     while (!m_oExitSync.wait_for(REPORT_LOAD_STATUS_INTERVAL) && m_emStatus != RUN_STATUS::Exit)
     {
-        Manager::ReportLoadStatusRequest req;
-        auto load = CpuLoadInstance->getCurrentCpuUsage();
-        auto mem_load = MemoryLoadInstance->getCurrentMemUsageInPercent();
-        req.set_cpuload(load);
-        req.set_memroyused(mem_load);
-
         if (!m_oNodeRuntimeInfo.ManagerMode) // Manager module
         {
+            Manager::ReportLoadStatusRequest req;
+            auto load = CpuLoadInstance->getCurrentCpuUsage();
+            auto mem_load = MemoryLoadInstance->getCurrentMemUsageInPercent();
+            req.set_cpuload(load);
+            req.set_memroyused(mem_load);
+
             auto event = make_shared<Events::SendPackageEvent>(m_ManagerSession);
-            event->SetRequest( (int)Functions::ReportLoadStatus, ConvertObjToStr(&req), PRIORITY_LEVEL::Low);
+            event->SetRequest((int)Functions::ReportLoadStatus, ConvertObjToStr(&req), PRIORITY_LEVEL::Low);
             m_iC->SendMessage(event);
         }
     }
@@ -505,8 +525,9 @@ void CSloongBaseService::Stop()
 
 void CSloongBaseService::OnProgramRestartEventHandler(SharedEvent event)
 {
-    // Restart service. use the Exit Sync object, notify the wait thread and return the ExitResult.
-    // in main function, check the result, if is Retry, do the init loop.
+    // Restart service. use the Exit Sync object, notify the wait thread and
+    // return the ExitResult. in main function, check the result, if is Retry, do
+    // the init loop.
     m_oExitResult = CResult(ResultType::Retry);
     m_emStatus = RUN_STATUS::Exit;
     m_oExitSync.notify_all();
@@ -529,9 +550,8 @@ void CSloongBaseService::OnSendPackageToManagerEventHandler(SharedEvent e)
     auto event = dynamic_pointer_cast<SendPackageToManagerEvent>(e);
 
     auto req = make_shared<SendPackageEvent>(m_ManagerSession);
-    req->SetCallbackFunc([event](IEvent *e, Package *p)
-                         { event->CallCallbackFunc(p); });
-    req->SetRequest( event->GetFunctionID(), event->GetContent(), PRIORITY_LEVEL::Real_time);
+    req->SetCallbackFunc([event](IEvent *e, Package *p) { event->CallCallbackFunc(p); });
+    req->SetRequest(event->GetFunctionID(), event->GetContent(), PRIORITY_LEVEL::Real_time);
     m_iC->SendMessage(req);
 }
 
