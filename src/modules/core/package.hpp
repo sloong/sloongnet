@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-09-27 15:34:25
+ * @LastEditTime: 2021-09-27 16:01:17
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/package.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -51,7 +51,7 @@ namespace Sloong
         void set_sessionid(uint64_t sessionid) { SessionID = sessionid; }
 
         
-        auto get_timeline(){            return _timeline;        }
+        auto get_timeline(){ return _timeline; }
 
         void merge_timeline(Package *other)
         {
@@ -62,9 +62,8 @@ namespace Sloong
         }
 
         /*** 
-         * @description: 
-         * @param {string} &note
-         * @return {*}
+         * @description: record current time point to timeline.
+         * @param {string&} note: the note message
          */        
         void record_point(const string &note)
         {
