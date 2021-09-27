@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-12-04 17:40:06
- * @LastEditTime: 2021-09-27 15:31:23
+ * @LastEditTime: 2021-09-27 16:14:22
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ConnectSession.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -67,7 +67,7 @@ using namespace Sloong::Events;
 
 Sloong::ConnectSession::ConnectSession()
 {
-	m_pSendList = new queue_safety<UniquePackage>[ PRIORITY_LEVEL_ARRAYSIZE ]();
+	m_pSendList = new queue_safety<UniquePackage>[PRIORITY_LEVEL_ARRAYSIZE]();
 }
 
 ConnectSession::~ConnectSession()
@@ -81,7 +81,6 @@ ConnectSession::~ConnectSession()
 	SAFE_DELETE_ARR(m_pSendList);
 
 	m_oPrepareSendList.clear();
-	
 }
 
 void Sloong::ConnectSession::Initialize(IControl *iMsg, UniqueConnection conn)
@@ -91,26 +90,28 @@ void Sloong::ConnectSession::Initialize(IControl *iMsg, UniqueConnection conn)
 	m_pConnection = std::move(conn);
 }
 
-
 ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
 {
 	if (IsOverflowPackage(pack.get()))
 	{
 		m_pLog->error("The package size is to bigger, this's returned and replaced with an error message package.");
 		pack->set_result(ResultType::Error);
-		pack->set_content("The package size is to bigger." );
+		pack->set_content("The package size is to bigger.");
 		pack->clear_extend();
 	}
 
-	if( m_pConnection->GetSocketID() ==  INVALID_SOCKET && m_pConnection->SupportReconnect() )
+	if (m_pConnection->GetSocketID() == INVALID_SOCKET && m_pConnection->SupportReconnect())
 	{
 		m_pConnection->Connect();
 	}
 
-	m_pLog->trace(format("SEND>>>[{}]>>No[{}]>>[{}]byte", m_pConnection->GetSocketID() , pack->id(), pack->ByteSizeLongEx()));
+	m_pLog->trace(format("SEND>>>[{}]>>No[{}]>>[{}]byte", m_pConnection->GetSocketID(), pack->id(), pack->ByteSizeLongEx()));
 
 	// if have exdata, directly add to epoll list.
-	if (IsBigPackage(pack.get()) || m_pConnection->IsSending() || (m_bIsSendListEmpty == false && !m_oPrepareSendList.empty()) || m_oSockSendMutex.try_lock() == false)
+	if (IsBigPackage(pack.get()) ||
+		m_pConnection->IsSending() ||
+		(m_bIsSendListEmpty == false && !m_oPrepareSendList.empty()) ||
+		m_oSockSendMutex.try_lock() == false)
 	{
 		AddToSendList(move(pack));
 		return ResultType::Retry;
@@ -166,7 +167,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 			if (IsOverflowPackage(package.get()))
 			{
 				m_pLog->warn("The package size is to bigger.");
-				AddToSendList(Package::MakeErrorResponse(package.get(),"The package size is to bigger."));
+				AddToSendList(Package::MakeErrorResponse(package.get(), "The package size is to bigger."));
 			}
 			else
 			{
@@ -176,22 +177,22 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 				bLoop = true;
 				m_ActiveTime = time(NULL);
 
-				if( package->hash().length() != 32 )
+				if (package->hash().length() != 32)
 				{
 					auto msg = "Hash check error. Make sure the hash algorithm is SHA256";
 					m_pLog->warn(msg);
-					AddToSendList(Package::MakeErrorResponse(package.get(),msg ));
+					AddToSendList(Package::MakeErrorResponse(package.get(), msg));
 					continue;
 				}
 				string hash(package->hash());
 				package->clear_hash();
 				unsigned char buffer[32] = {0};
-				CSHA256::Binary_Encoding(ConvertObjToStr(package.get()),buffer);
-				if( string((char*)buffer,32) != hash )
+				CSHA256::Binary_Encoding(ConvertObjToStr(package.get()), buffer);
+				if (string((char *)buffer, 32) != hash)
 				{
-					auto msg =  format("Hash check error. Package[{}]<->[{}]Calculate", ConvertToHexString(hash.c_str(),0,31),ConvertToHexString((char*)buffer,0,31) );
+					auto msg = format("Hash check error. Package[{}]<->[{}]Calculate", ConvertToHexString(hash.c_str(), 0, 31), ConvertToHexString((char *)buffer, 0, 31));
 					m_pLog->warn(msg);
-					AddToSendList(Package::MakeErrorResponse(package.get(),msg));
+					AddToSendList(Package::MakeErrorResponse(package.get(), msg));
 					continue;
 				}
 
@@ -204,10 +205,10 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 				readList.push(std::move(package));
 			}
 		}
-		else if (res.GetResult() == ResultType::Warning )
+		else if (res.GetResult() == ResultType::Warning)
 		{
 			// Receive function recved 0 length data. so this case may be no data can received, or the socket is closed.
-			// In here we look as socket is closed. 
+			// In here we look as socket is closed.
 			return ReceivePackageListResult::Make_Error("Socket rece function returned 0, so may it is closed.");
 		}
 		else if (res.GetResult() == ResultType::Ignore)
@@ -215,10 +216,10 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
 			// Receive data pageage length return 11(EAGAIN) error. so if in bLoop mode, this is OK.
 			break;
 		}
-		else if (res.GetResult() == ResultType::Retry )
+		else if (res.GetResult() == ResultType::Retry)
 		{
 			// Package is no receive done. need receive in next time.
-			m_pLog->debug(format("Receive package happened retry event. curent list[{}] ",readList.size()));
+			m_pLog->debug(format("Receive package happened retry event. curent list[{}] ", readList.size()));
 			break;
 		}
 		else if (res.GetResult() == ResultType::Error)
@@ -252,7 +253,7 @@ void Sloong::ConnectSession::ProcessPrepareSendList()
 		auto priority = pack->priority();
 		m_pSendList[priority].push(std::move(pack));
 		m_pLog->debug(format("Add package to send list[{}]. send list size[{}], prepare send list size[{}]",
-									 priority, m_pSendList[priority].size(), m_oPrepareSendList.size()));
+							 priority, m_pSendList[priority].size(), m_oPrepareSendList.size()));
 	}
 }
 
@@ -263,9 +264,9 @@ ResultType Sloong::ConnectSession::ProcessSendList()
 	{
 		m_pLog->debug(format("Start send package : AllSize[{}],Sent[{}]", m_pConnection->m_SendPackageSize, m_pConnection->m_SentSize));
 		auto res = m_pConnection->SendPackage(nullptr);
-		if( res.GetResult() == ResultType::Succeed )
+		if (res.GetResult() == ResultType::Succeed)
 		{
-			// Do nothing. 
+			// Do nothing.
 		}
 		else if (res.GetResult() == ResultType::Error)
 		{

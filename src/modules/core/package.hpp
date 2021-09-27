@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-09-27 16:01:17
+ * @LastEditTime: 2021-09-27 16:17:46
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/package.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -18,6 +18,8 @@ using namespace std;
 #include <sys/time.h>
 
 #include "result.h"
+
+#include "hash.h"
 
 namespace Sloong
 {
@@ -87,9 +89,12 @@ namespace Sloong
             {
                 // when set the empty to hash, the size for hash maybe different with true hash. because the Protobuf maybe optimize the string storage. especial for empty string. 
                 // so we calculate the hash and set true value. and then clear it.
+                string tmp;
                 unsigned char buffer[32] = {0};
-                CSHA256::Binary_Encoding(tmp, buffer);
-                pack->set_hash(buffer, 32);
+		        if (data.SerializeToString(&tmp))
+                    Universal::CSHA256::Binary_Encoding(tmp, buffer);
+                
+                data.set_hash(buffer, 32);
                 data.clear_hash();
             }
             return len;
