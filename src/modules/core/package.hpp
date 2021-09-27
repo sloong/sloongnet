@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-09-22 14:06:27
+ * @LastEditTime: 2021-09-27 15:34:25
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/package.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -61,6 +61,11 @@ namespace Sloong
             }
         }
 
+        /*** 
+         * @description: 
+         * @param {string} &note
+         * @return {*}
+         */        
         void record_point(const string &note)
         {
             _timeline.push_back(std::make_pair(GetClock(), note));
@@ -71,15 +76,21 @@ namespace Sloong
         }
 
         /*** 
-         * @description: 这个函数只针对需要提前计算正确的包大小的情况，因为hash字段是在发送之前由Connect对象设置的，所以会先检查Hash字段是否设置过，如果没有则会设置空进去，然后计算大小之后再清空hash。
+         * @description: This function only for case where the correct package size need to be calculated in advance. because the hash field is set by the Connect obejct before sending
+         * So this function will check the hash field and if it is not set, set the empty string into it. and then calculate the package size. and return it.
+         * before returned, it will cleanup the hash field if it is set by this function. 
+         * @return: the package size 
          */
         inline size_t ByteSizeLongEx()
         {
             auto len = data.ByteSizeLong();
             if (data.hash().length() == 0)
             {
-                data.set_hash(string(32, 0x00));
-                len = data.ByteSizeLong();
+                // when set the empty to hash, the size for hash maybe different with true hash. because the Protobuf maybe optimize the string storage. especial for empty string. 
+                // so we calculate the hash and set true value. and then clear it.
+                unsigned char buffer[32] = {0};
+                CSHA256::Binary_Encoding(tmp, buffer);
+                pack->set_hash(buffer, 32);
                 data.clear_hash();
             }
             return len;
