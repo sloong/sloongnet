@@ -1,11 +1,11 @@
-/*** 
+/***
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2021-09-23 17:37:56
  * @LastEditTime: 2021-09-23 20:52:45
  * @LastEditors: Chuanbin Wang
  * @FilePath: /Linux-System-Monitoring-Library/lib/linux_process_load.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description:
  */
 /**
  * @author: Daniel Fuchs
@@ -17,80 +17,38 @@
  */
 #pragma once
 
-#include <tuple>
-#include <map>
-#include <unordered_map>
-#include <string>
-#include <list>
-#include <memory>
-#include <iostream>
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
+#include <list>
+#include <map>
+#include <memory>
+#include <string>
+#include <tuple>
+#include <unordered_map>
 
 #include "linux_cpuload.hpp"
 #include "linux_memoryload.hpp"
 
-static const std::list<std::string> stats{"pid",
-                                          "comm",
-                                          "state",
-                                          "ppid",
-                                          "pgrp",
-                                          "session",
-                                          "tty_nr",
-                                          "tpgid",
-                                          "flags",
-                                          "minflt",
-                                          "cminflt",
-                                          "majflt",
-                                          "cmajflt",
-                                          "utime",
-                                          "stime",
-                                          "cutime",
-                                          "cstime",
-                                          "priority",
-                                          "nice",
-                                          "num_threads",
-                                          "itrealvalue",
-                                          "starttime",
-                                          "vsize",
-                                          "rss",
-                                          "rsslim",
-                                          "startcode",
-                                          "endcode",
-                                          "startstack",
-                                          "kstkesp",
-                                          "kstkeip",
-                                          "signal",
-                                          "blocked",
-                                          "sigignore",
-                                          "sigcatch",
-                                          "wchan",
-                                          "nswap",
-                                          "cnswap",
-                                          "exit_signal",
-                                          "processor",
-                                          "rt_priority",
-                                          "policy",
-                                          "delaycct_blkio_ticks",
-                                          "guest_time",
-                                          "cguest_time",
-                                          "start_data",
-                                          "end_data",
-                                          "start_brk",
-                                          "arg_start",
-                                          "arg_end",
-                                          "env_start",
-                                          "env_end",
-                                          "exit_code"};
+static const std::list<std::string> stats{
+    "pid",        "comm",        "state",       "ppid",      "pgrp",        "session",     "tty_nr",
+    "tpgid",      "flags",       "minflt",      "cminflt",   "majflt",      "cmajflt",     "utime",
+    "stime",      "cutime",      "cstime",      "priority",  "nice",        "num_threads", "itrealvalue",
+    "starttime",  "vsize",       "rss",         "rsslim",    "startcode",   "endcode",     "startstack",
+    "kstkesp",    "kstkeip",     "signal",      "blocked",   "sigignore",   "sigcatch",    "wchan",
+    "nswap",      "cnswap",      "exit_signal", "processor", "rt_priority", "policy",      "delaycct_blkio_ticks",
+    "guest_time", "cguest_time", "start_data",  "end_data",  "start_brk",   "arg_start",   "arg_end",
+    "env_start",  "env_end",     "exit_code"};
 
 class linuxProcessLoad
 {
 
-public:
+  public:
     /**
      * @brief get a map of [pid] which contains the cpu load between two calls.
-     *          function needs to be called regularly (e.g.: 5s.) to get the cpu load per process
+     *          function needs to be called regularly (e.g.: 5s.) to get the cpu
+     * load per process
      * @return const map[pid][cpuload]
      */
     std::map<std::string, double> getProcessCpuLoad()
@@ -99,7 +57,7 @@ public:
         return this->procCPUUsage;
     }
 
-private:
+  private:
     void parseProcess(const std::string &pid)
     {
         std::string path{"/proc/" + pid + "/stat"};
@@ -123,8 +81,7 @@ private:
                 {
                     procStat[identifierStart->data()] += " " + strPart;
                 }
-                if (std::count_if(strPart.begin(), strPart.end(), [](auto c)
-                                  { return c == '('; }))
+                if (std::count_if(strPart.begin(), strPart.end(), [](auto c) { return c == '('; }))
                 {
                     isProcessFound = true;
                     procStat[identifierStart->data()] = strPart;
@@ -134,8 +91,7 @@ private:
                     procStat[identifierStart->data()] = strPart;
                 }
 
-                if (std::count_if(strPart.begin(), strPart.end(), [](auto c)
-                                  { return c == ')'; }))
+                if (std::count_if(strPart.begin(), strPart.end(), [](auto c) { return c == ')'; }))
                 {
                     isProcessFound = false;
                 }
@@ -147,8 +103,8 @@ private:
             }
         }
 
-        procStat["comm"].erase(std::remove_if(procStat["comm"].begin(), procStat["comm"].end(), [](auto c)
-                                              { return c == '(' || c == ')'; }),
+        procStat["comm"].erase(std::remove_if(procStat["comm"].begin(), procStat["comm"].end(),
+                                              [](auto c) { return c == '(' || c == ')'; }),
                                procStat["comm"].end());
         processStat[pid] = procStat;
     }
@@ -170,8 +126,7 @@ private:
                 procPath.erase(procPath.begin(), procPath.begin() + static_cast<int32_t>(path.size()));
                 if (std::isdigit(procPath.at(0)))
                 {
-                    if (!std::count_if(procPath.begin(), procPath.end(), [](auto c)
-                                       { return std::isalpha(c); }))
+                    if (!std::count_if(procPath.begin(), procPath.end(), [](auto c) { return std::isalpha(c); }))
                     {
                         parseProcess(procPath);
                     }
@@ -205,7 +160,8 @@ private:
                 cpuTime += (std::stoull(proc.at("utime")) - std::stoull(oldProc.at("utime")));
                 cpuTime += (std::stoull(proc.at("stime")) - std::stoull(oldProc.at("stime")));
 
-                double percentage = ((static_cast<double>(cpuTime) * 100.0) / static_cast<double>((TotalUserTime + TotalSysTime)));
+                double percentage =
+                    ((static_cast<double>(cpuTime) * 100.0) / static_cast<double>((TotalUserTime + TotalSysTime)));
 
                 if (percentage > 0.1)
                 {

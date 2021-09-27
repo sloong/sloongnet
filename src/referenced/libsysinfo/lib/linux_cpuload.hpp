@@ -8,36 +8,29 @@
  */
 #pragma once
 
-#include <vector>
-#include <string>
-#include <tuple>
-#include <map>
-#include <unordered_map>
 #include <chrono>
-#include <stdexcept>
+#include <cmath>
 #include <fstream>
 #include <iostream>
-#include <cmath>
+#include <map>
 #include <sstream>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <unordered_map>
+#include <vector>
 
-const std::vector<std::string> cpuIdentifiers{"user",
-                                              "nice",
-                                              "system",
-                                              "idle",
-                                              "iowait",
-                                              "irq",
-                                              "softirq",
-                                              "steal",
-                                              "guest",
-                                              "guest_nice"};
+const std::vector<std::string> cpuIdentifiers{"user", "nice",    "system", "idle",  "iowait",
+                                              "irq",  "softirq", "steal",  "guest", "guest_nice"};
 
 class cpuLoad
 {
 
-public:
+  public:
     cpuLoad() = delete;
 
-    static shared_ptr<cpuLoad> createInstance(std::string procFileName = "/proc/stat"){
+    static shared_ptr<cpuLoad> createInstance(std::string procFileName = "/proc/stat")
+    {
         return make_shared<cpuLoad>(procFileName);
     }
 
@@ -45,7 +38,8 @@ public:
      * @brief constructor
      * @param procFileName
      */
-    explicit cpuLoad(std::string procFileName = "/proc/stat") : procFile(procFileName), cpuName(""){
+    explicit cpuLoad(std::string procFileName = "/proc/stat") : procFile(procFileName), cpuName("")
+    {
         initCpuUsage();
     };
 
@@ -55,7 +49,7 @@ public:
     void initCpuUsage()
     {
 
-        this->parseStatFile(this->procFile);
+        this->cpuLoadMap = this->parseStatFile(this->procFile);
         this->calculateCpuUsage();
         this->currentTime = std::chrono::system_clock::now() - std::chrono::milliseconds(2000);
     }
@@ -71,16 +65,15 @@ public:
     }
 
     /**
-     * @brief get Cpu user / nice / system /idle time. used for cpu usage per process
+     * @brief get Cpu user / nice / system /idle time. used for cpu usage per
+     * process
      * @return tuple<user,nice,system,idle>
      */
     std::tuple<uint64_t, uint64_t, uint64_t, uint64_t> getCpuTimes()
     {
         auto cpuLoad_ = this->parseStatFile(this->procFile);
-        return std::make_tuple(cpuLoad_.at("cpu").at("user"),
-                               cpuLoad_.at("cpu").at("nice"),
-                               cpuLoad_.at("cpu").at("system"),
-                               cpuLoad_.at("cpu").at("idle"));
+        return std::make_tuple(cpuLoad_.at("cpu").at("user"), cpuLoad_.at("cpu").at("nice"),
+                               cpuLoad_.at("cpu").at("system"), cpuLoad_.at("cpu").at("idle"));
     }
 
     /**
@@ -119,7 +112,7 @@ public:
 
         if (!file.is_open())
         {
-            throw std::runtime_error("unable to open " + cpuNameFile);
+            std::throw_with_nested(std::runtime_error("unable to open " + cpuNameFile));
         }
         std::string line;
         while (std::getline(file, line))
@@ -137,31 +130,35 @@ public:
         return std::string();
     }
 
-private:
+  private:
     void calculateCpuUsage()
     {
-        for (const auto &elem : this->cpuLoadMap)
+        try
         {
-
-            if (this->cpuLoadMap.at(elem.first).at("user") < this->oldCpuLoadMap.at(elem.first).at("user") ||
-                this->cpuLoadMap.at(elem.first).at("nice") < this->oldCpuLoadMap.at(elem.first).at("nice") ||
-                this->cpuLoadMap.at(elem.first).at("system") < this->oldCpuLoadMap.at(elem.first).at("system") ||
-                this->cpuLoadMap.at(elem.first).at("idle") < this->oldCpuLoadMap.at(elem.first).at("idle"))
+            for (const auto &elem : this->cpuLoadMap)
             {
-            }
-            else
-            {
-                auto total = (this->cpuLoadMap.at(elem.first).at("user") - this->oldCpuLoadMap.at(elem.first).at("user")) +
-                             (this->cpuLoadMap.at(elem.first).at("nice") - this->oldCpuLoadMap.at(elem.first).at("nice")) +
-                             (this->cpuLoadMap.at(elem.first).at("system") -
-                              this->oldCpuLoadMap.at(elem.first).at("system"));
+                auto &v = elem.second;
+                auto &old = this->oldCpuLoadMap.at(elem.first);
+                if (v.at("user") < old.at("user") || v.at("nice") < old.at("nice") ||
+                    v.at("system") < old.at("system") || v.at("idle") < old.at("idle"))
+                {
+                }
+                else
+                {
+                    auto total = (v.at("user") - old.at("user")) + (v.at("nice") - old.at("nice")) +
+                                 (v.at("system") - old.at("system"));
 
-                double percent = total;
-                total += (this->cpuLoadMap.at(elem.first).at("idle") - this->oldCpuLoadMap.at(elem.first).at("idle"));
-                percent /= total;
-                percent *= 100.0;
-                this->cpuUsage[elem.first] = percent;
+                    double percent = total;
+                    total += (v.at("idle") - old.at("idle"));
+                    percent /= total;
+                    percent *= 100.0;
+                    this->cpuUsage[elem.first] = percent;
+                }
             }
+        }
+        catch (const std::exception &e)
+        {
+            cerr << "calculateCpuUsage" << e.what() << endl;
         }
     }
     std::map<std::string, std::unordered_map<std::string, uint64_t>> parseStatFile(const std::string &fileName)
@@ -216,7 +213,7 @@ private:
         }
         catch (std::ifstream::failure &e)
         {
-            throw std::runtime_error("Exception: " + fileName + std::string(e.what()));
+            std::throw_with_nested(std::runtime_error("Exception: " + fileName + std::string(e.what())));
         }
         return cpuLoad_;
     }

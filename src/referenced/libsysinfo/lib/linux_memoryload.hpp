@@ -1,11 +1,11 @@
-/*** 
+/***
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2021-09-23 17:27:14
  * @LastEditTime: 2021-09-24 11:24:01
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/referenced/libsysinfo/lib/linux_memoryload.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description:
  */
 /**
  * @author: Daniel Fuchs
@@ -17,23 +17,20 @@
  */
 #pragma once
 
+#include <chrono>
+#include <cinttypes>
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <cinttypes>
 #include <string>
-#include <chrono>
 
 class memoryLoad
 {
-public:
-    explicit memoryLoad(std::string memInfo = "/proc/meminfo",
-                        std::string memInfoOfProcess = "/proc/self/status",
-                        std::string memInfoOfProcessPrefix = "/proc/self/") : totalMemoryInKB(0),
-                                                                              currentMemoryUsageInKB(0),
-                                                                              memInfoFile(memInfo),
-                                                                              memInfoOfProcessFile(memInfoOfProcess),
-                                                                              memInfoOfProcessPrefixFile(memInfoOfProcessPrefix){};
+  public:
+    explicit memoryLoad(std::string memInfo = "/proc/meminfo", std::string memInfoOfProcess = "/proc/self/status",
+                        std::string memInfoOfProcessPrefix = "/proc/self/")
+        : totalMemoryInKB(0), currentMemoryUsageInKB(0), memInfoFile(memInfo), memInfoOfProcessFile(memInfoOfProcess),
+          memInfoOfProcessPrefixFile(memInfoOfProcessPrefix){};
     /**
      * @brief get total memory of the system in KB
      * @return total memory in KB
@@ -81,7 +78,7 @@ public:
         return this->parseProcessMemoryFile(this->memInfoOfProcessFile);
     }
 
-private:
+  private:
     bool parseMemoryFile()
     {
         if (timeStamp + std::chrono::milliseconds(100) > std::chrono::steady_clock::now())

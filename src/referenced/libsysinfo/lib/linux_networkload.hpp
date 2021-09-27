@@ -8,49 +8,36 @@
  */
 #pragma once
 
-#include <map>
-#include <memory>
-#include <string>
-#include <list>
-#include <vector>
+#include <algorithm>
 #include <chrono>
-#include <unordered_map>
+#include <cstring>
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <list>
+#include <map>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
-#include <algorithm>
-#include <cstring>
+#include <string>
+#include <unordered_map>
 #include <utility>
+#include <vector>
 
-const std::list<std::string> identifiers{"RXbytes",
-                                         "RXpackets",
-                                         "RXerrs",
-                                         "RXdrop",
-                                         "RXfifo",
-                                         "RXframe",
-                                         "RXcompressed",
-                                         "RXmulticast",
-                                         "TXbytes",
-                                         "TXpackets",
-                                         "TXerrs",
-                                         "TXdrop",
-                                         "TXfifo",
-                                         "TXcolls",
-                                         "TXcarrier",
-                                         "TXcompressed"};
+const std::list<std::string> identifiers{"RXbytes",      "RXpackets",   "RXerrs",    "RXdrop",      "RXfifo", "RXframe",
+                                         "RXcompressed", "RXmulticast", "TXbytes",   "TXpackets",   "TXerrs", "TXdrop",
+                                         "TXfifo",       "TXcolls",     "TXcarrier", "TXcompressed"};
 
 class networkParser
 {
-private:
+  private:
     std::chrono::system_clock::time_point currentTime;
     std::chrono::system_clock::time_point timeBefore;
 
     std::map<std::string, std::unordered_map<std::string, uint64_t>> ethObj;
     std::map<std::string, std::unordered_map<std::string, uint64_t>> ethObjOld;
 
-public:
+  public:
     static std::shared_ptr<networkParser> createNetworkParser()
     {
         return std::make_shared<networkParser>();
@@ -82,7 +69,7 @@ public:
         }
         catch (std::ifstream::failure &e)
         {
-            throw std::runtime_error("Exception: " + netFile + std::string(e.what()));
+            std::throw_with_nested(std::runtime_error("Exception: " + netFile + std::string(e.what())));
         }
 
         this->timeBefore = std::chrono::system_clock::now();
@@ -104,9 +91,9 @@ public:
             {
                 if (ifName.empty())
                 {
-                    strPart.erase(std::remove_if(strPart.begin(), strPart.end(), [](auto c)
-                                                 { return !std::isalnum(c); }),
-                                  strPart.end());
+                    strPart.erase(
+                        std::remove_if(strPart.begin(), strPart.end(), [](auto c) { return !std::isalnum(c); }),
+                        strPart.end());
                     ifName = strPart;
                 }
                 else
@@ -158,14 +145,16 @@ public:
 class networkLoad
 {
 
-public:
-    static std::list<std::string> scanNetworkDevices(std::shared_ptr<networkParser> parser = nullptr, const std::string &ethernetDataFile = "/proc/net/dev")
+  public:
+    static std::list<std::string> scanNetworkDevices(std::shared_ptr<networkParser> parser = nullptr,
+                                                     const std::string &ethernetDataFile = "/proc/net/dev")
     {
         if (parser == nullptr)
             parser = networkParser::createNetworkParser();
         return parser->getNetworkDevices(ethernetDataFile);
     }
-    static std::vector<std::shared_ptr<networkLoad>> createLinuxEthernetScanList(std::shared_ptr<networkParser> parser = nullptr, const std::string &ethernetDataFileName = "/proc/net/dev")
+    static std::vector<std::shared_ptr<networkLoad>> createLinuxEthernetScanList(
+        std::shared_ptr<networkParser> parser = nullptr, const std::string &ethernetDataFileName = "/proc/net/dev")
     {
         std::vector<std::shared_ptr<networkLoad>> v;
         for (const auto &elem : networkLoad::scanNetworkDevices(parser, ethernetDataFileName))
@@ -175,7 +164,9 @@ public:
         return v;
     }
 
-    explicit networkLoad(std::shared_ptr<networkParser> parser = nullptr, std::string ethernetDataFileName = "/proc/net/dev", std::string ethName = "eth0") : ethernetDataFile(std::move(ethernetDataFileName)), ethDev(std::move(ethName))
+    explicit networkLoad(std::shared_ptr<networkParser> parser = nullptr,
+                         std::string ethernetDataFileName = "/proc/net/dev", std::string ethName = "eth0")
+        : ethernetDataFile(std::move(ethernetDataFileName)), ethDev(std::move(ethName))
     {
         if (parser == nullptr)
             parser = networkParser::createNetworkParser();
@@ -186,19 +177,18 @@ public:
         if (parser == nullptr)
             parser = networkParser::createNetworkParser();
         parser->parse(this->ethernetDataFile);
-        if (!std::count_if(identifiers.begin(), identifiers.end(), [designator](auto elem)
-                           { return elem == designator; }))
+        if (!std::count_if(identifiers.begin(), identifiers.end(),
+                           [designator](auto elem) { return elem == designator; }))
         {
-            throw std::runtime_error("invalid designator: " + designator);
+            std::throw_with_nested(std::runtime_error("invalid designator: " + designator));
         }
         auto before = parser->getTimeBefore();
         auto current = parser->getTimeStamp();
 
-        auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(
-            before - current);
+        auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(before - current);
 
-        uint64_t Bytes = (parser->getEthObj(this->ethDev).at(designator) -
-                          parser->getEthObjOld(this->ethDev).at(designator));
+        uint64_t Bytes =
+            (parser->getEthObj(this->ethDev).at(designator) - parser->getEthObjOld(this->ethDev).at(designator));
         if (static_cast<unsigned long>(msec.count()) <= 0)
         {
             Bytes /= 1;
@@ -216,10 +206,10 @@ public:
             parser = networkParser::createNetworkParser();
         parser->parse(this->ethernetDataFile);
         auto ifObj = parser->getEthObj(this->ethDev);
-        if (!std::count_if(identifiers.begin(), identifiers.end(), [designator](auto elem)
-                           { return elem == designator; }))
+        if (!std::count_if(identifiers.begin(), identifiers.end(),
+                           [designator](auto elem) { return elem == designator; }))
         {
-            throw std::runtime_error("invalid designator: " + designator);
+            std::throw_with_nested(std::runtime_error("invalid designator: " + designator));
         }
         return ifObj[designator];
     }
@@ -384,7 +374,7 @@ public:
         return it->data();
     }
 
-private:
+  private:
     std::string ethernetDataFile;
     std::string ethDev;
     bool isDeviceAvailable = false;

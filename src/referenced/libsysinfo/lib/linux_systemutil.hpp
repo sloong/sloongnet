@@ -1,11 +1,11 @@
-/*** 
+/***
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2021-09-23 17:41:16
  * @LastEditTime: 2021-09-23 17:44:25
  * @LastEditors: Chuanbin Wang
  * @FilePath: /Linux-System-Monitoring-Library/lib/linux_systemutil.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description:
  */
 /**
  * @author: Daniel Fuchs
@@ -17,27 +17,27 @@
  */
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <cstdlib>
-#include <unistd.h>
+#include <cinttypes>
+#include <csignal>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <dirent.h>
 #include <fstream>
-#include <sys/types.h>
-#include <csignal>
-#include <cstring>
+#include <iostream>
 #include <netinet/in.h>
-#include <sys/statvfs.h>
-#include <sys/stat.h>
 #include <pwd.h>
+#include <string>
+#include <sys/stat.h>
+#include <sys/statvfs.h>
+#include <sys/types.h>
 #include <thread>
-#include <cinttypes>
+#include <unistd.h>
 
 class linuxUtil
 {
 
-public:
+  public:
     static bool isDeviceOnline(std::string address)
     {
         const std::string processPrefix = {"ping -c 1 -w 1 "};
@@ -113,13 +113,12 @@ public:
     {
         if (pid == -1)
         {
-            throw std::runtime_error(
-                "Nothing to Kill, no Process " + procName + " PID " + std::to_string(pid));
+            throw std::runtime_error("Nothing to Kill, no Process " + procName + " PID " + std::to_string(pid));
         }
         int ret = kill(pid, 9);
         if (ret == -1)
         {
-            throw std::runtime_error("killing " + procName + " was not successful!");
+            std::throw_with_nested(std::runtime_error("killing " + procName + " was not successful!"));
         }
         return ret;
     }
@@ -175,7 +174,7 @@ public:
         if (setsid() < 0)
             std::exit(EXIT_FAILURE);
 
-        //TODO: Implement a working signal handler */
+        // TODO: Implement a working signal handler */
         std::signal(SIGCHLD, SIG_IGN);
         std::signal(SIGHUP, SIG_IGN);
 
@@ -247,11 +246,8 @@ public:
             free = freeblks * blksize;
             used = disk_size - free;
 
-            std::cout << "disk " << absoluteFilePath
-                      << " disksize: " << disk_size
-                      << " free: " << free
-                      << " used: " << used
-                      << std::endl;
+            std::cout << "disk " << absoluteFilePath << " disksize: " << disk_size << " free: " << free
+                      << " used: " << used << std::endl;
             return free;
         }
         else
