@@ -48,10 +48,9 @@ class cpuLoad
      */
     void initCpuUsage()
     {
-
         this->cpuLoadMap = this->parseStatFile(this->procFile);
-        this->calculateCpuUsage();
         this->currentTime = std::chrono::system_clock::now() - std::chrono::milliseconds(2000);
+        this->upDateCPUUsage();
     }
     /**
      * @brief get current cpu load in 0-100%
@@ -59,7 +58,6 @@ class cpuLoad
      */
     double getCurrentCpuUsage()
     {
-
         this->upDateCPUUsage();
         return this->cpuUsage.at("cpu");
     }
