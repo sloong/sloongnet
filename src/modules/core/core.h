@@ -1,13 +1,13 @@
-/*** 
+/***
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-08-07 12:43:05
  * @LastEditTime: 2021-09-23 16:50:00
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/core.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description:
  */
-/*** 
+/***
  * @......................................&&.........................
  * @....................................&&&..........................
  * @.................................&&&&............................
@@ -57,34 +57,33 @@
  * @..................................&..............................
  */
 
-
 #pragma once
 
 // std c head file
 #include <errno.h> // for errno
+#include <stdarg.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
+#include <unistd.h>
 
 // linux head file
-#include <sys/times.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <execinfo.h>
 #include <fcntl.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/times.h>
+#include <sys/types.h>
 
 // std c++ file
-#include <iostream>
-#include <queue>
-#include <vector>
-#include <string>
-#include <memory>
-#include <map>
-#include <mutex>
 #include <atomic>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <queue>
+#include <string>
+#include <vector>
 using namespace std;
 
 #include <fmt/format.h>
@@ -94,23 +93,21 @@ using fmt::format;
 
 #include <jsoncpp/json/json.h>
 
-
 #include "protocol/base.pb.h"
 using namespace Base;
 
 #include "protocol/core.pb.h"
 using namespace Core;
 
-
 #include "package.hpp"
 
 #include "Helper.h"
-#include "result.h"
-#include "queue_safety.hpp"
-#include "map_ex.hpp"
-#include "strict_map.hpp"
 #include "list_ex.hpp"
+#include "map_ex.hpp"
 #include "package.hpp"
+#include "queue_safety.hpp"
+#include "result.h"
+#include "strict_map.hpp"
 
 using namespace Sloong;
 

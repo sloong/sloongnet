@@ -1,13 +1,13 @@
-/*** 
+/***
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
  * @LastEditTime: 2021-09-24 11:02:38
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/IEvent.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description:
  */
-/*** 
+/***
  * @......................................&&.........................
  * @....................................&&&..........................
  * @.................................&&&&............................
@@ -59,8 +59,9 @@
 
 #pragma once
 
-#include <memory>
 #include <functional>
+#include <memory>
+
 using namespace std;
 
 // 事件的接口
@@ -68,33 +69,34 @@ using namespace std;
 // 所以将由框架在发送之前，根据处理函数的个数来自动调用AddRef函数来增加计数。
 // 要求处理函数在处理之后，手动调用SAFE_RELEASE_EVENT宏来进行释放。
 
-
 namespace Sloong
 {
-	class IEvent
-	{
-	public:
-		IEvent() {}
-		virtual ~IEvent() {}
-		virtual int32_t GetEvent() const = 0;
-		virtual bool IsOneTimeEvent() const = 0;
-	};
+class IEvent
+{
+  public:
+    IEvent()
+    {
+    }
+    virtual ~IEvent()
+    {
+    }
+    virtual int32_t GetEvent() const = 0;
+    virtual bool IsOneTimeEvent() const = 0;
+};
 
-	typedef shared_ptr<IEvent> SharedEvent;
-	
-	template<typename T> inline
-	T EVENT_TRANS(IEvent* p)
-	{
-		T tmp = dynamic_cast<T>(p);
-		assert(tmp);
-		return tmp;
-	}
-	
-	template<typename T> inline
-	shared_ptr<T> EVENT_TRANS(SharedEvent e)
-	{
-		auto tmp = dynamic_pointer_cast<T>(e);
-		assert(tmp);
-		return tmp;
-	}
+typedef shared_ptr<IEvent> SharedEvent;
+
+template <typename T> inline T EVENT_TRANS(IEvent *p)
+{
+    T tmp = dynamic_cast<T>(p);
+    assert(tmp);
+    return tmp;
 }
+
+template <typename T> inline shared_ptr<T> EVENT_TRANS(SharedEvent e)
+{
+    auto tmp = dynamic_pointer_cast<T>(e);
+    assert(tmp);
+    return tmp;
+}
+} // namespace Sloong

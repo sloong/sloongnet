@@ -8,106 +8,107 @@
  * @Description:
  */
 /***
-  * @......................................&&.........................
-  * @....................................&&&..........................
-  * @.................................&&&&............................
-  * @...............................&&&&..............................
-  * @.............................&&&&&&..............................
-  * @...........................&&&&&&....&&&..&&&&&&&&&&&&&&&........
-  * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............
-  * @................&...&&&&&&&&&&&&&&&&&&&&&&&&&&&&.................
-  * @.......................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........
-  * @...................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...............
-  * @..................&&&   &&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
-  * @...............&&&&&@  &&&&&&&&&&..&&&&&&&&&&&&&&&&&&&...........
-  * @..............&&&&&&&&&&&&&&&.&&....&&&&&&&&&&&&&..&&&&&.........
-  * @..........&&&&&&&&&&&&&&&&&&...&.....&&&&&&&&&&&&&...&&&&........
-  * @........&&&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&....&&&.......
-  * @.......&&&&&&&&.....................&&&&&&&&&&&&&&&&.....&&......
-  * @........&&&&&.....................&&&&&&&&&&&&&&&&&&.............
-  * @..........&...................&&&&&&&&&&&&&&&&&&&&&&&............
-  * @................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
-  * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&..&&&&&............
-  * @..............&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&....&&&&&............
-  * @...........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&......&&&&............
-  * @.........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........&&&&............
-  * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&............
-  * @......&&&&&&&&&&&&&&&&&&&...&&&&&&...............&&&.............
-  * @.....&&&&&&&&&&&&&&&&............................&&..............
-  * @....&&&&&&&&&&&&&&&.................&&...........................
-  * @...&&&&&&&&&&&&&&&.....................&&&&......................
-  * @...&&&&&&&&&&.&&&........................&&&&&...................
-  * @..&&&&&&&&&&&..&&..........................&&&&&&&...............
-  * @..&&&&&&&&&&&&...&............&&&.....&&&&...&&&&&&&.............
-  * @..&&&&&&&&&&&&&.................&&&.....&&&&&&&&&&&&&&...........
-  * @..&&&&&&&&&&&&&&&&..............&&&&&&&&&&&&&&&&&&&&&&&&.........
-  * @..&&.&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&&&&&&&&&&&&.......
-  * @...&&..&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&...&&&&&&&&&&&&......
-  * @....&..&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&&&&&.....
-  * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............&&&&&&&....
-  * @.......&&&&&.&&&&&&&&&&&&&&&&&&..&&&&&&&&...&..........&&&&&&....
-  * @........&&&.....&&&&&&&&&&&&&.....&&&&&&&&&&...........&..&&&&...
-  * @.......&&&........&&&.&&&&&&&&&.....&&&&&.................&&&&...
-  * @.......&&&...............&&&&&&&.......&&&&&&&&............&&&...
-  * @........&&...................&&&&&&.........................&&&..
-  * @.........&.....................&&&&........................&&....
-  * @...............................&&&.......................&&......
-  * @................................&&......................&&.......
-  * @.................................&&..............................
-  * @..................................&..............................
-  */
+ * @......................................&&.........................
+ * @....................................&&&..........................
+ * @.................................&&&&............................
+ * @...............................&&&&..............................
+ * @.............................&&&&&&..............................
+ * @...........................&&&&&&....&&&..&&&&&&&&&&&&&&&........
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............
+ * @................&...&&&&&&&&&&&&&&&&&&&&&&&&&&&&.................
+ * @.......................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @...................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...............
+ * @..................&&&   &&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @...............&&&&&@  &&&&&&&&&&..&&&&&&&&&&&&&&&&&&&...........
+ * @..............&&&&&&&&&&&&&&&.&&....&&&&&&&&&&&&&..&&&&&.........
+ * @..........&&&&&&&&&&&&&&&&&&...&.....&&&&&&&&&&&&&...&&&&........
+ * @........&&&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&....&&&.......
+ * @.......&&&&&&&&.....................&&&&&&&&&&&&&&&&.....&&......
+ * @........&&&&&.....................&&&&&&&&&&&&&&&&&&.............
+ * @..........&...................&&&&&&&&&&&&&&&&&&&&&&&............
+ * @................&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&............
+ * @..................&&&&&&&&&&&&&&&&&&&&&&&&&&&&..&&&&&............
+ * @..............&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&....&&&&&............
+ * @...........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&......&&&&............
+ * @.........&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.........&&&&............
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&............
+ * @......&&&&&&&&&&&&&&&&&&&...&&&&&&...............&&&.............
+ * @.....&&&&&&&&&&&&&&&&............................&&..............
+ * @....&&&&&&&&&&&&&&&.................&&...........................
+ * @...&&&&&&&&&&&&&&&.....................&&&&......................
+ * @...&&&&&&&&&&.&&&........................&&&&&...................
+ * @..&&&&&&&&&&&..&&..........................&&&&&&&...............
+ * @..&&&&&&&&&&&&...&............&&&.....&&&&...&&&&&&&.............
+ * @..&&&&&&&&&&&&&.................&&&.....&&&&&&&&&&&&&&...........
+ * @..&&&&&&&&&&&&&&&&..............&&&&&&&&&&&&&&&&&&&&&&&&.........
+ * @..&&.&&&&&&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&&&&&&&&&&&&.......
+ * @...&&..&&&&&&&&&&&&.........&&&&&&&&&&&&&&&&...&&&&&&&&&&&&......
+ * @....&..&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&...........&&&&&&&&.....
+ * @.......&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&..............&&&&&&&....
+ * @.......&&&&&.&&&&&&&&&&&&&&&&&&..&&&&&&&&...&..........&&&&&&....
+ * @........&&&.....&&&&&&&&&&&&&.....&&&&&&&&&&...........&..&&&&...
+ * @.......&&&........&&&.&&&&&&&&&.....&&&&&.................&&&&...
+ * @.......&&&...............&&&&&&&.......&&&&&&&&............&&&...
+ * @........&&...................&&&&&&.........................&&&..
+ * @.........&.....................&&&&........................&&....
+ * @...............................&&&.......................&&......
+ * @................................&&......................&&.......
+ * @.................................&&..............................
+ * @..................................&..............................
+ */
 
 #include "globalfunction.h"
-#include "utility.h"
-#include "version.h"
 #include "EpollEx.h"
 #include "IData.h"
 #include "luaMiddleLayer.h"
+#include "utility.h"
+#include "version.h"
+
 
 #include "protocol/datacenter.pb.h"
 #include "protocol/filecenter.pb.h"
 #include "protocol/manager.pb.h"
 
-#include "events/SendPackageToManager.hpp"
+#include "events/LuaEvent.hpp"
+#include "events/ModuleOnOff.hpp"
 #include "events/RegisterConnection.hpp"
 #include "events/SendPackage.hpp"
-#include "events/ModuleOnOff.hpp"
-#include "events/LuaEvent.hpp"
+#include "events/SendPackageToManager.hpp"
+
 using namespace Sloong::Events;
 
 unique_ptr<CGlobalFunction> Sloong::CGlobalFunction::Instance = make_unique<CGlobalFunction>();
 const string g_temp_file_path = "/tmp/sloongnet/receivefile/temp.tmp";
 
-LuaFunctionRegisterr g_LuaFunc[] =
-    {
-        {"ShowLog", CGlobalFunction::Lua_ShowLog},
-        {"GetEngineVer", CGlobalFunction::Lua_GetEngineVer},
-        {"Base64Encode", CGlobalFunction::Lua_Base64_Encode},
-        {"Base64Decode", CGlobalFunction::Lua_Base64_Decode},
-        {"HashEncode", CGlobalFunction::Lua_Hash_Encode},
-        {"ReloadScript", CGlobalFunction::Lua_ReloadScript},
-        {"GetConfig", CGlobalFunction::Lua_GetConfig},
-        {"GenUUID", CGlobalFunction::Lua_GenUUID},
-        {"SetCommData", CGlobalFunction::Lua_SetCommData},
-        {"GetCommData", CGlobalFunction::Lua_GetCommData},
-        {"MoveFile", CGlobalFunction::Lua_MoveFile},
-        {"SendFile", CGlobalFunction::Lua_SendFile},
-        {"ReceiveFile", CGlobalFunction::Lua_ReceiveFile},
-        {"CheckRecvStatus", CGlobalFunction::Lua_CheckRecvStatus},
-        {"SetExtendData", CGlobalFunction::Lua_SetExtendData},
-        {"SetExtendDataByFile", CGlobalFunction::Lua_SetExtendDataByFile},
-        {"ConnectToDBCenter", CGlobalFunction::Lua_ConnectToDBCenter},
-        {"SQLQueryToDBCenter", CGlobalFunction::Lua_SQLQueryToDBCenter},
-        {"SQLInsertToDBCenter", CGlobalFunction::Lua_SQLInsertToDBCenter},
-        {"SQLDeleteToDBCenter", CGlobalFunction::Lua_SQLDeleteToDBCenter},
-        {"SQLUpdateToDBCenter", CGlobalFunction::Lua_SQLUpdateToDBCenter},
-        {"PrepareUpload", CGlobalFunction::Lua_PrepareUpload},
-        {"UploadEnd", CGlobalFunction::Lua_UploadEnd},
-        {"GetThumbnail", CGlobalFunction::Lua_GetThumbnail},
-        {"ConvertImageFormat", CGlobalFunction::Lua_ConvertImageFormat},
-        {"SetTimeout", CGlobalFunction::Lua_SetTimeout},
-        // 这个功能的实现仅是为了达到可用的程度，其实现存在一些性能问题。
-        {"PushEvent", CGlobalFunction::Lua_PushEvent},
+LuaFunctionRegisterr g_LuaFunc[] = {
+    {"ShowLog", CGlobalFunction::Lua_ShowLog},
+    {"GetEngineVer", CGlobalFunction::Lua_GetEngineVer},
+    {"Base64Encode", CGlobalFunction::Lua_Base64_Encode},
+    {"Base64Decode", CGlobalFunction::Lua_Base64_Decode},
+    {"HashEncode", CGlobalFunction::Lua_Hash_Encode},
+    {"ReloadScript", CGlobalFunction::Lua_ReloadScript},
+    {"GetConfig", CGlobalFunction::Lua_GetConfig},
+    {"GenUUID", CGlobalFunction::Lua_GenUUID},
+    {"SetCommData", CGlobalFunction::Lua_SetCommData},
+    {"GetCommData", CGlobalFunction::Lua_GetCommData},
+    {"MoveFile", CGlobalFunction::Lua_MoveFile},
+    {"SendFile", CGlobalFunction::Lua_SendFile},
+    {"ReceiveFile", CGlobalFunction::Lua_ReceiveFile},
+    {"CheckRecvStatus", CGlobalFunction::Lua_CheckRecvStatus},
+    {"SetExtendData", CGlobalFunction::Lua_SetExtendData},
+    {"SetExtendDataByFile", CGlobalFunction::Lua_SetExtendDataByFile},
+    {"ConnectToDBCenter", CGlobalFunction::Lua_ConnectToDBCenter},
+    {"SQLQueryToDBCenter", CGlobalFunction::Lua_SQLQueryToDBCenter},
+    {"SQLInsertToDBCenter", CGlobalFunction::Lua_SQLInsertToDBCenter},
+    {"SQLDeleteToDBCenter", CGlobalFunction::Lua_SQLDeleteToDBCenter},
+    {"SQLUpdateToDBCenter", CGlobalFunction::Lua_SQLUpdateToDBCenter},
+    {"PrepareUpload", CGlobalFunction::Lua_PrepareUpload},
+    {"UploadEnd", CGlobalFunction::Lua_UploadEnd},
+    {"GetThumbnail", CGlobalFunction::Lua_GetThumbnail},
+    {"ConvertImageFormat", CGlobalFunction::Lua_ConvertImageFormat},
+    {"SetTimeout", CGlobalFunction::Lua_SetTimeout},
+    // 这个功能的实现仅是为了达到可用的程度，其实现存在一些性能问题。
+    {"PushEvent", CGlobalFunction::Lua_PushEvent},
 };
 
 CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
@@ -115,10 +116,14 @@ CResult Sloong::CGlobalFunction::Initialize(IControl *ic)
     IObject::Initialize(ic);
     IData::Initialize(ic);
     m_pModuleConfig = IData::GetModuleConfig();
-    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart, std::bind(&CGlobalFunction::OnStart, this, std::placeholders::_1));
-    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStop, std::bind(&CGlobalFunction::OnStop, this, std::placeholders::_1));
-    m_iC->RegisterEventHandler(LUA_EVENT_TYPE::OnReferenceModuleOnline, std::bind(&CGlobalFunction::OnReferenceModuleOnline, this, std::placeholders::_1));
-    m_iC->RegisterEventHandler(LUA_EVENT_TYPE::OnReferenceModuleOffline, std::bind(&CGlobalFunction::OnReferenceModuleOffline, this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStart,
+                               std::bind(&CGlobalFunction::OnStart, this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStop,
+                               std::bind(&CGlobalFunction::OnStop, this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(LUA_EVENT_TYPE::OnReferenceModuleOnline,
+                               std::bind(&CGlobalFunction::OnReferenceModuleOnline, this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(LUA_EVENT_TYPE::OnReferenceModuleOffline,
+                               std::bind(&CGlobalFunction::OnReferenceModuleOffline, this, std::placeholders::_1));
     return CResult::Succeed;
 }
 
@@ -176,7 +181,8 @@ void Sloong::CGlobalFunction::RecvDataConnFunc()
         int conn_sock = -1;
         if ((conn_sock = accept(m_ListenSock, NULL, NULL)) > 0)
         {
-            pLog->debug(format("Accept data connect :[{}][{}]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
+            pLog->debug(format("Accept data connect :[{}][{}]", CUtility::GetSocketIP(conn_sock),
+                               CUtility::GetSocketPort(conn_sock)));
             // When accept the connect , receive the uuid data. and
             char *pCheckBuf = new char[g_uuid_len + 1];
             memset(pCheckBuf, 0, g_uuid_len + 1);
@@ -234,7 +240,7 @@ void Sloong::CGlobalFunction::RecvFileFunc(int conn_sock)
         bool bLoop = false;
         do
         {
-            char *pLongBuffer = new char[g_data_pack_len + 1](); //dataLeng;
+            char *pLongBuffer = new char[g_data_pack_len + 1](); // dataLeng;
             memset(pLongBuffer, 0, g_data_pack_len + 1);
             int nRecvSize = Helper::RecvTimeout(conn_sock, pLongBuffer, g_data_pack_len, m_nRecvDataTimeoutTime);
             if (nRecvSize <= 0)
@@ -353,7 +359,8 @@ void Sloong::CGlobalFunction::RecvFileFunc(int conn_sock)
             }
         } while (bLoop);
 
-        pLog->debug(format("Receive connect done. close:[{}:{}]", CUtility::GetSocketIP(conn_sock), CUtility::GetSocketPort(conn_sock)));
+        pLog->debug(format("Receive connect done. close:[{}:{}]", CUtility::GetSocketIP(conn_sock),
+                           CUtility::GetSocketPort(conn_sock)));
         close(conn_sock);
     }
     catch (const std::exception &)
@@ -366,7 +373,8 @@ void Sloong::CGlobalFunction::RecvFileFunc(int conn_sock)
 void Sloong::CGlobalFunction::OnStart(SharedEvent e)
 {
     auto event = make_shared<SendPackageToManagerEvent>(Functions::QueryReferenceInfo, "");
-    event->SetCallbackFunc(std::bind(&CGlobalFunction::QueryReferenceInfoResponseHandler, this, std::placeholders::_1, std::placeholders::_2));
+    event->SetCallbackFunc(std::bind(&CGlobalFunction::QueryReferenceInfoResponseHandler, this, std::placeholders::_1,
+                                     std::placeholders::_2));
     m_iC->SendMessage(event);
     m_emStatus = RUN_STATUS::Running;
 }
@@ -374,7 +382,6 @@ void Sloong::CGlobalFunction::OnStop(SharedEvent e)
 {
     m_emStatus = RUN_STATUS::Exit;
 }
-
 
 void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent *send_pack, Package *res_pack)
 {
@@ -411,9 +418,7 @@ void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent *send_pac
 void Sloong::CGlobalFunction::AddConnection(uint64_t uuid, const string &addr, int port)
 {
     auto event = make_shared<RegisterConnectionEvent>(addr, port);
-    event->SetCallbackFunc([this, uuid](IEvent *e, uint64_t hashcode) {
-        m_mapUUIDToConnectionID[uuid] = hashcode;
-    });
+    event->SetCallbackFunc([this, uuid](IEvent *e, uint64_t hashcode) { m_mapUUIDToConnectionID[uuid] = hashcode; });
     m_iC->SendMessage(event);
 }
 
@@ -424,7 +429,8 @@ void Sloong::CGlobalFunction::OnReferenceModuleOnline(SharedEvent e)
     auto item = info->item();
     m_mapUUIDToNode[item.uuid()] = item;
     m_mapTemplateIDToUUIDs[item.templateid()].push_back(item.uuid());
-    m_pLog->info(format("New node[{}][{}:{}] is online:templateid[{}],list size[{}]", item.uuid(), item.address(), item.port(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
+    m_pLog->info(format("New node[{}][{}:{}] is online:templateid[{}],list size[{}]", item.uuid(), item.address(),
+                        item.port(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
 
     AddConnection(item.uuid(), item.address(), item.port());
 }
@@ -439,7 +445,8 @@ void Sloong::CGlobalFunction::OnReferenceModuleOffline(SharedEvent e)
     m_mapTemplateIDToUUIDs[item.templateid()].erase(item.uuid());
     m_mapUUIDToConnectionID.erase(uuid);
     m_mapUUIDToNode.erase(uuid);
-    m_pLog->info(format("Node is offline [{}], template id[{}],list size[{}]", item.uuid(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
+    m_pLog->info(format("Node is offline [{}], template id[{}],list size[{}]", item.uuid(), item.templateid(),
+                        m_mapTemplateIDToUUIDs[item.templateid()].size()));
 }
 
 void Sloong::CGlobalFunction::RegisterFuncToLua(CLua *pLua)
@@ -617,20 +624,23 @@ int CGlobalFunction::Lua_MoveFile(lua_State *l)
         if (orgName == "" || newName == "")
         {
             nRes = -2;
-            std::throw_with_nested(invalid_argument(format("Move File error. File name cannot empty. orgName:{};newName:{}", orgName, newName)));
+            std::throw_with_nested(invalid_argument(
+                format("Move File error. File name cannot empty. orgName:{};newName:{}", orgName, newName)));
         }
 
         if (access(orgName.c_str(), ACC_R) != 0)
         {
             nRes = -1;
-            std::throw_with_nested(runtime_error(format("Move File error. Origin file not exist or can not read:[{}]", orgName)));
+            std::throw_with_nested(
+                runtime_error(format("Move File error. Origin file not exist or can not read:[{}]", orgName)));
         }
 
         int res = Helper::CheckFileDirectory(newName);
         if (res < 0)
         {
             nRes = -1;
-            std::throw_with_nested(runtime_error(format("Move File error.CheckFileDirectory error:[{}][{}]", newName, res)));
+            std::throw_with_nested(
+                runtime_error(format("Move File error.CheckFileDirectory error:[{}][{}]", newName, res)));
         }
 
         if (!Helper::MoveFile(orgName, newName))
@@ -768,7 +778,8 @@ U64Result CGlobalFunction::GetConnectionID(int templateid)
         auto item = CGlobalFunction::Instance->m_mapUUIDToNode[uuid];
         CGlobalFunction::Instance->AddConnection(uuid, item.address(), item.port());
 
-        return U64Result::Make_Error(format("Try connect to [{}][{}][{}:{}], please wait and retry.", templateid, uuid, item.address(), item.port()));
+        return U64Result::Make_Error(format("Try connect to [{}][{}][{}:{}], please wait and retry.", templateid, uuid,
+                                            item.address(), item.port()));
     }
 
     return U64Result::Make_OKResult(CGlobalFunction::Instance->m_mapUUIDToConnectionID[uuid]);
@@ -812,7 +823,7 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
     request.set_database(DBName);
 
     auto req = make_shared<SendPackageEvent>(session);
-    req->SetRequest( DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request), PRIORITY_LEVEL::Real_time );
+    req->SetRequest(DataCenter::Functions::ConnectDatabase, ConvertObjToStr(&request), PRIORITY_LEVEL::Real_time);
     auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
@@ -1055,7 +1066,7 @@ int CGlobalFunction::Lua_PrepareUpload(lua_State *l)
     request.set_filesize(file_size);
 
     auto req = make_shared<SendPackageEvent>(session);
-    req->SetRequest(  FileCenter::Functions::PrepareUpload, ConvertObjToStr(&request), PRIORITY_LEVEL::Real_time);
+    req->SetRequest(FileCenter::Functions::PrepareUpload, ConvertObjToStr(&request), PRIORITY_LEVEL::Real_time);
     auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
@@ -1093,7 +1104,7 @@ int CGlobalFunction::Lua_UploadEnd(lua_State *l)
     request.set_token(token);
 
     auto req = make_shared<SendPackageEvent>(session);
-    req->SetRequest( FileCenter::Functions::Uploaded, ConvertObjToStr(&request), PRIORITY_LEVEL::Real_time);
+    req->SetRequest(FileCenter::Functions::Uploaded, ConvertObjToStr(&request), PRIORITY_LEVEL::Real_time);
     auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
@@ -1136,7 +1147,7 @@ int CGlobalFunction::Lua_GetThumbnail(lua_State *l)
     request.set_quality(quality);
 
     auto req = make_shared<SendPackageEvent>(session);
-    req->SetRequest(  FileCenter::Functions::GetThumbnail, ConvertObjToStr(&request),PRIORITY_LEVEL::Real_time);
+    req->SetRequest(FileCenter::Functions::GetThumbnail, ConvertObjToStr(&request), PRIORITY_LEVEL::Real_time);
     auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, CGlobalFunction::Instance->m_nTimeout);
     if (res.IsFialed())
     {
@@ -1207,7 +1218,7 @@ int CGlobalFunction::Lua_ConvertImageFormat(lua_State *l)
     request.set_retainsourcefile(retain);
 
     auto req = make_shared<SendPackageEvent>(session);
-    req->SetRequest( FileCenter::Functions::ConvertImageFile, ConvertObjToStr(&request),PRIORITY_LEVEL::Real_time);
+    req->SetRequest(FileCenter::Functions::ConvertImageFile, ConvertObjToStr(&request), PRIORITY_LEVEL::Real_time);
     auto res = req->SyncCall(CGlobalFunction::Instance->m_iC, timeout);
     if (res.IsFialed())
     {
