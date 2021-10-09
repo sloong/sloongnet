@@ -8,12 +8,12 @@ example:
         "default": 5,
         "range": [
             {
-                "forward_to": 5
+                "forward_to": 5,
                 "begin": 100,
                 "end":200,
                 "convert_rule": {
                     "direction":"+/-",
-                    "offset":10,
+                    "offset":10
                 }
             }
         ],
@@ -21,7 +21,7 @@ example:
             {
                 "forward_to": 5,
                 "maps": [
-                    "105":"305",
+                    "105":"305"
                 ]
             }
         ]

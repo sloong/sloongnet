@@ -59,46 +59,13 @@
 
 #pragma once
 
-// std c head file
-#include <errno.h> // for errno
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-// linux head file
-#include <execinfo.h>
-#include <fcntl.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/times.h>
-#include <sys/types.h>
-
-// std c++ file
-#include <atomic>
-#include <iostream>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <queue>
-#include <string>
-#include <vector>
-using namespace std;
-
-#include <fmt/format.h>
-using fmt::format;
-
-#include <spdlog/spdlog.h>
-
-#include <jsoncpp/json/json.h>
-
 #include "protocol/base.pb.h"
 using namespace Base;
 
 #include "protocol/core.pb.h"
 using namespace Core;
 
+#include "std.h"
 #include "package.hpp"
 
 #include "Helper.h"

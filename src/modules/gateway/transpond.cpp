@@ -1,11 +1,11 @@
-/*** 
+/***
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-28 14:43:16
  * @LastEditTime: 2021-09-30 14:03:03
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/gateway/transpond.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description:
  */
 
 #include "transpond.h"

@@ -59,12 +59,7 @@
 
 #pragma once
 
-#include <fmt/format.h>
-using fmt::format;
-
-#include <spdlog/spdlog.h>
-
-#include <jsoncpp/json/json.h>
+#include "std.h"
 
 // univ head file
 #include "univ.h"

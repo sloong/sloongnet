@@ -15,8 +15,6 @@ using namespace Base;
 #include <list>
 using namespace std;
 
-#include <sys/time.h>
-
 #include "result.h"
 
 #include "hash.h"
