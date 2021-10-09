@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-21 11:17:32
- * @LastEditTime: 2021-09-22 10:10:35
+ * @LastEditTime: 2021-10-09 17:57:33
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -70,7 +70,7 @@ namespace Sloong
 {
     struct NodeItem
     {
-        void Active() { ActiveTime = time(NULL); }
+        void Active() { ActiveTime = chrono::system_clock::to_time_t(chrono::system_clock::now()); }
         string Address;
         int Port;
         time_t ActiveTime;
@@ -83,9 +83,7 @@ namespace Sloong
             Json::Value item;
             item["Address"] = this->Address;
             item["Port"] = this->Port;
-            char buffer[80];
-            strftime(buffer, 80, "%c", std::localtime(&ActiveTime));
-            item["ActiveTime"] = string(buffer);
+            item["ActiveTime"] = format("{:%Y-%m-%d %H:%M:%S}",chrono::system_clock::from_time_t(this->ActiveTime));
             item["UUID"] = (Json::UInt64)this->UUID;
             item["TemplateName"] = this->TemplateName;
             item["TemplateID"] = this->TemplateID;
@@ -95,9 +93,7 @@ namespace Sloong
         {
             item->set_address(this->Address);
             item->set_port(this->Port);
-            char buffer[80];
-            strftime(buffer, 80, "%c", std::localtime(&ActiveTime));
-            item->set_activetime(string(buffer));
+            item->set_activetime(format("{:%Y-%m-%d %H:%M:%S}",chrono::system_clock::from_time_t(this->ActiveTime)));
             item->set_uuid(this->UUID);
             item->set_templatename(this->TemplateName);
             item->set_templateid(this->TemplateID);
