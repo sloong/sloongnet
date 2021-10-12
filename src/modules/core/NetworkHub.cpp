@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2021-09-22 14:43:34
+ * @LastEditTime: 2021-10-12 17:17:45
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/NetworkHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -496,6 +496,10 @@ void Sloong::CNetworkHub::MessageProcessWorkLoop()
 				goto MessagePorcessListRetry;
 			}
 			m_oProcessThreadSync.wait_for(100);
+		}
+		catch ( const std::exception& e )
+		{ 
+			m_pLog->error(format("MessageProcessWorkLoop catch exception: {}", e.what()));
 		}
 		catch (...)
 		{
