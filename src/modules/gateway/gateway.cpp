@@ -444,7 +444,7 @@ FWResult Sloong::SloongNetGateway::GetForwardInfo(int function)
         forward_to = _DefaultTemplateId;
     }
 
-    if (m_mapTempteIDToUUIDs.exist(forward_to))
+    if (!m_mapTempteIDToUUIDs.exist(forward_to))
     {
         m_pLog->error(format("Function [{}] has matching for forward to template [{}], but not found infomation in the "
                              "template info list"));
