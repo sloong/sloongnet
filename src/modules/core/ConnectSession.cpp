@@ -126,7 +126,7 @@ ResultType Sloong::ConnectSession::SendDataPackage(UniquePackage pack)
     }
     else if (res.GetResult() == ResultType::Error)
     {
-        m_pLog->warn(format("Send data failed.[{}]", m_pConnection->m_strAddress));
+        m_pLog->warn(format("Send data to {} failed.[{}]", m_pConnection->m_strAddress, res.GetMessage()));
         return ResultType::Error;
     }
     else if (res.GetResult() == ResultType::Retry)
