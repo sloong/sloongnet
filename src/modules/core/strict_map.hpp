@@ -122,7 +122,13 @@ template <typename K, typename V> class strict_map : public std::map<K, V>
     {
         shared_lock<shared_mutex> lock(m_mut);
         auto it = this->find(key);
-        assert(it != this->end());
+        if(  it == this->end())
+        {
+            stringstream ss;
+            ss << key;
+            throw std::runtime_error(format("strict_map: not found key {}",  ss.str()));
+        }            
+
         return it->second;
     }
 
