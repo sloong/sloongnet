@@ -46,7 +46,7 @@ std::string CLua::findScript(const string &strFullName)
 	string testFile(""), res("");
 	for (auto item : m_listSearchRoute)
 	{
-		testFile = Helper::Replace(Helper::Replace(item, "%pathdir%", m_strScriptFolder), "%filename%", strFullName);
+		testFile = Helper::Replace(Helper::Replace(item, "${dir}", m_strScriptFolder), "${filename}", strFullName);
 		if (CUtility::FileExist(testFile))
 		{
 			res = testFile;
