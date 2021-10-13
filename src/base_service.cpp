@@ -178,7 +178,7 @@ U64Result CSloongBaseService::InitlializeForWorker(EasyConnect *con)
             {
                 this_thread::sleep_for(std::chrono::seconds(1));
                 // sleep(1);
-                m_pLog->trace("Control return retry package. wait 1s and retry.");
+                m_pLog->debug("Control return retry package. wait 1s and retry.");
             }
             continue;
         }
@@ -505,7 +505,7 @@ CResult CSloongBaseService::Run()
             req.set_memroyused(mem_load);
 
             auto event = make_shared<Events::SendPackageEvent>(m_ManagerSession);
-            event->SetRequest((int)Functions::ReportLoadStatus, ConvertObjToStr(&req), PRIORITY_LEVEL::Low);
+            event->SetRequest((int)Functions::ReportLoadStatus, ConvertObjToStr(&req), PRIORITY_LEVEL::Inessential);
             m_iC->SendMessage(event);
         }
     }
@@ -551,7 +551,7 @@ void CSloongBaseService::OnSendPackageToManagerEventHandler(SharedEvent e)
 
     auto req = make_shared<SendPackageEvent>(m_ManagerSession);
     req->SetCallbackFunc([event](IEvent *e, Package *p) { event->CallCallbackFunc(p); });
-    req->SetRequest(event->GetFunctionID(), event->GetContent(), PRIORITY_LEVEL::Real_time);
+    req->SetRequest(event->GetFunctionID(), event->GetContent(), PRIORITY_LEVEL::Immediate);
     m_iC->SendMessage(req);
 }
 

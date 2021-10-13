@@ -12,11 +12,11 @@ enum ResultType{
 }
 
 enum PRIORITY_LEVEL{
-    Real_time=0;
+    Immediate = 0;
     High=1;
-    Standard=2;
+    Medium=2;
     Low=3;
-    Time_consuming=4;
+    Inessential=4;
 }
 
 message DataPackage

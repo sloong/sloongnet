@@ -205,7 +205,7 @@ ReceivePackageListResult Sloong::ConnectSession::OnDataCanReceive()
                     m_pLog->warn(format("Receive priority level error. the data is {}, the config level is {}. add "
                                         "this message to last list",
                                         package->priority(), PRIORITY_LEVEL_ARRAYSIZE));
-                    package->set_priority(PRIORITY_LEVEL::Time_consuming);
+                    package->set_priority(PRIORITY_LEVEL::Inessential);
                 }
 
                 readList.push(std::move(package));

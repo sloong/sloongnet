@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-09-22 10:03:21
+ * @LastEditTime: 2021-10-13 11:09:52
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/events/SendPackage.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -33,7 +33,7 @@ namespace Sloong
 			}
 			inline bool HaveCallbackFunc() { return m_pCallback != nullptr; }
 
-			void SetRequest( int32_t func, const string& content, PRIORITY_LEVEL priority= PRIORITY_LEVEL::Standard)
+			void SetRequest( int32_t func, const string& content, PRIORITY_LEVEL priority= PRIORITY_LEVEL::Medium)
 			{
 				m_pData = make_unique<Package>();
 				m_pData->set_type(DataPackage_PackageType::DataPackage_PackageType_Request);
@@ -43,7 +43,7 @@ namespace Sloong
 				m_pData->set_sessionid(m_ConnectionHashCode);
 			}
 
-			void SetRequest( int32_t func, string&& content, PRIORITY_LEVEL priority= PRIORITY_LEVEL::Standard)
+			void SetRequest( int32_t func, string&& content, PRIORITY_LEVEL priority= PRIORITY_LEVEL::Medium)
 			{
 				m_pData = make_unique<Package>();
 				m_pData->set_type(DataPackage_PackageType::DataPackage_PackageType_Request);
@@ -54,7 +54,7 @@ namespace Sloong
 			}
 
 
-			void SetEvent(int32_t func, const string& content, bool controlEvent = false, PRIORITY_LEVEL priority = PRIORITY_LEVEL::Standard )
+			void SetEvent(int32_t func, const string& content, bool controlEvent = false, PRIORITY_LEVEL priority = PRIORITY_LEVEL::Medium )
 			{
 				m_pData = make_unique<Package>();
 				m_pData->set_type(controlEvent ? DataPackage_PackageType::DataPackage_PackageType_ControlEvent : DataPackage_PackageType::DataPackage_PackageType_ManagerEvent  );

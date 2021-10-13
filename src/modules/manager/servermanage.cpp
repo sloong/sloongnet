@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-29 09:27:21
- * @LastEditTime: 2021-09-22 10:06:08
+ * @LastEditTime: 2021-10-12 17:16:21
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/manager/servermanage.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -362,6 +362,7 @@ PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
 
 CResult Sloong::CServerManage::EventRecorderHandler(const string &req_str, Package *pack)
 {
+	
 	return CResult::Succeed;
 }
 
