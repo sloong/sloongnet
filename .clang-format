@@ -1,1 +1,3 @@
 BasedOnStyle: Microsoft
+DerivePointerAlignment: true
+PointerAlignment: Left 
