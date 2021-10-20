@@ -155,14 +155,14 @@ CResult SloongNetGateway::Initialized()
 
             if (!m_pModuleConfig->isMember("forwarders"))
             {
-                return CResult::Make_Error("Configuration cannot empty");
+                return CResult::Make_Error("Gateway configuration cannot empty");
             }
 
             auto forwarders = m_pModuleConfig->operator[]("forwarders");
 
             if (!CheckJsonInt(forwarders, "default"))
             {
-                return CResult::Make_Error("Configuration forwards-default cannot empty");
+                return CResult::Make_Error("Gateway configuration forwards-default cannot empty");
             }
 
             _DefaultTemplateId = GetJsonInt(forwarders, "default");

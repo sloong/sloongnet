@@ -1,13 +1,13 @@
-/*** 
+/***
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-09-15 10:14:33
+ * @LastEditTime: 2021-10-20 12:52:31
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description:
  */
-/*** 
+/***
  * @......................................&&.........................
  * @....................................&&&..........................
  * @.................................&&&&............................
@@ -59,94 +59,95 @@
 
 #pragma once
 
-#include "main.h"
-#include "IData.h"
-#include "IEvent.h"
 #include "IControl.h"
 
-#include "ControlHub.h"
-#include "NetworkHub.h"
-#include "EasyConnect.h"
-#include <dlfcn.h>
+#include "main.h"
 
-#include <spdlog/spdlog.h>
+#include "ControlHub.h"
+#include "EasyConnect.h"
+#include "NetworkHub.h"
+#include <dlfcn.h>
 
 namespace Sloong
 {
-	typedef struct NodeInfo
-	{
-		bool ManagerMode = false;
-		string Address= "";
-		int Port = 0;
-		string AssignedTargetTemplateID= "";
-		string IncludeTargetType= "";
-		string ExcludeTargetType= "";
-		GLOBAL_CONFIG TemplateConfig;
-		int TemplateID;
-		uint64_t NodeUUID;
-	} NodeInfo;
+typedef struct NodeInfo
+{
+    bool ManagerMode = false;
+    string Address = "";
+    int Port = 0;
+    string AssignedTargetTemplateID = "";
+    string IncludeTargetType = "";
+    string ExcludeTargetType = "";
+    GLOBAL_CONFIG TemplateConfig;
+    int TemplateID;
+    uint64_t NodeUUID;
+} NodeInfo;
 
-	class CSloongBaseService
-	{
-	public:
-		CSloongBaseService() {}
+class CSloongBaseService
+{
+  public:
+    CSloongBaseService()
+    {
+    }
 
-		virtual ~CSloongBaseService() {	}
+    virtual ~CSloongBaseService()
+    {
+    }
 
-		// Just call it without Control module.
-		virtual CResult Initialize(NodeInfo, spdlog::logger* );
+    // Just call it without Control module.
+    virtual CResult Initialize(NodeInfo, shared_ptr<logger_ex>);
 
-		virtual CResult Run();
-		virtual void Stop();
+    virtual CResult Run();
+    virtual void Stop();
 
-		TResult<shared_ptr<Package>> RegisterToControl(EasyConnect *con, string uuid);
+    TResult<shared_ptr<Package>> RegisterToControl(EasyConnect *con, string uuid);
 
-	protected:
-		virtual U64Result InitlializeForWorker(EasyConnect *);
-		virtual CResult InitlializeForManager();
+  protected:
+    virtual U64Result InitlializeForWorker(EasyConnect *);
+    virtual CResult InitlializeForManager();
 
-		CResult RegisterNode(uint64_t);
-		CResult InitModule();
-		void InitSystem();
+    CResult RegisterNode(uint64_t);
+    CResult InitModule();
+    void InitSystem();
 
-	protected:
-		void OnProgramRestartEventHandler(SharedEvent);
-		void OnProgramStopEventHandler(SharedEvent);
-		void OnSendPackageToManagerEventHandler(SharedEvent);
-		void OnGetManagerSocketEventHandler(SharedEvent);
+  protected:
+    void OnProgramRestartEventHandler(SharedEvent);
+    void OnProgramStopEventHandler(SharedEvent);
+    void OnSendPackageToManagerEventHandler(SharedEvent);
+    void OnGetManagerSocketEventHandler(SharedEvent);
 
-	protected:
-		static void sloong_terminator();
-		static void sloong_unexpected();
-		static void on_sigint(int);
-		static void on_SIGINT_Event(int);
+  protected:
+    static void sloong_terminator();
+    static void sloong_unexpected();
+    static void on_sigint(int);
+    static void on_SIGINT_Event(int);
 
-	protected:
-		unique_ptr<CNetworkHub> m_pNetwork = make_unique<CNetworkHub>();
-		unique_ptr<CControlHub> m_iC = make_unique<CControlHub>();
-		NodeInfo m_oNodeRuntimeInfo;
-		
-		static const uint64_t INVALID_SESSION = 0;
+  protected:
+    unique_ptr<CNetworkHub> m_pNetwork = make_unique<CNetworkHub>();
+    unique_ptr<CControlHub> m_iC = make_unique<CControlHub>();
+    NodeInfo m_oNodeRuntimeInfo;
 
-		spdlog::logger* m_pLog = nullptr;
-		uint64_t m_ManagerSession=INVALID_SESSION;
-		Json::Value m_oModuleConfig;
-		EasySync m_oExitSync;
-		CResult m_oExitResult = CResult::Succeed;
-		void *m_pModule = nullptr;
-		RUN_STATUS m_emStatus = RUN_STATUS::Created;
+    static const uint64_t INVALID_SESSION = 0;
 
-		CreateProcessEnvironmentFunction m_pModuleCreateProcessEvnFunc = nullptr;
-		RequestPackageProcessFunction m_pModuleRequestHandler = nullptr;
-		ResponsePackageProcessFunction m_pModuleResponseHandler = nullptr;
-		EventPackageProcessFunction m_pModuleEventHandler = nullptr;
-		NewConnectAcceptProcessFunction m_pModuleAcceptHandler = nullptr;
-		ModuleInitializationFunction m_pModuleInitializationFunc = nullptr;
-		ModuleInitializedFunction m_pModuleInitializedFunc = nullptr;
-		PrepareInitializeFunction m_pPrepareInitializeFunc = nullptr;
+    shared_ptr<logger_ex> m_pLog = nullptr;
+    uint64_t m_ManagerSession = INVALID_SESSION;
+    Json::Value m_oModuleConfig;
+    EasySync m_oExitSync;
+    CResult m_oExitResult = CResult::Succeed;
+    void *m_pModule = nullptr;
+    RUN_STATUS m_emStatus = RUN_STATUS::Created;
 
-		static constexpr int REPORT_LOAD_STATUS_INTERVAL = 1000 * 10; // one mintue
-	public:
-		static unique_ptr<CSloongBaseService> Instance;
-	};
+    CreateProcessEnvironmentFunction m_pModuleCreateProcessEvnFunc = nullptr;
+    RequestPackageProcessFunction m_pModuleRequestHandler = nullptr;
+    ResponsePackageProcessFunction m_pModuleResponseHandler = nullptr;
+    EventPackageProcessFunction m_pModuleEventHandler = nullptr;
+    NewConnectAcceptProcessFunction m_pModuleAcceptHandler = nullptr;
+    ModuleInitializationFunction m_pModuleInitializationFunc = nullptr;
+    ModuleInitializedFunction m_pModuleInitializedFunc = nullptr;
+    PrepareInitializeFunction m_pPrepareInitializeFunc = nullptr;
+
+    static constexpr int REPORT_LOAD_STATUS_INTERVAL = 1000 * 10; // ten seconds
+  public:
+    static unique_ptr<CSloongBaseService> Instance;
+};
 } // namespace Sloong

@@ -66,15 +66,17 @@ using namespace Base;
 using namespace Core;
 
 #include "std.h"
-#include "package.hpp"
+
+#include "extend/list_ex.hpp"
+#include "extend/logger_ex.hpp"
+#include "extend/map_ex.hpp"
+#include "extend/queue_safety.hpp"
+#include "extend/strict_map.hpp"
 
 #include "Helper.h"
-#include "list_ex.hpp"
-#include "map_ex.hpp"
-#include "package.hpp"
-#include "queue_safety.hpp"
 #include "result.h"
-#include "strict_map.hpp"
+
+#include "package.hpp"
 
 using namespace Sloong;
 

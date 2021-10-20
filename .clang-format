@@ -1,3 +1,4 @@
 BasedOnStyle: Microsoft
 DerivePointerAlignment: true
 PointerAlignment: Left 
+AllowShortFunctionsOnASingleLine: All 

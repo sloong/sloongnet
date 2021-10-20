@@ -72,6 +72,11 @@ using namespace Manager;
 #include "linux_cpuload.hpp"
 #include "linux_memoryload.hpp"
 
+#include <spdlog/sinks/daily_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+
+#include "IData.h"
+
 IControl *Sloong::IData::m_iC = nullptr;
 unique_ptr<CSloongBaseService> Sloong::CSloongBaseService::Instance = nullptr;
 
@@ -234,9 +239,11 @@ void CSloongBaseService::InitSystem()
     signal(SIGSEGV, &on_sigint);
 }
 
-CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger *log)
+CResult CSloongBaseService::Initialize(NodeInfo info, shared_ptr<logger_ex> logger)
 {
-    m_pLog = log;
+    m_pLog = logger;
+    m_pLog->set_name("INIT");
+
     m_emStatus = RUN_STATUS::Created;
 
     m_oNodeRuntimeInfo = move(info);
@@ -270,16 +277,16 @@ CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger *log)
     if (res.IsFialed())
         return res;
     auto pConfig = &m_oNodeRuntimeInfo.TemplateConfig;
-    // if (pConfig->logoperation() == 0)
-    // pConfig->set_logoperation(LOGOPT::WriteToSTDOut);
 
 #ifdef DEBUG
     pConfig->set_loglevel(Core::LogLevel::Verbos);
-    // pConfig->set_logoperation(pConfig->logoperation() | LOGOPT::WriteToSTDOut);
 #endif
+
+    auto file_logger = make_shared<spdlog::sinks::daily_file_sink_mt>(pConfig->logpath(), 0, 0);
+    file_logger->set_level(spdlog::level::debug);
+
+    m_pLog->add_sink(move(file_logger));
     m_pLog->set_level(spdlog::level::level_enum(pConfig->loglevel()));
-    // m_pLog->Initialize(pConfig->logpath(), "", LOGOPT(pConfig->logoperation()),
-    // LOGLEVEL(pConfig->loglevel()), LOGTYPE::DAY);
 
     res = InitModule();
     if (res.IsFialed())
@@ -295,7 +302,7 @@ CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger *log)
         }
     }
 
-    res = m_iC->Initialize(pConfig->mqthreadquantity(), m_pLog);
+    res = m_iC->Initialize(pConfig->mqthreadquantity(), m_pLog.get());
     if (res.IsFialed())
     {
         m_pLog->critical(res.GetMessage());
@@ -304,7 +311,7 @@ CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger *log)
     m_pLog->debug("Control center initialization succeed.");
 
     m_iC->Add(DATA_ITEM::ServerConfiguration, &m_oNodeRuntimeInfo.TemplateConfig);
-    m_iC->Add(DATA_ITEM::Logger, m_pLog);
+    m_iC->Add(DATA_ITEM::Logger, m_pLog.get());
     m_iC->Add(DATA_ITEM::NodeUUID, &m_oNodeRuntimeInfo.NodeUUID);
     if (pConfig->moduleconfig().length() > 0)
     {
@@ -388,6 +395,8 @@ CResult CSloongBaseService::Initialize(NodeInfo info, spdlog::logger *log)
             return res;
         }
     }
+
+    m_pLog->set_name("SLOONG");
 
     return CResult::Succeed;
 }
@@ -555,6 +564,4 @@ void CSloongBaseService::OnSendPackageToManagerEventHandler(SharedEvent e)
     m_iC->SendMessage(req);
 }
 
-void CSloongBaseService::OnGetManagerSocketEventHandler(SharedEvent e)
-{
-}
+void CSloongBaseService::OnGetManagerSocketEventHandler(SharedEvent e) {}

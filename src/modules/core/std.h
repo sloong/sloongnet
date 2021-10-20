@@ -1,11 +1,20 @@
-/*** 
+/***
+ * @Author: Chuanbin Wang - wcb@sloong.com
+ * @Date: 2021-10-20 14:55:32
+ * @LastEditTime: 2021-10-20 14:55:32
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/core/std.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description:
+ */
+/***
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2021-10-09 18:00:45
  * @LastEditTime: 2021-10-09 18:00:52
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/std.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description:
  */
 
 #pragma once
@@ -37,8 +46,8 @@
 #include <vector>
 using namespace std;
 
-#include <fmt/format.h>
 #include <fmt/chrono.h>
+#include <fmt/format.h>
 using fmt::format;
 
 #include <spdlog/spdlog.h>

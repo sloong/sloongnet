@@ -19,6 +19,20 @@
             "cwd": "${workspaceFolder}/build/debug/",
         },
         {
+            "name": "LocalGateway",
+            "type": "cppdbg",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/debug/sloongnet",
+            "args": [
+                    "Worker",
+                    "localhost:19000",
+                    "--include=Gateway"
+            ],
+            "cwd": "${workspaceFolder}/build/debug/",
+        },
+        {
             "name": "DebugGateway",
             "type": "cppdbg",
             "MIMode": "gdb",
