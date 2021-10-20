@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2021-09-14 20:51:28
+ * @LastEditTime: 2021-10-20 14:33:41
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ControlHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -79,19 +79,21 @@ void Sloong::CControlHub::Exit()
 	m_oSync.notify_all();
 }
 
-void *Sloong::CControlHub::Get(uint64_t item)
+void *Sloong::CControlHub::Get(uint64_t key)
 {
-	auto data = m_oDataList.find(item);
-	if (data == m_oDataList.end())
+	auto baseitem = m_oDataList.try_get(key);
+	if (baseitem == nullptr || (*baseitem)->Type != DataItemType::Object)
 		return nullptr;
 
-	return (*data).second;
+	auto item = dynamic_pointer_cast<ObjectData>(*baseitem);
+
+	return item->Ptr;
 }
 
 string Sloong::CControlHub::GetTempString(const string &key, bool erase)
 {
 	auto baseitem = m_oTempDataList.try_get(key);
-	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::String)
+	if (baseitem == nullptr || (*baseitem)->Type != DataItemType::String)
 		return string();
 
 	auto item = dynamic_pointer_cast<StringData>(*baseitem);
@@ -105,7 +107,7 @@ string Sloong::CControlHub::GetTempString(const string &key, bool erase)
 void *Sloong::CControlHub::GetTempObject(const string &key, int *out_size, bool erase)
 {
 	auto baseitem = m_oTempDataList.try_get(key);
-	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::Object)
+	if (baseitem == nullptr || (*baseitem)->Type != DataItemType::Object)
 		return nullptr;
 
 	auto item = dynamic_pointer_cast<ObjectData>(*baseitem);
@@ -121,7 +123,7 @@ void *Sloong::CControlHub::GetTempObject(const string &key, int *out_size, bool 
 unique_ptr<char[]> Sloong::CControlHub::GetTempBytes(const string &key, int *out_in_size)
 {
 	auto baseitem = m_oTempDataList.try_get(key);
-	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::Bytes)
+	if (baseitem == nullptr || (*baseitem)->Type != DataItemType::Bytes)
 		return nullptr;
 
 	auto item = dynamic_pointer_cast<BytesData>(*baseitem);
@@ -136,7 +138,7 @@ unique_ptr<char[]> Sloong::CControlHub::GetTempBytes(const string &key, int *out
 shared_ptr<void> Sloong::CControlHub::GetTempSharedPtr(const string &key, bool erase)
 {
 	auto baseitem = m_oTempDataList.try_get(key);
-	if (baseitem == nullptr || (*baseitem)->Type != TempDataItemType::SharedPtr)
+	if (baseitem == nullptr || (*baseitem)->Type != DataItemType::SharedPtr)
 		return nullptr;
 
 	auto item = dynamic_pointer_cast<SharedPtrData>(*baseitem);

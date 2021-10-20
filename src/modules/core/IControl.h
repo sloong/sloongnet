@@ -71,6 +71,8 @@ class IControl
     virtual void Add(uint64_t, void *) = 0;
     virtual void *Get(uint64_t) = 0;
     virtual void Remove(uint64_t) = 0;
+    virtual void AddSharedPtr(uint64_t, shared_ptr<void>) = 0;
+    virtual shared_ptr<void> GetSharedPtr(uint64_t) = 0;
     virtual void AddTempString(const string &, const string &) = 0;
     virtual void AddTempObject(const string &, const void *, int) = 0;
     virtual void AddTempBytes(const string &, unique_ptr<char[]> &, int) = 0;
