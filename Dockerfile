@@ -11,14 +11,15 @@ RUN /tmp/build/build.sh -r
 FROM sloong/sloongnet_run
 LABEL maintainer="admin@sloong.com"
 
-WORKDIR /usr/local/bin
-COPY --from=build-env /tmp/build/release/ /usr/local/bin/
-RUN chmod +x /usr/local/bin/sloongnet
+RUN mkdir /app
+WORKDIR /app
+COPY --from=build-env /tmp/build/release/ /app
+RUN chmod +x /app/sloongnet
 
 RUN mkdir -p /data/log
 ENV DB_FILE_PATH="/data/configuration.db"
 
 VOLUME /data
 EXPOSE 8000
-ENTRYPOINT ["/usr/local/bin/sloongnet"]
+ENTRYPOINT ["/app/sloongnet"]
 CMD ["Worker","controller:8000"]
