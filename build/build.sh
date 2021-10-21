@@ -80,6 +80,7 @@ build(){
 }
 
 build_debug(){
+	echo "Build DEBUG"
 	OUTPATH=$SCRIPTFOLDER/$PROJECT-debug
 	MAKEFLAG=debug
 	CMAKEFLAG=Debug
@@ -106,6 +107,7 @@ clean_all(){
 }
 
 build_release(){
+	echo "Build RELEASE"
 	OUTPATH=$SCRIPTFOLDER/$PROJECT-release
 	MAKEFLAG=release
 	CMAKEFLAG=Release

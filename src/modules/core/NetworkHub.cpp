@@ -138,6 +138,7 @@ CResult Sloong::CNetworkHub::Initialize(IControl *iMsg)
 
 void Sloong::CNetworkHub::Run(SharedEvent event)
 {
+    m_pLog->info("NetworkHub is running.");
     m_emStatus = RUN_STATUS::Running;
 }
 
@@ -354,7 +355,7 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
     m_pLog->debug("Check connect timeout thread is running.");
     while (m_emStatus != RUN_STATUS::Exit)
     {
-        m_pLog->debug("Check connect timeout start.");
+        m_pLog->trace("Check connect timeout start.");
         closedList.clear();
     RecheckTimeout:
         shared_lock<shared_mutex> rlock(m_oSockListMutex);
@@ -371,7 +372,7 @@ void Sloong::CNetworkHub::CheckTimeoutWorkLoop()
             }
         }
         rlock.unlock();
-        m_pLog->debug(format("Check connect timeout done. wait [{}] ms.", tinterval));
+        m_pLog->trace(format("Check connect timeout done. wait [{}] ms.", tinterval));
         m_oCheckTimeoutThreadSync.wait_for(tinterval);
     }
     m_pLog->info("check timeout connect thread is exit ");

@@ -396,8 +396,6 @@ CResult CSloongBaseService::Initialize(NodeInfo info, shared_ptr<logger_ex> logg
         }
     }
 
-    m_pLog->set_name("SLOONG");
-
     return CResult::Succeed;
 }
 
@@ -495,7 +493,9 @@ CResult CSloongBaseService::Run()
         // event.
         return CResult::Make_Error("Application run function is called, but the status not created.");
     }
+    m_pLog->set_name("RUNNING");
     m_pLog->info("Application begin running.");
+
     m_iC->SendMessage(EVENT_TYPE::ProgramStart);
     m_emStatus = RUN_STATUS::Running;
 
@@ -526,7 +526,9 @@ CResult CSloongBaseService::Run()
 
 void CSloongBaseService::Stop()
 {
+    m_pLog->set_name("STOP");
     m_pLog->info("Application will exit.");
+
     m_iC->SendMessage(EVENT_TYPE::ProgramStop);
     if (m_emStatus == RUN_STATUS::Created)
         m_emStatus = RUN_STATUS::Exit;
