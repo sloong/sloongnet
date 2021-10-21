@@ -3,7 +3,7 @@
 # @Author: WCB
  # @Date: 2019-12-11 14:28:05
  # @LastEditors: Chuanbin Wang
- # @LastEditTime: 2021-09-15 13:39:03
+ # @LastEditTime: 2021-10-21 17:34:04
  # @Description: file content
  ###
 pwd
@@ -24,15 +24,17 @@ build(){
 
 build_image() {
     docker build -t sloong/sloongnet_build:latest -f $SCRIPTFOLDER/Build.Dockerfile .
-    docker push sloong/sloongnet_build
 }
 
 
 run_image() {
-    docker build -t sloong/sloongnet_run -f $SCRIPTFOLDER/Run.Dockerfile .
-    docker push sloong/sloongnet_run
+    docker build -t sloong/sloongnet_run:latest -f $SCRIPTFOLDER/Run.Dockerfile .
 }
 
+push_image(){
+	docker push sloong/sloongnet_build
+	docker push sloong/sloongnet_run
+}
 
 if [ $# -eq 0 ]; then
 	build
@@ -45,6 +47,9 @@ if [ $# -eq 1 ]; then
 			;;
 		--run) 
 			run_image
+			;;
+		--push)
+			push_image
 			;;
 		* ) 
 			build

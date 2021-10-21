@@ -14,11 +14,11 @@ RUN sed -i "s/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g" /etc/apt/sources.li
  && apt update 
 
 # copy file to docker
-COPY . /tmp/
+COPY ./build/environment.sh /tmp/
 WORKDIR /tmp
 
 # install build packages
-RUN /tmp/build/environment.sh --run \
+RUN /tmp/environment.sh --run \
  && apt clean \
  && apt autoremove --yes \
  && rm -rf /var/lib/apt/lists/* \
