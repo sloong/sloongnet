@@ -1,8 +1,8 @@
 #include "filemanager.h"
+#include "IData.h"
+#include "ImageProcesser.h"
 #include "filecenter.h"
 #include "utility.h"
-#include "ImageProcesser.h"
-#include "IData.h"
 using namespace Sloong;
 
 CResult Sloong::FileManager::Initialize(IControl *ic)
@@ -13,32 +13,52 @@ CResult Sloong::FileManager::Initialize(IControl *ic)
     m_mapTokenToUploadInfo = STATIC_TRANS<map_ex<string, UploadInfo> *>(m);
 
     auto config = IData::GetModuleConfig();
-    if (!(*config)["ArchiveFolder"].empty())
+    if (CheckJsonString(*config, "ArchiveFolder"))
     {
         m_strArchiveFolder = (*config)["ArchiveFolder"].asString();
     }
-    if (!(*config)["UploadTempSaveFolder"].empty())
+    else
+    {
+        m_pLog->warn(format("ArchiveFolder is not set, use default value [{}]", m_strArchiveFolder));
+    }
+    if (CheckJsonString(*config, "UploadTempSaveFolder"))
     {
         m_strUploadTempSaveFolder = (*config)["UploadTempSaveFolder"].asString();
     }
-    if (!(*config)["CacheFolder"].empty())
+    else
+    {
+        m_pLog->warn(format("UploadTempSaveFolder is not set, use default value [{}]", m_strUploadTempSaveFolder));
+    }
+    if (CheckJsonString(*config, "CacheFolder"))
     {
         m_strCacheFolder = (*config)["CacheFolder"].asString();
+    }
+    else
+    {
+        m_pLog->warn(format("CacheFolder is not set, use default value [{}]", m_strCacheFolder));
     }
 
     FormatFolderString(m_strArchiveFolder);
     FormatFolderString(m_strUploadTempSaveFolder);
     FormatFolderString(m_strCacheFolder);
 
-    m_mapFuncToHandler[Functions::PrepareUpload] = std::bind(&FileManager::PrepareUploadHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::Uploading] = std::bind(&FileManager::UploadingHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::Uploaded] = std::bind(&FileManager::UploadedHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::SimpleUpload] = std::bind(&FileManager::SimpleUploadHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::DownloadVerify] = std::bind(&FileManager::DownloadVerifyHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::DownloadFile] = std::bind(&FileManager::DownloadFileHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::PrepareUpload] =
+        std::bind(&FileManager::PrepareUploadHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::Uploading] =
+        std::bind(&FileManager::UploadingHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::Uploaded] =
+        std::bind(&FileManager::UploadedHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::SimpleUpload] =
+        std::bind(&FileManager::SimpleUploadHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::DownloadVerify] =
+        std::bind(&FileManager::DownloadVerifyHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::DownloadFile] =
+        std::bind(&FileManager::DownloadFileHandler, this, std::placeholders::_1, std::placeholders::_2);
 
-    m_mapFuncToHandler[Functions::ConvertImageFile] = std::bind(&FileManager::ConvertImageFileHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::GetThumbnail] = std::bind(&FileManager::GetThumbnailHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::ConvertImageFile] =
+        std::bind(&FileManager::ConvertImageFileHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler[Functions::GetThumbnail] =
+        std::bind(&FileManager::GetThumbnailHandler, this, std::placeholders::_1, std::placeholders::_2);
 
     return CResult::Succeed;
 }
@@ -47,18 +67,21 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(Package *pack)
 {
     auto function = (Functions)pack->function();
     if (!Functions_IsValid(function))
-        return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, format("FileCenter no provide [{}] function.", function)));
+        return PackageResult::Make_OKResult(
+            Package::MakeErrorResponse(pack, format("FileCenter no provide [{}] function.", function)));
 
     auto req_obj = pack->content();
     auto func_name = Functions_Name(function);
     m_pLog->debug(format("Request [{}][{}]:[{}]", function, func_name, req_obj));
     if (!m_mapFuncToHandler.exist(function))
-        return PackageResult::Make_OKResult(Package::MakeErrorResponse(pack, format("Function [{}] no handler.", func_name)));
+        return PackageResult::Make_OKResult(
+            Package::MakeErrorResponse(pack, format("Function [{}] no handler.", func_name)));
 
     auto res = m_mapFuncToHandler[function](req_obj, pack);
     auto response = Package::MakeResponse(pack, res);
     if (res.IsSucceed())
-        m_pLog->debug(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage().length()));
+        m_pLog->debug(
+            format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage().length()));
     else
         m_pLog->debug(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage()));
     return PackageResult::Make_OKResult(move(response));
@@ -81,7 +104,8 @@ CResult Sloong::FileManager::MergeFile(const list<FileRange> &fileList, const st
     return CResult::Succeed;
 }
 
-CResult Sloong::FileManager::SplitFile(const string &filepath, int splitSize, map_ex<int, string> &pReadList, int *out_all_size)
+CResult Sloong::FileManager::SplitFile(const string &filepath, int splitSize, map_ex<int, string> &pReadList,
+                                       int *out_all_size)
 {
     if (!FileExist(filepath))
     {
@@ -112,7 +136,8 @@ CResult Sloong::FileManager::ArchiveFile(const string &index, const string &sour
 
         m_pLog->debug(format("Archive file: source[{}] target[{}]", source, target));
         if (source.length() < 3 || target.length() < 3)
-            return CResult::Make_Error(format("Move File error. File name cannot empty. source:{};target:{}", source, target));
+            return CResult::Make_Error(
+                format("Move File error. File name cannot empty. source:{};target:{}", source, target));
 
         if (access(source.c_str(), ACC_R) != 0)
             return CResult::Make_Error(format("Move File error. Origin file not exist or can not read:[{}]", source));
@@ -195,7 +220,8 @@ CResult Sloong::FileManager::UploadingHandler(const string &str_req, Package *pa
     auto &data = req->uploaddata();
 
     if (data.end() - data.start() != data.data().length())
-        return CResult::Make_Error(format("Length check error.[{}]<->[{}]", data.end() - data.start(), data.data().length()));
+        return CResult::Make_Error(
+            format("Length check error.[{}]<->[{}]", data.end() - data.start(), data.data().length()));
 
     auto sha256 = CSHA256::Encode(data.data());
     if (data.sha256() != sha256)
@@ -279,7 +305,7 @@ CResult Sloong::FileManager::DownloadVerifyHandler(const string &str_req, Packag
         return CResult::Make_Error("Cann't access to target file:" + real_path );
     }
 
-    
+
 
     // 怎样来避免文件内容被拷贝的同时，满足拆分读取的需求？
     // 这里准备使用list的方式，读取时指定一个大小，将文件内容读取到一个string的list中
@@ -426,7 +452,8 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
 
     if (!req->retainsourcefile())
     {
-        m_pLog->info(format("{} is convert to {} with {} format.delete old file.", req->index(), uuid, SupportFormat_Name(req->targetformat())));
+        m_pLog->info(format("{} is convert to {} with {} format.delete old file.", req->index(), uuid,
+                            SupportFormat_Name(req->targetformat())));
         int r = remove(real_path.c_str());
         if (r != 0)
         {
@@ -440,7 +467,8 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
 CResult Sloong::FileManager::GetThumbnailHandler(const string &str_req, Package *trans_pack)
 {
     auto req = ConvertStrToObj<GetThumbnailRequest>(str_req);
-    string thumb_file = format("{}{}x{}x{}/{}.webp", m_strCacheFolder, req->width(), req->height(), req->quality(), req->index());
+    string thumb_file =
+        format("{}{}x{}x{}/{}.webp", m_strCacheFolder, req->width(), req->height(), req->quality(), req->index());
     if (!FileExist(thumb_file))
     {
         Helper::CheckFileDirectory(thumb_file);

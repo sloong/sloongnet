@@ -15,49 +15,47 @@ enum SupportFormat
 
 enum Functions{
     Invalid=0;
-    reserved 1 to 300;// FileCenter function is start by 301-400
-
+    
     // 准备上传文件，获取上传token
     // Request << PrepareUploadRequest
     // Response >> PrepareUploadResponse
-    PrepareUpload=301;
+    PrepareUpload=1;
 
     // 上传文件分包
     // Request << UploadingRequest
     // Response >> Result
-    Uploading=302;
+    Uploading=2;
 
     // 上传完成
     // Request << UploadedRequest
     // Response >> Result
-	Uploaded=303;
+	Uploaded=3;
     
     // 简单的上传，适用于上传小文件，不支持断点续传。
     // Request << SimpleUploadRequest(&Extend)
     // Response >> Token in Content
-    SimpleUpload=304;
+    SimpleUpload=4;
 
     // 下载校验,可以对已下载的信息进行校验.
     // Request << DownloadVerifyRequest
     // Response >> DownloadVerifyResponse
-    DownloadVerify=305;
+    DownloadVerify=5;
 
     // 下载文件分包
     // Request << DownloadFileRequest
     // Response >> DownloadFileResponse(&Extend)
-    DownloadFile=306;
+    DownloadFile=6;
 
     // 尝试以图片的形式处理文件，对文件进行格式转换操作
     // Request << ConvertImageFileRequest
     // Response >> ConvertImageFileResponse
-    ConvertImageFile=311;
+    ConvertImageFile=7;
 
     // 尝试获取文件的缩略图，仅支持图片文件
     // Request << GetThumbnailRequest
     // Response >> GetThumbnailResponse(&Extend)
-    GetThumbnail=312;
+    GetThumbnail=8;
 
-    reserved 400 to max;
 }
 
 message FileRange{

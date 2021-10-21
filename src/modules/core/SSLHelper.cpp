@@ -1,18 +1,18 @@
-/*** 
+/***
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-08-03 14:38:46
  * @LastEditTime: 2020-08-10 16:24:43
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/SSLHelper.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description:
  */
 #include "SSLHelper.h"
 #include "Helper.h"
 
 // openssl head file
-#include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <openssl/ssl.h>
 
 bool support_ssl_reconnect = false;
 
@@ -173,7 +173,8 @@ int Sloong::SSLHelper::SSL_Write_Ex(const char *buf, int len)
     return SSL_write(pSSL, buf, len);
 }
 
-unsigned long Sloong::SSLHelper::G_InitializeSSL(LPVOID *out_ctx, const string &certFile, const string &keyFile, const string &passwd)
+unsigned long Sloong::SSLHelper::G_InitializeSSL(LPVOID *out_ctx, const string &certFile, const string &keyFile,
+                                                 const string &passwd)
 {
     SSL_library_init();
     OpenSSL_add_all_algorithms();                   /* load & register all cryptos, etc. */
@@ -187,12 +188,12 @@ unsigned long Sloong::SSLHelper::G_InitializeSSL(LPVOID *out_ctx, const string &
     if (!passwd.empty())
         SSL_CTX_set_default_passwd_cb_userdata(ctx, (void *)passwd.c_str());
 
-    //New lines
+    // New lines
     if (SSL_CTX_load_verify_locations(ctx, certFile.c_str(), keyFile.c_str()) != 1)
         return ERR_get_error();
     if (SSL_CTX_set_default_verify_paths(ctx) != 1)
         return ERR_get_error();
-    //End new lines
+    // End new lines
     /* set the local certificate from CertFile */
     if (SSL_CTX_use_certificate_file(ctx, certFile.c_str(), SSL_FILETYPE_PEM) <= 0)
     {
@@ -237,10 +238,10 @@ bool Sloong::SSLHelper::do_handshake()
     switch (SSL_get_error(pSSL, res))
     {
     case SSL_ERROR_WANT_WRITE:
-        //m_stStatus = ConnectStatus::WaitWrite;
+        // m_stStatus = ConnectStatus::WaitWrite;
         break;
     case SSL_ERROR_WANT_READ:
-        //m_stStatus = ConnectStatus::WaitRead;
+        // m_stStatus = ConnectStatus::WaitRead;
         break;
     default:
         m_stStatus = ConnectStatus::ConnectError;

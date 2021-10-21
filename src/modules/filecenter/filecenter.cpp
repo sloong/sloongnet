@@ -1,13 +1,13 @@
-/*** 
+/***
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
  * @LastEditTime: 2021-09-06 14:29:40
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filecenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description:
  */
-/*** 
+/***
  * @......................................&&.........................
  * @....................................&&&..........................
  * @.................................&&&&............................
@@ -145,18 +145,15 @@ void Sloong::CFileCenter::EventPackageProcesser(Package *pack)
 
     switch (event)
     {
-    case Manager::Events::ReferenceModuleOnline:
-    {
+    case Manager::Events::ReferenceModuleOnline: {
         m_pLog->info("Receive ReferenceModuleOnline event");
     }
     break;
-    case Manager::Events::ReferenceModuleOffline:
-    {
+    case Manager::Events::ReferenceModuleOffline: {
         m_pLog->info("Receive ReferenceModuleOffline event");
     }
     break;
-    default:
-    {
+    default: {
     }
     break;
     }

@@ -11,7 +11,6 @@
 #include <string.h>
 #include <inttypes.h>
 #include <errno.h>
-#include <sys/time.h>
 #define SOCKET int
 #endif
 
@@ -40,6 +39,7 @@
 #include <queue>
 #include <mutex>
 #include <functional>
+#include <chrono>
 using namespace std;
 
 namespace Sloong
@@ -239,18 +239,11 @@ namespace Sloong
             return strResult;
         }
 
-        static inline timeval CurrentDatetime()
-        {
-            struct timeval current;
-            gettimeofday(&current, NULL);
-            return current;
-        }
-
         static inline string FormatDatetime()
         {
-            auto cur = CurrentDatetime();
-            auto lt = localtime(&cur.tv_sec);
-            return Format("%d/%d/%d-%d:%d:%d.%.4d", (lt->tm_year + 1900), lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec, cur.tv_usec / 1000);
+            auto cur = chrono::system_clock::to_time_t(chrono::system_clock::now());
+            auto lt = std::localtime(&cur);
+            return Format("%d/%d/%d-%d:%d:%d", (lt->tm_year + 1900), lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
         }
 
         /// Move file

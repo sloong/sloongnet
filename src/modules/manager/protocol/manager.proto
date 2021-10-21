@@ -86,9 +86,6 @@ enum Functions{
     /// Request: SetNodeLogLevelRequest
     /// Response: None
     SetNodeLogLevel=14;
-
-    // reserved for other service.
-    reserved 101 to max;
 }
 
 message PostLogMessageRequest

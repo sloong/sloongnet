@@ -3,10 +3,9 @@ package Processer;
 
 enum Functions{
     Invalid=0;
-    reserved 1 to 600;// Processer function is start by 601
-    GetText=601;
-    Reload=602;
-	GetIP=607;
+    GetText=1;
+    Reload=2;
+	GetIP=7;
 }
 
 message GetTextMessageRequest{

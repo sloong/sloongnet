@@ -125,7 +125,7 @@ CResult SloongControlService::Initialized()
 	m_iC->RegisterEventHandler(EVENT_TYPE::ConnectionBreaked, std::bind(&SloongControlService::OnConnectionBreaked, this, std::placeholders::_1));
 
 	// Check every two minutes, timeout time as 30 seconds.
-	auto event = make_shared<EnableTimeoutCheckEvent>(30,2*60);
+	auto event = make_shared<EnableTimeoutCheckEvent>(15,20);
 	m_iC->SendMessage(event);
 
 	return CResult::Succeed;
