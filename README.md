@@ -1,3 +1,4 @@
+
 # Sloongnet - Only implement business as server's framework 
 Copyright 2015-2021 Sloong.com. All Rights Reserved
 
@@ -21,9 +22,6 @@ And in the case that the default components can not meet, according to the rules
 * Support message priority mode, high priority requests will be processed first
 * Asynchronous communication mode, the messages sent and then received are not corresponding, with the message priority function, low priority time-consuming requests will not affect the processing and return of high priority messages
 
-
-# History
-[View](https://git.sloong.com:8000/public/sloongnet/src/master/ChangeLog.md)
 
 # Contact US
 If have any question, tell us.

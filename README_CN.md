@@ -1,8 +1,13 @@
 ﻿﻿# Sloongnet - 只需实现业务的服务框架
-
 Copyright 2015-2021 Sloong.com. All Rights Reserved
 
+[![Build Status](https://drone.sloong.com:8000/api/badges/sloongnet/engine/status.svg)](https://drone.sloong.com:8000/sloongnet/engine)
+
 ***
+
+# Language 
+[English](https://git.sloong.com:8000/sloongnet/engine/src/branch/develop/README.md)
+
 
 # 概览
 
@@ -19,34 +24,6 @@ Copyright 2015-2021 Sloong.com. All Rights Reserved
 * 基于`事件驱动`的理念进行设计
 * 支持消息优先级，高优先级请求将被优先处理
 * 异步通讯模式，发送后接收的消息并不是对应的，配合消息优先级功能，低优先级的耗时请求将不会影响高优先级消息的处理和返回
-
-
-# 更新历史
-[点击查看](https://git.sloong.com/public/sloongnet/src/master/ChangeLog.md)
-
-## 直接安装
-1. 安装依赖包：
-```
-
-```
-2. 下载最新发布包
-3. 解压并执行.
-
-
-## 编译安装
-1. 下载源代码
-```
-git clone https://git.sloong.com:8000/sloongnet/engine.git    
-cd engine
-```
-2. 安装依赖
-```
-./build/environment.sh
-```
-3. 开始编译
-```
-./build/build.sh -r
-```
 
 
 ## 联系我们
