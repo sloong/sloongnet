@@ -8,7 +8,7 @@ include_directories(
     "${CMAKE_CURRENT_LIST_DIR}/referenced/sqlite_orm"
 )
 
-
+SET(LIBRARY_OUTPUT_PATH "../../")
 
 # 当前目录下所有源文件赋给SRC_LIST
 aux_source_directory(. SRC_LIST)
@@ -24,4 +24,5 @@ list(APPEND SRC_LIST ${PROTOSRCS})
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRC_LIST})
 
 # 添加链接库
-target_link_libraries(${PROJECT_NAME} sqlite3)
+target_link_libraries(${PROJECT_NAME} sqlite3
+        core)

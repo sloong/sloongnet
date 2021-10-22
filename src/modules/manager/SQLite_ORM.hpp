@@ -21,7 +21,7 @@ namespace Sloong
   'name' TEXT,\
   'note' TEXT,\
   'reference' TEXT,\
-  'configuation' blob,\
+  'configuration' blob,\
   PRIMARY KEY ('id')\
 );";
 
@@ -32,7 +32,7 @@ namespace Sloong
         string name;
         string note;
         string reference;
-        vector<char> configuation;
+        vector<char> configuration;
     };
 
     inline auto InitStorage(const string& path) {
@@ -44,7 +44,7 @@ namespace Sloong
                 make_column("name", &TemplateInfo::name),
                 make_column("note", &TemplateInfo::note),
                 make_column("reference", &TemplateInfo::reference),
-                make_column("configuation", &TemplateInfo::configuation)
+                make_column("configuration", &TemplateInfo::configuration)
             )
         );
     }

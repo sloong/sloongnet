@@ -4,34 +4,32 @@ package DataCenter;
 // DataCenter function is start by 201-300
 enum Functions{
     Invalid=0;
-    reserved 1 to 200;
 
     // Connect to Database. It will return the connect result.
     // Request:ConnectDatabaseRequest
     // Response:ConnectDatabaseResponse
-    ConnectDatabase=201;
+    ConnectDatabase=1;
 
     // Run query sql.
     // Request: QuerySQLCmdRequest
     // Response: QuerySQLCmdResponse
-    QuerySQLCmd=202;
+    QuerySQLCmd=2;
 
     // Run insert sql
     // Request: InsertSQLCmdRequest
     // Response: InsertSQLCmdResponse
-    InsertSQLCmd=203;
+    InsertSQLCmd=3;
 
     // Run update sql
     // Request: UpdateSQLCmdRequest
     // Response: UpdateSQLCmdResponse
-    UpdateSQLCmd=204;
+    UpdateSQLCmd=4;
 
     // Run delete sql
     // Request: DeleteSQLCmdRequest
     // Response: DeleteSQLCmdResponse
-    DeleteSQLCmd=205;
+    DeleteSQLCmd=5;
 
-    reserved 300 to max;
 }
 
 message ConnectDatabaseRequest{

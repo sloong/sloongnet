@@ -62,7 +62,6 @@
 
 #include "core.h"
 #include "export.h"
-#include <jsoncpp/json/json.h>
 #include "LuaProcessCenter.h"
 #include "IObject.h"
 
@@ -83,7 +82,8 @@ extern "C"
 enum LUA_EVENT_TYPE
 {
 	OnReferenceModuleOnline = EVENT_TYPE::CustomEventMix +1,
-	OnReferenceModuleOffline = EVENT_TYPE::CustomEventMix +2,
+	OnReferenceModuleOffline,
+	ProcessLuaEvent,
 };
 
 namespace Sloong
@@ -110,7 +110,7 @@ namespace Sloong
 
 		void SetReloadScriptFlag();
 
-		inline CLog* GetLog(){ return m_pLog; }
+		inline spdlog::logger* GetLog(){ return m_pLog; }
 
 	protected:
 		list_ex<shared_ptr<CLuaProcessCenter>> m_listProcess;

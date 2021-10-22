@@ -81,7 +81,7 @@ namespace Sloong
 			mysql_close(&m_MySql);
 		}
 
-		inline void SetLog(CLog *log) { m_pLog = log; }
+		inline void SetLog(spdlog::logger *log) { m_pLog = log; }
 
 		CResult Connect(const string &Address, int Port, const string &User, const string &Password, const string &Database);
 
@@ -108,7 +108,7 @@ namespace Sloong
 		U64Result RunModifySQLCmd( const string& );
 
 	private:
-		CLog *m_pLog = nullptr;
+		spdlog::logger *m_pLog = nullptr;
 		MYSQL m_MySql;
 		string m_strErrorMsg;
 		bool m_bIsConnect = false;

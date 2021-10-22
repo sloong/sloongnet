@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2019-11-05 08:59:19
- * @LastEditTime: 2020-07-31 14:37:10
+ * @LastEditTime: 2021-09-02 17:26:15
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/DBResult.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -116,7 +116,7 @@ void Sloong::DBResult::SetItemData(int lineIndex, int columnIndex, const string 
 
 int Sloong::DBResult::AppendColumn(string columnName)
 {
-    m_oColumns.push_back(columnName);
+    m_oColumns.emplace_back(columnName);
     return (int)m_oColumns.size() - 1;
 }
 
@@ -125,6 +125,6 @@ int Sloong::DBResult::AppendLine()
     auto newLine = make_shared<DBLine>();
     for (size_t i = 0; i < m_oColumns.size(); i++)
         newLine->push_back("");
-    m_oDatas.push_back(newLine);
+    m_oDatas.emplace_back(newLine);
     return (int)m_oDatas.size() - 1;
 }

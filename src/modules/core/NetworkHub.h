@@ -84,8 +84,9 @@ namespace Sloong
         void SendPackageEventHandler(SharedEvent);
         void OnConnectionBreakedEventHandler(SharedEvent);
         void MonitorSendStatusEventHandler(SharedEvent);
-        void RegisteConnectionEventHandler(SharedEvent);
+        void RegisterConnectionEventHandler(SharedEvent);
         void OnGetConnectionInfoEventHandler(SharedEvent);
+        void OnEnableTimeoutCheckEventHandler(SharedEvent);
 
         inline void RegisterProcesser(RequestPackageProcessFunction req, ResponsePackageProcessFunction res, EventPackageProcessFunction event)
         {
@@ -125,7 +126,7 @@ namespace Sloong
 
     protected:
         map_ex<uint64_t, unique_ptr<ConnectSession>> m_mapConnectIDToSession;
-        mutex m_oSockListMutex;
+        shared_mutex  m_oSockListMutex;
         RUN_STATUS m_emStatus = RUN_STATUS::Created;
         unique_ptr<CEpollEx> m_pEpoll;
         EasySync m_oCheckTimeoutThreadSync;
@@ -147,6 +148,6 @@ namespace Sloong
         ResponsePackageProcessFunction m_pResponseFunc = nullptr;
         EventPackageProcessFunction m_pEventFunc = nullptr;
         NewConnectAcceptProcessFunction m_pAcceptFunc = nullptr;
-        queue_ex<UniquePackage> *m_pWaitProcessList;
+        vector<queue_safety<UniquePackage>> m_oWaitProcessList;
     };
 } // namespace Sloong

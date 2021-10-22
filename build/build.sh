@@ -32,58 +32,114 @@ CPU_NUM=`grep -c "model name" /proc/cpuinfo`
 # default value is debug
 VERSION_STR=$(cat $SCRIPTFOLDER/../version)
 
+MAKE_CMD="make -j$CPU_NUM"
 
+echo "System has $CPU_NUM cpus installed"
 
 clean(){
-	rm -rdf $MAKEFLAG/$PROJECT
-	if [ -d $OUTPATH  ];then
-		rm -rdf $OUTPATH
+	if [ -d $BUILD_FOLDER  ];then
+		rm -rdf $BUILD_FOLDER
+	fi
+}
+
+build_path(){
+	BUILD_FOLDER=$SCRIPTFOLDER/cache/$MAKEFLAG
+	OUTPUT_FOLDER=$SCRIPTFOLDER/$MAKEFLAG
+	
+}
+
+check_folder(){
+	if [ ! -d $BUILD_FOLDER  ];then
+		mkdir -p $BUILD_FOLDER
+	fi
+	if [ ! -d $OUTPUT_FOLDER/modules ];then
+		mkdir -p $OUTPUT_FOLDER/modules
 	fi
 }
 
 build(){
-	if [ ! -d $MAKEFLAG  ];then
-		mkdir $MAKEFLAG
-	fi
-	cd $MAKEFLAG
+	check_folder
+	cd $BUILD_FOLDER
 	cmake -DCMAKE_TOOLCHAIN_FILE=$SCRIPTFOLDER/clang.cmake -DCMAKE_BUILD_TYPE=$CMAKEFLAG $CMAKE_FILE_PATH
 	if [ $? -ne 0 ];then
 		echo "Run cmake cmd return error. build stop."
 		exit 1
 	fi
 
-	make -j$CPU_NUM
+	
 	if [ $? -ne 0 ];then
 		echo "Run make cmd return error. build stop."
 		exit 1
 	fi
+	echo $MAKE_CMD
+	$MAKE_CMD
+	cp $PROJECT $OUTPUT_FOLDER/
+	cp libcore.so $OUTPUT_FOLDER/
+	cp libmanager.so $OUTPUT_FOLDER/
+	cp modules/*.so $OUTPUT_FOLDER/modules/
+}
 
+build_debug(){
+	echo "Build DEBUG"
+	OUTPATH=$SCRIPTFOLDER/$PROJECT-debug
+	MAKEFLAG=debug
+	CMAKEFLAG=Debug
+	build_path
+	# clean
+	build
+}
+
+
+clean_cache(){
+	if [ -d $SCRIPTFOLDER/cache  ];then
+		rm -rdf $SCRIPTFOLDER/cache
+	fi
+}
+
+clean_all(){
+	clean_cache
+	if [ -d $SCRIPTFOLDER/debug  ];then
+		rm -rdf $SCRIPTFOLDER/debug
+	fi
+	if [ -d $SCRIPTFOLDER/release  ];then
+		rm -rdf $SCRIPTFOLDER/release
+	fi
+}
+
+build_release(){
+	echo "Build RELEASE"
+	OUTPATH=$SCRIPTFOLDER/$PROJECT-release
+	MAKEFLAG=release
+	CMAKEFLAG=Release
+	build_path
+	clean
+	build
+}
+
+build_ci(){
+	MAKE_CMD=make
+	OUTPATH=$SCRIPTFOLDER/$PROJECT-debug
+	MAKEFLAG=debug
+	CMAKEFLAG=Debug
+	build_path
+	# clean
+	build
+}
+
+
+copyfile(){
 	mkdir -p $OUTPATH/modules/
 
-	cp $CMAKE_FILE_PATH/referenced/libuniv/libuniv.so $OUTPATH/
 	cp $SCRIPTFOLDER/$MAKEFLAG/$PROJECT $OUTPATH/
 	cp $SCRIPTFOLDER/$MAKEFLAG/libcore.so $OUTPATH/
 	cp $SCRIPTFOLDER/$MAKEFLAG/modules/*.so $OUTPATH/modules/
 }
 
-build_debug(){
-	OUTPATH=$SCRIPTFOLDER/$PROJECT-debug
-	MAKEFLAG=debug
-	CMAKEFLAG=Debug
-	# clean
-	build
-}
-
-build_release(){
-	OUTPATH=$SCRIPTFOLDER/$PROJECT-release
-	MAKEFLAG=release
-	CMAKEFLAG=Release
-	clean
-	build
-}
-
 zipfile(){
+	copyfile
+
 	OUTFILE=$OUTPATH-v$VERSION_STR
+
 	cd $OUTPATH
 	tar -rv -f $OUTFILE.tar *.so
 	tar -rv -f $OUTFILE.tar $PROJECT
@@ -107,6 +163,9 @@ if [ $# -eq 1 ]; then
 		-r) 
 			build_release
 			;;
+		-ci) 
+			build_ci
+			;;
 		-d) 
 			build_debug
 			;;
@@ -117,6 +176,12 @@ if [ $# -eq 1 ]; then
 		-dz) 
 			build_debug
 			zipfile
+			;;
+		-ca)
+			clean_all
+			;;
+		-c)
+			clean_cache
 			;;
 		* ) 
 			show_help

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-07-31 14:33:34
+ * @LastEditTime: 2021-09-01 15:48:10
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/IData.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -62,7 +62,7 @@
 #include "core.h"
 namespace Sloong
 {
-	class CConfiguation;
+	class CConfiguration;
 	class IData
 	{
 	public:
@@ -70,16 +70,16 @@ namespace Sloong
 			if ( m_iC == nullptr) m_iC = ic;
 		}
 		static GLOBAL_CONFIG* GetGlobalConfig(){
-			return STATIC_TRANS<GLOBAL_CONFIG*>(m_iC->Get(DATA_ITEM::ServerConfiguation ));
+			return STATIC_TRANS<GLOBAL_CONFIG*>(m_iC->Get(DATA_ITEM::ServerConfiguration ));
 		}
 		static Json::Value* GetModuleConfig(){
-			return STATIC_TRANS<Json::Value*>(m_iC->Get(DATA_ITEM::ModuleConfiguation ));
+			return STATIC_TRANS<Json::Value*>(m_iC->Get(DATA_ITEM::ModuleConfiguration ));
 		}
-		static CLog* GetLog(){
-			return STATIC_TRANS<CLog*>(m_iC->Get(DATA_ITEM::Logger));
+		static spdlog::logger* GetLog(){
+			return STATIC_TRANS<spdlog::logger*>(m_iC->Get(DATA_ITEM::Logger));
 		}
-		static RuntimeDataPackage* GetRuntimeData(){
-			return STATIC_TRANS<RuntimeDataPackage*>(m_iC->Get(DATA_ITEM::RuntimeData ));
+		static uint64_t GetNodeUUID(){
+			return *(STATIC_TRANS<uint64_t*>(m_iC->Get(DATA_ITEM::NodeUUID )));
 		}
 	public:
 		static IControl* m_iC;

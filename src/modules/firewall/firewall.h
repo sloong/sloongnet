@@ -46,7 +46,7 @@ namespace Sloong
 
 	protected:
 		IControl* 	m_iC = nullptr;
-		CLog*		m_pLog =nullptr;
+		spdlog::logger*		m_pLog =nullptr;
 		GLOBAL_CONFIG* m_pConfig;
 	public:
 		static unique_ptr<SloongNetFirewall> Instance;

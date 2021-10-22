@@ -10,76 +10,7 @@
 #include <sys/socket.h>
 using namespace std;
 using namespace Sloong;
-#ifdef _WINDOWS
 
-#else
-
-#endif
-
-int CUtility::GetMemory(int &total, int &free)
-{
-	ifstream ofs;
-	ofs.open("/proc/meminfo");
-
-	int num;
-	char name[256];
-	char unit[10];
-	while (!ofs.eof())
-	{
-
-		ofs >> name >> num >> unit;
-		if (strcasecmp(name, "memtotal:") == 0)
-		{
-			total = num;
-		}
-		else if (strcasecmp(name, "memfree:") == 0)
-		{
-			free = num;
-			break;
-		}
-		else
-		{
-			continue;
-		}
-	}
-
-	ofs.close();
-	return 0;
-}
-
-void CUtility::RecordCPUStatus(CPU_OCCUPY *cpust)
-{
-	FILE *fd;
-	char buff[256];
-
-	fd = fopen("/proc/stat", "r");
-	fgets(buff, sizeof(buff), fd);
-
-	sscanf(buff, "%s %u %u %u %u", cpust->name, &cpust->user, &cpust->nice, &cpust->system, &cpust->idle);
-
-	fclose(fd);
-}
-
-double CUtility::CalculateCPULoad(CPU_OCCUPY *prev)
-{
-	CPU_OCCUPY cur;
-	RecordCPUStatus(&cur);
-
-	unsigned long od, nd;
-	unsigned long id, sd;
-	double cpu_use = 0.0;
-
-	od = (unsigned long)(prev->user + prev->nice + prev->system + prev->idle); //第一次(用户+优先级+系统+空闲)的时间再赋给od
-	nd = (unsigned long)(cur.user + cur.nice + cur.system + cur.idle);		   //第二次(用户+优先级+系统+空闲)的时间再赋给od
-
-	id = (unsigned long)(cur.user - prev->user);	 //用户第一次和第二次的时间之差再赋给id
-	sd = (unsigned long)(cur.system - prev->system); //系统第一次和第二次的时间之差再赋给sd
-	if ((nd - od) != 0)
-		cpu_use = ((sd + id) * 10000) / (nd - od); //((用户+系统)乖100)除(第一次和第二次的时间差)再赋给g_cpu_used
-	else
-		cpu_use = 0;
-	return cpu_use;
-}
 
 string Sloong::CUtility::GetSocketIP(int socket)
 {
@@ -105,7 +36,7 @@ string Sloong::CUtility::GetSocketAddress(int socket)
 	int nSize = sizeof(add);
 	memset(&add, 0, sizeof(add));
 	getpeername(socket, (sockaddr *)&add, (socklen_t *)&nSize);
-	return Helper::Format("%s:%d", inet_ntoa(add.sin_addr), add.sin_port);
+	return format("{}:{}", inet_ntoa(add.sin_addr), add.sin_port);
 }
 
 unique_ptr<char[]> Sloong::CUtility::ReadFile(const string &filepath, int *out_size)
@@ -169,6 +100,13 @@ string Sloong::CUtility::SHA1EncodeFile(const string& path)
 	return string((char*)t,Sloong::Universal::SHA1_LENGTH);
 }
 
+string Sloong::CUtility::SHA256EncodeFile(const string& path)
+{
+	unsigned char t[Sloong::Universal::SHA256_LENGTH] = {0};
+	CSHA256::Binary_Encoding(path, t, true );
+	return Helper::BinaryToHex(t,Sloong::Universal::SHA256_LENGTH);
+}
+
 CResult Sloong::CUtility::WriteFile(const string &filepath, const char *pBuffer, int size)
 {
 	return CResult::Make_Error("No realize.");
@@ -218,7 +156,7 @@ VStrResult CUtility::IPToHostName(const string &ip)
 
 	if (auto res = getaddrinfo(ip.c_str(), nullptr, &hints, &addr_res) != 0)
 	{
-		return VStrResult::Make_Error(Helper::Format("getaddrinfo: %s", gai_strerror(res)));
+		return VStrResult::Make_Error(format("getaddrinfo: {}", gai_strerror(res)));
 	}
 
 	vector<string> list;
@@ -229,7 +167,7 @@ VStrResult CUtility::IPToHostName(const string &ip)
 		auto ret = getnameinfo(res_p->ai_addr, res_p->ai_addrlen, host, sizeof(host), NULL, 0, NI_NAMEREQD);
 		if (ret != 0)
 		{
-			errmsg += Helper::Format("getaddrinfo: %s", gai_strerror(ret));
+			errmsg += format("getaddrinfo: {}", gai_strerror(ret));
 		}
 		else
 		{
@@ -261,7 +199,7 @@ VStrResult CUtility::HostnameToIP(const string &hostname)
 
 	if (auto res = getaddrinfo(hostname.c_str(), NULL, &hints, &hostname_res) != 0)
 	{
-		return VStrResult::Make_Error(Helper::Format("getaddrinfo: %s", gai_strerror(res)));
+		return VStrResult::Make_Error(format("getaddrinfo: {}", gai_strerror(res)));
 	}
 
 	vector<string> list;
@@ -272,7 +210,7 @@ VStrResult CUtility::HostnameToIP(const string &hostname)
 		auto ret = getnameinfo(res_p->ai_addr, res_p->ai_addrlen, host, sizeof(host), NULL, 0, NI_NUMERICHOST);
 		if (ret != 0)
 		{
-			errmsg += Helper::Format("getaddrinfo: %s", gai_strerror(ret));
+			errmsg += format("getaddrinfo: {}", gai_strerror(ret));
 		}
 		else
 		{

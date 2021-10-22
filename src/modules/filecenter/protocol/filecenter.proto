@@ -1,58 +1,61 @@
 syntax = "proto3";
 package FileCenter;
 
+
 enum SupportFormat
 {
-    JPG=0;
-    PNG=1;
-    WEBP=2;
+    // For one picture, differenet convert algorithm have differenet effect.
+    // So we can convert multiple time with each algorithom. and select the best one.
+    Best=0;
+    WEBP=1;
+    HEIF=2;
+    AVIF=3;
+    FLIF=4;
 }
 
 enum Functions{
     Invalid=0;
-    reserved 1 to 300;// FileCenter function is start by 301-400
-
+    
     // 准备上传文件，获取上传token
     // Request << PrepareUploadRequest
     // Response >> PrepareUploadResponse
-    PrepareUpload=301;
+    PrepareUpload=1;
 
     // 上传文件分包
     // Request << UploadingRequest
     // Response >> Result
-    Uploading=302;
+    Uploading=2;
 
     // 上传完成
     // Request << UploadedRequest
     // Response >> Result
-	Uploaded=303;
+	Uploaded=3;
     
     // 简单的上传，适用于上传小文件，不支持断点续传。
     // Request << SimpleUploadRequest(&Extend)
     // Response >> Token in Content
-    SimpleUpload=304;
+    SimpleUpload=4;
 
     // 下载校验,可以对已下载的信息进行校验.
     // Request << DownloadVerifyRequest
     // Response >> DownloadVerifyResponse
-    DownloadVerify=305;
+    DownloadVerify=5;
 
     // 下载文件分包
     // Request << DownloadFileRequest
     // Response >> DownloadFileResponse(&Extend)
-    DownloadFile=306;
+    DownloadFile=6;
 
     // 尝试以图片的形式处理文件，对文件进行格式转换操作
     // Request << ConvertImageFileRequest
     // Response >> ConvertImageFileResponse
-    ConvertImageFile=311;
+    ConvertImageFile=7;
 
     // 尝试获取文件的缩略图，仅支持图片文件
     // Request << GetThumbnailRequest
     // Response >> GetThumbnailResponse(&Extend)
-    GetThumbnail=312;
+    GetThumbnail=8;
 
-    reserved 400 to max;
 }
 
 message FileRange{
@@ -60,14 +63,15 @@ message FileRange{
     int32 Start=1;
     // End pointer for data range
     int32 End=2;
-    // Hashcode for This data range. Hash function is CRC32
-    fixed32 CRCCode=3;
+    // Hashcode for This data range.
+    string SHA256=3;
     // In download request no need set.
     bytes Data=4;
 }
 
 message PrepareUploadRequest{
-    fixed32 CRCCode=1;
+    // Hashcode for file.
+    string SHA256=1;
     int32 FileSize=2;
 }
 
@@ -91,8 +95,8 @@ message DownloadVerifyRequest{
     int32 Start=2;
     // End pointer for data range
     int32 End=3;
-    // Hashcode for This data range. Hash function is CRC32
-    fixed32 CRCCode=4;
+    // Hashcode for This data range.
+    string SHA256=4;
 }
 
 message DownloadFileRequest{
@@ -106,7 +110,8 @@ message DownloadFileResponse{
 }
 
 message SimpleUploadRequest{
-    fixed32 CRCCode=1;
+    // Hashcode for file. 
+    string SHA256=1;
     int32 FileSize=2;
     bytes Data=3;
 }
@@ -116,11 +121,21 @@ message ConvertImageFileRequest{
     
     SupportFormat TargetFormat=2;
     // 保留源文件
-    bool RetainSourceFiles=3;
+    bool RetainSourceFile=3;
+
+    int32 Quality=4;
+}
+
+message FileInfo{
+    string Index=1;
+    string SHA256=2;
+    int32 Size=3;
+    SupportFormat Format=4;
 }
 
 message ConvertImageFileResponse{
-    bytes NewFileIndexCode=1;
+    FileInfo NewFileInfo=1;
+    repeated FileInfo ExtendInfos=2;
 }
 
 message GetThumbnailRequest{

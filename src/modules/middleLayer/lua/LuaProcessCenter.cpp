@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-09-18 12:26:03
+ * @LastEditTime: 2021-09-17 17:43:13
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/middleLayer/lua/LuaProcessCenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -59,8 +59,13 @@
 
 #include "LuaProcessCenter.h"
 #include "globalfunction.h"
+#include "luaMiddleLayer.h"
 #include "IData.h"
+#include "events/LuaEvent.hpp"
 using namespace Sloong;
+using namespace Sloong::Events;
+
+static const int MAX_TRY_NUM = 99;
 
 CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 {
@@ -75,7 +80,7 @@ CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 	// 这里使用处理线程池的数量进行初始化，保证在所有线程都在处理Lua请求时不会因luacontext发生堵塞
 	auto num = m_pConfig->operator[]("LuaContextQuantity").asInt();
 	if (num < 1)
-		return CResult::Make_Error("LuaContextQuantity must be bigger than 0,");
+		return CResult::Make_Error(format("LuaContextQuantity must be bigger than 0, current value is [{}]", num));
 
 	for (int i = 0; i < num; i++)
 	{
@@ -83,9 +88,20 @@ CResult Sloong::CLuaProcessCenter::Initialize(IControl *iMsg)
 		if (res.IsFialed())
 			return res;
 	}
+
+	m_iC->RegisterEventHandler(LUA_EVENT_TYPE::ProcessLuaEvent, std::bind(&CLuaProcessCenter::OnProcessLuaEvent, this, std::placeholders::_1));
+	
 	return CResult::Succeed;
 }
 
+void Sloong::CLuaProcessCenter::OnProcessLuaEvent(SharedEvent e)
+{
+	auto event = EVENT_TRANS<LuaEvent>(e);
+	int id = GetFreeLuaContext(MAX_TRY_NUM);
+	auto pLua = m_listLuaContent[id]->Content.get();
+	pLua->RunEventFunction(m_pConfig->operator[]("LuaEventFunction").asString(), event->GetLuaEvent(), event->GetLuaEventParams() );
+	FreeLuaContext(id);
+}
 
 void Sloong::CLuaProcessCenter::ReloadContext()
 {
@@ -104,8 +120,10 @@ CResult Sloong::CLuaProcessCenter::NewThreadInit()
 	auto lua = make_unique<LuaContent>();
 	lua->Content = c.MoveResultObject();
 	lua->Reload.store(false);
+
+	lua->Content->EnableLog(m_pLog);
 	
-	m_listLuaContent.push_back(move(lua));
+	m_listLuaContent.emplace_back(move(lua));
 	int id = (int)m_listLuaContent.size() - 1;
 	FreeLuaContext(id);
 	return CResult::Succeed;
@@ -115,17 +133,21 @@ TResult<unique_ptr<CLua>> Sloong::CLuaProcessCenter::InitLua()
 {
 	auto lua = make_unique<CLua>();
 	auto folder = m_pConfig->operator[]("LuaScriptFolder").asString();
-	m_pLog->Verbos("Init lua base on folder : " + folder);
+	m_pLog->info("Init lua base on folder : " + folder);
 	lua->SetScriptFolder(folder);
 	
-	CGlobalFunction::Instance->RegistFuncToLua(lua.get());
-	
-	auto res = lua->RunScript(m_pConfig->operator[]("LuaEntryFile").asString());
+	CGlobalFunction::Instance->RegisterFuncToLua(lua.get());
+	auto f = m_pConfig->operator[]("LuaEntryFile").asString();
+	if( f.empty() )
+	{	
+		return TResult<unique_ptr<CLua>>::Make_Error("The config [LuaEntryFile] no exist or it's empty");
+	}
+	auto res = lua->RunScript(f);
 	if (res.IsFialed())
 	{
 		return TResult<unique_ptr<CLua>>::Make_Error("Run Script Fialed." + res.GetMessage());
 	}
-	res = lua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), Helper::Format("'%s'", m_pConfig->operator[]("LuaScriptFolder").asString().c_str()));
+	res = lua->RunFunction(m_pConfig->operator[]("LuaEntryFunction").asString(), format("'{}'", m_pConfig->operator[]("LuaScriptFolder").asString()));
 	if (res.IsFialed())
 	{
 		return TResult<unique_ptr<CLua>>::Make_Error("Run Function Fialed." + res.GetMessage());
@@ -136,7 +158,7 @@ TResult<unique_ptr<CLua>> Sloong::CLuaProcessCenter::InitLua()
 void Sloong::CLuaProcessCenter::CloseSocket(CLuaPacket *uinfo)
 {
 	// call close function.
-	int id = GetFreeLuaContext();
+	int id = GetFreeLuaContext(MAX_TRY_NUM);
 	auto pLua = m_listLuaContent[id]->Content.get();
 	pLua->RunFunction(m_pConfig->operator[]("LuaSocketCloseFunction").asString(), uinfo, 0, "", "");
 	FreeLuaContext(id);
@@ -177,21 +199,20 @@ SResult Sloong::CLuaProcessCenter::MsgProcess(int function, CLuaPacket *pUInfo, 
 		return SResult::Make_Error("Server process error. Unexpected exceptions happened.");
 	}
 }
-#define LUA_CONTEXT_WAIT_SECONDE 10
-int Sloong::CLuaProcessCenter::GetFreeLuaContext()
+
+int Sloong::CLuaProcessCenter::GetFreeLuaContext(int try_num)
 {
-	for (int i = 0; i < LUA_CONTEXT_WAIT_SECONDE && m_oFreeLuaContext.empty(); i++)
+	for (int i = 0; i < try_num && m_oFreeLuaContext.empty(); i++)
 	{
-		m_pLog->Debug("Wait lua context 1 sencond :" + Helper::ntos(i));
+		m_pLog->debug("Wait lua context 1 sencond :" + Helper::ntos(i));
 		m_oSSync.wait_for(500);
 	}
 
 	if (m_oFreeLuaContext.empty())
 	{
-		m_pLog->Debug("no free context");
+		m_pLog->error("no free context");
 		return -1;
 	}
-	int nID = m_oFreeLuaContext.front();
-	m_oFreeLuaContext.pop();
+	int nID = m_oFreeLuaContext.pop(-1);
 	return nID;
 }

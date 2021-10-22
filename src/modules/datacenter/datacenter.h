@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-08-06 18:50:01
+ * @LastEditTime: 2021-09-01 15:38:04
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/datacenter/datacenter.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -104,8 +104,6 @@ namespace Sloong
 
 		GLOBAL_CONFIG* m_pConfig;
 		Json::Value *m_pModuleConfig;
-		RuntimeDataPackage *m_pRuntimeData = nullptr;
-
 	public:
 		static unique_ptr<CDataCenter> Instance;
 	};

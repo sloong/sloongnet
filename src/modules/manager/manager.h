@@ -28,7 +28,7 @@ extern "C"
 
 namespace Sloong
 {
-	class CConfiguation;
+	class CConfiguration;
 	class SloongControlService : public IObject
 	{
 	public:

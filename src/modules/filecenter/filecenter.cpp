@@ -1,13 +1,13 @@
-/*** 
+/***
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-10-09 10:28:37
+ * @LastEditTime: 2021-09-06 14:29:40
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filecenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description:
  */
-/*** 
+/***
  * @......................................&&.........................
  * @....................................&&&..........................
  * @.................................&&&&............................
@@ -63,7 +63,6 @@
 using namespace Manager;
 
 using namespace Sloong;
-
 
 unique_ptr<CFileCenter> Sloong::CFileCenter::Instance = nullptr;
 
@@ -127,12 +126,12 @@ CResult CFileCenter::Initialized()
 CResult Sloong::CFileCenter::CreateProcessEnvironmentHandler(void **out_env)
 {
     auto item = make_unique<FileManager>();
-	auto res = item->Initialize(m_iC);
-	if (res.IsFialed())
-		return res;
-	(*out_env) = item.get();
-	m_listManage.push_back(std::move(item));
-	return CResult::Succeed;
+    auto res = item->Initialize(m_iC);
+    if (res.IsFialed())
+        return res;
+    (*out_env) = item.get();
+    m_listManage.emplace_back(std::move(item));
+    return CResult::Succeed;
 }
 
 void Sloong::CFileCenter::EventPackageProcesser(Package *pack)
@@ -140,24 +139,21 @@ void Sloong::CFileCenter::EventPackageProcesser(Package *pack)
     auto event = Events_MIN;
     if (!Manager::Events_Parse(pack->content(), &event))
     {
-        m_pLog->Error(Helper::Format("Receive event but parse error. content:[%s]", pack->content().c_str()));
+        m_pLog->error(format("Receive event but parse error. content:[{}]", pack->content()));
         return;
     }
 
     switch (event)
     {
-    case Manager::Events::ReferenceModuleOnline:
-    {
-        m_pLog->Info("Receive ReferenceModuleOnline event");
+    case Manager::Events::ReferenceModuleOnline: {
+        m_pLog->info("Receive ReferenceModuleOnline event");
     }
     break;
-    case Manager::Events::ReferenceModuleOffline:
-    {
-        m_pLog->Info("Receive ReferenceModuleOffline event");
+    case Manager::Events::ReferenceModuleOffline: {
+        m_pLog->info("Receive ReferenceModuleOffline event");
     }
     break;
-    default:
-    {
+    default: {
     }
     break;
     }

@@ -9,12 +9,13 @@
 #include "manager.h"
 #include "utility.h"
 #include "events/ConnectionBreak.hpp"
+#include "events/EnableTimeoutCheck.hpp"
 #include "fstream_ex.hpp"
 
 using namespace Sloong::Events;
 
 unique_ptr<SloongControlService> Sloong::SloongControlService::Instance = nullptr;
-string Sloong::SloongControlService::g_strDBFilePath = "./configuation.db";
+string Sloong::SloongControlService::g_strDBFilePath = "./configuration.db";
 
 extern "C" PackageResult RequestPackageProcesser(void *pEnv, Package *pack)
 {
@@ -91,6 +92,7 @@ CResult SloongControlService::PrepareInitialize(GLOBAL_CONFIG *config)
 	}
 	// When config parse done, revert the port setting. Because we always use the command line port.
 	config->set_listenport(port);
+	
 
 	return CResult::Succeed;
 }
@@ -121,6 +123,11 @@ CResult SloongControlService::Initialization(IControl *iC)
 CResult SloongControlService::Initialized()
 {
 	m_iC->RegisterEventHandler(EVENT_TYPE::ConnectionBreaked, std::bind(&SloongControlService::OnConnectionBreaked, this, std::placeholders::_1));
+
+	// Check every two minutes, timeout time as 30 seconds.
+	auto event = make_shared<EnableTimeoutCheckEvent>(15,20);
+	m_iC->SendMessage(event);
+
 	return CResult::Succeed;
 }
 
@@ -137,7 +144,7 @@ void Sloong::SloongControlService::ResetControlConfig(GLOBAL_CONFIG *config)
 
 void Sloong::SloongControlService::OnConnectionBreaked(SharedEvent e)
 {
-	auto event = DYNAMIC_TRANS<ConnectionBreakedEventn *>(e.get());
+	auto event = DYNAMIC_TRANS<ConnectionBreakedEvent *>(e.get());
 	auto id = event->GetSessionID();
 	for (auto &item : m_listServerManage)
 		item->OnSocketClosed(id);
@@ -150,11 +157,11 @@ inline CResult Sloong::SloongControlService::CreateProcessEnvironmentHandler(voi
 	if (res.IsFialed())
 		return res;
 	(*out_env) = item.get();
-	m_listServerManage.push_back(std::move(item));
+	m_listServerManage.emplace_back(std::move(item));
 	return CResult::Succeed;
 }
 
 void Sloong::SloongControlService::EventPackageProcesser(Package *pack)
 {
-	m_pLog->Info("EventPackageProcesser is called.");
+	m_pLog->info("EventPackageProcesser is called.");
 }

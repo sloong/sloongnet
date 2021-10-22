@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2020-08-11 19:08:24
+ * @LastEditTime: 2021-10-22 12:38:45
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EpollEx.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -37,11 +37,11 @@ U64Result Sloong::CEpollEx::CreateListenSocket(const string &addr, int port)
 	// SOL_SOCKET:在socket层面设置
 	// SO_REUSEADDR:允许套接字和一个已在使用中的地址捆绑
 	if (0 != setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &sock_op, sizeof(sock_op)))
-		return U64Result::Make_Error(Helper::Format("Set socket property to [SO_REUSEADDR] field. Error info: [%d]%s", errno, strerror(errno)));
+		return U64Result::Make_Error(format("Set socket property to [SO_REUSEADDR] field. Error info: [{}]{}", errno, strerror(errno)));
 
 #ifdef SO_REUSEPORT
 	if (0 != setsockopt(listen_sock, SOL_SOCKET, SO_REUSEPORT, &sock_op, sizeof(sock_op)))
-		return U64Result::Make_Error(Helper::Format("Set socket property to [SO_REUSEPORT] field. Error info: [%d]%s", errno, strerror(errno)));
+		return U64Result::Make_Error(format("Set socket property to [SO_REUSEPORT] field. Error info: [{}]{}", errno, strerror(errno)));
 #endif
 
 	// 初始化地址结构
@@ -56,11 +56,11 @@ U64Result Sloong::CEpollEx::CreateListenSocket(const string &addr, int port)
 
 	// 绑定端口
 	if (-1 == bind(listen_sock, (struct sockaddr *)&address, sizeof(address)))
-		return U64Result::Make_Error(Helper::Format("Bind to %d field. Error info: [%d]%s", port, errno, strerror(errno)));
+		return U64Result::Make_Error(format("Bind to {} field. Error info: [{}]{}", port, errno, strerror(errno)));
 
 	// 监听端口,定义的SOMAXCONN大小为128,太小了,这里修改为1024
 	if (-1 == listen(listen_sock, 1024))
-		return U64Result::Make_Error(Helper::Format("Listen to %d field. Error info: [%d]%s", port, errno, strerror(errno)));
+		return U64Result::Make_Error(format("Listen to {} field. Error info: [{}]{}", port, errno, strerror(errno)));
 
 	return U64Result::Make_OKResult(listen_sock);
 }
@@ -70,7 +70,7 @@ CResult Sloong::CEpollEx::Initialize(IControl *iMsg)
 {
 	IObject::Initialize(iMsg);
 	int nPort = IData::GetGlobalConfig()->listenport();
-	m_pLog->Info(Helper::Format("epollex is initialize.license port is %d", nPort));
+	m_pLog->info(format("epollex is initialize.license port is {}", nPort));
 
 	// For Test the port cannot used. when test done, close it.
 	auto nRes = CreateListenSocket("0.0.0.0", nPort);
@@ -86,16 +86,16 @@ CResult Sloong::CEpollEx::Initialize(IControl *iMsg)
 	if (workThread < 1)
 		return CResult::Make_Error("Epoll work thread must be big than 0");
 
-	m_pLog->Info(Helper::Format("epollex is running with %d threads", workThread));
+	m_pLog->info(format("epollex is running with {} threads", workThread));
 
 #ifdef SO_REUSEPORT
-	m_pLog->Debug("System support SO_REUSEPORT. epoll will run with SO_REUSEPORT mode.");
+	m_pLog->debug("System support SO_REUSEPORT. epoll will run with SO_REUSEPORT mode.");
 #endif
 
 	m_EpollHandle = epoll_create(65535);
 
 	// Init the thread pool
-	CThreadPool::AddWorkThread(std::bind(&CEpollEx::MainWorkLoop, this), workThread);
+	ThreadPool::AddWorkThread(std::bind(&CEpollEx::MainWorkLoop, this), workThread);
 	m_emStatus = RUN_STATUS::Running;
 	
 	return CResult::Succeed;
@@ -107,7 +107,7 @@ CResult Sloong::CEpollEx::Run()
 }
 
 
-void Sloong::CEpollEx::RegisteConnection( EasyConnect* conn )
+void Sloong::CEpollEx::RegisterConnection( EasyConnect* conn )
 {
 	conn->SetOnReconnectCallback([&](uint64_t id, int old_sock, int cur_sock){
 		if( m_mapSocketToID.exist(old_sock) ) 
@@ -117,11 +117,11 @@ void Sloong::CEpollEx::RegisteConnection( EasyConnect* conn )
 		}
 		
 		AddMonitorSocket(cur_sock);
-		m_mapSocketToID[cur_sock] = id;
+		m_mapSocketToID.insert(cur_sock,id);
 	});
 	AddMonitorSocket(conn->GetSocketID());
-	m_mapSocketToID[conn->GetSocketID()] = conn->GetHashCode();
-	m_mapIDToConnection[conn->GetHashCode()] = conn;
+	m_mapSocketToID.insert(conn->GetSocketID(),conn->GetHashCode());
+	m_mapIDToConnection.insert(conn->GetHashCode(),conn);
 }
 
 void Sloong::CEpollEx::UnregisteConnection( uint64_t id )
@@ -129,7 +129,7 @@ void Sloong::CEpollEx::UnregisteConnection( uint64_t id )
 	if( !m_mapIDToConnection.exist(id) )	
 		return;
 
-	auto conn = m_mapIDToConnection[id];
+	auto conn = m_mapIDToConnection.get(id);
 	if( conn != nullptr )
 	{
 		DeleteMonitorSocket(conn->GetSocketID());
@@ -142,7 +142,7 @@ void Sloong::CEpollEx::ModifySendMonitorStatus( uint64_t id, bool monitor )
 {
 	if( !m_mapIDToConnection.exist(id) )	
 		return;
-	auto sock = m_mapIDToConnection[id]->GetSocketID();
+	auto sock = m_mapIDToConnection.get(id)->GetSocketID();
 	if( monitor )
 	{
 		MonitorSendStatus(sock);
@@ -213,18 +213,18 @@ void Sloong::CEpollEx::MainWorkLoop()
 	auto pid = this_thread::get_id();
 	string spid = Helper::ntos(pid);
 	
-	m_pLog->Info("epoll work thread is started. PID:" + spid);
+	m_pLog->info("epoll work thread is started. PID:" + spid);
 	int port = IData::GetGlobalConfig()->listenport();
 	auto res = CreateListenSocket("0.0.0.0", port);
 	if (res.IsFialed())
 	{
-		m_pLog->Fatal(res.GetMessage());
+		m_pLog->critical(res.GetMessage());
 		m_iC->SendMessage(EVENT_TYPE::ProgramStop);
 		return;
 	}
 	int sock = res.GetResultObject();
 	unique_lock<mutex> lock(m_acceptMutex);
-	m_mapAcceptSocketToPID[sock] = pid;
+	m_mapAcceptSocketToPID.insert(sock,pid);
 	lock.unlock();
 
 	// 创建epoll事件对象
@@ -232,10 +232,8 @@ void Sloong::CEpollEx::MainWorkLoop()
 
 	while (m_emStatus == RUN_STATUS::Created)
 	{
-		this_thread::sleep_for(std::chrono::microseconds(100));
+		this_thread::sleep_for(std::chrono::microseconds(10));
 	}
-
-	m_pLog->Info("epoll work thread is running. PID:" + spid);
 
 	int n, i;
 	while (m_emStatus == RUN_STATUS::Running)
@@ -253,7 +251,7 @@ void Sloong::CEpollEx::MainWorkLoop()
 				int fd = m_Events[i].data.fd;
 				if (m_mapAcceptSocketToPID.exist(fd))
 				{
-					m_pLog->Debug("EPoll Accept event happened.");
+					m_pLog->debug("EPoll Accept event happened.");
 					// accept the connect and add it to the list
 					int conn_sock = -1;
 					do
@@ -262,9 +260,9 @@ void Sloong::CEpollEx::MainWorkLoop()
 						if (conn_sock == -1)
 						{
 							if (errno == EAGAIN)
-								m_pLog->Debug("Accept end.");
+								m_pLog->debug("Accept end.");
 							else
-								m_pLog->Warn("Accept error.");
+								m_pLog->warn("Accept error.");
 							continue;
 						}
 						auto res = OnNewAccept(conn_sock);
@@ -280,12 +278,12 @@ void Sloong::CEpollEx::MainWorkLoop()
 				{
 					if( !m_mapSocketToID.exist(fd))
 					{
-						m_pLog->Error(Helper::Format("EPoll EPOLLIN event happened. Socket[%d][%s] Data Can Receive.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						m_pLog->error(format("EPoll EPOLLIN event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
 					}
 					else
 					{
-						auto id = m_mapSocketToID[fd];
-						m_pLog->Debug(Helper::Format("EPoll EPOLLIN event happened. Socket[%d][%s] Data Can Receive.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						auto id = m_mapSocketToID.get(fd);
+						m_pLog->debug(format("EPoll EPOLLIN event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
 						auto res = OnDataCanReceive(id);
 						if (res == ResultType::Error)
 							UnregisteConnection(id);
@@ -297,12 +295,12 @@ void Sloong::CEpollEx::MainWorkLoop()
 					
 					if( !m_mapSocketToID.exist(fd))
 					{
-						m_pLog->Error(Helper::Format("EPoll EPOLLOUT event happened. Socket[%d][%s] Data Can Receive.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						m_pLog->error(format("EPoll EPOLLOUT event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
 					}
 					else
 					{
-						auto id = m_mapSocketToID[fd];
-						m_pLog->Debug(Helper::Format("EPoll EPOLLOUT event happened.Socket[%d][%s] Can Write Data.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						auto id = m_mapSocketToID.get(fd);
+						m_pLog->debug(format("EPoll EPOLLOUT event happened.Socket[{}][{}] Can Write Data.", fd, CUtility::GetSocketAddress(fd)));
 						auto res = OnCanWriteData(id);
 						// 所有消息全部发送完毕后只需要监听可读消息就可以了。
 						if (res == ResultType::Succeed)
@@ -314,12 +312,12 @@ void Sloong::CEpollEx::MainWorkLoop()
 					
 					if( !m_mapSocketToID.exist(fd))
 					{
-						m_pLog->Error(Helper::Format("EPoll EPOLLIN event happened. Socket[%d][%s] Data Can Receive.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						m_pLog->error(format("EPoll EPOLLIN event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
 					}
 					else
 					{
-						auto id = m_mapSocketToID[fd];
-						m_pLog->Debug(Helper::Format("EPoll unkuown event happened. Socket[%d][%s] close this connnect.", fd, CUtility::GetSocketAddress(fd).c_str()));
+						auto id = m_mapSocketToID.get(fd);
+						m_pLog->debug(format("EPoll unkuown event happened. Socket[{}][{}] close this connnect.", fd, CUtility::GetSocketAddress(fd)));
 						OnOtherEventHappened(id);
 					}
 				}
@@ -327,14 +325,14 @@ void Sloong::CEpollEx::MainWorkLoop()
 		}
 		catch (exception &ex)
 		{
-			m_pLog->Error(Helper::Format("Error happened in Epoll work thead. message:", ex.what()));
+			m_pLog->error(format("Error happened in Epoll work thead. message:", ex.what()));
 		}
 		catch (...)
 		{
-			m_pLog->Error("Unkown error happened in Epoll work thead.");
+			m_pLog->error("Unkown error happened in Epoll work thead.");
 		}
 	}
-	m_pLog->Info("epoll work thread is exit " + spid);
+	m_pLog->info(format("epoll work thread[{}] is exit " , spid));
 }
 
 void Sloong::CEpollEx::Exit()

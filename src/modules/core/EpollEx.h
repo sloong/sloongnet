@@ -79,7 +79,7 @@ namespace Sloong
 		CResult Run();
 		void Exit();
 
-		void RegisteConnection(EasyConnect* );
+		void RegisterConnection(EasyConnect* );
 		void UnregisteConnection(uint64_t);
 
 		/*** 
@@ -109,7 +109,7 @@ namespace Sloong
 
 	protected:
 		/*** 
-		 * @description: Registe a socket to epoll with data can receive event(EPOLLIN).
+		 * @description: Register a socket to epoll with data can receive event(EPOLLIN).
 		 * @param: 
 		 * 		1 > Socket handle.
 		 */

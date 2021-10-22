@@ -27,15 +27,17 @@ enum Functions{
     PostLog=1;
 
     // When worker start, send this request to registe a worker, and wait manage assigning template.
-    // Request: RegisteWorkerRequest * In defualt no should set, just send request with empty content.
-    // Response: Result    -> Succeed      RegisteWorkerMessageResponse
+    // Note: The template configuration can't ensure can works in the node. so must send another request to confirm the node is ready to work.
+    // Request: RegisterWorkerRequest * In defualt no should set, just send request with empty content.
+    // Response: Result    -> Succeed      RegisterWorkerResponse
     //                     -> Retry        Wait assign, wait some time and retry again.
-    RegisteWorker=2;
+    RegisterWorker=2;
     
     // When assigning tamplate, and node is ready to work, send this requst.
-    // Request : RegisteNodeRequest
+    // Note: registe is may field, such as a node is already registered for same traget template. you must send RegisterWorker request again to get another template.
+    // Request : RegisterNodeRequest
     // Response: Result
-    RegisteNode=3;
+    RegisterNode=3;
 
     //
     // Request:AddTemplateRequest
@@ -74,8 +76,16 @@ enum Functions{
     // Response: None
     ReportLoadStatus=12;
 
-    // reserved for other service.
-    reserved 101 to max;
+    /// For worker lost the connect to the manager. when the connect is reconnected, send this request
+    /// If the template node no full, return succeed. else return error. worker should exit or waiting as other node.
+    /// Request: ReconnectRegisterRequest
+    /// Response: Result
+    ReconnectRegister=13;
+
+    /// Set log level for node. 
+    /// Request: SetNodeLogLevelRequest
+    /// Response: None
+    SetNodeLogLevel=14;
 }
 
 message PostLogMessageRequest
@@ -94,7 +104,7 @@ message PostLogMessageRequest
    bytes Content =7;// For succeed is message content; For other is message
 }
 
-message RegisteWorkerRequest
+message RegisterWorkerRequest
 {
    // In defualt no should set, just send request with empty content.
    // Just ues this when a worker node is for specified template.
@@ -111,14 +121,15 @@ message RegisteWorkerRequest
    repeated Core.MODULE_TYPE ExcludeTargetType=4;
 }
 
-message RegisteWorkerResponse
+message RegisterWorkerResponse
 {
-   int32 TemplateID=1;
-   bytes Configuation=2;
+   fixed64 RegisterID=1;
+   int32 TemplateID=2;
+   bytes Configuration=3;
 }
 
-message RegisteNodeRequest{
-   int32 TemplateID=1;
+message RegisterNodeRequest{
+   fixed64 RegisterID=1;
 }
 
 message ReferenceTemplateInfo
@@ -164,7 +175,7 @@ message TemplateItem{
    string Note=3;
    int32 Replicas=4;
    int32 Created=5;
-   bytes Configuation=6;
+   bytes Configuration=6;
 }
 message QueryTemplateResponse{
    repeated TemplateItem TemplateInfos=1;
@@ -195,4 +206,14 @@ message ReportLoadStatusRequest{
    double MemroyUsed=3;
    double NetworkIn=5;
    double NetworkOut=6;
+}
+
+message ReconnectRegisterRequest{
+   int32 TemplateID=1;
+   fixed64 NodeUUID=2;
+}
+
+message SetNodeLogLevelRequest{
+   repeated fixed64 Nodes=1;
+   Core.LogLevel LogLevel=2;
 }

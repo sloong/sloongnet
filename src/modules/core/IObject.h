@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2020-07-31 14:34:18
+ * @LastEditTime: 2021-09-22 13:58:40
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/IObject.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -67,14 +67,14 @@ namespace Sloong
     class IObject
     {
     public:
-        inline void Initialize(IControl *iMsg)
+        inline void Initialize(IControl *iC)
         {
-            m_iC = iMsg;
-            m_pLog = STATIC_TRANS<CLog *>(m_iC->Get(DATA_ITEM::Logger));
+            m_iC = iC;
+            m_pLog = STATIC_TRANS<spdlog::logger *>(m_iC->Get(DATA_ITEM::Logger));
         }
 
     protected:
         IControl *m_iC;
-        CLog *m_pLog;
+        spdlog::logger *m_pLog;
     };
 } // namespace Sloong

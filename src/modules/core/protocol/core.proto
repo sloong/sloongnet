@@ -6,23 +6,22 @@ package Core;
 
 // LogLevel
 enum LogLevel{
-    All = 0;
-    Verbos = 1;
-    Debug = 2;
-    Info = 3;
-    Warn = 4;
-    Err = 5;
-    Assert = 6;
-    Fatal = 7;  
+    Verbos = 0;
+    Debug = 1;
+    Info = 2;
+    Warn = 3;
+    Err = 4;
+    Fatal = 5;  
+    Off=6;
 }
 
 enum DATA_ITEM
 {
     Invalid=0;
-    ServerConfiguation=1;
-	ModuleConfiguation=2;
+    ServerConfiguration=1;
+	ModuleConfiguration=2;
 	Logger=3;
-	RuntimeData=4;
+	NodeUUID=4;
     ReferenceTemplateInfo=5;
 
     CustomMix=100;
@@ -82,12 +81,16 @@ enum EVENT_TYPE
 	NetworkHubFunctionConfig=15;
 
     // 注册一个已经存在的连接到EPOLL
-    // 参数类型为RegisteConnectionEvent
-    RegisteConnection=16;
+    // 参数类型为RegisterConnectionEvent
+    RegisterConnection=16;
 
     // 获取一个连接的信息
     // 参数类型为GetConnectionInfoEvent
     GetConnectionInfo=18;
+
+    // 启用超时检查功能
+    // 参数类型为EnableTimeoutCheckEvent
+    EnableTimeoutCheck=19;
 
     //////////////////////////////////////////////////////////////////////////
 	// 由 * 其他模块 * 模块提供的自定义消息 (>100)
@@ -99,6 +102,7 @@ enum ControlEvent{
     InvalidEvent=0;
     Restart=1;
     Stop=2;
+    SetLogLevel=3;
 }
 
 message GLOBAL_CONFIG
@@ -138,13 +142,4 @@ message GLOBAL_CONFIG
     string  KeyFilePath=20;
     string  CertPasswd=21;
 
-};
-
-message RuntimeDataPackage
-{
-    string ManagerAddress=1;
-	int32 ManagerPort=2;
-	int32 TemplateID=3;
-    fixed64 NodeUUID=4;
-	GLOBAL_CONFIG TemplateConfig=5;
 }

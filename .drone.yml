@@ -1,0 +1,46 @@
+kind: pipeline
+name: default
+
+steps:
+  - name: build
+    image: sloong/sloongnet_build
+    commands:
+      - build/build.sh -d
+    when:
+      event: push
+      branch:
+        exclude:
+          - master
+          - develop
+
+  - name: build_docker
+    image: plugins/docker
+    settings:
+      repo: sloong/sloongnet
+      cache_from: sloong/sloongnet
+      use_cache: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      tags:
+        - develop
+    when:
+      event: push
+      branch: develop
+
+  - name: release_docker
+    image: plugins/docker
+    settings:
+      repo: sloong/sloongnet
+      cache_from: sloong/sloongnet
+      use_cache: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      tags:
+        - latest
+    when:
+      branch: master
+

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2021-01-14 19:02:57
+ * @LastEditTime: 2021-03-26 17:28:54
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/filecenter/filemanager.h
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -25,7 +25,7 @@ namespace Sloong
     typedef struct UploadInfo
     {
         string Path;
-        uint64_t HashCode;
+        string SHA256;
         int64_t FileSize;
         list<FileRange> DataList;
     } UploadInfo;
@@ -55,7 +55,7 @@ namespace Sloong
 
         CResult MergeFile(const list<FileRange> &fileList, const string &saveFile);
         CResult SplitFile(const string &saveFile, int splitSize, map_ex<int, string> &pReadList, int* out_all_size);
-        CResult GetFileSize(const string &path, int *out_size);
+        int GetFileSize(const string &path);
         void ClearCache(const string &folder);
 
     protected:
@@ -63,6 +63,7 @@ namespace Sloong
         map_ex<string, UploadInfo>* m_mapTokenToUploadInfo;
 
         string m_strUploadTempSaveFolder = "./tmp/";
+        string m_strCacheFolder = "./cache/";
         string m_strArchiveFolder = "./archive/";
     };
 

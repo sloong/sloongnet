@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 1970-01-01 08:00:00
- * @LastEditTime: 2020-08-06 17:31:54
+ * @LastEditTime: 2021-09-02 17:27:13
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/datacenter/datacenter.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -123,7 +123,6 @@ CResult CDataCenter::Initialized()
 {
 	m_pConfig = IData::GetGlobalConfig();
 	m_pModuleConfig = IData::GetModuleConfig();
-	m_pRuntimeData = IData::GetRuntimeData();
 	if (m_pModuleConfig == nullptr)
 	{
 		return CResult::Make_Error("Initialize error. no config data.");
@@ -139,7 +138,7 @@ CResult CDataCenter::CreateProcessEnvironmentHandler(void **out_env)
 	if (res.IsFialed())
 		return res;
 	(*out_env) = item.get();
-	m_listDBHub.push_back(std::move(item));
+	m_listDBHub.emplace_back(std::move(item));
 	return CResult::Succeed;
 }
 
@@ -148,7 +147,7 @@ void Sloong::CDataCenter::EventPackageProcesser(Package *data_pack)
 	auto event = (Manager::Events)data_pack->function();
 	if (!Manager::Events_IsValid(event))
 	{
-		m_pLog->Error(Helper::Format("EventPackageProcesser is called.but the fucntion[%d] check error.", event));
+		m_pLog->error(format("EventPackageProcesser is called.but the fucntion[{}] check error.", event));
 		return;
 	}
 
@@ -156,7 +155,7 @@ void Sloong::CDataCenter::EventPackageProcesser(Package *data_pack)
 	{
 	default:
 	{
-		m_pLog->Error(Helper::Format("Event is no processed. [%s][%d].", Manager::Events_Name(event).c_str(), event));
+		m_pLog->error(format("Event is no processed. [{}][{}].", Manager::Events_Name(event), event));
 	}
 	break;
 	}

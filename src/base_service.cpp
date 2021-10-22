@@ -1,13 +1,13 @@
-/*** 
+/***
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-01-12 20:35:33
+ * @LastEditTime: 2021-09-27 17:30:03
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/base_service.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: 
+ * @Description:
  */
-/*** 
+/***
  * @......................................&&.........................
  * @....................................&&&..........................
  * @.................................&&&&............................
@@ -58,16 +58,24 @@
  */
 
 #include "base_service.h"
-#include "utility.h"
-#include "snowflake.h"
 
+#include "events/RegisterConnection.hpp"
 #include "events/SendPackage.hpp"
 #include "events/SendPackageToManager.hpp"
-#include "events/RegisteConnection.hpp"
+#include "utility.h"
+
 using namespace Sloong::Events;
 
-#include "protocol/manager.pb.h"
+#include "modules/manager/protocol/manager.pb.h"
 using namespace Manager;
+
+#include "linux_cpuload.hpp"
+#include "linux_memoryload.hpp"
+
+#include <spdlog/sinks/daily_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+
+#include "IData.h"
 
 IControl *Sloong::IData::m_iC = nullptr;
 unique_ptr<CSloongBaseService> Sloong::CSloongBaseService::Instance = nullptr;
@@ -99,116 +107,116 @@ void CSloongBaseService::on_SIGINT_Event(int signal)
     Instance->Stop();
 }
 
-CResult CSloongBaseService::InitlializeForWorker(RuntimeDataPackage *data, RunInfo *info, EasyConnect *con)
+U64Result CSloongBaseService::InitlializeForWorker(EasyConnect *con)
 {
-    cout << "Connect to control succeed. Start registe and get configuation." << endl;
+    m_pLog->info("Connect to control succeed. Start registe and get configuration.");
 
-    RegisteWorkerRequest sub_req;
-    if (!info->AssignedTargetTemplateID.empty())
+    RegisterWorkerRequest sub_req;
+    if (!m_oNodeRuntimeInfo.AssignedTargetTemplateID.empty())
     {
-        sub_req.set_runmode(RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_AssignTemplate);
-        for (auto &item : Helper::split(info->AssignedTargetTemplateID, ','))
+        sub_req.set_runmode(RegisterWorkerRequest_RunType::RegisterWorkerRequest_RunType_AssignTemplate);
+        for (auto &item : Helper::split(m_oNodeRuntimeInfo.AssignedTargetTemplateID, ','))
         {
             if (item.empty())
                 continue;
             int id = 0;
             if (!ConvertStrToInt(item, &id))
-                return CResult::Make_Error(Helper::Format("Convert template id [%s] to int failed.", item.c_str()));
+                return U64Result::Make_Error(format("Convert template id {} to int failed.", item));
             sub_req.add_assigntargettemplateid(id);
         }
     }
-    else if (!info->ExcludeTargetType.empty())
+    else if (!m_oNodeRuntimeInfo.ExcludeTargetType.empty())
     {
-        sub_req.set_runmode(RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_ExcludeType);
-        for (auto &item : Helper::split(info->ExcludeTargetType, ','))
+        sub_req.set_runmode(RegisterWorkerRequest_RunType::RegisterWorkerRequest_RunType_ExcludeType);
+        for (auto &item : Helper::split(m_oNodeRuntimeInfo.ExcludeTargetType, ','))
         {
             if (item.empty())
                 continue;
             MODULE_TYPE forceType = MODULE_TYPE::Manager;
             if (!MODULE_TYPE_Parse(item, &forceType))
-                return CResult::Make_Error(Helper::Format("Parse [%s] to module type error", item.c_str()));
+                return U64Result::Make_Error(format("Parse {} to module type error", item));
 
             sub_req.add_excludetargettype(forceType);
         }
     }
-    else if (!info->IncludeTargetType.empty())
+    else if (!m_oNodeRuntimeInfo.IncludeTargetType.empty())
     {
-        sub_req.set_runmode(RegisteWorkerRequest_RunType::RegisteWorkerRequest_RunType_IncludeType);
-        for (auto &item : Helper::split(info->IncludeTargetType, ','))
+        sub_req.set_runmode(RegisterWorkerRequest_RunType::RegisterWorkerRequest_RunType_IncludeType);
+        for (auto &item : Helper::split(m_oNodeRuntimeInfo.IncludeTargetType, ','))
         {
             if (item.empty())
                 continue;
             MODULE_TYPE forceType = MODULE_TYPE::Manager;
             if (!MODULE_TYPE_Parse(item, &forceType))
-                return CResult::Make_Error(Helper::Format("Parse [%s] to module type error", item.c_str()));
+                return U64Result::Make_Error(format("Parse {} to module type error", item));
 
             sub_req.add_includetargettype(forceType);
         }
     }
 
     uint64_t uuid = 0;
-    auto result = CResult::Make_Error("Cancelled by User.");
+    auto result = U64Result::Make_Error("Cancelled by User.");
     while (m_emStatus != RUN_STATUS::Exit)
     {
-        auto req = PackageHelper::GetRequestPackage();
-        req->set_function(Manager::Functions::RegisteWorker);
+        auto req = Package::GetRequestPackage();
+        req->set_function(Manager::Functions::RegisterWorker);
         req->set_sender(uuid);
 
-        PackageHelper::SetContent(req.get(), ConvertObjToStr(&sub_req));
+        req->set_content(ConvertObjToStr(&sub_req));
         if (con->SendPackage(move(req)).IsFialed())
-            return CResult::Make_Error("Send get config request error.");
+            return U64Result::Make_Error("Send get config request error.");
         auto res = con->RecvPackage(true);
         if (res.IsFialed())
-            return CResult::Make_Error("Receive get config result error.");
+            return U64Result::Make_Error("Receive get config result error.");
         auto response = res.MoveResultObject();
         if (!response)
-            return CResult::Make_Error("Parse the get config response data error.");
+            return U64Result::Make_Error("Parse the get config response data error.");
 
         if (response->result() == ResultType::Retry)
         {
             if (uuid == 0)
             {
                 uuid = Helper::BytesToInt64(response->content().c_str());
-                cout << "Control assigen uuid ." << uuid << endl;
+                m_pLog->info(format("Control assigen uuid [{}].", uuid));
             }
             else
             {
                 this_thread::sleep_for(std::chrono::seconds(1));
-                //sleep(1);
-                cout << "Control return retry package. wait 1s and retry." << endl;
+                // sleep(1);
+                m_pLog->debug("Control return retry package. wait 1s and retry.");
             }
             continue;
         }
         else if (response->result() == ResultType::Succeed)
         {
-            auto res_pack = ConvertStrToObj<RegisteWorkerResponse>(response->content());
-            string serverConfig = res_pack->configuation();
+            auto res_pack = ConvertStrToObj<RegisterWorkerResponse>(response->content());
+            string serverConfig = res_pack->configuration();
             if (serverConfig.size() == 0)
-                return CResult::Make_Error("Control no return config infomation.");
-            if (!data->mutable_templateconfig()->ParseFromString(serverConfig))
-                return CResult::Make_Error("Parse the config struct error.");
+                return U64Result::Make_Error("Control no return config infomation.");
+            if (!m_oNodeRuntimeInfo.TemplateConfig.ParseFromString(serverConfig))
+                return U64Result::Make_Error("Parse the config struct error.");
 
-            data->set_templateid(res_pack->templateid());
-            data->set_nodeuuid(uuid);
-            result = CResult::Succeed;
+            m_oNodeRuntimeInfo.NodeUUID = uuid;
+            m_oNodeRuntimeInfo.TemplateID = res_pack->templateid();
+            result = U64Result::Make_OKResult(res_pack->registerid());
             break;
         }
         else
         {
-            return CResult::Make_Error(Helper::Format("Control return an unexpected result [%s]. Message [%s].", ResultType_Name(response->result()).c_str(), response->content().c_str()));
+            return U64Result::Make_Error(format("Control return an unexpected result {}. Message {}.",
+                                                ResultType_Name(response->result()), response->content()));
         }
     };
-    cout << "Get configuation done." << endl;
+    m_pLog->info("Get configuration done.");
     return result;
 }
 
-CResult CSloongBaseService::InitlializeForManager(RuntimeDataPackage *data)
+CResult CSloongBaseService::InitlializeForManager()
 {
-    data->set_nodeuuid(0);
-    data->set_templateid(1);
-    auto config = data->mutable_templateconfig();
-    config->set_listenport(data->managerport());
-    config->set_modulepath("./modules/");
+    m_oNodeRuntimeInfo.NodeUUID = 0;
+    auto config = &m_oNodeRuntimeInfo.TemplateConfig;
+    config->set_listenport(m_oNodeRuntimeInfo.Port);
+    config->set_modulepath("./");
     config->set_modulename("libmanager.so");
     return CResult::Succeed;
 }
@@ -217,54 +225,68 @@ void CSloongBaseService::InitSystem()
 {
     set_terminate(sloong_terminator);
     set_unexpected(sloong_unexpected);
-    //SIG_IGN:忽略信号的处理程序
-    //SIGPIPE:在reader终止之后写pipe的时候发生
-    signal(SIGPIPE, SIG_IGN); // this signal should call the socket check function. and remove the timeout socket.
-    //SIGCHLD: 进程Terminate或Stop的时候,SIGPIPE会发送给进程的父进程,缺省情况下该Signal会被忽略
+    // SIG_IGN:忽略信号的处理程序
+    // SIGPIPE:在reader终止之后写pipe的时候发生
+    signal(SIGPIPE, SIG_IGN); // this signal should call the socket check
+                              // function. and remove the timeout socket.
+    // SIGCHLD:
+    // 进程Terminate或Stop的时候,SIGPIPE会发送给进程的父进程,缺省情况下该Signal会被忽略
     signal(SIGCHLD, SIG_IGN);
-    //SIGINT:由Interrupt Key产生,通常是Ctrl+c或者Delete,发送给所有的ForeGroundGroup进程.
+    // SIGINT:由Interrupt
+    // Key产生,通常是Ctrl+c或者Delete,发送给所有的ForeGroundGroup进程.
     signal(SIGINT, &on_SIGINT_Event);
     // SIGSEGV:当一个进程执行了一个无效的内存引用，或发生段错误时发送给它的信号
     signal(SIGSEGV, &on_sigint);
 }
 
-CResult CSloongBaseService::Initialize(RunInfo info)
+CResult CSloongBaseService::Initialize(NodeInfo info, shared_ptr<logger_ex> logger)
 {
-    m_oServerConfig.set_manageraddress(info.Address);
-    m_oServerConfig.set_managerport(info.Port);
+    m_pLog = logger;
+    m_pLog->set_name("INIT");
+
+    m_emStatus = RUN_STATUS::Created;
+
+    m_oNodeRuntimeInfo = move(info);
     m_oExitResult = CResult::Succeed;
 
     InitSystem();
 
     CResult res = CResult::Succeed;
     UniqueConnection pManagerConnect = nullptr;
-
+    uint64_t registerid = 0;
     if (info.ManagerMode)
     {
-        res = InitlializeForManager(&m_oServerConfig);
+        res = InitlializeForManager();
     }
     else
     {
         pManagerConnect = make_unique<EasyConnect>();
-        res = pManagerConnect->InitializeAsClient(nullptr, m_oServerConfig.manageraddress(), m_oServerConfig.managerport(), nullptr);
+        res =
+            pManagerConnect->InitializeAsClient(nullptr, m_oNodeRuntimeInfo.Address, m_oNodeRuntimeInfo.Port, nullptr);
         if (res.IsFialed())
         {
             return CResult::Make_Error("Connect to control fialed." + res.GetMessage());
         }
 
-        res = InitlializeForWorker(&m_oServerConfig, &info, pManagerConnect.get());
+        auto regres = InitlializeForWorker(pManagerConnect.get());
+        if (regres.IsFialed())
+            return CResult(regres.GetResult(), regres.GetMessage());
+        else
+            registerid = regres.GetResultObject();
     }
     if (res.IsFialed())
         return res;
-    auto pConfig = m_oServerConfig.mutable_templateconfig();
-    if (pConfig->logoperation() == 0)
-        pConfig->set_logoperation(LOGOPT::WriteToSTDOut);
+    auto pConfig = &m_oNodeRuntimeInfo.TemplateConfig;
 
 #ifdef DEBUG
-    pConfig->set_loglevel(Core::LogLevel::All);
-    pConfig->set_logoperation(pConfig->logoperation() | LOGOPT::WriteToSTDOut);
+    pConfig->set_loglevel(Core::LogLevel::Verbos);
 #endif
-    m_pLog->Initialize(pConfig->logpath(), "", LOGOPT(pConfig->logoperation()), LOGLEVEL(pConfig->loglevel()), LOGTYPE::DAY);
+
+    auto file_logger = make_shared<spdlog::sinks::daily_file_sink_mt>(pConfig->logpath(), 0, 0);
+    file_logger->set_level(spdlog::level::debug);
+
+    m_pLog->add_sink(move(file_logger));
+    m_pLog->set_level(spdlog::level::level_enum(pConfig->loglevel()));
 
     res = InitModule();
     if (res.IsFialed())
@@ -275,7 +297,7 @@ CResult CSloongBaseService::Initialize(RunInfo info)
         res = m_pPrepareInitializeFunc(pConfig);
         if (res.IsFialed())
         {
-            m_pLog->Fatal(res.GetMessage());
+            m_pLog->critical(res.GetMessage());
             return res;
         }
     }
@@ -283,39 +305,48 @@ CResult CSloongBaseService::Initialize(RunInfo info)
     res = m_iC->Initialize(pConfig->mqthreadquantity(), m_pLog.get());
     if (res.IsFialed())
     {
-        m_pLog->Fatal(res.GetMessage());
+        m_pLog->critical(res.GetMessage());
         return res;
     }
-    m_pLog->Debug("Control center initialization succeed.");
+    m_pLog->debug("Control center initialization succeed.");
 
-    m_iC->Add(DATA_ITEM::ServerConfiguation, m_oServerConfig.mutable_templateconfig());
+    m_iC->Add(DATA_ITEM::ServerConfiguration, &m_oNodeRuntimeInfo.TemplateConfig);
     m_iC->Add(DATA_ITEM::Logger, m_pLog.get());
-    m_iC->Add(DATA_ITEM::RuntimeData, &m_oServerConfig);
+    m_iC->Add(DATA_ITEM::NodeUUID, &m_oNodeRuntimeInfo.NodeUUID);
     if (pConfig->moduleconfig().length() > 0)
     {
-        if(!m_oJsonReader.parse(pConfig->moduleconfig(), m_oModuleConfig))
+        Json::CharReaderBuilder builder;
+        const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+        JSONCPP_STRING err;
+        if (!reader->parse(pConfig->moduleconfig().c_str(),
+                           pConfig->moduleconfig().c_str() + pConfig->moduleconfig().length(), &m_oModuleConfig, &err))
         {
-            m_pLog->Fatal("Error parsing module configuration");
+            m_pLog->critical("Error parsing module configuration");
+            cerr << err << endl;
             return CResult::Make_Error("Error parsing module configuration");
         }
-        m_iC->Add(DATA_ITEM::ModuleConfiguation, &m_oModuleConfig);
+        m_iC->Add(DATA_ITEM::ModuleConfiguration, &m_oModuleConfig);
     }
     else
     {
-        m_iC->Add(DATA_ITEM::ModuleConfiguation, nullptr);
+        m_iC->Add(DATA_ITEM::ModuleConfiguration, nullptr);
     }
 
     res = m_pModuleInitializationFunc(m_iC.get());
     if (res.IsFialed())
     {
-        m_pLog->Fatal(res.GetMessage());
+        m_pLog->critical(res.GetMessage());
         return res;
     }
-    m_pLog->Debug("Module initialization succeed.");
+    m_pLog->debug("Module initialization succeed.");
 
-    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramRestart, std::bind(&CSloongBaseService::OnProgramRestartEventHandler, this, std::placeholders::_1));
-    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStop, std::bind(&CSloongBaseService::OnProgramStopEventHandler, this, std::placeholders::_1));
-    m_iC->RegisterEventHandler(EVENT_TYPE::SendPackageToManager, std::bind(&CSloongBaseService::OnSendPackageToManagerEventHandler, this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramRestart, std::bind(&CSloongBaseService::OnProgramRestartEventHandler,
+                                                                     this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(EVENT_TYPE::ProgramStop,
+                               std::bind(&CSloongBaseService::OnProgramStopEventHandler, this, std::placeholders::_1));
+    m_iC->RegisterEventHandler(
+        EVENT_TYPE::SendPackageToManager,
+        std::bind(&CSloongBaseService::OnSendPackageToManagerEventHandler, this, std::placeholders::_1));
 
     IData::Initialize(m_iC.get());
     m_pNetwork->RegisterEnvCreateProcesser(m_pModuleCreateProcessEvnFunc);
@@ -325,31 +356,42 @@ CResult CSloongBaseService::Initialize(RunInfo info)
     res = m_pNetwork->Initialize(m_iC.get());
     if (res.IsFialed())
     {
-        m_pLog->Fatal(res.GetMessage());
+        m_pLog->critical(res.GetMessage());
         return res;
     }
-    m_pLog->Debug("Network initialization succeed.");
+    m_pLog->debug("Network initialization succeed.");
 
     if (pManagerConnect)
     {
-        auto event = make_shared<Events::RegisteConnectionEvent>(pManagerConnect->m_strAddress, pManagerConnect->m_nPort);
-        event->SetCallbackFunc([s = &m_ManagerSession](IEvent *e, uint64_t sessionid) {
-            *s = sessionid;
+        auto event =
+            make_shared<Events::RegisterConnectionEvent>(pManagerConnect->m_strAddress, pManagerConnect->m_nPort);
+        event->SetCallbackFunc([s = &m_ManagerSession](IEvent *e, uint64_t sessionid) { *s = sessionid; });
+        event->EnableReconnectCallback([&](uint64_t, int, int) {
+            ReconnectRegisterRequest req_pack;
+            req_pack.set_templateid(m_oNodeRuntimeInfo.TemplateID);
+            req_pack.set_nodeuuid(m_oNodeRuntimeInfo.NodeUUID);
+
+            auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::ReconnectRegister,
+                                                                ConvertObjToStr(&req_pack));
+            return event->SyncCall(m_iC.get(), 5000);
         });
         m_iC->CallMessage(event);
     }
 
     res = m_pModuleInitializedFunc();
     if (res.IsFialed())
-        m_pLog->Fatal(res.GetMessage());
-    m_pLog->Debug("Module initialized succeed.");
+    {
+        m_pLog->critical(res.GetMessage());
+        return res;
+    }
+    m_pLog->debug("Module initialized succeed.");
 
     if (!info.ManagerMode)
     {
-        auto res = RegisteNode();
+        auto res = RegisterNode(registerid);
         if (res.IsFialed())
         {
-            m_pLog->Fatal(res.GetMessage());
+            m_pLog->critical(res.GetMessage());
             return res;
         }
     }
@@ -360,79 +402,86 @@ CResult CSloongBaseService::Initialize(RunInfo info)
 CResult CSloongBaseService::InitModule()
 {
     // Load the module library
-    string libFullPath = m_oServerConfig.templateconfig().modulepath() + m_oServerConfig.templateconfig().modulename();
+    string libFullPath =
+        m_oNodeRuntimeInfo.TemplateConfig.modulepath() + m_oNodeRuntimeInfo.TemplateConfig.modulename();
 
-    m_pLog->Debug(Helper::Format("Start init module[%s] and load module functions", libFullPath.c_str()));
-    m_pModule = dlopen(libFullPath.c_str(), RTLD_LAZY);
+    m_pLog->debug(format("Start init module {} and load module functions", libFullPath));
+    m_pModule = dlopen(libFullPath.c_str(), RTLD_LAZY | RTLD_GLOBAL);
     if (m_pModule == nullptr)
     {
-        string errMsg = Helper::Format("Load library [%s] error[%s].", libFullPath.c_str(), dlerror());
-        m_pLog->Error(errMsg);
+        string errMsg = format("Load library {} error {}.", libFullPath, dlerror());
+        m_pLog->error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     char *errmsg;
     m_pModuleCreateProcessEvnFunc = (CreateProcessEnvironmentFunction)dlsym(m_pModule, "CreateProcessEnvironment");
     if ((errmsg = dlerror()) != NULL)
     {
-        string errMsg = Helper::Format("Load function CreateProcessEnvironment error[%s].", errmsg);
-        m_pLog->Error(errMsg);
+        string errMsg = format("Load function CreateProcessEnvironment error {}.", errmsg);
+        m_pLog->error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     m_pModuleRequestHandler = (RequestPackageProcessFunction)dlsym(m_pModule, "RequestPackageProcesser");
     if ((errmsg = dlerror()) != NULL)
     {
-        string errMsg = Helper::Format("Load function RequestPackageProcesser error[%s].", errmsg);
-        m_pLog->Error(errMsg);
+        string errMsg = format("Load function RequestPackageProcesser error {}.", errmsg);
+        m_pLog->error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     m_pModuleResponseHandler = (ResponsePackageProcessFunction)dlsym(m_pModule, "ResponsePackageProcesser");
     if ((errmsg = dlerror()) != NULL)
     {
-        string errMsg = Helper::Format("Load function ResponsePackageProcesser error[%s].", errmsg);
-        m_pLog->Error(errMsg);
+        string errMsg = format("Load function ResponsePackageProcesser error {}.", errmsg);
+        m_pLog->error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     m_pModuleEventHandler = (EventPackageProcessFunction)dlsym(m_pModule, "EventPackageProcesser");
     if ((errmsg = dlerror()) != NULL)
     {
-        string errMsg = Helper::Format("Load function EventPackageProcessFunction error[%s].", errmsg);
-        m_pLog->Error(errMsg);
+        string errMsg = format("Load function EventPackageProcessFunction error {}.", errmsg);
+        m_pLog->error(errMsg);
         return CResult::Make_Error(errMsg);
     }
     m_pModuleAcceptHandler = (NewConnectAcceptProcessFunction)dlsym(m_pModule, "NewConnectAcceptProcesser");
     if ((errmsg = dlerror()) != NULL)
     {
-        string errMsg = Helper::Format("Load function NewConnectAcceptProcesser error[%s]. Use default function.", errmsg);
-        m_pLog->Warn(errMsg);
+        string errMsg = format("Load function NewConnectAcceptProcesser error {}. "
+                               "Use default function.",
+                               errmsg);
+        m_pLog->warn(errMsg);
     }
     m_pPrepareInitializeFunc = (PrepareInitializeFunction)dlsym(m_pModule, "PrepareInitialize");
     if ((errmsg = dlerror()) != NULL)
     {
-        string errMsg = Helper::Format("Load function PrepareInitialize error[%s]. maybe module no need.", errmsg);
-        m_pLog->Warn(errMsg);
+        string errMsg = format("Load function PrepareInitialize error {}. maybe module no need.", errmsg);
+        m_pLog->warn(errMsg);
     }
     m_pModuleInitializationFunc = (ModuleInitializationFunction)dlsym(m_pModule, "ModuleInitialization");
     if ((errmsg = dlerror()) != NULL)
     {
-        string errMsg = Helper::Format("Load function ModuleInitialize error[%s]. maybe module no need initiliaze.", errmsg);
-        m_pLog->Warn(errMsg);
+        string errMsg = format("Load function ModuleInitialize error {}. maybe "
+                               "module no need initiliaze.",
+                               errmsg);
+        m_pLog->warn(errMsg);
     }
     m_pModuleInitializedFunc = (ModuleInitializedFunction)dlsym(m_pModule, "ModuleInitialized");
     if ((errmsg = dlerror()) != NULL)
     {
-        string errMsg = Helper::Format("Load function ModuleInitialize error[%s]. maybe module no need initiliaze.", errmsg);
-        m_pLog->Warn(errMsg);
+        string errMsg = format("Load function ModuleInitialize error {}. maybe "
+                               "module no need initiliaze.",
+                               errmsg);
+        m_pLog->warn(errMsg);
     }
-    m_pLog->Debug("load module functions done.");
+    m_pLog->debug("load module functions done.");
     return CResult::Succeed;
 }
 
-CResult CSloongBaseService::RegisteNode()
+CResult CSloongBaseService::RegisterNode(uint64_t id)
 {
-    RegisteNodeRequest req_pack;
-    req_pack.set_templateid(m_oServerConfig.templateid());
+    RegisterNodeRequest req_pack;
+    req_pack.set_registerid(id);
 
-    auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::RegisteNode, ConvertObjToStr(&req_pack));
+    auto event = make_shared<SendPackageToManagerEvent>(Manager::Functions::RegisterNode, ConvertObjToStr(&req_pack));
     return event->SyncCall(m_iC.get(), 5000);
 }
 
@@ -440,50 +489,46 @@ CResult CSloongBaseService::Run()
 {
     if (m_emStatus != RUN_STATUS::Created)
     {
-        // May create evnironment error, and the application is received programstop event.
+        // May create evnironment error, and the application is received programstop
+        // event.
         return CResult::Make_Error("Application run function is called, but the status not created.");
     }
-    m_pLog->Info("Application begin running.");
+    m_pLog->set_name("RUNNING");
+    m_pLog->info("Application begin running.");
+
     m_iC->SendMessage(EVENT_TYPE::ProgramStart);
     m_emStatus = RUN_STATUS::Running;
 
-    bool enableReport = false;
-    if (enableReport)
+    auto CpuLoadInstance = cpuLoad::createInstance();
+    unique_ptr<memoryLoad> MemoryLoadInstance = make_unique<memoryLoad>();
+
+    // Report server load status each one minutes.
+    while (!m_oExitSync.wait_for(REPORT_LOAD_STATUS_INTERVAL) && m_emStatus != RUN_STATUS::Exit)
     {
-        auto prev_status = make_shared<CPU_OCCUPY>();
-        CUtility::RecordCPUStatus(prev_status.get());
-        int mem_total, mem_free;
-        // Report server load status each one minutes.
-        while (!m_oExitSync.wait_for(REPORT_LOAD_STATUS_INTERVAL))
+        if (!m_oNodeRuntimeInfo.ManagerMode) // Manager module
         {
             Manager::ReportLoadStatusRequest req;
-            auto load = CUtility::CalculateCPULoad(prev_status.get());
-            CUtility::GetMemory(mem_total, mem_free);
+            auto load = CpuLoadInstance->getCurrentCpuUsage();
+            auto mem_load = MemoryLoadInstance->getCurrentMemUsageInPercent();
             req.set_cpuload(load);
-            req.set_memroyused(mem_total / mem_free);
+            req.set_memroyused(mem_load);
 
-            if (m_oServerConfig.templateid() != 1) // Manager module
-            {
-                auto event = make_shared<Events::SendPackageEvent>(m_ManagerSession);
-                event->SetRequest(m_oServerConfig.nodeuuid(), snowflake::Instance->nextid(), Base::PRIORITY_LEVEL::LOW_LEVEL, (int)Functions::ReportLoadStatus, ConvertObjToStr(&req));
-                m_iC->SendMessage(event);
-            }
-
-            CUtility::RecordCPUStatus(prev_status.get());
+            auto event = make_shared<Events::SendPackageEvent>(m_ManagerSession);
+            event->SetRequest((int)Functions::ReportLoadStatus, ConvertObjToStr(&req), PRIORITY_LEVEL::Inessential);
+            m_iC->SendMessage(event);
         }
     }
-    while (m_emStatus != RUN_STATUS::Exit)
-    {
-        m_oExitSync.wait_for(1000);
-    }
-    m_pLog->Info("Application main work loop end with result " + ResultType_Name(m_oExitResult.GetResult()));
+
+    m_pLog->info("Application main work loop end with result " + ResultType_Name(m_oExitResult.GetResult()));
 
     return m_oExitResult;
 }
 
 void CSloongBaseService::Stop()
 {
-    m_pLog->Info("Application will exit.");
+    m_pLog->set_name("STOP");
+    m_pLog->info("Application will exit.");
+
     m_iC->SendMessage(EVENT_TYPE::ProgramStop);
     if (m_emStatus == RUN_STATUS::Created)
         m_emStatus = RUN_STATUS::Exit;
@@ -491,9 +536,11 @@ void CSloongBaseService::Stop()
 
 void CSloongBaseService::OnProgramRestartEventHandler(SharedEvent event)
 {
-    // Restart service. use the Exit Sync object, notify the wait thread and return the ExitResult.
-    // in main function, check the result, if is Retry, do the init loop.
+    // Restart service. use the Exit Sync object, notify the wait thread and
+    // return the ExitResult. in main function, check the result, if is Retry, do
+    // the init loop.
     m_oExitResult = CResult(ResultType::Retry);
+    m_emStatus = RUN_STATUS::Exit;
     m_oExitSync.notify_all();
 }
 
@@ -502,12 +549,11 @@ void CSloongBaseService::OnProgramStopEventHandler(SharedEvent event)
     if (m_emStatus == RUN_STATUS::Exit)
         return;
     m_emStatus = RUN_STATUS::Exit;
-    m_pLog->Info("Application receive ProgramStopEvent.");
-    m_oExitSync.notify_all();
-    m_iC->Exit();
-    m_pLog->End();
+    m_pLog->info("Application receive ProgramStopEvent.");
     if (m_pModule)
         dlclose(m_pModule);
+    m_oExitSync.notify_all();
+    m_iC->Exit();
 }
 
 void CSloongBaseService::OnSendPackageToManagerEventHandler(SharedEvent e)
@@ -515,13 +561,9 @@ void CSloongBaseService::OnSendPackageToManagerEventHandler(SharedEvent e)
     auto event = dynamic_pointer_cast<SendPackageToManagerEvent>(e);
 
     auto req = make_shared<SendPackageEvent>(m_ManagerSession);
-    req->SetCallbackFunc([event](IEvent *e, Package *p) {
-        event->CallCallbackFunc(p);
-    });
-    req->SetRequest(IData::GetRuntimeData()->nodeuuid(), snowflake::Instance->nextid(), Base::HEIGHT_LEVEL, event->GetFunctionID(), event->GetContent());
+    req->SetCallbackFunc([event](IEvent *e, Package *p) { event->CallCallbackFunc(p); });
+    req->SetRequest(event->GetFunctionID(), event->GetContent(), PRIORITY_LEVEL::Immediate);
     m_iC->SendMessage(req);
 }
 
-void CSloongBaseService::OnGetManagerSocketEventHandler(SharedEvent e)
-{
-}
+void CSloongBaseService::OnGetManagerSocketEventHandler(SharedEvent e) {}

@@ -5,7 +5,7 @@
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/events/ConnectionBreak.hpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
- * @Description: ConnectionBreakedEventn object
+ * @Description: ConnectionBreakedEvent object
  */
 
 
@@ -16,17 +16,23 @@ namespace Sloong
 {
 	namespace Events
 	{
-		class ConnectionBreakedEventn : public NormalEvent
+		class ConnectionBreakedEvent : public NormalEvent
 		{
 		public:
-			ConnectionBreakedEventn(uint64_t session):NormalEvent( EVENT_TYPE::ConnectionBreaked ){
+			ConnectionBreakedEvent(uint64_t session):NormalEvent( EVENT_TYPE::ConnectionBreaked ){
 				m_SessionID = session;
 			}
-			virtual	~ConnectionBreakedEventn(){}
+			virtual	~ConnectionBreakedEvent(){}
 
 			inline uint64_t GetSessionID() { return m_SessionID; }
+
+			inline void SetJustClose(bool b){ m_JustClose = b;}
+
+			inline bool GetJustClose(){ return m_JustClose; }
 		protected:
 			uint64_t m_SessionID;
+
+			bool m_JustClose;
 		};
 	}	
 }

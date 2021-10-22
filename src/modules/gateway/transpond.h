@@ -1,20 +1,21 @@
-/*
- * @Author: WCB
+/*** 
+ * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2020-04-28 14:43:07
- * @LastEditors: WCB
- * @LastEditTime: 2020-04-28 14:52:01
- * @Description: file content
+ * @LastEditTime: 2021-09-22 14:44:34
+ * @LastEditors: Chuanbin Wang
+ * @FilePath: /engine/src/modules/gateway/transpond.h
+ * @Copyright 2015-2020 Sloong.com. All Rights Reserved
+ * @Description: 
  */
 
-#ifndef SLOONGNET_GATEWAY_TRANSPOND_H
-#define SLOONGNET_GATEWAY_TRANSPOND_H
+#pragma once
 
 
 #include "IObject.h"
 
 namespace Sloong
 {
-	class GatewayTranspond
+	class GatewayTranspond : public IObject
 	{
 	public:
 		GatewayTranspond(){}
@@ -28,10 +29,7 @@ namespace Sloong
 		PackageResult MessageToClient(UniquePackage, Package *);
 
     protected:
-		IControl* 	m_iC = nullptr;
-		CLog*		m_pLog =nullptr;
+		// map_ex<int,>
 	};
 
 }
-
-#endif

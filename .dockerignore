@@ -6,6 +6,7 @@ Dockerfile
 *.pb.cc
 *.pb.h
 build/docker_build.sh
+build/cache
 build/debug
 build/release
 build/sloongnet-*
