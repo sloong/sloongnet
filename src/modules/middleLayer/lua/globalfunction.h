@@ -157,8 +157,8 @@ namespace Sloong
         map_ex<string, int> m_mapDBNameToSessionID;
         Json::Value *m_pModuleConfig = nullptr;
 
-        map<int, string> g_RecvDataConnList;
-        map<string, map<string, RecvDataPackage *>> g_RecvDataInfoList;
+        map_ex<int, string> g_RecvDataConnList;
+        map_ex<string, map<string, RecvDataPackage *>> g_RecvDataInfoList;
 
         static constexpr int g_data_pack_len = 8;
         static constexpr int g_uuid_len = 36;

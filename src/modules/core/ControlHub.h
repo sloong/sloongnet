@@ -150,7 +150,7 @@ class CControlHub : public IControl
     // Data
     void Add(uint64_t item, void *object)
     {
-        m_oDataList[item] = make_shared<ObjectData>(const_cast<void *>(object), 0);
+        m_oDataList.insert(item, make_shared<ObjectData>(const_cast<void *>(object), 0));
     }
     void *Get(uint64_t);
 
@@ -165,7 +165,7 @@ class CControlHub : public IControl
 
     void AddSharedPtr(uint64_t item, shared_ptr<void> object)
     {
-        m_oDataList[item] = make_shared<SharedPtrData>(object);
+        m_oDataList.insert(item, make_shared<SharedPtrData>(object));
     }
     shared_ptr<void> GetSharedPtr(uint64_t key)
     {
@@ -185,7 +185,7 @@ class CControlHub : public IControl
 
     void AddTempString(const string &key, const string &value)
     {
-        m_oTempDataList[key] = make_shared<StringData>(value);
+        m_oTempDataList.insert(key, make_shared<StringData>(value));
     }
     string GetTempString(const string &, bool = true);
     inline bool ExistTempString(const string &key)
@@ -199,7 +199,7 @@ class CControlHub : public IControl
 
     void AddTempObject(const string &key, const void *object, int size)
     {
-        m_oTempDataList[key] = make_shared<ObjectData>(const_cast<void *>(object), size);
+        m_oTempDataList.insert(key, make_shared<ObjectData>(const_cast<void *>(object), size));
     }
     void *GetTempObject(const string &, int *, bool = true);
     inline bool ExistTempObject(const string &key)
@@ -213,7 +213,7 @@ class CControlHub : public IControl
 
     void AddTempBytes(const string &key, unique_ptr<char[]> &bytes, int size)
     {
-        m_oTempDataList[key] = make_shared<BytesData>(bytes, size);
+        m_oTempDataList.insert(key, make_shared<BytesData>(bytes, size));
     }
 
     unique_ptr<char[]> GetTempBytes(const string &, int *);
@@ -228,7 +228,7 @@ class CControlHub : public IControl
 
     void AddTempSharedPtr(const string &key, shared_ptr<void> ptr)
     {
-        m_oTempDataList[key] = make_shared<SharedPtrData>(ptr);
+        m_oTempDataList.insert(key, make_shared<SharedPtrData>(ptr));
     }
     shared_ptr<void> GetTempSharedPtr(const string &, bool = true);
     inline bool ExistTempSharedPtr(const string &key)

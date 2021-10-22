@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2015-11-12 15:56:50
- * @LastEditTime: 2021-09-14 20:47:46
+ * @LastEditTime: 2021-10-22 12:38:45
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/EpollEx.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -117,11 +117,11 @@ void Sloong::CEpollEx::RegisterConnection( EasyConnect* conn )
 		}
 		
 		AddMonitorSocket(cur_sock);
-		m_mapSocketToID[cur_sock] = id;
+		m_mapSocketToID.insert(cur_sock,id);
 	});
 	AddMonitorSocket(conn->GetSocketID());
-	m_mapSocketToID[conn->GetSocketID()] = conn->GetHashCode();
-	m_mapIDToConnection[conn->GetHashCode()] = conn;
+	m_mapSocketToID.insert(conn->GetSocketID(),conn->GetHashCode());
+	m_mapIDToConnection.insert(conn->GetHashCode(),conn);
 }
 
 void Sloong::CEpollEx::UnregisteConnection( uint64_t id )
@@ -129,7 +129,7 @@ void Sloong::CEpollEx::UnregisteConnection( uint64_t id )
 	if( !m_mapIDToConnection.exist(id) )	
 		return;
 
-	auto conn = m_mapIDToConnection[id];
+	auto conn = m_mapIDToConnection.get(id);
 	if( conn != nullptr )
 	{
 		DeleteMonitorSocket(conn->GetSocketID());
@@ -142,7 +142,7 @@ void Sloong::CEpollEx::ModifySendMonitorStatus( uint64_t id, bool monitor )
 {
 	if( !m_mapIDToConnection.exist(id) )	
 		return;
-	auto sock = m_mapIDToConnection[id]->GetSocketID();
+	auto sock = m_mapIDToConnection.get(id)->GetSocketID();
 	if( monitor )
 	{
 		MonitorSendStatus(sock);
@@ -224,7 +224,7 @@ void Sloong::CEpollEx::MainWorkLoop()
 	}
 	int sock = res.GetResultObject();
 	unique_lock<mutex> lock(m_acceptMutex);
-	m_mapAcceptSocketToPID[sock] = pid;
+	m_mapAcceptSocketToPID.insert(sock,pid);
 	lock.unlock();
 
 	// 创建epoll事件对象
@@ -282,7 +282,7 @@ void Sloong::CEpollEx::MainWorkLoop()
 					}
 					else
 					{
-						auto id = m_mapSocketToID[fd];
+						auto id = m_mapSocketToID.get(fd);
 						m_pLog->debug(format("EPoll EPOLLIN event happened. Socket[{}][{}] Data Can Receive.", fd, CUtility::GetSocketAddress(fd)));
 						auto res = OnDataCanReceive(id);
 						if (res == ResultType::Error)
@@ -299,7 +299,7 @@ void Sloong::CEpollEx::MainWorkLoop()
 					}
 					else
 					{
-						auto id = m_mapSocketToID[fd];
+						auto id = m_mapSocketToID.get(fd);
 						m_pLog->debug(format("EPoll EPOLLOUT event happened.Socket[{}][{}] Can Write Data.", fd, CUtility::GetSocketAddress(fd)));
 						auto res = OnCanWriteData(id);
 						// 所有消息全部发送完毕后只需要监听可读消息就可以了。
@@ -316,7 +316,7 @@ void Sloong::CEpollEx::MainWorkLoop()
 					}
 					else
 					{
-						auto id = m_mapSocketToID[fd];
+						auto id = m_mapSocketToID.get(fd);
 						m_pLog->debug(format("EPoll unkuown event happened. Socket[{}][{}] close this connnect.", fd, CUtility::GetSocketAddress(fd)));
 						OnOtherEventHappened(id);
 					}

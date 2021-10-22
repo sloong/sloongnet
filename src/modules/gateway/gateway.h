@@ -135,8 +135,8 @@ class SloongNetGateway : public IObject
   public:
     FWResult GetForwardInfo(int function);
     list_ex<_FORWARD_RANE_INFO> m_mapforwardRangeInfo;
-    strict_map<int, _FORWARD_MAP_INFO> m_mapForwardMapInfo;
-    strict_map<int, list_ex<uint64_t>> m_mapTempteIDToUUIDs;
+    map_ex<int, _FORWARD_MAP_INFO> m_mapForwardMapInfo;
+    map_ex<int, list_ex<uint64_t>> m_mapTempteIDToUUIDs;
     map_ex<uint64_t, NodeItem> m_mapUUIDToNode;
     map_ex<uint64_t, SessionID> m_mapUUIDToConnectionID;
     map_ex<uint64_t, UniquePackage> m_mapSerialToRequest;

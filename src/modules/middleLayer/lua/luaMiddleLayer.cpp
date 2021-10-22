@@ -97,9 +97,9 @@ PackageResult Sloong::LuaMiddleLayer::RequestPackageProcesser(CLuaProcessCenter 
 {
 	CLuaPacket *info = nullptr;
 	if (!m_mapUserInfoList.exist(pack->sender()))
-		m_mapUserInfoList[pack->sender()] = make_unique<CLuaPacket>();
+		m_mapUserInfoList.get(pack->sender()) = make_unique<CLuaPacket>();
 
-	info = m_mapUserInfoList[pack->sender()].get();
+	info = m_mapUserInfoList.get(pack->sender()).get();
 	auto function = pack->function();
 	auto& content =pack->content();
 	auto& extend = pack->extend();
