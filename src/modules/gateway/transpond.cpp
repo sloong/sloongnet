@@ -54,7 +54,7 @@ PackageResult Sloong::GatewayTranspond::MessageToProcesser(Package *pack)
         m_pLog->debug(format("Trans package [{}][{}] -> [{}][{}]", pack->sessionid(), pack->id(),
                              trans_pack->sessionid(), trans_pack->id()));
 
-        SloongNetGateway::Instance->m_mapSerialToRequest[trans_pack->id()] = move(response);
+        SloongNetGateway::Instance->m_mapSerialToRequest.insert(trans_pack->id(), move(response));
         return PackageResult::Make_OKResult(move(trans_pack));
     }
     else

@@ -42,23 +42,23 @@ CResult Sloong::FileManager::Initialize(IControl *ic)
     FormatFolderString(m_strUploadTempSaveFolder);
     FormatFolderString(m_strCacheFolder);
 
-    m_mapFuncToHandler[Functions::PrepareUpload] =
-        std::bind(&FileManager::PrepareUploadHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::Uploading] =
-        std::bind(&FileManager::UploadingHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::Uploaded] =
-        std::bind(&FileManager::UploadedHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::SimpleUpload] =
-        std::bind(&FileManager::SimpleUploadHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::DownloadVerify] =
-        std::bind(&FileManager::DownloadVerifyHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::DownloadFile] =
-        std::bind(&FileManager::DownloadFileHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler.insert(Functions::PrepareUpload,
+        std::bind(&FileManager::PrepareUploadHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::Uploading,
+        std::bind(&FileManager::UploadingHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::Uploaded,
+        std::bind(&FileManager::UploadedHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::SimpleUpload,
+        std::bind(&FileManager::SimpleUploadHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::DownloadVerify,
+        std::bind(&FileManager::DownloadVerifyHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::DownloadFile,
+        std::bind(&FileManager::DownloadFileHandler, this, std::placeholders::_1, std::placeholders::_2));
 
-    m_mapFuncToHandler[Functions::ConvertImageFile] =
-        std::bind(&FileManager::ConvertImageFileHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::GetThumbnail] =
-        std::bind(&FileManager::GetThumbnailHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler.insert(Functions::ConvertImageFile,
+        std::bind(&FileManager::ConvertImageFileHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::GetThumbnail,
+        std::bind(&FileManager::GetThumbnailHandler, this, std::placeholders::_1, std::placeholders::_2));
 
     return CResult::Succeed;
 }
@@ -77,7 +77,7 @@ PackageResult Sloong::FileManager::RequestPackageProcesser(Package *pack)
         return PackageResult::Make_OKResult(
             Package::MakeErrorResponse(pack, format("Function [{}] no handler.", func_name)));
 
-    auto res = m_mapFuncToHandler[function](req_obj, pack);
+    auto res = m_mapFuncToHandler.get(function)(req_obj, pack);
     auto response = Package::MakeResponse(pack, res);
     if (res.IsSucceed())
         m_pLog->debug(
@@ -121,7 +121,7 @@ CResult Sloong::FileManager::SplitFile(const string &filepath, int splitSize, ma
         string str;
         str.resize(splitSize);
         in.read(str.data(), splitSize);
-        pReadList[i] = move(str);
+        pReadList.insert(i,move(str));
     }
     in.close();
     *out_all_size = nSize;
@@ -197,7 +197,7 @@ CResult Sloong::FileManager::PrepareUploadHandler(const string &str_req, Package
     auto req = ConvertStrToObj<PrepareUploadRequest>(str_req);
 
     auto token = CUtility::GenUUID();
-    auto &savedInfo = (*m_mapTokenToUploadInfo)[token];
+    auto &savedInfo = (*m_mapTokenToUploadInfo).get(token);
     savedInfo.SHA256 = req->sha256();
     savedInfo.FileSize = req->filesize();
     savedInfo.Path = m_strUploadTempSaveFolder + token + "/";
@@ -403,7 +403,7 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
         fms.push_back(req->targetformat());
     }
 
-    map<SupportFormat, string> f_path;
+    map_ex<SupportFormat, string> f_path;
     string new_file_path;
     for (auto f : fms)
     {
@@ -413,7 +413,7 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
 
         auto info = response.add_extendinfos();
         auto temp_path = res.GetMessage();
-        f_path[f] = temp_path;
+        f_path.insert(f,temp_path);
         info->set_size(GetFileSize(temp_path));
         info->set_sha256(CSHA256::Encode(temp_path, true));
     }
@@ -435,13 +435,13 @@ CResult Sloong::FileManager::ConvertImageFileHandler(const string &str_req, Pack
         auto f = *i;
         if (f.format() == best_fmt)
         {
-            new_file_path = f_path[f.format()];
+            new_file_path = f_path.get(f.format());
             response.set_allocated_newfileinfo(&f);
             infos->erase(i);
         }
         else
         {
-            remove(f_path[f.format()].c_str());
+            remove(f_path.get(f.format()).c_str());
         }
     }
 

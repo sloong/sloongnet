@@ -206,8 +206,8 @@ class CServerManage : public IObject
   protected:
     map_ex<Manager::Functions, FunctionHandler> m_mapFuncToHandler;
     map_ex<uint64_t, NodeItem> m_mapUUIDToNodeItem;
-    strict_map<int, TemplateItem> m_mapIDToTemplateItem;
+    map_ex<int, TemplateItem> m_mapIDToTemplateItem;
     map_ex<uint64_t, uint64_t> m_mapConnectionToUUID;
-    strict_map<uint64_t, RegisterNodeInfo> m_mapRegisterdUUIDToInfo;
+    map_ex<uint64_t, RegisterNodeInfo> m_mapRegisterdUUIDToInfo;
 };
 } // namespace Sloong

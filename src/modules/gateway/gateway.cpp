@@ -320,7 +320,7 @@ void SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent *send_pack, Pack
         // }
         for (auto item : info.nodeinfos())
         {
-            m_mapUUIDToNode[item.uuid()] = item;
+            m_mapUUIDToNode.insert(item.uuid(), item);
             m_mapTempteIDToUUIDs.insert(info.templateid(), list_ex<uint64_t>());
             m_mapTempteIDToUUIDs.get(info.templateid()).push_back(item.uuid());
 
@@ -332,7 +332,7 @@ void SloongNetGateway::QueryReferenceInfoResponseHandler(IEvent *send_pack, Pack
 void SloongNetGateway::AddConnection(uint64_t uuid, const string &addr, int port)
 {
     auto event = make_shared<RegisterConnectionEvent>(addr, port);
-    event->SetCallbackFunc([this, uuid](IEvent *e, uint64_t hashcode) { m_mapUUIDToConnectionID[uuid] = hashcode; });
+    event->SetCallbackFunc([this, uuid](IEvent *e, uint64_t hashcode) { m_mapUUIDToConnectionID.insert(uuid, hashcode); });
     m_iC->SendMessage(event);
 }
 
@@ -356,7 +356,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOnlineEvent(const string &str_re
 {
     auto req = ConvertStrToObj<Manager::EventReferenceModuleOnline>(str_req);
     auto item = req->item();
-    m_mapUUIDToNode[item.uuid()] = item;
+    m_mapUUIDToNode.insert(item.uuid(), item);
     auto uuids = m_mapTempteIDToUUIDs.try_get(item.templateid());
     if (uuids == nullptr)
     {
@@ -373,7 +373,7 @@ void Sloong::SloongNetGateway::OnReferenceModuleOfflineEvent(const string &str_r
 {
     auto req = ConvertStrToObj<Manager::EventReferenceModuleOffline>(str_req);
     auto uuid = req->uuid();
-    auto item = m_mapUUIDToNode[uuid];
+    auto item = m_mapUUIDToNode.get(uuid);
 
     auto uuids = m_mapTempteIDToUUIDs.try_get(item.templateid());
     if (uuids == nullptr)
@@ -462,10 +462,10 @@ FWResult Sloong::SloongNetGateway::GetForwardInfo(int function)
     {
         // TODO: should be check the node loading.
         return FWResult::Make_OKResult(
-            _FORWARD_INFO{.connection_id = m_mapUUIDToConnectionID[node], .function_id = new_function});
+            _FORWARD_INFO{.connection_id = m_mapUUIDToConnectionID.get(node), .function_id = new_function});
     }
 
     auto node = m_mapTempteIDToUUIDs.get(forward_to).begin();
     return FWResult::Make_OKResult(
-        _FORWARD_INFO{.connection_id = m_mapUUIDToConnectionID[*node], .function_id = new_function});
+        _FORWARD_INFO{.connection_id = m_mapUUIDToConnectionID.get(*node), .function_id = new_function});
 }

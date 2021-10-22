@@ -203,7 +203,7 @@ void Sloong::CGlobalFunction::RecvDataConnFunc()
                 continue;
             }
             // Add to connect list
-            g_RecvDataConnList[conn_sock] = pCheckBuf;
+            g_RecvDataConnList.insert(conn_sock,pCheckBuf);
             // Start new thread to recv data for this connect.
             auto f = std::bind(&CGlobalFunction::RecvFileFunc, this, conn_sock);
             // TODO: modify the libarary function.
@@ -407,8 +407,8 @@ void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent *send_pac
         }
         for (auto item : info.nodeinfos())
         {
-            m_mapUUIDToNode[item.uuid()] = item;
-            m_mapTemplateIDToUUIDs[info.templateid()].push_back(item.uuid());
+            m_mapUUIDToNode.insert(item.uuid(), item);
+            m_mapTemplateIDToUUIDs.get(info.templateid()).push_back(item.uuid());
 
             AddConnection(item.uuid(), item.address(), item.port());
         }
@@ -418,7 +418,7 @@ void Sloong::CGlobalFunction::QueryReferenceInfoResponseHandler(IEvent *send_pac
 void Sloong::CGlobalFunction::AddConnection(uint64_t uuid, const string &addr, int port)
 {
     auto event = make_shared<RegisterConnectionEvent>(addr, port);
-    event->SetCallbackFunc([this, uuid](IEvent *e, uint64_t hashcode) { m_mapUUIDToConnectionID[uuid] = hashcode; });
+    event->SetCallbackFunc([this, uuid](IEvent *e, uint64_t hashcode) { m_mapUUIDToConnectionID.insert(uuid, hashcode); });
     m_iC->SendMessage(event);
 }
 
@@ -427,10 +427,10 @@ void Sloong::CGlobalFunction::OnReferenceModuleOnline(SharedEvent e)
     auto event = EVENT_TRANS<ModuleOnlineEvent>(e);
     auto info = event->GetInfos();
     auto item = info->item();
-    m_mapUUIDToNode[item.uuid()] = item;
-    m_mapTemplateIDToUUIDs[item.templateid()].push_back(item.uuid());
+    m_mapUUIDToNode.insert(item.uuid(), item);
+    m_mapTemplateIDToUUIDs.get(item.templateid()).push_back(item.uuid());
     m_pLog->info(format("New node[{}][{}:{}] is online:templateid[{}],list size[{}]", item.uuid(), item.address(),
-                        item.port(), item.templateid(), m_mapTemplateIDToUUIDs[item.templateid()].size()));
+                        item.port(), item.templateid(), m_mapTemplateIDToUUIDs.get(item.templateid()).size()));
 
     AddConnection(item.uuid(), item.address(), item.port());
 }
@@ -440,13 +440,13 @@ void Sloong::CGlobalFunction::OnReferenceModuleOffline(SharedEvent e)
     auto event = EVENT_TRANS<ModuleOfflineEvent>(e);
     auto info = event->GetInfos();
     auto uuid = info->uuid();
-    auto item = m_mapUUIDToNode[uuid];
+    auto item = m_mapUUIDToNode.get(uuid);
 
-    m_mapTemplateIDToUUIDs[item.templateid()].erase(item.uuid());
+    m_mapTemplateIDToUUIDs.get(item.templateid()).erase(item.uuid());
     m_mapUUIDToConnectionID.erase(uuid);
     m_mapUUIDToNode.erase(uuid);
     m_pLog->info(format("Node is offline [{}], template id[{}],list size[{}]", item.uuid(), item.templateid(),
-                        m_mapTemplateIDToUUIDs[item.templateid()].size()));
+                        m_mapTemplateIDToUUIDs.get(item.templateid()).size()));
 }
 
 void Sloong::CGlobalFunction::RegisterFuncToLua(CLua *pLua)
@@ -599,7 +599,7 @@ int CGlobalFunction::Lua_SetCommData(lua_State *l)
         if (value.empty())
             Instance->m_mapCommData.erase(key);
         else
-            Instance->m_mapCommData[key] = value;
+            Instance->m_mapCommData.insert(key,value);
     }
     return 0;
 }
@@ -608,7 +608,7 @@ int CGlobalFunction::Lua_GetCommData(lua_State *l)
 {
     auto key = CLua::GetString(l, 1, "");
     if (key.length() > 0 && Instance->m_mapCommData.exist(key))
-        CLua::PushString(l, Instance->m_mapCommData[key]);
+        CLua::PushString(l, Instance->m_mapCommData.get(key));
     else
         CLua::PushString(l, "");
     return 1;
@@ -684,7 +684,7 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State *l)
     auto fileList = CLua::GetTableParam(l, 1);
     string uuid = CUtility::GenUUID();
 
-    map<string, RecvDataPackage *> recv_list;
+    map_ex<string, RecvDataPackage *> recv_list;
     for (auto item : *fileList)
     {
         RecvDataPackage *pack = new RecvDataPackage();
@@ -694,10 +694,10 @@ int CGlobalFunction::Lua_ReceiveFile(lua_State *l)
         pack->strPath = save_folder;
         pack->strMD5 = md5;
         pack->emStatus = RecvStatus::Wait;
-        recv_list[md5] = pack;
+        recv_list.insert(md5,pack);
     }
 
-    CGlobalFunction::Instance->g_RecvDataInfoList[uuid] = recv_list;
+    CGlobalFunction::Instance->g_RecvDataInfoList.insert(uuid,recv_list);
 
     CLua::PushString(l, uuid);
     return 1;
@@ -708,7 +708,7 @@ int CGlobalFunction::Lua_CheckRecvStatus(lua_State *l)
     string uuid = CLua::GetString(l, 1);
     string md5 = CLua::GetString(l, 2);
     Helper::tolower(md5);
-    auto recv_list = CGlobalFunction::Instance->g_RecvDataInfoList[uuid];
+    auto recv_list = CGlobalFunction::Instance->g_RecvDataInfoList.get(uuid);
     auto recv_item = recv_list.find(md5);
     if (recv_item == recv_list.end())
     {
@@ -767,22 +767,22 @@ int CGlobalFunction::Lua_SetExtendDataByFile(lua_State *l)
 
 U64Result CGlobalFunction::GetConnectionID(int templateid)
 {
-    if (CGlobalFunction::Instance->m_mapTemplateIDToUUIDs[templateid].size() == 0)
+    if (CGlobalFunction::Instance->m_mapTemplateIDToUUIDs.get(templateid).size() == 0)
     {
         return U64Result::Make_Error(format("Template[{}] no node online.", templateid));
     }
 
-    auto uuid = CGlobalFunction::Instance->m_mapTemplateIDToUUIDs[templateid].front();
+    auto uuid = CGlobalFunction::Instance->m_mapTemplateIDToUUIDs.get(templateid).front();
     if (!CGlobalFunction::Instance->m_mapUUIDToConnectionID.exist(uuid))
     {
-        auto item = CGlobalFunction::Instance->m_mapUUIDToNode[uuid];
+        auto item = CGlobalFunction::Instance->m_mapUUIDToNode.get(uuid);
         CGlobalFunction::Instance->AddConnection(uuid, item.address(), item.port());
 
         return U64Result::Make_Error(format("Try connect to [{}][{}][{}:{}], please wait and retry.", templateid, uuid,
                                             item.address(), item.port()));
     }
 
-    return U64Result::Make_OKResult(CGlobalFunction::Instance->m_mapUUIDToConnectionID[uuid]);
+    return U64Result::Make_OKResult(CGlobalFunction::Instance->m_mapUUIDToConnectionID.get(uuid));
 }
 
 int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
@@ -798,7 +798,7 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
     if (CGlobalFunction::Instance->m_mapDBNameToSessionID.exist(DBName))
     {
         CLua::PushInteger(l, Base::ResultType::Succeed);
-        CLua::PushInteger(l, CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName]);
+        CLua::PushInteger(l, CGlobalFunction::Instance->m_mapDBNameToSessionID.get(DBName));
         return 2;
     }
 
@@ -837,7 +837,7 @@ int CGlobalFunction::Lua_ConnectToDBCenter(lua_State *l)
         CLua::PushString(l, "Parse result error.");
         return 2;
     }
-    CGlobalFunction::Instance->m_mapDBNameToSessionID[DBName] = response->session();
+    CGlobalFunction::Instance->m_mapDBNameToSessionID.get(DBName) = response->session();
 
     CLua::PushInteger(l, Base::ResultType::Succeed);
     CLua::PushInteger(l, response->session());

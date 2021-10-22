@@ -71,32 +71,32 @@ CResult Sloong::CServerManage::Initialize(IControl *ic, const string &db_path)
 {
     IObject::Initialize(ic);
 
-    m_mapFuncToHandler[Functions::PostLog] =
-        std::bind(&CServerManage::EventRecorderHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::RegisterWorker] =
-        std::bind(&CServerManage::RegisterWorkerHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::RegisterNode] =
-        std::bind(&CServerManage::RegisterNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::AddTemplate] =
-        std::bind(&CServerManage::AddTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::DeleteTemplate] =
-        std::bind(&CServerManage::DeleteTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::SetTemplate] =
-        std::bind(&CServerManage::SetTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::QueryTemplate] =
-        std::bind(&CServerManage::QueryTemplateHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::QueryNode] =
-        std::bind(&CServerManage::QueryNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::QueryReferenceInfo] =
-        std::bind(&CServerManage::QueryReferenceInfoHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::StopNode] =
-        std::bind(&CServerManage::StopNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::RestartNode] =
-        std::bind(&CServerManage::RestartNodeHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::ReportLoadStatus] =
-        std::bind(&CServerManage::ReportLoadStatusHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[Functions::ReconnectRegister] =
-        std::bind(&CServerManage::ReconnectRegisterHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler.insert(Functions::PostLog,
+        std::bind(&CServerManage::EventRecorderHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::RegisterWorker,
+        std::bind(&CServerManage::RegisterWorkerHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::RegisterNode,
+        std::bind(&CServerManage::RegisterNodeHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::AddTemplate,
+        std::bind(&CServerManage::AddTemplateHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::DeleteTemplate,
+        std::bind(&CServerManage::DeleteTemplateHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::SetTemplate,
+        std::bind(&CServerManage::SetTemplateHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::QueryTemplate,
+        std::bind(&CServerManage::QueryTemplateHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::QueryNode,
+        std::bind(&CServerManage::QueryNodeHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::QueryReferenceInfo,
+        std::bind(&CServerManage::QueryReferenceInfoHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::StopNode,
+        std::bind(&CServerManage::StopNodeHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::RestartNode,
+        std::bind(&CServerManage::RestartNodeHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::ReportLoadStatus,
+        std::bind(&CServerManage::ReportLoadStatusHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(Functions::ReconnectRegister,
+        std::bind(&CServerManage::ReconnectRegisterHandler, this, std::placeholders::_1, std::placeholders::_2));
 
     if (!CConfiguration::Instance->IsInituialized())
     {
@@ -251,7 +251,7 @@ void Sloong::CServerManage::SendManagerEvent(const list<uint64_t> &notifyList, M
         string msg_str;
         if (msg)
             msg->SerializeToString(&msg_str);
-        auto req = make_unique<SendPackageEvent>(m_mapUUIDToNodeItem[item].ConnectionHashCode);
+        auto req = make_unique<SendPackageEvent>(m_mapUUIDToNodeItem.get(item).ConnectionHashCode);
         req->SetEvent(event, msg_str, DataPackage_PackageType::DataPackage_PackageType_ManagerEvent);
         m_iC->SendMessage(std::move(req));
     }
@@ -262,7 +262,7 @@ void Sloong::CServerManage::SendControlEvent(const list<uint64_t> &notifyList, C
 {
     for (auto item : notifyList)
     {
-        auto req = make_unique<SendPackageEvent>(m_mapUUIDToNodeItem[item].ConnectionHashCode);
+        auto req = make_unique<SendPackageEvent>(m_mapUUIDToNodeItem.get(item).ConnectionHashCode);
         req->SetEvent(event, msg, DataPackage_PackageType::DataPackage_PackageType_ControlEvent);
         m_iC->SendMessage(std::move(req));
     }
@@ -273,7 +273,7 @@ void Sloong::CServerManage::OnSocketClosed(uint64_t con)
     if (!m_mapConnectionToUUID.exist(con))
         return;
 
-    auto target = m_mapConnectionToUUID[con];
+    auto target = m_mapConnectionToUUID.get(con);
     auto tpl = m_mapUUIDToNodeItem.try_get(target);
     if (tpl == nullptr)
     {
@@ -339,7 +339,7 @@ PackageResult Sloong::CServerManage::ProcessHandler(Package *pack)
             Package::MakeErrorResponse(pack, format("Function [{}] no handler.", func_name)));
     }
 
-    auto res = m_mapFuncToHandler[function](req_str, pack);
+    auto res = m_mapFuncToHandler.get(function)(req_str, pack);
     if (res.IsError())
         m_pLog->warn(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage()));
     else
@@ -370,10 +370,10 @@ CResult Sloong::CServerManage::RegisterWorkerHandler(const string &req_str, Pack
     {
         NodeItem item;
         item.UUID = sender;
-        m_mapUUIDToNodeItem[sender] = item;
+        m_mapUUIDToNodeItem.insert(sender,item);
         auto event = make_shared<GetConnectionInfoEvent>(pack->sessionid());
         event->SetCallbackFunc(
-            [item = &m_mapUUIDToNodeItem[sender]](IEvent *e, ConnectionInfo info) { item->Address = info.Address; });
+            [item = &m_mapUUIDToNodeItem.get(sender)](IEvent *e, ConnectionInfo info) { item->Address = info.Address; });
         m_iC->SendMessage(event);
         m_pLog->debug(format("New module register to system. Allocating uuid [{}].", item.UUID));
         char m_pMsgBuffer[8] = {0};
@@ -498,13 +498,13 @@ CResult Sloong::CServerManage::RegisterNodeHandler(const string &req_str, Packag
     }
 
     // Save node info.
-    auto &item = m_mapUUIDToNodeItem[sender];
+    auto &item = m_mapUUIDToNodeItem.get(sender);
     item.TemplateName = tpl->Name;
     item.TemplateID = tpl->ID;
     item.Port = tpl->ConfigurationObj->listenport();
     item.ConnectionHashCode = pack->sessionid();
     tpl->Created.unique_insert(sender);
-    m_mapConnectionToUUID[pack->sessionid()] = sender;
+    m_mapConnectionToUUID.insert(pack->sessionid(),sender);
 
     // Find reference node and notify them
     list<uint64_t> notifyList;
@@ -520,7 +520,7 @@ CResult Sloong::CServerManage::RegisterNodeHandler(const string &req_str, Packag
     if (notifyList.size() > 0)
     {
         EventReferenceModuleOnline online_event;
-        m_mapUUIDToNodeItem[sender].ToProtobuf(online_event.mutable_item());
+        m_mapUUIDToNodeItem.get(sender).ToProtobuf(online_event.mutable_item());
         SendManagerEvent(notifyList, Manager::Events::ReferenceModuleOnline, &online_event);
     }
 
@@ -676,7 +676,7 @@ CResult Sloong::CServerManage::QueryNodeHandler(const string &req_str, Package *
         {
             for (auto servID : m_mapIDToTemplateItem.get(id).Created)
             {
-                m_mapUUIDToNodeItem[servID].ToProtobuf(res.add_nodeinfos());
+                m_mapUUIDToNodeItem.get(servID).ToProtobuf(res.add_nodeinfos());
             }
         }
     }
@@ -725,7 +725,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
     if (!m_mapUUIDToNodeItem.exist(uuid))
         return CResult::Make_Error(format("The node is no registed. [{}]", uuid));
 
-    auto id = m_mapUUIDToNodeItem[uuid].TemplateID;
+    auto id = m_mapUUIDToNodeItem.get(uuid).TemplateID;
     auto item = m_mapIDToTemplateItem.try_get(id);
     if (item == nullptr)
         return CResult::Make_Error(format("The template id error. UUID[{}];ID[{}]", uuid, id));
@@ -750,7 +750,7 @@ CResult Sloong::CServerManage::QueryReferenceInfoHandler(const string &req_str, 
         item->set_providefunctions(tpl->ConfigurationObj->modulefunctoins());
         for (auto node : tpl->Created)
         {
-            m_mapUUIDToNodeItem[node].ToProtobuf(item->add_nodeinfos());
+            m_mapUUIDToNodeItem.get(node).ToProtobuf(item->add_nodeinfos());
         }
     }
     m_pLog->debug("QueryReferenceInfoHandler response >>> " + res.ShortDebugString());
@@ -792,10 +792,10 @@ CResult Sloong::CServerManage::ReconnectRegisterHandler(const string &req_str, P
 
     NodeItem item;
     item.UUID = req->nodeuuid();
-    m_mapUUIDToNodeItem[item.UUID] = item;
+    m_mapUUIDToNodeItem.insert(item.UUID,item);
     auto event = make_shared<GetConnectionInfoEvent>(pack->sessionid());
     event->SetCallbackFunc(
-        [item = &m_mapUUIDToNodeItem[item.UUID]](IEvent *e, ConnectionInfo info) { item->Address = info.Address; });
+        [item = &m_mapUUIDToNodeItem.get(item.UUID)](IEvent *e, ConnectionInfo info) { item->Address = info.Address; });
     m_iC->CallMessage(event);
 
     item.TemplateName = tpl->Name;
@@ -803,7 +803,7 @@ CResult Sloong::CServerManage::ReconnectRegisterHandler(const string &req_str, P
     item.Port = tpl->ConfigurationObj->listenport();
     item.ConnectionHashCode = pack->sessionid();
     tpl->Created.unique_insert(item.UUID);
-    m_mapConnectionToUUID[pack->sessionid()] = item.UUID;
+    m_mapConnectionToUUID.insert(pack->sessionid(),item.UUID);
 
     // Find reference node and notify them
     list<uint64_t> notifyList;
@@ -819,7 +819,7 @@ CResult Sloong::CServerManage::ReconnectRegisterHandler(const string &req_str, P
     if (notifyList.size() > 0)
     {
         EventReferenceModuleOnline online_event;
-        m_mapUUIDToNodeItem[item.UUID].ToProtobuf(online_event.mutable_item());
+        m_mapUUIDToNodeItem.get(item.UUID).ToProtobuf(online_event.mutable_item());
         SendManagerEvent(notifyList, Manager::Events::ReferenceModuleOnline, &online_event);
     }
 

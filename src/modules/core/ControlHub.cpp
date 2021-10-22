@@ -1,7 +1,7 @@
 /*** 
  * @Author: Chuanbin Wang - wcb@sloong.com
  * @Date: 2018-02-28 10:55:37
- * @LastEditTime: 2021-10-20 14:33:41
+ * @LastEditTime: 2021-10-22 12:16:55
  * @LastEditors: Chuanbin Wang
  * @FilePath: /engine/src/modules/core/ControlHub.cpp
  * @Copyright 2015-2020 Sloong.com. All Rights Reserved
@@ -172,9 +172,9 @@ void Sloong::CControlHub::SendMessage(SharedEvent evt)
 void Sloong::CControlHub::RegisterEventHandler(int t, MsgHandlerFunc func)
 {
 	if (!m_oMsgHandlerList.exist(t))
-		m_oMsgHandlerList[t] = vector<MsgHandlerFunc>();
+		m_oMsgHandlerList.insert(t, vector<MsgHandlerFunc>());
 
-	m_oMsgHandlerList[t].push_back(func);
+	m_oMsgHandlerList.get(t).push_back(func);
 }
 
 void Sloong::CControlHub::CallMessage(SharedEvent event)
@@ -182,7 +182,7 @@ void Sloong::CControlHub::CallMessage(SharedEvent event)
 	try
 	{
 		auto evt_type = event->GetEvent();
-		auto handler_list = m_oMsgHandlerList[evt_type];
+		auto handler_list = m_oMsgHandlerList.get(evt_type);
 		auto handler_num = handler_list.size();
 		if (handler_num == 0)
 			return;

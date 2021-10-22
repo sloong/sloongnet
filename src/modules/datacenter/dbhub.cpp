@@ -14,15 +14,15 @@ CResult Sloong::DBHub::Initialize(IControl *ic)
         return res;
 
     auto m = ic->Get(DATACENTER_DATAITEM::MapSessionIDToConnection);
-    m_pMapSessionIDToConnections = STATIC_TRANS<map_ex<int, map<thread::id,UniqueMySQLEx>>*>(m);
+    m_pMapSessionIDToConnections = STATIC_TRANS<map_ex<int, map_ex<thread::id,UniqueMySQLEx>>*>(m);
     m = ic->Get(DATACENTER_DATAITEM::MapDBNameToSessionID);
     m_pMapDBNameToSessioinID = STATIC_TRANS<map_ex<string, int>*>(m);
 
-    m_mapFuncToHandler[DataCenter::Functions::ConnectDatabase] = std::bind(&DBHub::ConnectDatabaseHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[DataCenter::Functions::QuerySQLCmd] = std::bind(&DBHub::QuerySQLCmdHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[DataCenter::Functions::InsertSQLCmd] = std::bind(&DBHub::InsertSQLCmdHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[DataCenter::Functions::UpdateSQLCmd] = std::bind(&DBHub::UpdateSQLCmdHandler, this, std::placeholders::_1, std::placeholders::_2);
-    m_mapFuncToHandler[DataCenter::Functions::DeleteSQLCmd] = std::bind(&DBHub::DeleteSQLCmdHandler, this, std::placeholders::_1, std::placeholders::_2);
+    m_mapFuncToHandler.insert(DataCenter::Functions::ConnectDatabase, std::bind(&DBHub::ConnectDatabaseHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(DataCenter::Functions::QuerySQLCmd , std::bind(&DBHub::QuerySQLCmdHandler, this, std::placeholders::_1, std::placeholders::_2 ));
+    m_mapFuncToHandler.insert(DataCenter::Functions::InsertSQLCmd, std::bind(&DBHub::InsertSQLCmdHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(DataCenter::Functions::UpdateSQLCmd, std::bind(&DBHub::UpdateSQLCmdHandler, this, std::placeholders::_1, std::placeholders::_2));
+    m_mapFuncToHandler.insert(DataCenter::Functions::DeleteSQLCmd, std::bind(&DBHub::DeleteSQLCmdHandler, this, std::placeholders::_1, std::placeholders::_2));
 
     return CResult::Succeed;
 }
@@ -43,7 +43,7 @@ PackageResult Sloong::DBHub::RequestPackageProcesser(Package *pack)
         return PackageResult::Make_Error(format("Function [{}] no handler.", func_name));
     }
 
-    auto res = m_mapFuncToHandler[function](req_str, pack);
+    auto res = m_mapFuncToHandler.get(function)(req_str, pack);
    if (res.IsError())
 		m_pLog->warn(format("Response [{}]:[{}][{}].", func_name, ResultType_Name(res.GetResult()), res.GetMessage()));
 	else
@@ -58,10 +58,10 @@ CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, Package *pa
     if (!m_pMapDBNameToSessioinID->exist(req->database()))
     {
         auto config = IData::GetModuleConfig();
-        auto sessions = map<thread::id,UniqueMySQLEx>();
-        sessions[this_thread::get_id()] = make_unique<MySqlEx>();
+        auto sessions = map_ex<thread::id,UniqueMySQLEx>();
+        sessions.insert(this_thread::get_id(),make_unique<MySqlEx>());
 
-        auto connection = sessions[this_thread::get_id()].get();
+        auto connection = sessions.get(this_thread::get_id()).get();
         auto res = connection->Connect((*config)["Address"].asString(), (*config)["Port"].asInt(), (*config)["User"].asString(),
                                        (*config)["Password"].asString(), req->database());
         if (res.IsFialed())
@@ -70,8 +70,8 @@ CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, Package *pa
         connection->SetLog(m_pLog);
         // TODO：这里直接使用size自增来作为key是非常不保险的，在多线程的情况下很容易冲突。后续需要进行优化
         auto id =  m_pMapSessionIDToConnections->size() + 1;
-         (*m_pMapSessionIDToConnections)[id].merge(sessions);
-        (*m_pMapDBNameToSessioinID)[req->database()] = id;
+         (*m_pMapSessionIDToConnections).get(id).merge(sessions);
+        (*m_pMapDBNameToSessioinID).insert(req->database(), id);
     }
 
     auto id = m_pMapDBNameToSessioinID->try_get(req->database());
@@ -84,15 +84,15 @@ CResult Sloong::DBHub::ConnectDatabaseHandler(const string &req_obj, Package *pa
     return CResult::Make_OK(ConvertObjToStr(&response));
 }
 
-inline MySqlEx* GetCurrentThreadConnextion(  map<thread::id,UniqueMySQLEx>* sessions )
+inline MySqlEx* GetCurrentThreadConnextion(  map_ex<thread::id,UniqueMySQLEx>* sessions )
 {
     auto id = this_thread::get_id();
     auto it = sessions->find(id);
     if( it == sessions->end() )
     {
-        (*sessions)[id] = sessions->begin()->second->Duplicate();
+        sessions->insert(id,sessions->begin()->second->Duplicate());
     }
-    return (*sessions)[id].get();
+    return sessions->get(id).get();
 }
 
 CResult Sloong::DBHub::QuerySQLCmdHandler(const string &req_obj, Package *pack)
